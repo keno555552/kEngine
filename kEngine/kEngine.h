@@ -176,6 +176,7 @@ public:
 
 	/// Timer
 	float GetFPS();
+	float GetFPSPerSecond();
 	float GetDeltaTime();
 	TimeManager* GetTimeManager()const;
 

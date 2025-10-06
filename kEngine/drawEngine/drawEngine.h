@@ -33,12 +33,14 @@ public:
 
 	/// 三角形関連
 	void DrawTriangle(TransformationMatrix* wvpData, MaterialConfig material);
+
 	/// 2D図形関連
 	void CollectSprite(Vector2 pos, MaterialConfig material);
 	void DrawSprite();
 	void DrawSpriteDirect(Vector2 pos, MaterialConfig material);
 	void DrawSpriteDirect(Vector2 pos, MaterialConfig material, Vector2 LTpos, Vector2 LBpos, Vector2 RTpos, Vector2 RBpos, float TsizeX, float TsizeY, Vector2 TCLTPos, Vector2 TCRBPos);
 
+	/// Tile関連
 	void CollectTile(Vector2* pos, MaterialConfig material);
 	void DrawTile(Vector2 pos, MaterialConfig material);
 	
@@ -70,6 +72,7 @@ private:
 	int modelHandle_ = 0;
 	int modelGroupHandle_ = 0;
 	DirectXBase* directXDriver_ = nullptr;
+	ID3D12GraphicsCommandList* commandList_ = nullptr;
 
 	int kClientWidth_ = 0;
 	int kClientHeight_ = 0;

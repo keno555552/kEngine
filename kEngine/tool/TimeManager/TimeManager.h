@@ -1,5 +1,6 @@
 #pragma once
 #include <chrono>
+#include <vector>
 
 class TimeManager
 {
@@ -9,12 +10,16 @@ public:
 
 public:
 	float getDeltaTime() const { return deltaTime_; }
-	float getFPS() const { return fps_; }
+	float getInstantFPS() const { return instantFps_; }
+	float getFPSPerSecond() const { return fpsPerSecond_; }
 
 private:
-	std::chrono::steady_clock::time_point lastTime;
+	std::chrono::steady_clock::time_point lastUpdateTime;
 	float deltaTime_ = 0.0f;
-	float fps_ = 0.0f;
+	float oneScondCounter_ = 0.0f;
+	std::vector<float>fpsHistory_;
+	float instantFps_ = 0.0f;
+	float fpsPerSecond_ = 0.0f;
 };
 
 class Timer {

@@ -2,12 +2,25 @@
 
 void TimeManager::Update() {
 	auto now = std::chrono::steady_clock::now();
-	std::chrono::duration<float> elapsed = now - lastTime;
+	std::chrono::duration<float> elapsed = now - lastUpdateTime;
 	deltaTime_ = elapsed.count();
-	lastTime = now;
+	lastUpdateTime = now;
 
-	if (deltaTime_ > 0.0f)
-		fps_ = 1.0f / deltaTime_;
+	oneScondCounter_ += deltaTime_;
+
+	if (oneScondCounter_ > 1.0f) {
+		float sum = 0.0f;
+		for (auto& ptr : fpsHistory_) {
+			sum += ptr;
+		}
+		fpsPerSecond_ = sum/ fpsHistory_.size();
+		fpsHistory_.clear();
+		oneScondCounter_ = 0.0f;
+	} else {
+		if (deltaTime_ > 0.0f)instantFps_ = 1.0f / deltaTime_;
+		fpsHistory_.push_back(instantFps_);
+	}
+
 }
 
 #pragma region Timer

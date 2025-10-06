@@ -133,10 +133,6 @@ private:
 	int E = 0;
 	int D = 0;
 
-	/// TimeManager
-	float timer = 0.0f;
-
-	Timer* timer2 = new Timer;
 
 	float iVolume = 1.0f;
 	float mVolume = 1.0f;

@@ -49,24 +49,24 @@ SceneTester::SceneTester(kEngine* system) {
 		objectGroup.push_back(object);
 	}
 
-	for (int i = 0; i < 10; i++) 
+	//for (int i = 0; i < 10; i++) 
+	for (int i = 0; i < 200; i++) 
 	{
 		Object* object = new Object;
 		MaterialConfig materialConfig;
 		intMaterialConfig(&materialConfig);
 		object->materialConfig.push_back(materialConfig);
-		object->objectType = TILE;
+		//object->objectType = TILE;
+		object->objectType = SPRITE;
 		object->transform.translate = { i * 0.1f,i * 0.1f, 0.0f };
 		object->transformationMatrix = debugCamera_->transformationMatrixTransform(object->transform);
 		objectGroup.push_back(object);
 	}
 
-	timer2->InitM(10, system->GetTimeManager());
 };
 
 
 SceneTester::~SceneTester() {
-	delete timer2, timer2 = nullptr;
 }
 
 void SceneTester::Update() {
@@ -181,6 +181,9 @@ void SceneTester::Draw() {
 			case SPRITE:
 				system_->DrawSprite({ ptr->transform.translate.x,ptr->transform.translate.y }, ptr->materialConfig[0]);
 				break;
+			case TILE:
+				//system_->DrawTile({ ptr->transform.translate.x,ptr->transform.translate.y }, ptr->materialConfig[0]);
+				break;
 			case CUBE:
 				system_->DrawCube(&ptr->transformationMatrix, ptr->materialConfig[0]);
 				break;
@@ -222,7 +225,6 @@ void SceneTester::Draw() {
 			}
 		}
 	}
-	timer2->ToZero();
 
 	ImGui::Begin("ControlPanel");
 	//ImGui::Checkbox("isTemplate", &isTemplate);
@@ -563,13 +565,12 @@ void SceneTester::Draw() {
 
 	{
 		float fps = system_->GetFPS();
+		float fps1s = system_->GetFPSPerSecond();
 		float deltaTime = system_->GetDeltaTime();
-		timer += deltaTime;
 		ImGui::Begin("Try FPS");
 		ImGui::InputFloat("FPS", &fps);
+		ImGui::InputFloat("FPS_1s", &fps1s);
 		ImGui::InputFloat("deltaTime", &deltaTime);
-		ImGui::InputFloat("timer", &timer);
-		ImGui::InputFloat("timer2", &timer2->parameter_);
 		ImGui::End();
 	}
 

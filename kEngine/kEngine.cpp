@@ -309,7 +309,11 @@ int kEngine::GetGamepadR2() {
 #pragma region TimeManager
 
 float kEngine::GetFPS() {
-	return timeManager->getFPS();
+	return timeManager->getInstantFPS();
+}
+
+float kEngine::GetFPSPerSecond() {
+	return timeManager->getFPSPerSecond();
 }
 
 float kEngine::GetDeltaTime() {

@@ -62,6 +62,12 @@ ResourceManager::~ResourceManager() {
 		vertexResourceModelGroup_.clear();
 	}
 
+	if (!materialConfigList_.empty()) {
+		for (auto ptr : materialConfigList_) {
+			delete ptr;
+		}
+		materialConfigList_.clear();
+	}
 
 	delete textureResource_;
 	delete vertexResourceTriangle_;
@@ -81,11 +87,11 @@ void ResourceManager::AddSpriteInstance(Vector2 pos, MaterialConfig material) {
 		[&](MaterialConfig* ptr) {return *ptr == material; });
 
 	if (it != materialConfigList_.end()) {
-		instance->materialConfigIndex = std::distance(materialConfigList_.begin(), it);
+		instance->materialConfigIndex = (int)std::distance(materialConfigList_.begin(), it);
 	} else {
 		MaterialConfig* newMaterial = new MaterialConfig(material);
 		materialConfigList_.push_back(newMaterial);
-		instance->materialConfigIndex = materialConfigList_.size() - 1;
+		instance->materialConfigIndex = int(materialConfigList_.size() - 1);
 	}
 
 	spriteList_.push_back(instance);
@@ -151,13 +157,7 @@ void ResourceManager::ClearTurnResource() {
 			}
 		}
 	}
-	
-	if (!materialConfigList_.empty()) {
-		for (auto ptr : materialConfigList_) {
-			delete ptr;
-		}
-		materialConfigList_.clear();
-	}
+
 	
 	if (!spriteList_.empty()) {
 		for (auto ptr : spriteList_) {
