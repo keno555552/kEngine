@@ -229,6 +229,29 @@ Matrix4x4 Matrix4x4::operator*(const float& target) {
 	return resuit;
 }
 
+Matrix4x4& Matrix4x4::operator=(const Matrix4x4& target) {
+	Matrix4x4 resuit = {};
+	for (int x = 0; x < 4; x++) {
+		for (int y = 0; y < 4; y++) {
+			this->m[x][y] = target.m[x][y];
+		}
+	}
+	return *this;
+}
+
+bool Matrix4x4::operator==(const Matrix4x4& target) {
+
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			if (m[i][j] != target.m[i][j])return false;
+		}
+	}
+	return true;
+}
+
+bool Matrix4x4::operator!=(const Matrix4x4& target) {
+	return !(*this == target);
+}
 
 Matrix4x4 operator*(float scalar, const Matrix4x4& vec) {
 	Matrix4x4 resuit = {};

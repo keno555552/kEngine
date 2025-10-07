@@ -112,6 +112,9 @@ IDxcBlob* CompileShader(
 	shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
 	if (shaderError != nullptr && shaderError->GetStringLength() != 0) {
 		Log(shaderError->GetStringPointer());
+		std::string errorMessage(shaderError->GetStringPointer(), shaderError->GetStringLength());
+		OutputDebugStringA(errorMessage.c_str());
+		Log(errorMessage);
 		// 警告・エラーダメゼッタイ
 		assert(false);
 	}

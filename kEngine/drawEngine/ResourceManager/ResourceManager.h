@@ -30,15 +30,14 @@ public:
 	struct SpriteInstance {
 		Vector2 position;
 		Vector2 scale;
+		Vector3 rotate;
 		int materialConfigIndex;
 		int layer;
 		bool isDraw;
 	};
 
 	struct ModelInstance {
-		Vector2 postion;
-		Vector2 rotation;
-		Vector2 scale;
+		TransformationMatrix transformMatrix;
 		int modelID;
 		int layer;
 	};

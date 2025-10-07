@@ -85,12 +85,6 @@ void Sprite2D::Set2DWVP(Vector2* wvpData) {
 	wvpData_->WVP.Identity();
 	wvpData_->world.Identity();
 
-	//Vector3 aa = { 0.0f,0.0f,0.0f };
-
-	//ImGui::Begin("Sprite2D");
-	//ImGui::SliderFloat3("AA", &aa.x, -10, 10);
-	//ImGui::End();
-
 	// CPUで動かす用のTransformを作る。
 	Transform transformSprite = CreateDefaultTransform();
 	if (wvpData != nullptr) {

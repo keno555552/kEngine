@@ -28,11 +28,13 @@ public:
 	void Initialize(const char* kClientTitle, int kClientWidth, int kClientHeight, DirectXBase* directXDirver);
 
 	void PreDraw();
+	void EndDraw();
 
 	void SetDirectionalLight(DirectionalLight* light);
 
 	/// 三角形関連
 	void DrawTriangle(TransformationMatrix* wvpData, MaterialConfig material);
+
 
 	/// 2D図形関連
 	void CollectSprite(Vector2 pos, MaterialConfig material);
@@ -41,8 +43,8 @@ public:
 	void DrawSpriteDirect(Vector2 pos, MaterialConfig material, Vector2 LTpos, Vector2 LBpos, Vector2 RTpos, Vector2 RBpos, float TsizeX, float TsizeY, Vector2 TCLTPos, Vector2 TCRBPos);
 
 	/// Tile関連
-	void CollectTile(Vector2* pos, MaterialConfig material);
-	void DrawTile(Vector2 pos, MaterialConfig material);
+	void CollectTile(Vector2 pos, MaterialConfig material);
+	void DrawTile();
 	
 	/// 立方体関連
 	void DrawCube(TransformationMatrix* wvpData, MaterialConfig material);
@@ -57,13 +59,12 @@ public:
 	int readCommonTextureHandle(int Handle);
 	int readModelTextureHandle(int Handle);
 	int GetMuitModelNum(int modelHandle);
-
+	
 	int LoadTexture(const std::string& filePath);
 	int LoadModelTexture(const std::string& filePath);
 
 	void CompoDraw();
 
-	void EndDraw();
 
 private:
 	Shader_compile* shader_compile_ = new Shader_compile;
@@ -81,8 +82,19 @@ private:
 	int kSudivision_ = 0;
 
 private:
+	enum class psoType {
+		NONE = -1,
+		defaultPSO = 0,
+		Lightmodel_Lambert = 0,
+		Lightmodel_HalfLambert = 1,
+		Tile = 2,
+	};
+
+private:
+	/// PSO関連
+
 	LightModelType defaultLightModel_ = LightModelType::Lambert;
-	LightModelType currentLightModel_ = defaultLightModel_;
+	psoType currentPSO_ = psoType::NONE;
 
 private:
 	IDxcUtils* dxcUtils = nullptr;
@@ -102,32 +114,43 @@ private:
 	int defaultTextureHandle_ = 0;						// white5x5
 	ID3D12Resource* depthStencilResource = nullptr;
 
+
 	///Lighting関連
 	DirectionalLight* directionalLightData = {};
 
-	int kParticleNumInstance_ = 10;
+	/// 交換用容器
+	Microsoft::WRL::ComPtr<ID3D12Resource> tileWVPResource_ = nullptr;
+	TransformationMatrix* tileInstancingData_ = nullptr;
+	D3D12_GPU_DESCRIPTOR_HANDLE TileSrvHandleGPU_{};
+	//Material関連
+	BasicResource* materialResource_ = new BasicResource;
+	Material* materialData = new Material;
+
+
 
 private:
-	struct RenderResourceGroup {
-		int resourceID;
-
-		MaterialConfig* material;
-		VertexResource* vertex;
-
-	};
+	//struct RenderResourceGroup {
+	//	int resourceID;
+	//
+	//	MaterialConfig* material;
+	//	VertexResource* vertex;
+	//
+	//};
 
 private:
 	D3D12_VIEWPORT createViewport(int kClientWidth, int kClientHeight);
 	D3D12_RECT createScissorRect(int kClientWidth, int kClientHeight);
-	void SetMaterial(ID3D12Resource* resource, Matrix4x4 uvTransform, Vector4 color, int isLighting);
+	void InitializeMaterial();
+	void SetMaterial(Matrix4x4 uvTransform, Vector4 color, int isLighting);
 	void SetLighting(ID3D12Resource* resource, DirectionalLight* directionalLight);
 
+	void PSODecition(MaterialConfig& material);
 	DirectX::ScratchImage LoadTextrueLow(const std::string& filePath);
 	ID3D12Resource* CreateTextureResource(ID3D12Device* device, const DirectX::TexMetadata& metadata);
 	ID3D12Resource* UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages, ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
 	int MakeTextureShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResource);
 	int MakeModelShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResource);
-	int MakeParticleShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResource);
+	D3D12_GPU_DESCRIPTOR_HANDLE Create2DTileWVPBuffer(ID3D12Resource* insstancingResource);
 	ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);
 	void MakeDepthStencilView();
 

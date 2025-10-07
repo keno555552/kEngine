@@ -1,17 +1,12 @@
 #include "Tile2D.hlsli"
 
-//float4 main( float4 pos : POSITION ) : SV_POSITION
-//{
-//	return pos;
-//}
-
 struct TransformationMatrix
 {
     float4x4 WVP;
     float4x4 world;
 };
 
-StructuredBuffer<TransformationMatrix> gTransformationMatrix : register(t0);
+StructuredBuffer<TransformationMatrix> gTransformationMatrices : register(t0);
 
 struct VertexShaderInput
 {
@@ -20,12 +15,12 @@ struct VertexShaderInput
     float3 normal : NORMAL0;
 };
 
-VertexShaderOutput main(VertexShaderInput input, int instanceId:SV_InstanceId)
+VertexShaderOutput main(VertexShaderInput input, uint instanceId:SV_InstanceID)
 {
     VertexShaderOutput output;
-    output.position = mul(input.position, gTransformationMatrix[instanceId].WVP);
+    output.position = mul(input.position, gTransformationMatrices[instanceId].WVP);
     output.texcoord = input.texcoord;
-    output.normal = normalize(mul(input.normal, (float3x3) gTransformationMatrix[instanceId].world));
+    output.normal = normalize(mul(input.normal, (float3x3) gTransformationMatrices[instanceId].world));
     return output;
 }
 

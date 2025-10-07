@@ -1,16 +1,9 @@
 #include "Tile2D.hlsli"
-#if defined(LIGHT_MODEL_LAMBERT)
-#include "./LightingLambert/Lambert.hlsl"
-#endif
-
-#if defined(LIGHT_MODEL_HALF)
-#include "./LightingLambert/HalfLambert.hlsl"
-#endif
 
 struct Material
 {
     float4 color;
-    int enableLighting;
+    uint enableLighting;
     float4x4 uvTransform;
 };
 

@@ -78,7 +78,8 @@ ResourceManager::~ResourceManager() {
 void ResourceManager::AddSpriteInstance(Vector2 pos, MaterialConfig material) {
 	SpriteInstance* instance = new SpriteInstance;
 	instance->position = pos;
-	instance->scale = { 1.0f,1.0f };     /// まだ使ってない
+	instance->scale = { 1.0f,1.0f };		/// まだ使ってない
+	instance->rotate = { 0.0f,0.0f,0.0f };  /// まだ使ってない
 	instance->layer = 0;					/// まだ使ってない
 	instance->isDraw = false;
 
@@ -93,7 +94,6 @@ void ResourceManager::AddSpriteInstance(Vector2 pos, MaterialConfig material) {
 		materialConfigList_.push_back(newMaterial);
 		instance->materialConfigIndex = int(materialConfigList_.size() - 1);
 	}
-
 	spriteList_.push_back(instance);
 }
 

@@ -18,8 +18,8 @@ struct MaterialConfig
 	LightModelType lightModelType = LightModelType::HalfLambert;
 	bool enableLighting = true;
 
-	bool operator!=(const MaterialConfig target);
 	bool operator==(const MaterialConfig target);
+	bool operator!=(const MaterialConfig target);
 };
 
 void intMaterialConfig(MaterialConfig* materialConfig);

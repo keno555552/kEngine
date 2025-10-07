@@ -20,10 +20,11 @@ public:
 	static bool GetMouseState() { return isConnetMouse_; }
 	static void SetConnetGamePad(bool* state) { isConnetGamePad_ = *state; }
 	static bool GetGamePadState() { return isConnetGamePad_; }
-	static void SetGamePadType(gamepadType Type) { gamePadType_ = Type;}
-	static gamepadType GetGamePadType() {return gamePadType_;}
+	static void SetGamePadType(gamepadType Type) { gamePadType_ = Type; }
+	static gamepadType GetGamePadType() { return gamePadType_; }
 	static void SetXInputIp(int IP) { XInputDriverIP_ = IP; }
 	static int GetXInputIp() { return XInputDriverIP_; }
+	static int GetTileNumInstance() { return kTileNumInstance_; }
 
 private:
 	static int clientWidth_;
@@ -34,4 +35,8 @@ private:
 	static bool isConnetGamePad_;
 	static gamepadType gamePadType_;
 	static int XInputDriverIP_;
+
+private:
+	///描画設定
+	static const int kTileNumInstance_ = 2000;     /// Tileの最大インスタンス数
 };

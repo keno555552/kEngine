@@ -49,8 +49,9 @@ SceneTester::SceneTester(kEngine* system) {
 		objectGroup.push_back(object);
 	}
 
+	for (int i = 0; i < 1; i++) 
 	//for (int i = 0; i < 10; i++) 
-	for (int i = 0; i < 200; i++) 
+	//for (int i = 0; i < 200; i++) 
 	{
 		Object* object = new Object;
 		MaterialConfig materialConfig;

@@ -51,7 +51,8 @@ void kEngine::DrawTriangle(TransformationMatrix* wvpData, MaterialConfig materia
 }
 
 void kEngine::DrawSprite(Vector2 pos, MaterialConfig material) {
-	drawEngine->CollectSprite(pos, material);
+	//drawEngine->CollectSprite(pos, material);
+	drawEngine->CollectTile(pos, material);
 	//drawEngine->DrawSpriteDirect(pos, material);
 }
 

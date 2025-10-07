@@ -13,18 +13,6 @@ void intMaterialConfig(MaterialConfig* materialConfig) {
 	materialConfig->enableLighting = true;
 };
 
-bool MaterialConfig::operator!=(const MaterialConfig target) {
-	if (useOriginalTexture == target.useOriginalTexture)return false;
-	if (textureHandle == target.textureHandle)return false;
-	if (uvTranslate == target.uvTranslate)return false;
-	if (uvScale == target.uvScale)return false;
-	if (uvRotate == target.uvRotate)return false;
-	if (textureColor == target.textureColor)return false;
-	if (lightModelType == target.lightModelType)return false;
-	if (enableLighting == target.enableLighting)return false;
-	return true;
-}
-
 bool MaterialConfig::operator==(const MaterialConfig target) {
 	if (useOriginalTexture != target.useOriginalTexture)return false;
 	if (textureHandle != target.textureHandle)return false;
@@ -35,4 +23,8 @@ bool MaterialConfig::operator==(const MaterialConfig target) {
 	if (lightModelType != target.lightModelType)return false;
 	if (enableLighting != target.enableLighting)return false;
 	return true;
+}
+
+bool MaterialConfig::operator!=(const MaterialConfig target) {
+	return !(*this == target);
 }

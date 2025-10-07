@@ -70,10 +70,10 @@ void DircetXCommen::EndFrame()
 
 	// GPUにコマンドリストの実行を行わせる
 	ID3D12CommandList* commandLists[] = { commandList };
-	commandQueue->ExecuteCommandLists(1, commandLists); // 讓GPU執行命令列表
+	commandQueue->ExecuteCommandLists(1, commandLists);
 
 	// GPUとOSに画面の交換を行うよう通知する
-	SwapChain->Present(1, 0); // 通知GPU和操作系統進行畫面交換
+	SwapChain->Present(1, 0);
 
 	// Fenceの値を更新
 	fenceValue++;
