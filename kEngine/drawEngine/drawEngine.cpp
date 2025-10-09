@@ -7,7 +7,7 @@
 DrawEngine::~DrawEngine() {
 	delete shader_compile_;
 
-	for (auto& ptr:psoList_){
+	for (auto& ptr : psoList_) {
 		ptr->Release();
 		ptr = nullptr;
 	}
@@ -123,6 +123,13 @@ void DrawEngine::PreDraw() {
 
 }
 
+void DrawEngine::CommitDraw() {
+	/// 集まったデータで描画
+	/// Sprite描画
+	DrawSprite();
+	DrawTile();
+}
+
 void DrawEngine::EndDraw() {
 
 	/// 各種のリソースを解放
@@ -199,7 +206,7 @@ void DrawEngine::DrawTriangle(TransformationMatrix* wvpData, MaterialConfig mate
 }
 
 void DrawEngine::CollectSprite(Vector2 pos, MaterialConfig material) {
-	resourceManager_->AddSpriteInstance(pos, material);
+	resourceManager_->instanceManager_->AddSpriteInstance(pos, material);
 }
 
 void DrawEngine::DrawSprite() {
@@ -258,6 +265,8 @@ void DrawEngine::DrawSprite() {
 	//}
 #pragma endregion
 
+	if (resourceManager_->instanceManager_->spriteList_.empty())return;
+
 	struct MaterialStateCache {
 		int materialIndex = -1;
 		int textureHandle = -1;
@@ -266,16 +275,16 @@ void DrawEngine::DrawSprite() {
 
 	MaterialStateCache lastMaterialState_;
 
-	std::unordered_map<int, std::vector<ResourceManager::SpriteInstance*>> groupedSprites;
+	std::unordered_map<int, std::vector<SpriteInstance*>> groupedSprites;
 
-	for (auto ptr : resourceManager_->spriteList_) {
-		if (!ptr->isDraw) {
+	for (auto& ptr : resourceManager_->instanceManager_->spriteList_) {
+		if (ptr->drawState == InstanceManager::STANDBY) {
 			groupedSprites[ptr->materialConfigIndex].push_back(ptr);
 		}
 	}
 
 	for (auto& [materialIndex, group] : groupedSprites) {
-		MaterialConfig* material = resourceManager_->materialConfigList_[materialIndex];
+		MaterialConfig* material = resourceManager_->instanceManager_->materialConfigList_[materialIndex];
 
 		bool needSetMaterial =
 			materialIndex != lastMaterialState_.materialIndex ||
@@ -284,8 +293,11 @@ void DrawEngine::DrawSprite() {
 
 		if (needSetMaterial) {
 			// Set PSO
-			commandList_->SetPipelineState(psoList_[(int)material->lightModelType]);
-			PSODecition(*material);
+			commandList_->SetPipelineState(psoList_[(int)psoType::Tile]);
+			currentPSO_ = psoType::Tile;
+			rootSignature_ = pso_->getRootSignature((int)psoType::Tile);
+			commandList_->SetGraphicsRootSignature(rootSignature_);
+
 
 			// Set Material
 			SetMaterial(material->uvTransformMatrix, material->textureColor, false);
@@ -313,7 +325,7 @@ void DrawEngine::DrawSprite() {
 			commandList_->SetGraphicsRootConstantBufferView(1, resourceManager_->vertexResourceSpriteGroup_[0]->GetWVPResource_()->GetGPUVirtualAddress());
 			commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
 			commandList_->DrawIndexedInstanced(12, 1, 0, 0, 0);
-			ptr->isDraw = true;
+			ptr->drawState == InstanceManager::STANDBY;
 		}
 	}
 }
@@ -392,11 +404,11 @@ void DrawEngine::DrawSpriteDirect(Vector2 pos, MaterialConfig material, Vector2 
 }
 
 void DrawEngine::CollectTile(Vector2 pos, MaterialConfig material) {
-	resourceManager_->AddTileInstance(pos, material);
+	resourceManager_->instanceManager_->AddTileInstance(pos, material);
 }
 
 void DrawEngine::DrawTile() {
-
+	if (resourceManager_->instanceManager_->tileList_.empty())return;
 	struct MaterialStateCache {
 		int materialIndex = -1;
 		int textureHandle = -1;
@@ -405,16 +417,16 @@ void DrawEngine::DrawTile() {
 
 	MaterialStateCache lastMaterialState_;
 
-	std::unordered_map<int, std::vector<ResourceManager::SpriteInstance*>> groupedSprites;
+	std::unordered_map<int, std::vector<SpriteInstance*>> groupedTiles;
 
-	for (auto ptr : resourceManager_->tileList_) {
-		if (!ptr->isDraw) {
-			groupedSprites[ptr->materialConfigIndex].push_back(ptr);
+	for (auto& ptr : resourceManager_->instanceManager_->tileList_) {
+		if (ptr->drawState == InstanceManager::STANDBY) {
+			groupedTiles[ptr->materialConfigIndex].push_back(ptr);
 		}
 	}
 
-	for (auto& [materialIndex, group] : groupedSprites) {
-		MaterialConfig* material = resourceManager_->materialConfigList_[materialIndex];
+	for (auto& [materialIndex, group] : groupedTiles) {
+		MaterialConfig* material = resourceManager_->instanceManager_->materialConfigList_[materialIndex];
 
 		bool needSetMaterial =
 			materialIndex != lastMaterialState_.materialIndex ||
@@ -449,6 +461,12 @@ void DrawEngine::DrawTile() {
 		commandList_->IASetIndexBuffer(&IndexBufferView);
 
 		int tileCount = (int)group.size();
+
+		/// ループの中に入らないように先に計算しとく
+		Matrix4x4 viewMatrixSprtie; viewMatrixSprtie.Identity();
+		Matrix4x4 projectionMatrixSprtie = MakeOrthographicMatrix(0.0f, 0.0f, float(config::GetClientWidth()), float(config::GetClientHeight()), 0.0f, 100.0f);
+		Matrix4x4 viewProj = viewMatrixSprtie * projectionMatrixSprtie;
+
 		for (int i = 0; i < group.size(); i++) {
 			// 単位行列を書き込んておく
 			if (tileInstancingData_[i].WVP != Identity()) tileInstancingData_[i].WVP = Identity();
@@ -462,12 +480,10 @@ void DrawEngine::DrawTile() {
 
 			// Sprite用のworldViewProjectionMatrixを作る
 			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
-			Matrix4x4 viewMatrixSprtie; viewMatrixSprtie.Identity();
-			Matrix4x4 projectionMatrixSprtie = MakeOrthographicMatrix(0.0f, 0.0f, float(config::GetClientWidth()), float(config::GetClientHeight()), 0.0f, 100.0f);
-			Matrix4x4 worldViewProjectionMatrixSprite = worldMatrixSprite * (viewMatrixSprtie * projectionMatrixSprtie);
+			Matrix4x4 worldViewProjectionMatrixSprite = worldMatrixSprite * viewProj;
 			tileInstancingData_[i].WVP = worldViewProjectionMatrixSprite;
 
-			group[i]->isDraw = true;
+			group[i]->drawState = InstanceManager::STANDBY;
 		}
 
 		commandList_->SetGraphicsRootDescriptorTable(1, TileSrvHandleGPU_);
@@ -686,16 +702,6 @@ int DrawEngine::LoadModelTexture(const std::string& filePath) {
 	int handle = MakeModelShaderResourceView(metadata, textrueResourceN);
 	return handle;
 }
-
-void DrawEngine::CompoDraw() {
-
-	/// Sprite描画
-	DrawSprite();
-	DrawTile();
-
-}
-
-
 
 D3D12_VIEWPORT DrawEngine::createViewport(int kClientWidth, int kClientHeight) {
 	viewport.Width = (float)kClientWidth;

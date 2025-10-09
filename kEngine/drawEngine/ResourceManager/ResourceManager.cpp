@@ -58,25 +58,7 @@ ResourceManager::~ResourceManager() {
 	materialResource_->ClearResource();
 	lightingResource_->ClearResource();
 
-	for (auto ptr : materialConfigList_) {
-		delete ptr;
-	}
-	materialConfigList_.clear();
 
-	for (auto ptr : spriteList_) {
-		delete ptr;
-	}
-	spriteList_.clear();
-
-	for (auto ptr : tileList_) {
-		delete ptr;
-	}
-	tileList_.clear();
-
-	for (auto ptr : modelList_) {
-		delete ptr;
-	}
-	modelList_.clear();
 
 	for (auto& tex : textureData_) {
 		if (tex.texture) {
@@ -93,53 +75,7 @@ ResourceManager::~ResourceManager() {
 	delete vertexResourceTriangle_;
 	delete vertexResourceCube_;
 	delete vertexResourceSphere_;
-}
-
-void ResourceManager::AddSpriteInstance(Vector2 pos, MaterialConfig material) {
-	SpriteInstance* instance = new SpriteInstance;
-	instance->position = pos;
-	instance->scale = { 1.0f,1.0f };		/// まだ使ってない
-	instance->rotate = { 0.0f,0.0f,0.0f };  /// まだ使ってない
-	instance->layer = 0;					/// まだ使ってない
-	instance->isDraw = false;
-
-	auto it = std::find_if(materialConfigList_.begin(),
-		materialConfigList_.end(),
-		[&](MaterialConfig* ptr) {return *ptr == material; });
-
-	if (it != materialConfigList_.end()) {
-		instance->materialConfigIndex = (int)std::distance(materialConfigList_.begin(), it);
-	} else {
-		MaterialConfig* newMaterial = new MaterialConfig(material);
-		materialConfigList_.push_back(newMaterial);
-		instance->materialConfigIndex = int(materialConfigList_.size() - 1);
-	}
-	spriteList_.push_back(instance);
-}
-
-void ResourceManager::AddTileInstance(Vector2 pos, MaterialConfig material) {
-	SpriteInstance* instance = new SpriteInstance;
-	instance->position = pos;
-	instance->scale = { 1.0f,1.0f };		/// まだ使ってない
-	instance->rotate = { 0.0f,0.0f,0.0f };  /// まだ使ってない
-	instance->layer = 0;					/// まだ使ってない
-	instance->isDraw = false;
-
-	auto it = std::find_if(materialConfigList_.begin(),
-		materialConfigList_.end(),
-		[&](MaterialConfig* ptr) {return *ptr == material; });
-
-	if (it != materialConfigList_.end()) {
-		instance->materialConfigIndex = (int)std::distance(materialConfigList_.begin(), it);
-	} else {
-		MaterialConfig* newMaterial = new MaterialConfig(material);
-		materialConfigList_.push_back(newMaterial);
-		instance->materialConfigIndex = int(materialConfigList_.size() - 1);
-	}
-	tileList_.push_back(instance);
-}
-
-void ResourceManager::AddModelInstance() {
+	delete instanceManager_;
 }
 
 void ResourceManager::CreateTurnResource() {
@@ -186,25 +122,5 @@ void ResourceManager::ClearTurnResource() {
 		}
 	}
 
-	if (!spriteList_.empty()) {
-		for (auto ptr : spriteList_) {
-			delete ptr;
-		}
-		spriteList_.clear();
-	}
-
-	if (!tileList_.empty()) {
-		for (auto ptr : tileList_) {
-			delete ptr;
-		}
-		tileList_.clear();
-	}
-
-	if (!modelList_.empty()) {
-		for (auto ptr : modelList_) {
-			delete ptr;
-		}
-		modelList_.clear();
-	}
-
+	instanceManager_->Update();
 }

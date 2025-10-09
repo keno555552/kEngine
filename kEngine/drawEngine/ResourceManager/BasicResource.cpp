@@ -63,7 +63,6 @@ Microsoft::WRL::ComPtr<ID3D12Resource> BasicResource::GetResource(int Index) {
 	} else {
 		return resource_[Index];
 	}
-	assert(false);
 	return nullptr;
 }
 

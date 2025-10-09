@@ -28,6 +28,7 @@ public:
 	void Initialize(const char* kClientTitle, int kClientWidth, int kClientHeight, DirectXBase* directXDirver);
 
 	void PreDraw();
+	void CommitDraw();
 	void EndDraw();
 
 	void SetDirectionalLight(DirectionalLight* light);
@@ -62,9 +63,6 @@ public:
 
 	int LoadTexture(const std::string& filePath);
 	int LoadModelTexture(const std::string& filePath);
-
-	void CompoDraw();
-
 
 private:
 	Shader_compile* shader_compile_ = new Shader_compile;

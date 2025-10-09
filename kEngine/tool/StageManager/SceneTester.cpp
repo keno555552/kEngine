@@ -42,7 +42,7 @@ SceneTester::SceneTester(kEngine* system) {
 		object->objectType = MODEL;
 		object->modelHandle = ModelType::SKYDOME;
 		MaterialConfig materialConfig;
-		intMaterialConfig(&materialConfig);
+		InitMaterialConfig(&materialConfig);
 		materialConfig.lightModelType = LightModelType::HalfLambert;
 		materialConfig.enableLighting = false;
 		object->materialConfig.push_back(materialConfig);
@@ -51,10 +51,10 @@ SceneTester::SceneTester(kEngine* system) {
 
 	//for (int i = 0; i < 1; i++) 
 	//for (int i = 0; i < 10; i++) 
-	for (int i = 0; i < 2000; i++) {
+	for (int i = 0; i < 200; i++) {
 		Object* object = new Object;
 		MaterialConfig materialConfig;
-		intMaterialConfig(&materialConfig);
+		InitMaterialConfig(&materialConfig);
 		object->materialConfig.push_back(materialConfig);
 		object->objectType = TILE;
 		//object->objectType = SPRITE;
@@ -62,17 +62,17 @@ SceneTester::SceneTester(kEngine* system) {
 		object->transformationMatrix = debugCamera_->transformationMatrixTransform(object->transform);
 		objectGroup.push_back(object);
 	}
-	{
-		Object* object = new Object;
-		MaterialConfig materialConfig;
-		intMaterialConfig(&materialConfig);
-		object->materialConfig.push_back(materialConfig);
-		//object->objectType = TILE;
-		object->objectType = SPRITE;
-		object->transform.translate = { 0,0,0 };
-		object->transformationMatrix = debugCamera_->transformationMatrixTransform(object->transform);
-		objectGroup.push_back(object);
-	}
+	//{
+	//	Object* object = new Object;
+	//	MaterialConfig materialConfig;
+	//	InitMaterialConfig(&materialConfig);
+	//	object->materialConfig.push_back(materialConfig);
+	//	//object->objectType = TILE;
+	//	object->objectType = SPRITE;
+	//	object->transform.translate = { 0,0,0 };
+	//	object->transformationMatrix = debugCamera_->transformationMatrixTransform(object->transform);
+	//	objectGroup.push_back(object);
+	//}
 
 	//for (int i = 0; i < 1; i++) 
 	//for (int i = 0; i < 10; i++) 
@@ -269,7 +269,7 @@ void SceneTester::Draw() {
 		if (ImGui::Button("Add Object")) {
 			Object* object = new Object;
 			MaterialConfig materialConfig;
-			intMaterialConfig(&materialConfig);
+			InitMaterialConfig(&materialConfig);
 			object->materialConfig.push_back(materialConfig);
 			if (selectedItem == TRIANGLE) { object->objectType = TRIANGLE; }
 
@@ -278,7 +278,7 @@ void SceneTester::Draw() {
 				object->modelHandle = ModelType::MULTIMESH;
 				for (int i = 0; i < system_->GetMuitModelNum((int)ModelType::MULTIMESH) - 1; i++) {
 					MaterialConfig materialConfig;
-					intMaterialConfig(&materialConfig);
+					InitMaterialConfig(&materialConfig);
 					object->materialConfig.push_back(materialConfig);
 				}
 			} else if (selectedItem == MULTIMATERIAL) {
@@ -286,7 +286,7 @@ void SceneTester::Draw() {
 				object->modelHandle = ModelType::MULTIMATERIAL;
 				for (int i = 0; i < system_->GetMuitModelNum((int)ModelType::MULTIMATERIAL) - 1; i++) {
 					MaterialConfig materialConfig;
-					intMaterialConfig(&materialConfig);
+					InitMaterialConfig(&materialConfig);
 					object->materialConfig.push_back(materialConfig);
 				}
 			} else if (selectedItem == CHARATER) {
@@ -294,7 +294,7 @@ void SceneTester::Draw() {
 				object->modelHandle = ModelType::CHARATER;
 				for (int i = 0; i < system_->GetMuitModelNum((int)ModelType::CHARATER) - 1; i++) {
 					MaterialConfig materialConfig;
-					intMaterialConfig(&materialConfig);
+					InitMaterialConfig(&materialConfig);
 					object->materialConfig.push_back(materialConfig);
 				}
 			} else if (selectedItem == NEEDLE) {
@@ -302,7 +302,7 @@ void SceneTester::Draw() {
 				object->modelHandle = ModelType::NEEDLE;
 				for (int i = 0; i < system_->GetMuitModelNum((int)ModelType::NEEDLE) - 1; i++) {
 					MaterialConfig materialConfig;
-					intMaterialConfig(&materialConfig);
+					InitMaterialConfig(&materialConfig);
 					object->materialConfig.push_back(materialConfig);
 				}
 			}

@@ -18,6 +18,8 @@ typedef struct Vector2 {
 	Vector2 operator*(const int& target);
 	friend Vector2 operator*(int scalar, const Vector2& vec);
 
+	bool operator==(const Vector2& target);
+	bool operator!=(const Vector2& target);
 }Vector2;
 
 

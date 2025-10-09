@@ -5,6 +5,7 @@
 #include "Material.h"
 #include "MaterialConfig.h"
 #include "VertexIndex.h"
+#include "InstanceManager.h"
 
 class ResourceManager
 {
@@ -18,37 +19,7 @@ public:
 
 
 #pragma region Instance管理
-public:
-	void AddSpriteInstance(Vector2 pos, MaterialConfig material);
-	void AddTileInstance(Vector2 pos, MaterialConfig material);
-	//void ResmoveSpriteInstance();
-	//void UpdateTileInstance();
-	void AddModelInstance();
-	void AddParticleInstance();
-	//void ResmoveModelInstance();
-	//void UpdateModelInstance();
 
-public:
-	struct SpriteInstance {
-		Vector2 position;
-		Vector2 scale;
-		Vector3 rotate;
-		int materialConfigIndex;
-		int layer;
-		bool isDraw;
-	};
-
-	struct ModelInstance {
-		TransformationMatrix transformMatrix;
-		int modelID;
-		int layer;
-	};
-
-public:
-	std::vector<MaterialConfig*> materialConfigList_;
-	std::vector<SpriteInstance*> spriteList_;
-	std::vector<SpriteInstance*> tileList_;
-	std::vector<ModelInstance*> modelList_;
 
 #pragma endregion
 
@@ -85,6 +56,9 @@ public:
 	Cube* vertexResourceCube_ = new Cube;
 	Sphere* vertexResourceSphere_ = new Sphere;
 	std::vector<ModelGroup*> vertexResourceModelGroup_;
+
+	/// Instance管理
+	InstanceManager* instanceManager_ = new InstanceManager;
 
 	/// 無用もの消し関連
 	int deleteParameter = 0;

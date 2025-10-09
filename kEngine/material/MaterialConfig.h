@@ -22,5 +22,6 @@ struct MaterialConfig
 	bool operator!=(const MaterialConfig target);
 };
 
-void intMaterialConfig(MaterialConfig* materialConfig);
+void InitMaterialConfig(MaterialConfig* materialConfig);
 
+MaterialConfig CreateInitMaterialConfig();

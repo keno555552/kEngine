@@ -1,7 +1,7 @@
 #include "MaterialConfig.h"
 
 
-void intMaterialConfig(MaterialConfig* materialConfig) {
+void InitMaterialConfig(MaterialConfig* materialConfig) {
 	materialConfig->useOriginalTexture = true;
 	materialConfig->textureHandle = 0,
 	materialConfig->uvTranslate = { 0,0,0 },
@@ -11,7 +11,12 @@ void intMaterialConfig(MaterialConfig* materialConfig) {
 	materialConfig->textureColor = { 1.0f,1.0f,1.0f,1.0f },
 	materialConfig->lightModelType = LightModelType::HalfLambert,
 	materialConfig->enableLighting = true;
-};
+}
+MaterialConfig CreateInitMaterialConfig() {
+	MaterialConfig newMaterial;
+	InitMaterialConfig(&newMaterial);
+	return newMaterial;
+}
 
 bool MaterialConfig::operator==(const MaterialConfig target) {
 	if (useOriginalTexture != target.useOriginalTexture)return false;

@@ -33,7 +33,7 @@ void kEngine::StartFrame() {
 }
 
 void kEngine::EndFrame() {
-	drawEngine->CompoDraw();
+	drawEngine->CommitDraw();
 	dxComm->EndFrame();
 	drawEngine->EndDraw();
 }
