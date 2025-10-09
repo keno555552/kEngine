@@ -157,7 +157,7 @@ void Model::GetModelData(ModelData modelData) {
 ID3D12Resource* Model::CreateVertexResource_(ID3D12Device* device) {
 
 	ModelData modelData = LoadObjFile(directoryPath_, objName_);
-	vertexResource_->CreateResource_(device, sizeof(VertexData) * modelData.vertices.size());
+	vertexResource_->CreateResourceClass_(device, sizeof(VertexData) * modelData.vertices.size());
 	CreateVertexBufferView_(int(modelData.vertices.size()));
 	texturePath_ = modelData.material.textureFilePath;
 	VertexNum_ = int(modelData.vertices.size());
@@ -168,12 +168,12 @@ ID3D12Resource* Model::CreateVertexResource_(ID3D12Device* device) {
 	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
 	vertexResource_->GetResource()->Unmap(0, nullptr);
 
-	return vertexResource_->GetResource();
+	return vertexResource_->GetResource().Get();
 }
 
 ID3D12Resource* Model::CreateVertexResourceG_(ID3D12Device* device) {
 
-	vertexResource_->CreateResource_(device, sizeof(VertexData) * modelData_.vertices.size());
+	vertexResource_->CreateResourceClass_(device, sizeof(VertexData) * modelData_.vertices.size());
 	CreateVertexBufferView_(int(modelData_.vertices.size()));
 	texturePath_ = modelData_.material.textureFilePath;
 	VertexNum_ = int(modelData_.vertices.size());
@@ -184,7 +184,7 @@ ID3D12Resource* Model::CreateVertexResourceG_(ID3D12Device* device) {
 	std::memcpy(vertexData, modelData_.vertices.data(), sizeof(VertexData) * modelData_.vertices.size());
 	vertexResource_->GetResource()->Unmap(0, nullptr);
 
-	return vertexResource_->GetResource();
+	return vertexResource_->GetResource().Get();
 }
 
 void Model::SetWVP(TransformationMatrix* wvpData) {
@@ -199,7 +199,7 @@ void Model::SetWVP(TransformationMatrix* wvpData) {
 }
 
 ID3D12Resource* Model::SetWVPResource_(ID3D12Device* device, TransformationMatrix* wvpData) {
-	ID3D12Resource* resuit = CreateWVPResource_(device);
+	ID3D12Resource* resuit = CreateWVPResource_(device).Get();
 	SetWVP(wvpData);
 	return resuit;
 }

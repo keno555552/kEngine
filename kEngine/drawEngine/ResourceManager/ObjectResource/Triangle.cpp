@@ -1,7 +1,7 @@
 #include "Triangle.h"
 
 ID3D12Resource* Triangle::CreateVertexResource_(ID3D12Device* device) {
-	vertexResource_->CreateResource_(device, sizeof(VertexData) * 6);
+	vertexResource_->CreateResourceClass_(device, sizeof(VertexData) * 6);
 	//CreateVertexBufferView_(6);
 
 	// 頂点リソースにデータを書き込む
@@ -50,7 +50,7 @@ ID3D12Resource* Triangle::CreateVertexResource_(ID3D12Device* device) {
 
 	vertexResource_->GetResource()->Unmap(0, nullptr);
 
-	return vertexResource_->GetResource();
+	return vertexResource_->GetResource().Get();
 }
 
 void Triangle::SetWVP(TransformationMatrix* wvpData) {
@@ -65,7 +65,7 @@ void Triangle::SetWVP(TransformationMatrix* wvpData) {
 }
 
 ID3D12Resource* Triangle::SetWVPResource_(ID3D12Device* device, TransformationMatrix* wvpData) {
-	ID3D12Resource* resuit = CreateWVPResource_(device);
+	ID3D12Resource* resuit = CreateWVPResource_(device).Get();
 	SetWVP(wvpData);
 	return resuit;
 }

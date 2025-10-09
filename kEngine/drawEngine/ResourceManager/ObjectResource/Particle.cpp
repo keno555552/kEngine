@@ -19,7 +19,7 @@ void Particle::SetSize(Vector2 LTpos, Vector2 LBpos, Vector2 RTpos, Vector2 RBpo
 
 ID3D12Resource* Particle::CreateVertexResource_(ID3D12Device* device) {
 
-	vertexResource_->CreateResource_(device, sizeof(VertexData) * 5);
+	vertexResource_->CreateResourceClass_(device, sizeof(VertexData) * 5);
 	//CreateVertexBufferView_(6);
 
 	VertexData* vertexDataSprite = nullptr;
@@ -44,11 +44,11 @@ ID3D12Resource* Particle::CreateVertexResource_(ID3D12Device* device) {
 	vertexResource_->GetResource()->Unmap(0, nullptr);
 
 
-	return vertexResource_->GetResource();
+	return vertexResource_->GetResource().Get();
 }
 
 ID3D12Resource* Particle::CreateIndexResource_(ID3D12Device* device) {
-	indexResource_->CreateResource_(device, sizeof(uint32_t) * 3 * 4);
+	indexResource_->CreateResourceClass_(device, sizeof(uint32_t) * 3 * 4);
 
 	indexBufferView = {};
 	/// リソースの先頭のアドレスから使う
@@ -74,7 +74,7 @@ ID3D12Resource* Particle::CreateIndexResource_(ID3D12Device* device) {
 	indexDataSprite[10] = TOP_LEFT;
 	indexDataSprite[11] = CENTER;
 	indexResource_->GetResource()->Unmap(0, nullptr);
-	return indexResource_->GetResource();
+	return indexResource_->GetResource().Get();
 }
 
 void Particle::Set2DWVP(Vector2* wvpData) {
@@ -111,7 +111,7 @@ void Particle::Set2DWVP(Vector2* wvpData) {
 }
 
 ID3D12Resource* Particle::SetWVPResource_(ID3D12Device* device, Vector2 pos) {
-	ID3D12Resource* resuit = CreateWVPResource_(device);
+	ID3D12Resource* resuit = CreateWVPResource_(device).Get();
 	Set2DWVP(&pos);
 	return resuit;
 }

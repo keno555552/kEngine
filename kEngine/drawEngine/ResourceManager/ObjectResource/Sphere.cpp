@@ -4,7 +4,7 @@
 ID3D12Resource* Sphere::CreateVertexResource_(ID3D12Device* device) {
 	kSudivision_ = kMaxSudivision_;
 	uint32_t VertexNum = kMaxSudivision_ * kMaxSudivision_ * 4;
-	vertexResource_->CreateResource_(device, sizeof(VertexData) * VertexNum);
+	vertexResource_->CreateResourceClass_(device, sizeof(VertexData) * VertexNum);
 	CreateVertexBufferView_(VertexNum);
 
 	VertexData* vertexData = nullptr;// 頂点リソースにデータを書き込む
@@ -64,12 +64,12 @@ ID3D12Resource* Sphere::CreateVertexResource_(ID3D12Device* device) {
 		};
 	}
 	vertexResource_->GetResource()->Unmap(0, nullptr);
-	return vertexResource_->GetResource();
+	return vertexResource_->GetResource().Get();
 }
 
 ID3D12Resource* Sphere::CreateIndexResource_(ID3D12Device* device) {
 	uint32_t IndexNum = kMaxSudivision_ * kMaxSudivision_ * 6;
-	indexResource_->CreateResource_(device, sizeof(uint32_t) * IndexNum);
+	indexResource_->CreateResourceClass_(device, sizeof(uint32_t) * IndexNum);
 	CreateIndexBufferView_(IndexNum);
 	VertexNum_ = IndexNum;
 
@@ -96,7 +96,7 @@ ID3D12Resource* Sphere::CreateIndexResource_(ID3D12Device* device) {
 		}
 	}
 	indexResource_->GetResource()->Unmap(0, nullptr);
-	return indexResource_->GetResource();
+	return indexResource_->GetResource().Get();
 }
 
 void Sphere::SetWVP(TransformationMatrix* wvpData) {
@@ -111,7 +111,7 @@ void Sphere::SetWVP(TransformationMatrix* wvpData) {
 }
 
 ID3D12Resource* Sphere::SetWVPResource_(ID3D12Device* device, TransformationMatrix* wvpData) {
-	ID3D12Resource* resuit = CreateWVPResource_(device);
+	ID3D12Resource* resuit = CreateWVPResource_(device).Get();
 	SetWVP(wvpData);
 	return resuit;
 }

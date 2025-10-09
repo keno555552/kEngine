@@ -20,9 +20,11 @@ public:
 #pragma region Instance管理
 public:
 	void AddSpriteInstance(Vector2 pos, MaterialConfig material);
+	void AddTileInstance(Vector2 pos, MaterialConfig material);
 	//void ResmoveSpriteInstance();
 	//void UpdateTileInstance();
 	void AddModelInstance();
+	void AddParticleInstance();
 	//void ResmoveModelInstance();
 	//void UpdateModelInstance();
 
@@ -45,6 +47,7 @@ public:
 public:
 	std::vector<MaterialConfig*> materialConfigList_;
 	std::vector<SpriteInstance*> spriteList_;
+	std::vector<SpriteInstance*> tileList_;
 	std::vector<ModelInstance*> modelList_;
 
 #pragma endregion
@@ -64,10 +67,7 @@ public:
 	ID3D12Device* Bdevice_ = nullptr;
 
 	/// Material関係
-	BasicResource* materialResourceTriangle_ = new BasicResource;
-	BasicResource* materialResourceSprite_ = new BasicResource;
-	BasicResource* materialResourceCube_ = new BasicResource;
-	BasicResource* materialResourceSphere_ = new BasicResource;
+	BasicResource* materialResource_ = new BasicResource;
 	std::vector<BasicResource*> materialResourceModelGroup_;
 
 	/// テクスチャ関係
@@ -77,7 +77,7 @@ public:
 	BasicResource* intermediateResource_ = new BasicResource;/*EndDrawでTextrueを作ったら解放する*/
 
 	/// Lighting関係
-	ID3D12Resource* lightingResource_ = nullptr;
+	BasicResource* lightingResource_ = new BasicResource;
 
 	/// 図形関係
 	Triangle* vertexResourceTriangle_ = new Triangle;

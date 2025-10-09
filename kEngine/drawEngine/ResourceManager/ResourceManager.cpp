@@ -4,8 +4,6 @@ ResourceManager::ResourceManager(ID3D12Device* device) {
 
 	Bdevice_ = device;
 
-	materialResourceSprite_->CreateResource_(Bdevice_, sizeof(Material));
-
 	vertexResourceTriangle_->CreateVertexResource_(Bdevice_);
 	vertexResourceTriangle_->CreateVertexBufferView_(6);
 
@@ -26,7 +24,6 @@ ResourceManager::ResourceManager(ID3D12Device* device) {
 
 ResourceManager::~ResourceManager() {
 	///ID3D12Resource*の解放する
-	//lightingResource_->Release();//前フレームクリアされるからいらない
 	vertexResourceTriangle_->ClearVertexResource();
 	if (!vertexResourceSpriteGroup_.empty()) {
 		for (auto ptr : vertexResourceSpriteGroup_) {
@@ -36,17 +33,10 @@ ResourceManager::~ResourceManager() {
 	}
 	vertexResourceCube_->ClearAllResource();
 	vertexResourceSphere_->ClearAllResource();
-	textureResource_->ClearResource();
-	intermediateResource_->ClearResource();
-
-	materialResourceTriangle_->ClearResource();
-	materialResourceSprite_->ClearResource();
-	materialResourceCube_->ClearResource();
-	materialResourceSphere_->ClearResource();
-
 	if (!materialResourceModelGroup_.empty()) {
 		for (auto& material : materialResourceModelGroup_) {
 			if (material) {
+				material->ClearResource();
 				delete material;
 				material = nullptr;
 			}
@@ -62,14 +52,44 @@ ResourceManager::~ResourceManager() {
 		vertexResourceModelGroup_.clear();
 	}
 
-	if (!materialConfigList_.empty()) {
-		for (auto ptr : materialConfigList_) {
-			delete ptr;
-		}
-		materialConfigList_.clear();
-	}
+	textureResource_->ClearResource();
+	intermediateResource_->ClearResource();
+	//
+	materialResource_->ClearResource();
+	lightingResource_->ClearResource();
 
+	for (auto ptr : materialConfigList_) {
+		delete ptr;
+	}
+	materialConfigList_.clear();
+
+	for (auto ptr : spriteList_) {
+		delete ptr;
+	}
+	spriteList_.clear();
+
+	for (auto ptr : tileList_) {
+		delete ptr;
+	}
+	tileList_.clear();
+
+	for (auto ptr : modelList_) {
+		delete ptr;
+	}
+	modelList_.clear();
+
+	for (auto& tex : textureData_) {
+		if (tex.texture) {
+			tex.texture->Release();
+			tex.texture = nullptr;
+		}
+	}
+	textureData_.clear();
+
+	delete materialResource_;
 	delete textureResource_;
+	delete intermediateResource_;
+	delete lightingResource_;
 	delete vertexResourceTriangle_;
 	delete vertexResourceCube_;
 	delete vertexResourceSphere_;
@@ -97,13 +117,32 @@ void ResourceManager::AddSpriteInstance(Vector2 pos, MaterialConfig material) {
 	spriteList_.push_back(instance);
 }
 
+void ResourceManager::AddTileInstance(Vector2 pos, MaterialConfig material) {
+	SpriteInstance* instance = new SpriteInstance;
+	instance->position = pos;
+	instance->scale = { 1.0f,1.0f };		/// まだ使ってない
+	instance->rotate = { 0.0f,0.0f,0.0f };  /// まだ使ってない
+	instance->layer = 0;					/// まだ使ってない
+	instance->isDraw = false;
+
+	auto it = std::find_if(materialConfigList_.begin(),
+		materialConfigList_.end(),
+		[&](MaterialConfig* ptr) {return *ptr == material; });
+
+	if (it != materialConfigList_.end()) {
+		instance->materialConfigIndex = (int)std::distance(materialConfigList_.begin(), it);
+	} else {
+		MaterialConfig* newMaterial = new MaterialConfig(material);
+		materialConfigList_.push_back(newMaterial);
+		instance->materialConfigIndex = int(materialConfigList_.size() - 1);
+	}
+	tileList_.push_back(instance);
+}
+
 void ResourceManager::AddModelInstance() {
-
-
 }
 
 void ResourceManager::CreateTurnResource() {
-	lightingResource_ = CreateResource(Bdevice_, sizeof(DirectionalLight));
 }
 
 void ResourceManager::ClearTurnResource() {
@@ -111,14 +150,6 @@ void ResourceManager::ClearTurnResource() {
 
 	intermediateResource_->ClearResource();
 
-	materialResourceTriangle_->ClearResource();
-	//materialResourceSprite_->ClearResource();
-	materialResourceCube_->ClearResource();
-	materialResourceSphere_->ClearResource();
-
-	lightingResource_->Release();
-
-	vertexResourceTriangle_->ClearWVPResource();
 
 	if (!vertexResourceSpriteGroup_.empty()) {
 		int i = 0;
@@ -144,9 +175,6 @@ void ResourceManager::ClearTurnResource() {
 		}
 	}
 
-	vertexResourceCube_->ClearWVPResource();
-	vertexResourceSphere_->ClearWVPResource();
-
 	if (!materialResourceModelGroup_.empty()) {
 		for (auto& material : materialResourceModelGroup_) {
 			material->ClearResource();
@@ -158,12 +186,25 @@ void ResourceManager::ClearTurnResource() {
 		}
 	}
 
-	
 	if (!spriteList_.empty()) {
 		for (auto ptr : spriteList_) {
 			delete ptr;
 		}
 		spriteList_.clear();
+	}
+
+	if (!tileList_.empty()) {
+		for (auto ptr : tileList_) {
+			delete ptr;
+		}
+		tileList_.clear();
+	}
+
+	if (!modelList_.empty()) {
+		for (auto ptr : modelList_) {
+			delete ptr;
+		}
+		modelList_.clear();
 	}
 
 }

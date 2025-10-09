@@ -13,10 +13,10 @@ kEngine::kEngine() {
 
 kEngine::~kEngine() {
 	delete drawEngine;
-	delete dxComm;
 	delete inputManager;
 	delete soundManager;
 	delete timeManager;
+	delete dxComm;
 }
 
 void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClientHeight) {
@@ -51,9 +51,11 @@ void kEngine::DrawTriangle(TransformationMatrix* wvpData, MaterialConfig materia
 }
 
 void kEngine::DrawSprite(Vector2 pos, MaterialConfig material) {
-	//drawEngine->CollectSprite(pos, material);
+	drawEngine->CollectSprite(pos, material);
+}
+
+void kEngine::DrawTile(Vector2 pos, MaterialConfig material) {
 	drawEngine->CollectTile(pos, material);
-	//drawEngine->DrawSpriteDirect(pos, material);
 }
 
 void kEngine::DrawSprite(Vector2 pos, MaterialConfig material, Vector2 LTpos, Vector2 LBpos, Vector2 RTpos, Vector2 RBpos, float TsizeX, float TsizeY, Vector2 TCLTPos, Vector2 TCRBPos) {

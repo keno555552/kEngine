@@ -31,13 +31,15 @@ public:
 
 	ID3D12PipelineState* createPSO_Tile(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler);
 
+	ID3D12PipelineState* createPSO_3DParticle(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler, LightModelType lightModelType);
+
 private:
 	//D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
 	DirectXBase* directXDriver_;
 	ID3DBlob* signatureBlob_ = nullptr;
 	ID3DBlob* errorBlob_ = nullptr;
 	std::vector<ID3D12RootSignature*> rootSignatureList_;
-	ID3D12RootSignature* rootSignature_;
+	ID3D12RootSignature* rootSignature_;					///Listからもセーブしたから解放しなくていい
 	D3D12_INPUT_ELEMENT_DESC inputElementDescs_[3] = {};
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc_ = {};
 	D3D12_BLEND_DESC blendDesc_ = {};
@@ -45,15 +47,15 @@ private:
 	IDxcBlob* vertexShaderBlob_ = nullptr;
 	IDxcBlob* pixelShaderBlob_ = nullptr;
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
-	ID3D12PipelineState* graphicsPipelineState_ = nullptr;
+	ID3D12PipelineState* graphicsPipelineState_ = nullptr;	///外に出して、そこで解放したからしなくていい
 
 private:
 	void createInputLayout();
 	void SetBlendState();
 	void SetRasterizerState();
 	void ShaderCompile(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler, LightModelType lightModelType);
-	void ShaderCompile_Tile(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler);
+	void ShaderCompile_Particle2D(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler);
+	void ShaderCompile_Particle3D(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler, LightModelType lightModelType);
 	void SetDepthStencilState();
 	void SetGraphicsPipelineState();
-	//ID3D12Resource* CreateBufferResource(ID3D12Device* device, size_t sizeInBytes);
 };

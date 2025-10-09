@@ -122,9 +122,10 @@ std::vector<ModelData> LoadMuitObjFile(const std::string& directoryPath, const s
 ModelGroup::~ModelGroup() {
 	if (!modelGroup_.empty()) 		{
 		for (Model* model : modelGroup_) {
-			delete model;      // 釋放堆積記憶體
+			model->ClearAllResource();
+			delete model;      
 		}
-		modelGroup_.clear();   // 清空 vector 容器
+		modelGroup_.clear();   
 
 	}
 }

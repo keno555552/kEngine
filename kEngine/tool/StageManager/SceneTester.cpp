@@ -49,9 +49,19 @@ SceneTester::SceneTester(kEngine* system) {
 		objectGroup.push_back(object);
 	}
 
-	for (int i = 0; i < 1; i++) 
+	//for (int i = 0; i < 1; i++) 
 	//for (int i = 0; i < 10; i++) 
-	//for (int i = 0; i < 200; i++) 
+	for (int i = 0; i < 2000; i++) {
+		Object* object = new Object;
+		MaterialConfig materialConfig;
+		intMaterialConfig(&materialConfig);
+		object->materialConfig.push_back(materialConfig);
+		object->objectType = TILE;
+		//object->objectType = SPRITE;
+		object->transform.translate = { i * 0.1f,i * 0.1f, 0.0f };
+		object->transformationMatrix = debugCamera_->transformationMatrixTransform(object->transform);
+		objectGroup.push_back(object);
+	}
 	{
 		Object* object = new Object;
 		MaterialConfig materialConfig;
@@ -59,15 +69,36 @@ SceneTester::SceneTester(kEngine* system) {
 		object->materialConfig.push_back(materialConfig);
 		//object->objectType = TILE;
 		object->objectType = SPRITE;
-		object->transform.translate = { i * 0.1f,i * 0.1f, 0.0f };
+		object->transform.translate = { 0,0,0 };
 		object->transformationMatrix = debugCamera_->transformationMatrixTransform(object->transform);
 		objectGroup.push_back(object);
 	}
+
+	//for (int i = 0; i < 1; i++) 
+	//for (int i = 0; i < 10; i++) 
+	//for (int i = 0; i < 200; i++) 
+	//{
+	//	Object* object = new Object;
+	//	MaterialConfig materialConfig;
+	//	intMaterialConfig(&materialConfig);
+	//	object->materialConfig.push_back(materialConfig);
+	//	object->objectType = CUBE;
+	//	//object->objectType = SPRITE;
+	//	object->transform.translate = { i * 0.1f,i * 0.1f, 0.0f };
+	//	object->transformationMatrix = debugCamera_->transformationMatrixTransform(object->transform);
+	//	objectGroup.push_back(object);
+	//}
 
 };
 
 
 SceneTester::~SceneTester() {
+	if (!objectGroup.empty()) {
+		for (auto& ptr : objectGroup) {
+			delete ptr, ptr = nullptr;
+		}
+	}
+	objectGroup.clear();
 }
 
 void SceneTester::Update() {
@@ -183,7 +214,7 @@ void SceneTester::Draw() {
 				system_->DrawSprite({ ptr->transform.translate.x,ptr->transform.translate.y }, ptr->materialConfig[0]);
 				break;
 			case TILE:
-				//system_->DrawTile({ ptr->transform.translate.x,ptr->transform.translate.y }, ptr->materialConfig[0]);
+				system_->DrawTile({ ptr->transform.translate.x,ptr->transform.translate.y }, ptr->materialConfig[0]);
 				break;
 			case CUBE:
 				system_->DrawCube(&ptr->transformationMatrix, ptr->materialConfig[0]);
@@ -346,6 +377,44 @@ void SceneTester::Draw() {
 			name1 = "Sprite.trans.translate" + std::to_string(i);
 			name2 = "Sprite.trans.rotate" + std::to_string(i);
 			name3 = "Sprite.trans.scale" + std::to_string(i);
+			name4 = "Material_" + std::to_string(i);
+			name5 = "useOriginalTexture_" + std::to_string(i);
+			name6 = "objectMaterialHandle_" + std::to_string(i);
+			name7 = "UVTranslate_" + std::to_string(i);
+			name8 = "UVScale_" + std::to_string(i);
+			name9 = "UVRotate_" + std::to_string(i);
+			name10 = "Color_" + std::to_string(i);
+			name11 = "EnableLighting_" + std::to_string(i);
+			name12 = "LightingItem_" + std::to_string(i);
+			name13 = "Delete_" + std::to_string(i);
+			if (ImGui::CollapsingHeader(name.c_str())) {
+				ImGui::SliderFloat3(name1.c_str(), &ptr->transform.translate.x, 0, 640.0f);
+				ImGui::SliderFloat3(name2.c_str(), &ptr->transform.rotate.x, -5.0f, 5.0f);
+				ImGui::SliderFloat3(name3.c_str(), &ptr->transform.scale.x, -5.0f, 5.0f);
+				for (auto& ptr2 : ptr->materialConfig) {
+					if (ImGui::CollapsingHeader(name4.c_str())) {
+						ImGui::Checkbox(name5.c_str(), &ptr2.useOriginalTexture);
+						ImGui::Combo(name6.c_str(), &ptr2.textureHandle, items, IM_ARRAYSIZE(items));
+						ImGui::SliderFloat2(name7.c_str(), &ptr2.uvTranslate.x, 0.0f, 640.0f);
+						ImGui::SliderFloat2(name8.c_str(), &ptr2.uvScale.x, 0.0f, 10.0f);
+						ImGui::SliderAngle(name9.c_str(), &ptr2.uvRotate.z, 0.0f, 400.0f);
+						ImGui::ColorEdit4(name10.c_str(), &ptr2.textureColor.x);
+						ImGui::Checkbox(name11.c_str(), &ptr2.enableLighting);
+					}
+				}
+			}
+			ImGui::Separator();
+			if (ImGui::Button(name13.c_str())) {
+				ptr->isDelete = true;
+			}
+			i++;
+			break;
+		case TILE:
+			ImGui::Separator();
+			name = "Tile" + std::to_string(i);
+			name1 = "Tile.trans.translate" + std::to_string(i);
+			name2 = "Tile.trans.rotate" + std::to_string(i);
+			name3 = "Tile.trans.scale" + std::to_string(i);
 			name4 = "Material_" + std::to_string(i);
 			name5 = "useOriginalTexture_" + std::to_string(i);
 			name6 = "objectMaterialHandle_" + std::to_string(i);

@@ -25,6 +25,7 @@ private:
 	enum objectType {
 		TRIANGLE,
 		SPRITE,
+		TILE,
 		CUBE,
 		SPHERE,
 		MODEL,
@@ -36,7 +37,6 @@ private:
 		CHARATER,
 		NEEDLE,
 		SKYDOME,
-		TILE,
 		PRATICLE,
 	};
 
@@ -50,7 +50,6 @@ private:
 		CHARATER,
 		NEEDLE,
 		SKYDOME,
-		TILE,
 		PRATICLE,
 	};
 

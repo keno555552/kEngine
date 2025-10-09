@@ -606,7 +606,6 @@ ID3D12DescriptorHeap* DirectXBase::CreateDescriptorHeap(ID3D12Device* device, D3
 
 void DirectXBase::CreateRenderTargetViews(ID3D12Device* device, IDXGISwapChain4* swapChain, ID3D12DescriptorHeap* rtvDescriptorHeap) {
 	// SwapChainからResourceを引っ張ってくる
-	//ID3D12Resource* swapChainResources[2] = { nullptr };
 	HRESULT hr = swapChain->GetBuffer(0, IID_PPV_ARGS(&swapChainResources[0]));
 	// うまく取得できなければ起動できない
 	assert(SUCCEEDED(hr));
@@ -749,7 +748,6 @@ void DirectXBase::Finalize() {
 	if (SwapChain)				SwapChain->Release();
 	if (swapChainResources[0])	swapChainResources[0]->Release();
 	if (swapChainResources[1])	swapChainResources[1]->Release();
-	//if (DescriptorHeap)			DescriptorHeap->Release();
 	if (rtvDescriptorHeap)		rtvDescriptorHeap->Release();
 	if (srvDescriptorHeap)		srvDescriptorHeap->Release();
 	if (dsvDescriptorHeap)		dsvDescriptorHeap->Release();
@@ -767,8 +765,6 @@ void DirectXBase::Finalize() {
 		debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_DETAIL);
 		debug->ReportLiveObjects(DXGI_DEBUG_APP, DXGI_DEBUG_RLO_ALL);
 		debug->ReportLiveObjects(DXGI_DEBUG_D3D12, DXGI_DEBUG_RLO_ALL);
-
-
 
 		debug->Release();
 	}

@@ -13,7 +13,7 @@ public:
 	/// 頂点リソースの作成と解放
 	virtual ID3D12Resource* CreateVertexResource_(ID3D12Device* device) { return 0; };
 	virtual ID3D12Resource* CreateIndexResource_(ID3D12Device* device) { return 0; }
-	ID3D12Resource* CreateWVPResource_(ID3D12Device* device);
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateWVPResource_(ID3D12Device* device);
 	void ClearAllResource();
 	void ClearVertexResource();
 	void ClearIndexResource();
@@ -24,9 +24,9 @@ public:
 	D3D12_INDEX_BUFFER_VIEW CreateIndexBufferView_(uint32_t NumOfIndex);
 
 	/// Resourceを取得する
-	ID3D12Resource* GetVertexResource() { return vertexResource_->GetResource(); }
-	ID3D12Resource* GetIndexResource_() { return indexResource_->GetResource(); };
-	ID3D12Resource* GetWVPResource_() { return wvpResource_->GetResource(); };
+	Microsoft::WRL::ComPtr<ID3D12Resource> GetVertexResource() { return vertexResource_->GetResource(); }
+	Microsoft::WRL::ComPtr<ID3D12Resource> GetIndexResource_() { return indexResource_->GetResource(); };
+	Microsoft::WRL::ComPtr<ID3D12Resource> GetWVPResource_() { return wvpResource_->GetResource(); };
 	D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView() { return vertexBufferView; }
 	D3D12_INDEX_BUFFER_VIEW GetIndexBufferView() { return indexBufferView; }
 

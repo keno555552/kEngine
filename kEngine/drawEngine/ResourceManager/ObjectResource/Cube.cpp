@@ -1,6 +1,6 @@
 #include "Cube.h"
 ID3D12Resource* Cube::CreateVertexResource_(ID3D12Device* device) {
-	vertexResource_->CreateResource_(device, sizeof(VertexData) * 24);
+	vertexResource_->CreateResourceClass_(device, sizeof(VertexData) * 24);
 
 	// 頂点リソースにデータを書き込む
 	VertexData* vertexData = nullptr;
@@ -77,11 +77,11 @@ ID3D12Resource* Cube::CreateVertexResource_(ID3D12Device* device) {
 		vertexData[3 + i * 4].normal = normal;
 	}
 	vertexResource_->GetResource()->Unmap(0, nullptr);
-	return vertexResource_->GetResource();
+	return vertexResource_->GetResource().Get();
 }
 
 ID3D12Resource* Cube::CreateIndexResource_(ID3D12Device* device) {
-	indexResource_->CreateResource_(device, sizeof(uint32_t) * 36);
+	indexResource_->CreateResourceClass_(device, sizeof(uint32_t) * 36);
 
 	indexBufferView = {};
 	/// リソースの先頭のアドレスから使う
@@ -112,7 +112,7 @@ ID3D12Resource* Cube::CreateIndexResource_(ID3D12Device* device) {
 		}
 	}
 	indexResource_->GetResource()->Unmap(0, nullptr);
-	return indexResource_->GetResource();
+	return indexResource_->GetResource().Get();
 }
 
 void Cube::SetWVP(TransformationMatrix* wvpData) {
@@ -127,7 +127,7 @@ void Cube::SetWVP(TransformationMatrix* wvpData) {
 }
 
 ID3D12Resource* Cube::SetWVPResource_(ID3D12Device* device, TransformationMatrix* wvpData) {
-	ID3D12Resource* resuit = CreateWVPResource_(device);
+	ID3D12Resource* resuit = CreateWVPResource_(device).Get();
 	SetWVP(wvpData);
 	return resuit;
 }

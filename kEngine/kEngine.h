@@ -47,6 +47,8 @@ public:
 	/// <param name="material"> MaterialConfig </param>
 	void DrawSprite(Vector2 pos, MaterialConfig material);
 
+	void DrawTile(Vector2 pos, MaterialConfig material);
+
 	/// <summary>
 	/// 2D 四角形を描く, 左上が0,0, 右下プラス, 座標はピクセル計算, 
 	/// </summary>

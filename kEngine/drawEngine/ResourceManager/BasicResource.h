@@ -1,6 +1,7 @@
 #pragma once
 #include "DircetXBase.h"
 #include <vector>
+#include <wrl.h>
 
 ID3D12Resource* CreateResource(ID3D12Device* device, size_t sizeInBytes);
 
@@ -9,14 +10,14 @@ class BasicResource
 public:
 	~BasicResource();
 	
-	ID3D12Resource* CreateResource_(ID3D12Device* device, size_t sizeInBytes);
-	ID3D12Resource* SaveResource_(ID3D12Resource* resource);
-	ID3D12Resource* GetResource(int Index = -1);
-
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateResourceClass_(ID3D12Device* device, size_t sizeInBytes);
+	Microsoft::WRL::ComPtr<ID3D12Resource> SaveResource_(ID3D12Resource* resource);
+	Microsoft::WRL::ComPtr<ID3D12Resource> GetResource(int Index = -1);
+	int ShowResourceCounter() { return resourceCounter; }
 	void ClearResource();
 
 private:
-	std::vector<ID3D12Resource*> resource_;
+	std::vector <Microsoft::WRL::ComPtr< ID3D12Resource>> resource_;
 	int resourceCounter = 0;
 };
 

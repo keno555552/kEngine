@@ -1,4 +1,4 @@
-#include "object3d.hlsli"
+#include "Particle.hlsli"
 #if defined(LIGHT_MODEL_LAMBERT)
 #include "./LightingLambert/Lambert.hlsl"
 #endif

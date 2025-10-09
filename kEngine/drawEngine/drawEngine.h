@@ -45,13 +45,13 @@ public:
 	/// Tile関連
 	void CollectTile(Vector2 pos, MaterialConfig material);
 	void DrawTile();
-	
+
 	/// 立方体関連
 	void DrawCube(TransformationMatrix* wvpData, MaterialConfig material);
 	/// 球体関連
 	void DrawSphere(TransformationMatrix* wvpData, MaterialConfig material, int sudivision);
 	/// モデル関連
-	void DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material,int modelHandle);
+	void DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle);
 	void DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material);
 	bool SetModelTexture(Model* model);
 	bool SetModelGroupTexture(Model* model);
@@ -59,7 +59,7 @@ public:
 	int readCommonTextureHandle(int Handle);
 	int readModelTextureHandle(int Handle);
 	int GetMuitModelNum(int modelHandle);
-	
+
 	int LoadTexture(const std::string& filePath);
 	int LoadModelTexture(const std::string& filePath);
 
@@ -85,9 +85,11 @@ private:
 	enum class psoType {
 		NONE = -1,
 		defaultPSO = 0,
-		Lightmodel_Lambert = 0,
-		Lightmodel_HalfLambert = 1,
-		Tile = 2,
+		Normal_Lambert = 0,
+		Normal_HalfLambert,
+		Tile ,
+		Particle_Lambert,
+		Particle_HalfLambert,
 	};
 
 private:
@@ -100,14 +102,14 @@ private:
 	IDxcUtils* dxcUtils = nullptr;
 	IDxcCompiler3* dxcCompiler = nullptr;
 	IDxcIncludeHandler* includeHandler = nullptr;
-	std::vector<ID3D12PipelineState*> PSO_;
+	std::vector<ID3D12PipelineState*> psoList_;
 	ID3D12RootSignature* rootSignature_ = nullptr;
 	D3D12_VIEWPORT viewport{};
 	D3D12_RECT scissorRect{};
-	
+
 	/// Textrue関連
-	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
+	D3D12_GPU_DESCRIPTOR_HANDLE TileSrvHandleGPU_{};
 	uint32_t textrueCounter = 1;
 	std::vector<int> commonTextureSRVMap_;
 	std::vector<int> modelTextureSRVMap_;
@@ -116,15 +118,15 @@ private:
 
 
 	///Lighting関連
-	DirectionalLight* directionalLightData = {};
+	DirectionalLight* directionalLightData = {};		// 外部から受ける
 
 	/// 交換用容器
 	Microsoft::WRL::ComPtr<ID3D12Resource> tileWVPResource_ = nullptr;
 	TransformationMatrix* tileInstancingData_ = nullptr;
-	D3D12_GPU_DESCRIPTOR_HANDLE TileSrvHandleGPU_{};
+
 	//Material関連
-	BasicResource* materialResource_ = new BasicResource;
-	Material* materialData = new Material;
+	Material* materialData = nullptr;
+	DirectionalLight* lightingData = nullptr;
 
 
 
@@ -142,9 +144,10 @@ private:
 	D3D12_RECT createScissorRect(int kClientWidth, int kClientHeight);
 	void InitializeMaterial();
 	void SetMaterial(Matrix4x4 uvTransform, Vector4 color, int isLighting);
-	void SetLighting(ID3D12Resource* resource, DirectionalLight* directionalLight);
+	void InitializeLighting();
+	void SetLighting(DirectionalLight* directionalLight);
 
-	void PSODecition(MaterialConfig& material);
+	void PSODecition(MaterialConfig& material,bool isParticle = false);
 	DirectX::ScratchImage LoadTextrueLow(const std::string& filePath);
 	ID3D12Resource* CreateTextureResource(ID3D12Device* device, const DirectX::TexMetadata& metadata);
 	ID3D12Resource* UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages, ID3D12Device* device, ID3D12GraphicsCommandList* commandList);

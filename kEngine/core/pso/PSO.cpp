@@ -8,10 +8,14 @@ PSO::~PSO() {
 	if (errorBlob_) {
 		errorBlob_->Release();
 	}
-	rootSignature_->Release();
+
+	for (auto& ptr: rootSignatureList_) {
+		ptr->Release();
+		ptr = nullptr;
+	}
+	rootSignatureList_.clear();
 	vertexShaderBlob_->Release();
 	pixelShaderBlob_->Release();
-	rootSignatureList_.clear();
 	//graphicsPipelineState_->Release();
 }
 
@@ -38,7 +42,21 @@ ID3D12PipelineState* PSO::createPSO_Tile(IDxcUtils* dxcUtils, IDxcCompiler3* dxc
 	createInputLayout();
 	SetBlendState();
 	SetRasterizerState();
-	ShaderCompile_Tile(dxcUtils, dxcCompiler, includeHandler);
+	ShaderCompile_Particle2D(dxcUtils, dxcCompiler, includeHandler);
+	SetDepthStencilState();
+
+	SetGraphicsPipelineState();
+	return graphicsPipelineState_;
+}
+
+ID3D12PipelineState* PSO::createPSO_3DParticle(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler,
+	LightModelType lightModelType) {
+
+	createRootSignature(true);
+	createInputLayout();
+	SetBlendState();
+	SetRasterizerState();
+	ShaderCompile_Particle3D(dxcUtils, dxcCompiler, includeHandler, lightModelType);
 	SetDepthStencilState();
 
 	SetGraphicsPipelineState();
@@ -183,7 +201,7 @@ void PSO::ShaderCompile(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcInc
 	assert(pixelShaderBlob_ != nullptr);
 }
 
-void PSO::ShaderCompile_Tile(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler) {
+void PSO::ShaderCompile_Particle2D(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler) {
 	/// Shaderをコンパイルする
 	vertexShaderBlob_ = {};
 	vertexShaderBlob_ = CompileShader(L"./resources/Shader/Tile2D.VS.hlsl", L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
@@ -191,6 +209,17 @@ void PSO::ShaderCompile_Tile(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, ID
 
 	pixelShaderBlob_ = {};
 	pixelShaderBlob_ = CompileShader(L"./resources/Shader/Tile2D.PS.hlsl", L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
+	assert(pixelShaderBlob_ != nullptr);
+}
+
+void PSO::ShaderCompile_Particle3D(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler, LightModelType lightModelType) {
+	/// Shaderをコンパイルする
+	vertexShaderBlob_ = {};
+	vertexShaderBlob_ = CompileShader(L"./resources/Shader/Particle.VS.hlsl", L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
+	assert(vertexShaderBlob_ != nullptr);
+
+	pixelShaderBlob_ = {};
+	pixelShaderBlob_ = CompileShader(L"./resources/Shader/Particle.PS.hlsl", L"ps_6_0", dxcUtils, dxcCompiler, includeHandler, lightModelType);
 	assert(pixelShaderBlob_ != nullptr);
 }
 

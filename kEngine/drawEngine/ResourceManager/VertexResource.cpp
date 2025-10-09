@@ -4,7 +4,7 @@
 #include "TransformationMatrix.h"
 
 
-ID3D12Resource* CreateWVPResource(ID3D12Device* device, size_t sizeInBytes) {
+Microsoft::WRL::ComPtr< ID3D12Resource> CreateWVPResource(ID3D12Device* device, size_t sizeInBytes) {
 	return CreateResource(device, sizeInBytes);
 }
 
@@ -38,16 +38,16 @@ VertexResource::~VertexResource() {
 	ClearWVPResource();
 }
 
-ID3D12Resource* VertexResource::CreateWVPResource_(ID3D12Device* device) {
-	return wvpResource_->CreateResource_(device, sizeof(TransformationMatrix));
+Microsoft::WRL::ComPtr<ID3D12Resource> VertexResource::CreateWVPResource_(ID3D12Device* device) {
+	return wvpResource_->CreateResourceClass_(device, sizeof(TransformationMatrix));
 }
 
 D3D12_VERTEX_BUFFER_VIEW VertexResource::CreateVertexBufferView_(uint32_t NumOfVertex) {
-	return vertexBufferView = CreateVertexBufferView(vertexResource_->GetResource(), NumOfVertex);
+	return vertexBufferView = CreateVertexBufferView(vertexResource_->GetResource().Get(), NumOfVertex);
 }
 
 D3D12_INDEX_BUFFER_VIEW VertexResource::CreateIndexBufferView_(uint32_t NumOfIndex) {
-	return indexBufferView = CreateIndexBufferView(indexResource_->GetResource(),NumOfIndex);
+	return indexBufferView = CreateIndexBufferView(indexResource_->GetResource().Get(), NumOfIndex);
 }
 
 void VertexResource::ClearAllResource() {

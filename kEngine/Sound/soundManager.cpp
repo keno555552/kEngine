@@ -9,6 +9,9 @@ SoundManager::SoundManager() {
 }
 
 SoundManager::~SoundManager() {
+	for(auto& ptr:sounds_){
+		delete ptr;
+	}
 	sounds_.clear();
 	resourceCounter = 0;
 

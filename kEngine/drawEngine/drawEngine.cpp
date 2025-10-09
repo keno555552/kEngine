@@ -6,15 +6,14 @@
 
 DrawEngine::~DrawEngine() {
 	delete shader_compile_;
-	delete pso_;
 
-	for (auto& i : PSO_) {
-		if (i) {
-			i->Release();
-			i = nullptr;
-		}
+	for (auto& ptr:psoList_){
+		ptr->Release();
+		ptr = nullptr;
 	}
-	PSO_.clear();
+	psoList_.clear();
+
+	delete pso_;
 
 	//delete directXDriver_;            /*借り*/
 
@@ -25,14 +24,18 @@ DrawEngine::~DrawEngine() {
 	//rootSignature_->Release();		/*借り*/
 
 	//delete directionalLightData;      /*借り*/
-
+	tileWVPResource_->Unmap(0, nullptr);
+	tileWVPResource_.Reset();
+	tileInstancingData_ = nullptr;
+	resourceManager_->materialResource_->GetResource()->Unmap(0, nullptr);
+	resourceManager_->materialResource_->GetResource().Reset();
+	materialData = nullptr;
+	resourceManager_->lightingResource_->GetResource()->Unmap(0, nullptr);
+	resourceManager_->lightingResource_->GetResource().Reset();
+	lightingData = nullptr;
 	delete resourceManager_;
 
-	//materialResource_->Release();
-	//materialResourceSprite_->Release();
-
 	depthStencilResource->Release();
-
 }
 
 void DrawEngine::Initialize
@@ -53,22 +56,28 @@ void DrawEngine::Initialize
 	pso_->Initialize(directXDriver_);
 	for (int i = 0; i < (int)LightModelType::NumLightModels; i++) {
 		ID3D12PipelineState* graphicsPipelineState_ = pso_->createPSO(dxcUtils, dxcCompiler, includeHandler, (LightModelType)i);
-		PSO_.push_back(graphicsPipelineState_);
+		psoList_.push_back(graphicsPipelineState_);
 	}
 	ID3D12PipelineState* graphicsPipelineState_ = pso_->createPSO_Tile(dxcUtils, dxcCompiler, includeHandler);
-	PSO_.push_back(graphicsPipelineState_);
+	psoList_.push_back(graphicsPipelineState_);
+	for (int i = 0; i < (int)LightModelType::NumLightModels; i++) {
+		ID3D12PipelineState* graphicsPipelineState_ = pso_->createPSO(dxcUtils, dxcCompiler, includeHandler, (LightModelType)i);
+		psoList_.push_back(graphicsPipelineState_);
+	}
 
 
 	rootSignature_ = pso_->getRootSignature((int)psoType::defaultPSO);
 
 	depthStencilResource = CreateDepthStencilTextureResource(directXDriver_->GetDriver(), kClientWidth, kClientHeight);
 	MakeDepthStencilView();
+
 	///
 	viewport = createViewport(kClientWidth, kClientHeight);
 	scissorRect = createScissorRect(kClientWidth, kClientHeight);
 
 
 	InitializeMaterial();
+	InitializeLighting();
 
 	/// Tile用wvpBufferを作成
 	tileWVPResource_ = CreateResource(directXDriver_->GetDriver(), sizeof(TransformationMatrix) * config::GetTileNumInstance());
@@ -79,13 +88,13 @@ void DrawEngine::Initialize
 	}
 	TileSrvHandleGPU_ = Create2DTileWVPBuffer(tileWVPResource_.Get());
 
-	Microsoft::WRL::ComPtr<ID3D12Debug> debugController;
-	D3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
-	debugController->EnableDebugLayer();
+	//Microsoft::WRL::ComPtr<ID3D12Debug> debugController;
+	//D3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
+	//debugController->EnableDebugLayer();
 
-	Microsoft::WRL::ComPtr<ID3D12Debug1> debugController1;
-	debugController.As(&debugController1);
-	debugController1->SetEnableGPUBasedValidation(TRUE);
+	//Microsoft::WRL::ComPtr<ID3D12Debug1> debugController1;
+	//debugController.As(&debugController1);
+	//debugController1->SetEnableGPUBasedValidation(TRUE);
 
 	/// デフォルトのモデルを設定
 	SetModel("resources/object/plane/plane.obj");
@@ -97,7 +106,7 @@ void DrawEngine::PreDraw() {
 	commandList_->RSSetViewports(1, &viewport);  // Viewportを設定
 	commandList_->RSSetScissorRects(1, &scissorRect);  // Scissorを設定
 	/// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-	commandList_->SetPipelineState(PSO_[(int)defaultLightModel_]);  // PSOを設定
+	commandList_->SetPipelineState(psoList_[(int)defaultLightModel_]);  // PSOを設定
 	rootSignature_ = pso_->getRootSignature((int)psoType::defaultPSO);
 	commandList_->SetGraphicsRootSignature(rootSignature_);
 	if (currentPSO_ != psoType::defaultPSO) {
@@ -110,7 +119,8 @@ void DrawEngine::PreDraw() {
 	resourceManager_->CreateTurnResource();
 
 	/// Lighting
-	SetLighting(resourceManager_->lightingResource_, directionalLightData);
+	SetLighting(directionalLightData);
+
 }
 
 void DrawEngine::EndDraw() {
@@ -119,26 +129,44 @@ void DrawEngine::EndDraw() {
 	resourceManager_->ClearTurnResource();
 }
 
-
 void DrawEngine::SetDirectionalLight(DirectionalLight* light) {
 	if (light)directionalLightData = light;
 }
 
-void DrawEngine::PSODecition(MaterialConfig& material) {
+void DrawEngine::PSODecition(MaterialConfig& material, bool isParticle) {
 	bool psoChanged = false;
-	switch (material.lightModelType) {
-	case LightModelType::Lambert:
-		if (currentPSO_ != psoType::Lightmodel_Lambert) {
-			commandList_->SetPipelineState(PSO_[(int)material.lightModelType]);
-			currentPSO_ = psoType::Lightmodel_Lambert;
-			psoChanged = true;
+	if (!isParticle) {
+		switch (material.lightModelType) {
+		case LightModelType::Lambert:
+			if (currentPSO_ != psoType::Normal_Lambert) {
+				commandList_->SetPipelineState(psoList_[(int)material.lightModelType]);
+				currentPSO_ = psoType::Normal_Lambert;
+				psoChanged = true;
+			}
+			break;
+		case LightModelType::HalfLambert:
+			if (currentPSO_ != psoType::Normal_HalfLambert) {
+				commandList_->SetPipelineState(psoList_[(int)material.lightModelType]);
+				currentPSO_ = psoType::Normal_HalfLambert;
+				psoChanged = true;
+			}
+			break;
 		}
-		break;
-	case LightModelType::HalfLambert:
-		if (currentPSO_ != psoType::Lightmodel_HalfLambert) {
-			commandList_->SetPipelineState(PSO_[(int)material.lightModelType]);
-			currentPSO_ = psoType::Lightmodel_HalfLambert;
-			psoChanged = true;
+	} else {
+		switch (material.lightModelType) {
+		case LightModelType::Lambert:
+			if (currentPSO_ != psoType::Particle_Lambert) {
+				commandList_->SetPipelineState(psoList_[(int)material.lightModelType]);
+				currentPSO_ = psoType::Particle_Lambert;
+				psoChanged = true;
+			}
+			break;
+		case LightModelType::HalfLambert:
+			if (currentPSO_ != psoType::Particle_HalfLambert) {
+				commandList_->SetPipelineState(psoList_[(int)material.lightModelType]);
+				currentPSO_ = psoType::Particle_HalfLambert;
+				psoChanged = true;
+			}
 			break;
 		}
 	}
@@ -153,8 +181,8 @@ void DrawEngine::DrawTriangle(TransformationMatrix* wvpData, MaterialConfig mate
 	PSODecition(material);
 
 	/// SetMaterial
-	SetMaterial( material.uvTransformMatrix, material.textureColor, material.enableLighting);
-	
+	SetMaterial(material.uvTransformMatrix, material.textureColor, material.enableLighting);
+
 	/// textrue設定
 	int materialHandle = readCommonTextureHandle(material.textureHandle);
 	textureSrvHandleGPU_ = directXDriver_->GetGPUDescriptorHandle(directXDriver_->GetSrvDescriptorHeap(), directXDriver_->GetDesriptorSizeSRV(), materialHandle);
@@ -166,7 +194,7 @@ void DrawEngine::DrawTriangle(TransformationMatrix* wvpData, MaterialConfig mate
 	resourceManager_->vertexResourceTriangle_->SetWVPResource_(directXDriver_->GetDriver(), wvpData);
 	commandList_->SetGraphicsRootConstantBufferView(1, resourceManager_->vertexResourceTriangle_->GetWVPResource_()->GetGPUVirtualAddress());
 	/// 描画！(DrawCall/ドローコール)。
-	commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
 	commandList_->DrawInstanced(6, 1, 0, 0);
 }
 
@@ -256,11 +284,11 @@ void DrawEngine::DrawSprite() {
 
 		if (needSetMaterial) {
 			// Set PSO
-			commandList_->SetPipelineState(PSO_[(int)material->lightModelType]);
+			commandList_->SetPipelineState(psoList_[(int)material->lightModelType]);
 			PSODecition(*material);
 
 			// Set Material
-			SetMaterial( material->uvTransformMatrix, material->textureColor, false);
+			SetMaterial(material->uvTransformMatrix, material->textureColor, false);
 
 			// Set Texture
 			int materialHandle = readCommonTextureHandle(material->textureHandle);
@@ -283,7 +311,7 @@ void DrawEngine::DrawSprite() {
 		for (auto ptr : group) {
 			resourceManager_->vertexResourceSpriteGroup_[0]->SetWVPResource_(directXDriver_->GetDriver(), ptr->position);
 			commandList_->SetGraphicsRootConstantBufferView(1, resourceManager_->vertexResourceSpriteGroup_[0]->GetWVPResource_()->GetGPUVirtualAddress());
-			commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetGPUVirtualAddress());
+			commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
 			commandList_->DrawIndexedInstanced(12, 1, 0, 0, 0);
 			ptr->isDraw = true;
 		}
@@ -312,7 +340,7 @@ void DrawEngine::DrawSpriteDirect(Vector2 pos, MaterialConfig material) {
 	commandList_->SetGraphicsRootConstantBufferView(1, resourceManager_->vertexResourceSpriteGroup_[0]->GetWVPResource_()->GetGPUVirtualAddress());
 	/// 描画! (DrawCall)
 
-	commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
 	commandList_->DrawIndexedInstanced(12, 1, 0, 0, 0);
 }
 
@@ -343,7 +371,7 @@ void DrawEngine::DrawSpriteDirect(Vector2 pos, MaterialConfig material, Vector2 
 	}
 
 	/// SetMaterial
-	SetMaterial( material.uvTransformMatrix, material.textureColor, false);
+	SetMaterial(material.uvTransformMatrix, material.textureColor, false);
 	/// textrue設定
 	int materialHandle = readCommonTextureHandle(material.textureHandle);
 	textureSrvHandleGPU_ = directXDriver_->GetGPUDescriptorHandle(directXDriver_->GetSrvDescriptorHeap(), directXDriver_->GetDesriptorSizeSRV(), materialHandle);
@@ -359,12 +387,12 @@ void DrawEngine::DrawSpriteDirect(Vector2 pos, MaterialConfig material, Vector2 
 	/// TransformationMatrixCBufferの場所を設定
 	commandList_->SetGraphicsRootConstantBufferView(1, resourceManager_->vertexResourceSpriteGroup_[vertexHandle]->GetWVPResource_()->GetGPUVirtualAddress());
 	/// 描画! (DrawCall)
-	commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
 	commandList_->DrawIndexedInstanced(12, 1, 0, 0, 0);
 }
 
 void DrawEngine::CollectTile(Vector2 pos, MaterialConfig material) {
-	resourceManager_->AddSpriteInstance(pos, material);
+	resourceManager_->AddTileInstance(pos, material);
 }
 
 void DrawEngine::DrawTile() {
@@ -379,7 +407,7 @@ void DrawEngine::DrawTile() {
 
 	std::unordered_map<int, std::vector<ResourceManager::SpriteInstance*>> groupedSprites;
 
-	for (auto ptr : resourceManager_->spriteList_) {
+	for (auto ptr : resourceManager_->tileList_) {
 		if (!ptr->isDraw) {
 			groupedSprites[ptr->materialConfigIndex].push_back(ptr);
 		}
@@ -395,10 +423,7 @@ void DrawEngine::DrawTile() {
 
 		if (needSetMaterial) {
 			// Set PSO
-			//commandList_->SetPipelineState(PSO_[(int)material->lightModelType]);
-			//currentLightModel_ = material->lightModelType;
-
-			commandList_->SetPipelineState(PSO_[(int)psoType::Tile]);
+			commandList_->SetPipelineState(psoList_[(int)psoType::Tile]);
 			currentPSO_ = psoType::Tile;
 			rootSignature_ = pso_->getRootSignature((int)psoType::Tile);
 			commandList_->SetGraphicsRootSignature(rootSignature_);
@@ -423,7 +448,7 @@ void DrawEngine::DrawTile() {
 		D3D12_INDEX_BUFFER_VIEW IndexBufferView = resourceManager_->vertexResourceSpriteGroup_[0]->GetIndexBufferView();
 		commandList_->IASetIndexBuffer(&IndexBufferView);
 
-		int tileCount = group.size();
+		int tileCount = (int)group.size();
 		for (int i = 0; i < group.size(); i++) {
 			// 単位行列を書き込んておく
 			if (tileInstancingData_[i].WVP != Identity()) tileInstancingData_[i].WVP = Identity();
@@ -446,8 +471,8 @@ void DrawEngine::DrawTile() {
 		}
 
 		commandList_->SetGraphicsRootDescriptorTable(1, TileSrvHandleGPU_);
-		commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetGPUVirtualAddress());
-		commandList_->DrawIndexedInstanced(12, tileCount, 0, 0,0);
+		commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
+		commandList_->DrawIndexedInstanced(12, tileCount, 0, 0, 0);
 	}
 }
 
@@ -471,7 +496,7 @@ void DrawEngine::DrawCube(TransformationMatrix* wvpData, MaterialConfig material
 	resourceManager_->vertexResourceCube_->SetWVPResource_(directXDriver_->GetDriver(), wvpData);
 	commandList_->SetGraphicsRootConstantBufferView(1, resourceManager_->vertexResourceCube_->GetWVPResource_()->GetGPUVirtualAddress());
 	/// 描画！(DrawCall/ドローコール)。
-	commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
 	commandList_->DrawIndexedInstanced(36, 1, 0, 0, 0);
 }
 
@@ -481,7 +506,7 @@ void DrawEngine::DrawSphere(TransformationMatrix* wvpData, MaterialConfig materi
 	PSODecition(material);
 
 	/// SetMaterial
-	SetMaterial( material.uvTransformMatrix, material.textureColor, material.enableLighting);
+	SetMaterial(material.uvTransformMatrix, material.textureColor, material.enableLighting);
 	/// textrue設定
 	int materialHandle = readCommonTextureHandle(material.textureHandle);
 	textureSrvHandleGPU_ = directXDriver_->GetGPUDescriptorHandle(directXDriver_->GetSrvDescriptorHeap(), directXDriver_->GetDesriptorSizeSRV(), materialHandle);
@@ -503,7 +528,7 @@ void DrawEngine::DrawSphere(TransformationMatrix* wvpData, MaterialConfig materi
 	commandList_->SetGraphicsRootConstantBufferView(1, resourceManager_->vertexResourceSphere_->GetWVPResource_()->GetGPUVirtualAddress());
 
 	/// 描画
-	commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
 	commandList_->DrawIndexedInstanced(resourceManager_->vertexResourceSphere_->GetVertexNum(), 1, 0, 0, 0);
 }
 
@@ -535,7 +560,7 @@ void DrawEngine::DrawModel(TransformationMatrix* wvpData, std::vector<MaterialCo
 		commandList_->SetGraphicsRootConstantBufferView(1, resourceManager_->vertexResourceModelGroup_[modelHandle]->GetModel(i)->GetWVPResource_()->GetGPUVirtualAddress());
 
 		/// 描画
-		commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetGPUVirtualAddress());
+		commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
 		commandList_->DrawInstanced(resourceManager_->vertexResourceModelGroup_[modelHandle]->GetModel(i)->GetVertexNum(), 1, 0, 0);
 	}
 }
@@ -561,7 +586,7 @@ void DrawEngine::DrawModel(TransformationMatrix* wvpData, std::vector<MaterialCo
 	commandList_->SetGraphicsRootConstantBufferView(1, resourceManager_->vertexResourceModelGroup_[0]->GetModel(0)->GetWVPResource_()->GetGPUVirtualAddress());
 
 	/// 描画
-	commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
 	commandList_->DrawInstanced(resourceManager_->vertexResourceModelGroup_[0]->GetModel(0)->GetVertexNum(), 1, 0, 0);
 }
 
@@ -665,7 +690,7 @@ int DrawEngine::LoadModelTexture(const std::string& filePath) {
 void DrawEngine::CompoDraw() {
 
 	/// Sprite描画
-	//DrawSprite();
+	DrawSprite();
 	DrawTile();
 
 }
@@ -696,15 +721,15 @@ D3D12_RECT DrawEngine::createScissorRect(int kClientWidth, int kClientHeight) {
 }
 
 void DrawEngine::InitializeMaterial() {
-	// materialの色の初期化
-	materialData->color = {1.0f,1.0f,1.0f,1.0f};
-	materialData->enableLighting = false;
-	materialData->uvTransform = Identity();
-
-	materialResource_->CreateResource_(directXDriver_->GetDriver(), sizeof(Material));
 
 	// 書き込むためのアドレスを取得
-	materialResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+	resourceManager_->materialResource_->CreateResourceClass_(directXDriver_->GetDriver(), sizeof(Material));
+	resourceManager_->materialResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+
+	// materialの色の初期化
+	materialData->color = { 1.0f,1.0f,1.0f,1.0f };
+	materialData->enableLighting = false;
+	materialData->uvTransform = Identity();
 }
 
 void DrawEngine::SetMaterial(Matrix4x4 uvTransform, Vector4 color, int isLighting) {
@@ -712,19 +737,22 @@ void DrawEngine::SetMaterial(Matrix4x4 uvTransform, Vector4 color, int isLightin
 	materialData->color = color;
 	materialData->enableLighting = isLighting;
 	materialData->uvTransform = uvTransform;
-	commandList_->SetGraphicsRootConstantBufferView(0, materialResource_->GetResource()->GetGPUVirtualAddress());
+	commandList_->SetGraphicsRootConstantBufferView(0, resourceManager_->materialResource_->GetResource()->GetGPUVirtualAddress());
 }
 
-void DrawEngine::SetLighting(ID3D12Resource* resource, DirectionalLight* directionalLight) {
-	// マテリアルにデータを書き込む
-	DirectionalLight* lightingData{};
+void DrawEngine::InitializeLighting() {
 
-	resource->Map(0, nullptr, reinterpret_cast<void**>(&lightingData));
+	// マテリアルにデータを書き込む
+
+	resourceManager_->lightingResource_->CreateResourceClass_(directXDriver_->GetDriver(), sizeof(DirectionalLight));
+	resourceManager_->lightingResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&lightingData));
+}
+
+void DrawEngine::SetLighting(DirectionalLight* directionalLight) {
+	// Lightingにデータを書き込む
 
 	*lightingData = *directionalLight;
 	lightingData->direction = Normalize(lightingData->direction);
-
-	resource->Unmap(0, nullptr);
 }
 
 DirectX::ScratchImage DrawEngine::LoadTextrueLow(const std::string& filePath) {
@@ -847,8 +875,7 @@ int DrawEngine::MakeTextureShaderResourceView(const DirectX::TexMetadata& metada
 	srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels); // 最初のMipLevelを使用
 
 	//
-	//textureSrvHandleCPU_ = directXDriver_->GetSrvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart();
-	//textureSrvHandleGPU_ = directXDriver_->GetSrvDescriptorHeap()->GetGPUDescriptorHandleForHeapStart();
+	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU_{};
 	textureSrvHandleCPU_ = directXDriver_->GetCPUDescriptorHandle(directXDriver_->GetSrvDescriptorHeap(), directXDriver_->GetDesriptorSizeSRV(), textrueCounter);
 	textureSrvHandleGPU_ = directXDriver_->GetGPUDescriptorHandle(directXDriver_->GetSrvDescriptorHeap(), directXDriver_->GetDesriptorSizeSRV(), textrueCounter);
 
@@ -875,8 +902,7 @@ int DrawEngine::MakeModelShaderResourceView(const DirectX::TexMetadata& metadata
 	srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels); // 最初のMipLevelを使用
 
 	//
-	//textureSrvHandleCPU_ = directXDriver_->GetSrvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart();
-	//textureSrvHandleGPU_ = directXDriver_->GetSrvDescriptorHeap()->GetGPUDescriptorHandleForHeapStart();
+	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU_{};
 	textureSrvHandleCPU_ = directXDriver_->GetCPUDescriptorHandle(directXDriver_->GetSrvDescriptorHeap(), directXDriver_->GetDesriptorSizeSRV(), textrueCounter);
 	textureSrvHandleGPU_ = directXDriver_->GetGPUDescriptorHandle(directXDriver_->GetSrvDescriptorHeap(), directXDriver_->GetDesriptorSizeSRV(), textrueCounter);
 
