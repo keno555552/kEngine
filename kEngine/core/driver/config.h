@@ -24,7 +24,8 @@ public:
 	static gamepadType GetGamePadType() { return gamePadType_; }
 	static void SetXInputIp(int IP) { XInputDriverIP_ = IP; }
 	static int GetXInputIp() { return XInputDriverIP_; }
-	static int GetTileNumInstance() { return kTileNumInstance_; }
+	static int Get2DTileNumInstance() { return k2DTileNumInstance_; }
+	static int Get3DTileNumInstance() { return k3DTileNumInstance_; }
 
 private:
 	static int clientWidth_;
@@ -38,5 +39,6 @@ private:
 
 private:
 	///描画設定
-	static const int kTileNumInstance_ = 2000;     /// Tileの最大インスタンス数
+	static const int k2DTileNumInstance_ = 10000;     /// Tileの最大インスタンス数
+	static const int k3DTileNumInstance_ = 10000;     /// Tileの最大インスタンス数
 };

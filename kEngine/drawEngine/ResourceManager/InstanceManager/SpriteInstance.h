@@ -3,7 +3,7 @@
 #include "Vector3.h"
 
 struct SpriteInstance {
-	Vector2 position;
+	Vector3 position;
 	Vector2 scale;
 	Vector3 rotate;
 	int materialConfigIndex;

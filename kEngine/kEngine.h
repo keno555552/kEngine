@@ -85,7 +85,10 @@ public:
 	/// <param name="material"></param>
 	/// <param name="modelHandle"></param>
 	void DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material,int modelHandle);
+
 	void DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material);
+
+	void Draw3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material);
 	int GetMuitModelNum(int modelHandle) { return drawEngine->GetMuitModelNum(modelHandle); }
 	int SetModelObj(std::string path);
 

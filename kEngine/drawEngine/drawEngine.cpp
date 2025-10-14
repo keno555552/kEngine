@@ -24,9 +24,9 @@ DrawEngine::~DrawEngine() {
 	//rootSignature_->Release();		/*借り*/
 
 	//delete directionalLightData;      /*借り*/
-	tileWVPResource_->Unmap(0, nullptr);
-	tileWVPResource_.Reset();
-	tileInstancingData_ = nullptr;
+	tile2DWVPResource_->Unmap(0, nullptr);
+	tile2DWVPResource_.Reset();
+	tile2DInstancingData_ = nullptr;
 	resourceManager_->materialResource_->GetResource()->Unmap(0, nullptr);
 	resourceManager_->materialResource_->GetResource().Reset();
 	materialData = nullptr;
@@ -61,7 +61,7 @@ void DrawEngine::Initialize
 	ID3D12PipelineState* graphicsPipelineState_ = pso_->createPSO_Tile(dxcUtils, dxcCompiler, includeHandler);
 	psoList_.push_back(graphicsPipelineState_);
 	for (int i = 0; i < (int)LightModelType::NumLightModels; i++) {
-		ID3D12PipelineState* graphicsPipelineState_ = pso_->createPSO(dxcUtils, dxcCompiler, includeHandler, (LightModelType)i);
+		ID3D12PipelineState* graphicsPipelineState_ = pso_->createPSO_3DParticle(dxcUtils, dxcCompiler, includeHandler, (LightModelType)i);
 		psoList_.push_back(graphicsPipelineState_);
 	}
 
@@ -80,13 +80,21 @@ void DrawEngine::Initialize
 	InitializeLighting();
 
 	/// Tile用wvpBufferを作成
-	tileWVPResource_ = CreateResource(directXDriver_->GetDriver(), sizeof(TransformationMatrix) * config::GetTileNumInstance());
-	tileWVPResource_->Map(0, nullptr, reinterpret_cast<void**>(&tileInstancingData_));
-	for (int index = 0; index < config::GetTileNumInstance(); ++index) {
-		tileInstancingData_[index].WVP = Identity();
-		tileInstancingData_[index].world = Identity();
+	tile2DWVPResource_ = CreateResource(directXDriver_->GetDriver(), sizeof(TransformationMatrix) * config::Get2DTileNumInstance());
+	tile2DWVPResource_->Map(0, nullptr, reinterpret_cast<void**>(&tile2DInstancingData_));
+	for (int index = 0; index < config::Get2DTileNumInstance(); ++index) {
+		tile2DInstancingData_[index].WVP = Identity();
+		tile2DInstancingData_[index].world = Identity();
 	}
-	TileSrvHandleGPU_ = Create2DTileWVPBuffer(tileWVPResource_.Get());
+	Tile2DSrvHandleGPU_ = CreateTileWVPBuffer(tile2DWVPResource_.Get());
+
+	tile3DWVPResource_ = CreateResource(directXDriver_->GetDriver(), sizeof(TransformationMatrix) * config::Get3DTileNumInstance());
+	tile3DWVPResource_->Map(0, nullptr, reinterpret_cast<void**>(&tile3DInstancingData_));
+	for (int index = 0; index < config::Get3DTileNumInstance(); ++index) {
+		tile3DInstancingData_[index].WVP = Identity();
+		tile3DInstancingData_[index].world = Identity();
+	}
+	Tile3DSrvHandleGPU_ = CreateTileWVPBuffer(tile3DWVPResource_.Get());
 
 	//Microsoft::WRL::ComPtr<ID3D12Debug> debugController;
 	//D3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
@@ -118,6 +126,10 @@ void DrawEngine::PreDraw() {
 	/// 各種のリソースを設定
 	resourceManager_->CreateTurnResource();
 
+	/// InstanceCounterReset
+	instance2DCounter = 0;
+	instance3DCounter = 0;
+
 	/// Lighting
 	SetLighting(directionalLightData);
 
@@ -126,6 +138,7 @@ void DrawEngine::PreDraw() {
 void DrawEngine::CommitDraw() {
 	/// 集まったデータで描画
 	/// Sprite描画
+	Draw3DTile();
 	DrawSprite();
 	DrawTile();
 }
@@ -163,14 +176,16 @@ void DrawEngine::PSODecition(MaterialConfig& material, bool isParticle) {
 		switch (material.lightModelType) {
 		case LightModelType::Lambert:
 			if (currentPSO_ != psoType::Particle_Lambert) {
-				commandList_->SetPipelineState(psoList_[(int)material.lightModelType]);
+				currentPSO_ = psoType::Particle_Lambert;
+				commandList_->SetPipelineState(psoList_[(int)currentPSO_]);
 				currentPSO_ = psoType::Particle_Lambert;
 				psoChanged = true;
 			}
 			break;
 		case LightModelType::HalfLambert:
 			if (currentPSO_ != psoType::Particle_HalfLambert) {
-				commandList_->SetPipelineState(psoList_[(int)material.lightModelType]);
+				currentPSO_ = psoType::Particle_HalfLambert;
+				commandList_->SetPipelineState(psoList_[(int)currentPSO_]);
 				currentPSO_ = psoType::Particle_HalfLambert;
 				psoChanged = true;
 			}
@@ -293,11 +308,10 @@ void DrawEngine::DrawSprite() {
 
 		if (needSetMaterial) {
 			// Set PSO
-			commandList_->SetPipelineState(psoList_[(int)psoType::Tile]);
-			currentPSO_ = psoType::Tile;
-			rootSignature_ = pso_->getRootSignature((int)psoType::Tile);
+			commandList_->SetPipelineState(psoList_[(int)psoType::defaultPSO]);
+			currentPSO_ = psoType::defaultPSO;
+			rootSignature_ = pso_->getRootSignature((int)psoType::defaultPSO);
 			commandList_->SetGraphicsRootSignature(rootSignature_);
-
 
 			// Set Material
 			SetMaterial(material->uvTransformMatrix, material->textureColor, false);
@@ -319,15 +333,45 @@ void DrawEngine::DrawSprite() {
 		D3D12_INDEX_BUFFER_VIEW IndexBufferView = resourceManager_->vertexResourceSpriteGroup_[0]->GetIndexBufferView();
 		commandList_->IASetIndexBuffer(&IndexBufferView);
 
+		///// ループの中に入らないように先に計算しとく
+		//Matrix4x4 viewMatrixSprtie; viewMatrixSprtie.Identity();
+		//Matrix4x4 projectionMatrixSprtie = MakeOrthographicMatrix(0.0f, 0.0f, float(config::GetClientWidth()), float(config::GetClientHeight()), 0.0f, 100.0f);
+		//Matrix4x4 viewProj = viewMatrixSprtie * projectionMatrixSprtie;
+		//
+		//int spriteCount = (int)group.size();
+		//
+		//for (int i = 0; i < group.size(); i++) {
+		//	// 単位行列を書き込んておく
+		//	if (tileInstancingData_[i].WVP != Identity()) tileInstancingData_[i].WVP = Identity();
+		//	if (tileInstancingData_[i].world != Identity()) tileInstancingData_[i].world = Identity();
+		//
+		//	// CPUで動かす用のTransformを作る。
+		//	Transform transformSprite = CreateDefaultTransform();
+		//	if (group[i] != nullptr) {
+		//		transformSprite.translate = { group[i]->position.x,group[i]->position.y,0.0f };
+		//	}
+		//
+		//	// Sprite用のworldViewProjectionMatrixを作る
+		//	Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
+		//	Matrix4x4 worldViewProjectionMatrixSprite = worldMatrixSprite * viewProj;
+		//	tileInstancingData_[i].WVP = worldViewProjectionMatrixSprite;
+		//
+		//	group[i]->drawState = InstanceManager::ISDRAW;
+		//}
+
 		// Draw all sprites with same material
 		for (auto ptr : group) {
 			resourceManager_->vertexResourceSpriteGroup_[0]->SetWVPResource_(directXDriver_->GetDriver(), ptr->position);
 			commandList_->SetGraphicsRootConstantBufferView(1, resourceManager_->vertexResourceSpriteGroup_[0]->GetWVPResource_()->GetGPUVirtualAddress());
 			commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
 			commandList_->DrawIndexedInstanced(12, 1, 0, 0, 0);
-			ptr->drawState == InstanceManager::STANDBY;
+			ptr->drawState = InstanceManager::ISDRAW;
 		}
 	}
+
+
+
+
 }
 
 void DrawEngine::DrawSpriteDirect(Vector2 pos, MaterialConfig material) {
@@ -347,7 +391,7 @@ void DrawEngine::DrawSpriteDirect(Vector2 pos, MaterialConfig material) {
 	D3D12_INDEX_BUFFER_VIEW IndexBufferView = resourceManager_->vertexResourceSpriteGroup_[0]->GetIndexBufferView();
 	commandList_->IASetIndexBuffer(&IndexBufferView);
 	/// wvp用のCBufferの場所を設定
-	resourceManager_->vertexResourceSpriteGroup_[0]->SetWVPResource_(directXDriver_->GetDriver(), pos);
+	resourceManager_->vertexResourceSpriteGroup_[0]->SetWVPResource_(directXDriver_->GetDriver(), { pos.x,pos.y,0.0f });
 	/// TransformationMatrixCBufferの場所を設定
 	commandList_->SetGraphicsRootConstantBufferView(1, resourceManager_->vertexResourceSpriteGroup_[0]->GetWVPResource_()->GetGPUVirtualAddress());
 	/// 描画! (DrawCall)
@@ -395,7 +439,7 @@ void DrawEngine::DrawSpriteDirect(Vector2 pos, MaterialConfig material, Vector2 
 	D3D12_INDEX_BUFFER_VIEW IndexBufferView = resourceManager_->vertexResourceSpriteGroup_[vertexHandle]->GetIndexBufferView();
 	commandList_->IASetIndexBuffer(&IndexBufferView);
 	/// wvp用のCBufferの場所を設定
-	resourceManager_->vertexResourceSpriteGroup_[vertexHandle]->SetWVPResource_(directXDriver_->GetDriver(), pos);
+	resourceManager_->vertexResourceSpriteGroup_[vertexHandle]->SetWVPResource_(directXDriver_->GetDriver(), { pos.x,pos.y,0.0f });
 	/// TransformationMatrixCBufferの場所を設定
 	commandList_->SetGraphicsRootConstantBufferView(1, resourceManager_->vertexResourceSpriteGroup_[vertexHandle]->GetWVPResource_()->GetGPUVirtualAddress());
 	/// 描画! (DrawCall)
@@ -403,35 +447,42 @@ void DrawEngine::DrawSpriteDirect(Vector2 pos, MaterialConfig material, Vector2 
 	commandList_->DrawIndexedInstanced(12, 1, 0, 0, 0);
 }
 
-void DrawEngine::CollectTile(Vector2 pos, MaterialConfig material) {
-	resourceManager_->instanceManager_->AddTileInstance(pos, material);
+void DrawEngine::Collect2DTile(Vector2 pos, MaterialConfig material) {
+	resourceManager_->instanceManager_->Add2DTileInstance(pos, material);
 }
 
 void DrawEngine::DrawTile() {
-	if (resourceManager_->instanceManager_->tileList_.empty())return;
+	if (resourceManager_->instanceManager_->tile2DList_.empty())return;
 	struct MaterialStateCache {
 		int materialIndex = -1;
 		int textureHandle = -1;
 		LightModelType lightModel = LightModelType::HalfLambert;
 	};
 
+
+
 	MaterialStateCache lastMaterialState_;
 
 	std::unordered_map<int, std::vector<SpriteInstance*>> groupedTiles;
 
-	for (auto& ptr : resourceManager_->instanceManager_->tileList_) {
+	for (auto& ptr : resourceManager_->instanceManager_->tile2DList_) {
 		if (ptr->drawState == InstanceManager::STANDBY) {
 			groupedTiles[ptr->materialConfigIndex].push_back(ptr);
 		}
 	}
 
+	/// ループの中に入らないように先に計算しとく
+	Matrix4x4 viewMatrixSprtie; viewMatrixSprtie.Identity();
+	Matrix4x4 projectionMatrixSprtie = MakeOrthographicMatrix(0.0f, 0.0f, float(config::GetClientWidth()), float(config::GetClientHeight()), 0.0f, 100.0f);
+	Matrix4x4 viewProj = viewMatrixSprtie * projectionMatrixSprtie;
+
 	for (auto& [materialIndex, group] : groupedTiles) {
 		MaterialConfig* material = resourceManager_->instanceManager_->materialConfigList_[materialIndex];
 
 		bool needSetMaterial =
-			materialIndex != lastMaterialState_.materialIndex ||
-			material->textureHandle != lastMaterialState_.textureHandle ||
-			material->lightModelType != lastMaterialState_.lightModel;
+			((materialIndex != lastMaterialState_.materialIndex) ||
+				(material->textureHandle != lastMaterialState_.textureHandle) ||
+				(material->lightModelType != lastMaterialState_.lightModel));
 
 		if (needSetMaterial) {
 			// Set PSO
@@ -462,33 +513,32 @@ void DrawEngine::DrawTile() {
 
 		int tileCount = (int)group.size();
 
-		/// ループの中に入らないように先に計算しとく
-		Matrix4x4 viewMatrixSprtie; viewMatrixSprtie.Identity();
-		Matrix4x4 projectionMatrixSprtie = MakeOrthographicMatrix(0.0f, 0.0f, float(config::GetClientWidth()), float(config::GetClientHeight()), 0.0f, 100.0f);
-		Matrix4x4 viewProj = viewMatrixSprtie * projectionMatrixSprtie;
+
+		int wvpInstanceStartpoint = instance2DCounter;
 
 		for (int i = 0; i < group.size(); i++) {
 			// 単位行列を書き込んておく
-			if (tileInstancingData_[i].WVP != Identity()) tileInstancingData_[i].WVP = Identity();
-			if (tileInstancingData_[i].world != Identity()) tileInstancingData_[i].world = Identity();
+			if (tile2DInstancingData_[instance2DCounter].WVP != Identity()) tile2DInstancingData_[instance2DCounter].WVP = Identity();
+			if (tile2DInstancingData_[instance2DCounter].world != Identity()) tile2DInstancingData_[instance2DCounter].world = Identity();
 
 			// CPUで動かす用のTransformを作る。
 			Transform transformSprite = CreateDefaultTransform();
 			if (group[i] != nullptr) {
-				transformSprite.translate = { group[i]->position.x,group[i]->position.y,0.0f };
+				transformSprite.translate = { group[i]->position.x,group[i]->position.y,group[i]->position.z };
 			}
 
 			// Sprite用のworldViewProjectionMatrixを作る
 			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
 			Matrix4x4 worldViewProjectionMatrixSprite = worldMatrixSprite * viewProj;
-			tileInstancingData_[i].WVP = worldViewProjectionMatrixSprite;
+			tile2DInstancingData_[instance2DCounter].WVP = worldViewProjectionMatrixSprite;
 
-			group[i]->drawState = InstanceManager::STANDBY;
+			group[i]->drawState = InstanceManager::ISDRAW;
+			instance2DCounter++;
 		}
 
-		commandList_->SetGraphicsRootDescriptorTable(1, TileSrvHandleGPU_);
+		commandList_->SetGraphicsRootDescriptorTable(1, Tile2DSrvHandleGPU_);
 		commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
-		commandList_->DrawIndexedInstanced(12, tileCount, 0, 0, 0);
+		commandList_->DrawIndexedInstanced(12, tileCount, 0, 0, wvpInstanceStartpoint);
 	}
 }
 
@@ -604,6 +654,90 @@ void DrawEngine::DrawModel(TransformationMatrix* wvpData, std::vector<MaterialCo
 	/// 描画
 	commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
 	commandList_->DrawInstanced(resourceManager_->vertexResourceModelGroup_[0]->GetModel(0)->GetVertexNum(), 1, 0, 0);
+}
+
+void DrawEngine::Collect3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material) {
+	for (auto& ptr : material) {
+		resourceManager_->instanceManager_->Add3DTileInstance(wvpData, ptr);
+	}
+}
+
+void DrawEngine::Draw3DTile() {
+
+	if (resourceManager_->instanceManager_->tile3DList_.empty())return;
+	struct MaterialStateCache {
+		int materialIndex = -1;
+		int textureHandle = -1;
+		LightModelType lightModel = LightModelType::HalfLambert;
+	};
+
+	MaterialStateCache lastMaterialState_;
+
+	std::unordered_map<int, std::vector<ModelInstance*>> groupedTiles;
+
+	for (auto& ptr : resourceManager_->instanceManager_->tile3DList_) {
+		if (ptr->drawState == InstanceManager::STANDBY) {
+			groupedTiles[ptr->materialConfigIndex].push_back(ptr);
+		}
+	}
+
+	for (auto& [materialIndex, group] : groupedTiles) {
+		MaterialConfig* material = resourceManager_->instanceManager_->materialConfigList_[materialIndex];
+
+		bool needSetMaterial =
+			((materialIndex != lastMaterialState_.materialIndex) ||
+				(material->textureHandle != lastMaterialState_.textureHandle) ||
+				(material->lightModelType != lastMaterialState_.lightModel));
+
+		if (needSetMaterial) {
+			// Set PSO
+			PSODecition(*material,true);
+
+			// Set Material
+			SetMaterial(material->uvTransformMatrix, material->textureColor, false);
+
+			// Set Texture
+			int materialHandle = readCommonTextureHandle(material->textureHandle);
+			textureSrvHandleGPU_ = directXDriver_->GetGPUDescriptorHandle(directXDriver_->GetSrvDescriptorHeap(), directXDriver_->GetDesriptorSizeSRV(), materialHandle);
+			commandList_->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU_);
+
+			// Update cache
+			lastMaterialState_.materialIndex = materialIndex;
+			lastMaterialState_.textureHandle = material->textureHandle;
+			lastMaterialState_.lightModel = material->lightModelType;
+		}
+
+		/// VBVを設定
+		D3D12_VERTEX_BUFFER_VIEW BufferView = resourceManager_->vertexResourceCube_->GetVertexBufferView();
+		commandList_->IASetVertexBuffers(0, 1, &BufferView);
+		/// IBVを設定
+		D3D12_INDEX_BUFFER_VIEW IndexBufferView = resourceManager_->vertexResourceCube_->GetIndexBufferView();
+		commandList_->IASetIndexBuffer(&IndexBufferView);
+
+		int tileCount = (int)group.size();
+
+
+		int wvpInstanceStartpoint = instance3DCounter;
+
+		for (int i = 0; i < group.size(); i++) {
+			// 単位行列を書き込んておく
+			if (tile3DInstancingData_[instance3DCounter].WVP != Identity()) tile3DInstancingData_[instance3DCounter].WVP = Identity();
+			if (tile3DInstancingData_[instance3DCounter].world != Identity()) tile3DInstancingData_[instance3DCounter].world = Identity();
+
+			// CPUで動かす用のTransformを作る。
+			if (group[i] != nullptr) {
+				tile3DInstancingData_[instance3DCounter].WVP = group[i]->WVP;
+				tile3DInstancingData_[instance3DCounter].world = group[i]->world;
+			}
+
+			group[i]->drawState = InstanceManager::ISDRAW;
+			instance3DCounter++;
+		}
+
+		commandList_->SetGraphicsRootDescriptorTable(1, Tile3DSrvHandleGPU_);
+		commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
+		commandList_->DrawIndexedInstanced(36, tileCount, 0, 0, wvpInstanceStartpoint);
+	}
 }
 
 bool DrawEngine::SetModelTexture(Model* model) {
@@ -926,7 +1060,7 @@ int DrawEngine::MakeModelShaderResourceView(const DirectX::TexMetadata& metadata
 	return (int)modelTextureSRVMap_.size() - 1;
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE DrawEngine::Create2DTileWVPBuffer(ID3D12Resource* instancingResource) {
+D3D12_GPU_DESCRIPTOR_HANDLE DrawEngine::CreateTileWVPBuffer(ID3D12Resource* instancingResource) {
 	//
 	D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc{};
 	instancingSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
@@ -934,7 +1068,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE DrawEngine::Create2DTileWVPBuffer(ID3D12Resource* in
 	instancingSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 	instancingSrvDesc.Buffer.FirstElement = 0;
 	instancingSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-	instancingSrvDesc.Buffer.NumElements = config::GetTileNumInstance();
+	instancingSrvDesc.Buffer.NumElements = config::Get2DTileNumInstance();
 	instancingSrvDesc.Buffer.StructureByteStride = sizeof(TransformationMatrix);
 
 	//

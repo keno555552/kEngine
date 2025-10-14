@@ -50,6 +50,7 @@ private:
 		CHARATER,
 		NEEDLE,
 		SKYDOME,
+		TILE,
 		PRATICLE,
 	};
 

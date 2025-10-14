@@ -1,5 +1,6 @@
 #include "config.h"
 
+/// インスタンス設定
 int config::clientWidth_ = 0;
 int config::clientHeight_ = 0;
 

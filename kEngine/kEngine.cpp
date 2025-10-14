@@ -51,15 +51,16 @@ void kEngine::DrawTriangle(TransformationMatrix* wvpData, MaterialConfig materia
 }
 
 void kEngine::DrawSprite(Vector2 pos, MaterialConfig material) {
-	drawEngine->CollectSprite(pos, material);
-}
-
-void kEngine::DrawTile(Vector2 pos, MaterialConfig material) {
-	drawEngine->CollectTile(pos, material);
+	drawEngine->DrawSpriteDirect(pos, material);
+	//drawEngine->CollectSprite(pos, material);
 }
 
 void kEngine::DrawSprite(Vector2 pos, MaterialConfig material, Vector2 LTpos, Vector2 LBpos, Vector2 RTpos, Vector2 RBpos, float TsizeX, float TsizeY, Vector2 TCLTPos, Vector2 TCRBPos) {
 	drawEngine->DrawSpriteDirect(pos, material, LTpos, LBpos, RTpos, RBpos, TsizeX, TsizeY, TCLTPos, TCRBPos);
+}
+
+void kEngine::DrawTile(Vector2 pos, MaterialConfig material) {
+	drawEngine->Collect2DTile(pos, material);
 }
 
 void kEngine::DrawCube(TransformationMatrix* wvpData, MaterialConfig material) {
@@ -76,6 +77,10 @@ void kEngine::DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfi
 
 void kEngine::DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material) {
 	drawEngine->DrawModel(wvpData, material);
+}
+
+void kEngine::Draw3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material) {
+	drawEngine->Collect3DTile(wvpData, material);
 }
 
 int kEngine::SetModelObj(std::string path) {

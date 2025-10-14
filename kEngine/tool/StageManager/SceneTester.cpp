@@ -51,14 +51,14 @@ SceneTester::SceneTester(kEngine* system) {
 
 	//for (int i = 0; i < 1; i++) 
 	//for (int i = 0; i < 10; i++) 
-	for (int i = 0; i < 200; i++) {
+	for (int i = 0; i < 5; i++) {
 		Object* object = new Object;
 		MaterialConfig materialConfig;
 		InitMaterialConfig(&materialConfig);
 		object->materialConfig.push_back(materialConfig);
-		object->objectType = TILE;
-		//object->objectType = SPRITE;
-		object->transform.translate = { i * 0.1f,i * 0.1f, 0.0f };
+		//object->objectType = TILE;
+		object->objectType = SPRITE;
+		object->transform.translate = { i * 100.0f, i * 100.0f, 0.0f };
 		object->transformationMatrix = debugCamera_->transformationMatrixTransform(object->transform);
 		objectGroup.push_back(object);
 	}
@@ -76,18 +76,19 @@ SceneTester::SceneTester(kEngine* system) {
 
 	//for (int i = 0; i < 1; i++) 
 	//for (int i = 0; i < 10; i++) 
-	//for (int i = 0; i < 200; i++) 
-	//{
-	//	Object* object = new Object;
-	//	MaterialConfig materialConfig;
-	//	intMaterialConfig(&materialConfig);
-	//	object->materialConfig.push_back(materialConfig);
-	//	object->objectType = CUBE;
-	//	//object->objectType = SPRITE;
-	//	object->transform.translate = { i * 0.1f,i * 0.1f, 0.0f };
-	//	object->transformationMatrix = debugCamera_->transformationMatrixTransform(object->transform);
-	//	objectGroup.push_back(object);
-	//}
+	for (int i = 0; i < 200; i++) 
+	{
+		Object* object = new Object;
+		MaterialConfig materialConfig;
+		InitMaterialConfig(&materialConfig);
+		object->materialConfig.push_back(materialConfig);
+		object->objectType = MODEL;
+		object->modelHandle = ModelType::TILE;
+		//object->objectType = SPRITE;
+		object->transform.translate = { i * 0.1f,i * 0.1f, i * 1.0f };
+		object->transformationMatrix = debugCamera_->transformationMatrixTransform(object->transform);
+		objectGroup.push_back(object);
+	}
 
 };
 
@@ -248,6 +249,9 @@ void SceneTester::Draw() {
 					break;
 				case ModelType::NEEDLE:
 					system_->DrawModel(&ptr->transformationMatrix, ptr->materialConfig, needleModelHandle_);
+					break;
+				case ModelType::TILE:
+					system_->Draw3DTile(& ptr->transformationMatrix, ptr->materialConfig);
 					break;
 				case ModelType::SKYDOME:
 					system_->DrawModel(&ptr->transformationMatrix, ptr->materialConfig, skydomeModelHandle_);

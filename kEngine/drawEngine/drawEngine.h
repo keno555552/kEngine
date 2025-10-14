@@ -18,7 +18,7 @@
 #include "MaterialConfig.h"
 #include "VertexIndex.h"
 
-
+#include <format>
 
 class DrawEngine
 {
@@ -44,7 +44,7 @@ public:
 	void DrawSpriteDirect(Vector2 pos, MaterialConfig material, Vector2 LTpos, Vector2 LBpos, Vector2 RTpos, Vector2 RBpos, float TsizeX, float TsizeY, Vector2 TCLTPos, Vector2 TCRBPos);
 
 	/// Tile関連
-	void CollectTile(Vector2 pos, MaterialConfig material);
+	void Collect2DTile(Vector2 pos, MaterialConfig material);
 	void DrawTile();
 
 	/// 立方体関連
@@ -54,6 +54,10 @@ public:
 	/// モデル関連
 	void DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle);
 	void DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material);
+
+	/// Tile関連
+	void Collect3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material);
+	void Draw3DTile();
 	bool SetModelTexture(Model* model);
 	bool SetModelGroupTexture(Model* model);
 	int SetModel(std::string Path);
@@ -107,7 +111,8 @@ private:
 
 	/// Textrue関連
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
-	D3D12_GPU_DESCRIPTOR_HANDLE TileSrvHandleGPU_{};
+	D3D12_GPU_DESCRIPTOR_HANDLE Tile2DSrvHandleGPU_{};
+	D3D12_GPU_DESCRIPTOR_HANDLE Tile3DSrvHandleGPU_{};
 	uint32_t textrueCounter = 1;
 	std::vector<int> commonTextureSRVMap_;
 	std::vector<int> modelTextureSRVMap_;
@@ -119,8 +124,12 @@ private:
 	DirectionalLight* directionalLightData = {};		// 外部から受ける
 
 	/// 交換用容器
-	Microsoft::WRL::ComPtr<ID3D12Resource> tileWVPResource_ = nullptr;
-	TransformationMatrix* tileInstancingData_ = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> tile2DWVPResource_ = nullptr;
+	TransformationMatrix* tile2DInstancingData_ = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> tile3DWVPResource_ = nullptr;
+	TransformationMatrix* tile3DInstancingData_ = nullptr;
+	int instance2DCounter = 0;
+	int instance3DCounter = 0;
 
 	//Material関連
 	Material* materialData = nullptr;
@@ -151,7 +160,7 @@ private:
 	ID3D12Resource* UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages, ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
 	int MakeTextureShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResource);
 	int MakeModelShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResource);
-	D3D12_GPU_DESCRIPTOR_HANDLE Create2DTileWVPBuffer(ID3D12Resource* insstancingResource);
+	D3D12_GPU_DESCRIPTOR_HANDLE CreateTileWVPBuffer(ID3D12Resource* insstancingResource);
 	ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);
 	void MakeDepthStencilView();
 

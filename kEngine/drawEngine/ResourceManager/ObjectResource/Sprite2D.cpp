@@ -76,7 +76,7 @@ ID3D12Resource* Sprite2D::CreateIndexResource_(ID3D12Device* device) {
 	return indexResource_->GetResource().Get();
 }
 
-void Sprite2D::Set2DWVP(Vector2* wvpData) {
+void Sprite2D::Set2DWVP(Vector3* wvpData) {
 	TransformationMatrix* wvpData_ = nullptr;
 
 	// 書き込むためのアドレスを取得
@@ -88,7 +88,7 @@ void Sprite2D::Set2DWVP(Vector2* wvpData) {
 	// CPUで動かす用のTransformを作る。
 	Transform transformSprite = CreateDefaultTransform();
 	if (wvpData != nullptr) {
-		transformSprite.translate = { wvpData->x,wvpData->y,0.0f };
+		transformSprite.translate = { wvpData->x,wvpData->y,wvpData->z };
 		//transformSprite.scale = { 1.0f,0.5f,1.0f };
 		//transformSprite.rotate = aa;
 	}
@@ -103,7 +103,7 @@ void Sprite2D::Set2DWVP(Vector2* wvpData) {
 	wvpResource_->GetResource()->Unmap(0, nullptr);
 }
 
-ID3D12Resource* Sprite2D::SetWVPResource_(ID3D12Device* device, Vector2 pos) {
+ID3D12Resource* Sprite2D::SetWVPResource_(ID3D12Device* device, Vector3 pos) {
 	ID3D12Resource* resuit = CreateWVPResource_(device).Get();
 	Set2DWVP(&pos);
 	return resuit;

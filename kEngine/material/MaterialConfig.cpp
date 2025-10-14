@@ -1,23 +1,5 @@
 #include "MaterialConfig.h"
 
-
-void InitMaterialConfig(MaterialConfig* materialConfig) {
-	materialConfig->useOriginalTexture = true;
-	materialConfig->textureHandle = 0,
-	materialConfig->uvTranslate = { 0,0,0 },
-	materialConfig->uvScale = { 1,1,1 },
-	materialConfig->uvRotate = { 0,0,0 },
-	materialConfig->uvTransformMatrix = {},
-	materialConfig->textureColor = { 1.0f,1.0f,1.0f,1.0f },
-	materialConfig->lightModelType = LightModelType::HalfLambert,
-	materialConfig->enableLighting = true;
-}
-MaterialConfig CreateInitMaterialConfig() {
-	MaterialConfig newMaterial;
-	InitMaterialConfig(&newMaterial);
-	return newMaterial;
-}
-
 bool MaterialConfig::operator==(const MaterialConfig target) {
 	if (useOriginalTexture != target.useOriginalTexture)return false;
 	if (textureHandle != target.textureHandle)return false;
@@ -32,4 +14,22 @@ bool MaterialConfig::operator==(const MaterialConfig target) {
 
 bool MaterialConfig::operator!=(const MaterialConfig target) {
 	return !(*this == target);
+}
+
+void InitMaterialConfig(MaterialConfig* materialConfig) {
+	materialConfig->useOriginalTexture = true;
+	materialConfig->textureHandle = 0,
+	materialConfig->uvTranslate = { 0,0,0 },
+	materialConfig->uvScale = { 1,1,1 },
+	materialConfig->uvRotate = { 0,0,0 },
+	materialConfig->uvTransformMatrix = {},
+	materialConfig->textureColor = { 1.0f,1.0f,1.0f,1.0f },
+	materialConfig->lightModelType = LightModelType::HalfLambert,
+	materialConfig->enableLighting = true;
+}
+
+MaterialConfig CreateInitMaterialConfig() {
+	MaterialConfig newMaterial;
+	InitMaterialConfig(&newMaterial);
+	return newMaterial;
 }
