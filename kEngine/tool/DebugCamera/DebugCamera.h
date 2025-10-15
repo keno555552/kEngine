@@ -30,6 +30,19 @@ public:
 	void Move(Vector3 speed);
 	void Rotate(Vector3 Theta);
 
+	/// 操作設定
+	void isKeyQAvailable(bool available) { isQ_ = available; }
+	void isKeyEAvailable(bool available) { isE_ = available; }
+	void isKeyAAvailable(bool available) { isA_ = available; }
+	void isKeyDAvailable(bool available) { isD_ = available; }
+	void isKeyWAvailable(bool available) { isW_ = available; }
+	void isKeySAvailable(bool available) { isS_ = available; }
+	void isKeyZAvailable(bool available) { isZ_ = available; }
+	void isKeyRAvailable(bool available) { isR_ = available; }
+	void isMouseMiddleAvailable(bool available) { isQ_ = available; }
+	void isMouseRightvailable(bool available) { isQ_ = available; }
+	void isGamePadAvailable(bool available) { isQ_ = available; }
+
 private:
 	kEngine* system_ = nullptr;
 
@@ -48,4 +61,19 @@ private:
 	Matrix4x4 projectionMatrix_{};
 	/// ビュー行列
 	Matrix4x4 viewMatrix_{};
+
+private:
+	/// 操作可能フラグ
+	bool isQ_ = true;
+	bool isE_ = true;
+	bool isA_ = true;
+	bool isD_ = true;
+	bool isW_ = true;
+	bool isS_ = true;
+	bool isZ_ = true;
+	bool isC_ = true;
+	bool isR_ = true;
+	bool isMouseM_ = true;
+	bool isMouseR_ = true;
+	bool isGamePad_ = true;
 };

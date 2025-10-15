@@ -500,9 +500,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="resources\Shader\Object3d.hlsli">
-      <Filter>リソース ファイル</Filter>
-    </None>
     <None Include="resources\map\map.csv">
       <Filter>リソース ファイル\Map</Filter>
     </None>

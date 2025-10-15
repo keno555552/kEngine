@@ -88,6 +88,11 @@ void DrawEngine::Initialize
 	}
 	Tile2DSrvHandleGPU_ = CreateTileWVPBuffer(tile2DWVPResource_.Get());
 
+	// 建立 256-byte 對齊的 CBV buffer（最小大小）
+	instanceOffsetResource_ = CreateResource(directXDriver_->GetDriver(), 256); // 或用 CreateCommittedResource
+	instanceOffsetResource_->Map(0, nullptr, reinterpret_cast<void**>(&instanceOffsetData_));
+
+
 	tile3DWVPResource_ = CreateResource(directXDriver_->GetDriver(), sizeof(TransformationMatrix) * config::Get3DTileNumInstance());
 	tile3DWVPResource_->Map(0, nullptr, reinterpret_cast<void**>(&tile3DInstancingData_));
 	for (int index = 0; index < config::Get3DTileNumInstance(); ++index) {
@@ -140,7 +145,7 @@ void DrawEngine::CommitDraw() {
 	/// Sprite描画
 	Draw3DTile();
 	DrawSprite();
-	DrawTile();
+	Draw2DTile();
 }
 
 void DrawEngine::EndDraw() {
@@ -368,10 +373,6 @@ void DrawEngine::DrawSprite() {
 			ptr->drawState = InstanceManager::ISDRAW;
 		}
 	}
-
-
-
-
 }
 
 void DrawEngine::DrawSpriteDirect(Vector2 pos, MaterialConfig material) {
@@ -451,15 +452,13 @@ void DrawEngine::Collect2DTile(Vector2 pos, MaterialConfig material) {
 	resourceManager_->instanceManager_->Add2DTileInstance(pos, material);
 }
 
-void DrawEngine::DrawTile() {
+void DrawEngine::Draw2DTile() {
 	if (resourceManager_->instanceManager_->tile2DList_.empty())return;
 	struct MaterialStateCache {
 		int materialIndex = -1;
 		int textureHandle = -1;
 		LightModelType lightModel = LightModelType::HalfLambert;
 	};
-
-
 
 	MaterialStateCache lastMaterialState_;
 
@@ -513,13 +512,16 @@ void DrawEngine::DrawTile() {
 
 		int tileCount = (int)group.size();
 
-
 		int wvpInstanceStartpoint = instance2DCounter;
 
 		for (int i = 0; i < group.size(); i++) {
+
+			///int instanceCounter = max(instance2DCounter - 1,0);
+			int instanceCounter = instance2DCounter;
+
 			// 単位行列を書き込んておく
-			if (tile2DInstancingData_[instance2DCounter].WVP != Identity()) tile2DInstancingData_[instance2DCounter].WVP = Identity();
-			if (tile2DInstancingData_[instance2DCounter].world != Identity()) tile2DInstancingData_[instance2DCounter].world = Identity();
+			if (tile2DInstancingData_[instanceCounter].WVP != Identity()) tile2DInstancingData_[instanceCounter].WVP = Identity();
+			if (tile2DInstancingData_[instanceCounter].world != Identity()) tile2DInstancingData_[instanceCounter].world = Identity();
 
 			// CPUで動かす用のTransformを作る。
 			Transform transformSprite = CreateDefaultTransform();
@@ -530,15 +532,17 @@ void DrawEngine::DrawTile() {
 			// Sprite用のworldViewProjectionMatrixを作る
 			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
 			Matrix4x4 worldViewProjectionMatrixSprite = worldMatrixSprite * viewProj;
-			tile2DInstancingData_[instance2DCounter].WVP = worldViewProjectionMatrixSprite;
+			tile2DInstancingData_[instanceCounter].WVP = worldViewProjectionMatrixSprite;
 
 			group[i]->drawState = InstanceManager::ISDRAW;
 			instance2DCounter++;
 		}
 
+		*instanceOffsetData_ = wvpInstanceStartpoint;
 		commandList_->SetGraphicsRootDescriptorTable(1, Tile2DSrvHandleGPU_);
+		commandList_->SetGraphicsRootConstantBufferView(1, instanceOffsetResource_->GetGPUVirtualAddress());
 		commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
-		commandList_->DrawIndexedInstanced(12, tileCount, 0, 0, wvpInstanceStartpoint);
+		commandList_->DrawIndexedInstanced(12, tileCount, 0, 0, 0);
 	}
 }
 
@@ -694,7 +698,7 @@ void DrawEngine::Draw3DTile() {
 			PSODecition(*material,true);
 
 			// Set Material
-			SetMaterial(material->uvTransformMatrix, material->textureColor, false);
+			SetMaterial(material->uvTransformMatrix, material->textureColor, material->enableLighting);
 
 			// Set Texture
 			int materialHandle = readCommonTextureHandle(material->textureHandle);

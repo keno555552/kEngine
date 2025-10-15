@@ -40,7 +40,7 @@ PixelShaderOutput main(VertexShaderOutput input)
     {
         float3 result = { 0, 0, 0 };
         float totalWeight = 0.0f;
-        
+ 
 #if defined(LIGHT_MODEL_LAMBERT)
       result += ApplyLighting_Lambert(normalize(input.normal), (-gDirectionalLight.direction), gDirectionalLight.color.rgb);
       totalWeight += 1.0f;

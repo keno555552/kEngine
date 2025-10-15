@@ -24,7 +24,7 @@ void InstanceManager::Update() {
 
 void InstanceManager::AddSpriteInstance(Vector2 pos, MaterialConfig material) {
 	SpriteInstance instance;
-	instance.position = { pos.x,pos.y,(float)tileLayerCount * 0.001f };
+	instance.position = { pos.x,pos.y,(float)tileLayerCount * -0.001f };
 	instance.scale = { 1.0f,1.0f };		/// まだ使ってない
 	instance.rotate = { 0.0f,0.0f,0.0f };  /// まだ使ってない
 	instance.layer = 0;					/// まだ使ってない
@@ -34,12 +34,12 @@ void InstanceManager::AddSpriteInstance(Vector2 pos, MaterialConfig material) {
 		materialConfigList_.end(),
 		[&](MaterialConfig* ptr) {return *ptr == material; });
 
-	if (checker != materialConfigList_.end()) {
-		instance.materialConfigIndex = (int)std::distance(materialConfigList_.begin(), checker);
-	} else {
+	if (checker == materialConfigList_.end()) {
 		MaterialConfig* newMaterial = new MaterialConfig(material);
 		materialConfigList_.push_back(newMaterial);
 		instance.materialConfigIndex = int(materialConfigList_.size() - 1);
+	} else {
+		instance.materialConfigIndex = (int)std::distance(materialConfigList_.begin(), checker);
 	}
 
 	auto checker2 = std::find_if(spriteList_.begin(),
@@ -48,6 +48,7 @@ void InstanceManager::AddSpriteInstance(Vector2 pos, MaterialConfig material) {
 
 	if (checker2 != spriteList_.end()) {
 		(*checker2)->drawState = STANDBY;
+		(*checker2)->materialConfigIndex = instance.materialConfigIndex;
 	} else {
 		SpriteInstance* newInstance = new SpriteInstance(instance);
 		spriteList_.push_back(newInstance);
@@ -58,7 +59,7 @@ void InstanceManager::AddSpriteInstance(Vector2 pos, MaterialConfig material) {
 
 void InstanceManager::Add2DTileInstance(Vector2 pos, MaterialConfig material) {
 	SpriteInstance instance;
-	instance.position = { pos.x,pos.y,(float)tileLayerCount * 0.001f };
+	instance.position = { pos.x,pos.y,(float)tileLayerCount * -0.001f };
 	instance.scale = { 1.0f,1.0f };		/// まだ使ってない
 	instance.rotate = { 0.0f,0.0f,0.0f };  /// まだ使ってない
 	instance.layer = 0;					/// まだ使ってない

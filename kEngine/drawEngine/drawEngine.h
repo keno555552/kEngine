@@ -45,7 +45,7 @@ public:
 
 	/// Tile関連
 	void Collect2DTile(Vector2 pos, MaterialConfig material);
-	void DrawTile();
+	void Draw2DTile();
 
 	/// 立方体関連
 	void DrawCube(TransformationMatrix* wvpData, MaterialConfig material);
@@ -112,6 +112,9 @@ private:
 	/// Textrue関連
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE Tile2DSrvHandleGPU_{};
+	Microsoft::WRL::ComPtr<ID3D12Resource> instanceOffsetResource_;
+	UINT* instanceOffsetData_ = nullptr;
+	
 	D3D12_GPU_DESCRIPTOR_HANDLE Tile3DSrvHandleGPU_{};
 	uint32_t textrueCounter = 1;
 	std::vector<int> commonTextureSRVMap_;
