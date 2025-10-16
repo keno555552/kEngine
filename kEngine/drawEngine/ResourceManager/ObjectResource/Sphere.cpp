@@ -98,20 +98,3 @@ ID3D12Resource* Sphere::CreateIndexResource_(ID3D12Device* device) {
 	indexResource_->GetResource()->Unmap(0, nullptr);
 	return indexResource_->GetResource().Get();
 }
-
-void Sphere::SetWVP(TransformationMatrix* wvpData) {
-	TransformationMatrix* wvpData_ = nullptr;
-
-	/// 書き込むためのアドレスを取得
-	wvpResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&wvpData_));
-	/// 単位行列を書きこんでおく
-	*wvpData_ = *wvpData;
-
-	wvpResource_->GetResource()->Unmap(0, nullptr);
-}
-
-ID3D12Resource* Sphere::SetWVPResource_(ID3D12Device* device, TransformationMatrix* wvpData) {
-	ID3D12Resource* resuit = CreateWVPResource_(device).Get();
-	SetWVP(wvpData);
-	return resuit;
-}

@@ -159,8 +159,10 @@ ID3D12Resource* Model::CreateVertexResource_(ID3D12Device* device) {
 	ModelData modelData = LoadObjFile(directoryPath_, objName_);
 	vertexResource_->CreateResourceClass_(device, sizeof(VertexData) * modelData.vertices.size());
 	CreateVertexBufferView_(int(modelData.vertices.size()));
-	texturePath_ = modelData.material.textureFilePath;
 	VertexNum_ = int(modelData.vertices.size());
+
+	// ついてにModelのテキスチャーもセーブ
+	texturePath_ = modelData.material.textureFilePath;
 
 	// 頂点リソースにデータを書き込む
 	VertexData* vertexData = nullptr;
@@ -186,24 +188,6 @@ ID3D12Resource* Model::CreateVertexResourceG_(ID3D12Device* device) {
 
 	return vertexResource_->GetResource().Get();
 }
-
-void Model::SetWVP(TransformationMatrix* wvpData) {
-	TransformationMatrix* wvpData_ = nullptr;
-
-	/// 書き込むためのアドレスを取得
-	wvpResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&wvpData_));
-	/// 単位行列を書きこんでおく
-	*wvpData_ = *wvpData;
-
-	wvpResource_->GetResource()->Unmap(0, nullptr);
-}
-
-ID3D12Resource* Model::SetWVPResource_(ID3D12Device* device, TransformationMatrix* wvpData) {
-	ID3D12Resource* resuit = CreateWVPResource_(device).Get();
-	SetWVP(wvpData);
-	return resuit;
-}
-
 
 void Model::SetModelObj(std::string Path) {
 	std::filesystem::path path(Path);

@@ -5,6 +5,7 @@ bool SpriteInstance::CheckSame(const SpriteInstance target) {
 	if (scale != target.scale)return false;
 	if (rotate != target.rotate)return false;
 	if (materialConfigIndex != target.materialConfigIndex)return false;
+	if (resourceHandle != target.resourceHandle)return false;
 	if (layer != target.layer)return false;
 	return true;
 }

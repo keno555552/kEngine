@@ -76,39 +76,6 @@ ID3D12Resource* Sprite2D::CreateIndexResource_(ID3D12Device* device) {
 	return indexResource_->GetResource().Get();
 }
 
-void Sprite2D::Set2DWVP(Vector3* wvpData) {
-	TransformationMatrix* wvpData_ = nullptr;
-
-	// 書き込むためのアドレスを取得
-	wvpResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&wvpData_));
-	// 単位行列を書き込んておく
-	wvpData_->WVP.Identity();
-	wvpData_->world.Identity();
-
-	// CPUで動かす用のTransformを作る。
-	Transform transformSprite = CreateDefaultTransform();
-	if (wvpData != nullptr) {
-		transformSprite.translate = { wvpData->x,wvpData->y,wvpData->z };
-		//transformSprite.scale = { 1.0f,0.5f,1.0f };
-		//transformSprite.rotate = aa;
-	}
-
-	// Sprite用のworldViewProjectionMatrixを作る
-	Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
-	Matrix4x4 viewMatrixSprtie; viewMatrixSprtie.Identity();
-	Matrix4x4 projectionMatrixSprtie = MakeOrthographicMatrix(0.0f, 0.0f, float(config::GetClientWidth()), float(config::GetClientHeight()), 0.0f, 100.0f);
-	Matrix4x4 worldViewProjectionMatrixSprite = worldMatrixSprite * (viewMatrixSprtie * projectionMatrixSprtie);
-	wvpData_->WVP = worldViewProjectionMatrixSprite;
-	// 模擬裁剪空間結果計算
-	wvpResource_->GetResource()->Unmap(0, nullptr);
-}
-
-ID3D12Resource* Sprite2D::SetWVPResource_(ID3D12Device* device, Vector3 pos) {
-	ID3D12Resource* resuit = CreateWVPResource_(device).Get();
-	Set2DWVP(&pos);
-	return resuit;
-}
-
 bool Sprite2D::CheckSize(Vector2 LTpos, Vector2 LBpos, Vector2 RTpos, Vector2 RBpos, float TsizeX, float TsizeY, Vector2 TCLTPos, Vector2 TCRBPos) {
 	if(coner[	 TOP_LEFT].x == LTpos.x)return false;
 	if(coner[	 TOP_LEFT].y == LTpos.y)return false;

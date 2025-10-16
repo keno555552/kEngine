@@ -14,7 +14,6 @@ public:
 	int GetVertexNum() { return VertexNum_; }
 
 private:
-	void SetWVP(TransformationMatrix* wvpData);
 	int kMaxSudivision_ = 18;
 	int kSudivision_ = 0;
 	int VertexNum_ = 0;

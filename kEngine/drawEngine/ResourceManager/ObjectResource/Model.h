@@ -32,7 +32,6 @@ public:
 	void GetModelData(ModelData modeldata);
 	ID3D12Resource* CreateVertexResource_(ID3D12Device* device)override;
 	ID3D12Resource* CreateVertexResourceG_(ID3D12Device* device);
-	ID3D12Resource* SetWVPResource_(ID3D12Device* device, TransformationMatrix* wvpData);
 	std::string GetTexturePatch() { return texturePath_; }
 	void SetTextureHandle(int textureHandle) {textureHandle_ = textureHandle;}
 	UINT GetTextureHandle() { return textureHandle_; }
@@ -41,7 +40,6 @@ public:
 
 private:
 	ModelData modelData_ = {};
-	void SetWVP(TransformationMatrix* wvpData);
 	std::string directoryPath_ = "resources/object/plane";
 	std::string objName_ = "plane.obj";
 	std::string texturePath_;

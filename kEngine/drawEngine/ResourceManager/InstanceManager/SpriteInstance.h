@@ -7,6 +7,7 @@ struct SpriteInstance {
 	Vector2 scale;
 	Vector3 rotate;
 	int materialConfigIndex;
+	int resourceHandle;
 	int layer;
 	int drawState;
 

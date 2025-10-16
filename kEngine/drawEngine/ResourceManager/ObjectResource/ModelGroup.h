@@ -10,7 +10,7 @@ public:
 	~ModelGroup();
 
 	Model* GetModel(int handle){return modelGroup_[handle];}
-	void pushModel(Model* model);
+	void PushModel(Model* model);
 	void SetModelObj(std::string Path);
 	std::string GetDirectoryPath() { return directoryPath_; }
 	std::string GetObjName_() { return objName_; }

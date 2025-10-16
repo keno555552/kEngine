@@ -21,9 +21,10 @@ struct MaterialConfig
 	bool operator==(const MaterialConfig target);
 	bool operator!=(const MaterialConfig target);
 
-	int usedState;
+	int materialResourceHandle = 0;
+	int usedState = 0;
 };
 
+/// MaterialConfig初期化
 void InitMaterialConfig(MaterialConfig* materialConfig);
-
-MaterialConfig CreateInitMaterialConfig();
+MaterialConfig InitMaterialConfig();

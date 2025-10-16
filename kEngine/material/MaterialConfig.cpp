@@ -18,19 +18,20 @@ bool MaterialConfig::operator!=(const MaterialConfig target) {
 
 void InitMaterialConfig(MaterialConfig* materialConfig) {
 	materialConfig->useOriginalTexture = true;
-	materialConfig->textureHandle = 0,
-	materialConfig->uvTranslate = { 0,0,0 },
-	materialConfig->uvScale = { 1,1,1 },
-	materialConfig->uvRotate = { 0,0,0 },
-	materialConfig->uvTransformMatrix = {},
-	materialConfig->textureColor = { 1.0f,1.0f,1.0f,1.0f },
-	materialConfig->lightModelType = LightModelType::HalfLambert,
+	materialConfig->textureHandle = 0;
+	materialConfig->uvTranslate = { 0,0,0 };
+	materialConfig->uvScale = { 1,1,1 };
+	materialConfig->uvRotate = { 0,0,0 };
+	materialConfig->uvTransformMatrix = {};
+	materialConfig->textureColor = { 1.0f,1.0f,1.0f,1.0f };
+	materialConfig->lightModelType = LightModelType::HalfLambert;
 	materialConfig->enableLighting = true;
+	materialConfig->materialResourceHandle = -1;
 	materialConfig->usedState = 0;
 }
 
-MaterialConfig CreateInitMaterialConfig() {
-	MaterialConfig newMaterial;
-	InitMaterialConfig(&newMaterial);
-	return newMaterial;
+MaterialConfig InitMaterialConfig() {
+	MaterialConfig newMaterialConfig;
+	InitMaterialConfig(&newMaterialConfig);
+	return newMaterialConfig;
 }

@@ -130,7 +130,7 @@ ModelGroup::~ModelGroup() {
 	}
 }
 
-void ModelGroup::pushModel(Model* model) {
+void ModelGroup::PushModel(Model* model) {
 	modelGroup_.push_back(model);
 }
 

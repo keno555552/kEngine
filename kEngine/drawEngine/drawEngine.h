@@ -72,8 +72,6 @@ private:
 	Shader_compile* shader_compile_ = new Shader_compile;
 	PSO* pso_ = new PSO;
 	ResourceManager* resourceManager_ = nullptr;
-	int modelHandle_ = 0;
-	int modelGroupHandle_ = 0;
 	DirectXBase* directXDriver_ = nullptr;
 	ID3D12GraphicsCommandList* commandList_ = nullptr;
 
@@ -117,7 +115,7 @@ private:
 	std::vector<int> commonTextureSRVMap_;
 	std::vector<int> modelTextureSRVMap_;
 	int defaultTextureHandle_ = 0;						// white5x5
-	ID3D12Resource* depthStencilResource = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilResource = nullptr;
 
 
 	///Lighting関連
@@ -139,16 +137,16 @@ private:
 	DirectionalLight* lightingData = nullptr;
 
 private:
+	/// 内部関数
 	D3D12_VIEWPORT createViewport(int kClientWidth, int kClientHeight);
 	D3D12_RECT createScissorRect(int kClientWidth, int kClientHeight);
-	void InitializeMaterial();
-	void SetMaterial(Matrix4x4 uvTransform, Vector4 color, int isLighting);
+	void SetMaterial(int MaterialHandle);
 	void InitializeLighting();
 	void SetLighting(DirectionalLight* directionalLight);
 
 	void PSODecition(MaterialConfig& material,bool isParticle = false);
 	DirectX::ScratchImage LoadTextrueLow(const std::string& filePath);
-	ID3D12Resource* CreateTextureResource(ID3D12Device* device, const DirectX::TexMetadata& metadata);
+	ID3D12Resource* CreateTextureResource(ID3D12Device* device, const DirectX::TexMetadata& metadata, ResourceManager::TextureInfo* saveData = nullptr);
 	ID3D12Resource* UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages, ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
 	int MakeTextureShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResource);
 	int MakeModelShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResource);

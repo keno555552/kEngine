@@ -14,7 +14,7 @@ private:
 	static const int k3DTileNumInstance_ = 10000;     /// Tileの最大インスタンス数
 
 	///最大マテリアル数設定
-	static const int kMaxMaterialNum_ = 100;          /// 最大マテリアル数
+	static const int kMaxMaterialNum_ = 10000;          /// 最大マテリアル数
 
 private:
 	static int clientWidth_;

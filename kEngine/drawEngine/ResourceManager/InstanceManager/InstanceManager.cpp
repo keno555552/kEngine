@@ -60,8 +60,35 @@ void InstanceManager::AddSpriteInstance(Vector2 pos, MaterialConfig material) {
 }
 
 void InstanceManager::AddModelInstance(TransformationMatrix* wvpData, MaterialConfig material) {
+	ModelInstance instance;
+	instance.WVP = wvpData->WVP;
+	instance.world = wvpData->world;
+	instance.drawState = STANDBY;
 
+	auto checker = std::find_if(materialConfigList_.begin(),
+		materialConfigList_.end(),
+		[&](MaterialConfig* ptr) {return *ptr == material; });
 
+	if (checker == materialConfigList_.end()) {
+		MaterialConfig* newMaterial = new MaterialConfig(material);
+		materialConfigList_.push_back(newMaterial);
+		instance.materialConfigIndex = int(materialConfigList_.size() - 1);
+	} else {
+		instance.materialConfigIndex = (int)std::distance(materialConfigList_.begin(), checker);
+	}
+
+	auto checker2 = std::find_if(modelList_.begin(),
+		modelList_.end(),
+		[&](ModelInstance* ptr) {return ptr->CheckSame(instance); });
+
+	if (checker2 != modelList_.end()) {
+		(*checker2)->drawState = STANDBY;
+		(*checker2)->materialConfigIndex = instance.materialConfigIndex;
+	} else {
+		ModelInstance* newInstance = new ModelInstance(instance);
+		modelList_.push_back(newInstance);
+	}
+	return;
 }
 
 void InstanceManager::Add2DTileInstance(Vector2 pos, MaterialConfig material) {
@@ -100,7 +127,7 @@ void InstanceManager::Add2DTileInstance(Vector2 pos, MaterialConfig material) {
 }
 
 void InstanceManager::Add3DTileInstance(TransformationMatrix* wvpData, MaterialConfig material) {
-	ModelInstance instance;
+	ModelInstance instance{};
 	instance.WVP = wvpData->WVP;
 	instance.world = wvpData->world;
 	instance.drawState = STANDBY;
