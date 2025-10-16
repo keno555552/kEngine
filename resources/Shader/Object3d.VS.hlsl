@@ -12,6 +12,11 @@ struct TransformationMatrix
 };
 ConstantBuffer<TransformationMatrix> gTransformationMatrix : register(b0);
 
+cbuffer InstanceOffset : register(b1)
+{
+    uint instanceOffset;
+}
+
 struct VertexShaderInput
 {
     float4 position : POSITION0;

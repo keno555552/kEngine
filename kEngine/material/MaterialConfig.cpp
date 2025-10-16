@@ -26,6 +26,7 @@ void InitMaterialConfig(MaterialConfig* materialConfig) {
 	materialConfig->textureColor = { 1.0f,1.0f,1.0f,1.0f },
 	materialConfig->lightModelType = LightModelType::HalfLambert,
 	materialConfig->enableLighting = true;
+	materialConfig->usedState = 0;
 }
 
 MaterialConfig CreateInitMaterialConfig() {

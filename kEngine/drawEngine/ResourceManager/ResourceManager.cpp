@@ -4,8 +4,8 @@ ResourceManager::ResourceManager(ID3D12Device* device) {
 
 	Bdevice_ = device;
 
-	vertexResourceTriangle_->CreateVertexResource_(Bdevice_);
-	vertexResourceTriangle_->CreateVertexBufferView_(6);
+	CreateTriangleResource();
+	CreateCubeResource();
 
 	Sprite2D* vertexResourceSprite_ = new Sprite2D;
 	vertexResourceSprite_->CreateVertexResource_(Bdevice_);
@@ -14,48 +14,15 @@ ResourceManager::ResourceManager(ID3D12Device* device) {
 	vertexResourceSprite_->CreateIndexBufferView_(12);
 	vertexResourceSprite_->SetKeep(true);
 	vertexResourceSpriteGroup_.push_back(vertexResourceSprite_);
-
-	vertexResourceCube_->CreateVertexResource_(Bdevice_);
-	vertexResourceCube_->CreateVertexBufferView_(24);
-	vertexResourceCube_->CreateIndexResource_(Bdevice_);
-	vertexResourceCube_->CreateIndexBufferView_(36);
-
 }
 
 ResourceManager::~ResourceManager() {
 	///ID3D12Resource*の解放する
-	vertexResourceTriangle_->ClearVertexResource();
-	if (!vertexResourceSpriteGroup_.empty()) {
-		for (auto ptr : vertexResourceSpriteGroup_) {
-			ptr->ClearAllResource();
-			delete ptr;
-		}
-	}
-	vertexResourceCube_->ClearAllResource();
-	vertexResourceSphere_->ClearAllResource();
-	if (!materialResourceModelGroup_.empty()) {
-		for (auto& material : materialResourceModelGroup_) {
-			if (material) {
-				material->ClearResource();
-				delete material;
-				material = nullptr;
-			}
-		}
-		materialResourceModelGroup_.clear();
 
-		for (auto& modelGroup : vertexResourceModelGroup_) {
-			if (modelGroup) {
-				delete modelGroup;
-				modelGroup = nullptr;
-			}
-		}
-		vertexResourceModelGroup_.clear();
-	}
 
 	textureResource_->ClearResource();
 	intermediateResource_->ClearResource();
 	//
-	materialResource_->ClearResource();
 	lightingResource_->ClearResource();
 
 
@@ -67,8 +34,10 @@ ResourceManager::~ResourceManager() {
 		}
 	}
 	textureData_.clear();
+	vertexResourceTriangle_->ClearVertexResource();
+	vertexResourceCube_->ClearAllResource();
+	vertexResourceSphere_->ClearAllResource();
 
-	delete materialResource_;
 	delete textureResource_;
 	delete intermediateResource_;
 	delete lightingResource_;
@@ -78,49 +47,40 @@ ResourceManager::~ResourceManager() {
 	delete instanceManager_;
 }
 
-void ResourceManager::CreateTurnResource() {
-}
 
 void ResourceManager::ClearTurnResource() {
 	deleteParameter++;
-
 	intermediateResource_->ClearResource();
-
-
-	if (!vertexResourceSpriteGroup_.empty()) {
-		int i = 0;
-		auto ptr = vertexResourceSpriteGroup_.begin();
-
-		while (ptr != vertexResourceSpriteGroup_.end()) {
-			(*ptr)->ClearWVPResource();
-
-			if (deleteParameter % 100 == 0) {
-				if ((*ptr)->GetKeep() != true && i != 0) {
-					(*ptr)->ClearAllResource();
-					delete* ptr; // 釋放 Sprite2D 實例
-					ptr = vertexResourceSpriteGroup_.erase(ptr); // 從容器移除指標
-					++i;
-					continue; // 跳過 ++it
-				} else {
-					(*ptr)->SetKeep(false);
-				}
-			}
-
-			++ptr;
-			++i;
-		}
-	}
-
-	if (!materialResourceModelGroup_.empty()) {
-		for (auto& material : materialResourceModelGroup_) {
-			material->ClearResource();
-		}
-		for (auto& modelGroup : vertexResourceModelGroup_) {
-			for (int model = 0; model < modelGroup->GetModelNum(); model++) {
-				modelGroup->GetModel(model)->ClearWVPResource();
-			}
-		}
-	}
-
 	instanceManager_->Update();
+}
+
+void ResourceManager::CreateTriangleResource() {
+	vertexResourceTriangle_->CreateVertexResource_(Bdevice_);
+	vertexResourceTriangle_->CreateVertexBufferView_(6);
+}
+
+void ResourceManager::CreateCubeResource() {
+	vertexResourceCube_->CreateVertexResource_(Bdevice_);
+	vertexResourceCube_->CreateVertexBufferView_(24);
+	vertexResourceCube_->CreateIndexResource_(Bdevice_);
+	vertexResourceCube_->CreateIndexBufferView_(36);
+}
+
+void ResourceManager::ColletSprite(Vector2 pos, MaterialConfig material) {
+	int instanceNum = instanceManager_->spriteList_.size();
+	instanceManager_->AddSpriteInstance(pos, material);
+	if (instanceNum < instanceManager_->spriteList_.size()) {
+	}
+}
+
+void ResourceManager::ColletModel(TransformationMatrix* wvpData, MaterialConfig material) {
+	instanceManager_->AddModelInstance(wvpData, material);
+}
+
+void ResourceManager::Collet2DTile(Vector2 pos, MaterialConfig material) {
+	instanceManager_->Add2DTileInstance(pos, material);
+}
+
+void ResourceManager::Collet3DTile(TransformationMatrix* wvpData, MaterialConfig material) {
+	instanceManager_->Add3DTileInstance(wvpData, material);
 }

@@ -12,6 +12,7 @@ cbuffer InstanceOffset : register(b1)
     uint instanceOffset;
 }
 
+
 struct VertexShaderInput
 {
     float4 position : POSITION0;
@@ -23,10 +24,19 @@ struct VertexShaderInput
 VertexShaderOutput main(VertexShaderInput input, uint instanceId:SV_InstanceID)
 {
     VertexShaderOutput output;
-    output.position = mul(input.position, gTransformationMatrix[instanceId + instanceOffset].WVP);
+    output.position = mul(input.position, gTransformationMatrix[instanceId].WVP);
     output.texcoord = input.texcoord;
-    output.normal = normalize(mul(input.normal, (float3x3) gTransformationMatrix[instanceId + instanceOffset].world));
+    output.normal = normalize(mul(input.normal, (float3x3) gTransformationMatrix[instanceId].world));
     return output;
+    
+    //uint actualIndex = instanceId + instanceOffset;
+    //TransformationMatrix transform = gTransformationMatrices[actualIndex];
+    //
+    //VertexShaderOutput output;
+    //output.position = mul(input.position, transform.WVP);
+    //output.texcoord = input.texcoord;
+    //output.normal = normalize(mul(input.normal, (float3x3) transform.world));
+    //return output;
 }
 
 

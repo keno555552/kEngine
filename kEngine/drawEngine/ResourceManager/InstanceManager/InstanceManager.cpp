@@ -4,6 +4,7 @@ InstanceManager::~InstanceManager() {
 	ClearInstance(materialConfigList_);
 	ClearInstance(spriteList_);
 	ClearInstance(tile2DList_);
+	ClearInstance(modelList_);
 	ClearInstance(tile3DList_);
 }
 
@@ -11,6 +12,7 @@ void InstanceManager::Update() {
 
 	UpdateInstance(spriteList_);
 	UpdateInstance(tile2DList_);
+	UpdateInstance(modelList_);
 	UpdateInstance(tile3DList_);
 
 
@@ -55,6 +57,11 @@ void InstanceManager::AddSpriteInstance(Vector2 pos, MaterialConfig material) {
 	}
 	spriteLayerCount++;
 	return;
+}
+
+void InstanceManager::AddModelInstance(TransformationMatrix* wvpData, MaterialConfig material) {
+
+
 }
 
 void InstanceManager::Add2DTileInstance(Vector2 pos, MaterialConfig material) {

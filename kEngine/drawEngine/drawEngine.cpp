@@ -88,10 +88,8 @@ void DrawEngine::Initialize
 	}
 	Tile2DSrvHandleGPU_ = CreateTileWVPBuffer(tile2DWVPResource_.Get());
 
-	// 建立 256-byte 對齊的 CBV buffer（最小大小）
-	instanceOffsetResource_ = CreateResource(directXDriver_->GetDriver(), 256); // 或用 CreateCommittedResource
-	instanceOffsetResource_->Map(0, nullptr, reinterpret_cast<void**>(&instanceOffsetData_));
-
+	instanceOffsetResource_->CreateResourceClass_(directXDriver_->GetDriver(), 256);
+	instanceOffsetResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&instanceOffsetData_));
 
 	tile3DWVPResource_ = CreateResource(directXDriver_->GetDriver(), sizeof(TransformationMatrix) * config::Get3DTileNumInstance());
 	tile3DWVPResource_->Map(0, nullptr, reinterpret_cast<void**>(&tile3DInstancingData_));
@@ -538,9 +536,10 @@ void DrawEngine::Draw2DTile() {
 			instance2DCounter++;
 		}
 
-		*instanceOffsetData_ = wvpInstanceStartpoint;
+		//*instanceOffsetData_ = wvpInstanceStartpoint;
+		commandList_->SetGraphicsRootConstantBufferView(4, instanceOffsetResource_->GetResource()->GetGPUVirtualAddress());
+		
 		commandList_->SetGraphicsRootDescriptorTable(1, Tile2DSrvHandleGPU_);
-		commandList_->SetGraphicsRootConstantBufferView(1, instanceOffsetResource_->GetGPUVirtualAddress());
 		commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
 		commandList_->DrawIndexedInstanced(12, tileCount, 0, 0, 0);
 	}

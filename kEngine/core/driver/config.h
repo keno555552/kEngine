@@ -8,6 +8,25 @@ enum gamepadType {
 
 class config
 {
+private:
+	///描画設定
+	static const int k2DTileNumInstance_ = 10000;     /// Tileの最大インスタンス数
+	static const int k3DTileNumInstance_ = 10000;     /// Tileの最大インスタンス数
+
+	///最大マテリアル数設定
+	static const int kMaxMaterialNum_ = 100;          /// 最大マテリアル数
+
+private:
+	static int clientWidth_;
+	static int clientHeight_;
+
+	static bool isConnetKeyboard_;
+	static bool isConnetMouse_;
+	static bool isConnetGamePad_;
+	static gamepadType gamePadType_;
+	static int XInputDriverIP_;
+
+
 public:
 
 	static void SaveClientWidth(int clientWidth) { clientWidth_ = clientWidth; }
@@ -26,19 +45,5 @@ public:
 	static int GetXInputIp() { return XInputDriverIP_; }
 	static int Get2DTileNumInstance() { return k2DTileNumInstance_; }
 	static int Get3DTileNumInstance() { return k3DTileNumInstance_; }
-
-private:
-	static int clientWidth_;
-	static int clientHeight_;
-
-	static bool isConnetKeyboard_;
-	static bool isConnetMouse_;
-	static bool isConnetGamePad_;
-	static gamepadType gamePadType_;
-	static int XInputDriverIP_;
-
-private:
-	///描画設定
-	static const int k2DTileNumInstance_ = 10000;     /// Tileの最大インスタンス数
-	static const int k3DTileNumInstance_ = 10000;     /// Tileの最大インスタンス数
+	static int GetMaxMaterialNum() { return kMaxMaterialNum_; }
 };

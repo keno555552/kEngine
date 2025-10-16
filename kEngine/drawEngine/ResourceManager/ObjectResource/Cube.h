@@ -5,7 +5,7 @@
 #include "VertexResource.h"
 #include "Config.h"
 
-class Cube :public VertexResource
+class Cube :public MeshBuffer
 {
 public:
 	ID3D12Resource* CreateVertexResource_(ID3D12Device* device)override;

@@ -26,7 +26,7 @@ struct ModelData
 ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename);
 
 
-class Model :public VertexResource
+class Model :public MeshBuffer
 {
 public:
 	void GetModelData(ModelData modeldata);

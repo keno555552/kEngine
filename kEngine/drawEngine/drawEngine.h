@@ -112,9 +112,6 @@ private:
 	/// Textrue関連
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE Tile2DSrvHandleGPU_{};
-	Microsoft::WRL::ComPtr<ID3D12Resource> instanceOffsetResource_;
-	UINT* instanceOffsetData_ = nullptr;
-	
 	D3D12_GPU_DESCRIPTOR_HANDLE Tile3DSrvHandleGPU_{};
 	uint32_t textrueCounter = 1;
 	std::vector<int> commonTextureSRVMap_;
@@ -134,20 +131,12 @@ private:
 	int instance2DCounter = 0;
 	int instance3DCounter = 0;
 
+	BasicResource* instanceOffsetResource_ = new BasicResource;
+	std::vector<UINT*> instanceOffsetData_;
+
 	//Material関連
 	Material* materialData = nullptr;
 	DirectionalLight* lightingData = nullptr;
-
-
-
-private:
-	//struct RenderResourceGroup {
-	//	int resourceID;
-	//
-	//	MaterialConfig* material;
-	//	VertexResource* vertex;
-	//
-	//};
 
 private:
 	D3D12_VIEWPORT createViewport(int kClientWidth, int kClientHeight);

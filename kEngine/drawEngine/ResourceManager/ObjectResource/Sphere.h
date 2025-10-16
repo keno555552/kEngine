@@ -5,7 +5,7 @@
 #include "VertexResource.h"
 #include "Config.h"
 
-class Sphere :public VertexResource
+class Sphere :public MeshBuffer
 {
 public:
 	ID3D12Resource* CreateVertexResource_(ID3D12Device* device)override;

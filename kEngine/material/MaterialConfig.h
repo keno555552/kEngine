@@ -20,6 +20,8 @@ struct MaterialConfig
 
 	bool operator==(const MaterialConfig target);
 	bool operator!=(const MaterialConfig target);
+
+	int usedState;
 };
 
 void InitMaterialConfig(MaterialConfig* materialConfig);

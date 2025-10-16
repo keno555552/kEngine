@@ -16,6 +16,7 @@ public:
 	void Update();
 
 	void AddSpriteInstance(Vector2 pos, MaterialConfig material);
+	void AddModelInstance(TransformationMatrix* wvpData, MaterialConfig material);
 	void Add2DTileInstance(Vector2 pos, MaterialConfig material);
 	//void ResmoveSpriteInstance();
 	//void UpdateTileInstance();
@@ -36,7 +37,8 @@ public:
 	std::vector< MaterialConfig* > materialConfigList_;
 	std::vector< SpriteInstance* > spriteList_;
 	std::vector< SpriteInstance* > tile2DList_;
-	std::vector< ModelInstance*>  tile3DList_;
+	std::vector< ModelInstance*> modelList_;
+	std::vector< ModelInstance*> tile3DList_;
 
 public:
 	int tileLayerCount = 0;

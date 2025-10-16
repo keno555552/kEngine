@@ -9,7 +9,7 @@ PSO::~PSO() {
 		errorBlob_->Release();
 	}
 
-	for (auto& ptr: rootSignatureList_) {
+	for (auto& ptr : rootSignatureList_) {
 		ptr->Release();
 		ptr = nullptr;
 	}
@@ -88,7 +88,7 @@ ID3D12RootSignature* PSO::createRootSignature(bool isParticle) {
 	descriptionRootSignature.NumStaticSamplers = _countof(staticSampler);
 
 	/// RootParameter作成。PixelShaderのMaterialとVertexShaderのTransform
-	D3D12_ROOT_PARAMETER rootParameters[4] = {};                                                    ///4になった
+	D3D12_ROOT_PARAMETER rootParameters[5] = {};                                                    ///4になった
 
 	// Material用
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;                                // CBV を使う
@@ -106,11 +106,12 @@ ID3D12RootSignature* PSO::createRootSignature(bool isParticle) {
 		descriptorRangeForInstancing[0].NumDescriptors = 1;
 		descriptorRangeForInstancing[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 		descriptorRangeForInstancing[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-	
+
 		rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;						/// DescirptorTableを使う
 		rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;								/// VertexShaderで使う
 		rootParameters[1].DescriptorTable.pDescriptorRanges = descriptorRangeForInstancing;					/// Tableの中身の配列を指定
 		rootParameters[1].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeForInstancing);		/// Tableで利用する数
+
 	}
 
 	// Texture用
@@ -123,6 +124,12 @@ ID3D12RootSignature* PSO::createRootSignature(bool isParticle) {
 	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;                                /// CBV を使う
 	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;                             /// PixelShaderで使う
 	rootParameters[3].Descriptor.ShaderRegister = 1;
+
+	// slot 4: InstanceOffset (b1, VertexShader)
+	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParameters[4].Descriptor.ShaderRegister = 1;
+
 
 
 	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ

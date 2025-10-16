@@ -33,40 +33,30 @@ D3D12_INDEX_BUFFER_VIEW CreateIndexBufferView(ID3D12Resource* vertexResource, ui
 	return indexBufferView;
 }
 
-VertexResource::~VertexResource() {
+MeshBuffer::~MeshBuffer() {
 	ClearVertexResource();
-	ClearWVPResource();
+	ClearIndexResource();
 }
 
-Microsoft::WRL::ComPtr<ID3D12Resource> VertexResource::CreateWVPResource_(ID3D12Device* device) {
-	return wvpResource_->CreateResourceClass_(device, sizeof(TransformationMatrix));
-}
-
-D3D12_VERTEX_BUFFER_VIEW VertexResource::CreateVertexBufferView_(uint32_t NumOfVertex) {
+D3D12_VERTEX_BUFFER_VIEW MeshBuffer::CreateVertexBufferView_(uint32_t NumOfVertex) {
 	return vertexBufferView = CreateVertexBufferView(vertexResource_->GetResource().Get(), NumOfVertex);
 }
 
-D3D12_INDEX_BUFFER_VIEW VertexResource::CreateIndexBufferView_(uint32_t NumOfIndex) {
+D3D12_INDEX_BUFFER_VIEW MeshBuffer::CreateIndexBufferView_(uint32_t NumOfIndex) {
 	return indexBufferView = CreateIndexBufferView(indexResource_->GetResource().Get(), NumOfIndex);
 }
 
-void VertexResource::ClearAllResource() {
+void MeshBuffer::ClearAllResource() {
 	ClearVertexResource();
 	ClearIndexResource();
-	ClearWVPResource();
 }
 
-void VertexResource::ClearVertexResource() {
+void MeshBuffer::ClearVertexResource() {
 	if (vertexResource_)vertexResource_->ClearResource();
 }
 
-void VertexResource::ClearIndexResource() {
+void MeshBuffer::ClearIndexResource() {
 	if (indexResource_)indexResource_->ClearResource();
-}
-
-
-void VertexResource::ClearWVPResource() {
-	if (wvpResource_)wvpResource_->ClearResource();
 }
 
 

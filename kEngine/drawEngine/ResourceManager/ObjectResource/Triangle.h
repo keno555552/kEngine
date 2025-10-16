@@ -5,7 +5,7 @@
 #include "VertexResource.h"
 #include "Config.h"
 
-class Triangle:public VertexResource
+class Triangle:public MeshBuffer
 {
 public:
 	ID3D12Resource* CreateVertexResource_(ID3D12Device* device)override;

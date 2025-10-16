@@ -5,7 +5,7 @@
 #include "VertexResource.h"
 #include "Config.h"
 
-class Particle :public VertexResource
+class Particle :public MeshBuffer
 {
 public:
 	void SetSize(Vector2 LTpos, Vector2 LBpos, Vector2 RTpos, Vector2 RBpos, float TsizeX, float TsizeY, Vector2 TCLTPos, Vector2 TCRBPos);

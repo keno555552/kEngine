@@ -5,7 +5,7 @@
 #include "VertexResource.h"
 #include "Config.h"
 
-class Sprite2D :public VertexResource
+class Sprite2D :public MeshBuffer
 {
 public:
 	void SetSize(Vector2 LTpos, Vector2 LBpos, Vector2 RTpos, Vector2 RBpos, float TsizeX, float TsizeY,Vector2 TCLTPos, Vector2 TCRBPos);
