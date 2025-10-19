@@ -11,7 +11,7 @@ public:
 	~BasicResource();
 	
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateResourceClass_(ID3D12Device* device, size_t sizeInBytes);
-	Microsoft::WRL::ComPtr<ID3D12Resource> SaveResource_(ID3D12Resource* resource);
+	Microsoft::WRL::ComPtr<ID3D12Resource> SaveResource_(Microsoft::WRL::ComPtr<ID3D12Resource> resource);
 	Microsoft::WRL::ComPtr<ID3D12Resource> GetResource(int Index = -1);
 	int ShowResourceCounter() { return resourceCounter; }
 	void ClearResource();
@@ -19,5 +19,8 @@ public:
 private:
 	std::vector <Microsoft::WRL::ComPtr< ID3D12Resource>> resource_;
 	int resourceCounter = 0;
+
+	/// Debug
+	char buffer[128];
 };
 

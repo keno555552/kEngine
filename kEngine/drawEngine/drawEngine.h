@@ -122,9 +122,9 @@ private:
 	DirectionalLight* directionalLightData = {};		// 外部から受ける
 
 	/// 交換用容器
-	Microsoft::WRL::ComPtr<ID3D12Resource> tile2DWVPResource_ = nullptr;
+	BasicResource* tile2DWVPResource_ = new BasicResource;
 	TransformationMatrix* tile2DInstancingData_ = nullptr;
-	Microsoft::WRL::ComPtr<ID3D12Resource> tile3DWVPResource_ = nullptr;
+	BasicResource* tile3DWVPResource_ = new BasicResource;
 	TransformationMatrix* tile3DInstancingData_ = nullptr;
 	int instance2DCounter = 0;
 	int instance3DCounter = 0;

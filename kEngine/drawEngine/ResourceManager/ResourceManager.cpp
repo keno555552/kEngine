@@ -15,6 +15,9 @@ ResourceManager::~ResourceManager() {
 
 	ClearPointer(materialResourceList_);
 	ClearPointer(meshBufferList_);
+	spriteMeshHandles_.clear();
+	modelMeshHandles_.clear();
+	modelGroupList_.clear();
 
 	for (auto& tex : textureData_) {
 		if (tex.texture) {

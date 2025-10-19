@@ -49,8 +49,10 @@ private:
 	template<typename TInstance>
 	void ClearInstance(std::vector< TInstance*>& list) {
 		for (auto& ptr : list) {
-			delete ptr;
-			ptr = nullptr;
+			if (ptr) {
+				delete ptr;
+				ptr = nullptr;
+			}
 		}
 		list.clear();
 	}

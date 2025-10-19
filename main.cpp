@@ -18,6 +18,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	system->Initialize(kWindowTitle, kWindowWidth, kWindowHeight);
 	MSG msg = {};
 
+
+
 	///Lighting
 	DirectionalLight directionalLight{
 		.color{1.0f,1.0f,1.0f,1.0f},
@@ -60,6 +62,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		}
 	}
+
 	CoUninitialize();
 	delete system;
 	return 0;

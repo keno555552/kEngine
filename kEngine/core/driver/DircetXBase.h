@@ -45,6 +45,9 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 #include <dxgidebug.h>
 
+
+
+
 #pragma region wordChange
 /// <summary>
 /// 出力ウィンドウに文字出力

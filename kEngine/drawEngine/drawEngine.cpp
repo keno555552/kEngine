@@ -6,25 +6,33 @@
 
 DrawEngine::~DrawEngine() {
 	delete shader_compile_;
-
+	
 	for (auto& ptr : psoList_) {
 		ptr->Release();
 		ptr = nullptr;
 	}
 	psoList_.clear();
-
+	
 	delete pso_;
-
+	
 	//delete directXDriver_;            /*借り*/
-
+	
 	//dxcUtils->Release();				/*借り*/
 	//dxcCompiler->Release();			/*借り*/
 	//includeHandler->Release();		/*借り*/
-
+	
 	//rootSignature_->Release();		/*借り*/
-
+	
 	//delete directionalLightData;      /*借り*/
+	delete tile2DWVPResource_;
+	delete tile3DWVPResource_;
+	delete instanceOffsetResource_;
+
+	depthStencilResource->Release();
+	depthStencilResource->Release();
+	
 	delete resourceManager_;
+
 }
 
 void DrawEngine::Initialize
@@ -67,25 +75,24 @@ void DrawEngine::Initialize
 	InitializeLighting();
 
 	/// Tile用wvpBufferを作成
-	tile2DWVPResource_ = CreateResource(directXDriver_->GetDriver(), sizeof(TransformationMatrix) * config::Get2DTileNumInstance());
-	tile2DWVPResource_->Map(0, nullptr, reinterpret_cast<void**>(&tile2DInstancingData_));
+	tile2DWVPResource_->CreateResourceClass_(directXDriver_->GetDriver(), sizeof(TransformationMatrix) * config::Get2DTileNumInstance());
+	tile2DWVPResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&tile2DInstancingData_));
 	for (int index = 0; index < config::Get2DTileNumInstance(); ++index) {
 		tile2DInstancingData_[index].WVP = Identity();
 		tile2DInstancingData_[index].world = Identity();
 	}
-	Tile2DSrvHandleGPU_ = CreateTileWVPBuffer(tile2DWVPResource_.Get());
+	Tile2DSrvHandleGPU_ = CreateTileWVPBuffer(tile2DWVPResource_->GetResource().Get());
 
-	instanceOffsetResource_->CreateResourceClass_(directXDriver_->GetDriver(), 256);
-	instanceOffsetResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&instanceOffsetData_));
-
-	tile3DWVPResource_ = CreateResource(directXDriver_->GetDriver(), sizeof(TransformationMatrix) * config::Get3DTileNumInstance());
-	tile3DWVPResource_->Map(0, nullptr, reinterpret_cast<void**>(&tile3DInstancingData_));
+	tile3DWVPResource_->CreateResourceClass_(directXDriver_->GetDriver(), sizeof(TransformationMatrix) * config::Get3DTileNumInstance());
+	tile3DWVPResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&tile3DInstancingData_));
 	for (int index = 0; index < config::Get3DTileNumInstance(); ++index) {
 		tile3DInstancingData_[index].WVP = Identity();
 		tile3DInstancingData_[index].world = Identity();
 	}
-	Tile3DSrvHandleGPU_ = CreateTileWVPBuffer(tile3DWVPResource_.Get());
+	Tile3DSrvHandleGPU_ = CreateTileWVPBuffer(tile3DWVPResource_->GetResource().Get());
 
+	instanceOffsetResource_->CreateResourceClass_(directXDriver_->GetDriver(), 256);
+	instanceOffsetResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&instanceOffsetData_));
 	//Microsoft::WRL::ComPtr<ID3D12Debug> debugController;
 	//D3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
 	//debugController->EnableDebugLayer();
@@ -783,12 +790,14 @@ int DrawEngine::LoadTexture(const std::string& filePath) {
 		}
 	}
 	const DirectX::TexMetadata& metadata = mipImage.GetMetadata();
-	ID3D12Resource* textrueResourceN = CreateTextureResource(directXDriver_->GetDriver(), metadata);
-	ID3D12Resource* intermediateResourceN = UploadTextureData(textrueResourceN, mipImage, directXDriver_->GetDriver(), commandList_);
+	Microsoft::WRL::ComPtr<ID3D12Resource> textrueResourceN;
+	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResourceN;
+	textrueResourceN.Attach(CreateTextureResource(directXDriver_->GetDriver(), metadata));
+	intermediateResourceN.Attach(UploadTextureData(textrueResourceN.Get(), mipImage, directXDriver_->GetDriver(), commandList_));
 	resourceManager_->intermediateResource_->SaveResource_(intermediateResourceN);
 	resourceManager_->textureResource_->SaveResource_(textrueResourceN);
 
-	int handle = MakeTextureShaderResourceView(metadata, textrueResourceN);
+	int handle = MakeTextureShaderResourceView(metadata, textrueResourceN.Get());
 
 	resourceManager_->commonTextureFilePath_.push_back(filePath);
 	return handle;
@@ -797,12 +806,14 @@ int DrawEngine::LoadTexture(const std::string& filePath) {
 int DrawEngine::LoadModelTexture(const std::string& filePath) {
 	DirectX::ScratchImage mipImage = LoadTextrueLow(filePath);
 	const DirectX::TexMetadata& metadata = mipImage.GetMetadata();
-	ID3D12Resource* textrueResourceN = CreateTextureResource(directXDriver_->GetDriver(), metadata);
-	ID3D12Resource* intermediateResourceN = UploadTextureData(textrueResourceN, mipImage, directXDriver_->GetDriver(), commandList_);
+	Microsoft::WRL::ComPtr<ID3D12Resource> textrueResourceN;
+	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResourceN;
+	textrueResourceN.Attach(CreateTextureResource(directXDriver_->GetDriver(), metadata));
+	intermediateResourceN.Attach(UploadTextureData(textrueResourceN.Get(), mipImage, directXDriver_->GetDriver(), commandList_));
 	resourceManager_->intermediateResource_->SaveResource_(intermediateResourceN);
 	resourceManager_->textureResource_->SaveResource_(textrueResourceN);
 
-	int handle = MakeModelShaderResourceView(metadata, textrueResourceN);
+	int handle = MakeModelShaderResourceView(metadata, textrueResourceN.Get());
 	return handle;
 }
 

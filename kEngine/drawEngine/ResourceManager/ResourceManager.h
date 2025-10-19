@@ -97,7 +97,6 @@ private:
 								Vector2 TCLTPos, Vector2 TCRBPos);
 	int CreateSphereResource(int sudivision);
 
-
 	template<typename T>
 	void ClearPointer(std::vector< T* >& list) {
 		for (auto& ptr : list) {

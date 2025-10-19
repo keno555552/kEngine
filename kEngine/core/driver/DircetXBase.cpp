@@ -1,6 +1,7 @@
 #include "DircetXBase.h"
 #include "ConvertString.h"
 
+
 #pragma region wordChange
 void Log(const std::string& message) {
 	OutputDebugStringA(message.c_str());
