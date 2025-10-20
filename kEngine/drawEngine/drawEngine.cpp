@@ -588,6 +588,7 @@ void DrawEngine::Draw2DTile() {
 		commandList_->SetGraphicsRootDescriptorTable(1, Tile2DSrvHandleGPU_);
 		commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
 		commandList_->DrawIndexedInstanced(12, tileCount, 0, 0, 0);
+		offsetDataCounter_++;
 	}
 }
 
