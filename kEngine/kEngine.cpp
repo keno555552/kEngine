@@ -9,6 +9,14 @@ kEngine::kEngine() {
 	soundManager = new SoundManager;
 	timeManager = new TimeManager;
 
+
+	///Lighting
+	DirectionalLight directionalLight{
+		.color{1.0f,1.0f,1.0f,1.0f},
+		.direction{-0.5f,-0.5f,0.4f},
+		.intensity{1.0f}
+	};
+	SetDirectionalLight(&directionalLight);
 }
 
 kEngine::~kEngine() {

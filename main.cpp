@@ -18,14 +18,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	system->Initialize(kWindowTitle, kWindowWidth, kWindowHeight);
 	MSG msg = {};
 
-	///Lighting
-	DirectionalLight directionalLight{
-		.color{1.0f,1.0f,1.0f,1.0f},
-		.direction{-0.5f,-0.5f,0.4f},
-		.intensity{1.0f}
-	};
 
-	system->SetDirectionalLight(&directionalLight);
 
 	SceneManager* sceneManager = new SceneManager(system);
 
