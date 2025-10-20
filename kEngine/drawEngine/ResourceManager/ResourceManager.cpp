@@ -15,6 +15,9 @@ ResourceManager::~ResourceManager() {
 
 	ClearPointer(materialResourceList_);
 	ClearPointer(meshBufferList_);
+	spriteMeshHandles_.clear();
+	modelMeshHandles_.clear();
+	modelGroupList_.clear();
 
 	for (auto& tex : textureData_) {
 		if (tex.texture) {
@@ -167,7 +170,7 @@ int ResourceManager::CreateModelRosource(std::string Path) {
 
 	ModelGroup* modelGroup = new ModelGroup;
 	modelGroup->SetModelObj(Path);
-
+	
 	/// パースによって同じモデルがリストにいるかを確認
 	if (!modelGroupList_.empty()) {
 		for (int i = 0; i < modelGroupList_.size(); i++) {
@@ -180,7 +183,7 @@ int ResourceManager::CreateModelRosource(std::string Path) {
 			}
 		}
 	}
-
+	
 	/// Model読み込み
 	std::vector<ModelData> modelList = LoadMuitObjFile(modelGroup->GetDirectoryPath(), modelGroup->GetObjName_());
 	for (auto& ptr : modelList) {

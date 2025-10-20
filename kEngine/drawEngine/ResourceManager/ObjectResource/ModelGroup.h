@@ -7,7 +7,7 @@ std::vector<ModelData> LoadMuitObjFile(const std::string& directoryPath, const s
 class ModelGroup
 {
 public:
-	~ModelGroup();
+	//~ModelGroup();
 
 	Model* GetModel(int handle){return modelGroup_[handle];}
 	void PushModel(Model* model);

@@ -119,16 +119,16 @@ std::vector<ModelData> LoadMuitObjFile(const std::string& directoryPath, const s
 	return modelGroup;														// 構築したModelDataを返す
 }
 
-ModelGroup::~ModelGroup() {
-	if (!modelGroup_.empty()) 		{
-		for (Model* model : modelGroup_) {
-			model->ClearAllResource();
-			delete model;      
-		}
-		modelGroup_.clear();   
-
-	}
-}
+//ModelGroup::~ModelGroup() {
+//	if (!modelGroup_.empty()) 		{
+//		for (Model* model : modelGroup_) {
+//			model->ClearAllResource();
+//			delete model;      
+//		}
+//		modelGroup_.clear();   
+//
+//	}
+//}
 
 void ModelGroup::PushModel(Model* model) {
 	modelGroup_.push_back(model);

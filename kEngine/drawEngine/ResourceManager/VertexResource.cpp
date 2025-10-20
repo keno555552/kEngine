@@ -34,8 +34,9 @@ D3D12_INDEX_BUFFER_VIEW CreateIndexBufferView(ID3D12Resource* vertexResource, ui
 }
 
 MeshBuffer::~MeshBuffer() {
-	ClearVertexResource();
-	ClearIndexResource();
+	ClearAllResource();
+	delete vertexResource_;
+	delete indexResource_;
 }
 
 D3D12_VERTEX_BUFFER_VIEW MeshBuffer::CreateVertexBufferView_(uint32_t NumOfVertex) {
@@ -52,11 +53,11 @@ void MeshBuffer::ClearAllResource() {
 }
 
 void MeshBuffer::ClearVertexResource() {
-	if (vertexResource_)vertexResource_->ClearResource();
+	if (vertexResource_->ShowResourceCounter() > 0)vertexResource_->ClearResource();
 }
 
 void MeshBuffer::ClearIndexResource() {
-	if (indexResource_)indexResource_->ClearResource();
+	if (indexResource_->ShowResourceCounter() > 0)indexResource_->ClearResource();
 }
 
 

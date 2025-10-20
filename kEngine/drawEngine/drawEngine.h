@@ -87,7 +87,7 @@ private:
 		defaultPSO = 0,
 		Normal_Lambert = 0,
 		Normal_HalfLambert,
-		Tile ,
+		Tile,
 		Particle_Lambert,
 		Particle_HalfLambert,
 	};
@@ -115,26 +115,36 @@ private:
 	std::vector<int> commonTextureSRVMap_;
 	std::vector<int> modelTextureSRVMap_;
 	int defaultTextureHandle_ = 0;						// white5x5
-	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilResource = nullptr;
+	//Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilResource = nullptr;
+	ID3D12Resource* depthStencilResource = nullptr;
 
 
 	///Lighting関連
 	DirectionalLight* directionalLightData = {};		// 外部から受ける
 
 	/// 交換用容器
-	Microsoft::WRL::ComPtr<ID3D12Resource> tile2DWVPResource_ = nullptr;
+	BasicResource* tile2DWVPResource_ = new BasicResource;
 	TransformationMatrix* tile2DInstancingData_ = nullptr;
-	Microsoft::WRL::ComPtr<ID3D12Resource> tile3DWVPResource_ = nullptr;
+	BasicResource* tile3DWVPResource_ = new BasicResource;
 	TransformationMatrix* tile3DInstancingData_ = nullptr;
 	int instance2DCounter = 0;
 	int instance3DCounter = 0;
 
-	BasicResource* instanceOffsetResource_ = new BasicResource;
-	std::vector<UINT*> instanceOffsetData_;
-
 	//Material関連
 	Material* materialData = nullptr;
 	DirectionalLight* lightingData = nullptr;
+
+private:
+
+	struct OffsetData {
+		BasicResource* instanceOffsetResource = new BasicResource;
+		UINT* instanceOffset;
+		int state = 0;// 0:未使用 1:使用中
+	};
+
+	std::vector<OffsetData*> instanceOffsetData_;
+	int offsetDataCounter_;
+
 
 private:
 	/// 内部関数
@@ -144,7 +154,7 @@ private:
 	void InitializeLighting();
 	void SetLighting(DirectionalLight* directionalLight);
 
-	void PSODecition(MaterialConfig& material,bool isParticle = false);
+	void PSODecition(MaterialConfig& material, bool isParticle = false);
 	DirectX::ScratchImage LoadTextrueLow(const std::string& filePath);
 	ID3D12Resource* CreateTextureResource(ID3D12Device* device, const DirectX::TexMetadata& metadata, ResourceManager::TextureInfo* saveData = nullptr);
 	ID3D12Resource* UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages, ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
