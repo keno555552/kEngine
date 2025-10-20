@@ -17,7 +17,7 @@ public:
 	void ClearResource();
 
 private:
-	std::vector <Microsoft::WRL::ComPtr< ID3D12Resource>> resource_;
+	std::vector <Microsoft::WRL::ComPtr<ID3D12Resource>> resource_;
 	int resourceCounter = 0;
 
 	/// Debug

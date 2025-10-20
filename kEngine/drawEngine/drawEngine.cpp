@@ -5,33 +5,33 @@
 
 
 DrawEngine::~DrawEngine() {
-	delete shader_compile_;
-	
-	for (auto& ptr : psoList_) {
-		ptr->Release();
-		ptr = nullptr;
-	}
-	psoList_.clear();
-	
-	delete pso_;
-	
-	//delete directXDriver_;            /*借り*/
-	
-	//dxcUtils->Release();				/*借り*/
-	//dxcCompiler->Release();			/*借り*/
-	//includeHandler->Release();		/*借り*/
-	
-	//rootSignature_->Release();		/*借り*/
-	
-	//delete directionalLightData;      /*借り*/
-	delete tile2DWVPResource_;
-	delete tile3DWVPResource_;
-	delete instanceOffsetResource_;
-
-	depthStencilResource->Release();
-	depthStencilResource->Release();
-	
-	delete resourceManager_;
+	//delete shader_compile_;
+	//
+	//for (auto& ptr : psoList_) {
+	//	ptr->Release();
+	//	ptr = nullptr;
+	//}
+	//psoList_.clear();
+	//
+	//delete pso_;
+	//
+	////delete directXDriver_;            /*借り*/
+	//
+	////dxcUtils->Release();				/*借り*/
+	////dxcCompiler->Release();			/*借り*/
+	////includeHandler->Release();		/*借り*/
+	//
+	////rootSignature_->Release();		/*借り*/
+	//
+	////delete directionalLightData;      /*借り*/
+	//delete tile2DWVPResource_;
+	//delete tile3DWVPResource_;
+	//delete instanceOffsetResource_;
+	//
+	////depthStencilResource.Reset();
+	//depthStencilResource->Release();
+	//
+	//delete resourceManager_;
 
 }
 
@@ -91,8 +91,17 @@ void DrawEngine::Initialize
 	}
 	Tile3DSrvHandleGPU_ = CreateTileWVPBuffer(tile3DWVPResource_->GetResource().Get());
 
-	instanceOffsetResource_->CreateResourceClass_(directXDriver_->GetDriver(), 256);
-	instanceOffsetResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&instanceOffsetData_));
+	/// InstanceOffset用バッファを作成
+	for (int i = 0; i < config::GetMaxMaterialNum(); i++) {
+		OffsetData* offsetData = new OffsetData;
+		UINT* offset = nullptr;
+		offsetData->instanceOffsetResource->CreateResourceClass_(directXDriver_->GetDriver(), 256);
+		offsetData->instanceOffsetResource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&offset));
+		offsetData->instanceOffset = offset;
+		offsetData->state = 0;
+		instanceOffsetData_.push_back(offsetData);
+	}
+
 	//Microsoft::WRL::ComPtr<ID3D12Debug> debugController;
 	//D3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
 	//debugController->EnableDebugLayer();
@@ -126,6 +135,7 @@ void DrawEngine::PreDraw() {
 	/// InstanceCounterReset
 	instance2DCounter = 0;
 	instance3DCounter = 0;
+	offsetDataCounter_ = 0;
 
 	/// Lighting
 	SetLighting(directionalLightData);
@@ -144,6 +154,11 @@ void DrawEngine::EndDraw() {
 
 	/// 各種のリソースを解放
 	resourceManager_->ClearTurnResource();
+
+	for (auto& ptr : instanceOffsetData_) {
+		if (ptr->state = 1) { ptr->state = 2; }
+		if (ptr->state = 2) { ptr->state = 0; }
+	}
 }
 
 void DrawEngine::SetDirectionalLight(DirectionalLight* light) {
@@ -533,9 +548,43 @@ void DrawEngine::Draw2DTile() {
 			instance2DCounter++;
 		}
 
+#pragma region 自分で作った
+		//auto findOffset = std::find_if(instanceOffsetData_.begin(),
+		//	instanceOffsetData_.end(),
+		//	[&](OffsetData* ptr) {return *ptr->instanceOffset == wvpInstanceStartpoint; });
+		//
+		//if (findOffset == instanceOffsetData_.end()) {
+		//	auto findCanUse = std::find_if(instanceOffsetData_.begin(),
+		//		instanceOffsetData_.end(),
+		//		[&](OffsetData* ptr) {return (ptr->state == 0); });
+		//
+		//	if (findCanUse != instanceOffsetData_.end()) {
+		//		*(*findCanUse)->instanceOffset = static_cast<UINT>(wvpInstanceStartpoint);
+		//		(*findCanUse)->state = 1;
+		//		inUse = *findCanUse;
+		//	} else {
+		//		Log("No enough offset buffer");
+		//	}
+		//	break;
+		//} else {
+		//	(*findOffset)->state = 1;
+		//	inUse = *findOffset;
+		//	break;
+		//}
+		//if (!inUse)return;
+#pragma endregion
+
 		//*instanceOffsetData_ = wvpInstanceStartpoint;
-		commandList_->SetGraphicsRootConstantBufferView(4, instanceOffsetResource_->GetResource()->GetGPUVirtualAddress());
-		
+		OffsetData* inUse = nullptr;
+		inUse = instanceOffsetData_[offsetDataCounter_];
+		if (*instanceOffsetData_[offsetDataCounter_]->instanceOffset == static_cast<UINT>(wvpInstanceStartpoint)) {
+		} else {
+			*instanceOffsetData_[offsetDataCounter_]->instanceOffset = static_cast<UINT>(wvpInstanceStartpoint);
+		}
+		instanceOffsetData_[offsetDataCounter_]->state = 1;
+
+		commandList_->SetGraphicsRootConstantBufferView(4, inUse->instanceOffsetResource->GetResource()->GetGPUVirtualAddress());
+
 		commandList_->SetGraphicsRootDescriptorTable(1, Tile2DSrvHandleGPU_);
 		commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
 		commandList_->DrawIndexedInstanced(12, tileCount, 0, 0, 0);
@@ -842,9 +891,9 @@ D3D12_RECT DrawEngine::createScissorRect(int kClientWidth, int kClientHeight) {
 
 void DrawEngine::SetMaterial(int MaterialHandle) {
 	// materialの色
-	if (resourceManager_->materialResourceList_[MaterialHandle] == nullptr) { 
+	if (resourceManager_->materialResourceList_[MaterialHandle] == nullptr) {
 		Log("Material CBuffer is not created");
-		return; 
+		return;
 	}
 	commandList_->SetGraphicsRootConstantBufferView(0, resourceManager_->materialResourceList_[MaterialHandle]->GetResource()->GetGPUVirtualAddress());
 }
@@ -917,6 +966,10 @@ ID3D12Resource* DrawEngine::CreateTextureResource(ID3D12Device* device, const Di
 		IID_PPV_ARGS(&resource));			// 作成するResourceポインタへのポインタ
 	assert(SUCCEEDED(hr));
 
+	char buffer[128];
+	sprintf_s(buffer, "Create resource at %p\n", resource);
+	OutputDebugStringA(buffer);
+
 	return resource;
 }
 
@@ -953,6 +1006,10 @@ ID3D12Resource* DrawEngine::CreateDepthStencilTextureResource(ID3D12Device* devi
 		&depthClearValue,					// Clear最適値
 		IID_PPV_ARGS(&resource));			// 作成するResourceポインタへのポインタ
 	assert(SUCCEEDED(hr));
+
+	char buffer[128];
+	sprintf_s(buffer, "Create resource at %p\n", resource);
+	OutputDebugStringA(buffer);
 
 	return resource;
 }
@@ -1069,7 +1126,7 @@ void DrawEngine::MakeDepthStencilView() {
 	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 	// DSVHeap先頭にDSVをつくる
 	directXDriver_->GetDriver()->CreateDepthStencilView(
-		depthStencilResource.Get(), &dsvDesc, directXDriver_->GetDsvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart()
+		depthStencilResource, &dsvDesc, directXDriver_->GetDsvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart()
 	);
 }
 

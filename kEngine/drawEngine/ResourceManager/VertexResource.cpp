@@ -53,11 +53,11 @@ void MeshBuffer::ClearAllResource() {
 }
 
 void MeshBuffer::ClearVertexResource() {
-	if (vertexResource_)vertexResource_->ClearResource();
+	if (vertexResource_->ShowResourceCounter() > 0)vertexResource_->ClearResource();
 }
 
 void MeshBuffer::ClearIndexResource() {
-	if (indexResource_)indexResource_->ClearResource();
+	if (indexResource_->ShowResourceCounter() > 0)indexResource_->ClearResource();
 }
 
 
