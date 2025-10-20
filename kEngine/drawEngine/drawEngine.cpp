@@ -5,33 +5,40 @@
 
 
 DrawEngine::~DrawEngine() {
-	//delete shader_compile_;
-	//
-	//for (auto& ptr : psoList_) {
-	//	ptr->Release();
-	//	ptr = nullptr;
-	//}
-	//psoList_.clear();
-	//
-	//delete pso_;
-	//
-	////delete directXDriver_;            /*借り*/
-	//
-	////dxcUtils->Release();				/*借り*/
-	////dxcCompiler->Release();			/*借り*/
-	////includeHandler->Release();		/*借り*/
-	//
-	////rootSignature_->Release();		/*借り*/
-	//
-	////delete directionalLightData;      /*借り*/
-	//delete tile2DWVPResource_;
-	//delete tile3DWVPResource_;
-	//delete instanceOffsetResource_;
-	//
-	////depthStencilResource.Reset();
-	//depthStencilResource->Release();
-	//
-	//delete resourceManager_;
+	delete shader_compile_;
+	
+	for (auto& ptr : psoList_) {
+		ptr->Release();
+		ptr = nullptr;
+	}
+	psoList_.clear();
+	
+	delete pso_;
+	
+	//delete directXDriver_;            /*借り*/
+	
+	//dxcUtils->Release();				/*借り*/
+	//dxcCompiler->Release();			/*借り*/
+	//includeHandler->Release();		/*借り*/
+	
+	//rootSignature_->Release();		/*借り*/
+	
+	//delete directionalLightData;      /*借り*/
+	delete tile2DWVPResource_;
+	delete tile3DWVPResource_;
+
+	for (auto& ptr : instanceOffsetData_) {
+		delete ptr->instanceOffsetResource;
+		ptr->instanceOffsetResource = nullptr;
+		ptr->instanceOffset = nullptr;
+		delete ptr;
+		ptr = nullptr;
+	}
+	
+	//depthStencilResource.Reset();
+	depthStencilResource->Release();
+	
+	delete resourceManager_;
 
 }
 
