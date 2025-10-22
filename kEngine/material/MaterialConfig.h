@@ -18,11 +18,12 @@ struct MaterialConfig
 	LightModelType lightModelType = LightModelType::HalfLambert;
 	bool enableLighting = true;
 
+	int materialResourceHandle = -1;
+	int drawState = 0;
+
 	bool operator==(const MaterialConfig target);
 	bool operator!=(const MaterialConfig target);
 
-	int materialResourceHandle = 0;
-	int usedState = 0;
 };
 
 /// MaterialConfig初期化

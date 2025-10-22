@@ -52,21 +52,25 @@ public:
 	/// 球体関連
 	void DrawSphere(TransformationMatrix* wvpData, MaterialConfig material, int sudivision);
 	/// モデル関連
-	void DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle);
-	void DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material);
+	void CollectModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = 0);
+	void DrawModel();
 
 	/// Tile関連
 	void Collect3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material);
 	void Draw3DTile();
-	bool SetModelTexture(Model* model);
-	bool SetModelGroupTexture(Model* model);
-	int SetModel(std::string Path);
-	int readCommonTextureHandle(int Handle);
-	int readModelTextureHandle(int Handle);
-	int GetMuitModelNum(int modelHandle);
 
+	/// リソースローディング
+
+	int readModelTextureHandle(int Handle);
+	int readCommenTextureHandle(int Handle);
+
+	bool SetModelTexture(Model* model);
+	//bool SetModelGroupTexture(Model* model);
+	int SetModel(std::string Path);
+	int GetMuitModelNum(int modelHandle);
 	int LoadTexture(const std::string& filePath);
 	int LoadModelTexture(const std::string& filePath);
+
 
 private:
 	Shader_compile* shader_compile_ = new Shader_compile;
@@ -153,6 +157,7 @@ private:
 	void SetMaterial(int MaterialHandle);
 	void InitializeLighting();
 	void SetLighting(DirectionalLight* directionalLight);
+
 
 	void PSODecition(MaterialConfig& material, bool isParticle = false);
 	DirectX::ScratchImage LoadTextrueLow(const std::string& filePath);

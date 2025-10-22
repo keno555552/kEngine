@@ -80,11 +80,12 @@ void kEngine::DrawSprete(TransformationMatrix* wvpData, MaterialConfig material)
 }
 
 void kEngine::DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle) {
-	drawEngine->DrawModel(wvpData, material, modelHandle);
+	//drawEngine->DrawModel(wvpData, material, modelHandle);
+	drawEngine->CollectModel(wvpData, material, modelHandle);
 }
 
 void kEngine::DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material) {
-	drawEngine->DrawModel(wvpData, material);
+	drawEngine->CollectModel(wvpData, material);
 }
 
 void kEngine::Draw3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material) {
@@ -96,7 +97,7 @@ int kEngine::SetModelObj(std::string path) {
 }
 
 int kEngine::commonTextureHandleReader(int handle) {
-	return drawEngine->readCommonTextureHandle(handle);
+	return drawEngine->readCommenTextureHandle(handle);
 };
 int kEngine::commonModelHandleReader(int handle) {
 	return drawEngine->readModelTextureHandle(handle);

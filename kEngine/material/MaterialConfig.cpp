@@ -9,6 +9,7 @@ bool MaterialConfig::operator==(const MaterialConfig target) {
 	if (textureColor != target.textureColor)return false;
 	if (lightModelType != target.lightModelType)return false;
 	if (enableLighting != target.enableLighting)return false;
+	if (materialResourceHandle != target.materialResourceHandle)return false;
 	return true;
 }
 
@@ -27,7 +28,7 @@ void InitMaterialConfig(MaterialConfig* materialConfig) {
 	materialConfig->lightModelType = LightModelType::HalfLambert;
 	materialConfig->enableLighting = true;
 	materialConfig->materialResourceHandle = -1;
-	materialConfig->usedState = 0;
+	materialConfig->drawState = 0;
 }
 
 MaterialConfig InitMaterialConfig() {

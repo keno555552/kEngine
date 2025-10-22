@@ -49,19 +49,32 @@ SceneTester::SceneTester(kEngine* system) {
 		objectGroup.push_back(object);
 	}
 
-	//for (int i = 0; i < 1; i++) 
-	//for (int i = 0; i < 10; i++) 
-	for (int i = 0; i < 5; i++) {
-		Object* object = new Object;
+	{
 		MaterialConfig materialConfig;
 		InitMaterialConfig(&materialConfig);
-		object->materialConfig.push_back(materialConfig);
-		object->objectType = TILE;
-		//object->objectType = SPRITE;
-		object->transform.translate = { i * 100.0f, i * 100.0f, 0.0f };
-		object->transformationMatrix = debugCamera_->transformationMatrixTransform(object->transform);
-		objectGroup.push_back(object);
+		player->materialConfig.push_back(materialConfig);
+		player->objectType = MODEL;
+		player->modelHandle = ModelType::CHARATER;
+		player->transform.translate = { 0, 0, 0 };
+		player->transformationMatrix = debugCamera_->transformationMatrixTransform(player->transform);
+		objectGroup.push_back(player);
+
 	}
+
+	//for (int i = 0; i < 1; i++) 
+	////for (int i = 0; i < 10; i++) 
+	////for (int i = 0; i < 5; i++) 
+	//{
+	//	Object* object = new Object;
+	//	MaterialConfig materialConfig;
+	//	InitMaterialConfig(&materialConfig);
+	//	object->materialConfig.push_back(materialConfig);
+	//	object->objectType = TILE;
+	//	//object->objectType = SPRITE;
+	//	object->transform.translate = { i * 100.0f, i * 100.0f, 0.0f };
+	//	object->transformationMatrix = debugCamera_->transformationMatrixTransform(object->transform);
+	//	objectGroup.push_back(object);
+	//}
 	//{
 	//	Object* object = new Object;
 	//	MaterialConfig materialConfig;
@@ -184,6 +197,8 @@ void SceneTester::Update() {
 	debugCamera_->MouseControlUpdate();
 	debugCamera_->Update();
 
+	player->materialConfig[0].uvRotate.z += 0.5f;
+
 	for (auto& ptr : objectGroup) {
 		ptr->transformationMatrix = debugCamera_->transformationMatrixTransform(ptr->transform);
 		for (auto& ptr2 : ptr->materialConfig) {
@@ -251,7 +266,7 @@ void SceneTester::Draw() {
 					system_->DrawModel(&ptr->transformationMatrix, ptr->materialConfig, needleModelHandle_);
 					break;
 				case ModelType::TILE:
-					system_->Draw3DTile(& ptr->transformationMatrix, ptr->materialConfig);
+					system_->Draw3DTile(&ptr->transformationMatrix, ptr->materialConfig);
 					break;
 				case ModelType::SKYDOME:
 					system_->DrawModel(&ptr->transformationMatrix, ptr->materialConfig, skydomeModelHandle_);
@@ -265,7 +280,7 @@ void SceneTester::Draw() {
 	ImGui::Begin("ControlPanel");
 	//ImGui::Checkbox("isTemplate", &isTemplate);
 	{
-		const char* items[] = { "Triangle", "Sprite" ,"Cube","Sphere" ,"Plant","BUNNY","TEAPOT","SUZANNE","multiMesh","multiMaterial","charater","needle" };
+		const char* items[] = { "Triangle", "Sprite" ,"Tile","Cube","Sphere" ,"Plant","BUNNY","TEAPOT","SUZANNE","multiMesh","multiMaterial","charater","needle" };
 		int selectedItem = CreateObjectHandle;
 		if (ImGui::Combo("Model", &selectedItem, items, IM_ARRAYSIZE(items))) {
 			CreateObjectHandle = selectedItem;

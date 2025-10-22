@@ -16,7 +16,7 @@ public:
 	void Update();
 
 	void AddSpriteInstance(Vector2 pos, MaterialConfig material);
-	void AddModelInstance(TransformationMatrix* wvpData, MaterialConfig material);
+	void AddModelInstance(TransformationMatrix* wvpData, MaterialConfig material, int vertexNum, int modelHandle = 0);
 	void Add2DTileInstance(Vector2 pos, MaterialConfig material);
 	//void ResmoveSpriteInstance();
 	//void UpdateTileInstance();

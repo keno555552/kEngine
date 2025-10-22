@@ -13,7 +13,7 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateResourceClass_(ID3D12Device* device, size_t sizeInBytes);
 	Microsoft::WRL::ComPtr<ID3D12Resource> SaveResource_(Microsoft::WRL::ComPtr<ID3D12Resource> resource);
 	Microsoft::WRL::ComPtr<ID3D12Resource> GetResource(int Index = -1);
-	int ShowResourceCounter() { return resourceCounter; }
+	int GetResourceCounter() { return resourceCounter; }
 	void ClearResource();
 
 private:

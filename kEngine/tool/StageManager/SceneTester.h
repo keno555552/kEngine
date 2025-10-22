@@ -117,6 +117,9 @@ private:
 	/// オブジェクト群
 	std::vector<Object*> objectGroup;
 
+	/// Test
+	Object* player = new Object;
+
 private:
 	/// Menu用変数
 	bool isUVChecker = true;
