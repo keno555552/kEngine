@@ -49,17 +49,17 @@ SceneTester::SceneTester(kEngine* system) {
 		objectGroup.push_back(object);
 	}
 
-	{
-		MaterialConfig materialConfig;
-		InitMaterialConfig(&materialConfig);
-		player->materialConfig.push_back(materialConfig);
-		player->objectType = MODEL;
-		player->modelHandle = ModelType::CHARATER;
-		player->transform.translate = { 0, 0, 0 };
-		player->transformationMatrix = debugCamera_->transformationMatrixTransform(player->transform);
-		objectGroup.push_back(player);
-
-	}
+	//{
+	//	MaterialConfig materialConfig;
+	//	InitMaterialConfig(&materialConfig);
+	//	player->materialConfig.push_back(materialConfig);
+	//	player->objectType = MODEL;
+	//	player->modelHandle = ModelType::CHARATER;
+	//	player->transform.translate = { 0, 0, 0 };
+	//	player->transformationMatrix = debugCamera_->transformationMatrixTransform(player->transform);
+	//	objectGroup.push_back(player);
+	//
+	//}
 
 	//for (int i = 0; i < 1; i++) 
 	////for (int i = 0; i < 10; i++) 
@@ -88,20 +88,21 @@ SceneTester::SceneTester(kEngine* system) {
 	//}
 
 	//for (int i = 0; i < 1; i++) 
-	//for (int i = 0; i < 10; i++) 
+	for (int i = 0; i < 10; i++) 
 	//for (int i = 0; i < 200; i++) 
-	//{
-	//	Object* object = new Object;
-	//	MaterialConfig materialConfig;
-	//	InitMaterialConfig(&materialConfig);
-	//	object->materialConfig.push_back(materialConfig);
-	//	object->objectType = MODEL;
-	//	object->modelHandle = ModelType::TILE;
-	//	//object->objectType = SPRITE;
-	//	object->transform.translate = { i * 0.1f,i * 0.1f, i * 1.0f };
-	//	object->transformationMatrix = debugCamera_->transformationMatrixTransform(object->transform);
-	//	objectGroup.push_back(object);
-	//}
+	 {
+		Object* object = new Object;
+		MaterialConfig materialConfig;
+		InitMaterialConfig(&materialConfig);
+		object->materialConfig.push_back(materialConfig);
+		object->objectType = CUBE;
+		//object->modelHandle = ModelType::TEAPOT;
+		//object->modelHandle = ModelType::TILE;
+		//object->objectType = SPRITE;
+		object->transform.translate = { i * 0.1f,i * 0.1f, i * 1.0f };
+		object->transformationMatrix = debugCamera_->transformationMatrixTransform(object->transform);
+		objectGroup.push_back(object);
+	}
 
 };
 
@@ -197,7 +198,7 @@ void SceneTester::Update() {
 	debugCamera_->MouseControlUpdate();
 	debugCamera_->Update();
 
-	player->materialConfig[0].uvRotate.z += 0.5f;
+	//player->materialConfig[0].uvRotate.z += 0.5f;
 
 	for (auto& ptr : objectGroup) {
 		ptr->transformationMatrix = debugCamera_->transformationMatrixTransform(ptr->transform);

@@ -88,7 +88,13 @@ public:
 
 	void DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material);
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="wvpData"></param>
+	/// <param name="material"></param>
 	void Draw3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material);
+	
 	int GetMuitModelNum(int modelHandle) { return drawEngine->GetMuitModelNum(modelHandle); }
 	int SetModelObj(std::string path);
 

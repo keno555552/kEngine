@@ -8,6 +8,7 @@ struct ModelInstance
 	int materialConfigIndex;
 	int resourceHandle;
 	int modelHandle; /// modelHandleのハンドル
+	bool useDefaultModel;
 	int vertexNum;
 	int drawState;
 

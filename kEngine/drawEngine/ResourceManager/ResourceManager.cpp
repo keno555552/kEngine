@@ -72,51 +72,6 @@ void ResourceManager::ColletSprite(Vector2 pos, MaterialConfig material) {
 	}
 }
 
-void ResourceManager::ColletModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelGroupHandle) {
-
-	int modelNum = modelGroupList_[modelGroupHandle]->GetModelNum();
-
-	for (int i = 0; i < modelNum; i++) {
-
-		int before = (int)instanceManager_->materialConfigList_.size();
-
-		/// 処理してるマテリアルをまとめる
-		MaterialConfig usingMaterial;
-		if (i < material.size())usingMaterial = material[i];
-		else usingMaterial = material.back();
-
-		if (usingMaterial.useOriginalTexture == true) {
-			usingMaterial.textureHandle = (modelGroupList_[modelGroupHandle])->GetModel(i)->GetTextureHandle();
-		}
-
-		/// Instance追加
-		instanceManager_->AddModelInstance(wvpData, usingMaterial,
-			modelGroupList_[modelGroupHandle]->GetModel(i)->GetVertexNum(),
-			modelGroupList_[modelGroupHandle]->GetModelHandle(i));
-
-		int after = (int)instanceManager_->materialConfigList_.size();
-
-		/// マテリアルが足すがによってリソース追加
-		if (after > before) {
-			/// 新しいResourceを追加
-			BasicResource* newResource = new BasicResource;
-			newResource->CreateResourceClass_(Bdevice_, sizeof(Material));
-			materialResourceList_.push_back(newResource);
-
-			/// MaterialとMapする
-			Material* newData = nullptr;
-			newResource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&newData));
-			newData->inputMaterialConfig(usingMaterial);
-			newResource->GetResource()->Unmap(0, nullptr);
-
-			/// instanceにResourceのHandleを設定
-			instanceManager_->materialConfigList_.back()->materialResourceHandle = (int)materialResourceList_.size() - 1;
-		}
-
-
-	}
-}
-
 void ResourceManager::Collet2DTile(Vector2 pos, MaterialConfig material) {
 	int materialNum = (int)instanceManager_->materialConfigList_.size();
 	instanceManager_->Add2DTileInstance(pos, material);
@@ -137,8 +92,132 @@ void ResourceManager::Collet2DTile(Vector2 pos, MaterialConfig material) {
 	}
 }
 
-void ResourceManager::Collet3DTile(TransformationMatrix* wvpData, const MaterialConfig material) {
-	instanceManager_->Add3DTileInstance(wvpData, material);
+void ResourceManager::ColletModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelGroupHandle, bool useDefaultModel) {
+
+	int modelNum = 1;
+	if (!useDefaultModel) modelNum = modelGroupList_[modelGroupHandle]->GetModelNum();
+
+	for (int i = 0; i < modelNum; i++) {
+
+		int before = (int)instanceManager_->materialConfigList_.size();
+
+		/// 処理してるマテリアルをまとめる
+		MaterialConfig usingMaterial;
+		if (i < material.size())usingMaterial = material[i];
+		else usingMaterial = material.back();
+
+
+		/// Instance追加
+		if (!useDefaultModel) {
+
+			if (usingMaterial.useOriginalTexture == true) {
+				usingMaterial.textureHandle = (modelGroupList_[modelGroupHandle])->GetModel(i)->GetTextureHandle();
+			}
+
+			instanceManager_->AddModelInstance(wvpData, usingMaterial,
+				modelGroupList_[modelGroupHandle]->GetModel(i)->GetVertexNum(),
+				modelGroupList_[modelGroupHandle]->GetModelHandle(i), 
+				useDefaultModel);
+
+		} else {
+
+			if (usingMaterial.useOriginalTexture == true) {
+				usingMaterial.textureHandle = 0;
+			}
+
+			if (modelGroupHandle == default_Cube_MeshBufferHandle_) {
+				instanceManager_->AddModelInstance(wvpData, usingMaterial,
+					36,
+					default_Cube_MeshBufferHandle_, 
+					useDefaultModel);
+			}
+		}
+
+		int after = (int)instanceManager_->materialConfigList_.size();
+
+		/// マテリアルが足すがによってリソース追加
+		if (after > before) {
+			/// 新しいResourceを追加
+			BasicResource* newResource = new BasicResource;
+			newResource->CreateResourceClass_(Bdevice_, sizeof(Material));
+			materialResourceList_.push_back(newResource);
+
+			/// MaterialとMapする
+			Material* newData = nullptr;
+			newResource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&newData));
+			newData->inputMaterialConfig(usingMaterial);
+			newResource->GetResource()->Unmap(0, nullptr);
+
+			/// instanceにResourceのHandleを設定
+			instanceManager_->materialConfigList_.back()->materialResourceHandle = (int)materialResourceList_.size() - 1;
+		}
+	}
+}
+
+void ResourceManager::Collet3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelGroupHandle, bool useDefaultModel) {
+
+	int modelNum = 1;
+	if (!useDefaultModel) modelNum = modelGroupList_[modelGroupHandle]->GetModelNum();
+
+	for (int i = 0; i < modelNum; i++) {
+
+		int before = (int)instanceManager_->materialConfigList_.size();
+
+		/// 処理してるマテリアルをまとめる
+		MaterialConfig usingMaterial;
+		if (i < material.size())usingMaterial = material[i];
+		else usingMaterial = material.back();
+
+		if (usingMaterial.useOriginalTexture == true) {
+			usingMaterial.textureHandle = (modelGroupList_[modelGroupHandle])->GetModel(i)->GetTextureHandle();
+		}
+
+		/// Instance追加
+		if (!useDefaultModel) {
+
+			if (usingMaterial.useOriginalTexture == true) {
+				usingMaterial.textureHandle = (modelGroupList_[modelGroupHandle])->GetModel(i)->GetTextureHandle();
+			}
+
+			instanceManager_->Add3DTileInstance(wvpData, usingMaterial,
+				modelGroupList_[modelGroupHandle]->GetModel(i)->GetVertexNum(),
+				modelGroupList_[modelGroupHandle]->GetModelHandle(i),
+				useDefaultModel);
+
+		} else {
+
+			if (usingMaterial.useOriginalTexture == true) {
+				usingMaterial.textureHandle = 0;
+			}
+
+			if (modelGroupHandle == default_Cube_MeshBufferHandle_) {
+				instanceManager_->Add3DTileInstance(wvpData, usingMaterial,
+					36,
+					default_Cube_MeshBufferHandle_,
+					useDefaultModel);
+			}
+		}
+
+
+		int after = (int)instanceManager_->materialConfigList_.size();
+
+		/// マテリアルが足すがによってリソース追加
+		if (after > before) {
+			/// 新しいResourceを追加
+			BasicResource* newResource = new BasicResource;
+			newResource->CreateResourceClass_(Bdevice_, sizeof(Material));
+			materialResourceList_.push_back(newResource);
+
+			/// MaterialとMapする
+			Material* newData = nullptr;
+			newResource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&newData));
+			newData->inputMaterialConfig(usingMaterial);
+			newResource->GetResource()->Unmap(0, nullptr);
+
+			/// instanceにResourceのHandleを設定
+			instanceManager_->materialConfigList_.back()->materialResourceHandle = (int)materialResourceList_.size() - 1;
+		}
+	}
 }
 
 
@@ -151,6 +230,7 @@ int ResourceManager::CreateTriangleResource() {
 }
 
 int ResourceManager::CreateCubeResource() {
+
 	Cube* newCube_ = new Cube;
 	newCube_->CreateVertexResource_(Bdevice_);
 	newCube_->CreateVertexBufferView_(24);

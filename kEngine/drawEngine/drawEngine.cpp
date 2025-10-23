@@ -153,6 +153,7 @@ void DrawEngine::CommitDraw() {
 	/// 集まったデータで描画
 	/// Sprite描画
 	DrawModel();
+	DrawCube();
 	Draw3DTile();
 	DrawSprite();
 	Draw2DTile();
@@ -576,28 +577,87 @@ void DrawEngine::Draw2DTile() {
 	}
 }
 
-void DrawEngine::DrawCube(TransformationMatrix* wvpData, MaterialConfig material) {
-	///// SetPSO
-	//PSODecition(material);
-	//
-	///// SetMaterial
-	//SetMaterial(material.uvTransformMatrix, material.textureColor, material.enableLighting);
-	///// textrue設定
-	//int materialHandle = readCommonTextureHandle(material.textureHandle);
-	//textureSrvHandleGPU_ = directXDriver_->GetGPUDescriptorHandle(directXDriver_->GetSrvDescriptorHeap(), directXDriver_->GetDesriptorSizeSRV(), materialHandle);
-	//commandList_->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU_);
-	///// VBVを設定
-	//D3D12_VERTEX_BUFFER_VIEW BufferView = resourceManager_->vertexResourceCube_->GetVertexBufferView();
-	//commandList_->IASetVertexBuffers(0, 1, &BufferView);
-	///// IBVを設定
-	//D3D12_INDEX_BUFFER_VIEW IndexBufferView = resourceManager_->vertexResourceCube_->GetIndexBufferView();
-	//commandList_->IASetIndexBuffer(&IndexBufferView);
-	///// wvp用のCBufferの場所を設定
-	//resourceManager_->vertexResourceCube_->SetWVPResource_(directXDriver_->GetDriver(), wvpData);
-	//commandList_->SetGraphicsRootConstantBufferView(1, resourceManager_->vertexResourceCube_->GetWVPResource_()->GetGPUVirtualAddress());
-	///// 描画！(DrawCall/ドローコール)。
-	//commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
-	//commandList_->DrawIndexedInstanced(36, 1, 0, 0, 0);
+void DrawEngine::CollectCube(TransformationMatrix* wvpData, MaterialConfig material) {
+	resourceManager_->ColletModel(wvpData, { material }, resourceManager_->default_Cube_MeshBufferHandle_, true);
+}
+
+void DrawEngine::DrawCube() {
+
+	if (resourceManager_->instanceManager_->modelList_.empty())return;
+	struct MaterialStateCache {
+		int materialIndex = -1;
+		int textureHandle = -1;
+		LightModelType lightModel = LightModelType::HalfLambert;
+	};
+
+	MaterialStateCache lastMaterialState_;
+
+	std::unordered_map<int, std::vector<ModelInstance*>> groupedModelTile;
+
+	for (auto& ptr : resourceManager_->instanceManager_->modelList_) {
+		if (ptr->drawState == InstanceManager::STANDBY) {
+			groupedModelTile[ptr->materialConfigIndex].push_back(ptr);
+		}
+	}
+
+	for (auto& [materialIndex, group] : groupedModelTile) {
+
+		MaterialConfig* material = resourceManager_->instanceManager_->materialConfigList_[materialIndex];
+
+		bool needSetMaterial =
+			((materialIndex != lastMaterialState_.materialIndex) ||
+				(material->textureHandle != lastMaterialState_.textureHandle) ||
+				(material->lightModelType != lastMaterialState_.lightModel));
+
+		if (needSetMaterial) {
+			// Set PSO
+			PSODecition(*material);
+
+			// Set Material
+			SetMaterial(material->materialResourceHandle);
+
+			// Set Texture
+			int materialHandle;
+			if (material->useOriginalTexture)materialHandle = readModelTextureHandle(material->textureHandle);
+			if (!material->useOriginalTexture)materialHandle = readCommenTextureHandle(material->textureHandle);
+			textureSrvHandleGPU_ = directXDriver_->GetGPUDescriptorHandle(directXDriver_->GetSrvDescriptorHeap(), directXDriver_->GetDesriptorSizeSRV(), materialHandle);
+			commandList_->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU_);
+
+			// Update cache
+			lastMaterialState_.materialIndex = materialIndex;
+			lastMaterialState_.textureHandle = material->textureHandle;
+			lastMaterialState_.lightModel = material->lightModelType;
+
+			material->drawState = InstanceManager::ISDRAW;
+		}
+
+		bool isDraw = false;
+
+		for (auto& ptr : group) {
+			if (ptr->useDefaultModel && ptr->modelHandle == resourceManager_->default_Cube_MeshBufferHandle_) {
+				/// wvp用のCBufferの場所を設定
+				ID3D12Resource* wvpResource = resourceManager_->wvpResource_->CreateWVPResource_(directXDriver_->GetDriver(), ptr->transformData);
+				commandList_->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
+
+
+				/// VBVを設定
+				D3D12_VERTEX_BUFFER_VIEW VertexBufferView = resourceManager_->meshBufferList_[resourceManager_->default_Cube_MeshBufferHandle_]->GetVertexBufferView();
+				commandList_->IASetVertexBuffers(0, 1, &VertexBufferView);
+
+				/// IBVを設定
+				D3D12_INDEX_BUFFER_VIEW IndexBufferView = resourceManager_->meshBufferList_[resourceManager_->default_Cube_MeshBufferHandle_]->GetIndexBufferView();
+				commandList_->IASetIndexBuffer(&IndexBufferView);
+
+				/// 描画
+				commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
+				commandList_->DrawIndexedInstanced(ptr->vertexNum, 1, 0, 0, 0);
+				ptr->drawState = InstanceManager::ISDRAW;
+				isDraw = true;
+			}
+		}
+
+		if (!isDraw)material->drawState = InstanceManager::STANDBY;
+	}
 }
 
 void DrawEngine::DrawSphere(TransformationMatrix* wvpData, MaterialConfig material, int sudivision) {
@@ -686,31 +746,161 @@ void DrawEngine::DrawModel() {
 			material->drawState = InstanceManager::ISDRAW;
 		}
 
+		bool isDraw = false;
+
 		for (auto& ptr : group) {
-			/// wvp用のCBufferの場所を設定
-			ID3D12Resource* wvpResource = resourceManager_->wvpResource_->CreateWVPResource_(directXDriver_->GetDriver(), ptr->transformData);
-			commandList_->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
+			if(!ptr->useDefaultModel){
+				/// wvp用のCBufferの場所を設定
+				ID3D12Resource* wvpResource = resourceManager_->wvpResource_->CreateWVPResource_(directXDriver_->GetDriver(), ptr->transformData);
+				commandList_->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 
 
 				/// VBVを設定
-			D3D12_VERTEX_BUFFER_VIEW BufferView = resourceManager_->meshBufferList_[ptr->modelHandle]->GetVertexBufferView();
-			commandList_->IASetVertexBuffers(0, 1, &BufferView);
+				D3D12_VERTEX_BUFFER_VIEW BufferView = resourceManager_->meshBufferList_[ptr->modelHandle]->GetVertexBufferView();
+				commandList_->IASetVertexBuffers(0, 1, &BufferView);
 
-			/// 描画
-			commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
-			commandList_->DrawInstanced(ptr->vertexNum, 1, 0, 0);
-			ptr->drawState = InstanceManager::ISDRAW;
+				/// 描画
+				commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
+				commandList_->DrawInstanced(ptr->vertexNum, 1, 0, 0);
+				ptr->drawState = InstanceManager::ISDRAW;
+				isDraw = true;
+			}
 		}
+
+		if(!isDraw)material->drawState = InstanceManager::STANDBY;
 	}
 }
 
-void DrawEngine::Collect3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material) {
-	for (auto& ptr : material) {
-		resourceManager_->instanceManager_->Add3DTileInstance(wvpData, ptr);
+void DrawEngine::Collect3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle) {
+	if (modelHandle == 0) {
+		resourceManager_->Collet3DTile(wvpData, material, resourceManager_->default_Cube_MeshBufferHandle_);
+		return;
 	}
+	resourceManager_->Collet3DTile(wvpData, material, modelHandle);
 }
 
 void DrawEngine::Draw3DTile() {
+
+	///if (resourceManager_->instanceManager_->tile3DList_.empty())return;
+	///struct MaterialStateCache {
+	///	int materialIndex = -1;
+	///	int textureHandle = -1;
+	///	LightModelType lightModel = LightModelType::HalfLambert;
+	///};
+	///
+	///MaterialStateCache lastMaterialState_;
+	///
+	///std::unordered_map<int, std::vector<ModelInstance*>> groupedModelTile;
+	///std::unordered_map<int, std::vector<ModelInstance*>> groupedwvpTile;
+	///
+	///for (auto& ptr : resourceManager_->instanceManager_->tile3DList_) {
+	///	if (ptr->drawState == InstanceManager::STANDBY) {
+	///		groupedModelTile[ptr->materialConfigIndex].push_back(ptr);
+	///	}
+	///}
+	///
+	///for (auto& [materialIndex, group] : groupedModelTile) {
+	///
+	///	MaterialConfig* material = resourceManager_->instanceManager_->materialConfigList_[materialIndex];
+	///
+	///	bool needSetMaterial =
+	///		((materialIndex != lastMaterialState_.materialIndex) ||
+	///			(material->textureHandle != lastMaterialState_.textureHandle) ||
+	///			(material->lightModelType != lastMaterialState_.lightModel));
+	///
+	///	if (needSetMaterial) {
+	///		// Set PSO
+	///		PSODecition(*material);
+	///
+	///		// Set Material
+	///		SetMaterial(material->materialResourceHandle);
+	///
+	///		// Set Texture
+	///		int materialHandle;
+	///		if (material->useOriginalTexture)materialHandle = readModelTextureHandle(material->textureHandle);
+	///		if (!material->useOriginalTexture)materialHandle = readCommenTextureHandle(material->textureHandle);
+	///		textureSrvHandleGPU_ = directXDriver_->GetGPUDescriptorHandle(directXDriver_->GetSrvDescriptorHeap(), directXDriver_->GetDesriptorSizeSRV(), materialHandle);
+	///		commandList_->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU_);
+	///
+	///		// Update cache
+	///		lastMaterialState_.materialIndex = materialIndex;
+	///		lastMaterialState_.textureHandle = material->textureHandle;
+	///		lastMaterialState_.lightModel = material->lightModelType;
+	///
+	///		material->drawState = InstanceManager::ISDRAW;
+	///	}
+	///
+	///	for (auto& ptr : group) {
+	///		if (ptr->drawState == InstanceManager::STANDBY) {
+	///			groupedwvpTile[ptr->modelHandle].push_back(ptr);
+	///		}
+	///	}
+	///
+	///	int lastModelHandle = -1;
+	///
+	///	for (auto& [modelHandle, group2] : groupedwvpTile) {
+	///
+	///		if (lastModelHandle != modelHandle) {
+	///			/// VBVを設定
+	///			D3D12_VERTEX_BUFFER_VIEW BufferView = resourceManager_->meshBufferList_[modelHandle]->GetVertexBufferView();
+	///			commandList_->IASetVertexBuffers(0, 1, &BufferView);
+	///		}
+	///	}
+	///
+	///	/// wvp用のCBufferの場所を設定
+	///	ID3D12Resource* wvpResource = resourceManager_->wvpResource_->CreateWVPResource_(directXDriver_->GetDriver(), ptr->transformData);
+	///	commandList_->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
+	///
+	///	/// 描画
+	///	commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
+	///	commandList_->DrawInstanced(ptr->vertexNum, 1, 0, 0);
+	///	ptr->drawState = InstanceManager::ISDRAW;
+	///
+	///
+	///	int tileCount = (int)group.size();
+	///
+	///	int wvpInstanceStartpoint = instance3DCounter;
+	///
+	///	for (int i = 0; i < group.size(); i++) {
+	///
+	///		///int instanceCounter = max(instance2DCounter - 1,0);
+	///		int instanceCounter = instance3DCounter;
+	///
+	///		// 単位行列を書き込んておく
+	///		if (tile3DInstancingData_[instanceCounter].WVP != Identity()) tile3DInstancingData_[instanceCounter].WVP = Identity();
+	///		if (tile3DInstancingData_[instanceCounter].world != Identity()) tile3DInstancingData_[instanceCounter].world = Identity();
+	///
+	///		// CPUで動かす用のTransformを作る。
+	///		Transform transformSprite = CreateDefaultTransform();
+	///		if (group[i] != nullptr) {
+	///			transformSprite.translate = { group[i]->position.x,group[i]->position.y,group[i]->position.z };
+	///		}
+	///
+	///		// Sprite用のworldViewProjectionMatrixを作る
+	///		Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
+	///		Matrix4x4 worldViewProjectionMatrixSprite = worldMatrixSprite * viewProj;
+	///		tile3DInstancingData_[instanceCounter].WVP = worldViewProjectionMatrixSprite;
+	///
+	///		group[i]->drawState = InstanceManager::ISDRAW;
+	///		instance3DCounter++;
+	///	}
+	///
+	///	//*instanceOffsetData_ = wvpInstanceStartpoint;
+	///	OffsetData* inUse = nullptr;
+	///	inUse = instanceOffsetData_[offsetDataCounter_];
+	///	if (*instanceOffsetData_[offsetDataCounter_]->instanceOffset == static_cast<UINT>(wvpInstanceStartpoint)) {
+	///	} else {
+	///		*instanceOffsetData_[offsetDataCounter_]->instanceOffset = static_cast<UINT>(wvpInstanceStartpoint);
+	///	}
+	///	instanceOffsetData_[offsetDataCounter_]->state = 1;
+	///
+	///	commandList_->SetGraphicsRootConstantBufferView(4, inUse->instanceOffsetResource->GetResource()->GetGPUVirtualAddress());
+	///
+	///	commandList_->SetGraphicsRootDescriptorTable(1, Tile2DSrvHandleGPU_);
+	///	commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
+	///	commandList_->DrawIndexedInstanced(12, tileCount, 0, 0, 0);
+	///	offsetDataCounter_++;
+	///}
 
 	//if (resourceManager_->instanceManager_->tile3DList_.empty())return;
 	//struct MaterialStateCache {
@@ -796,15 +986,6 @@ bool DrawEngine::SetModelTexture(Model* model) {
 	model->SetTextureHandle(defaultTextureHandle_ + 1);
 	return false;
 }
-
-//bool DrawEngine::SetModelGroupTexture(Model* model) {
-//	if (!model->GetTexturePatch().empty()) {
-//		model->SetTextureHandle(LoadModelTexture(model->GetTexturePatch()));
-//		return true;
-//	}
-//	model->SetTextureHandle(defaultTextureHandle_ + 1);
-//	return false;
-//}
 
 int DrawEngine::SetModel(std::string Path) {
 

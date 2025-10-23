@@ -48,7 +48,8 @@ public:
 	void Draw2DTile();
 
 	/// 立方体関連
-	void DrawCube(TransformationMatrix* wvpData, MaterialConfig material);
+	void CollectCube(TransformationMatrix* wvpData, MaterialConfig material);
+	void DrawCube();
 	/// 球体関連
 	void DrawSphere(TransformationMatrix* wvpData, MaterialConfig material, int sudivision);
 	/// モデル関連
@@ -56,7 +57,7 @@ public:
 	void DrawModel();
 
 	/// Tile関連
-	void Collect3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material);
+	void Collect3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = 0);
 	void Draw3DTile();
 
 	/// リソースローディング
@@ -65,7 +66,6 @@ public:
 	int readCommenTextureHandle(int Handle);
 
 	bool SetModelTexture(Model* model);
-	//bool SetModelGroupTexture(Model* model);
 	int SetModel(std::string Path);
 	int GetMuitModelNum(int modelHandle);
 	int LoadTexture(const std::string& filePath);

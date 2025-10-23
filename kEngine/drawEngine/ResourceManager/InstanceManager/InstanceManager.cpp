@@ -60,10 +60,11 @@ void InstanceManager::AddSpriteInstance(Vector2 pos, MaterialConfig material) {
 	return;
 }
 
-void InstanceManager::AddModelInstance(TransformationMatrix* wvpData, MaterialConfig material, int vertexNum, int modelHandle) {
+void InstanceManager::AddModelInstance(TransformationMatrix* wvpData, MaterialConfig material, int vertexNum, int modelHandle, bool useDefaultModel) {
 	ModelInstance instance;
 	instance.transformData = wvpData;	///参照渡し
 	instance.modelHandle = modelHandle;
+	instance.useDefaultModel = useDefaultModel;
 	instance.vertexNum = vertexNum;
 	instance.drawState = STANDBY;
 
@@ -126,9 +127,13 @@ void InstanceManager::Add2DTileInstance(Vector2 pos, MaterialConfig material) {
 	tileLayerCount++;
 }
 
-void InstanceManager::Add3DTileInstance(TransformationMatrix* wvpData, MaterialConfig material) {
-	ModelInstance instance{};
+void InstanceManager::Add3DTileInstance(TransformationMatrix* wvpData, MaterialConfig material, int vertexNum, int modelHandle, bool useDefaultModel) {
+
+	ModelInstance instance;
 	instance.transformData = wvpData;	///参照渡し
+	instance.modelHandle = modelHandle;
+	instance.useDefaultModel = useDefaultModel;
+	instance.vertexNum = vertexNum;
 	instance.drawState = STANDBY;
 
 	auto checker = std::find_if(materialConfigList_.begin(),

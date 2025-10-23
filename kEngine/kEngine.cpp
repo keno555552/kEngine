@@ -72,7 +72,7 @@ void kEngine::DrawTile(Vector2 pos, MaterialConfig material) {
 }
 
 void kEngine::DrawCube(TransformationMatrix* wvpData, MaterialConfig material) {
-	drawEngine->DrawCube(wvpData, material);
+	drawEngine->CollectCube(wvpData, material);
 }
 
 void kEngine::DrawSprete(TransformationMatrix* wvpData, MaterialConfig material) {

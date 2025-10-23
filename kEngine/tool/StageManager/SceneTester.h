@@ -118,7 +118,7 @@ private:
 	std::vector<Object*> objectGroup;
 
 	/// Test
-	Object* player = new Object;
+	//Object* player = new Object;
 
 private:
 	/// Menu用変数

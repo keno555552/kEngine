@@ -10,7 +10,6 @@ class Cube :public MeshBuffer
 public:
 	ID3D12Resource* CreateVertexResource_(ID3D12Device* device)override;
 	ID3D12Resource* CreateIndexResource_(ID3D12Device* device)override;
-	ID3D12Resource* SetWVPResource_(ID3D12Device* device, TransformationMatrix* wvpData);
 
 private:
 	enum {
@@ -23,5 +22,4 @@ private:
 		BACK_BOTTOM_RIGHT,
 		BACK_BOTTOM_LEFT
 	};
-	void SetWVP(TransformationMatrix* wvpData);
 };

@@ -16,11 +16,11 @@ public:
 	void Update();
 
 	void AddSpriteInstance(Vector2 pos, MaterialConfig material);
-	void AddModelInstance(TransformationMatrix* wvpData, MaterialConfig material, int vertexNum, int modelHandle = 0);
+	void AddModelInstance(TransformationMatrix* wvpData, MaterialConfig material, int vertexNum, int modelHandle = 0, bool useDefaultModel = false);
 	void Add2DTileInstance(Vector2 pos, MaterialConfig material);
 	//void ResmoveSpriteInstance();
 	//void UpdateTileInstance();
-	void Add3DTileInstance(TransformationMatrix* wvpData, MaterialConfig material);
+	void Add3DTileInstance(TransformationMatrix* wvpData, MaterialConfig material, int vertexNum, int modelHandle = 0, bool useDefaultModel = false);
 	void AddParticleInstance(TransformationMatrix* wvpData, MaterialConfig material);
 	//void ResmoveModelInstance();
 	//void UpdateModelInstance();
