@@ -23,7 +23,6 @@ void SceneManager::SceneChanger() {
 		delete sceneUsing_, sceneUsing_ = nullptr;
 	}
 
-
 	if (sceneUsing_ == nullptr) {
 		switch (sceneUsingHandle_) {
 		case SceneNum::NONE:

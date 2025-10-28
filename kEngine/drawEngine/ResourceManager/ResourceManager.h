@@ -42,9 +42,9 @@ public:
 
 	/// Resource Collect
 	void ColletSprite(Vector2 pos, MaterialConfig material);
-	void ColletModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelGroupHandle = 0, bool useDefaultModel = false);
+	void ColletModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = 0, bool useDefaultModel = false);
 	void Collet2DTile(Vector2 pos, MaterialConfig material);
-	void Collet3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelGroupHandle = 0,bool useDefaultModel = false);
+	void Collet3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = 0,bool useDefaultModel = false);
 
 	/// モデル読み込み
 	int CreateModelRosource(std::string Path);
@@ -55,10 +55,10 @@ public:
 	ID3D12Device* Bdevice_ = nullptr;
 
 	/// テクスチャ関係
-	BasicResource* intermediateResource_ = new BasicResource;/*EndDrawでTextrueを作ったら解放する*/
+	BasicResource* intermediateResource_ = new BasicResource;	///EndDrawでTextrueを作ったら解放する
 	std::vector<std::string> commonTextureFilePath_;
-	std::vector<TextureInfo> textureData_;				///テキスチャーのデイタの収納のどころ
-	BasicResource* textureResource_ = new BasicResource; ///テキスチャーの収納のどころ
+	std::vector<TextureInfo> textureData_;						///テキスチャーのデイタの収納のどころ
+	BasicResource* textureResource_ = new BasicResource;		///テキスチャーの収納のどころ
 
 	/// Lighting関係
 	BasicResource* lightingResource_ = new BasicResource;

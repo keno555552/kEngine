@@ -6,6 +6,5 @@ bool ModelInstance::CheckSame(const ModelInstance target) {
 	if (resourceHandle != target.resourceHandle)return false;
 	if (modelHandle != target.modelHandle)return false;
 	if (useDefaultModel != target.useDefaultModel)return false;
-	if (drawState != target.drawState)return false;
 	return true;
 }

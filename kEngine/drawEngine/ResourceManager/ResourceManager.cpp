@@ -92,10 +92,10 @@ void ResourceManager::Collet2DTile(Vector2 pos, MaterialConfig material) {
 	}
 }
 
-void ResourceManager::ColletModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelGroupHandle, bool useDefaultModel) {
+void ResourceManager::ColletModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle, bool useDefaultModel) {
 
 	int modelNum = 1;
-	if (!useDefaultModel) modelNum = modelGroupList_[modelGroupHandle]->GetModelNum();
+	if (!useDefaultModel) modelNum = modelGroupList_[modelHandle]->GetModelNum();
 
 	for (int i = 0; i < modelNum; i++) {
 
@@ -111,12 +111,12 @@ void ResourceManager::ColletModel(TransformationMatrix* wvpData, std::vector<Mat
 		if (!useDefaultModel) {
 
 			if (usingMaterial.useOriginalTexture == true) {
-				usingMaterial.textureHandle = (modelGroupList_[modelGroupHandle])->GetModel(i)->GetTextureHandle();
+				usingMaterial.textureHandle = (modelGroupList_[modelHandle])->GetModel(i)->GetTextureHandle();
 			}
 
 			instanceManager_->AddModelInstance(wvpData, usingMaterial,
-				modelGroupList_[modelGroupHandle]->GetModel(i)->GetVertexNum(),
-				modelGroupList_[modelGroupHandle]->GetModelHandle(i), 
+				modelGroupList_[modelHandle]->GetModel(i)->GetVertexNum(),
+				modelGroupList_[modelHandle]->GetModelHandle(i), 
 				useDefaultModel);
 
 		} else {
@@ -125,7 +125,7 @@ void ResourceManager::ColletModel(TransformationMatrix* wvpData, std::vector<Mat
 				usingMaterial.textureHandle = 0;
 			}
 
-			if (modelGroupHandle == default_Cube_MeshBufferHandle_) {
+			if (modelHandle == default_Cube_MeshBufferHandle_) {
 				instanceManager_->AddModelInstance(wvpData, usingMaterial,
 					36,
 					default_Cube_MeshBufferHandle_, 
@@ -154,10 +154,10 @@ void ResourceManager::ColletModel(TransformationMatrix* wvpData, std::vector<Mat
 	}
 }
 
-void ResourceManager::Collet3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelGroupHandle, bool useDefaultModel) {
+void ResourceManager::Collet3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle, bool useDefaultModel) {
 
 	int modelNum = 1;
-	if (!useDefaultModel) modelNum = modelGroupList_[modelGroupHandle]->GetModelNum();
+	if (!useDefaultModel) modelNum = modelGroupList_[modelHandle]->GetModelNum();
 
 	for (int i = 0; i < modelNum; i++) {
 
@@ -169,19 +169,19 @@ void ResourceManager::Collet3DTile(TransformationMatrix* wvpData, std::vector<Ma
 		else usingMaterial = material.back();
 
 		if (usingMaterial.useOriginalTexture == true) {
-			usingMaterial.textureHandle = (modelGroupList_[modelGroupHandle])->GetModel(i)->GetTextureHandle();
+			usingMaterial.textureHandle = (modelGroupList_[modelHandle])->GetModel(i)->GetTextureHandle();
 		}
 
 		/// Instance追加
 		if (!useDefaultModel) {
 
 			if (usingMaterial.useOriginalTexture == true) {
-				usingMaterial.textureHandle = (modelGroupList_[modelGroupHandle])->GetModel(i)->GetTextureHandle();
+				usingMaterial.textureHandle = (modelGroupList_[modelHandle])->GetModel(i)->GetTextureHandle();
 			}
 
 			instanceManager_->Add3DTileInstance(wvpData, usingMaterial,
-				modelGroupList_[modelGroupHandle]->GetModel(i)->GetVertexNum(),
-				modelGroupList_[modelGroupHandle]->GetModelHandle(i),
+				modelGroupList_[modelHandle]->GetModel(i)->GetVertexNum(),
+				modelGroupList_[modelHandle]->GetModelHandle(i),
 				useDefaultModel);
 
 		} else {
@@ -190,7 +190,7 @@ void ResourceManager::Collet3DTile(TransformationMatrix* wvpData, std::vector<Ma
 				usingMaterial.textureHandle = 0;
 			}
 
-			if (modelGroupHandle == default_Cube_MeshBufferHandle_) {
+			if (modelHandle == default_Cube_MeshBufferHandle_) {
 				instanceManager_->Add3DTileInstance(wvpData, usingMaterial,
 					36,
 					default_Cube_MeshBufferHandle_,

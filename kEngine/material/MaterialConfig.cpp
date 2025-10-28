@@ -9,7 +9,7 @@ bool MaterialConfig::operator==(const MaterialConfig target) {
 	if (textureColor != target.textureColor)return false;
 	if (lightModelType != target.lightModelType)return false;
 	if (enableLighting != target.enableLighting)return false;
-	if (materialResourceHandle != target.materialResourceHandle)return false;
+	//if (materialResourceHandle != target.materialResourceHandle)return false;
 	return true;
 }
 

@@ -53,11 +53,11 @@ public:
 	/// 球体関連
 	void DrawSphere(TransformationMatrix* wvpData, MaterialConfig material, int sudivision);
 	/// モデル関連
-	void CollectModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = 0);
+	void CollectModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = -1);
 	void DrawModel();
 
 	/// Tile関連
-	void Collect3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = 0);
+	void Collect3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = -1);
 	void Draw3DTile();
 
 	/// リソースローディング
@@ -131,8 +131,8 @@ private:
 	TransformationMatrix* tile2DInstancingData_ = nullptr;
 	BasicResource* tile3DWVPResource_ = new BasicResource;
 	TransformationMatrix* tile3DInstancingData_ = nullptr;
-	int instance2DCounter = 0;
-	int instance3DCounter = 0;
+	int instance2DCounter_ = 0;
+	int instance3DCounter_ = 0;
 
 	//Material関連
 	Material* materialData = nullptr;
