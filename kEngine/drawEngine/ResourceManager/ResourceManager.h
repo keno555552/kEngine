@@ -55,10 +55,10 @@ public:
 	ID3D12Device* Bdevice_ = nullptr;
 
 	/// テクスチャ関係
-	BasicResource* intermediateResource_ = new BasicResource;	///EndDrawでTextrueを作ったら解放する
+	BasicResource* intermediateResource_ = new BasicResource;/*EndDrawでTextrueを作ったら解放する*/
 	std::vector<std::string> commonTextureFilePath_;
-	std::vector<TextureInfo> textureData_;						///テキスチャーのデイタの収納のどころ
-	BasicResource* textureResource_ = new BasicResource;		///テキスチャーの収納のどころ
+	std::vector<TextureInfo> textureData_;				///テキスチャーのデイタの収納のどころ
+	BasicResource* textureResource_ = new BasicResource; ///テキスチャーの収納のどころ
 
 	/// Lighting関係
 	BasicResource* lightingResource_ = new BasicResource;

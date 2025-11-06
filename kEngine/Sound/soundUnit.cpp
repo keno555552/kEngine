@@ -46,14 +46,15 @@ SoundData SoundUnit::SoundLoadWave(const char* filename) {
 	/// 3.フェイルクローズ
 	// Dataチャンクの読み込み
 	ChunkHeader data;
-	file.read((char*)&data, sizeof(data));
-	// JUNKチャンクを検出した場合
-	if (strncmp(data.id, "JUNK", 4) == 0) {
-		// 読み取り位置をJUNKチャンク終わりまで進める
-		file.seekg(data.size, std::ios_base::cur);
-		// 再読み込み
+	while (true) {
 		file.read((char*)&data, sizeof(data));
+		if (strncmp(data.id, "data", 4) == 0) {
+			break;
+		}
+		// スキップ
+		file.seekg(data.size, std::ios_base::cur);
 	}
+
 
 	if (strncmp(data.id, "data", 4) != 0) {
 		assert(0);
@@ -72,7 +73,14 @@ SoundData SoundUnit::SoundLoadWave(const char* filename) {
 }
 
 SoundData SoundUnit::SoundLoad(const char* filename) {
+	delete[] filename_; // 釋放舊的
+	size_t len = std::strlen(filename) + 1;
+	filename_ = new char[len];
+	errno_t err = strcpy_s(filename_, len, filename);
+	if (err != 0) {
+	}
 	return SoundLoadWave(filename);
+
 }
 
 void SoundUnit::SoundUnload() {

@@ -119,11 +119,11 @@ Matrix3x3 Transpose(Matrix3x3 matrix) {
 
 ////////////////////////////////////////////////////////////////////////////陣列結合
 
-Matrix3x3 MakeAffineMatrix(Vector2 scale, float rotate, Vector2 translate) {
-	return { scale.x * cosf(rotate),scale.x * sinf(rotate),0,
-			 -scale.y * sinf(rotate),scale.y * cosf(rotate),0,
-			  translate.x,translate.y,1 };
-}
+//Matrix3x3 MakeAffineMatrix(Vector2 scale, float rotate, Vector2 translate) {
+//	return { scale.x * cosf(rotate),scale.x * sinf(rotate),0,
+//			 -scale.y * sinf(rotate),scale.y * cosf(rotate),0,
+//			  translate.x,translate.y,1 };
+//}
 
 Matrix3x3 MatrixMix(Matrix3x3 matrix1, Matrix3x3 matrix2)
 {

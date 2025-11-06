@@ -20,6 +20,15 @@ SoundManager::~SoundManager() {
 }
 
 int SoundManager::SoundLoadSE(const char* filename) {
+	{
+		int i = 0;
+		for (auto& ptr : sounds_) {
+			if (ptr->GetFileName() == filename) {
+				return i;
+			}
+			i++;
+		}
+	}
 	SoundUnit* sound = new SoundUnit;
 	sound->SoundLoad(filename);
 	sounds_.push_back(sound);

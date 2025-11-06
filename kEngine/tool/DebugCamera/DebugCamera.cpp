@@ -14,7 +14,8 @@ void DebugCamera::Update() {
 	viewMatrix_ = Inverse(cameraMatrix);
 }
 
-TransformationMatrix DebugCamera::transformationMatrixTransform(Transform objTransform) {
+TransformationMatrix
+DebugCamera::transformationMatrixTransform(Transform objTransform) {
 
 	Matrix4x4 objWorldMatrix = MakeAffineMatrix(objTransform.scale, objTransform.rotate, objTransform.translate);
 	Matrix4x4 worldViewProjectionMatrix = objWorldMatrix * (viewMatrix_ * projectionMatrix_);

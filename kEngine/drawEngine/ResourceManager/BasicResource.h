@@ -21,6 +21,6 @@ private:
 	int resourceCounter = 0;
 
 	/// Debug
-	char buffer[128];
+	char buffer[128]{};
 };
 

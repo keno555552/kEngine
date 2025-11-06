@@ -1,5 +1,9 @@
 #include "Vector4.h"
 
+Vector4 Vector4::operator/=(const float& target) {
+	return { x / target, y / target , z / target, w / target };
+}
+
 Vector4 Vector4::operator+(const Vector4& target) {
     return { x + target.x, y + target.y , z + target.z, w + target.w };
 }

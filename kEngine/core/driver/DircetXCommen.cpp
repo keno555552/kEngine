@@ -1,12 +1,13 @@
 #include "DircetXCommen.h"
 
-DircetXCommen::~DircetXCommen()
-{
+DircetXCommen::~DircetXCommen() {
 	Finalize();
 }
 
-void DircetXCommen::StartFrame()
-{
+void DircetXCommen::StartFrame() {
+	static FrameRateLimiter limiter(60.0);
+	limiter.Wait();
+
 	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
@@ -44,9 +45,13 @@ void DircetXCommen::StartFrame()
 	commandList->SetDescriptorHeaps(1, descriptorHeaps);
 }
 
-void DircetXCommen::EndFrame()
-{
+void DircetXCommen::EndFrame() {
+
+#ifdef _DEBUG
+	// 実際のcommandListのImGuiの描画コマンドを積む
 	ImGui::Render();
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
+#endif
 
 	UINT backBufferIndex = SwapChain->GetCurrentBackBufferIndex();
 
@@ -57,8 +62,6 @@ void DircetXCommen::EndFrame()
 
 	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
-	// 実際のcommandListのImGuiの描画コマンドを積む
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
 
 	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 	// TransitionBarrierを張る
@@ -73,7 +76,7 @@ void DircetXCommen::EndFrame()
 	commandQueue->ExecuteCommandLists(1, commandLists);
 
 	// GPUとOSに画面の交換を行うよう通知する
-	SwapChain->Present(1, 0);
+	SwapChain->Present(0, 0);
 
 	// Fenceの値を更新
 	fenceValue++;
@@ -82,8 +85,7 @@ void DircetXCommen::EndFrame()
 
 	// Fenceの値が指定したSignal値にたどり着いているか確認する
 	// GetCompletedValueの初期値はFence作成時に渡した初期値
-	if (fence->GetCompletedValue() < fenceValue)
-	{
+	if (fence->GetCompletedValue() < fenceValue) {
 		// 指定したSignalにたどりついていないので、たどり着くまで待つようにイベントを設定する
 		fence->SetEventOnCompletion(fenceValue, fenceEvent);
 		// イベント待つ
@@ -94,4 +96,8 @@ void DircetXCommen::EndFrame()
 	assert(SUCCEEDED(hr)); // 確保重置成功
 	hr = commandList->Reset(commandAllocator, nullptr); // 重置命令列表，準備記錄新的渲染命令
 	assert(SUCCEEDED(hr)); // 確保重置成功
+
+
+	//static FrameRateLimiter limiter(60.0);
+	//limiter.Wait();
 }

@@ -1,6 +1,6 @@
 #include "Particle.h"
 
-void Particle::SetSize(Vector2 LTpos, Vector2 LBpos, Vector2 RTpos, Vector2 RBpos, float TsizeX, float TsizeY, Vector2 TCLTPos, Vector2 TCRBPos) {
+void GameParticle::SetSize(Vector2 LTpos, Vector2 LBpos, Vector2 RTpos, Vector2 RBpos, float TsizeX, float TsizeY, Vector2 TCLTPos, Vector2 TCRBPos) {
 	coner[TOP_LEFT] = LTpos;
 	coner[BOTTOM_LEFT] = LBpos;
 	coner[TOP_RIGHT] = RTpos;
@@ -17,7 +17,7 @@ void Particle::SetSize(Vector2 LTpos, Vector2 LBpos, Vector2 RTpos, Vector2 RBpo
 	TexcoordRB_.y = TCRBPos.y / TsizeY;
 }
 
-ID3D12Resource* Particle::CreateVertexResource_(ID3D12Device* device) {
+ID3D12Resource* GameParticle::CreateVertexResource_(ID3D12Device* device) {
 
 	vertexResource_->CreateResourceClass_(device, sizeof(VertexData) * 5);
 	//CreateVertexBufferView_(6);
@@ -47,7 +47,7 @@ ID3D12Resource* Particle::CreateVertexResource_(ID3D12Device* device) {
 	return vertexResource_->GetResource().Get();
 }
 
-ID3D12Resource* Particle::CreateIndexResource_(ID3D12Device* device) {
+ID3D12Resource* GameParticle::CreateIndexResource_(ID3D12Device* device) {
 	indexResource_->CreateResourceClass_(device, sizeof(uint32_t) * 3 * 4);
 
 	indexBufferView = {};
@@ -77,7 +77,7 @@ ID3D12Resource* Particle::CreateIndexResource_(ID3D12Device* device) {
 	return indexResource_->GetResource().Get();
 }
 
-bool Particle::CheckSize(Vector2 LTpos, Vector2 LBpos, Vector2 RTpos, Vector2 RBpos, float TsizeX, float TsizeY, Vector2 TCLTPos, Vector2 TCRBPos) {
+bool GameParticle::CheckSize(Vector2 LTpos, Vector2 LBpos, Vector2 RTpos, Vector2 RBpos, float TsizeX, float TsizeY, Vector2 TCLTPos, Vector2 TCRBPos) {
 	if (coner[TOP_LEFT].x == LTpos.x)return false;
 	if (coner[TOP_LEFT].y == LTpos.y)return false;
 	if (coner[BOTTOM_LEFT].x == LBpos.x)return false;

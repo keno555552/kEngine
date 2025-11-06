@@ -74,14 +74,14 @@ Matrix3x3 Transpose(Matrix3x3 matrix);
 
 ////////////////////////////////////////////////////////////////////////////陣列結合
 
-/// <summary>
-/// 使わない、例の結合用関数
-/// </summary>
-/// <param name="scale"></param>
-/// <param name="rotate"></param>
-/// <param name="translate"></param>
-/// <returns></returns>
-Matrix3x3 MakeAffineMatrix(Vector2 scale, float rotate, Vector2 translate);
+///// <summary>
+///// 使わない、例の結合用関数
+///// </summary>
+///// <param name="scale"></param>
+///// <param name="rotate"></param>
+///// <param name="translate"></param>
+///// <returns></returns>
+//Matrix3x3 MakeAffineMatrix(Vector2 scale, float rotate, Vector2 translate);
 
 /// <summary>
 /// 二つのMatrix3x3を掛け算する
