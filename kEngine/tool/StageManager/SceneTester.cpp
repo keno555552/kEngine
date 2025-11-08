@@ -9,22 +9,22 @@ SceneTester::SceneTester(kEngine* system) {
 	debugCamera_ = new DebugCamera(system_, kWindowWidth, kWindowHeight);
 
 
-	bunnyModelHandle_ = system_->SetModelObj("resources/object/bunny/bunny.obj");
-	teapotModelHandle_ = system_->SetModelObj("resources/object/teapot/teapot.obj");
-	suzanneModelHandle_ = system_->SetModelObj("resources/object/suzanne/suzanne.obj");
-	multiMeshModelHandle_ = system_->SetModelObj("resources/object/multiMesh/multiMesh.obj");
-	multiMaterialModelHandle_ = system_->SetModelObj("resources/object/multiMaterial/multiMaterial.obj");
-	charaterModelHandle_ = system_->SetModelObj("resources/object/charater/charater.obj");
-	needleModelHandle_ = system_->SetModelObj("resources/object/needle/needle_Body.obj");
-	skydomeModelHandle_ = system_->SetModelObj("resources/object/skydome/skydome.obj");
+	bunnyModelHandle_			= system_->SetModelObj("resources/TemplateResource/object/bunny/bunny.obj");
+	teapotModelHandle_			= system_->SetModelObj("resources/TemplateResource/object/teapot/teapot.obj");
+	suzanneModelHandle_			= system_->SetModelObj("resources/TemplateResource/object/suzanne/suzanne.obj");
+	multiMeshModelHandle_		= system_->SetModelObj("resources/TemplateResource/object/multiMesh/multiMesh.obj");
+	multiMaterialModelHandle_	= system_->SetModelObj("resources/TemplateResource/object/multiMaterial/multiMaterial.obj");
+	charaterModelHandle_		= system_->SetModelObj("resources/TemplateResource/object/charater/charater.obj");
+	needleModelHandle_			= system_->SetModelObj("resources/TemplateResource/object/needle/needle_Body.obj");
+	skydomeModelHandle_			= system_->SetModelObj("resources/TemplateResource/object/skydome/skydome.obj");
 
-	uvCheckerHandle1_ = system_->LoadTextrue("resources/uvChecker.png");
-	monsterBallHandle_ = system_->LoadTextrue("resources/monsterBall.png");
-	objHandle_ = system_->LoadTextrue("resources/obj.png");
-	whiteHandle_ = system_->LoadTextrue("resources/white5x5.png");
+	uvCheckerHandle1_			= system_->LoadTextrue("resources/TemplateResource/texture/uvChecker.png");
+	monsterBallHandle_			= system_->LoadTextrue("resources/TemplateResource/texture/monsterBall.png");
+	objHandle_					= system_->LoadTextrue("resources/TemplateResource/texture/obj.png");
+	whiteHandle_				= system_->LoadTextrue("resources/TemplateResource/texture/white5x5.png");
 
-	se1_ = system_->SoundLoadSE("resources/sound/SE/game_start.wav");
-	se2_ = system_->SoundLoadSE("resources/sound/SE/take.wav");
+	se1_						= system_->SoundLoadSE("resources/TemplateResource/sound/SE/game_start.wav");
+	se2_						= system_->SoundLoadSE("resources/TemplateResource/sound/SE/take.wav");
 	//{
 	//	Object* object = new Object;
 	//	object->objectType = MODEL;

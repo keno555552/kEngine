@@ -2,14 +2,14 @@
 
 SceneManager::SceneManager(kEngine* system) {
 	system_ = system;
-	sceneUsingHandle_ = SceneNum::S_TITLE;
+	sceneUsingHandle_ = SceneNum::S_TESTER;
 
 	InitMaterialConfig(&materialConfig_);
 	materialConfig_.uvTransformMatrix =
 		MakeAffineMatrix(materialConfig_.uvScale, materialConfig_.uvRotate,
 			materialConfig_.uvTranslate);
 	materialConfig_.textureHandle =
-		system_->LoadTextrue("resources/uvChecker.png");
+		system_->LoadTextrue("resources/TemplateResource/texture/uvChecker.png");
 	// materialConfig_.textureHandle =
 	// system_->LoadTextrue("resources/nullScene.png");
 
@@ -108,36 +108,36 @@ bool SceneManager::GetIsEnd() {
 
 void SceneManager::winDataUpdate() {
 
-	switch (sceneUsingHandle_) {
-	case SceneNum::S_STAGE01:
-		if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[0] = true;
-		break;
-	case SceneNum::S_STAGE02:
-		if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[1] = true;
-		break;
-	case SceneNum::S_STAGE03:
-		if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[2] = true;
-		break;
-	case SceneNum::S_STAGE04:
-		if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[3] = true;
-		break;
-	case SceneNum::S_STAGE05:
-		if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[4] = true;
-		break;
-	case SceneNum::S_STAGE06:
-		if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[5] = true;
-		break;
-	case SceneNum::S_STAGE07:
-		if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[6] = true;
-		break;
-	case SceneNum::S_STAGE08:
-		if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[7] = true;
-		break;
-	case SceneNum::S_STAGE09:
-		if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[8] = true;
-		break;
-	case SceneNum::S_STAGE10:
-		if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[9] = true;
-		break;
-	}
+	//switch (sceneUsingHandle_) {
+	//case SceneNum::S_STAGE01:
+	//	if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[0] = true;
+	//	break;
+	//case SceneNum::S_STAGE02:
+	//	if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[1] = true;
+	//	break;
+	//case SceneNum::S_STAGE03:
+	//	if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[2] = true;
+	//	break;
+	//case SceneNum::S_STAGE04:
+	//	if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[3] = true;
+	//	break;
+	//case SceneNum::S_STAGE05:
+	//	if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[4] = true;
+	//	break;
+	//case SceneNum::S_STAGE06:
+	//	if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[5] = true;
+	//	break;
+	//case SceneNum::S_STAGE07:
+	//	if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[6] = true;
+	//	break;
+	//case SceneNum::S_STAGE08:
+	//	if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[7] = true;
+	//	break;
+	//case SceneNum::S_STAGE09:
+	//	if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[8] = true;
+	//	break;
+	//case SceneNum::S_STAGE10:
+	//	if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[9] = true;
+	//	break;
+	//}
 }

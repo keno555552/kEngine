@@ -118,8 +118,8 @@ void DrawEngine::Initialize
 	//debugController1->SetEnableGPUBasedValidation(TRUE);
 
 	/// デフォルトのモデルを設定
-	SetModel("resources/object/plane/plane.obj");
-	defaultTextureHandle_ = LoadModelTexture("resources/white5x5.png");
+	SetModel("resources/TemplateResource/object/plane/plane.obj");
+	defaultTextureHandle_ = LoadModelTexture("resources/TemplateResource/texture/white5x5.png");
 
 }
 
