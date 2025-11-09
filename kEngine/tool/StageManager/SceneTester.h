@@ -50,12 +50,12 @@ private:
 		CHARATER,
 		NEEDLE,
 		SKYDOME,
-		TILE,
+		TILE3D,
 		PRATICLE,
 	};
 
 	///Transform変数を作る
-	struct Object {
+	struct InstanceObject {
 		int objectType = TRIANGLE;
 
 		Transform transform = CreateDefaultTransform();
@@ -115,7 +115,10 @@ private:
 
 private:
 	/// オブジェクト群
-	std::vector<Object*> objectGroup;
+	std::vector<InstanceObject*> objectGroup;
+
+	/// Test
+	//Object* player = new Object;
 
 private:
 	/// Menu用変数

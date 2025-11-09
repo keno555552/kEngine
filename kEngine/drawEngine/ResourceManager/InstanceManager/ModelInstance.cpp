@@ -1,10 +1,10 @@
 #include "ModelInstance.h"
 
 bool ModelInstance::CheckSame(const ModelInstance target) {
-	if (WVP != target.WVP)return false;
-	if (world != target.world)return false;
+	if (transformData != target.transformData)return false;
 	if (materialConfigIndex != target.materialConfigIndex)return false;
 	if (resourceHandle != target.resourceHandle)return false;
-	if (drawState != target.drawState)return false;
+	if (modelHandle != target.modelHandle)return false;
+	if (useDefaultModel != target.useDefaultModel)return false;
 	return true;
 }

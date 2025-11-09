@@ -201,9 +201,6 @@
     <ClCompile Include="kEngine\core\driver\config.cpp">
       <Filter>ソース ファイル\kEngine\core\driver</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\driver\DircetXBase.cpp">
-      <Filter>ソース ファイル\kEngine\core\driver</Filter>
-    </ClCompile>
     <ClCompile Include="kEngine\core\driver\DircetXCommen.cpp">
       <Filter>ソース ファイル\kEngine\core\driver</Filter>
     </ClCompile>
@@ -230,9 +227,6 @@
     </ClCompile>
     <ClCompile Include="kEngine\Sound\soundManager.cpp">
       <Filter>ソース ファイル\kEngine\Sound</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\tool\DebugCamera\DebugCamera.cpp">
-      <Filter>ソース ファイル\kEngine\tool</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\tool\mathsUnit\Matrix3x3.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
@@ -301,6 +295,15 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\drawEngine\ResourceManager\InstanceManager\ModelInstance.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\tool\Camera\Camera.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\tool\Camera\DebugCamera.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\core\driver\DircetXBase.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -392,9 +395,6 @@
     <ClInclude Include="kEngine\core\Input\inputManager.h">
       <Filter>ヘッダー ファイル\kEngine\core\Input</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\driver\DircetXBase.h">
-      <Filter>ヘッダー ファイル\kEngine\core\driver</Filter>
-    </ClInclude>
     <ClInclude Include="kEngine\core\driver\DircetXCommen.h">
       <Filter>ヘッダー ファイル\kEngine\core\driver</Filter>
     </ClInclude>
@@ -421,9 +421,6 @@
     </ClInclude>
     <ClInclude Include="kEngine\Sound\soundUnit.h">
       <Filter>ヘッダー ファイル\kEngine\Sound</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\tool\DebugCamera\DebugCamera.h">
-      <Filter>ヘッダー ファイル\kEngine\tool</Filter>
     </ClInclude>
     <ClInclude Include="scenes\Scene1.h">
       <Filter>ヘッダー ファイル\kEngine\tool\StageManager</Filter>
@@ -474,6 +471,15 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\drawEngine\ResourceManager\InstanceManager\ModelInstance.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\tool\Camera\Camera.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\tool\Camera\DebugCamera.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\core\driver\DircetXBase.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

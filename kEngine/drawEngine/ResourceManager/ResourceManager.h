@@ -1,5 +1,6 @@
 #pragma once
 #include "BasicResource.h"
+#include "WVPResource.h"
 #include "VertexResource.h"
 #include "VertexData.h"
 #include "Material.h"
@@ -12,10 +13,10 @@ class ResourceManager
 {
 public:
 	struct TextureInfo {
-		ID3D12Resource* texture;    
-		int width;                 
-		int height;                
-		Vector4 uvOffset;           
+		ID3D12Resource* texture;
+		int width;
+		int height;
+		Vector4 uvOffset;
 	};
 
 
@@ -41,9 +42,9 @@ public:
 
 	/// Resource Collect
 	void ColletSprite(Vector2 pos, MaterialConfig material);
-	void ColletModel(TransformationMatrix* wvpData, MaterialConfig material);
+	void ColletModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = 0, bool useDefaultModel = false);
 	void Collet2DTile(Vector2 pos, MaterialConfig material);
-	void Collet3DTile(TransformationMatrix* wvpData, MaterialConfig material);
+	void Collet3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = 0,bool useDefaultModel = false);
 
 	/// モデル読み込み
 	int CreateModelRosource(std::string Path);
@@ -65,6 +66,7 @@ public:
 	/// Material関係
 	std::vector<BasicResource*> materialResourceList_;
 
+	WVPResource* wvpResource_ = nullptr;
 
 	//////////////////////////////InstanceBuffer関係
 
@@ -74,10 +76,10 @@ public:
 	//////////////////////////////Vertex\Index関係
 
 	/// 図形関係
-	std::vector<MeshBuffer*> meshBufferList_;
-	std::vector<int> spriteMeshHandles_;
-	std::vector<int> modelMeshHandles_;
-	std::vector<ModelGroup*> modelGroupList_;
+	std::vector<MeshBuffer*> meshBufferList_;		/// すべでのモデルを収納するどころ		これを使って解放する
+	std::vector<MeshBuffer*> spriteMeshHandles_;	/// スブライドのハンドルを収納する		解放に使えない
+	std::vector<MeshBuffer*> modelMeshHandles_;		/// モデルのハンドルを収納する			解放に使えない
+	std::vector<ModelGroup*> modelGroupList_;		/// モデルグループを	収納する			解放に使えない
 
 	/// デフォルトMeshBuffer
 	int default_Triangle_MeshBufferHandle_ = 0; // 三角形
@@ -91,12 +93,17 @@ private:
 	int CreateTriangleResource();
 	int CreateCubeResource();
 	int CreateSprite2DResource();
-	int CreateSprite2DResource(Vector2 LTpos, Vector2 LBpos, 
-								Vector2 RTpos, Vector2 RBpos,
-								float TsizeX, float TsizeY, 
-								Vector2 TCLTPos, Vector2 TCRBPos);
+	int CreateSprite2DResource(Vector2 LTpos, Vector2 LBpos,
+		Vector2 RTpos, Vector2 RBpos,
+		float TsizeX, float TsizeY,
+		Vector2 TCLTPos, Vector2 TCRBPos);
 	int CreateSphereResource(int sudivision);
 
+
+private:
+	////////////////////////////// 関数テンプレート
+
+	/// ポインタ解放テンプレート
 	template<typename T>
 	void ClearPointer(std::vector< T* >& list) {
 		for (auto& ptr : list) {
@@ -105,5 +112,17 @@ private:
 		}
 		list.clear();
 	}
+
+	template<typename T>
+	bool CheckInstance(std::vector< T* >& list, T target, bool useCustomCheck) {
+
+		auto checker = std::find_if(list.begin(),
+				list.end(),
+				[&](T* ptr) {return *ptr == target; });
+
+		return checker == list.end();
+	}
+
+
 };
 

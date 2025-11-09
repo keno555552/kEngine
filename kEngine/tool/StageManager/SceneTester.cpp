@@ -9,22 +9,22 @@ SceneTester::SceneTester(kEngine* system) {
 	debugCamera_ = new DebugCamera(system_, kWindowWidth, kWindowHeight);
 
 
-	bunnyModelHandle_ = system_->SetModelObj("resources/object/bunny/bunny.obj");
-	teapotModelHandle_ = system_->SetModelObj("resources/object/teapot/teapot.obj");
-	suzanneModelHandle_ = system_->SetModelObj("resources/object/suzanne/suzanne.obj");
-	multiMeshModelHandle_ = system_->SetModelObj("resources/object/multiMesh/multiMesh.obj");
-	multiMaterialModelHandle_ = system_->SetModelObj("resources/object/multiMaterial/multiMaterial.obj");
-	charaterModelHandle_ = system_->SetModelObj("resources/object/charater/charater.obj");
-	needleModelHandle_ = system_->SetModelObj("resources/object/needle/needle_Body.obj");
-	skydomeModelHandle_ = system_->SetModelObj("resources/object/skydome/skydome.obj");
+	bunnyModelHandle_			= system_->SetModelObj("resources/TemplateResource/object/bunny/bunny.obj");
+	teapotModelHandle_			= system_->SetModelObj("resources/TemplateResource/object/teapot/teapot.obj");
+	suzanneModelHandle_			= system_->SetModelObj("resources/TemplateResource/object/suzanne/suzanne.obj");
+	multiMeshModelHandle_		= system_->SetModelObj("resources/TemplateResource/object/multiMesh/multiMesh.obj");
+	multiMaterialModelHandle_	= system_->SetModelObj("resources/TemplateResource/object/multiMaterial/multiMaterial.obj");
+	charaterModelHandle_		= system_->SetModelObj("resources/TemplateResource/object/charater/charater.obj");
+	needleModelHandle_			= system_->SetModelObj("resources/TemplateResource/object/needle/needle_Body.obj");
+	skydomeModelHandle_			= system_->SetModelObj("resources/TemplateResource/object/skydome/skydome.obj");
 
-	uvCheckerHandle1_ = system_->LoadTextrue("resources/uvChecker.png");
-	monsterBallHandle_ = system_->LoadTextrue("resources/monsterBall.png");
-	objHandle_ = system_->LoadTextrue("resources/obj.png");
-	whiteHandle_ = system_->LoadTextrue("resources/white5x5.png");
+	uvCheckerHandle1_			= system_->LoadTextrue("resources/TemplateResource/texture/uvChecker.png");
+	monsterBallHandle_			= system_->LoadTextrue("resources/TemplateResource/texture/monsterBall.png");
+	objHandle_					= system_->LoadTextrue("resources/TemplateResource/texture/obj.png");
+	whiteHandle_				= system_->LoadTextrue("resources/TemplateResource/texture/white5x5.png");
 
-	se1_ = system_->SoundLoadSE("resources/sound/SE/game_start.wav");
-	se2_ = system_->SoundLoadSE("resources/sound/SE/take.wav");
+	se1_						= system_->SoundLoadSE("resources/TemplateResource/sound/SE/game_start.wav");
+	se2_						= system_->SoundLoadSE("resources/TemplateResource/sound/SE/take.wav");
 	//{
 	//	Object* object = new Object;
 	//	object->objectType = MODEL;
@@ -38,7 +38,7 @@ SceneTester::SceneTester(kEngine* system) {
 	//	objectGroup.push_back(object);
 	//}
 	{
-		Object* object = new Object;
+		InstanceObject* object = new InstanceObject;
 		object->objectType = MODEL;
 		object->modelHandle = ModelType::SKYDOME;
 		MaterialConfig materialConfig;
@@ -49,10 +49,23 @@ SceneTester::SceneTester(kEngine* system) {
 		objectGroup.push_back(object);
 	}
 
+	//{
+	//	MaterialConfig materialConfig;
+	//	InitMaterialConfig(&materialConfig);
+	//	player->materialConfig.push_back(materialConfig);
+	//	player->objectType = MODEL;
+	//	player->modelHandle = ModelType::CHARATER;
+	//	player->transform.translate = { 0, 0, 0 };
+	//	player->transformationMatrix = debugCamera_->transformationMatrixTransform(player->transform);
+	//	objectGroup.push_back(player);
+	//
+	//}
+
 	//for (int i = 0; i < 1; i++) 
-	//for (int i = 0; i < 10; i++) 
-	for (int i = 0; i < 5; i++) {
-		Object* object = new Object;
+	////for (int i = 0; i < 10; i++) 
+	for (int i = 0; i < 5; i++) 
+	{
+		InstanceObject* object = new InstanceObject;
 		MaterialConfig materialConfig;
 		InitMaterialConfig(&materialConfig);
 		object->materialConfig.push_back(materialConfig);
@@ -77,19 +90,20 @@ SceneTester::SceneTester(kEngine* system) {
 	//for (int i = 0; i < 1; i++) 
 	//for (int i = 0; i < 10; i++) 
 	//for (int i = 0; i < 200; i++) 
-	//{
+	// {
 	//	Object* object = new Object;
 	//	MaterialConfig materialConfig;
 	//	InitMaterialConfig(&materialConfig);
 	//	object->materialConfig.push_back(materialConfig);
+	//	//object->objectType = CUBE;
 	//	object->objectType = MODEL;
-	//	object->modelHandle = ModelType::TILE;
+	//	//object->modelHandle = ModelType::TEAPOT;
+	//	object->modelHandle = ModelType::TILE3D;
 	//	//object->objectType = SPRITE;
 	//	object->transform.translate = { i * 0.1f,i * 0.1f, i * 1.0f };
 	//	object->transformationMatrix = debugCamera_->transformationMatrixTransform(object->transform);
 	//	objectGroup.push_back(object);
 	//}
-
 };
 
 
@@ -184,6 +198,8 @@ void SceneTester::Update() {
 	debugCamera_->MouseControlUpdate();
 	debugCamera_->Update();
 
+	//player->materialConfig[0].uvRotate.z += 0.5f;
+
 	for (auto& ptr : objectGroup) {
 		ptr->transformationMatrix = debugCamera_->transformationMatrixTransform(ptr->transform);
 		for (auto& ptr2 : ptr->materialConfig) {
@@ -250,8 +266,8 @@ void SceneTester::Draw() {
 				case ModelType::NEEDLE:
 					system_->DrawModel(&ptr->transformationMatrix, ptr->materialConfig, needleModelHandle_);
 					break;
-				case ModelType::TILE:
-					system_->Draw3DTile(& ptr->transformationMatrix, ptr->materialConfig);
+				case ModelType::TILE3D:
+					system_->Draw3DTile(&ptr->transformationMatrix, ptr->materialConfig);
 					break;
 				case ModelType::SKYDOME:
 					system_->DrawModel(&ptr->transformationMatrix, ptr->materialConfig, skydomeModelHandle_);
@@ -265,13 +281,13 @@ void SceneTester::Draw() {
 	ImGui::Begin("ControlPanel");
 	//ImGui::Checkbox("isTemplate", &isTemplate);
 	{
-		const char* items[] = { "Triangle", "Sprite" ,"Cube","Sphere" ,"Plant","BUNNY","TEAPOT","SUZANNE","multiMesh","multiMaterial","charater","needle" };
+		const char* items[] = { "Triangle", "Sprite" ,"Tile","Cube","Sphere" ,"Plant","BUNNY","TEAPOT","SUZANNE","multiMesh","multiMaterial","charater","needle" };
 		int selectedItem = CreateObjectHandle;
 		if (ImGui::Combo("Model", &selectedItem, items, IM_ARRAYSIZE(items))) {
 			CreateObjectHandle = selectedItem;
 		}
 		if (ImGui::Button("Add Object")) {
-			Object* object = new Object;
+			InstanceObject* object = new InstanceObject;
 			MaterialConfig materialConfig;
 			InitMaterialConfig(&materialConfig);
 			object->materialConfig.push_back(materialConfig);

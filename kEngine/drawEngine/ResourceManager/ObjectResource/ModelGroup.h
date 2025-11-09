@@ -14,6 +14,7 @@ public:
 	void SetModelObj(std::string Path);
 	std::string GetDirectoryPath() { return directoryPath_; }
 	std::string GetObjName_() { return objName_; }
+	std::string GetFullPath_() { return (directoryPath_ + "/" + objName_); }
 	void PushModelHandle(int handle) { modelHandle_.push_back(handle); }
 	int GetModelHandle(int handle) { return modelHandle_[handle]; }
 	int GetModelNum() { return (int)modelGroup_.size();}

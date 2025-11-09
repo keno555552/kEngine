@@ -44,7 +44,8 @@ private:
 	std::string objName_ = "plane.obj";
 	std::string texturePath_;
 	std::string mtlName_;
-	int textureHandle_ = 1;
+	int textureHandle_ = -1;
+	int modelResourceHandle_ = -1;
 	int VertexNum_ = 0;
 };
 

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "TimeManager.h"
 
 void TimeManager::Update() {
@@ -13,7 +14,7 @@ void TimeManager::Update() {
 		for (auto& ptr : fpsHistory_) {
 			sum += ptr;
 		}
-		fpsPerSecond_ = sum/ fpsHistory_.size();
+		fpsPerSecond_ = sum / fpsHistory_.size();
 		fpsHistory_.clear();
 		oneScondCounter_ = 0.0f;
 	} else {
@@ -87,7 +88,7 @@ void Timer::ToZeroMix() {
 
 void Timer::foreverUp() {
 	float t = timeManager_->getDeltaTime();
-	if (parameter_ < maxTime_ - 1) {
+	if (parameter_ < maxTime_) {
 		parameter_ += t;
 	} else {
 		parameter_ = 0.0f;
@@ -117,18 +118,24 @@ int Timer::FrameChange() {
 }
 
 float Timer::linearity(int a, int b) {
-	float T = float(parameter_ / maxTime_);
+	if (parameter_ <= 0.0f)return static_cast<float>(a);
+
+	float T = std::clamp(parameter_ / maxTime_,0.0f,1.0f);
 	return (1.0f - T) * a + (T)*b;
 }
 
 float Timer::easyIn(int a, int b, float r) {
-	float T = float(parameter_ / maxTime_);
+	if (parameter_ <= 0.0f)return static_cast<float>(a);
+
+	float T = std::clamp(parameter_ / maxTime_, 0.0f, 1.0f);
 	float easedT = 1.0f - powf(1 - T, r);
 	return (1.0f - easedT) * a + (easedT)*b;
 }
 
 float Timer::easyOut(int a, int b, float r) {
-	float T = float(parameter_ / maxTime_);
+	if (parameter_ <= 0.0f)return static_cast<float>(a);
+
+	float T = std::clamp(parameter_ / maxTime_, 0.0f, 1.0f);
 	float easedT = 1 - (1.0f - powf(T, r));
 	return (1.0f - easedT) * a + (easedT)*b;
 }

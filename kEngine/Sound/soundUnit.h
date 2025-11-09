@@ -9,6 +9,9 @@
 #include <vector>
 #include <memory>
 
+#include <string.h>
+#include <cstring> 
+
 #pragma region wav Reader
 /// チャンクヘッダ
 struct ChunkHeader {
@@ -90,11 +93,14 @@ public:
 	void SoundSetMute(bool isMute);
 	bool SoundGetMute()const { return isMute_; }
 
+	char* GetFileName() { return filename_; }
+
 	void SoundUnload();
 
 private:
 	SoundData* soundData = new SoundData;
 	VoiceCallback* voiceCallBack_ = new VoiceCallback;
+	char* filename_{};
 
 	/// やむ操作
 	std::vector<IXAudio2SourceVoice*> pSourceVoiceGroup;

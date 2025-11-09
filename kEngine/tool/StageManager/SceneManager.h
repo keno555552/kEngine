@@ -1,12 +1,12 @@
 #pragma once
-#include "Scene.h"
-#include "SceneTester.h"
-#include "SceneTestForGE.h"
 #include "MaterialConfig.h"
+#include "Scene.h"
 #include "Scene1.h"
+#include "SceneTestForGE.h"
+#include "SceneTester.h"
 
-class SceneManager
-{
+
+class SceneManager {
 public:
 	SceneManager(kEngine* system);
 	~SceneManager();
@@ -14,17 +14,13 @@ public:
 	void Update();
 	void Render();
 
+	bool GetIsEnd();
+
 public:
-	enum class SceneNum {
-		NONE = -2,
-		TESTER = -1,
-		TITLE,
-		STAGE,
-		WIN,
-		GAMEOVER,
-	};
-	SceneNum sceneUsingHandle_ = SceneNum::NONE;
+	SceneNum sceneUsingHandle_ = SceneNum::S_NONE;
 	void SceneChanger();
+
+	void winDataUpdate();
 
 private:
 	Scene* sceneUsing_ = nullptr;
@@ -33,11 +29,21 @@ private:
 	int nullptrSceneHandle_ = 0;
 
 private:
-	kEngine* system_ = nullptr;//借り
+	kEngine* system_ = nullptr; // 借り
+	
+	bool stageIsClear_[10]{};
 
-	//Vector2 LT = {0,0};
-	//Vector2 LB = {0,64 };
-	//Vector2 RT = {64,0};
-	//Vector2 RB = {64,64};
+	bool isFirst_ = true;
+
+	bool isFromTitle_ = true;
+
+	bool isReset_ = false;
+
+	bool isEnd_ = false;
+
+
+		// Vector2 LT = {0,0};
+		// Vector2 LB = {0,64 };
+		// Vector2 RT = {64,0};
+		// Vector2 RB = {64,64};
 };
-

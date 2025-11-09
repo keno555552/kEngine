@@ -3,6 +3,7 @@
 #include "externals/DirectXTex/DirectXTex.h"
 #include "externals/DirectXTex/d3dx12.h"
 #include <vector>
+#include "Config.h"
 #include "shader_compile.h"
 #include "PSO.h"
 #include "ResourceManager.h"
@@ -17,6 +18,8 @@
 #include "LightModelType.h"
 #include "MaterialConfig.h"
 #include "VertexIndex.h"
+#include "Camera.h"
+
 
 #include <format>
 
@@ -36,7 +39,6 @@ public:
 	/// 三角形関連
 	void DrawTriangle(TransformationMatrix* wvpData, MaterialConfig material);
 
-
 	/// 2D図形関連
 	void CollectSprite(Vector2 pos, MaterialConfig material);
 	void DrawSprite();
@@ -48,25 +50,32 @@ public:
 	void Draw2DTile();
 
 	/// 立方体関連
-	void DrawCube(TransformationMatrix* wvpData, MaterialConfig material);
+	void CollectCube(TransformationMatrix* wvpData, MaterialConfig material);
+	void DrawCube();
 	/// 球体関連
 	void DrawSphere(TransformationMatrix* wvpData, MaterialConfig material, int sudivision);
 	/// モデル関連
-	void DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle);
-	void DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material);
+	void CollectModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = -1);
+	void DrawModel();
 
 	/// Tile関連
-	void Collect3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material);
+	void Collect3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = -1);
 	void Draw3DTile();
-	bool SetModelTexture(Model* model);
-	bool SetModelGroupTexture(Model* model);
-	int SetModel(std::string Path);
-	int readCommonTextureHandle(int Handle);
-	int readModelTextureHandle(int Handle);
-	int GetMuitModelNum(int modelHandle);
 
+	/// Camera
+	void SetCamera(Camera* camera);
+
+	/// リソースローディング
+
+	int readModelTextureHandle(int Handle);
+	int readCommenTextureHandle(int Handle);
+
+	bool SetModelTexture(Model* model);
+	int SetModel(std::string Path);
+	int GetMuitModelNum(int modelHandle);
 	int LoadTexture(const std::string& filePath);
 	int LoadModelTexture(const std::string& filePath);
+
 
 private:
 	Shader_compile* shader_compile_ = new Shader_compile;
@@ -127,8 +136,12 @@ private:
 	TransformationMatrix* tile2DInstancingData_ = nullptr;
 	BasicResource* tile3DWVPResource_ = new BasicResource;
 	TransformationMatrix* tile3DInstancingData_ = nullptr;
-	int instance2DCounter = 0;
-	int instance3DCounter = 0;
+	int instance2DCounter_ = 0;
+	int instance3DCounter_ = 0;
+
+	/// カメラ
+	Camera* instanceCamera_ = nullptr; // 実体は外でもつ
+	Camera* saveCamera_ = nullptr; //　仮カメラ、カメラがない時使う 
 
 	//Material関連
 	Material* materialData = nullptr;
@@ -143,7 +156,7 @@ private:
 	};
 
 	std::vector<OffsetData*> instanceOffsetData_;
-	int offsetDataCounter_;
+	int offsetDataCounter_{};
 
 
 private:
@@ -153,6 +166,7 @@ private:
 	void SetMaterial(int MaterialHandle);
 	void InitializeLighting();
 	void SetLighting(DirectionalLight* directionalLight);
+
 
 	void PSODecition(MaterialConfig& material, bool isParticle = false);
 	DirectX::ScratchImage LoadTextrueLow(const std::string& filePath);

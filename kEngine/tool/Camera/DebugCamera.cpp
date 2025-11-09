@@ -2,29 +2,24 @@
 
 DebugCamera::DebugCamera(kEngine* system, float windowWidth, float windowHeight) {
 	system_ = system;
-	projectionMatrix_ = MakePerspectiveFovMatrix(0.45f, float(windowWidth) / float(windowHeight), 0.1f, 100.0f);
-	Update();
-	matRot_ = MakeRotateMatrix4x4(cameraTransform_.rotate);
+	camera_ = new Camera(windowWidth, windowHeight);
+}
+
+DebugCamera::~DebugCamera() {
+	delete camera_;
 }
 
 void DebugCamera::Update() {
-	/// カメラMatrix更新
-	Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform_.scale, cameraTransform_.rotate, cameraTransform_.translate);
-	/// ビュー行列更新
-	viewMatrix_ = Inverse(cameraMatrix);
+	MouseControlUpdate();
 }
 
-TransformationMatrix DebugCamera::transformationMatrixTransform(Transform objTransform) {
-
-	Matrix4x4 objWorldMatrix = MakeAffineMatrix(objTransform.scale, objTransform.rotate, objTransform.translate);
-	Matrix4x4 worldViewProjectionMatrix = objWorldMatrix * (viewMatrix_ * projectionMatrix_);
-
-	return { worldViewProjectionMatrix, objWorldMatrix };;
+TransformationMatrix
+DebugCamera::transformationMatrixTransform(Transform objTransform) {
+	return { camera_->transformationMatrixTransform(objTransform) };
 }
 
 void DebugCamera::SetCamera(Transform cameraTransform) {
-	cameraTransform_ = cameraTransform;
-	Update();
+	camera_->SetCamera(cameraTransform);
 }
 
 void DebugCamera::MouseControlUpdate() {
@@ -51,8 +46,8 @@ void DebugCamera::MouseControlUpdate() {
 	//右鍵視覚移動
 	if (system_->GetMouseIsPush(1) && isMouseR_) {
 		{
-			cameraTransform_.rotate.x = cameraTransform_.rotate.x + ((float)system_->GetMousePosYIns() * scale);
-			cameraTransform_.rotate.y = cameraTransform_.rotate.y + ((float)system_->GetMousePosXIns() * scale);
+			cameraTransform.rotate.x = ((float)system_->GetMousePosYIns() * scale);
+			cameraTransform.rotate.y = ((float)system_->GetMousePosXIns() * scale);
 		}
 	}
 
@@ -62,30 +57,30 @@ void DebugCamera::MouseControlUpdate() {
 		if (system_->GetGamepadLStick01Y() != 0)				cameraTransform.translate.z += system_->GetGamepadLStick01Y() / 50.0f;
 		if (system_->GetGamepadIsPush(VK_PAD_LSHOULDER) != 0)	cameraTransform.translate.y += 0.01f;
 		if (system_->GetGamepadIsPush(VK_PAD_RSHOULDER) != 0)	cameraTransform.translate.y -= 0.01f;
-		if (system_->GetGamepadRStick01Y() != 0)				cameraTransform_.rotate.x = cameraTransform_.rotate.x - system_->GetGamepadRStick01Y() / 100.0f;
-		if (system_->GetGamepadRStick01X() != 0)				cameraTransform_.rotate.y = cameraTransform_.rotate.y + system_->GetGamepadRStick01X() / 100.0f;
+		if (system_->GetGamepadRStick01Y() != 0)				cameraTransform.rotate.x -= system_->GetGamepadRStick01Y() / 100.0f;
+		if (system_->GetGamepadRStick01X() != 0)				cameraTransform.rotate.y += system_->GetGamepadRStick01X() / 100.0f;
 	}
-
-
 
 	///元の位置に戻る
 	if (system_->GetIsPush(DIK_R) && isR_) {
-		SetCamera({ cameraDefaultTransform_ });
+		SetCamera(CameraDefaultTransform());
 	}
 	if (system_->GetGamepadIsPush(VK_PAD_BACK) && isGamePad_) {
-		SetCamera({ cameraDefaultTransform_ });
+		SetCamera(CameraDefaultTransform());
 	}
 
 	Move(cameraTransform.translate);
+	Rotate(cameraTransform.rotate);
+
+	camera_->Update();
 }
 
 ///<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<以降フレームの更新方法が変わったら、ここも変えよう
 void DebugCamera::Move(Vector3 speed) {
-	Matrix4x4 handle = MakeTranslateMatrix4x4(speed) * MakeRotateMatrix4x4(cameraTransform_.rotate);
-	cameraTransform_.translate = cameraTransform_.translate + MakeTranslateVector3(handle);
+	camera_->Move(speed);
 }
 
 void DebugCamera::Rotate(Vector3 Theta) {
-	cameraTransform_.rotate = cameraTransform_.rotate + Theta;
+	camera_->Rotate(Theta);
 }
 
