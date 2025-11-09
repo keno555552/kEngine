@@ -38,7 +38,7 @@ SceneTester::SceneTester(kEngine* system) {
 	//	objectGroup.push_back(object);
 	//}
 	{
-		Object* object = new Object;
+		InstanceObject* object = new InstanceObject;
 		object->objectType = MODEL;
 		object->modelHandle = ModelType::SKYDOME;
 		MaterialConfig materialConfig;
@@ -65,7 +65,7 @@ SceneTester::SceneTester(kEngine* system) {
 	////for (int i = 0; i < 10; i++) 
 	for (int i = 0; i < 5; i++) 
 	{
-		Object* object = new Object;
+		InstanceObject* object = new InstanceObject;
 		MaterialConfig materialConfig;
 		InitMaterialConfig(&materialConfig);
 		object->materialConfig.push_back(materialConfig);
@@ -89,21 +89,21 @@ SceneTester::SceneTester(kEngine* system) {
 
 	//for (int i = 0; i < 1; i++) 
 	//for (int i = 0; i < 10; i++) 
-	for (int i = 0; i < 200; i++) 
-	 {
-		Object* object = new Object;
-		MaterialConfig materialConfig;
-		InitMaterialConfig(&materialConfig);
-		object->materialConfig.push_back(materialConfig);
-		//object->objectType = CUBE;
-		object->objectType = MODEL;
-		//object->modelHandle = ModelType::TEAPOT;
-		object->modelHandle = ModelType::TILE3D;
-		//object->objectType = SPRITE;
-		object->transform.translate = { i * 0.1f,i * 0.1f, i * 1.0f };
-		object->transformationMatrix = debugCamera_->transformationMatrixTransform(object->transform);
-		objectGroup.push_back(object);
-	}
+	//for (int i = 0; i < 200; i++) 
+	// {
+	//	Object* object = new Object;
+	//	MaterialConfig materialConfig;
+	//	InitMaterialConfig(&materialConfig);
+	//	object->materialConfig.push_back(materialConfig);
+	//	//object->objectType = CUBE;
+	//	object->objectType = MODEL;
+	//	//object->modelHandle = ModelType::TEAPOT;
+	//	object->modelHandle = ModelType::TILE3D;
+	//	//object->objectType = SPRITE;
+	//	object->transform.translate = { i * 0.1f,i * 0.1f, i * 1.0f };
+	//	object->transformationMatrix = debugCamera_->transformationMatrixTransform(object->transform);
+	//	objectGroup.push_back(object);
+	//}
 };
 
 
@@ -287,7 +287,7 @@ void SceneTester::Draw() {
 			CreateObjectHandle = selectedItem;
 		}
 		if (ImGui::Button("Add Object")) {
-			Object* object = new Object;
+			InstanceObject* object = new InstanceObject;
 			MaterialConfig materialConfig;
 			InitMaterialConfig(&materialConfig);
 			object->materialConfig.push_back(materialConfig);

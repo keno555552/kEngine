@@ -161,7 +161,7 @@ void Button::Render()
 			if (isSelect_) {
 				///選ばれてる
 				material_.textureHandle = textureS_;
-				//system_->DrawSprite(int(pos_.x - width_ / 2), int(pos_.y - height_ / 2), textureS_, 1.0f, 1.0f, 0.0f, 0xFFFFFFFF);
+				//Novice::DrawSprite(int(pos_.x - width_ / 2), int(pos_.y - height_ / 2), textureS_, 1.0f, 1.0f, 0.0f, 0xFFFFFFFF);
 			}
 			else {
 				///選ばれてない

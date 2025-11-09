@@ -117,6 +117,9 @@ void DrawEngine::Initialize
 	//debugController.As(&debugController1);
 	//debugController1->SetEnableGPUBasedValidation(TRUE);
 
+	/// カメラのスベア
+	saveCamera_ = new Camera((float)kClientHeight_, (float)kClientWidth_);
+
 	/// デフォルトのモデルを設定
 	SetModel("resources/TemplateResource/object/plane/plane.obj");
 	defaultTextureHandle_ = LoadModelTexture("resources/TemplateResource/texture/white5x5.png");
@@ -876,6 +879,11 @@ void DrawEngine::Draw3DTile() {
 
 	}
 
+}
+
+void DrawEngine::SetCamera(Camera* camera) {
+	instanceCamera_ = camera;
+	*saveCamera_ = *camera;
 }
 
 bool DrawEngine::SetModelTexture(Model* model) {

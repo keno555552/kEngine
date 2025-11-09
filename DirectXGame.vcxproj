@@ -172,7 +172,7 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>Default</LanguageStandard_C>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\kEngine\pso\;$(MSBuildProjectDirectory)\kEngine\;$(MSBuildProjectDirectory)\kEngine\tool\StageManager;$(MSBuildProjectDirectory)\kEngine\tool\ConvertString;$(MSBuildProjectDirectory)\kEngine\core\driver\;$(MSBuildProjectDirectory)\kEngine\core\pso\;$(MSBuildProjectDirectory)\kEngine\drawEngine\;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\InstanceManager;S(MSBuildProjectDirectory)\..\scenes;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\ObjectResource\;$(MSBuildProjectDirectory)\kEngine\Lighting\;$(MSBuildProjectDirectory)\kEngine\material\;$(MSBuildProjectDirectory)\kEngine\Sound\;$(MSBuildProjectDirectory)\kEngine\Shader\;$(MSBuildProjectDirectory)\kEngine\core\Input\;$(MSBuildProjectDirectory)\kEngine\tool\DebugCamera\;$(MSBuildProjectDirectory)\kEngine\tool\StageMananger\;$(MSBuildProjectDirectory)\kEngine\tool\mathsUnit\;$(MSBuildProjectDirectory)\;S(MSBuildProjectDirectory)\kEngine\ResourceManager</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\kEngine\pso\;$(MSBuildProjectDirectory)\kEngine\;$(MSBuildProjectDirectory)\kEngine\tool\StageManager;$(MSBuildProjectDirectory)\kEngine\tool\ConvertString;$(MSBuildProjectDirectory)\kEngine\tool\Camera;$(MSBuildProjectDirectory)\kEngine\core\driver\;$(MSBuildProjectDirectory)\kEngine\core\pso\;$(MSBuildProjectDirectory)\kEngine\drawEngine\;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\InstanceManager;$(MSBuildProjectDirectory)\kEngine\drawEngine\GameObject\Button;$(MSBuildProjectDirectory)\kEngine\drawEngine\GameObject\Object;S(MSBuildProjectDirectory)\..\scenes;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\ObjectResource\;$(MSBuildProjectDirectory)\kEngine\Lighting\;$(MSBuildProjectDirectory)\kEngine\material\;$(MSBuildProjectDirectory)\kEngine\Sound\;$(MSBuildProjectDirectory)\kEngine\Shader\;$(MSBuildProjectDirectory)\kEngine\core\Input\;$(MSBuildProjectDirectory)\kEngine\tool\DebugCamera\;$(MSBuildProjectDirectory)\kEngine\tool\StageMananger\;$(MSBuildProjectDirectory)\kEngine\tool\mathsUnit\;$(MSBuildProjectDirectory)\;S(MSBuildProjectDirectory)\kEngine\ResourceManager</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -196,7 +196,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>Default</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\kEngine\pso\;$(MSBuildProjectDirectory)\kEngine\;$(MSBuildProjectDirectory)\kEngine\tool\StageManager;$(MSBuildProjectDirectory)\kEngine\tool\ConvertString;$(MSBuildProjectDirectory)\kEngine\core\driver\;$(MSBuildProjectDirectory)\kEngine\core\pso\;$(MSBuildProjectDirectory)\kEngine\drawEngine\;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\InstanceManager;S(MSBuildProjectDirectory)\..\scenes;$(MSBuildProjectDirectory)\kEngine\drawEngine\DrawData;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\ObjectResource\;$(MSBuildProjectDirectory)\kEngine\drawEngine\InstandManager;$(MSBuildProjectDirectory)\kEngine\Lighting\;$(MSBuildProjectDirectory)\kEngine\material\;$(MSBuildProjectDirectory)\kEngine\Sound\;$(MSBuildProjectDirectory)\kEngine\Shader\;$(MSBuildProjectDirectory)\kEngine\core\Input\;$(MSBuildProjectDirectory)\kEngine\tool\DebugCamera\;$(MSBuildProjectDirectory)\kEngine\tool\StageMananger\;$(MSBuildProjectDirectory)\kEngine\tool\mathsUnit\;$(MSBuildProjectDirectory)\;S(MSBuildProjectDirectory)\kEngine\ResourceManager</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\kEngine\pso\;$(MSBuildProjectDirectory)\kEngine\;$(MSBuildProjectDirectory)\kEngine\tool\StageManager;$(MSBuildProjectDirectory)\kEngine\tool\ConvertString;$(MSBuildProjectDirectory)\kEngine\tool\Camera;$(MSBuildProjectDirectory)\kEngine\core\driver\;$(MSBuildProjectDirectory)\kEngine\core\pso\;$(MSBuildProjectDirectory)\kEngine\drawEngine\;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\InstanceManager;$(MSBuildProjectDirectory)\kEngine\drawEngine\GameObject\Button;$(MSBuildProjectDirectory)\kEngine\drawEngine\GameObject\Object;S(MSBuildProjectDirectory)\..\scenes;$(MSBuildProjectDirectory)\kEngine\drawEngine\DrawData;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\ObjectResource\;$(MSBuildProjectDirectory)\kEngine\drawEngine\InstandManager;$(MSBuildProjectDirectory)\kEngine\Lighting\;$(MSBuildProjectDirectory)\kEngine\material\;$(MSBuildProjectDirectory)\kEngine\Sound\;$(MSBuildProjectDirectory)\kEngine\Shader\;$(MSBuildProjectDirectory)\kEngine\core\Input\;$(MSBuildProjectDirectory)\kEngine\tool\DebugCamera\;$(MSBuildProjectDirectory)\kEngine\tool\StageMananger\;$(MSBuildProjectDirectory)\kEngine\tool\mathsUnit\;$(MSBuildProjectDirectory)\;S(MSBuildProjectDirectory)\kEngine\ResourceManager</AdditionalIncludeDirectories>
       <Optimization>MaxSpeed</Optimization>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -226,7 +226,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>Default</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\kEngine\pso\;$(MSBuildProjectDirectory)\kEngine\;$(MSBuildProjectDirectory)\kEngine\tool\StageManager;$(MSBuildProjectDirectory)\kEngine\tool\ConvertString;$(MSBuildProjectDirectory)\kEngine\core\driver\;$(MSBuildProjectDirectory)\kEngine\core\pso\;$(MSBuildProjectDirectory)\kEngine\drawEngine\;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\InstanceManager;S(MSBuildProjectDirectory)\..\scenes;$(MSBuildProjectDirectory)\kEngine\drawEngine\DrawData;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\ObjectResource\;$(MSBuildProjectDirectory)\kEngine\drawEngine\InstandManager;$(MSBuildProjectDirectory)\kEngine\Lighting\;$(MSBuildProjectDirectory)\kEngine\material\;$(MSBuildProjectDirectory)\kEngine\Sound\;$(MSBuildProjectDirectory)\kEngine\core\Input\;$(MSBuildProjectDirectory)\kEngine\tool\ConvertString\;$(MSBuildProjectDirectory)\kEngine\tool\DebugCamera\;$(MSBuildProjectDirectory)\kEngine\tool\StageMananger\;$(MSBuildProjectDirectory)\kEngine\tool\mathsUnit\;$(MSBuildProjectDirectory)\resources\Shader\;$(MSBuildProjectDirectory)\;S(MSBuildProjectDirectory)\kEngine\ResourceManager</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\kEngine\pso\;$(MSBuildProjectDirectory)\kEngine\;$(MSBuildProjectDirectory)\kEngine\tool\StageManager;$(MSBuildProjectDirectory)\kEngine\tool\ConvertString;$(MSBuildProjectDirectory)\kEngine\tool\Camera;$(MSBuildProjectDirectory)\kEngine\core\driver\;$(MSBuildProjectDirectory)\kEngine\core\pso\;$(MSBuildProjectDirectory)\kEngine\drawEngine\;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\InstanceManager;$(MSBuildProjectDirectory)\kEngine\drawEngine\GameObject\Button;$(MSBuildProjectDirectory)\kEngine\drawEngine\GameObject\Object;S(MSBuildProjectDirectory)\..\scenes;$(MSBuildProjectDirectory)\kEngine\drawEngine\DrawData;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\ObjectResource\;$(MSBuildProjectDirectory)\kEngine\drawEngine\InstandManager;$(MSBuildProjectDirectory)\kEngine\Lighting\;$(MSBuildProjectDirectory)\kEngine\material\;$(MSBuildProjectDirectory)\kEngine\Sound\;$(MSBuildProjectDirectory)\kEngine\core\Input\;$(MSBuildProjectDirectory)\kEngine\tool\ConvertString\;$(MSBuildProjectDirectory)\kEngine\tool\DebugCamera\;$(MSBuildProjectDirectory)\kEngine\tool\StageMananger\;$(MSBuildProjectDirectory)\kEngine\tool\mathsUnit\;$(MSBuildProjectDirectory)\resources\Shader\;$(MSBuildProjectDirectory)\;S(MSBuildProjectDirectory)\kEngine\ResourceManager</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -246,9 +246,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="kEngine\tool\Camera\Camera.cpp" />
     <ClCompile Include="kEngine\drawEngine\ResourceManager\InstanceManager\InstanceManager.cpp" />
-    <ClCompile Include="kEngine\GameObject\button.cpp" />
-    <ClCompile Include="kEngine\tool\DebugCamera\DebugCamera.cpp" />
+    <ClCompile Include="kEngine\GameObject\Button\button.cpp" />
+    <ClCompile Include="kEngine\tool\Camera\DebugCamera.cpp" />
     <ClCompile Include="kEngine\core\Input\inputManager.cpp" />
     <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\Cube.cpp" />
     <ClCompile Include="kEngine\core\driver\config.cpp" />
@@ -300,6 +301,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\Triangle.cpp" />
     <ClCompile Include="kEngine\tool\TimeManager\TimeManager.cpp" />
     <ClCompile Include="kEngine\drawEngine\ResourceManager\InstanceManager\ModelInstance.cpp" />
+    <ClCompile Include="kEngine\GameObject\Object\Object.cpp" />
     <ClCompile Include="scenes\Scene1.cpp" />
     <ClCompile Include="kEngine\drawEngine\DrawData\SpriteData.cpp" />
     <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\Particle.cpp" />
@@ -308,9 +310,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\drawEngine\ResourceManager\WVPResource.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="kEngine\tool\Camera\Camera.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\InstanceManager\InstanceManager.h" />
-    <ClInclude Include="kEngine\GameObject\button.h" />
-    <ClInclude Include="kEngine\tool\DebugCamera\DebugCamera.h" />
+    <ClInclude Include="kEngine\GameObject\Button\button.h" />
+    <ClInclude Include="kEngine\tool\Camera\DebugCamera.h" />
     <ClInclude Include="kEngine\core\Input\inputManager.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\Cube.h" />
     <ClInclude Include="kEngine\core\driver\config.h" />
@@ -360,6 +363,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\Triangle.h" />
     <ClInclude Include="kEngine\tool\TimeManager\TimeManager.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\InstanceManager\ModelInstance.h" />
+    <ClInclude Include="kEngine\GameObject\Object\Object.h" />
     <ClInclude Include="scenes\Scene1.h" />
     <ClInclude Include="kEngine\drawEngine\DrawData\SpriteData.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\Particle.h" />

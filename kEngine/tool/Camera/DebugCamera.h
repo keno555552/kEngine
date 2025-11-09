@@ -1,17 +1,12 @@
 #pragma once
-#include "Matrix4x4.h"
-#include "Transform.h"
-#include "TransformationMatrix.h"
-#include "Vector2.h"
-#include "Vector3.h"
-#include "Vector4.h"
-#include "config.h"
+#include "Camera.h"
 #include "kEngine.h"
 
 class DebugCamera {
 public:
   /// 初期化
   DebugCamera(kEngine *system, float WindowWidth, float WindowHeight);
+  ~DebugCamera();
 
   /// 更新
   void Update();
@@ -29,9 +24,9 @@ public:
   void Move(Vector3 speed);
   void Rotate(Vector3 Theta);
 
-  Matrix4x4 GetViewMatrix() { return viewMatrix_; }
-  Matrix4x4 GetProjectionMatrix() { return projectionMatrix_; }
-  Transform GetTransform() { return cameraTransform_; }
+  Matrix4x4 GetViewMatrix() { return camera_->GetViewMatrix(); }
+  Matrix4x4 GetProjectionMatrix() { return camera_->GetProjectionMatrix(); }
+  Transform GetTransform() { return camera_->GetTransform(); }
 
 	/// 操作設定
 	void isKeyQAvailable(bool available) { isQ_ = available; }
@@ -49,20 +44,7 @@ public:
 private:
   kEngine *system_ = nullptr;
 
-  /// 累積回転行列
-  Matrix4x4 matRot_;
-
-  /// カメラ変数を作る
-  Transform cameraDefaultTransform_{{1.0f, 1.0f, 1.0f},   // scale
-                                    {0.0f, 0.0f, 0.0f},   // rotate
-                                    {0.0f, 0.0f, -5.0f}}; // translate
-
-  Transform cameraTransform_{cameraDefaultTransform_};
-
-	/// ProjectionMatrix
-	Matrix4x4 projectionMatrix_{};
-	/// ビュー行列
-	Matrix4x4 viewMatrix_{};
+  Camera * camera_ = nullptr;
 
 private:
 	/// 操作可能フラグ

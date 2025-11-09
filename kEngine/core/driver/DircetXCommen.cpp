@@ -5,8 +5,8 @@ DircetXCommen::~DircetXCommen() {
 }
 
 void DircetXCommen::StartFrame() {
-	static FrameRateLimiter limiter(60.0);
-	limiter.Wait();
+	//static FrameRateLimiter limiter(60.0);
+	//limiter.Wait();
 
 	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplWin32_NewFrame();
@@ -76,7 +76,7 @@ void DircetXCommen::EndFrame() {
 	commandQueue->ExecuteCommandLists(1, commandLists);
 
 	// GPUとOSに画面の交換を行うよう通知する
-	SwapChain->Present(0, 0);
+	SwapChain->Present(1, 0);
 
 	// Fenceの値を更新
 	fenceValue++;
@@ -101,3 +101,38 @@ void DircetXCommen::EndFrame() {
 	//static FrameRateLimiter limiter(60.0);
 	//limiter.Wait();
 }
+
+
+
+
+FrameRateLimiter::FrameRateLimiter(double targetFPS) {
+	targetFrameTime = 1.0f / targetFPS;
+	QueryPerformanceFrequency(&frequency);
+	QueryPerformanceCounter(&lastTime);
+}
+
+void FrameRateLimiter::Wait() {
+	LARGE_INTEGER currentTime;
+	QueryPerformanceCounter(&currentTime);
+
+	double elapsed = static_cast<double>(currentTime.QuadPart - lastTime.QuadPart) / frequency.QuadPart;
+	double remaining = targetFrameTime - elapsed;
+
+	if (remaining > 0.001f) {
+		DWORD sleepMs = static_cast<DWORD>((remaining - 0.001f) * 1000.0f);
+		if (sleepMs > 0) {
+			Sleep(sleepMs);
+		}
+	}
+
+	// busy wait
+	do {
+		QueryPerformanceCounter(&currentTime);
+		elapsed = static_cast<double>(currentTime.QuadPart - lastTime.QuadPart) / frequency.QuadPart;
+	} while (elapsed < targetFrameTime);
+
+	// 更新為實際時間點
+	lastTime = currentTime;
+}
+
+

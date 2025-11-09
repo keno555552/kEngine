@@ -9,7 +9,6 @@ kEngine::kEngine() {
 	soundManager = new SoundManager;
 	timeManager = new TimeManager;
 
-
 	///Lighting
 	DirectionalLight directionalLight{
 		.color{1.0f,1.0f,1.0f,1.0f},
@@ -76,7 +75,7 @@ void kEngine::DrawCube(TransformationMatrix* wvpData, MaterialConfig material) {
 }
 
 void kEngine::DrawSprete(TransformationMatrix* wvpData, MaterialConfig material) {
-	drawEngine->DrawSphere(wvpData, material,1);
+	drawEngine->DrawSphere(wvpData, material, 1);
 }
 
 void kEngine::DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle) {
@@ -92,6 +91,10 @@ void kEngine::Draw3DTile(TransformationMatrix* wvpData, std::vector<MaterialConf
 	drawEngine->Collect3DTile(wvpData, material);
 }
 
+int kEngine::GetMuitModelNum(int modelHandle) {
+	return drawEngine->GetMuitModelNum(modelHandle);
+}
+
 int kEngine::SetModelObj(std::string path) {
 	return drawEngine->SetModel(path);
 }
@@ -102,7 +105,6 @@ int kEngine::commonTextureHandleReader(int handle) {
 int kEngine::commonModelHandleReader(int handle) {
 	return drawEngine->readModelTextureHandle(handle);
 };
-
 
 int kEngine::LoadTextrue(const std::string& filePath) {
 	int handle = drawEngine->LoadTexture(filePath);
@@ -118,7 +120,7 @@ int kEngine::SoundLoadSE(const char* filename) {
 }
 
 void kEngine::SoundPlaySE(int Handle, float volume) {
-	soundManager->SoundPlaySE(Handle,volume);
+	soundManager->SoundPlaySE(Handle, volume);
 }
 
 void kEngine::SoundPlayBGM(int Handle, float volume) {
@@ -145,11 +147,11 @@ void kEngine::SoundSetMasterVolume(float volume) {
 	soundManager->SoundSetMasterVolume(volume);
 }
 
-void kEngine::SoundSetSEVolume(float volume){
+void kEngine::SoundSetSEVolume(float volume) {
 	soundManager->SoundSetMasterSEVolume(volume);
 }
 
-void kEngine::SoundSetBGMVolume(float volume){
+void kEngine::SoundSetBGMVolume(float volume) {
 	soundManager->SoundSetMasterBGMVolume(volume);
 }
 
@@ -158,12 +160,12 @@ bool kEngine::SoundIsPlaying(int Handle) {
 	return false;
 }
 
-float kEngine::SoundGetVolume(int Handle) {return soundManager->SoundGetVolume(Handle);}
+float kEngine::SoundGetVolume(int Handle) { return soundManager->SoundGetVolume(Handle); }
 float kEngine::SoundGetMasterVolume() const { return soundManager->SoundGetMasterVolume(); }
 float kEngine::SoundGetBGMVolume() const { return soundManager->SoundGetBGMVolume(); }
 float kEngine::SoundGetSEVolume() const { return soundManager->SoundGetSEVolume(); }
 
-void kEngine::SoundSetMute(int Handle, bool isMute) {soundManager->SoundSetMute(Handle,isMute);}
+void kEngine::SoundSetMute(int Handle, bool isMute) { soundManager->SoundSetMute(Handle, isMute); }
 void kEngine::SoundSetMasterMute(bool isMute) { soundManager->SoundSetMasterMute(isMute); }
 void kEngine::SoundSetBGMMute(bool isMute) { soundManager->SoundSetBGMMute(isMute); };
 void kEngine::SoundSetSEMute(bool isMute) { soundManager->SoundSetSEMute(isMute); };
@@ -272,11 +274,11 @@ int kEngine::GetGamepadDirectionFloat() {
 	return inputManager->gamepadDirectionFloat();
 }
 
-float kEngine::GetGamepadLStick01X(){
+float kEngine::GetGamepadLStick01X() {
 	return inputManager->gamepadLStick01X();
 }
 
-float kEngine::GetGamepadLStick01Y(){
+float kEngine::GetGamepadLStick01Y() {
 	return inputManager->gamepadLStick01Y();
 }
 

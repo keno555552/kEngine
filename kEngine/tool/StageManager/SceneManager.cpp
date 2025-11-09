@@ -36,10 +36,10 @@ void SceneManager::SceneChanger() {
 	}
 
 
-	if (system_->GetTriggerOn(DIK_R) || system_->GetGamepadTriggerOn(VK_PAD_START)) {
-		isReset_ = true;
-		delete sceneUsing_, sceneUsing_ = nullptr;
-	}
+	//if (system_->GetTriggerOn(DIK_R) || system_->GetGamepadTriggerOn(VK_PAD_START)) {
+	//	isReset_ = true;
+	//	delete sceneUsing_, sceneUsing_ = nullptr;
+	//}
 
 
 	if (sceneUsing_ == nullptr) {
@@ -76,8 +76,6 @@ void SceneManager::Update() {
 	if (sceneUsing_ != nullptr) {
 		sceneUsing_->Update();
 	}
-
-
 }
 
 void SceneManager::Render() {

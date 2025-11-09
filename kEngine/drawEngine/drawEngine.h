@@ -3,6 +3,7 @@
 #include "externals/DirectXTex/DirectXTex.h"
 #include "externals/DirectXTex/d3dx12.h"
 #include <vector>
+#include "Config.h"
 #include "shader_compile.h"
 #include "PSO.h"
 #include "ResourceManager.h"
@@ -17,6 +18,8 @@
 #include "LightModelType.h"
 #include "MaterialConfig.h"
 #include "VertexIndex.h"
+#include "Camera.h"
+
 
 #include <format>
 
@@ -35,7 +38,6 @@ public:
 
 	/// 三角形関連
 	void DrawTriangle(TransformationMatrix* wvpData, MaterialConfig material);
-
 
 	/// 2D図形関連
 	void CollectSprite(Vector2 pos, MaterialConfig material);
@@ -59,6 +61,9 @@ public:
 	/// Tile関連
 	void Collect3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = -1);
 	void Draw3DTile();
+
+	/// Camera
+	void SetCamera(Camera* camera);
 
 	/// リソースローディング
 
@@ -134,6 +139,10 @@ private:
 	int instance2DCounter_ = 0;
 	int instance3DCounter_ = 0;
 
+	/// カメラ
+	Camera* instanceCamera_ = nullptr; // 実体は外でもつ
+	Camera* saveCamera_ = nullptr; //　仮カメラ、カメラがない時使う 
+
 	//Material関連
 	Material* materialData = nullptr;
 	DirectionalLight* lightingData = nullptr;
@@ -147,7 +156,7 @@ private:
 	};
 
 	std::vector<OffsetData*> instanceOffsetData_;
-	int offsetDataCounter_;
+	int offsetDataCounter_{};
 
 
 private:

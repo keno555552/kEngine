@@ -231,7 +231,7 @@
     <ClCompile Include="kEngine\Sound\soundManager.cpp">
       <Filter>ソース ファイル\kEngine\Sound</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\DebugCamera\DebugCamera.cpp">
+    <ClCompile Include="kEngine\tool\Camera\DebugCamera.cpp">
       <Filter>ソース ファイル\kEngine\tool</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\tool\mathsUnit\Matrix3x3.cpp">
@@ -288,7 +288,7 @@
     <ClCompile Include="kEngine\core\pso\shader_compile.cpp">
       <Filter>ソース ファイル\Shader</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\GameObject\button.cpp">
+    <ClCompile Include="kEngine\GameObject\Button\button.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\tool\mathsUnit\Vector4.cpp">
@@ -304,6 +304,12 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\drawEngine\ResourceManager\WVPResource.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\tool\Camera\Camera.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\GameObject\Object\Object.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -425,7 +431,7 @@
     <ClInclude Include="kEngine\Sound\soundUnit.h">
       <Filter>ヘッダー ファイル\kEngine\Sound</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\DebugCamera\DebugCamera.h">
+    <ClInclude Include="kEngine\tool\Camera\DebugCamera.h">
       <Filter>ヘッダー ファイル\kEngine\tool</Filter>
     </ClInclude>
     <ClInclude Include="scenes\Scene1.h">
@@ -467,7 +473,7 @@
     <ClInclude Include="kEngine\core\pso\shader_compile.h">
       <Filter>ヘッダー ファイル\Shader</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\GameObject\button.h">
+    <ClInclude Include="kEngine\GameObject\Button\button.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\drawEngine\ResourceManager\InstanceManager\InstanceManager.h">
@@ -480,6 +486,12 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\drawEngine\ResourceManager\WVPResource.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\tool\Camera\Camera.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\GameObject\Object\Object.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

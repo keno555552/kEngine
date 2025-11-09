@@ -7,7 +7,6 @@ void Scene::Update() {
 void Scene::Draw() {
 }
 
-
 void Scene::ChangeNextStage(SceneNum sceneNum) {
 	nextStage = sceneNum;
 	phase_ = ScenePhase::EXIT;

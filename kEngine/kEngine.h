@@ -8,8 +8,6 @@
 #include "materialconfig.h"
 #include "tool/TimeManager/TimeManager.h"
 
-
-
 class kEngine
 {
 public:
@@ -32,14 +30,14 @@ public:
 #pragma endregion
 
 #pragma region 描画システム
-	
+
 	/// <summary>
 	/// 3D 三角形を描く
 	/// </summary>
 	/// <param name="wvpData">: 計算終わったTransformMatrix</param>
 	/// <param name="material">: MaterialConfig </param>
 	void DrawTriangle(TransformationMatrix* wvpData, MaterialConfig material);
-	
+
 	/// <summary>
 	/// 2D 四角形を描く, 左上が0,0, 右下プラス, 座標はピクセル計算
 	/// </summary>
@@ -77,14 +75,14 @@ public:
 	/// <param name="wvpData">: 計算終わったTransformMatrix</param>
 	/// <param name="material">: MaterialConfig </param>
 	void DrawSprete(TransformationMatrix* wvpData, MaterialConfig material);
-	
+
 	/// <summary>
 	/// 
 	/// </summary>
 	/// <param name="wvpData"></param>
 	/// <param name="material"></param>
 	/// <param name="modelHandle"></param>
-	void DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material,int modelHandle);
+	void DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle);
 
 	void DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material);
 
@@ -94,8 +92,8 @@ public:
 	/// <param name="wvpData"></param>
 	/// <param name="material"></param>
 	void Draw3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material);
-	
-	int GetMuitModelNum(int modelHandle) { return drawEngine->GetMuitModelNum(modelHandle); }
+
+	int GetMuitModelNum(int modelHandle);
 	int SetModelObj(std::string path);
 
 	int commonTextureHandleReader(int handle);
@@ -128,7 +126,7 @@ public:
 	float SoundGetBGMVolume() const;
 	float SoundGetSEVolume() const;
 
-	void SoundSetMute(int Handle,bool isMute);
+	void SoundSetMute(int Handle, bool isMute);
 	void SoundSetMasterMute(bool isMute);
 	void SoundSetBGMMute(bool isMute);
 	void SoundSetSEMute(bool isMute);
@@ -194,11 +192,10 @@ public:
 #pragma endregion
 
 private:
-	DircetXCommen* dxComm;
-	DrawEngine* drawEngine;
+	DircetXCommen* dxComm = nullptr;
+	DrawEngine* drawEngine = nullptr;
+	InputManager* inputManager = nullptr;
+	SoundManager* soundManager = nullptr;
+	TimeManager* timeManager = nullptr;
 
-	InputManager* inputManager;
-	SoundManager* soundManager;
-	TimeManager* timeManager;
 };
-
