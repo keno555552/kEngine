@@ -5,7 +5,7 @@ struct TransformationMatrix
     float4x4 WVP;
     float4x4 world;
 };
-StructuredBuffer<TransformationMatrix> gTransformationMatrix : register(t0);
+StructuredBuffer<TransformationMatrix> gTransformationMatrices : register(t0);
 
 cbuffer InstanceOffset : register(b1)
 {
@@ -23,20 +23,14 @@ struct VertexShaderInput
 
 VertexShaderOutput main(VertexShaderInput input, uint instanceId:SV_InstanceID)
 {
-    VertexShaderOutput output;
-    output.position = mul(input.position, gTransformationMatrix[instanceId].WVP);
-    output.texcoord = input.texcoord;
-    output.normal = normalize(mul(input.normal, (float3x3) gTransformationMatrix[instanceId].world));
-    return output;
+    uint actualIndex = instanceId + instanceOffset;
+    TransformationMatrix transform = gTransformationMatrices[actualIndex];
     
-    //uint actualIndex = instanceId + instanceOffset;
-    //TransformationMatrix transform = gTransformationMatrices[actualIndex];
-    //
-    //VertexShaderOutput output;
-    //output.position = mul(input.position, transform.WVP);
-    //output.texcoord = input.texcoord;
-    //output.normal = normalize(mul(input.normal, (float3x3) transform.world));
-    //return output;
+    VertexShaderOutput output;
+    output.position = mul(input.position, transform.WVP);
+    output.texcoord = input.texcoord;
+    output.normal = normalize(mul(input.normal, (float3x3) transform.world));
+    return output;
 }
 
 
