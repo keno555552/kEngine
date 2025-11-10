@@ -1,7 +1,16 @@
 #include "DircetXController.h"
+#include <pplwin.h>
+
+DircetXController::DircetXController() {
+	static FixFPS fixFPS;
+	fixFPS.Initialize();
+	
+	timeBeginPeriod(1);
+}
 
 DircetXController::~DircetXController() {
 	Finalize();
+	timeEndPeriod(1);
 }
 
 void DircetXController::StartFrame() {
@@ -78,6 +87,10 @@ void DircetXController::EndFrame() {
 	// GPUとOSに画面の交換を行うよう通知する
 	SwapChain->Present(1, 0);
 
+	static FixFPS fixFPS;
+	fixFPS.Update();
+
+
 	// Fenceの値を更新
 	fenceValue++;
 	// GPUがここまでたどり着いたときに、Fenceの値を指定した値に代入するようにSignalを送る
@@ -91,6 +104,8 @@ void DircetXController::EndFrame() {
 		// イベント待つ
 		WaitForSingleObject(fenceEvent, INFINITE);
 	}
+
+
 	// 次のフレーム用のコマンドリストを準備
 	hr = commandAllocator->Reset(); // 重置命令分配器，為下一幀準備
 	assert(SUCCEEDED(hr)); // 確保重置成功

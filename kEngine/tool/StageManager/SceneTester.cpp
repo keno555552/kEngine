@@ -104,6 +104,8 @@ SceneTester::SceneTester(kEngine* system) {
 	//	object->transformationMatrix = debugCamera_->transformationMatrixTransform(object->transform);
 	//	objectGroup.push_back(object);
 	//}
+
+	timer_->Init0(60.0f,system->GetTimeManager());
 };
 
 
@@ -215,6 +217,11 @@ void SceneTester::Update() {
 			objectGroup.erase(objectGroup.begin() + i);
 		}
 	}
+
+	if (system_->GetTriggerOn(DIK_Q)) {
+		timer_->parameter_ = 0;
+	}
+	timer_->ToMix();
 }
 
 void SceneTester::Draw() {
@@ -661,6 +668,12 @@ void SceneTester::Draw() {
 		ImGui::InputFloat("FPS", &fps);
 		ImGui::InputFloat("FPS_1s", &fps1s);
 		ImGui::InputFloat("deltaTime", &deltaTime);
+		ImGui::End();
+	}
+
+	{
+		ImGui::Begin("Timer");
+		ImGui::Text("%.1f,%.1f", timer_->parameter_, timer_->maxTime_);
 		ImGui::End();
 	}
 

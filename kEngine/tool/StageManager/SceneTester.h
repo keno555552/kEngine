@@ -119,6 +119,7 @@ private:
 
 	/// Test
 	//Object* player = new Object;
+	Timer* timer_ = new Timer;
 
 private:
 	/// Menu用変数
