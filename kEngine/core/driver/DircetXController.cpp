@@ -5,8 +5,8 @@ DircetXController::~DircetXController() {
 }
 
 void DircetXController::StartFrame() {
-	static FrameRateLimiter limiter(60.0);
-	limiter.Wait();
+	//static FrameRateLimiter limiter(60.0);
+	//limiter.Wait();
 
 	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplWin32_NewFrame();
@@ -97,10 +97,8 @@ void DircetXController::EndFrame() {
 	hr = commandList->Reset(commandAllocator, nullptr); // 重置命令列表，準備記錄新的渲染命令
 	assert(SUCCEEDED(hr)); // 確保重置成功
 
-
-
-	static FrameRateLimiter limiter(60.0);
-	limiter.Wait();
+	//static FrameRateLimiter limiter(60.0);
+	//limiter.Wait();
 }
 
 
