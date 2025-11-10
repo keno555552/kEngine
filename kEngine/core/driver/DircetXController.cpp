@@ -98,6 +98,7 @@ void DircetXController::EndFrame() {
 	assert(SUCCEEDED(hr)); // 確保重置成功
 
 
+
 	static FrameRateLimiter limiter(60.0);
 	limiter.Wait();
 }
