@@ -9,7 +9,7 @@
 #include <dxcapi.h>
 #pragma comment(lib,"dxcompiler.lib")
 
-#include "DircetXBase.h"
+#include "DircetXCore.h"
 
 
 class Shader_compile{

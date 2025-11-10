@@ -1,5 +1,5 @@
 #pragma once
-#include "DircetXBase.h"
+#include "DircetXCore.h"
 #include <vector>
 #include <wrl.h>
 

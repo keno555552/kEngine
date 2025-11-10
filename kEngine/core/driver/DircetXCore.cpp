@@ -1,4 +1,4 @@
-#include "DircetXBase.h"
+#include "DircetXCore.h"
 
 #include <cassert>
 #pragma comment(lib,"d3d12.lib")
@@ -35,7 +35,7 @@ bool CheakXInputDeviceConnected() {
 
 #pragma region DirectXCommon
 
-DirectXBase::DirectXBase() {
+DirectXCore::DirectXCore() {
 	debugController = {};
 	HRESULT hr = {};
 	dxgiFactory = {};
@@ -64,7 +64,7 @@ DirectXBase::DirectXBase() {
 	gamepadDevice = {};
 }
 
-DirectXBase::~DirectXBase() {
+DirectXCore::~DirectXCore() {
 	//if (dxgiFactory)			dxgiFactory->Release();
 	//if (useAdapter)				useAdapter->Release();
 	//if (device)					device->Release();
@@ -79,44 +79,44 @@ DirectXBase::~DirectXBase() {
 	//CloseHandle(fenceEvent);
 }
 
-uint32_t DirectXBase::GetDesriptorSizeSRV() {
+uint32_t DirectXCore::GetDesriptorSizeSRV() {
 	return device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 }
 
-uint32_t DirectXBase::GetDesriptorSizeRTV() {
+uint32_t DirectXCore::GetDesriptorSizeRTV() {
 	return device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 }
 
-uint32_t DirectXBase::GetDesriptorSizeDSV() {
+uint32_t DirectXCore::GetDesriptorSizeDSV() {
 	return device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 }
 
 
-D3D12_CPU_DESCRIPTOR_HANDLE DirectXBase::GetCPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index) {
+D3D12_CPU_DESCRIPTOR_HANDLE DirectXCore::GetCPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index) {
 	D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	handleCPU.ptr += (descriptorSize * index);
 	return handleCPU;
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE DirectXBase::GetGPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index) {
+D3D12_GPU_DESCRIPTOR_HANDLE DirectXCore::GetGPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index) {
 	D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
 	handleGPU.ptr += (descriptorSize * index);
 	return handleGPU;
 }
 
-bool DirectXBase::isDirectInputCreated() {
+bool DirectXCore::isDirectInputCreated() {
 	if (directInput != nullptr) { return true; }
 	return false;
 }
 
 
-void DirectXBase::SetDirectXInputKeyBoard() {
+void DirectXCore::SetDirectXInputKeyBoard() {
 	SetDirectXInput(Keyboard, keyBoardDevice);
 	bool boool = true;
 	config::SetConnetKeyboard(&boool);
 }
 
-void DirectXBase::ReleaseDirectXInputKeyBoard() {
+void DirectXCore::ReleaseDirectXInputKeyBoard() {
 	if (keyBoardDevice) {
 		keyBoardDevice->Unacquire();
 		keyBoardDevice->Release();
@@ -126,13 +126,13 @@ void DirectXBase::ReleaseDirectXInputKeyBoard() {
 	}
 }
 
-void DirectXBase::SetDirectXInputMouse() {
+void DirectXCore::SetDirectXInputMouse() {
 	SetDirectXInput(Mouse, mouseDevice);
 	bool boool = true;
 	config::SetConnetMouse(&boool);
 }
 
-void DirectXBase::ReleaseDirectXInputMouse() {
+void DirectXCore::ReleaseDirectXInputMouse() {
 	if (mouseDevice) {
 		mouseDevice->Unacquire();
 		mouseDevice->Release();
@@ -142,13 +142,13 @@ void DirectXBase::ReleaseDirectXInputMouse() {
 	}
 }
 
-void DirectXBase::SetDirectXInputGamepad() {
+void DirectXCore::SetDirectXInputGamepad() {
 	SetDirectXInput(GamePad, gamepadDevice);
 	bool boool = true;
 	config::SetConnetGamePad(&boool);
 }
 
-void DirectXBase::ReleaseDirectXInputGamepad() {
+void DirectXCore::ReleaseDirectXInputGamepad() {
 	if (gamepadDevice) {
 		gamepadDevice->Unacquire();
 		gamepadDevice->Release();
@@ -159,9 +159,7 @@ void DirectXBase::ReleaseDirectXInputGamepad() {
 }
 
 
-
-
-ID3D12Device* DirectXBase::CreateDevice(IDXGIAdapter4* adapter) {
+ID3D12Device* DirectXCore::CreateDevice(IDXGIAdapter4* adapter) {
 	ID3D12Device* device = nullptr;
 	// 機能レベルとログ出力用の文字列
 	D3D_FEATURE_LEVEL featureLevels[] = {
@@ -217,7 +215,7 @@ ID3D12Device* DirectXBase::CreateDevice(IDXGIAdapter4* adapter) {
 	return device;
 }
 
-void DirectXBase::InitializeGameInput() {
+void DirectXCore::InitializeGameInput() {
 }
 
 //void DirectXBase::InitializeGameInput() {
@@ -228,7 +226,7 @@ void DirectXBase::InitializeGameInput() {
 //}
 
 
-void DirectXBase::InitializeDirectXInput() {
+void DirectXCore::InitializeDirectXInput() {
 	HRESULT result = DirectInput8Create(
 		winAPI_->GetHINSTANCE(),
 		DIRECTINPUT_VERSION,
@@ -238,7 +236,7 @@ void DirectXBase::InitializeDirectXInput() {
 	assert(SUCCEEDED(result));
 }
 
-void DirectXBase::SetDirectXInput(InputType type, IDirectInputDevice8*& drive) {
+void DirectXCore::SetDirectXInput(InputType type, IDirectInputDevice8*& drive) {
 	HRESULT result;
 	bool boool = false;
 	bool skip = false;
@@ -304,12 +302,12 @@ void DirectXBase::SetDirectXInput(InputType type, IDirectInputDevice8*& drive) {
 	}
 }
 
-void DirectXBase::SetXInput() {
+void DirectXCore::SetXInput() {
 	CheakXInputDeviceConnected();
 }
 
 
-ID3D12CommandQueue* DirectXBase::CreateCommandQueue(ID3D12Device* device) {
+ID3D12CommandQueue* DirectXCore::CreateCommandQueue(ID3D12Device* device) {
 	// コマンドキューを生成する
 	ID3D12CommandQueue* commandQueue = nullptr;
 	D3D12_COMMAND_QUEUE_DESC commandQueueDesc{};
@@ -321,7 +319,7 @@ ID3D12CommandQueue* DirectXBase::CreateCommandQueue(ID3D12Device* device) {
 	return commandQueue;
 }
 
-ID3D12CommandAllocator* DirectXBase::CreateCommandAllocator(ID3D12Device* device) {
+ID3D12CommandAllocator* DirectXCore::CreateCommandAllocator(ID3D12Device* device) {
 	// コマンドアロケータを生成する
 	ID3D12CommandAllocator* commandAllocator = nullptr;
 	HRESULT hr = device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator));
@@ -331,7 +329,7 @@ ID3D12CommandAllocator* DirectXBase::CreateCommandAllocator(ID3D12Device* device
 	return commandAllocator;
 }
 
-ID3D12GraphicsCommandList* DirectXBase::CreateCommandList(ID3D12Device* device, ID3D12CommandAllocator* commandAllocator) {
+ID3D12GraphicsCommandList* DirectXCore::CreateCommandList(ID3D12Device* device, ID3D12CommandAllocator* commandAllocator) {
 	// コマンドリストを生成する
 	ID3D12GraphicsCommandList* commandList = nullptr;
 	HRESULT hr = device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator, nullptr, IID_PPV_ARGS(&commandList));
@@ -341,7 +339,7 @@ ID3D12GraphicsCommandList* DirectXBase::CreateCommandList(ID3D12Device* device, 
 	return commandList;
 }
 
-IDXGISwapChain4* DirectXBase::CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* commandQueue, HWND hwnd, UINT kClientWidth, UINT kClientHeight) {
+IDXGISwapChain4* DirectXCore::CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12CommandQueue* commandQueue, HWND hwnd, UINT kClientWidth, UINT kClientHeight) {
 	// スワップチェーンを生成する
 	IDXGISwapChain4* swapChain = nullptr;
 	swapChainDesc = {};
@@ -359,7 +357,7 @@ IDXGISwapChain4* DirectXBase::CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12
 	return swapChain;
 }
 
-ID3D12DescriptorHeap* DirectXBase::CreateDescriptorHeap(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible) {
+ID3D12DescriptorHeap* DirectXCore::CreateDescriptorHeap(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible) {
 	ID3D12DescriptorHeap* descriptorHeap = nullptr;
 	D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc{};
 	descriptorHeapDesc.Type = heapType;
@@ -371,7 +369,7 @@ ID3D12DescriptorHeap* DirectXBase::CreateDescriptorHeap(ID3D12Device* device, D3
 	return descriptorHeap;
 }
 
-void DirectXBase::CreateRenderTargetViews(ID3D12Device* device, IDXGISwapChain4* swapChain, ID3D12DescriptorHeap* rtvDescriptorHeap) {
+void DirectXCore::CreateRenderTargetViews(ID3D12Device* device, IDXGISwapChain4* swapChain, ID3D12DescriptorHeap* rtvDescriptorHeap) {
 	// SwapChainからResourceを引っ張ってくる
 	HRESULT hr = swapChain->GetBuffer(0, IID_PPV_ARGS(&swapChainResources[0]));
 	// うまく取得できなければ起動できない
@@ -401,7 +399,7 @@ void DirectXBase::CreateRenderTargetViews(ID3D12Device* device, IDXGISwapChain4*
 	device->CreateRenderTargetView(swapChainResources[1], &rtvDesc, rtvHandles[1]);
 }
 
-ID3D12Fence* DirectXBase::CreateFence(ID3D12Device* device) {
+ID3D12Fence* DirectXCore::CreateFence(ID3D12Device* device) {
 	///初期値0でFenceを作る
 	//ID3D12Fence* fence = nullptr;
 	//uint64_t fenceValue = 0;
@@ -415,7 +413,7 @@ ID3D12Fence* DirectXBase::CreateFence(ID3D12Device* device) {
 	return fence;
 }
 
-void DirectXBase::InitializeDrive(const char* kClientTitle, int kClientWidth, int kClientHeight) {
+void DirectXCore::InitializeDrive(const char* kClientTitle, int kClientWidth, int kClientHeight) {
 #ifdef _DEBUG
 	debugController = nullptr;
 	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
@@ -501,11 +499,11 @@ void DirectXBase::InitializeDrive(const char* kClientTitle, int kClientWidth, in
 	// SetDirectXInput(GamePad, gamepadDevice); //XInput優先
 }
 
-bool DirectXBase::ProcessMessage() {
+bool DirectXCore::ProcessMessage() {
 	return winAPI_->ProcessMessage();
 }
 
-void DirectXBase::Finalize() {
+void DirectXCore::Finalize() {
 	/// ImGuiの終了処理。詳細はさして重要ではないので解説は省略する。
 	// こういうもんである。初期化と逆順に行う
 	ImGui_ImplDX12_Shutdown();

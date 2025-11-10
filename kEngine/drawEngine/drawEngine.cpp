@@ -41,7 +41,7 @@ DrawEngine::~DrawEngine() {
 }
 
 void DrawEngine::Initialize
-(const char* kClientTitle, int kClientWidth, int kClientHeight, DirectXBase* directXDriver) {
+(const char* kClientTitle, int kClientWidth, int kClientHeight, DirectXCore* directXDriver) {
 	directXDriver_ = directXDriver;
 	commandList_ = directXDriver_->GetCommandList();
 	resourceManager_ = new ResourceManager(directXDriver_->GetDriver());

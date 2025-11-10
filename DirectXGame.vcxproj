@@ -246,6 +246,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="kEngine\core\driver\FrameRateLimiter.cpp" />
     <ClCompile Include="kEngine\core\driver\WinAPI.cpp" />
     <ClCompile Include="kEngine\tool\Camera\Camera.cpp" />
     <ClCompile Include="kEngine\drawEngine\ResourceManager\InstanceManager\InstanceManager.cpp" />
@@ -269,8 +270,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Sound\soundManager.cpp" />
     <ClCompile Include="kEngine\tool\StageManager\Scene.cpp" />
     <ClCompile Include="kEngine\tool\StringManage\ConvertString.cpp" />
-    <ClCompile Include="kEngine\core\driver\DircetXBase.cpp" />
-    <ClCompile Include="kEngine\core\driver\DircetXCommen.cpp" />
+    <ClCompile Include="kEngine\core\driver\DircetXCore.cpp" />
+    <ClCompile Include="kEngine\core\driver\DircetXController.cpp" />
     <ClCompile Include="kEngine\Lighting\DirectionalLight.cpp" />
     <ClCompile Include="kEngine\drawEngine\drawEngine.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
@@ -312,6 +313,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\drawEngine\ResourceManager\WVPResource.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="kEngine\core\driver\FrameRateLimiter.h" />
     <ClInclude Include="kEngine\core\driver\WinAPI.h" />
     <ClInclude Include="kEngine\tool\Camera\Camera.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\InstanceManager\InstanceManager.h" />
@@ -335,7 +337,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Sound\soundManager.h" />
     <ClInclude Include="kEngine\tool\StageManager\Scene.h" />
     <ClInclude Include="kEngine\tool\StringManage\ConvertString.h" />
-    <ClInclude Include="kEngine\core\driver\DircetXCommen.h" />
+    <ClInclude Include="kEngine\core\driver\DircetXController.h" />
     <ClInclude Include="kEngine\Lighting\DirectionalLight.h" />
     <ClInclude Include="kEngine\drawEngine\drawEngine.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
@@ -359,7 +361,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\kEngine.h" />
     <ClInclude Include="kEngine\core\pso\PSO.h" />
     <ClInclude Include="kEngine\core\pso\shader_compile.h" />
-    <ClInclude Include="kEngine\core\driver\DircetXBase.h" />
+    <ClInclude Include="kEngine\core\driver\DircetXCore.h" />
     <ClInclude Include="kEngine\tool\mathsUnit\TransformationMatrix.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\VertexData.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\VertexResource.h" />

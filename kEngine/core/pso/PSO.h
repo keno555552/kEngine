@@ -12,7 +12,7 @@
 #include <dxcapi.h>
 #pragma comment(lib,"dxcompiler.lib")
 
-#include "DircetXBase.h"
+#include "DircetXCore.h"
 #include "config.h"
 #include <vector>
 
@@ -24,7 +24,7 @@ class PSO{
 public:
 	~PSO();
 
-	void Initialize(DirectXBase* directXDriver);
+	void Initialize(DirectXCore* directXDriver);
 
 	ID3D12RootSignature* getRootSignature(int handle) { return rootSignatureList_[handle]; }
 
@@ -38,7 +38,7 @@ public:
 
 private:
 	//D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
-	DirectXBase* directXDriver_;
+	DirectXCore* directXDriver_;
 	ID3DBlob* signatureBlob_ = nullptr;
 	ID3DBlob* errorBlob_ = nullptr;
 	std::vector<ID3D12RootSignature*> rootSignatureList_;

@@ -4,10 +4,7 @@
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <wrl.h>
-
-
 #include "Logger.h"
-
 #include "WinAPI.h"
 
 // Input
@@ -40,10 +37,10 @@ bool CheakXInputDeviceConnected();
 #pragma endregion
 
 #pragma region DirectXCommon
-class DirectXBase {
+class DirectXCore {
 public:
-	DirectXBase();
-	~DirectXBase();
+	DirectXCore();
+	~DirectXCore();
 
 	/// Getter
 	ID3D12Device* GetDriver() { return device; };

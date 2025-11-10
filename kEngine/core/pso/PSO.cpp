@@ -18,7 +18,7 @@ PSO::~PSO() {
 	//graphicsPipelineState_->Release();
 }
 
-void PSO::Initialize(DirectXBase* directXDriver) {
+void PSO::Initialize(DirectXCore* directXDriver) {
 	directXDriver_ = directXDriver;
 	shader_compile_ = new Shader_compile;
 	shader_compile_->Initialize();

@@ -3,7 +3,7 @@
 #pragma region システム管理
 
 kEngine::kEngine() {
-	dxComm = new DircetXCommen;
+	dxComm = new DircetXController;
 	drawEngine = new DrawEngine;
 	inputManager = new InputManager;
 	soundManager = new SoundManager;

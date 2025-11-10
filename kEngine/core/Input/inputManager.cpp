@@ -1,6 +1,6 @@
 #include "inputManager.h"
 
-void InputManager::Initialize(DirectXBase* directXDirver, TimeManager* timeManager) {
+void InputManager::Initialize(DirectXCore* directXDirver, TimeManager* timeManager) {
 	driver_ = directXDirver;
 	timer->Init0(3, timeManager);
 }

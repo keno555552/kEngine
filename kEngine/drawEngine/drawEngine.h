@@ -1,5 +1,5 @@
 #pragma once
-#include "DircetXBase.h"
+#include "DircetXCore.h"
 #include "externals/DirectXTex/DirectXTex.h"
 #include "externals/DirectXTex/d3dx12.h"
 #include <vector>
@@ -28,7 +28,7 @@ class DrawEngine
 public:
 	~DrawEngine();
 
-	void Initialize(const char* kClientTitle, int kClientWidth, int kClientHeight, DirectXBase* directXDirver);
+	void Initialize(const char* kClientTitle, int kClientWidth, int kClientHeight, DirectXCore* directXDirver);
 
 	void PreDraw();
 	void CommitDraw();
@@ -81,7 +81,7 @@ private:
 	
 	PSO* pso_ = new PSO;
 	ResourceManager* resourceManager_ = nullptr;
-	DirectXBase* directXDriver_ = nullptr;
+	DirectXCore* directXDriver_ = nullptr;
 	ID3D12GraphicsCommandList* commandList_ = nullptr;
 
 	int kClientWidth_ = 0;

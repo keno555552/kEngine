@@ -1,5 +1,5 @@
 #pragma once
-#include "DircetXBase.h"
+#include "DircetXCore.h"
 #include "tool/TimeManager/TimeManager.h"
 #include "config.h"
 #include <cassert>
@@ -7,7 +7,7 @@
 class InputManager
 {
 public:
-	void Initialize(DirectXBase* directXDirver, TimeManager* timeManager);
+	void Initialize(DirectXCore* directXDirver, TimeManager* timeManager);
 
 	void KeysUpdata();
 	void Keys3sUpdata();
@@ -60,7 +60,7 @@ public:
 	int XIKeyChange(int input);
 
 private:
-	DirectXBase* driver_ = nullptr;    // 借り
+	DirectXCore* driver_ = nullptr;    // 借り
 	BYTE keys_[256] = { 0 };
 	BYTE preKeys_[256] = { 0 };
 	DIMOUSESTATE mouse_ = { 0 };
