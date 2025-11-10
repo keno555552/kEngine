@@ -2,38 +2,7 @@
 #include "ConvertString.h"
 
 
-#pragma region wordChange
-void Log(const std::string& message) {
-	OutputDebugStringA(message.c_str());
-}
-
-void Log(const std::wstring& message) {
-	OutputDebugStringW(message.c_str());
-}
-
-std::wstring utf8_to_utf16(const std::string& utf8) {
-	int size_needed = MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), (int)utf8.size(), NULL, 0);
-	std::wstring wstrTo(size_needed, 0);
-	MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), (int)utf8.size(), &wstrTo[0], size_needed);
-	return wstrTo;
-
-}
-
-#pragma endregion
-
-
 #pragma region Input
-LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
-	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam)) {
-		return true;
-	}
-	switch (msg) {
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		return 0;
-	}
-	return DefWindowProc(hwnd, msg, wparam, lparam);
-}
 
 bool CheakXInputDeviceConnected() {
 	XINPUT_STATE state;
@@ -58,170 +27,11 @@ bool CheakXInputDeviceConnected() {
 
 #pragma region WindowMake
 
-IDxcBlob* CompileShader(
-	// CompilerするShaderファイルへのパス
-	const std::wstring& filePath,
-	// Compilerに使用するProfile
-	const wchar_t* profile,
-	// 初期化で生成したものを3つ
-	IDxcUtils* dxcUtils,
-	IDxcCompiler3* dxcCompiler,
-	IDxcIncludeHandler* includeHandler
-) {
-	/// ここの中身をこの後書いていく
-	/// 1.hlslファイルを読む
-	// これからシェーダーをコンパイルする旨をログに出す
-	Log(ConvertString(std::format(L"Begin CompileShader, path:{}, profile:{}\n", filePath, profile)));
-	// hlslファイルを読む
-	IDxcBlobEncoding* shaderSource = nullptr;
-	HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &shaderSource);
-	// 読めなかったら止める
-	assert(SUCCEEDED(hr));
-	// 読み込んだファイルの内容を設定する
-	DxcBuffer shaderSourceBuffer;
-	shaderSourceBuffer.Ptr = shaderSource->GetBufferPointer();
-	shaderSourceBuffer.Size = shaderSource->GetBufferSize();
-	shaderSourceBuffer.Encoding = DXC_CP_UTF8; // UTF8の文字コードであることを通知
-
-	/// 2.Compileする
-	LPCWSTR arguments[] = {
-		filePath.c_str(),			// コンパイル対象のhlslファイル名
-		L"-E", L"main",				// エントリーポイントの指定。基本的にmain以外にはしない
-		L"-T", profile,				// ShaderProfileの設定
-		L"-Zi", L"-Qembed_debug",	// デバッグ用の情報を埋め込む
-		L"-Od",						// 最適化を外しておく
-		L"-Zpr"						// メモリレイアウトは行優先
-	};
-
-	// 実際にShaderをコンパイルする
-	IDxcResult* shaderResult = nullptr;
-	hr = dxcCompiler->Compile(
-		&shaderSourceBuffer, // 読み込んだファイル
-		arguments, // コンパイルオプション
-		_countof(arguments), // コンパイルオプションの数
-		includeHandler, // includeが含まれた諸々
-		IID_PPV_ARGS(&shaderResult) // コンパイル結果
-	);
-
-	// コンパイルエラーではなくdxcが起動できないなど致命的な状況
-	assert(SUCCEEDED(hr));
-
-	/// 3.警告・エラーがでていないか確認する
-	// 警告・エラーが出てたらログに出して止める
-	IDxcBlobUtf8* shaderError = nullptr;
-	shaderError = nullptr;
-	shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
-	if (shaderError != nullptr && shaderError->GetStringLength() != 0) {
-		Log(shaderError->GetStringPointer());
-		std::string errorMessage(shaderError->GetStringPointer(), shaderError->GetStringLength());
-		OutputDebugStringA(errorMessage.c_str());
-		Log(errorMessage);
-		// 警告・エラーダメゼッタイ
-		assert(false);
-	}
-
-	/// 4.Compile結果を受け取って返す
-	// コンパイル結果から実行用のバイナリ部分を取得
-	IDxcBlob* shaderBlob = nullptr;
-	hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
-	assert(SUCCEEDED(hr));
-	// 成功したログを出す
-	Log(ConvertString(std::format(L"Compile Succeeded, path:{}, profile:{}\n", filePath, profile)));
-	// もう使わないリソースを解放
-	shaderSource->Release();
-	shaderResult->Release();
-	// 実行用のバイナリを返却
-	return shaderBlob;
-}
-
-IDxcBlob* CompileShader(
-	// CompilerするShaderファイルへのパス
-	const std::wstring& filePath,
-	// Compilerに使用するProfile
-	const wchar_t* profile,
-	// 初期化で生成したものを3つ
-	IDxcUtils* dxcUtils,
-	IDxcCompiler3* dxcCompiler,
-	IDxcIncludeHandler* includeHandler,
-	LightModelType modelType
-) {
-	/// ここの中身をこの後書いていく
-	/// 1.hlslファイルを読む
-	// これからシェーダーをコンパイルする旨をログに出す
-	Log(ConvertString(std::format(L"Begin CompileShader, path:{}, profile:{}\n", filePath, profile)));
-	// hlslファイルを読む
-	IDxcBlobEncoding* shaderSource = nullptr;
-	HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &shaderSource);
-	// 読めなかったら止める
-	assert(SUCCEEDED(hr));
-	// 読み込んだファイルの内容を設定する
-	DxcBuffer shaderSourceBuffer;
-	shaderSourceBuffer.Ptr = shaderSource->GetBufferPointer();
-	shaderSourceBuffer.Size = shaderSource->GetBufferSize();
-	shaderSourceBuffer.Encoding = DXC_CP_UTF8; // UTF8の文字コードであることを通知
-
-	/// 2.Compileする
-	std::vector<LPCWSTR> arguments = {
-		filePath.c_str(),			// コンパイル対象のhlslファイル名
-		L"-E", L"main",				// エントリーポイントの指定。基本的にmain以外にはしない
-		L"-T", profile,				// ShaderProfileの設定
-		L"-Zi", L"-Qembed_debug",	// デバッグ用の情報を埋め込む
-		L"-Od",						// 最適化を外しておく
-		L"-Zpr"						// メモリレイアウトは行優先
-	};
-	// 光照モデル設定
-	if (modelType == LightModelType::Lambert) {
-		arguments.push_back(L"-D");
-		arguments.push_back(L"LIGHT_MODEL_LAMBERT=1");
-	}
-	if (modelType == LightModelType::HalfLambert) {
-		arguments.push_back(L"-D");
-		arguments.push_back(L"LIGHT_MODEL_HALF=1");
-	}
-
-
-	// 実際にShaderをコンパイルする
-	IDxcResult* shaderResult = nullptr;
-	hr = dxcCompiler->Compile(
-		&shaderSourceBuffer, // 読み込んだファイル
-		arguments.data(), // コンパイルオプション
-		static_cast<uint32_t>(arguments.size()), // コンパイルオプションの数
-		includeHandler, // includeが含まれた諸々
-		IID_PPV_ARGS(&shaderResult) // コンパイル結果
-	);
-	// コンパイルエラーではなくdxcが起動できないなど致命的な状況
-	assert(SUCCEEDED(hr));
-
-	/// 3.警告・エラーがでていないか確認する
-	// 警告・エラーが出てたらログに出して止める
-	IDxcBlobUtf8* shaderError = nullptr;
-	shaderError = nullptr;
-	shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
-	if (shaderError != nullptr && shaderError->GetStringLength() != 0) {
-		Log(shaderError->GetStringPointer());
-		// 警告・エラーダメゼッタイ
-		assert(false);
-	}
-
-	/// 4.Compile結果を受け取って返す
-	// コンパイル結果から実行用のバイナリ部分を取得
-	IDxcBlob* shaderBlob = nullptr;
-	hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
-	assert(SUCCEEDED(hr));
-	// 成功したログを出す
-	Log(ConvertString(std::format(L"Compile Succeeded, path:{}, profile:{}\n", filePath, profile)));
-	// もう使わないリソースを解放
-	shaderSource->Release();
-	shaderResult->Release();
-	// 実行用のバイナリを返却
-	return shaderBlob;
-}
 #pragma endregion
 
 #pragma region DirectXCommon
 
 DirectXBase::DirectXBase() {
-	wc = {};
 	debugController = {};
 	HRESULT hr = {};
 	dxgiFactory = {};
@@ -242,7 +52,7 @@ DirectXBase::DirectXBase() {
 	fence = {};
 	fenceValue = {};
 	fenceEvent = {};
-	hwnd = {};
+	winAPI_ = {};
 
 	directInput = {};
 	keyBoardDevice = {};
@@ -264,54 +74,6 @@ DirectXBase::~DirectXBase() {
 	//if (fence)					fence->Release();
 	//CloseHandle(fenceEvent);
 }
-
-HWND DirectXBase::WindowMake(const char* kClientTitle, int kClientWidth, int kClientHeight) {
-	///windowを登録する
-	RECT wrc{ 0,0,kClientWidth ,kClientHeight };
-	wc = {};
-	wc.lpfnWndProc = WindowProc;
-	wc.lpszClassName = L"CG2WindowClass";
-	wc.hInstance = GetModuleHandle(nullptr);
-	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-
-	///規範に合ってない
-	//size_t size_needed = mbstowcs(NULL, kClientTitle, 0) + 1;
-	//wchar_t* wtitle = new wchar_t[size_needed];
-	//mbstowcs(wtitle, kClientTitle, size_needed);
-
-	///外のtitle const char*を const wchar_t*に転換する
-	///もう古いって
-	/////wstringはstringのwchat_t版
-	//std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-	//std::wstring wtitle = converter.from_bytes(kClientTitle);
-	//const wchar_t* wctitle = wtitle.c_str();
-
-	std::wstring wtitle = utf8_to_utf16(kClientTitle);
-	const wchar_t* wctitle = wtitle.c_str();
-
-	RegisterClass(&wc);
-
-	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, FALSE);
-
-	HWND hwnd = CreateWindow(
-		wc.lpszClassName,
-		wctitle,
-		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
-		CW_USEDEFAULT,
-		CW_USEDEFAULT,
-		wrc.right - wrc.left, // ウィンドウ横幅
-		wrc.bottom - wrc.top, // ウィンドウ縦幅
-		nullptr,
-		nullptr,
-		wc.hInstance,
-		nullptr
-	);
-
-	ShowWindow(hwnd, SW_SHOW);
-
-	return hwnd;
-}
-
 
 uint32_t DirectXBase::GetDesriptorSizeSRV() {
 	return device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -409,13 +171,13 @@ ID3D12Device* DirectXBase::CreateDevice(IDXGIAdapter4* adapter) {
 		// 指定した機能レベルでデバイスが生成できたかを確認
 		if (SUCCEEDED(hr)) {
 			// 生成できたのでログ出力を行ってループを抜ける
-			Log(std::format("FeatureLevel : {}\n", featureLevelStrings[i]));
+			Logger::Log(std::format("FeatureLevel : {}\n", featureLevelStrings[i]));
 			break;
 		}
 	}
 	// デバイスの生成がうまくいかなかったので起動できない
 	assert(device != nullptr);
-	Log("Complete create D3D12Device!!!\n"); // 初期化完了のログをだす
+	Logger::Log("Complete create D3D12Device!!!\n"); // 初期化完了のログをだす
 
 #ifdef _DEBUG
 	ID3D12InfoQueue* infoQueue = nullptr;
@@ -464,7 +226,7 @@ void DirectXBase::InitializeGameInput() {
 
 void DirectXBase::InitializeDirectXInput() {
 	HRESULT result = DirectInput8Create(
-		wc.hInstance,
+		winAPI_->GetHINSTANCE(),
 		DIRECTINPUT_VERSION,
 		IID_IDirectInput8,
 		(void**)&directInput,
@@ -533,7 +295,7 @@ void DirectXBase::SetDirectXInput(InputType type, IDirectInputDevice8*& drive) {
 	if (!skip) {
 		/// 排他制御レベルのセット
 		result = drive->SetCooperativeLevel(
-			hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+			winAPI_->GetHWND(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 		assert(SUCCEEDED(result));
 	}
 }
@@ -660,7 +422,10 @@ void DirectXBase::InitializeDrive(const char* kClientTitle, int kClientWidth, in
 	}
 #endif
 
-	hwnd = WindowMake(kClientTitle, kClientWidth, kClientHeight);
+	/// WindowAPI、windowを作る
+	winAPI_ = new WinAPI();
+	winAPI_->Initialize(kClientTitle, kClientWidth, kClientHeight);
+
 	config::SaveClientWidth(kClientWidth);
 	config::SaveClientHeight(kClientHeight);
 
@@ -687,7 +452,7 @@ void DirectXBase::InitializeDrive(const char* kClientTitle, int kClientWidth, in
 		if (!(adapterDesc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE)) {
 			// 採用したアダプタの情報をログに出力。wstringの方なので注意
 			//std::wstring description(adapterDesc.Description);
-			Log(std::format(L"Use Adapter:{}\n", adapterDesc.Description));
+			Logger::Log(std::format(L"Use Adapter:{}\n", adapterDesc.Description));
 			break;
 		}
 		useAdapter = nullptr; // ソフトウェアアダプタの場合は見なかったことにする
@@ -700,7 +465,7 @@ void DirectXBase::InitializeDrive(const char* kClientTitle, int kClientWidth, in
 	commandAllocator = CreateCommandAllocator(device);
 	commandList = CreateCommandList(device, commandAllocator);
 
-	SwapChain = CreateSwapChain(dxgiFactory, commandQueue, hwnd, kClientWidth, kClientHeight);
+	SwapChain = CreateSwapChain(dxgiFactory, commandQueue, winAPI_->GetHWND(), kClientWidth, kClientHeight);
 	//DescriptorHeap = CreateDescriptorHeap(device);
 	rtvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
 	srvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
@@ -717,7 +482,7 @@ void DirectXBase::InitializeDrive(const char* kClientTitle, int kClientWidth, in
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
-	ImGui_ImplWin32_Init(hwnd);
+	ImGui_ImplWin32_Init(winAPI_->GetHWND());
 	ImGui_ImplDX12_Init(device,
 		swapChainDesc.BufferCount,
 		rtvDesc.Format,
@@ -730,6 +495,10 @@ void DirectXBase::InitializeDrive(const char* kClientTitle, int kClientWidth, in
 	SetDirectXInput(Keyboard, keyBoardDevice);
 	SetDirectXInput(Mouse, mouseDevice);
 	// SetDirectXInput(GamePad, gamepadDevice); //XInput優先
+}
+
+bool DirectXBase::ProcessMessage() {
+	return winAPI_->ProcessMessage();
 }
 
 void DirectXBase::Finalize() {
@@ -772,7 +541,8 @@ void DirectXBase::Finalize() {
 	/// デバッグレイヤーの解放
 	if (debugController)		debugController->Release();
 #endif
-	CloseWindow(hwnd);
+	winAPI_->Finalize();
+	delete winAPI_;
 }
 #pragma endregion
 

@@ -4,7 +4,7 @@
 #include "externals/DirectXTex/d3dx12.h"
 #include <vector>
 #include "Config.h"
-#include "shader_compile.h"
+//#include "shader_compile.h"
 #include "PSO.h"
 #include "ResourceManager.h"
 #include "Vector4.h"
@@ -78,7 +78,7 @@ public:
 
 
 private:
-	Shader_compile* shader_compile_ = new Shader_compile;
+	
 	PSO* pso_ = new PSO;
 	ResourceManager* resourceManager_ = nullptr;
 	DirectXBase* directXDriver_ = nullptr;
@@ -108,9 +108,6 @@ private:
 	psoType currentPSO_ = psoType::NONE;
 
 private:
-	IDxcUtils* dxcUtils = nullptr;
-	IDxcCompiler3* dxcCompiler = nullptr;
-	IDxcIncludeHandler* includeHandler = nullptr;
 	std::vector<ID3D12PipelineState*> psoList_;
 	ID3D12RootSignature* rootSignature_ = nullptr;
 	D3D12_VIEWPORT viewport{};

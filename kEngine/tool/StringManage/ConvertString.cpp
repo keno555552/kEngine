@@ -1,6 +1,6 @@
 #include "ConvertString.h"
 
-std::wstring ConvertString(const std::string& str) {
+std::wstring ConvertString::SwitchStdStringWstring(const std::string& str) {
     if (str.empty()) {
         return std::wstring();
     }
@@ -14,7 +14,7 @@ std::wstring ConvertString(const std::string& str) {
     return result;
 }
 
-std::string ConvertString(const std::wstring& str) {
+std::string ConvertString::SwitchStdStringWstring(const std::wstring& str) {
     if (str.empty()) {
         return std::string();
     }
@@ -26,4 +26,12 @@ std::string ConvertString(const std::wstring& str) {
     std::string result(sizeNeeded, 0);
     WideCharToMultiByte(CP_UTF8, 0, str.data(), static_cast<int>(str.size()), result.data(), sizeNeeded, NULL, NULL);
     return result;
+}
+
+std::wstring ConvertString::SwitchStdUtf8Utf16(const std::string& utf8) {
+    return SwitchStdStringWstring(utf8);
+}
+
+std::string ConvertString::SwitchStdUtf8Utf16(const std::wstring& wide) {
+    return SwitchStdStringWstring(wide);
 }

@@ -5,8 +5,6 @@
 
 
 DrawEngine::~DrawEngine() {
-	delete shader_compile_;
-
 	for (auto& ptr : psoList_) {
 		ptr->Release();
 		ptr = nullptr;
@@ -52,21 +50,15 @@ void DrawEngine::Initialize
 	kClientHeight_ = kClientHeight;
 
 	///
-	shader_compile_->Initialize();
-	dxcUtils = shader_compile_->getDxcUtils();
-	dxcCompiler = shader_compile_->getDxcCompiler();
-	includeHandler = shader_compile_->getIncludeHandler();
-
-	///
 	pso_->Initialize(directXDriver_);
 	for (int i = 0; i < (int)LightModelType::NumLightModels; i++) {
-		ID3D12PipelineState* graphicsPipelineState_ = pso_->createPSO(dxcUtils, dxcCompiler, includeHandler, (LightModelType)i);
+		ID3D12PipelineState* graphicsPipelineState_ = pso_->createPSO((LightModelType)i);
 		psoList_.push_back(graphicsPipelineState_);
 	}
-	ID3D12PipelineState* graphicsPipelineState_ = pso_->createPSO_Tile(dxcUtils, dxcCompiler, includeHandler);
+	ID3D12PipelineState* graphicsPipelineState_ = pso_->createPSO_Tile();
 	psoList_.push_back(graphicsPipelineState_);
 	for (int i = 0; i < (int)LightModelType::NumLightModels; i++) {
-		ID3D12PipelineState* graphicsPipelineState_ = pso_->createPSO_3DParticle(dxcUtils, dxcCompiler, includeHandler, (LightModelType)i);
+		ID3D12PipelineState* graphicsPipelineState_ = pso_->createPSO_3DParticle((LightModelType)i);
 		psoList_.push_back(graphicsPipelineState_);
 	}
 
@@ -994,7 +986,7 @@ D3D12_RECT DrawEngine::createScissorRect(int kClientWidth, int kClientHeight) {
 void DrawEngine::SetMaterial(int MaterialHandle) {
 	// materialの色
 	if (resourceManager_->materialResourceList_[MaterialHandle] == nullptr) {
-		Log("Material CBuffer is not created");
+		Logger::Log("Material CBuffer is not created");
 		return;
 	}
 	commandList_->SetGraphicsRootConstantBufferView(0, resourceManager_->materialResourceList_[MaterialHandle]->GetResource()->GetGPUVirtualAddress());
@@ -1018,7 +1010,7 @@ void DrawEngine::SetLighting(DirectionalLight* directionalLight) {
 DirectX::ScratchImage DrawEngine::LoadTextrueLow(const std::string& filePath) {
 	// テクスチャファイルを読んでプログラムで扱えるようにする
 	DirectX::ScratchImage image{};
-	std::wstring filePathW = ConvertString(filePath);
+	std::wstring filePathW = ConvertString::SwitchStdStringWstring(filePath);
 	HRESULT hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
 	assert(SUCCEEDED(hr)); // 読み込めなかったらエラー
 

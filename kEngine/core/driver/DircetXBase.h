@@ -11,11 +11,10 @@
 #include <cassert>
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
-#include <dxgidebug.h>
-#pragma comment(lib,"dxguid.lib")
 
-#include <dxcapi.h>
-#pragma comment(lib,"dxcompiler.lib")
+#include "Logger.h"
+
+#include "WinAPI.h"
 
 // Input
 #define DIRECTINPUT_VERSION 0x0800
@@ -33,12 +32,6 @@
 //#include <string>///<<<<<<<<formatに包含してる
 #include <format>
 
-///imgui関連
-#include "externals/imgui/imgui.h"
-#include "externals/imgui/imgui_impl_dx12.h"
-#include "externals/imgui/imgui_impl_win32.h"
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
 #include <vector>
 #include "LightModelType.h"
 #include "config.h"
@@ -46,41 +39,10 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include <dxgidebug.h>
 
 
-
-
-#pragma region wordChange
-/// <summary>
-/// 出力ウィンドウに文字出力
-/// </summary>
-/// <param name="message"></param>
-void Log(const std::string& message);
-
-/// <summary>
-/// 出力ウィンドウに文字出力
-/// </summary>
-/// <param name="message"></param>
-void Log(const std::wstring& message);
-
-/// UTF-8 to UTF-16 (std::wstring)
-std::wstring utf8_to_utf16(const std::string& utf8);
-
-#pragma endregion
-
 #pragma region Input
-/// <summary>
-/// マウスの入力
-/// </summary>
-/// <param name="hwnd"></param>
-/// <param name="msg"></param>
-/// <param name="wparam"></param>
-/// <param name="lparam"></param>
-/// <returns></returns>
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
 bool CheakXInputDeviceConnected();
-#pragma endregion
 
-#pragma region WindowMake
 #pragma endregion
 
 #pragma region DirectXCommon
@@ -91,7 +53,7 @@ public:
 
 	/// Getter
 	ID3D12Device* GetDriver() { return device; };
-	HWND GetHWND() { return hwnd; };
+	HWND GetHWND() { return winAPI_->GetHWND(); };
 	ID3D12DescriptorHeap* GetSrvDescriptorHeap() { return srvDescriptorHeap; };
 	ID3D12DescriptorHeap* GetDsvDescriptorHeap() { return dsvDescriptorHeap; };
 	ID3D12DescriptorHeap* GetRtvDescriptorHeap() { return rtvDescriptorHeap; };
@@ -122,9 +84,9 @@ public:
 	virtual void InitializeDrive(const char* kClientTitle, int kClientWidth, int kClientHeight);
 	
 	/// <summary>
-	/// システム初期化
+	/// システム完結のメッセージ
 	/// </summary>
-	//virtual void InitializeDriveD(const char* kClientTitle, int kClientWidth, int kClientHeight);
+	bool ProcessMessage();
 
 	void Finalize();
 protected:
@@ -134,7 +96,6 @@ protected:
 		GamePad
 	};
 
-	WNDCLASS wc;
 	ID3D12Debug1* debugController;
 	IDXGIFactory7* dxgiFactory;
 	IDXGIAdapter4* useAdapter;
@@ -153,7 +114,7 @@ protected:
 	ID3D12Fence* fence;
 	uint64_t fenceValue;
 	HANDLE fenceEvent;
-	HWND hwnd;
+	WinAPI* winAPI_;
 
 	/// DirectInput
 	IDirectInput8* directInput;
@@ -164,14 +125,6 @@ protected:
 
 
 protected:
-	/// <summary>
-	/// Windowを作る
-	/// </summary>
-	/// <param name="kClientTitle">Windowの名前</param>
-	/// <param name="kClientWidth">Windowの長さ</param>
-	/// <param name="kClientHeight">Windowの高さ</param>
-	/// <returns></returns>
-	HWND WindowMake(const char* kClientTitle, int kClientWidth, int kClientHeight);
 
 	/// 創建設備
 	ID3D12Device* CreateDevice(IDXGIAdapter4* adapter);
@@ -200,11 +153,5 @@ protected:
 
 };
 
-IDxcBlob* CompileShader(const std::wstring& filePath, const wchar_t* profile,
-						IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler);
-
-IDxcBlob* CompileShader(const std::wstring& filePath, const wchar_t* profile,
-						IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler,
-						LightModelType modelType);
 #pragma endregion
 

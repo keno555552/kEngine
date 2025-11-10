@@ -27,6 +27,8 @@ public:
 
 	void SetDirectionalLight(DirectionalLight* light);
 
+	bool ProcessMessage();
+
 #pragma endregion
 
 #pragma region 描画システム

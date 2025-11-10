@@ -23,38 +23,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	SceneManager* sceneManager = new SceneManager(system);
 
 	///========================Main処理=====================///
-	while (msg.message != WM_QUIT) {
+	while (true) {
+		// ゲームの処理で固定サイズ整数型を使用
+		int32_t score = 0;   // 32ビット幅の符号付き整数
 
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		} else {
-			// ゲームの処理で固定サイズ整数型を使用
-			int32_t score = 0;   // 32ビット幅の符号付き整数
+		///====================ゲーム処理====================///
 
-			///====================ゲーム処理====================///
+		sceneManager->Update();
 
-			sceneManager->Update();
+		///=====================描画処理=====================///
+		system->StartFrame();
 
-			///=====================描画処理=====================///
-			system->StartFrame();
+		sceneManager->Render();
 
-			sceneManager->Render();
+		system->EndFrame();
 
-			system->EndFrame();
+		///// 終了条件
 
-			///// 終了条件
-
-			if (system->GetTriggerOn(DIK_ESCAPE) ||
-				system->GetGamepadTriggerOn(VK_PAD_START)) {
-				break;
-			}
-
-
+		if (system->GetTriggerOn(DIK_ESCAPE) ||
+			system->GetGamepadTriggerOn(VK_PAD_START) ||
+			system->ProcessMessage()) {
+			break;
 		}
 	}
-
-	CoUninitialize();
 	delete system;
 	return 0;
 }

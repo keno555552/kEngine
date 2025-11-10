@@ -45,13 +45,17 @@ void kEngine::EndFrame() {
 	drawEngine->EndDraw();
 }
 
-#pragma endregion
-
-#pragma region 描画システム
-
 void kEngine::SetDirectionalLight(DirectionalLight* light) {
 	drawEngine->SetDirectionalLight(light);
 }
+
+bool kEngine::ProcessMessage() {
+	return dxComm->ProcessMessage();
+}
+
+#pragma endregion
+
+#pragma region 描画システム
 
 void kEngine::DrawTriangle(TransformationMatrix* wvpData, MaterialConfig material) {
 	drawEngine->DrawTriangle(wvpData, material);

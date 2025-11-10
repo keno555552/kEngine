@@ -1,7 +1,6 @@
 #include "PSO.h"
 #include "Vector4.h"
 
-
 PSO::~PSO() {
 	//directXDriver_->GetDriver()->Release(); /*借り*/
 	signatureBlob_->Release();
@@ -21,42 +20,42 @@ PSO::~PSO() {
 
 void PSO::Initialize(DirectXBase* directXDriver) {
 	directXDriver_ = directXDriver;
+	shader_compile_ = new Shader_compile;
+	shader_compile_->Initialize();
 }
 
-ID3D12PipelineState* PSO::createPSO(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler,
-	LightModelType lightModelType) {
+ID3D12PipelineState* PSO::createPSO(LightModelType lightModelType) {
 	createRootSignature(false);
 	createInputLayout();
 	SetBlendState();
 	SetRasterizerState();
-	ShaderCompile(dxcUtils, dxcCompiler, includeHandler, lightModelType);
+	ShaderCompile(lightModelType);
 	SetDepthStencilState();
 
 	SetGraphicsPipelineState();
 	return graphicsPipelineState_;
 }
 
-ID3D12PipelineState* PSO::createPSO_Tile(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler) {
+ID3D12PipelineState* PSO::createPSO_Tile() {
 
 	createRootSignature(true);
 	createInputLayout();
 	SetBlendState();
 	SetRasterizerState();
-	ShaderCompile_Particle2D(dxcUtils, dxcCompiler, includeHandler);
+	ShaderCompile_Particle2D();
 	SetDepthStencilState();
 
 	SetGraphicsPipelineState();
 	return graphicsPipelineState_;
 }
 
-ID3D12PipelineState* PSO::createPSO_3DParticle(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler,
-	LightModelType lightModelType) {
+ID3D12PipelineState* PSO::createPSO_3DParticle(LightModelType lightModelType) {
 
 	createRootSignature(true);
 	createInputLayout();
 	SetBlendState();
 	SetRasterizerState();
-	ShaderCompile_Particle3D(dxcUtils, dxcCompiler, includeHandler, lightModelType);
+	ShaderCompile_Particle3D(lightModelType);
 	SetDepthStencilState();
 
 	SetGraphicsPipelineState();
@@ -141,7 +140,7 @@ ID3D12RootSignature* PSO::createRootSignature(bool isParticle) {
 	errorBlob_ = nullptr;
 	HRESULT hr = D3D12SerializeRootSignature(&descriptionRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob_, &errorBlob_);
 	if (FAILED(hr)) {
-		Log(reinterpret_cast<char*>(errorBlob_->GetBufferPointer()));
+		Logger::Log(reinterpret_cast<char*>(errorBlob_->GetBufferPointer()));
 		assert(false);
 	}
 	// バイナリを元に生成
@@ -203,36 +202,36 @@ void PSO::SetRasterizerState() {
 
 }
 
-void PSO::ShaderCompile(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler, LightModelType lightModelType) {
+void PSO::ShaderCompile(LightModelType lightModelType) {
 	/// Shaderをコンパイルする
 	vertexShaderBlob_ = {};
-	vertexShaderBlob_ = CompileShader(L"./resources/Shader/Object3d.VS.hlsl", L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
+	vertexShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Object3d.VS.hlsl", L"vs_6_0");
 	assert(vertexShaderBlob_ != nullptr);
 
 	pixelShaderBlob_ = {};
-	pixelShaderBlob_ = CompileShader(L"./resources/Shader/Object3d.PS.hlsl", L"ps_6_0", dxcUtils, dxcCompiler, includeHandler, lightModelType);
+	pixelShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Object3d.PS.hlsl", L"ps_6_0",lightModelType);
 	assert(pixelShaderBlob_ != nullptr);
 }
 
-void PSO::ShaderCompile_Particle2D(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler) {
+void PSO::ShaderCompile_Particle2D() {
 	/// Shaderをコンパイルする
 	vertexShaderBlob_ = {};
-	vertexShaderBlob_ = CompileShader(L"./resources/Shader/Tile2D.VS.hlsl", L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
+	vertexShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Tile2D.VS.hlsl", L"vs_6_0");
 	assert(vertexShaderBlob_ != nullptr);
 
 	pixelShaderBlob_ = {};
-	pixelShaderBlob_ = CompileShader(L"./resources/Shader/Tile2D.PS.hlsl", L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
+	pixelShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Tile2D.PS.hlsl", L"ps_6_0");
 	assert(pixelShaderBlob_ != nullptr);
 }
 
-void PSO::ShaderCompile_Particle3D(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler, LightModelType lightModelType) {
+void PSO::ShaderCompile_Particle3D(LightModelType lightModelType) {
 	/// Shaderをコンパイルする
 	vertexShaderBlob_ = {};
-	vertexShaderBlob_ = CompileShader(L"./resources/Shader/Particle.VS.hlsl", L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
+	vertexShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Particle.VS.hlsl", L"vs_6_0");
 	assert(vertexShaderBlob_ != nullptr);
 
 	pixelShaderBlob_ = {};
-	pixelShaderBlob_ = CompileShader(L"./resources/Shader/Particle.PS.hlsl", L"ps_6_0", dxcUtils, dxcCompiler, includeHandler, lightModelType);
+	pixelShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Particle.PS.hlsl", L"ps_6_0", lightModelType);
 	assert(pixelShaderBlob_ != nullptr);
 }
 

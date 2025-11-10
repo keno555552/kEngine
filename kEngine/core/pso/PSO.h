@@ -16,6 +16,10 @@
 #include "config.h"
 #include <vector>
 
+#include "ConvertString.h"
+
+#include "shader_compile.h"
+
 class PSO{
 public:
 	~PSO();
@@ -26,12 +30,11 @@ public:
 
 	ID3D12RootSignature* createRootSignature(bool isParticle);
 
-	ID3D12PipelineState* createPSO(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler, 
-								   LightModelType lightMadelType);
+	ID3D12PipelineState* createPSO(LightModelType lightMadelType);
 
-	ID3D12PipelineState* createPSO_Tile(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler);
+	ID3D12PipelineState* createPSO_Tile();
 
-	ID3D12PipelineState* createPSO_3DParticle(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler, LightModelType lightModelType);
+	ID3D12PipelineState* createPSO_3DParticle(LightModelType lightModelType);
 
 private:
 	//D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
@@ -47,15 +50,16 @@ private:
 	IDxcBlob* vertexShaderBlob_ = nullptr;
 	IDxcBlob* pixelShaderBlob_ = nullptr;
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
-	ID3D12PipelineState* graphicsPipelineState_ = nullptr;	///外に出して、そこで解放したからしなくていい
+	ID3D12PipelineState* graphicsPipelineState_ = nullptr; ///外に出して、そこで解放したからしなくていい
+	Shader_compile* shader_compile_ = nullptr;
 
 private:
 	void createInputLayout();
 	void SetBlendState();
 	void SetRasterizerState();
-	void ShaderCompile(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler, LightModelType lightModelType);
-	void ShaderCompile_Particle2D(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler);
-	void ShaderCompile_Particle3D(IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler, LightModelType lightModelType);
+	void ShaderCompile(LightModelType lightModelType);
+	void ShaderCompile_Particle2D();
+	void ShaderCompile_Particle3D(LightModelType lightModelType);
 	void SetDepthStencilState();
 	void SetGraphicsPipelineState();
 };
