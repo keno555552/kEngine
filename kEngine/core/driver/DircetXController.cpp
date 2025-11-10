@@ -100,10 +100,3 @@ void DircetXController::EndFrame() {
 	//static FrameRateLimiter limiter(60.0);
 	//limiter.Wait();
 }
-
-
-
-
-
-
-
