@@ -30,8 +30,8 @@ public:
 	bool ProcessMessage();
 
 private:
-	HINSTANCE hInstance_;
-	HWND hwnd_;
+	HINSTANCE hInstance_ = {};
+	HWND hwnd_ = {};
 	std::wstring className_ = L"DefultWindowName_";
 
 	bool RegisterWindowClass();
