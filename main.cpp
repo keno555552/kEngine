@@ -18,6 +18,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	system->Initialize(kWindowTitle, kWindowWidth, kWindowHeight);
 	MSG msg = {};
 
+
 	SceneManager* sceneManager = new SceneManager(system);
 
 	///========================Main処理=====================///
