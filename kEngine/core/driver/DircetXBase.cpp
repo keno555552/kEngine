@@ -1,6 +1,10 @@
 #include "DircetXBase.h"
-#include "ConvertString.h"
 
+#include <cassert>
+#pragma comment(lib,"d3d12.lib")
+#pragma comment(lib,"dxgi.lib")
+
+#include "ConvertString.h"
 
 #pragma region Input
 

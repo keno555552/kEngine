@@ -16,8 +16,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	CoInitializeEx(0, COINIT_MULTITHREADED);
 	kEngine* system(new kEngine);
 	system->Initialize(kWindowTitle, kWindowWidth, kWindowHeight);
-	MSG msg = {};
-
 
 	SceneManager* sceneManager = new SceneManager(system);
 
