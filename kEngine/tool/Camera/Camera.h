@@ -10,10 +10,10 @@ Transform CameraDefaultTransform();
 class Camera {
 public:
 	/// 初期化
-	Camera(float WindowWidth, float WindowHeight);
+	Camera();
 
 	/// 更新
-	void Update();
+	virtual void Update();
 
 	/// スクリーン座標系転換
 	TransformationMatrix transformationMatrixTransform(Transform objTransform);

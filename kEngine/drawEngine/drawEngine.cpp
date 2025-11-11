@@ -110,7 +110,7 @@ void DrawEngine::Initialize
 	//debugController1->SetEnableGPUBasedValidation(TRUE);
 
 	/// カメラのスベア
-	saveCamera_ = new Camera((float)kClientHeight_, (float)kClientWidth_);
+	saveCamera_ = new Camera;
 
 	/// デフォルトのモデルを設定
 	SetModel("resources/TemplateResource/object/plane/plane.obj");

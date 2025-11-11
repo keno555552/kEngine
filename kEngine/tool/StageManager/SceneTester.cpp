@@ -6,7 +6,7 @@ SceneTester::SceneTester(kEngine* system) {
 	float kWindowWidth = (float)config::GetClientWidth();
 	float kWindowHeight = (float)config::GetClientHeight();
 	system_->SetDirectionalLight(&directionalLight);
-	debugCamera_ = new DebugCamera(system_, kWindowWidth, kWindowHeight);
+	debugCamera_ = new DebugCamera(system_);
 
 
 	bunnyModelHandle_			= system_->SetModelObj("resources/TemplateResource/object/bunny/bunny.obj");
@@ -89,21 +89,21 @@ SceneTester::SceneTester(kEngine* system) {
 
 	//for (int i = 0; i < 1; i++) 
 	//for (int i = 0; i < 10; i++) 
-	//for (int i = 0; i < 200; i++) 
-	// {
-	//	Object* object = new Object;
-	//	MaterialConfig materialConfig;
-	//	InitMaterialConfig(&materialConfig);
-	//	object->materialConfig.push_back(materialConfig);
-	//	//object->objectType = CUBE;
-	//	object->objectType = MODEL;
-	//	//object->modelHandle = ModelType::TEAPOT;
-	//	object->modelHandle = ModelType::TILE3D;
-	//	//object->objectType = SPRITE;
-	//	object->transform.translate = { i * 0.1f,i * 0.1f, i * 1.0f };
-	//	object->transformationMatrix = debugCamera_->transformationMatrixTransform(object->transform);
-	//	objectGroup.push_back(object);
-	//}
+	for (int i = 0; i < 200; i++) 
+	 {
+		InstanceObject* object = new InstanceObject;
+		MaterialConfig materialConfig;
+		InitMaterialConfig(&materialConfig);
+		object->materialConfig.push_back(materialConfig);
+		//object->objectType = CUBE;
+		object->objectType = MODEL;
+		//object->modelHandle = ModelType::TEAPOT;
+		object->modelHandle = ModelType::TILE3D;
+		//object->objectType = SPRITE;
+		object->transform.translate = { i * 0.1f,i * 0.1f, i * 1.0f };
+		object->transformationMatrix = debugCamera_->transformationMatrixTransform(object->transform);
+		objectGroup.push_back(object);
+	}
 
 	timer_->Init0(60.0f,system->GetTimeManager());
 };
