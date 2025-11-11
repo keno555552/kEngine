@@ -54,8 +54,8 @@ void SceneManager::SceneChanger() {
 			break;
 
 		case SceneNum::S_TESTER:
-			sceneUsing_ = new SceneTester(system_);
-			//sceneUsing_ = new SceneTest(system_);
+			//sceneUsing_ = new SceneTester(system_);
+			sceneUsing_ = new SceneTest(system_);
 			// sceneUsing_ = new StageTestForGE(system_);
 			break;
 		case SceneNum::S_TITLE:
