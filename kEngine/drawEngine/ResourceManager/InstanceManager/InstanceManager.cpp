@@ -94,7 +94,7 @@ void InstanceManager::AddModelInstance(TransformationMatrix* wvpData, MaterialCo
 
 void InstanceManager::Add2DTileInstance(Vector2 pos, MaterialConfig material) {
 	SpriteInstance instance;
-	instance.position = { pos.x,pos.y,(float)tileLayerCount * -0.001f };
+	instance.position = { pos.x,pos.y,(float)tileLayerCount * -0.01f };
 	instance.scale = { 1.0f,1.0f };		/// まだ使ってない
 	instance.rotate = { 0.0f,0.0f,0.0f };  /// まだ使ってない
 	instance.layer = 0;					/// まだ使ってない

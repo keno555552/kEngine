@@ -4,9 +4,11 @@
 #include "TransformationMatrix.h"
 #include "MaterialConfig.h"
 #include "MathsIncluder.h"
+#include "drawEngine.h"
+#include "Camera.h"
 
-struct Object {
-
+class Object {
+public:
 	Transform transform = CreateDefaultTransform();
 
 	Matrix4x4 worldMatrix = {};
@@ -20,4 +22,10 @@ struct Object {
 	int modelHandle = 0;
 
 	bool isDelete = false;
+
+public:
+	
+	void CreateDefaultData();
+	
+	void Update(Camera* camera);
 };

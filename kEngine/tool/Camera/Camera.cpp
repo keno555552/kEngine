@@ -7,9 +7,8 @@ Transform CameraDefaultTransform() {
 	};
 }
 
-Camera::Camera(float windowWidth, float windowHeight) {
-
-	projectionMatrix_ = MakePerspectiveFovMatrix(0.45f, float(windowWidth) / float(windowHeight), 0.1f, 100.0f);
+Camera::Camera() {
+	projectionMatrix_ = MakePerspectiveFovMatrix(0.45f, float(config::GetClientWidth()) / float(config::GetClientHeight()), 0.1f, 100.0f);
 	cameraTransform_ = CameraDefaultTransform();
 	Update();
 	matRot_ = MakeRotateMatrix4x4(cameraTransform_.rotate);

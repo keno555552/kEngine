@@ -13,7 +13,6 @@ SceneManager::SceneManager(kEngine* system) {
 	// materialConfig_.textureHandle =
 	// system_->LoadTextrue("resources/nullScene.png");
 
-
 	for (auto& ptr : stageIsClear_) {
 		ptr = false;
 	}
@@ -56,6 +55,7 @@ void SceneManager::SceneChanger() {
 
 		case SceneNum::S_TESTER:
 			sceneUsing_ = new SceneTester(system_);
+			//sceneUsing_ = new SceneTest(system_);
 			// sceneUsing_ = new StageTestForGE(system_);
 			break;
 		case SceneNum::S_TITLE:
