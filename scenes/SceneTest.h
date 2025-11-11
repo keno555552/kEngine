@@ -1,8 +1,8 @@
 #pragma once
 #include "Scene.h"
 #include "Object\Object.h"
-//#include "Camera.h"
 #include "DebugCamera.h"
+#include "Player\Player.h"
 
 class SceneTest :public Scene
 {
@@ -26,9 +26,17 @@ private:
 	/// 今使っているカメラ
 	Camera* usingCamera_ = nullptr;			// 借り用
 
+	/// =========== リソースハンドル ============///
+	/// モデルハンドル
+	int skydomeModelHandle_ = 0;
+
+	/// テキスチャーハンドル
+	int boxTextureHandle_ = 0;
 
 	/// =========== ゲームオブジェクト ==========///
-	Object* player_ = new Object;
+	Object* skydome_ = new Object;
+	Player* player_ = nullptr;
+
 
 
 	/// =============== フラグ ===============///

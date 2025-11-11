@@ -256,6 +256,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\Cube.cpp" />
     <ClCompile Include="kEngine\core\driver\config.cpp" />
     <ClCompile Include="kEngine\drawEngine\ResourceManager\BasicResource.cpp" />
+    <ClCompile Include="kEngine\tool\MapChip\MapChipField.cpp" />
     <ClCompile Include="kEngine\tool\mathsUnit\Vector4.cpp" />
     <ClCompile Include="kEngine\tool\PerlinNoise\PerlinNoise.cpp" />
     <ClCompile Include="kEngine\tool\mathsUnit\randomMaker.cpp" />
@@ -325,6 +326,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\Cube.h" />
     <ClInclude Include="kEngine\core\driver\config.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\BasicResource.h" />
+    <ClInclude Include="kEngine\tool\MapChip\MapChipField.h" />
     <ClInclude Include="kEngine\tool\PerlinNoise\PerlinNoise.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\VertexIndex.h" />
     <ClInclude Include="kEngine\tool\mathsUnit\randomMaker.h" />

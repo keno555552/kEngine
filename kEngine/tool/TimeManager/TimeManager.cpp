@@ -132,7 +132,7 @@ float Timer::easyIn(int a, int b, float r) {
 	return (1.0f - easedT) * a + (easedT)*b;
 }
 
-float Timer::easyOut(int a, int b, float r) {
+float Timer::easyOut(float a, float b, float r) {
 	if (parameter_ <= 0.0f)return static_cast<float>(a);
 
 	float T = std::clamp(parameter_ / maxTime_, 0.0f, 1.0f);
@@ -170,20 +170,17 @@ float Timer::easyOutBack(int a, int b, float r) {
 #pragma endregion 
 
 #pragma region Easing
-float linearity(int a, int b, int c, int t) {
-	float time = float(c) / t;
-	return (1.0f - time) * a + (time)*b;
+float linearity(float a, float b, float t) {
+	return (1.0f - t) * a + (t)*b;
 }
 
-float easyIn(int a, int b, int c, int t, float r) {
-	float time = float(c) / t;
-	float easedT = 1.0f - powf(1 - time, r);
+float easyIn(float a, float b, float t, float r) {
+	float easedT = 1.0f - powf(1.0f - t, r);
 	return (1.0f - easedT) * a + (easedT)*b;
 }
 
-float easyOut(int a, int b, int c, int t, float r) {
-	float time = float(c) / t;
-	float easedT = 1 - (1.0f - powf(time, r));
+float easyOut(float a, float b, float t, float r) {
+	float easedT = 1 - (1.0f - powf(t, r));
 	return (1.0f - easedT) * a + (easedT)*b;
 }
 

@@ -27,5 +27,5 @@ public:
 	
 	void CreateDefaultData();
 	
-	void Update(Camera* camera);
+	virtual void Update(Camera* camera);
 };
