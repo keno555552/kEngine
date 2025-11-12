@@ -10,7 +10,7 @@
 |Debug|[![DebugBuild](https://github.com/keno555552/kEngine/actions/workflows/DebugBuild.yml/badge.svg?branch=GE_master)](https://github.com/keno555552/kEngine/actions/workflows/DebugBuild.yml) |[![DebugBuild](https://github.com/keno555552/kEngine/actions/workflows/DebugBuild.yml/badge.svg?branch=CG_master)](https://github.com/keno555552/kEngine/actions/workflows/DebugBuild.yml)|[![DebugBuild](https://github.com/keno555552/kEngine/actions/workflows/DebugBuild.yml/badge.svg?branch=AL_master)](https://github.com/keno555552/kEngine/actions/workflows/DebugBuild.yml)|
 |Release|[![ReleaseBuild](https://github.com/keno555552/kEngine/actions/workflows/ReleaseBuild.yml/badge.svg?branch=GE_master)](https://github.com/keno555552/kEngine/actions/workflows/ReleaseBuild.yml)|[![ReleaseBuild](https://github.com/keno555552/kEngine/actions/workflows/ReleaseBuild.yml/badge.svg?branch=CG_master)](https://github.com/keno555552/kEngine/actions/workflows/ReleaseBuild.yml)|[![ReleaseBuild](https://github.com/keno555552/kEngine/actions/workflows/ReleaseBuild.yml/badge.svg?branch=AL_master)](https://github.com/keno555552/kEngine/actions/workflows/ReleaseBuild.yml)|
 
-### AL自作ゲーム
+### AL評価課題1
 ||Debug|Release|
 |:---|:---|:---|
 |Build|||
