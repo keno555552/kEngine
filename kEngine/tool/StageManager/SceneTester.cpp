@@ -285,6 +285,7 @@ void SceneTester::Draw() {
 		}
 	}
 
+#ifdef USE_IMGUI
 	ImGui::Begin("ControlPanel");
 	//ImGui::Checkbox("isTemplate", &isTemplate);
 	{
@@ -676,5 +677,5 @@ void SceneTester::Draw() {
 		ImGui::Text("%.1f,%.1f", timer_->parameter_, timer_->maxTime_);
 		ImGui::End();
 	}
-
+#endif
 }

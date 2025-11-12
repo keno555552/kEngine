@@ -47,8 +47,10 @@ void SceneTest::Draw() {
 	system_->DrawModel(&skydome_->transformationMatrix, skydome_->materialConfig, skydomeModelHandle_);
 	system_->DrawCube(&player_->transformationMatrix, player_->materialConfig[0]);
 	
+#ifdef USE_IMGUI
 	/// imgui処理
 	ImguiPart();
+#endif
 }
 
 void SceneTest::CameraPart() {
@@ -60,6 +62,7 @@ void SceneTest::CameraPart() {
 	usingCamera_->Update();
 }
 
+#ifdef USE_IMGUI
 void SceneTest::ImguiPart() {
 	ImGui::Begin("DebugCamera");
 	ImGui::Checkbox("isUse",&useDebugCamera);
@@ -82,3 +85,4 @@ void SceneTest::ImguiPart() {
 		ImGui::End();
 	}
 }
+#endif

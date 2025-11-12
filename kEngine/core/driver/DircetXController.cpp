@@ -15,9 +15,11 @@ DircetXController::~DircetXController() {
 
 void DircetXController::StartFrame() {
 
+#ifdef USE_IMGUI
 	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
+#endif
 
 	// これから書き込むバックバッファのインデックスを取得
 	UINT backBufferIndex = SwapChain->GetCurrentBackBufferIndex();
@@ -55,9 +57,11 @@ void DircetXController::StartFrame() {
 void DircetXController::EndFrame() {
 
 #ifdef _DEBUG
+#ifdef USE_IMGUI
 	// 実際のcommandListのImGuiの描画コマンドを積む
 	ImGui::Render();
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
+#endif
 #endif
 
 	UINT backBufferIndex = SwapChain->GetCurrentBackBufferIndex();

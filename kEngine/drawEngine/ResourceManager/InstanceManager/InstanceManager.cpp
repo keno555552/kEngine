@@ -15,7 +15,7 @@ void InstanceManager::Update() {
 	UpdateInstance(tile2DList_);
 	UpdateInstance(modelList_);
 	UpdateInstance(tile3DList_);
-
+	
 
 	if (tileLayerCount > 1) {
 		tileLayerCount = (int)tile2DList_[tile2DList_.size() - 1]->position.z;

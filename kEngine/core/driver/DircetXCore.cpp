@@ -478,25 +478,29 @@ void DirectXCore::InitializeDrive(const char* kClientTitle, int kClientWidth, in
 	fence = CreateFence(device);
 
 
-	///Imgui
-	// ImGuiの初期化。詳細はさして重要ではないので解説は省略する。
-	// こういうもんである
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui::StyleColorsDark();
-	ImGui_ImplWin32_Init(winAPI_->GetHWND());
-	ImGui_ImplDX12_Init(device,
-		swapChainDesc.BufferCount,
-		rtvDesc.Format,
-		srvDescriptorHeap,
-		srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-		srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+#ifdef USE_IMGUI
+		///Imgui
+		// ImGuiの初期化。詳細はさして重要ではないので解説は省略する。
+		// こういうもんである
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGui::StyleColorsDark();
+		ImGui_ImplWin32_Init(winAPI_->GetHWND());
+		ImGui_ImplDX12_Init(device,
+			swapChainDesc.BufferCount,
+			rtvDesc.Format,
+			srvDescriptorHeap,
+			srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+			srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+#endif
 
-	// DirectX入力装置の初期化
-	InitializeDirectXInput();
-	SetDirectXInput(Keyboard, keyBoardDevice);
-	SetDirectXInput(Mouse, mouseDevice);
-	// SetDirectXInput(GamePad, gamepadDevice); //XInput優先
+		// DirectX入力装置の初期化
+		InitializeDirectXInput();
+		SetDirectXInput(Keyboard, keyBoardDevice);
+		SetDirectXInput(Mouse, mouseDevice);
+		// SetDirectXInput(GamePad, gamepadDevice); //XInput優先
+
+
 }
 
 bool DirectXCore::ProcessMessage() {
@@ -504,11 +508,14 @@ bool DirectXCore::ProcessMessage() {
 }
 
 void DirectXCore::Finalize() {
+
+#ifdef USE_IMGUI
 	/// ImGuiの終了処理。詳細はさして重要ではないので解説は省略する。
 	// こういうもんである。初期化と逆順に行う
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
+#endif
 
 	/// すべでのものの解放
 	if (dxgiFactory)			dxgiFactory->Release();
@@ -529,6 +536,7 @@ void DirectXCore::Finalize() {
 	if (mouseDevice) { mouseDevice->Unacquire();  mouseDevice->Release(); }
 	if (gamepadDevice) { gamepadDevice->Unacquire();  gamepadDevice->Release(); }
 	CloseHandle(fenceEvent);
+
 #ifdef _DEBUG
 	/// リソースリークチェック
 	IDXGIDebug1* debug;
@@ -543,6 +551,8 @@ void DirectXCore::Finalize() {
 	/// デバッグレイヤーの解放
 	if (debugController)		debugController->Release();
 #endif
+
+	/// WindowAPIを消す
 	winAPI_->Finalize();
 	delete winAPI_;
 }
