@@ -29,6 +29,10 @@ TransformationMatrix Camera::transformationMatrixTransform(Transform objTransfor
 	return { worldViewProjectionMatrix, objWorldMatrix };
 }
 
+TransformationMatrix Camera::transformationMatrixTransform(Matrix4x4 worldMatrix) {
+	return { worldMatrix * (viewMatrix_ * projectionMatrix_), worldMatrix };
+}
+
 void Camera::SetCamera(Transform cameraTransform) {
 	cameraTransform_ = cameraTransform;
 	Update();

@@ -21,6 +21,7 @@ public:
 	//void ResmoveSpriteInstance();
 	//void UpdateTileInstance();
 	void Add3DTileInstance(TransformationMatrix* wvpData, MaterialConfig material, int vertexNum, int modelHandle = 0, bool useDefaultModel = false);
+	void Add3DInstance(TransformationMatrix wvpData, MaterialConfig material, int vertexNum, int modelHandle = 0, int modelGroupHandle = 0);
 	void AddParticleInstance(TransformationMatrix* wvpData, MaterialConfig material);
 	//void ResmoveModelInstance();
 	//void UpdateModelInstance();

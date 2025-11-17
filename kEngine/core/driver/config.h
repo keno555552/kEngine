@@ -26,9 +26,7 @@ private:
 	static gamepadType gamePadType_;
 	static int XInputDriverIP_;
 
-
 public:
-
 	static void SaveClientWidth(int clientWidth) { clientWidth_ = clientWidth; }
 	static int GetClientWidth() { return clientWidth_; }
 	static void SaveClientHeight(int clientHeight) { clientHeight_ = clientHeight; }
@@ -46,4 +44,10 @@ public:
 	static int Get2DTileNumInstance() { return k2DTileNumInstance_; }
 	static int Get3DTileNumInstance() { return k3DTileNumInstance_; }
 	static int GetMaxMaterialNum() { return kMaxMaterialNum_; }
+
+public:
+	static int default_Triangle_MeshBufferHandle_;
+	static int default_Sprite2D_MeshBufferHandle_;
+	static int default_Cube_MeshBufferHandle_;
+	static int default_Sphere_MeshBufferHandle_;
 };

@@ -8,7 +8,6 @@ WVPResource::~WVPResource() {
 	delete wvpResource_;
 }
 
-
 ID3D12Resource* WVPResource::CreateWVPResource_(ID3D12Device* device, TransformationMatrix* wvpData) {
 	wvpResource_->CreateResourceClass_(device, sizeof(TransformationMatrix));
 

@@ -29,13 +29,15 @@ private:
 	/// =========== リソースハンドル ============///
 	/// モデルハンドル
 	int skydomeModelHandle_ = 0;
+	int modelHandle_ = 0;
 
 	/// テキスチャーハンドル
 	int boxTextureHandle_ = 0;
 
 	/// =========== ゲームオブジェクト ==========///
-	Object* skydome_ = new Object;
+	Object* skydome_ = nullptr;
 	Player* player_ = nullptr;
+	Object* model_ = nullptr;
 
 
 

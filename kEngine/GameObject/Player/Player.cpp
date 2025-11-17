@@ -5,8 +5,8 @@
 
 Player::Player(kEngine* system, const Vector3& position) {
 	system_ = system;
-	transform = CreateDefaultTransform();
-	transform.translate = position;
+	mainPosition.transform = CreateDefaultTransform();
+	mainPosition.transform.translate = position;
 
 }
 
@@ -61,7 +61,7 @@ void Player::Move() {
 
 			if (lrDirection_ != LRDirection::kRight) {
 				lrDirection_ = LRDirection::kRight;
-				turnFirstRotationY_ = transform.rotate.y;
+				turnFirstRotationY_ = mainPosition.transform.rotate.y;
 				turnTimer_ = kTimeTurn;
 			}
 		}
@@ -73,7 +73,7 @@ void Player::Move() {
 			acceleration.x -= kAcceleration;
 			if (lrDirection_ != LRDirection::kLeft) {
 				lrDirection_ = LRDirection::kLeft;
-				turnFirstRotationY_ = transform.rotate.y;
+				turnFirstRotationY_ = mainPosition.transform.rotate.y;
 				turnTimer_ = kTimeTurn;
 			}
 		}
@@ -81,7 +81,7 @@ void Player::Move() {
 		if (system_->GetIsPush(DIK_A) && system_->GetIsPush(DIK_D)) {
 			if (lrDirection_ != LRDirection::None) {
 				lrDirection_ = LRDirection::None;
-				turnFirstRotationY_ = transform.rotate.y;
+				turnFirstRotationY_ = mainPosition.transform.rotate.y;
 				turnTimer_ = kTimeTurn;
 			}
 		}
@@ -99,7 +99,7 @@ void Player::Move() {
 		//if (behavior_ != Behavior::kAttack) {
 		if (lrDirection_ != LRDirection::None) {
 			lrDirection_ = LRDirection::None;
-			turnFirstRotationY_ = transform.rotate.y;
+			turnFirstRotationY_ = mainPosition.transform.rotate.y;
 			turnTimer_ = kTimeTurn;
 		}
 		//}
@@ -117,7 +117,7 @@ void Player::Move() {
 		// 状態に応じた角度を取得する
 		float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
 		// 自キャラの角度を設定する
-		transform.rotate.y = turnFirstRotationY_ * (turnTimer_ / kTimeTurn) + destinationRotationY * (1 - turnTimer_ / kTimeTurn);
+		mainPosition.transform.rotate.y = turnFirstRotationY_ * (turnTimer_ / kTimeTurn) + destinationRotationY * (1 - turnTimer_ / kTimeTurn);
 	}
 
 
@@ -136,7 +136,7 @@ void Player::Move() {
 		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
 		// 空中
 		if (velocity_.y < 0) {
-			if ((transform.translate.y + velocity_.y) <= 2.0f) {
+			if ((mainPosition.transform.translate.y + velocity_.y) <= 2.0f) {
 				landing = true;
 			}
 		}
@@ -153,9 +153,9 @@ void Player::OnGroundChanger(const CollisionMapInfo& info) {
 			std::vector<Vector3> positionsNew(kNumCorner);
 			for (uint32_t i = 0; i < positionsNew.size(); i++) {
 				Vector3 translation_ = {};
-				translation_.x = transform.translate.x + info.moveVector.x* system_->GetDeltaTime();
-				translation_.y = transform.translate.y + info.moveVector.y* system_->GetDeltaTime();
-				translation_.z = transform.translate.z + info.moveVector.z* system_->GetDeltaTime();
+				translation_.x = mainPosition.transform.translate.x + info.moveVector.x* system_->GetDeltaTime();
+				translation_.y = mainPosition.transform.translate.y + info.moveVector.y* system_->GetDeltaTime();
+				translation_.z = mainPosition.transform.translate.z + info.moveVector.z* system_->GetDeltaTime();
 				positionsNew[i] = CornerPosition(translation_, static_cast<Corner>(i));
 			}
 			bool hit = false;
@@ -197,9 +197,9 @@ void Player::MapCollisionDecideDown(CollisionMapInfo& info) {
 
 	for (uint32_t i = 0; i < positionsNew.size(); i++) {
 		Vector3 translation_ = {};
-		translation_.x = transform.translate.x + info.moveVector.x* system_->GetDeltaTime();
-		translation_.y = transform.translate.y + info.moveVector.y* system_->GetDeltaTime();
-		translation_.z = transform.translate.z + info.moveVector.z* system_->GetDeltaTime();
+		translation_.x = mainPosition.transform.translate.x + info.moveVector.x* system_->GetDeltaTime();
+		translation_.y = mainPosition.transform.translate.y + info.moveVector.y* system_->GetDeltaTime();
+		translation_.z = mainPosition.transform.translate.z + info.moveVector.z* system_->GetDeltaTime();
 		positionsNew[i] = CornerPosition(translation_, static_cast<Corner>(i));
 	}
 	if (info.moveVector.y > 0)
@@ -243,7 +243,7 @@ void Player::MapCollisionDecideDown(CollisionMapInfo& info) {
 		//	// 床判定であることを記録する
 		//	info.floorHit = true;
 		//}
-		info.moveVector.y = std::max(0.0f, 0.0f - (kPlayerHeight / 2.0f) - transform.translate.y);
+		info.moveVector.y = std::max(0.0f, 0.0f - (kPlayerHeight / 2.0f) - mainPosition.transform.translate.y);
 		info.floorHit = true;
 	}
 }
@@ -251,7 +251,7 @@ void Player::MapCollisionDecideDown(CollisionMapInfo& info) {
 
 
 void Player::MovePlayerByResult(const CollisionMapInfo& info) {
-	transform.translate.x += info.moveVector.x * system_->GetDeltaTime();
-	transform.translate.y += info.moveVector.y * system_->GetDeltaTime();
-	transform.translate.z += info.moveVector.z * system_->GetDeltaTime();
+	mainPosition.transform.translate.x += info.moveVector.x * system_->GetDeltaTime();
+	mainPosition.transform.translate.y += info.moveVector.y * system_->GetDeltaTime();
+	mainPosition.transform.translate.z += info.moveVector.z * system_->GetDeltaTime();
 }

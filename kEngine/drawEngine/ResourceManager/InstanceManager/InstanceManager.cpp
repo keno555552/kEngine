@@ -60,36 +60,36 @@ void InstanceManager::AddSpriteInstance(Vector2 pos, MaterialConfig material) {
 }
 
 void InstanceManager::AddModelInstance(TransformationMatrix* wvpData, MaterialConfig material, int vertexNum, int modelHandle, bool useDefaultModel) {
-	ModelInstance instance;
-	instance.transformData = wvpData;	///参照渡し
-	instance.modelHandle = modelHandle;
-	instance.useDefaultModel = useDefaultModel;
-	instance.vertexNum = vertexNum;
-	instance.drawState = STANDBY;
-
-	auto checker = std::find_if(materialConfigList_.begin(),
-		materialConfigList_.end(),
-		[&](MaterialConfig* ptr) {return *ptr == material; });
-
-	if (checker == materialConfigList_.end()) {
-		MaterialConfig* newMaterial = new MaterialConfig(material);
-		materialConfigList_.push_back(newMaterial);
-		instance.materialConfigIndex = int(materialConfigList_.size() - 1);
-	} else {
-		instance.materialConfigIndex = (int)std::distance(materialConfigList_.begin(), checker);
-	}
-
-	auto checker2 = std::find_if(modelList_.begin(),
-		modelList_.end(),
-		[&](ModelInstance* ptr) {return ptr->CheckSame(instance); });
-
-	if (checker2 != modelList_.end()) {
-		(*checker2)->drawState = STANDBY;
-		(*checker2)->materialConfigIndex = instance.materialConfigIndex;
-	} else {
-		ModelInstance* newInstance = new ModelInstance(instance);
-		modelList_.push_back(newInstance);
-	}
+//	ModelInstance instance;
+//	instance.transformData = wvpData;	///参照渡し
+//	instance.modelHandle = modelHandle;
+//	instance.useDefaultModel = useDefaultModel;
+//	instance.vertexNum = vertexNum;
+//	instance.drawState = STANDBY;
+//
+//	auto checker = std::find_if(materialConfigList_.begin(),
+//		materialConfigList_.end(),
+//		[&](MaterialConfig* ptr) {return *ptr == material; });
+//
+//	if (checker == materialConfigList_.end()) {
+//		MaterialConfig* newMaterial = new MaterialConfig(material);
+//		materialConfigList_.push_back(newMaterial);
+//		instance.materialConfigIndex = int(materialConfigList_.size() - 1);
+//	} else {
+//		instance.materialConfigIndex = (int)std::distance(materialConfigList_.begin(), checker);
+//	}
+//
+//	auto checker2 = std::find_if(modelList_.begin(),
+//		modelList_.end(),
+//		[&](ModelInstance* ptr) {return ptr->CheckSame(instance); });
+//
+//	if (checker2 != modelList_.end()) {
+//		(*checker2)->drawState = STANDBY;
+//		(*checker2)->materialConfigIndex = instance.materialConfigIndex;
+//	} else {
+//		ModelInstance* newInstance = new ModelInstance(instance);
+//		modelList_.push_back(newInstance);
+//	}
 }
 
 void InstanceManager::Add2DTileInstance(Vector2 pos, MaterialConfig material) {
@@ -127,11 +127,45 @@ void InstanceManager::Add2DTileInstance(Vector2 pos, MaterialConfig material) {
 }
 
 void InstanceManager::Add3DTileInstance(TransformationMatrix* wvpData, MaterialConfig material, int vertexNum, int modelHandle, bool useDefaultModel) {
+//
+//	ModelInstance instance;
+//	instance.transformData = wvpData;	///参照渡し
+//	instance.modelHandle = modelHandle;
+//	instance.useDefaultModel = useDefaultModel;
+//	instance.vertexNum = vertexNum;
+//	instance.drawState = STANDBY;
+//
+//	auto checker = std::find_if(materialConfigList_.begin(),
+//		materialConfigList_.end(),
+//		[&](MaterialConfig* ptr) {return *ptr == material; });
+//
+//	if (checker == materialConfigList_.end()) {
+//		MaterialConfig* newMaterial = new MaterialConfig(material);
+//		materialConfigList_.push_back(newMaterial);
+//		instance.materialConfigIndex = int(materialConfigList_.size() - 1);
+//	} else {
+//		instance.materialConfigIndex = (int)std::distance(materialConfigList_.begin(), checker);
+//		materialConfigList_[instance.materialConfigIndex]->drawState = STANDBY;
+//	}
+//
+//	auto checker2 = std::find_if(tile3DList_.begin(),
+//		tile3DList_.end(),
+//		[&](ModelInstance* ptr) {return ptr->CheckSame(instance); });
+//
+//	if (checker2 == tile3DList_.end()) {
+//		ModelInstance* newInstance = new ModelInstance(instance);
+//		tile3DList_.push_back(newInstance);
+//	} else {
+//		(*checker2)->drawState = STANDBY;
+//		(*checker2)->materialConfigIndex = instance.materialConfigIndex;
+//	}
+}
 
-	ModelInstance instance;
+void InstanceManager::Add3DInstance(TransformationMatrix wvpData, MaterialConfig material, int vertexNum, int modelHandle, int modelGroupHandle) {
+	ModelInstance instance{};
 	instance.transformData = wvpData;	///参照渡し
 	instance.modelHandle = modelHandle;
-	instance.useDefaultModel = useDefaultModel;
+	instance.modelGroupHandle = modelGroupHandle;
 	instance.vertexNum = vertexNum;
 	instance.drawState = STANDBY;
 

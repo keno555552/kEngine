@@ -17,6 +17,10 @@ bool MaterialConfig::operator!=(const MaterialConfig target) {
 	return !(*this == target);
 }
 
+void MaterialConfig::MakeUVMatrix() {
+	uvTransformMatrix = MakeAffineMatrix(uvScale, uvRotate, uvTranslate);
+}
+
 void InitMaterialConfig(MaterialConfig* materialConfig) {
 	materialConfig->useOriginalTexture = true;
 	materialConfig->textureHandle = 0;

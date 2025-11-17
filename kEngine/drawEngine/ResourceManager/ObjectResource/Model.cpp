@@ -196,5 +196,9 @@ void Model::SetModelObj(std::string Path) {
 
 }
 
+void Model::SetVertexNum(int num) {
+	VertexNum_ = num;
+}
+
 
 

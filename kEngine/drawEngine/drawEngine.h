@@ -4,15 +4,13 @@
 #include "externals/DirectXTex/d3dx12.h"
 #include <vector>
 #include "Config.h"
-//#include "shader_compile.h"
 #include "PSO.h"
 #include "ResourceManager.h"
-#include "Vector4.h"
 #include "VertexData.h"
 #include "Material.h"
 #include "DirectionalLight.h"
 
-#include "Matrix4x4.h"
+#include "MathsIncluder.h"
 #include "TransformationMatrix.h"
 #include "ConvertString.h"
 #include "LightModelType.h"
@@ -20,7 +18,7 @@
 #include "VertexIndex.h"
 #include "Camera.h"
 
-
+#include "ObjectData.h"
 #include <format>
 
 class DrawEngine
@@ -62,10 +60,21 @@ public:
 	void Collect3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = -1);
 	void Draw3DTile();
 
+
+	/// 描くものテータを収集する関数
+	//void Collect2D();
+	void Collect3D(ObjectData* object);
+
+	/// 全部描く関数
+	void Draw2D();
+	void Draw3D();
+	void DrawCall();
+
 	/// Camera
 	void SetCamera(Camera* camera);
 
 	/// リソースローディング
+	int GetModelTextureHandle(int modelHandle, int part);
 
 	int readModelTextureHandle(int Handle);
 	int readCommenTextureHandle(int Handle);
@@ -80,9 +89,9 @@ public:
 private:
 	
 	PSO* pso_ = new PSO;
-	ResourceManager* resourceManager_ = nullptr;
-	DirectXCore* directXDriver_ = nullptr;
-	ID3D12GraphicsCommandList* commandList_ = nullptr;
+	ResourceManager* resourceManager_{};
+	DirectXCore* directXDriver_{};
+	ID3D12GraphicsCommandList* commandList_{};
 
 	int kClientWidth_ = 0;
 	int kClientHeight_ = 0;
@@ -126,7 +135,8 @@ private:
 
 
 	///Lighting関連
-	DirectionalLight* directionalLightData = {};		// 外部から受ける
+	DirectionalLight* directionalLightData{};		// 外部から受ける
+	DirectionalLight* lightingData = nullptr;
 
 	/// 交換用容器
 	BasicResource* tile2DWVPResource_ = new BasicResource;
@@ -142,13 +152,12 @@ private:
 
 	//Material関連
 	Material* materialData = nullptr;
-	DirectionalLight* lightingData = nullptr;
 
 private:
 
 	struct OffsetData {
 		BasicResource* instanceOffsetResource = new BasicResource;
-		UINT* instanceOffset;
+		UINT* instanceOffset{};
 		int state = 0;// 0:未使用 1:使用中
 	};
 

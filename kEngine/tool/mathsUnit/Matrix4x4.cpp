@@ -505,13 +505,13 @@ Matrix4x4 MakeTranslateMatrix(const Vector3 translate) {
 
 #pragma region カメラ改変陣列
 Matrix4x4 MakeAffineMatrix(Vector3 scole, Vector3 rotate, Vector3 translate) {
-	Matrix4x4 r1 = MakeScaleMatrix4x4(scole);
+	Matrix4x4 s = MakeScaleMatrix4x4(scole);
 
-	Matrix4x4 r2 = MakeRotateMatrix4x4(rotate);
+	Matrix4x4 r = MakeRotateMatrix4x4(rotate);
 
-	Matrix4x4 r3 = MakeTranslateMatrix(translate);
+	Matrix4x4 t = MakeTranslateMatrix(translate);
 
-	return Matrix4x4{ r2 * r1 * r3 };
+	return Matrix4x4{ r * s * t };
 }
 
 Matrix4x4 MatrixMix(Matrix4x4* matrix1, Matrix4x4* matrix2, Matrix4x4* matrix3, Matrix4x4* matrix4) {

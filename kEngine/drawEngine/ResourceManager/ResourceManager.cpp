@@ -1,15 +1,15 @@
 #include "ResourceManager.h"
+#include <Object/Object.h>
 
 ResourceManager::ResourceManager(ID3D12Device* device) {
 
 	Bdevice_ = device;
 
 	wvpResource_ = new WVPResource(device);
-	default_Triangle_MeshBufferHandle_ = CreateTriangleResource();
-	default_Sprite2D_MeshBufferHandle_ = CreateSprite2DResource();
-	default_Cube_MeshBufferHandle_ = CreateCubeResource();
-	default_Sphere_MeshBufferHandle_ = CreateSphereResource(1);
-
+	config::default_Sprite2D_MeshBufferHandle_ = CreateSprite2DResource();
+	config::default_Triangle_MeshBufferHandle_ = CreateTriangleResource();
+	config::default_Cube_MeshBufferHandle_ = CreateCubeResource();
+	config::default_Sphere_MeshBufferHandle_ = CreateSphereResource(1);
 }
 
 ResourceManager::~ResourceManager() {
@@ -17,7 +17,6 @@ ResourceManager::~ResourceManager() {
 	ClearPointer(materialResourceList_);
 	ClearPointer(meshBufferList_);
 	spriteMeshHandles_.clear();
-	modelMeshHandles_.clear();
 	modelGroupList_.clear();
 
 	for (auto& tex : textureData_) {
@@ -116,7 +115,7 @@ void ResourceManager::ColletModel(TransformationMatrix* wvpData, std::vector<Mat
 
 			instanceManager_->AddModelInstance(wvpData, usingMaterial,
 				modelGroupList_[modelHandle]->GetModel(i)->GetVertexNum(),
-				modelGroupList_[modelHandle]->GetModelHandle(i), 
+				modelGroupList_[modelHandle]->GetModelHandle(i),
 				useDefaultModel);
 
 		} else {
@@ -125,10 +124,10 @@ void ResourceManager::ColletModel(TransformationMatrix* wvpData, std::vector<Mat
 				usingMaterial.textureHandle = 0;
 			}
 
-			if (modelHandle == default_Cube_MeshBufferHandle_) {
+			if (modelHandle == config::default_Cube_MeshBufferHandle_) {
 				instanceManager_->AddModelInstance(wvpData, usingMaterial,
 					36,
-					default_Cube_MeshBufferHandle_, 
+					config::default_Cube_MeshBufferHandle_,
 					useDefaultModel);
 			}
 		}
@@ -190,10 +189,10 @@ void ResourceManager::Collet3DTile(TransformationMatrix* wvpData, std::vector<Ma
 				usingMaterial.textureHandle = 0;
 			}
 
-			if (modelHandle == default_Cube_MeshBufferHandle_) {
+			if (modelHandle == config::default_Cube_MeshBufferHandle_) {
 				instanceManager_->Add3DTileInstance(wvpData, usingMaterial,
 					36,
-					default_Cube_MeshBufferHandle_,
+					config::default_Cube_MeshBufferHandle_,
 					useDefaultModel);
 			}
 		}
@@ -220,24 +219,52 @@ void ResourceManager::Collet3DTile(TransformationMatrix* wvpData, std::vector<Ma
 	}
 }
 
+void ResourceManager::Collet3D(ObjectData* object) {
+	int modelNum = modelGroupList_[object->modelHandle_]->GetModelNum();
 
-int ResourceManager::CreateTriangleResource() {
-	Triangle* newTriangle = new Triangle;
-	newTriangle->CreateVertexResource_(Bdevice_);
-	newTriangle->CreateVertexBufferView_(6);
-	meshBufferList_.push_back(newTriangle);
-	return int(meshBufferList_.size() - 1);
-}
+	for (int i = 0; i < modelNum; i++) {
 
-int ResourceManager::CreateCubeResource() {
+		int before = (int)instanceManager_->materialConfigList_.size();
 
-	Cube* newCube_ = new Cube;
-	newCube_->CreateVertexResource_(Bdevice_);
-	newCube_->CreateVertexBufferView_(24);
-	newCube_->CreateIndexResource_(Bdevice_);
-	newCube_->CreateIndexBufferView_(36);
-	meshBufferList_.push_back(newCube_);
-	return int(meshBufferList_.size() - 1);
+		/// 処理してるマテリアルをまとめる
+		TransformationMatrix wvpData{};
+		MaterialConfig usingMaterial{};
+		if (i < object->objectParts_.size()) { 
+			wvpData = object->objectParts_[i].transformationMatrix;
+			usingMaterial = *object->objectParts_[i].materialConfig; 
+		} else { 
+			wvpData = object->objectParts_.back().transformationMatrix;
+			usingMaterial = *object->objectParts_.back().materialConfig; 
+		}
+
+		/// Instance追加
+
+		instanceManager_->Add3DInstance(wvpData, usingMaterial,
+			modelGroupList_[object->modelHandle_]->GetModel(i)->GetVertexNum(),
+			modelGroupList_[object->modelHandle_]->GetModelHandle(i),
+			object->modelHandle_);
+
+
+		int after = (int)instanceManager_->materialConfigList_.size();
+
+		/// マテリアルが足すがによってリソース追加
+		if (after > before) {
+			/// 新しいResourceを追加
+			BasicResource* newResource = new BasicResource;
+			newResource->CreateResourceClass_(Bdevice_, sizeof(Material));
+			materialResourceList_.push_back(newResource);
+
+			/// MaterialとMapする
+			Material* newData = nullptr;
+			newResource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&newData));
+			newData->inputMaterialConfig(usingMaterial);
+			newResource->GetResource()->Unmap(0, nullptr);
+
+			/// instanceにResourceのHandleを設定
+			instanceManager_->materialConfigList_.back()->materialResourceHandle = (int)materialResourceList_.size() - 1;
+		}
+	}
+
 }
 
 
@@ -264,16 +291,57 @@ int ResourceManager::CreateSprite2DResource(Vector2 LTpos, Vector2 LBpos,
 	newSprite2D_->CreateIndexBufferView_(12);
 	newSprite2D_->SetKeep(true);
 	meshBufferList_.push_back(newSprite2D_);
+
 	return int(meshBufferList_.size() - 1);
 }
 
+int ResourceManager::CreateTriangleResource() {
+	Triangle* newTriangle = new Triangle;
+	newTriangle->CreateVertexResource_(Bdevice_);
+	newTriangle->CreateVertexBufferView_(6);
+	meshBufferList_.push_back(newTriangle);
+
+	ModelGroup* modelGroup = new ModelGroup;
+	modelGroup->PushModel(newTriangle);
+	modelGroup->PushModelHandle((int)meshBufferList_.size() - 1);
+	modelGroupList_.push_back(modelGroup);
+
+	return int(modelGroupList_.size() - 1);
+}
+
+int ResourceManager::CreateCubeResource() {
+
+	Cube* newCube_ = new Cube;
+	newCube_->CreateVertexResource_(Bdevice_);
+	newCube_->CreateVertexBufferView_(24);
+	newCube_->CreateIndexResource_(Bdevice_);
+	newCube_->CreateIndexBufferView_(36);
+	meshBufferList_.push_back(newCube_);
+
+	ModelGroup* modelGroup = new ModelGroup;
+	modelGroup->PushModel(newCube_);
+	modelGroup->PushModelHandle((int)meshBufferList_.size() - 1);
+	modelGroupList_.push_back(modelGroup);
+
+	return int(modelGroupList_.size() - 1);
+}
+
+
 int ResourceManager::CreateSphereResource(int sudivision) {
+	sudivision;
 
 	Sphere* newSphere = new Sphere;
 	newSphere->CreateVertexResource_(Bdevice_);
 	newSphere->CreateIndexResource_(Bdevice_);
 	meshBufferList_.push_back(newSphere);
-	return int(meshBufferList_.size() - 1);
+
+	ModelGroup* modelGroup = new ModelGroup;
+	modelGroup->PushModel(newSphere);
+	modelGroup->PushModelHandle((int)meshBufferList_.size() - 1);
+	modelGroupList_.push_back(modelGroup);
+
+	return int(modelGroupList_.size() - 1);
+
 }
 
 int ResourceManager::CreateModelRosource(std::string Path) {

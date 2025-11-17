@@ -85,8 +85,8 @@ public:
 	/// <param name="material"></param>
 	/// <param name="modelHandle"></param>
 	void DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle);
-
 	void DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material);
+
 
 	/// <summary>
 	/// 
@@ -94,6 +94,12 @@ public:
 	/// <param name="wvpData"></param>
 	/// <param name="material"></param>
 	void Draw3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material);
+
+
+	//void Collect2D(Sprite* sprite);
+	void Draw3D(ObjectData* objectData);
+
+	int GetModelTextureHandle(int modelHandle,int part);
 
 	int GetMuitModelNum(int modelHandle);
 	int SetModelObj(std::string path);

@@ -77,6 +77,8 @@ ID3D12Resource* Cube::CreateVertexResource_(ID3D12Device* device) {
 		vertexData[3 + i * 4].normal = normal;
 	}
 	vertexResource_->GetResource()->Unmap(0, nullptr);
+
+
 	return vertexResource_->GetResource().Get();
 }
 
@@ -112,6 +114,9 @@ ID3D12Resource* Cube::CreateIndexResource_(ID3D12Device* device) {
 		}
 	}
 	indexResource_->GetResource()->Unmap(0, nullptr);
+
+	SetVertexNum(36);
+
 	return indexResource_->GetResource().Get();
 }
 

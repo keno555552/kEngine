@@ -24,6 +24,8 @@ struct MaterialConfig
 	bool operator==(const MaterialConfig target);
 	bool operator!=(const MaterialConfig target);
 
+	void MakeUVMatrix();
+
 };
 
 /// MaterialConfig初期化

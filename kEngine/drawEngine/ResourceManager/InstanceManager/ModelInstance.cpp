@@ -5,6 +5,6 @@ bool ModelInstance::CheckSame(const ModelInstance target) {
 	if (materialConfigIndex != target.materialConfigIndex)return false;
 	if (resourceHandle != target.resourceHandle)return false;
 	if (modelHandle != target.modelHandle)return false;
-	if (useDefaultModel != target.useDefaultModel)return false;
+	if (modelGroupHandle != target.modelGroupHandle)return false;
 	return true;
 }

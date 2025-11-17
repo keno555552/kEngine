@@ -1,31 +1,26 @@
 #pragma once
 #include <vector>
+#include <memory>
 #include "Transform.h"
 #include "TransformationMatrix.h"
 #include "MaterialConfig.h"
 #include "MathsIncluder.h"
-#include "drawEngine.h"
+#include "kEngine.h"
 #include "Camera.h"
+#include "ObjectData.h"
 
-class Object {
+
+class Object : public ObjectData {
 public:
-	Transform transform = CreateDefaultTransform();
+	void IntObject(kEngine* system);
 
-	Matrix4x4 worldMatrix = {};
-
-	Matrix4x4 worldViewProjectionMatrix{};
-
-	TransformationMatrix transformationMatrix{};
-
-	std::vector<MaterialConfig> materialConfig;
-
-	int modelHandle = 0;
-
-	bool isDelete = false;
-
-public:
-	
-	void CreateDefaultData();
-	
 	virtual void Update(Camera* camera);
+
+	int GetPartIndex()const { return (int)objectParts_.size(); }
+
+	void CreateDefaultData();
+	void CreateModelData(int modelHandle);
+
+private:
+	kEngine* system_ = nullptr;
 };

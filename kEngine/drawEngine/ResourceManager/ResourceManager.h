@@ -8,6 +8,7 @@
 #include "VertexIndex.h"
 #include "InstanceManager.h"
 #include "config.h"
+#include "ObjectData.h"
 
 class ResourceManager
 {
@@ -46,6 +47,9 @@ public:
 	void Collet2DTile(Vector2 pos, MaterialConfig material);
 	void Collet3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = 0,bool useDefaultModel = false);
 
+	void Collet3D(ObjectData* object);
+
+
 	/// モデル読み込み
 	int CreateModelRosource(std::string Path);
 
@@ -78,27 +82,23 @@ public:
 	/// 図形関係
 	std::vector<MeshBuffer*> meshBufferList_;		/// すべでのモデルを収納するどころ		これを使って解放する
 	std::vector<MeshBuffer*> spriteMeshHandles_;	/// スブライドのハンドルを収納する		解放に使えない
-	std::vector<MeshBuffer*> modelMeshHandles_;		/// モデルのハンドルを収納する			解放に使えない
 	std::vector<ModelGroup*> modelGroupList_;		/// モデルグループを	収納する			解放に使えない
 
-	/// デフォルトMeshBuffer
-	int default_Triangle_MeshBufferHandle_ = 0; // 三角形
-	int default_Sprite2D_MeshBufferHandle_ = 0; // 2Dスブライド
-	int default_Cube_MeshBufferHandle_ = 0; // キューブ
-	int default_Sphere_MeshBufferHandle_ = 0; // 球体
+	/// ModelHandle
+	int modelHandleCounter_ = 0;
 
 
 private:
 	/// リソース作り
-	int CreateTriangleResource();
-	int CreateCubeResource();
 	int CreateSprite2DResource();
 	int CreateSprite2DResource(Vector2 LTpos, Vector2 LBpos,
 		Vector2 RTpos, Vector2 RBpos,
 		float TsizeX, float TsizeY,
 		Vector2 TCLTPos, Vector2 TCRBPos);
-	int CreateSphereResource(int sudivision);
 
+	int CreateTriangleResource();
+	int CreateCubeResource();
+	int CreateSphereResource(int sudivision);
 
 private:
 	////////////////////////////// 関数テンプレート
