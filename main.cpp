@@ -25,6 +25,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///====================ゲーム処理====================///
 		sceneManager->Update();
 
+
 		///=====================描画処理=====================///
 		system->StartFrame();
 
