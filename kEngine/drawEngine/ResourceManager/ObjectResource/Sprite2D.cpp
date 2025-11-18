@@ -5,6 +5,7 @@ void Sprite2D::SetSize(Vector2 LTpos, Vector2 LBpos,Vector2 RTpos, Vector2 RBpos
 	coner[ BOTTOM_LEFT] = LBpos;
 	coner[	 TOP_RIGHT] = RTpos;
 	coner[BOTTOM_RIGHT] = RBpos;
+
 	center = { ((LTpos.x + LBpos.x + RTpos.x + RBpos.x) / 4.0f),
 			   ((LTpos.y + LBpos.y + RTpos.y + RBpos.y) / 4.0f) };
 

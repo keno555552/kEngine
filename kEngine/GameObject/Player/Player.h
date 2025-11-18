@@ -37,7 +37,6 @@ public:
 
 
 private:
-	kEngine* system_ = nullptr;
 
 	enum class LRDirection { kRight, kLeft, None };
 

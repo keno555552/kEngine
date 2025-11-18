@@ -219,6 +219,31 @@ void ResourceManager::Collet3DTile(TransformationMatrix* wvpData, std::vector<Ma
 	}
 }
 
+
+
+
+
+
+void ResourceManager::Collet2D(SpriteData* sprite) {
+	int materialNum = (int)instanceManager_->materialConfigList_.size();
+	//instanceManager_->Add2DTileInstance(pos, material);
+	if (materialNum < (int)instanceManager_->materialConfigList_.size()) {
+		/// 新しいResourceを追加
+		BasicResource* newResource = new BasicResource;
+		newResource->CreateResourceClass_(Bdevice_, sizeof(Material));
+		materialResourceList_.push_back(newResource);
+
+		/// MaterialとMapする
+		Material* newData = nullptr;
+		newResource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&newData));
+		//newData->inputMaterialConfig(material);
+		newResource->GetResource()->Unmap(0, nullptr);
+
+		/// instanceにResourceのHandleを設定
+		instanceManager_->materialConfigList_.back()->materialResourceHandle = materialNum;
+	}
+}
+
 void ResourceManager::Collet3D(ObjectData* object) {
 	int modelNum = modelGroupList_[object->modelHandle_]->GetModelNum();
 

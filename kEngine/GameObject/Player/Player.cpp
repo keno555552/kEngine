@@ -4,7 +4,7 @@
 #include <numbers>
 
 Player::Player(kEngine* system, const Vector3& position) {
-	system_ = system;
+	Object::IntObject(system);
 	mainPosition.transform = CreateDefaultTransform();
 	mainPosition.transform.translate = position;
 

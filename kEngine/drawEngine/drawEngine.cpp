@@ -892,6 +892,10 @@ void DrawEngine::Draw3DTile() {
 
 }
 
+void DrawEngine::Collect2D(SpriteData* spriteData) {
+	resourceManager_->Collet2D(spriteData);
+}
+
 void DrawEngine::Collect3D(ObjectData* object) {
 	resourceManager_->Collet3D(object);
 }
@@ -975,7 +979,7 @@ void DrawEngine::Draw2D() {
 			// CPUで動かす用のTransformを作る。
 			Transform transformSprite = CreateDefaultTransform();
 			if (group[i] != nullptr) {
-				transformSprite.translate = { group[i]->position.x,group[i]->position.y,group[i]->position.z };
+				transformSprite.translate = group[i]->position;
 			}
 
 			// Sprite用のworldViewProjectionMatrixを作る

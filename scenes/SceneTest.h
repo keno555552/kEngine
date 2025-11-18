@@ -1,6 +1,7 @@
 #pragma once
 #include "Scene.h"
 #include "Object\Object.h"
+#include "Object\Sprite.h"
 #include "DebugCamera.h"
 #include "Player\Player.h"
 
@@ -29,15 +30,15 @@ private:
 	/// =========== リソースハンドル ============///
 	/// モデルハンドル
 	int skydomeModelHandle_ = 0;
-	int modelHandle_ = 0;
 
 	/// テキスチャーハンドル
 	int boxTextureHandle_ = 0;
+	int tryTextureHandle_ = 0;
 
 	/// =========== ゲームオブジェクト ==========///
 	Object* skydome_ = nullptr;
 	Player* player_ = nullptr;
-	Object* model_ = nullptr;
+	SimpleSprite* sprite_ = nullptr;
 
 
 

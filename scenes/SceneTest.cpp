@@ -9,9 +9,9 @@ SceneTest::SceneTest(kEngine* system){
 
 	/// =========== リソースロード ============///
 	skydomeModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/skydome/skydome.obj");
-	modelHandle_ = system_->SetModelObj("resources/TemplateResource/object/charater/charater.obj");
 
 	boxTextureHandle_ = system_->LoadTextrue("resources/texture/testBox.png");
+	tryTextureHandle_ = system_->LoadTextrue("resources/texture/Tryer.png");
 
 	//skydome_->CreateDefaultData();
 	skydome_ = new Object;
@@ -25,13 +25,6 @@ SceneTest::SceneTest(kEngine* system){
 	player_->objectParts_[0].materialConfig->useOriginalTexture = false;
 	player_->objectParts_[0].materialConfig->textureHandle = boxTextureHandle_;
 
-	model_ = new Object;
-	model_->IntObject(system_);
-	model_->CreateModelData(modelHandle_);
-	model_->objectParts_[0].materialConfig->enableLighting = false;
-	model_->objectParts_[1].materialConfig->enableLighting = false;
-	model_->objectParts_[2].materialConfig->enableLighting = false;
-	model_->objectParts_[3].materialConfig->enableLighting = false;
 }
 
 SceneTest::~SceneTest() {
@@ -52,8 +45,6 @@ void SceneTest::Update() {
 	/// player更新
 	player_->Update(usingCamera_);
 
-	model_->Update(usingCamera_);
-
 	if (system_->GetTriggerOn(DIK_0)) {
 		if (useDebugCamera)useDebugCamera = false;
 		else useDebugCamera = true;
@@ -65,9 +56,11 @@ void SceneTest::Draw() {
 
 	/// 実体処理
 	//system_->DrawModel(&skydome_->objectParts[0].transformationMatrix, &(skydome_->objectParts[0].materialConfig.get()), skydomeModelHandle_);
-	system_->Draw3D(skydome_);
-	system_->Draw3D(player_);
-	system_->Draw3D(model_);
+	skydome_->Draw();
+	player_->Draw();
+	//system_->Draw3D(skydome_);
+	//system_->Draw3D(player_);
+	//system_->Draw3D(model_);
 	
 #ifdef USE_IMGUI
 	/// imgui処理
@@ -104,17 +97,6 @@ void SceneTest::ImguiPart() {
 	{
 		ImGui::Begin("PlayerPos");
 		ImGui::SliderFloat3("Pos", &player_->mainPosition.transform.translate.x, -1.0f, 1.0f);
-		ImGui::End();
-	}
-
-	{
-		ImGui::Begin("ModelSetting");
-		ImGui::SliderFloat3("Pos", &model_->mainPosition.transform.translate.x, -5.0f, 5.0f);
-		ImGui::SliderFloat3("Rotate", &model_->mainPosition.transform.rotate.x, -5.0f, 5.0f);
-		ImGui::SliderFloat3("Part1_Rotate", &model_->objectParts_[0].transform.rotate.x, -5.0f, 5.0f);
-		ImGui::SliderFloat3("Part2_Rotate", &model_->objectParts_[1].transform.rotate.x, -5.0f, 5.0f);
-		ImGui::SliderFloat3("Part3_Rotate", &model_->objectParts_[2].transform.rotate.x, -5.0f, 5.0f);
-		ImGui::SliderFloat3("Part4_Rotate", &model_->objectParts_[3].transform.rotate.x, -5.0f, 5.0f);
 		ImGui::End();
 	}
 }

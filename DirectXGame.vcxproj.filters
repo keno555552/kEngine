@@ -138,9 +138,6 @@
     <ClCompile Include="main.cpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\DrawData\SpriteData.cpp">
-      <Filter>ソース ファイル\kEngine\DrawEngine\DrawData</Filter>
-    </ClCompile>
     <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\Cube.cpp">
       <Filter>ソース ファイル\kEngine\DrawEngine\ResourceManager\ObjectResource</Filter>
     </ClCompile>
@@ -330,7 +327,13 @@
     <ClCompile Include="externals\imgui\imgui.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\ObjectData.cpp">
+    <ClCompile Include="kEngine\drawEngine\DrawData\ObjectData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\GameObject\Object\Sprite.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\drawEngine\DrawData\SpriteData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -376,9 +379,6 @@
     </ClInclude>
     <ClInclude Include="externals\imgui\imstb_truetype.h">
       <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\DrawData\SpriteData.h">
-      <Filter>ヘッダー ファイル\kEngine\DrawEngine\DrawData</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\Cube.h">
       <Filter>ヘッダー ファイル\kEngine\DrawEngine\ResourceManager\ObjectResource</Filter>
@@ -533,7 +533,13 @@
     <ClInclude Include="kEngine\tool\MapChip\MapChipField.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\ObjectData.h">
+    <ClInclude Include="kEngine\drawEngine\DrawData\ObjectData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\GameObject\Object\Sprite.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\drawEngine\DrawData\SpriteData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

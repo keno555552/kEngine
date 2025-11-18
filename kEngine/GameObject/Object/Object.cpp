@@ -40,6 +40,10 @@ void Object::Update(Camera* camera) {
 
 }
 
+void Object::Draw() {
+	system_->Draw3D(this);
+}
+
 void Object::CreateModelData(int modelHandle) {
 	modelHandle_ = modelHandle;
 	int numOfPart = system_->GetMuitModelNum(modelHandle_);

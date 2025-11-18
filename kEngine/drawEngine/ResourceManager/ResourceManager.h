@@ -8,7 +8,8 @@
 #include "VertexIndex.h"
 #include "InstanceManager.h"
 #include "config.h"
-#include "ObjectData.h"
+#include "DrawData/ObjectData.h"
+#include <DrawData/SpriteData.h>
 
 class ResourceManager
 {
@@ -47,6 +48,7 @@ public:
 	void Collet2DTile(Vector2 pos, MaterialConfig material);
 	void Collet3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = 0,bool useDefaultModel = false);
 
+	void Collet2D(SpriteData* sprite);
 	void Collet3D(ObjectData* object);
 
 

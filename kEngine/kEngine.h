@@ -96,7 +96,9 @@ public:
 	void Draw3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material);
 
 
-	//void Collect2D(Sprite* sprite);
+
+
+	void Draw2D(SpriteData* spriteData);
 	void Draw3D(ObjectData* objectData);
 
 	int GetModelTextureHandle(int modelHandle,int part);

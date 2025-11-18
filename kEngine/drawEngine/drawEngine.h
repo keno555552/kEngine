@@ -18,7 +18,8 @@
 #include "VertexIndex.h"
 #include "Camera.h"
 
-#include "ObjectData.h"
+#include "DrawData/ObjectData.h"
+#include "DrawData/SpriteData.h"
 #include <format>
 
 class DrawEngine
@@ -61,8 +62,9 @@ public:
 	void Draw3DTile();
 
 
+
 	/// 描くものテータを収集する関数
-	//void Collect2D();
+	void Collect2D(SpriteData* spriteData);
 	void Collect3D(ObjectData* object);
 
 	/// 全部描く関数

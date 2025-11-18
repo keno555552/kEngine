@@ -89,6 +89,10 @@ void kEngine::Draw3DTile(TransformationMatrix* wvpData, std::vector<MaterialConf
 	drawEngine->Collect3DTile(wvpData, material);
 }
 
+void kEngine::Draw2D(SpriteData* spriteData) {
+	drawEngine->Collect2D(spriteData);
+}
+
 void kEngine::Draw3D(ObjectData* object) {
 	drawEngine->Collect3D(object);
 }

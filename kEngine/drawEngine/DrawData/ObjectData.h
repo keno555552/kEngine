@@ -5,7 +5,6 @@
 #include "Transform.h"
 #include "TransformationMatrix.h"
 #include "MaterialConfig.h"
-//#include "drawEngine.h"
 
 struct ObjectPart {
 	Transform transform = CreateDefaultTransform();
@@ -28,6 +27,6 @@ public:
 
 	bool isDelete_ = false;
 
-	ObjectPart followObject_;
+	ObjectPart* followObject_;
 };
 

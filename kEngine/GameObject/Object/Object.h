@@ -7,7 +7,7 @@
 #include "MathsIncluder.h"
 #include "kEngine.h"
 #include "Camera.h"
-#include "ObjectData.h"
+#include "DrawData/ObjectData.h"
 
 
 class Object : public ObjectData {
@@ -16,11 +16,13 @@ public:
 
 	virtual void Update(Camera* camera);
 
+	virtual void Draw();
+
 	int GetPartIndex()const { return (int)objectParts_.size(); }
 
 	void CreateDefaultData();
 	void CreateModelData(int modelHandle);
 
-private:
-	kEngine* system_ = nullptr;
+protected:
+	kEngine* system_ = nullptr; /// 借り
 };
