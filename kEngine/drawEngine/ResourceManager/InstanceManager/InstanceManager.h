@@ -7,6 +7,8 @@
 #include "TransformationMatrix.h"
 #include "SpriteInstance.h"
 #include "ModelInstance.h"
+#include "Transform.h"
+#include <algorithm>
 
 class InstanceManager
 {
@@ -21,8 +23,10 @@ public:
 	//void ResmoveSpriteInstance();
 	//void UpdateTileInstance();
 	void Add3DTileInstance(TransformationMatrix* wvpData, MaterialConfig material, int vertexNum, int modelHandle = 0, bool useDefaultModel = false);
+
+	void Add2DInstance(Transform wvpData, MaterialConfig material);
 	void Add3DInstance(TransformationMatrix wvpData, MaterialConfig material, int vertexNum, int modelHandle = 0, int modelGroupHandle = 0);
-	void AddParticleInstance(TransformationMatrix* wvpData, MaterialConfig material);
+	void SpriteLayerManagement();
 	//void ResmoveModelInstance();
 	//void UpdateModelInstance();
 
@@ -44,6 +48,8 @@ public:
 public:
 	int tileLayerCount = 0;
 	int spriteLayerCount = 0;
+
+	float layerdSpriteDepth_ = -0.4f;
 
 private:
 

@@ -4,8 +4,8 @@
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <wrl.h>
-#include "Logger.h"
 #include "WinAPI.h"
+#include "Logger.h"
 
 // Input
 #define DIRECTINPUT_VERSION 0x0800
@@ -29,14 +29,14 @@
 
 #include <dxgidebug.h>
 
-
 #pragma region Input
-
 bool CheakXInputDeviceConnected();
-
 #pragma endregion
 
+
+
 #pragma region DirectXCommon
+
 class DirectXCore {
 public:
 	DirectXCore();

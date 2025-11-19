@@ -172,7 +172,7 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>Default</LanguageStandard_C>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\kEngine\pso\;$(MSBuildProjectDirectory)\kEngine\;$(MSBuildProjectDirectory)\kEngine\tool\StageManager;$(MSBuildProjectDirectory)\kEngine\tool\StringManage;$(MSBuildProjectDirectory)\kEngine\tool\DebugTool;$(MSBuildProjectDirectory)\kEngine\tool\Camera;$(MSBuildProjectDirectory)\kEngine\core\driver\;$(MSBuildProjectDirectory)\kEngine\core\pso\;$(MSBuildProjectDirectory)\kEngine\GameObject\;$(MSBuildProjectDirectory)\kEngine\drawEngine\;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\InstanceManager;S(MSBuildProjectDirectory)\..\scenes;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\ObjectResource\;$(MSBuildProjectDirectory)\kEngine\Lighting\;$(MSBuildProjectDirectory)\kEngine\material\;$(MSBuildProjectDirectory)\kEngine\Sound\;$(MSBuildProjectDirectory)\kEngine\Shader\;$(MSBuildProjectDirectory)\kEngine\core\Input\;$(MSBuildProjectDirectory)\kEngine\tool\DebugCamera\;$(MSBuildProjectDirectory)\kEngine\tool\StageMananger\;$(MSBuildProjectDirectory)\kEngine\tool\mathsUnit\;$(MSBuildProjectDirectory)\;S(MSBuildProjectDirectory)\kEngine\ResourceManager</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\kEngine\pso\;$(MSBuildProjectDirectory)\kEngine\;$(MSBuildProjectDirectory)\kEngine\tool\StageManager;$(MSBuildProjectDirectory)\kEngine\tool\StringManage;$(MSBuildProjectDirectory)\kEngine\tool\DebugTool;$(MSBuildProjectDirectory)\kEngine\tool\Camera;$(MSBuildProjectDirectory)\kEngine\core\driver\;$(MSBuildProjectDirectory)\kEngine\core\pso\;$(MSBuildProjectDirectory)\kEngine\GameObject\;$(MSBuildProjectDirectory)\kEngine\drawEngine\;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\InstanceManager;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\ObjectResource\;$(MSBuildProjectDirectory)\kEngine\drawEngine\ResourceManager\TextureManager\;$(MSBuildProjectDirectory)\kEngine\Lighting\;$(MSBuildProjectDirectory)\kEngine\material\;$(MSBuildProjectDirectory)\kEngine\Sound\;$(MSBuildProjectDirectory)\kEngine\Shader\;$(MSBuildProjectDirectory)\kEngine\core\Input\;$(MSBuildProjectDirectory)\kEngine\tool\DebugCamera\;$(MSBuildProjectDirectory)\kEngine\tool\StageMananger\;$(MSBuildProjectDirectory)\kEngine\tool\mathsUnit\;$(MSBuildProjectDirectory)\;S(MSBuildProjectDirectory)\..\scenes</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -269,6 +269,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ClCompile>
     <ClCompile Include="kEngine\core\driver\FrameRateLimiter.cpp" />
     <ClCompile Include="kEngine\core\driver\WinAPI.cpp" />
+    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\SimpleSpriteMesh.cpp" />
     <ClCompile Include="kEngine\tool\Camera\Camera.cpp" />
     <ClCompile Include="kEngine\drawEngine\ResourceManager\InstanceManager\InstanceManager.cpp" />
     <ClCompile Include="kEngine\GameObject\Button\button.cpp" />
@@ -292,8 +293,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Sound\soundManager.cpp" />
     <ClCompile Include="kEngine\tool\StageManager\Scene.cpp" />
     <ClCompile Include="kEngine\tool\StringManage\ConvertString.cpp" />
-    <ClCompile Include="kEngine\core\driver\DircetXCore.cpp" />
-    <ClCompile Include="kEngine\core\driver\DircetXController.cpp" />
+    <ClCompile Include="kEngine\core\driver\DirectXCore.cpp" />
+    <ClCompile Include="kEngine\core\driver\DirectXController.cpp" />
     <ClCompile Include="kEngine\Lighting\DirectionalLight.cpp" />
     <ClCompile Include="kEngine\drawEngine\drawEngine.cpp" />
     <ClCompile Include="kEngine\kEngine.cpp" />
@@ -330,10 +331,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="scenes\SceneTest.cpp" />
     <ClCompile Include="kEngine\GameObject\Object\Sprite.cpp" />
     <ClCompile Include="kEngine\drawEngine\DrawData\SpriteData.cpp" />
+    <ClCompile Include="kEngine\drawEngine\ResourceManager\TextureManager\TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kEngine\core\driver\FrameRateLimiter.h" />
     <ClInclude Include="kEngine\core\driver\WinAPI.h" />
+    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\SimpleSpriteMesh.h" />
     <ClInclude Include="kEngine\tool\Camera\Camera.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\InstanceManager\InstanceManager.h" />
     <ClInclude Include="kEngine\GameObject\Button\button.h" />
@@ -357,7 +360,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Sound\soundManager.h" />
     <ClInclude Include="kEngine\tool\StageManager\Scene.h" />
     <ClInclude Include="kEngine\tool\StringManage\ConvertString.h" />
-    <ClInclude Include="kEngine\core\driver\DircetXController.h" />
+    <ClInclude Include="kEngine\core\driver\DirectXController.h" />
     <ClInclude Include="kEngine\Lighting\DirectionalLight.h" />
     <ClInclude Include="kEngine\drawEngine\drawEngine.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
@@ -381,7 +384,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\kEngine.h" />
     <ClInclude Include="kEngine\core\pso\PSO.h" />
     <ClInclude Include="kEngine\core\pso\shader_compile.h" />
-    <ClInclude Include="kEngine\core\driver\DircetXCore.h" />
+    <ClInclude Include="kEngine\core\driver\DirectXCore.h" />
     <ClInclude Include="kEngine\tool\mathsUnit\TransformationMatrix.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\VertexData.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\VertexResource.h" />
@@ -400,6 +403,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="scenes\SceneTest.h" />
     <ClInclude Include="kEngine\GameObject\Object\Sprite.h" />
     <ClInclude Include="kEngine\drawEngine\DrawData\SpriteData.h" />
+    <ClInclude Include="kEngine\drawEngine\ResourceManager\TextureManager\TextureManager.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\LightingLambert\HalfLambert.hlsl">

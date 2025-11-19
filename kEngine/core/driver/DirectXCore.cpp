@@ -1,4 +1,4 @@
-#include "DircetXCore.h"
+#include "DirectXCore.h"
 
 #include <cassert>
 #pragma comment(lib,"d3d12.lib")
@@ -470,7 +470,7 @@ void DirectXCore::InitializeDrive(const char* kClientTitle, int kClientWidth, in
 	SwapChain = CreateSwapChain(dxgiFactory, commandQueue, winAPI_->GetHWND(), kClientWidth, kClientHeight);
 	//DescriptorHeap = CreateDescriptorHeap(device);
 	rtvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
-	srvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
+	srvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, config::GetMaxSRVNum(), true);
 	dsvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
 
 	CreateRenderTargetViews(device, SwapChain, rtvDescriptorHeap);

@@ -47,7 +47,7 @@ public:
 
 
 #pragma region DeformableSprite
-struct SimpleSprite {
+struct DeformableSpriteVertex {
 	Vector2 LTpos;
 	Vector2 LBpos;
 	Vector2 RTpos;

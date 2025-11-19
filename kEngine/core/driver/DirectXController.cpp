@@ -1,19 +1,19 @@
-#include "DircetXController.h"
+#include "DirectXController.h"
 #include <pplwin.h>
 
-DircetXController::DircetXController() {
+DirectXController::DirectXController() {
 	static FixFPS fixFPS;
 	fixFPS.Initialize();
 	
 	timeBeginPeriod(1);
 }
 
-DircetXController::~DircetXController() {
+DirectXController::~DirectXController() {
 	Finalize();
 	timeEndPeriod(1);
 }
 
-void DircetXController::StartFrame() {
+void DirectXController::StartFrame() {
 
 #ifdef USE_IMGUI
 	ImGui_ImplDX12_NewFrame();
@@ -54,7 +54,7 @@ void DircetXController::StartFrame() {
 	commandList->SetDescriptorHeaps(1, descriptorHeaps);
 }
 
-void DircetXController::EndFrame() {
+void DirectXController::EndFrame() {
 
 #ifdef _DEBUG
 #ifdef USE_IMGUI

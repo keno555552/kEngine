@@ -1,5 +1,5 @@
 #pragma once
-#include "DircetXController.h"
+#include "DirectXController.h"
 #include "inputManager.h"
 #include "soundManager.h"
 #include "drawEngine.h"
@@ -202,7 +202,7 @@ public:
 #pragma endregion
 
 private:
-	DircetXController* dxComm = nullptr;
+	DirectXController* dxComm = nullptr;
 	DrawEngine* drawEngine = nullptr;
 	InputManager* inputManager = nullptr;
 	SoundManager* soundManager = nullptr;

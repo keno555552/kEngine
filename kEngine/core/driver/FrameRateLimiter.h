@@ -1,5 +1,5 @@
 #pragma once
-#include "DircetXCore.h"
+#include "DirectXCore.h"
 #include <chrono>
 
 class FrameRateLimiter {

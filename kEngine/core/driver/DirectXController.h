@@ -1,13 +1,13 @@
 #pragma once
-#include "DircetXCore.h"
+#include "DirectXCore.h"
 #include "FrameRateLimiter.h"
 #pragma comment(lib,"winmm.lib")
 
-class DircetXController :public DirectXCore
+class DirectXController :public DirectXCore
 {
 public:
-	DircetXController();
-	~DircetXController();
+	DirectXController();
+	~DirectXController();
 	void StartFrame();
 	void EndFrame();
 private:

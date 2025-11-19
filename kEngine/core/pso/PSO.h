@@ -12,7 +12,7 @@
 #include <dxcapi.h>
 #pragma comment(lib,"dxcompiler.lib")
 
-#include "DircetXCore.h"
+#include "DirectXCore.h"
 #include "config.h"
 #include <vector>
 

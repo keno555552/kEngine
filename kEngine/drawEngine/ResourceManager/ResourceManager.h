@@ -7,9 +7,10 @@
 #include "MaterialConfig.h"
 #include "VertexIndex.h"
 #include "InstanceManager.h"
+#include "TextureManager.h"
 #include "config.h"
 #include "DrawData/ObjectData.h"
-#include <DrawData/SpriteData.h>
+#include "DrawData/SpriteData.h"
 
 class ResourceManager
 {
@@ -21,7 +22,6 @@ public:
 		Vector4 uvOffset;
 	};
 
-
 #pragma region Instance管理
 
 
@@ -29,7 +29,7 @@ public:
 
 public:
 	/// 一回だけ作成するResource
-	ResourceManager(ID3D12Device* device);
+	ResourceManager(DirectXCore* device);
 	/// 最後で解放するResource
 	~ResourceManager();
 
@@ -53,13 +53,39 @@ public:
 
 
 	/// モデル読み込み
-	int CreateModelRosource(std::string Path);
+	int LoadModel(std::string Path);
+
+public:
+	//////////////////////////////命令
+
+	/// Texture指令
+
+	int LoadCommonTexture(const std::string& filePath);
+	int LoadModelTexture(const std::string& filePath);
+
+	int GetTextureHandleFromCommonList(int index);
+	int GetTextureHandleFromModelGroup(int modelHandle, int part);
+
+	DirectX::TexMetadata GetTextureMetadata(int textureHandle);
+
+	int ReadModelTextureHandle(int index);
+	int ReadCommenTextureHandle(int index);
+
+	bool SetModelTexture(Model* model);
+
+	int GetTextureCounter();
+	void TextureCounterPlus(int index = 1);
+
+	D3D12_CPU_DESCRIPTOR_HANDLE GetTextureCPUDescriptorHandle(int handle);
+	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureGPUDescriptorHandle(int handle);
 
 public:
 
 	/// 借りのDevice
+	DirectXCore* core_ = nullptr;
 	ID3D12Device* Bdevice_ = nullptr;
 
+	//////////////////////////////Texture関係
 	/// テクスチャ関係
 	BasicResource* intermediateResource_ = new BasicResource;/*EndDrawでTextrueを作ったら解放する*/
 	std::vector<std::string> commonTextureFilePath_;
@@ -83,8 +109,9 @@ public:
 
 	/// 図形関係
 	std::vector<MeshBuffer*> meshBufferList_;		/// すべでのモデルを収納するどころ		これを使って解放する
-	std::vector<MeshBuffer*> spriteMeshHandles_;	/// スブライドのハンドルを収納する		解放に使えない
+	std::vector<Sprite2D*> spriteMeshHandles_;	/// スブライドのハンドルを収納する		解放に使えない
 	std::vector<ModelGroup*> modelGroupList_;		/// モデルグループを	収納する			解放に使えない
+	SimpleSpriteMesh* simpleSpriteMesh_ = nullptr;	/// デフォルトのスプライトメッシュ
 
 	/// ModelHandle
 	int modelHandleCounter_ = 0;
@@ -92,15 +119,18 @@ public:
 
 private:
 	/// リソース作り
-	int CreateSprite2DResource();
-	int CreateSprite2DResource(Vector2 LTpos, Vector2 LBpos,
-		Vector2 RTpos, Vector2 RBpos,
-		float TsizeX, float TsizeY,
-		Vector2 TCLTPos, Vector2 TCRBPos);
-
+	
+	int CreateSimpleSpriteMeshResource();
+	//int CreateSprite2DResource(Vector2 LTpos, Vector2 LBpos,
+	//	Vector2 RTpos, Vector2 RBpos,
+	//	float TsizeX, float TsizeY,
+	//	Vector2 TCLTPos, Vector2 TCRBPos);
+	//int CreateSprite2DResource(const DirectX::TexMetadata mipData);
 	int CreateTriangleResource();
 	int CreateCubeResource();
 	int CreateSphereResource(int sudivision);
+
+	int CreateModelRosource(std::string Path);
 
 private:
 	////////////////////////////// 関数テンプレート

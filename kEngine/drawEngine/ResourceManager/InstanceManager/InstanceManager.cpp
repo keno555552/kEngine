@@ -15,7 +15,7 @@ void InstanceManager::Update() {
 	UpdateInstance(tile2DList_);
 	UpdateInstance(modelList_);
 	UpdateInstance(tile3DList_);
-	
+
 
 	if (tileLayerCount > 1) {
 		tileLayerCount = (int)tile2DList_[tile2DList_.size() - 1]->position.z;
@@ -60,36 +60,36 @@ void InstanceManager::AddSpriteInstance(Vector2 pos, MaterialConfig material) {
 }
 
 void InstanceManager::AddModelInstance(TransformationMatrix* wvpData, MaterialConfig material, int vertexNum, int modelHandle, bool useDefaultModel) {
-//	ModelInstance instance;
-//	instance.transformData = wvpData;	///参照渡し
-//	instance.modelHandle = modelHandle;
-//	instance.useDefaultModel = useDefaultModel;
-//	instance.vertexNum = vertexNum;
-//	instance.drawState = STANDBY;
-//
-//	auto checker = std::find_if(materialConfigList_.begin(),
-//		materialConfigList_.end(),
-//		[&](MaterialConfig* ptr) {return *ptr == material; });
-//
-//	if (checker == materialConfigList_.end()) {
-//		MaterialConfig* newMaterial = new MaterialConfig(material);
-//		materialConfigList_.push_back(newMaterial);
-//		instance.materialConfigIndex = int(materialConfigList_.size() - 1);
-//	} else {
-//		instance.materialConfigIndex = (int)std::distance(materialConfigList_.begin(), checker);
-//	}
-//
-//	auto checker2 = std::find_if(modelList_.begin(),
-//		modelList_.end(),
-//		[&](ModelInstance* ptr) {return ptr->CheckSame(instance); });
-//
-//	if (checker2 != modelList_.end()) {
-//		(*checker2)->drawState = STANDBY;
-//		(*checker2)->materialConfigIndex = instance.materialConfigIndex;
-//	} else {
-//		ModelInstance* newInstance = new ModelInstance(instance);
-//		modelList_.push_back(newInstance);
-//	}
+	//	ModelInstance instance;
+	//	instance.transformData = wvpData;	///参照渡し
+	//	instance.modelHandle = modelHandle;
+	//	instance.useDefaultModel = useDefaultModel;
+	//	instance.vertexNum = vertexNum;
+	//	instance.drawState = STANDBY;
+	//
+	//	auto checker = std::find_if(materialConfigList_.begin(),
+	//		materialConfigList_.end(),
+	//		[&](MaterialConfig* ptr) {return *ptr == material; });
+	//
+	//	if (checker == materialConfigList_.end()) {
+	//		MaterialConfig* newMaterial = new MaterialConfig(material);
+	//		materialConfigList_.push_back(newMaterial);
+	//		instance.materialConfigIndex = int(materialConfigList_.size() - 1);
+	//	} else {
+	//		instance.materialConfigIndex = (int)std::distance(materialConfigList_.begin(), checker);
+	//	}
+	//
+	//	auto checker2 = std::find_if(modelList_.begin(),
+	//		modelList_.end(),
+	//		[&](ModelInstance* ptr) {return ptr->CheckSame(instance); });
+	//
+	//	if (checker2 != modelList_.end()) {
+	//		(*checker2)->drawState = STANDBY;
+	//		(*checker2)->materialConfigIndex = instance.materialConfigIndex;
+	//	} else {
+	//		ModelInstance* newInstance = new ModelInstance(instance);
+	//		modelList_.push_back(newInstance);
+	//	}
 }
 
 void InstanceManager::Add2DTileInstance(Vector2 pos, MaterialConfig material) {
@@ -127,38 +127,88 @@ void InstanceManager::Add2DTileInstance(Vector2 pos, MaterialConfig material) {
 }
 
 void InstanceManager::Add3DTileInstance(TransformationMatrix* wvpData, MaterialConfig material, int vertexNum, int modelHandle, bool useDefaultModel) {
-//
-//	ModelInstance instance;
-//	instance.transformData = wvpData;	///参照渡し
-//	instance.modelHandle = modelHandle;
-//	instance.useDefaultModel = useDefaultModel;
-//	instance.vertexNum = vertexNum;
-//	instance.drawState = STANDBY;
-//
-//	auto checker = std::find_if(materialConfigList_.begin(),
-//		materialConfigList_.end(),
-//		[&](MaterialConfig* ptr) {return *ptr == material; });
-//
-//	if (checker == materialConfigList_.end()) {
-//		MaterialConfig* newMaterial = new MaterialConfig(material);
-//		materialConfigList_.push_back(newMaterial);
-//		instance.materialConfigIndex = int(materialConfigList_.size() - 1);
-//	} else {
-//		instance.materialConfigIndex = (int)std::distance(materialConfigList_.begin(), checker);
-//		materialConfigList_[instance.materialConfigIndex]->drawState = STANDBY;
-//	}
-//
-//	auto checker2 = std::find_if(tile3DList_.begin(),
-//		tile3DList_.end(),
-//		[&](ModelInstance* ptr) {return ptr->CheckSame(instance); });
-//
-//	if (checker2 == tile3DList_.end()) {
-//		ModelInstance* newInstance = new ModelInstance(instance);
-//		tile3DList_.push_back(newInstance);
-//	} else {
-//		(*checker2)->drawState = STANDBY;
-//		(*checker2)->materialConfigIndex = instance.materialConfigIndex;
-//	}
+	//
+	//	ModelInstance instance;
+	//	instance.transformData = wvpData;	///参照渡し
+	//	instance.modelHandle = modelHandle;
+	//	instance.useDefaultModel = useDefaultModel;
+	//	instance.vertexNum = vertexNum;
+	//	instance.drawState = STANDBY;
+	//
+	//	auto checker = std::find_if(materialConfigList_.begin(),
+	//		materialConfigList_.end(),
+	//		[&](MaterialConfig* ptr) {return *ptr == material; });
+	//
+	//	if (checker == materialConfigList_.end()) {
+	//		MaterialConfig* newMaterial = new MaterialConfig(material);
+	//		materialConfigList_.push_back(newMaterial);
+	//		instance.materialConfigIndex = int(materialConfigList_.size() - 1);
+	//	} else {
+	//		instance.materialConfigIndex = (int)std::distance(materialConfigList_.begin(), checker);
+	//		materialConfigList_[instance.materialConfigIndex]->drawState = STANDBY;
+	//	}
+	//
+	//	auto checker2 = std::find_if(tile3DList_.begin(),
+	//		tile3DList_.end(),
+	//		[&](ModelInstance* ptr) {return ptr->CheckSame(instance); });
+	//
+	//	if (checker2 == tile3DList_.end()) {
+	//		ModelInstance* newInstance = new ModelInstance(instance);
+	//		tile3DList_.push_back(newInstance);
+	//	} else {
+	//		(*checker2)->drawState = STANDBY;
+	//		(*checker2)->materialConfigIndex = instance.materialConfigIndex;
+	//	}
+}
+
+
+
+void InstanceManager::Add2DInstance(Transform wvpData, MaterialConfig material) {
+	/// 2Dインスタンスを作る
+	SpriteInstance instance;
+	instance.position = { wvpData.translate.x, wvpData.translate.y };
+	instance.scale = { wvpData.scale.x,wvpData.scale.y };
+	instance.rotate = wvpData.rotate;					
+	instance.drawState = STANDBY;
+
+	/// レイヤー設定
+	if (wvpData.translate.z == 0) {
+		/// レイヤー指定がない場合は自動設定
+		instance.position.z = tileLayerCount * -0.01f;
+		tileLayerCount++;
+	} else {
+		/// レイヤー指定がある場合はその値を使用し、深度調整のみ行う
+		instance.position.z = layerdSpriteDepth_ + wvpData.translate.z;
+	}
+
+	/// マテリアル設定
+	auto checker = std::find_if(materialConfigList_.begin(),
+		materialConfigList_.end(),
+		[&](MaterialConfig* ptr) {return *ptr == material; });
+
+	if (checker == materialConfigList_.end()) {
+		MaterialConfig* newMaterial = new MaterialConfig(material);
+		materialConfigList_.push_back(newMaterial);
+		instance.materialConfigIndex = int(materialConfigList_.size() - 1);
+	} else {
+		instance.materialConfigIndex = (int)std::distance(materialConfigList_.begin(), checker);
+	}
+
+	/// インスタンス重複チェック
+	auto checker2 = std::find_if(tile2DList_.begin(),
+		tile2DList_.end(),
+		[&](SpriteInstance* ptr) {return ptr->CheckSame(instance); });
+
+	if (checker2 != tile2DList_.end()) {
+		(*checker2)->drawState = STANDBY;
+		(*checker2)->materialConfigIndex = instance.materialConfigIndex;
+	} else {
+		SpriteInstance* newInstance = new SpriteInstance(instance);
+		tile2DList_.push_back(newInstance);
+	}
+
+	/// レイヤー管理
+	SpriteLayerManagement();
 }
 
 void InstanceManager::Add3DInstance(TransformationMatrix wvpData, MaterialConfig material, int vertexNum, int modelHandle, int modelGroupHandle) {
@@ -195,7 +245,36 @@ void InstanceManager::Add3DInstance(TransformationMatrix wvpData, MaterialConfig
 	}
 }
 
-void InstanceManager::AddParticleInstance(TransformationMatrix* wvpData, MaterialConfig material) {
+void InstanceManager::SpriteLayerManagement() {
+	if (spriteList_.empty()) return;
+
+	/// スロットの基本値とステップ値、0から0.01ずつ減少
+	float baseZ = 0.0f;
+	const float slotStep = -0.01f;
+	
+	std::vector<SpriteInstance*> unlayered;
+	std::vector<SpriteInstance*> layered;
+
+	// position.zが-0.4f以下のスプライトとそれ以外で分ける
+	for (auto* sprite : spriteList_) {
+		if (sprite->position.z <= -0.4f)
+			layered.push_back(sprite); 
+		else
+			unlayered.push_back(sprite); 
+	}
+
+	/// slot設定
+
+	/// stable_sortを使ってスロットし、Z値が同じ場合でも元の順序を保つ
+	std::stable_sort(unlayered.begin(), unlayered.end(),
+		[](auto* a, auto* b) { return a->position.z > b->position.z; });
+
+	for (int i = 0; i < unlayered.size(); ++i) {
+		unlayered[i]->position.z = baseZ + slotStep * static_cast<float>(i);
+	}
+
+	/// 最後に資料をspriteList_にまとめ直す
+	spriteList_.clear();
+	spriteList_.insert(spriteList_.end(), unlayered.begin(), unlayered.end());
+	spriteList_.insert(spriteList_.end(), layered.begin(), layered.end());
 }
-
-

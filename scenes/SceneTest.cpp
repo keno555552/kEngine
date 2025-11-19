@@ -25,6 +25,10 @@ SceneTest::SceneTest(kEngine* system){
 	player_->objectParts_[0].materialConfig->useOriginalTexture = false;
 	player_->objectParts_[0].materialConfig->textureHandle = boxTextureHandle_;
 
+	sprite_ = new SimpleSprite;
+	sprite_->IntObject(system_);
+	sprite_->CreateDefaultData();
+	sprite_->objectParts_[0].materialConfig->textureHandle = tryTextureHandle_;
 }
 
 SceneTest::~SceneTest() {
@@ -58,6 +62,7 @@ void SceneTest::Draw() {
 	//system_->DrawModel(&skydome_->objectParts[0].transformationMatrix, &(skydome_->objectParts[0].materialConfig.get()), skydomeModelHandle_);
 	skydome_->Draw();
 	player_->Draw();
+	sprite_->Draw();
 	//system_->Draw3D(skydome_);
 	//system_->Draw3D(player_);
 	//system_->Draw3D(model_);
