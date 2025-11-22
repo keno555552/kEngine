@@ -92,8 +92,8 @@ private:
 	
 	PSO* pso_ = new PSO;
 	ResourceManager* resourceManager_{};
-	DirectXCore* directXDriver_{};
-	ID3D12GraphicsCommandList* commandList_{};
+	DirectXCore* directXDriver_{};					/*借り*/
+	ID3D12GraphicsCommandList* commandList_{};		/*借り*/
 
 	int kClientWidth_ = 0;
 	int kClientHeight_ = 0;
@@ -120,7 +120,7 @@ private:
 
 private:
 	std::vector<ID3D12PipelineState*> psoList_;
-	ID3D12RootSignature* rootSignature_ = nullptr;
+	ID3D12RootSignature* rootSignature_ = nullptr; 			// Listからもセーブしたから解放しなくていい	
 	D3D12_VIEWPORT viewport{};
 	D3D12_RECT scissorRect{};
 
@@ -128,7 +128,7 @@ private:
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE Tile2DSrvHandleGPU_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE Tile3DSrvHandleGPU_{};
-	uint32_t textureCounter = 1;
+	uint32_t descriptorIndex_ = 1;						// 0はImgui用に予約
 	std::vector<int> commonTextureSRVMap_;
 	std::vector<int> modelTextureSRVMap_;
 	int defaultTextureHandle_ = 0;						// white5x5
@@ -177,11 +177,11 @@ private:
 
 
 	void PSODecition(MaterialConfig& material, bool isParticle = false);
-	DirectX::ScratchImage LoadTextrueLow(const std::string& filePath);
-	ID3D12Resource* CreateTextureResource(ID3D12Device* device, const DirectX::TexMetadata& metadata, ResourceManager::TextureInfo* saveData = nullptr);
-	ID3D12Resource* UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages, ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
-	int MakeTextureShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResource);
-	int MakeModelShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResource);
+	//DirectX::ScratchImage LoadTextrueLow(const std::string& filePath);
+	//ID3D12Resource* CreateTextureResource(ID3D12Device* device, const DirectX::TexMetadata& metadata, ResourceManager::TextureInfo* saveData = nullptr);
+	//ID3D12Resource* UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages, ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
+	//int MakeTextureShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResource);
+	//int MakeModelShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResource);
 	D3D12_GPU_DESCRIPTOR_HANDLE CreateTileWVPBuffer(ID3D12Resource* insstancingResource);
 	ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);
 	void MakeDepthStencilView();

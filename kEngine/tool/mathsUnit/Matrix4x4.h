@@ -56,9 +56,6 @@ Vector3 MakeTranslateVector3(const Matrix4x4 translate);
 
 #pragma region 陣列計算
 
-
-
-
 /// <summary>
 /// 
 /// </summary>
@@ -99,6 +96,14 @@ Matrix4x4 MakeRotateMatrix4x4(const Vector3 rotate);
 /// <param name="translate">Vector3</param>
 /// <returns>結果Matrix4x4</returns>
 Matrix4x4 MakeTranslateMatrix(const Vector3 translate);
+
+
+Vector3 ExtractScale(const Matrix4x4 matrix4x4);
+
+Vector3 ExtractRotate(const Matrix4x4 matrix4x4);
+
+Vector3 ExtractTranslate(const Matrix4x4 matrix4x4);
+
 
 #pragma endregion
 
@@ -179,5 +184,4 @@ Vector3 viewFinilTransform(Vector3 obj, Matrix4x4 tranformMatrix);
 
 #pragma endregion
 
-#pragma endregion
 

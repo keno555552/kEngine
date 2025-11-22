@@ -4,16 +4,41 @@
 void SimpleSprite::CreateDefaultData() {
 	modelHandle_ = 0;
 
+
+	mainPosition.materialConfig = std::make_shared<MaterialConfig>();
+	InitMaterialConfig(mainPosition.materialConfig.get());
+
 	SimpleSpritePart newObjectPart;
 	newObjectPart.materialConfig = std::make_shared<MaterialConfig>();
 	InitMaterialConfig(newObjectPart.materialConfig.get());
 	newObjectPart.materialConfig->enableLighting = false;
+	newObjectPart.materialConfig->MakeUVMatrix();
 
 	objectParts_.push_back(newObjectPart);
 }
 
 void SimpleSprite::IntObject(kEngine* system) {
 	system_ = system;
+}
+
+void SimpleSprite::Update(Camera* camera) {
+
+	for (auto& ptr : objectParts_) {
+		ptr.materialConfig->MakeUVMatrix();
+	}
+
+	mainPosition.materialConfig->MakeUVMatrix();
+
+
+	for (auto& part : objectParts_) {
+
+		part.worldTransform.scale		= part.transform.scale * mainPosition.transform.scale;
+		part.worldTransform.rotate		= part.transform.rotate + mainPosition.transform.rotate;
+		part.worldTransform.translate	= part.transform.translate + mainPosition.transform.translate;
+
+		part.materialConfig->MakeUVMatrix();
+	}
+
 }
 
 void SimpleSprite::Draw() {
@@ -25,7 +50,7 @@ Vector3 SimpleSprite::TransRotation(float theat) {
 }
 
 Vector3 SimpleSprite::TransTransform(Vector2 Pos) {
-	return Vector3( Pos.x, Pos.y, 0);
+	return Vector3(Pos.x, Pos.y, 0);
 }
 
 float SimpleSprite::TransLayerDepth(int layer) {

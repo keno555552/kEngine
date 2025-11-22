@@ -10,8 +10,10 @@ class SimpleSpriteMesh :public MeshBuffer
 public:
 	void SetSize(Vector2 RBpos);
 	ID3D12Resource* CreateVertexResource_(ID3D12Device* device)override;
+	void Mapping();
 	ID3D12Resource* CreateIndexResource_(ID3D12Device* device)override;
 
+	int GetVertexNum() { return 6; }
 	bool CheckSize(Vector2 RBpos);
 	void SetKeep(bool keep) { keep_ = keep; }
 	bool GetKeep() { return keep_; }
@@ -23,8 +25,7 @@ private:
 		TOP_LEFT = 0,
 		BOTTOM_LEFT,
 		BOTTOM_RIGHT,
-		TOP_RIGHT,
-		CENTER
+		TOP_RIGHT
 	};
 
 private:

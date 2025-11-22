@@ -21,12 +21,12 @@ class ObjectData {
 public:
 	std::vector<ObjectPart> objectParts_;
 
-	ObjectPart mainPosition;
+	ObjectPart mainPosition{};
 
 	int modelHandle_ = 0;
 
 	bool isDelete_ = false;
 
-	ObjectPart* followObject_;
+	ObjectPart* followObject_ = nullptr;
 };
 

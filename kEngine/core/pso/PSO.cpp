@@ -15,6 +15,7 @@ PSO::~PSO() {
 	rootSignatureList_.clear();
 	vertexShaderBlob_->Release();
 	pixelShaderBlob_->Release();
+	delete shader_compile_;
 	//graphicsPipelineState_->Release();
 }
 

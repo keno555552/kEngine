@@ -1,22 +1,29 @@
 #include "SimpleSpriteMesh.h"
 
 void SimpleSpriteMesh::SetSize(Vector2 RBpos) {
-	coner[TOP_LEFT] = { 0,		  0 };
-	coner[BOTTOM_LEFT] = { 0,	RBpos.y };
-	coner[TOP_RIGHT] = { RBpos.x,  0 };
+	coner[TOP_LEFT]		= { 0,		  0 };
+	coner[BOTTOM_LEFT]	= { 0,	RBpos.y };
 	coner[BOTTOM_RIGHT] = RBpos;
+	coner[TOP_RIGHT]	= { RBpos.x,  0 };
 
 	TexcoordLT_.x = 0;
 	TexcoordLT_.y = 0;
 	TexcoordRB_.x = 1;
 	TexcoordRB_.y = 1;
+
+	Mapping();
 }
 
 ID3D12Resource* SimpleSpriteMesh::CreateVertexResource_(ID3D12Device* device) {
 
 	vertexResource_->CreateResourceClass_(device, sizeof(VertexData) * 4);
-	//CreateVertexBufferView_(6);
 
+	Mapping();
+
+	return vertexResource_->GetResource().Get();
+}
+
+void SimpleSpriteMesh::Mapping() {
 	VertexData* vertexDataSprite = nullptr;
 	vertexResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
 	// 四点定義
@@ -33,8 +40,6 @@ ID3D12Resource* SimpleSpriteMesh::CreateVertexResource_(ID3D12Device* device) {
 	vertexDataSprite[TOP_RIGHT].texcoord = { TexcoordRB_.x, TexcoordRB_.y };
 	vertexDataSprite[TOP_RIGHT].normal = { 0.0f, 0.0f, -1.0f };
 	vertexResource_->GetResource()->Unmap(0, nullptr);
-
-	return vertexResource_->GetResource().Get();
 }
 
 ID3D12Resource* SimpleSpriteMesh::CreateIndexResource_(ID3D12Device* device) {
@@ -44,7 +49,7 @@ ID3D12Resource* SimpleSpriteMesh::CreateIndexResource_(ID3D12Device* device) {
 	/// リソースの先頭のアドレスから使う
 	indexBufferView.BufferLocation = indexResource_->GetResource()->GetGPUVirtualAddress();
 	/// 使用するリソースのサイズはインデックス6つ分のサイズ
-	indexBufferView.SizeInBytes = sizeof(uint32_t) * 3 * 4;
+	indexBufferView.SizeInBytes = sizeof(uint32_t) * 6;
 	///　インデックスはuint32_tとする
 	indexBufferView.Format = DXGI_FORMAT_R32_UINT;
 
@@ -52,8 +57,8 @@ ID3D12Resource* SimpleSpriteMesh::CreateIndexResource_(ID3D12Device* device) {
 	indexResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&indexDataSprite));
 	// 順番を指定
 	indexDataSprite[0] = TOP_LEFT;
-	indexDataSprite[1] = TOP_RIGHT;
-	indexDataSprite[2] = CENTER;
+	indexDataSprite[1] = BOTTOM_LEFT;
+	indexDataSprite[2] = BOTTOM_RIGHT;
 	indexDataSprite[3] = TOP_LEFT;
 	indexDataSprite[4] = BOTTOM_RIGHT;
 	indexDataSprite[5] = TOP_RIGHT;

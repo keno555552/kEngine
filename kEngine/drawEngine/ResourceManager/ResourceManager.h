@@ -73,8 +73,12 @@ public:
 
 	bool SetModelTexture(Model* model);
 
+	void ResizeSimpleSpriteMesh(DirectX::TexMetadata Metadata);
+
+	/// 暫くのCounter管理
 	int GetTextureCounter();
 	void TextureCounterPlus(int index = 1);
+	void TextuerCounterAdjust(int index);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE GetTextureCPUDescriptorHandle(int handle);
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureGPUDescriptorHandle(int handle);
@@ -87,9 +91,6 @@ public:
 
 	//////////////////////////////Texture関係
 	/// テクスチャ関係
-	BasicResource* intermediateResource_ = new BasicResource;/*EndDrawでTextrueを作ったら解放する*/
-	std::vector<std::string> commonTextureFilePath_;
-	std::vector<TextureInfo> textureData_;				///テキスチャーのデイタの収納のどころ
 	BasicResource* textureResource_ = new BasicResource; ///テキスチャーの収納のどころ
 
 	/// Lighting関係
@@ -98,7 +99,7 @@ public:
 	/// Material関係
 	std::vector<BasicResource*> materialResourceList_;
 
-	WVPResource* wvpResource_ = nullptr;
+	//WVPResource* wvpResource_ = nullptr;
 
 	//////////////////////////////InstanceBuffer関係
 

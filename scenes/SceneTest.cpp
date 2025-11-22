@@ -22,7 +22,7 @@ SceneTest::SceneTest(kEngine* system){
 	player_ = new Player(system,Vector3(0,0.5f,0));
 	player_->CreateDefaultData();
 	player_->modelHandle_ = config::default_Cube_MeshBufferHandle_;
-	player_->objectParts_[0].materialConfig->useOriginalTexture = false;
+	player_->objectParts_[0].materialConfig->useModelTexture = false;
 	player_->objectParts_[0].materialConfig->textureHandle = boxTextureHandle_;
 
 	sprite_ = new SimpleSprite;
@@ -37,6 +37,7 @@ SceneTest::~SceneTest() {
 
 	delete player_;
 	delete skydome_;
+	delete sprite_;
 }
 
 void SceneTest::Update() {
@@ -48,6 +49,8 @@ void SceneTest::Update() {
 
 	/// player更新
 	player_->Update(usingCamera_);
+
+	sprite_->Update(usingCamera_);
 
 	if (system_->GetTriggerOn(DIK_0)) {
 		if (useDebugCamera)useDebugCamera = false;
@@ -102,6 +105,20 @@ void SceneTest::ImguiPart() {
 	{
 		ImGui::Begin("PlayerPos");
 		ImGui::SliderFloat3("Pos", &player_->mainPosition.transform.translate.x, -1.0f, 1.0f);
+		ImGui::End();
+	}
+
+	{
+		ImGui::Begin("SpritePos");
+		ImGui::SliderFloat3("Pos",		&sprite_->mainPosition.transform.translate.x, 0.0f, 1280.0f);
+		ImGui::SliderFloat3("Rotate",	&sprite_->mainPosition.transform.rotate.x, 0.0f, 6.5f);
+		ImGui::SliderFloat3("Scale",	&sprite_->mainPosition.transform.scale.x, 0.0f, 5.0f);
+
+		ImGui::Text("MaterialConfig");
+		ImGui::SliderFloat3("uvTranslate", & sprite_->objectParts_[0].materialConfig->uvTranslate.x, -5.0f, 5.0f);
+		ImGui::SliderFloat3("uvScale", & sprite_->objectParts_[0].materialConfig->uvScale.x, -5.0f, 5.0f);
+		ImGui::SliderFloat3("uvRotate", & sprite_->objectParts_[0].materialConfig->uvRotate.x, -6.5f, 6.5f);
+		ImGui::ColorEdit4("Color", & sprite_->objectParts_[0].materialConfig->textureColor.x);
 		ImGui::End();
 	}
 }

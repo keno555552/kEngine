@@ -59,7 +59,7 @@ void Object::CreateModelData(int modelHandle) {
 		InitMaterialConfig(newObjectPart.materialConfig.get());
 		newObjectPart.materialConfig->lightModelType = LightModelType::HalfLambert;
 		newObjectPart.materialConfig->enableLighting = true;
-		newObjectPart.materialConfig->useOriginalTexture = true;
+		newObjectPart.materialConfig->useModelTexture = true;
 		newObjectPart.materialConfig->textureHandle = system_->GetModelTextureHandle(modelHandle,i);
 		objectParts_.push_back(newObjectPart);
 	}

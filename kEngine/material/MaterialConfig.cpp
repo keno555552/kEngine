@@ -1,7 +1,7 @@
 #include "MaterialConfig.h"
 
 bool MaterialConfig::operator==(const MaterialConfig target) {
-	if (useOriginalTexture != target.useOriginalTexture)return false;
+	if (useModelTexture != target.useModelTexture)return false;
 	if (textureHandle != target.textureHandle)return false;
 	if (uvTranslate != target.uvTranslate)return false;
 	if (uvScale != target.uvScale)return false;
@@ -21,7 +21,7 @@ void MaterialConfig::MakeUVMatrix() {
 }
 
 void InitMaterialConfig(MaterialConfig* materialConfig) {
-	materialConfig->useOriginalTexture = true;
+	materialConfig->useModelTexture = true;
 	materialConfig->textureHandle = 0;
 	materialConfig->uvTranslate = { 0,0,0 };
 	materialConfig->uvScale = { 1,1,1 };

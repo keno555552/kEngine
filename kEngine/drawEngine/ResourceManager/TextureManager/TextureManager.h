@@ -56,24 +56,31 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureGPUDescriptorHandle(int textureHandle) { return textureDatas[textureHandle].srvHandleGPU;}
 
 
-	int GetTextureCounter() { return textureCounter_; }
-	void TextureCounterPlus(int index) { textureCounter_ += index; }
+	int GetTextureCounter() { return descriptorIndex_; }
+	void TextureCounterPlus(int index) { descriptorIndex_ += index; }
+	void TextuerCounterAdjust(int index) { descriptorIndex_ = index;};
+
+	void EndUploadingTexture();
 
 private:
 	/// テクスチャ1枚分のデータ
 	struct TextureData {
-		std::string filePath;
-		DirectX::TexMetadata metadata;
-		Microsoft::WRL::ComPtr<ID3D12Resource>resource;
+		std::string filePath{};
+		DirectX::TexMetadata metadata{};
+		Microsoft::WRL::ComPtr<ID3D12Resource> resource;
 		D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU{};
 		D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU{};
 	};
 	std::vector<TextureData>textureDatas;
 
+	BasicResource* intermediateResource_ = new BasicResource;/*EndDrawでTextrueを作ったら解放する*/
+
 private:
+	/// 借りのDevice
 	static DirectXCore* core_;
 	static ID3D12Device* device_;
 
+	/// シングルトンインスタンス
 	static TextureManager* instance_;
 
 	TextureManager() = default;
@@ -81,7 +88,7 @@ private:
 	TextureManager(TextureManager&) = delete;
 	TextureManager& operator= (TextureManager&) = delete;
 
-	static uint32_t textureCounter_;
+	static uint32_t descriptorIndex_;
 	std::vector<int> commonTextureSRVMap_;
 	std::vector<int> modelTextureSRVMap_;
 	static const int defaultTextureHandle_ = 0;

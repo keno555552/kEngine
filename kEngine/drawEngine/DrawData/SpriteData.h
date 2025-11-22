@@ -11,7 +11,7 @@ struct SpritePart
 {
 	Transform transform = CreateDefaultTransform();
 
-	TransformationMatrix transformationMatrix{};
+	Transform worldTransform = CreateDefaultTransform();
 
 	std::shared_ptr<MaterialConfig>materialConfig;
 
@@ -36,11 +36,7 @@ class SpriteData {
 
 class SimpleSpriteData : public SpriteData {
 public:
-	std::vector<SimpleSpritePart> objectParts_;
-	SimpleSpritePart mainPosition;
-	int modelHandle_ = 0;
-	bool isDelete_ = false;
-	SpritePart* followObject_;
+
 };
 #pragma endregion
 

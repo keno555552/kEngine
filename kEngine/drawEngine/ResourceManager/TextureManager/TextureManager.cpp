@@ -4,9 +4,13 @@
 DirectXCore* TextureManager::core_ = nullptr;
 ID3D12Device* TextureManager::device_ = nullptr;
 TextureManager* TextureManager::instance_ = nullptr;
-uint32_t TextureManager::textureCounter_ = 0;
+uint32_t TextureManager::descriptorIndex_ = 0;
 
 int TextureManager::GetDefaultTextureHandle() { return defaultTextureHandle_; }
+
+void TextureManager::EndUploadingTexture() {
+	if (intermediateResource_->GetResourceCounter() != 0)intermediateResource_->ClearResource();
+}
 
 TextureManager* TextureManager::GetInstance() {
 	if (instance_ == nullptr) {
@@ -19,13 +23,22 @@ void TextureManager::Initialize(DirectXCore* core) {
 	core_ = core;
 	device_ = core->GetDriver();
 	textureDatas.reserve(config::GetMaxSRVNum());
-	textureCounter_ = 0;
+	descriptorIndex_ = 0;
 }
 
 void TextureManager::Finalize() {
+	for (auto& ptr : textureDatas) {
+		ptr.resource.Reset();
+	}
 	textureDatas.clear();
-	commonTextureSRVMap_.clear();
-	modelTextureSRVMap_.clear();
+
+	//commonTextureSRVMap_.clear();
+	//modelTextureSRVMap_.clear();
+
+	/// 解放の保険
+	intermediateResource_->ClearResource();
+	delete intermediateResource_;
+
 	delete instance_;
 	instance_ = nullptr;
 }
@@ -55,13 +68,15 @@ int TextureManager::LoadCommonTexture(const std::string& filePath) {
 	TextureData& textureData = textureDatas.emplace_back();
 	textureData.filePath = filePath;
 	textureData.metadata = mipImages.GetMetadata();
-	textureData.resource = CreateTextureResource(textureData.metadata);
+	textureData.resource.Attach(CreateTextureResource(textureData.metadata));
 
 	/// シェーダーリソースビュー作成とテクスチャデータのアップロード
 	textureHandle = MakeCommonTextureShaderResourceView(&textureData);
 
 	/// テクスチャデータのアップロード
-	Microsoft::WRL::ComPtr<ID3D12Resource>intermediateResource = UploadTextureData(mipImages, &textureData);
+	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource;
+	intermediateResource.Attach(UploadTextureData(mipImages, &textureData));
+	intermediateResource_->SaveResource_(intermediateResource);;
 
 	return textureHandle;
 }
@@ -89,8 +104,8 @@ int TextureManager::MakeCommonTextureShaderResourceView(TextureData* textureData
 	srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels); // 最初のMipLevelを使用
 
 	//
-	textureData->srvHandleCPU = core_->GetCPUDescriptorHandle(core_->GetSrvDescriptorHeap(), core_->GetDesriptorSizeSRV(), textureCounter_);
-	textureData->srvHandleGPU = core_->GetGPUDescriptorHandle(core_->GetSrvDescriptorHeap(), core_->GetDesriptorSizeSRV(), textureCounter_);
+	textureData->srvHandleCPU = core_->GetCPUDescriptorHandle(core_->GetSrvDescriptorHeap(), core_->GetDesriptorSizeSRV(), descriptorIndex_);
+	textureData->srvHandleGPU = core_->GetGPUDescriptorHandle(core_->GetSrvDescriptorHeap(), core_->GetDesriptorSizeSRV(), descriptorIndex_);
 
 	//
 	device_->CreateShaderResourceView(
@@ -99,11 +114,11 @@ int TextureManager::MakeCommonTextureShaderResourceView(TextureData* textureData
 		textureData->srvHandleCPU					// CPU用のハンドル
 	);
 
-	int counter = textureCounter_;
+	int counter = (int)textureDatas.size() - 1;
 	commonTextureSRVMap_.push_back(counter);
-	textureCounter_++;
+	descriptorIndex_++;
 
-	return (int)commonTextureSRVMap_.back();
+	return (int)commonTextureSRVMap_.size() - 1;
 }
 
 #pragma endregion
@@ -131,13 +146,15 @@ int TextureManager::LoadModelTexture(const std::string& filePath) {
 	TextureData& textureData = textureDatas.emplace_back();
 	textureData.filePath = filePath;
 	textureData.metadata = mipImages.GetMetadata();
-	textureData.resource = CreateTextureResource(textureData.metadata);
+	textureData.resource.Attach(CreateTextureResource(textureData.metadata));
 
 	/// シェーダーリソースビュー作成とテクスチャデータのアップロード
 	textureHandle = MakeModelTextureShaderResourceView(&textureData);
 
-	/// テクスチャデータのアップロード
-	Microsoft::WRL::ComPtr<ID3D12Resource>intermediateResource = UploadTextureData(mipImages, &textureData);
+	///// テクスチャデータのアップロード
+	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource;
+	intermediateResource.Attach(UploadTextureData(mipImages, &textureData));
+	intermediateResource_->SaveResource_(intermediateResource);
 
 	return textureHandle;
 }
@@ -169,8 +186,8 @@ int TextureManager::MakeModelTextureShaderResourceView(TextureData* textureData)
 	srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels); // 最初のMipLevelを使用
 
 	//
-	textureData->srvHandleCPU = core_->GetCPUDescriptorHandle(core_->GetSrvDescriptorHeap(), core_->GetDesriptorSizeSRV(), textureCounter_);
-	textureData->srvHandleGPU = core_->GetGPUDescriptorHandle(core_->GetSrvDescriptorHeap(), core_->GetDesriptorSizeSRV(), textureCounter_);
+	textureData->srvHandleCPU = core_->GetCPUDescriptorHandle(core_->GetSrvDescriptorHeap(), core_->GetDesriptorSizeSRV(), descriptorIndex_);
+	textureData->srvHandleGPU = core_->GetGPUDescriptorHandle(core_->GetSrvDescriptorHeap(), core_->GetDesriptorSizeSRV(), descriptorIndex_);
 
 	//
 	device_->CreateShaderResourceView(
@@ -179,11 +196,11 @@ int TextureManager::MakeModelTextureShaderResourceView(TextureData* textureData)
 		textureData->srvHandleCPU					// CPU用のハンドル
 	);
 
-	int counter = textureCounter_;
+	int counter = (int)textureDatas.size()-1;
 	modelTextureSRVMap_.push_back(counter);
-	textureCounter_++;
+	descriptorIndex_++;
 
-	return (int)modelTextureSRVMap_.back();
+	return (int)modelTextureSRVMap_.size() -1;
 }
 #pragma endregion
 

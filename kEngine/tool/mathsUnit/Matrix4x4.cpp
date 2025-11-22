@@ -466,6 +466,8 @@ Matrix4x4 Transpose(Matrix4x4 tranpose) {
 	return result;
 }
 
+
+
 Matrix4x4 MakeScaleMatrix4x4(const Vector3 scole) {
 	return Matrix4x4{ scole.x,    0.0f,    0.0f, 0.0f,
 						 0.0f, scole.y,    0.0f, 0.0f,
@@ -492,14 +494,32 @@ Matrix4x4 MakeRotateMatrix4x4(const Vector3 rotate) {
 	return Matrix4x4{ rX * (rY * rZ) };
 }
 
-
-
 Matrix4x4 MakeTranslateMatrix(const Vector3 translate) {
 	return Matrix4x4{ 1.0f,		  0.0f,		   0.0f, 0.0f,
 							 0.0f,		  1.0f,		   0.0f, 0.0f,
 							 0.0f,		  0.0f,		   1.0f, 0.0f,
 					  translate.x, translate.y,	translate.z, 1.0f };
 }
+
+
+
+Vector3 ExtractScale(const Matrix4x4 matrix4x4) {
+	return Vector3 { matrix4x4.m[0][0], matrix4x4.m[1][1], matrix4x4.m[2][2] };
+}
+
+Vector3 ExtractRotate(const Matrix4x4 matrix4x4) {
+	Vector3 rot;
+	rot.y = (float)asin(-matrix4x4.m[0][2]);                  // Y (pitch)
+	rot.x = (float)atan2(matrix4x4.m[1][2], matrix4x4.m[2][2]);         // X (yaw)
+	rot.z = (float)atan2(matrix4x4.m[0][1], matrix4x4.m[0][0]);         // Z (roll)
+	return rot;
+
+}
+
+Vector3 ExtractTranslate(const Matrix4x4 matrix4x4) {
+	return Vector3 { matrix4x4.m[3][0], matrix4x4.m[3][1], matrix4x4.m[3][2] };
+}
+
 
 #pragma endregion
 

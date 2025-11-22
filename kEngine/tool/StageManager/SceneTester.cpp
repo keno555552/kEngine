@@ -378,7 +378,7 @@ void SceneTester::Draw() {
 				ImGui::SliderFloat3(name3.c_str(), &ptr->transform.scale.x, -5.0f, 5.0f);
 				for (auto& ptr2 : ptr->materialConfig) {
 					if (ImGui::CollapsingHeader(name4.c_str())) {
-						ImGui::Checkbox(name5.c_str(), &ptr2.useOriginalTexture);
+						ImGui::Checkbox(name5.c_str(), &ptr2.useModelTexture);
 						ImGui::Combo(name6.c_str(), &ptr2.textureHandle, items, IM_ARRAYSIZE(items));
 						ImGui::SliderFloat2(name7.c_str(), &ptr2.uvTranslate.x, 0.0f, 640.0f);
 						ImGui::SliderFloat2(name8.c_str(), &ptr2.uvScale.x, 0.0f, 10.0f);
@@ -421,7 +421,7 @@ void SceneTester::Draw() {
 				ImGui::SliderFloat3(name3.c_str(), &ptr->transform.scale.x, -5.0f, 5.0f);
 				for (auto& ptr2 : ptr->materialConfig) {
 					if (ImGui::CollapsingHeader(name4.c_str())) {
-						ImGui::Checkbox(name5.c_str(), &ptr2.useOriginalTexture);
+						ImGui::Checkbox(name5.c_str(), &ptr2.useModelTexture);
 						ImGui::Combo(name6.c_str(), &ptr2.textureHandle, items, IM_ARRAYSIZE(items));
 						ImGui::SliderFloat2(name7.c_str(), &ptr2.uvTranslate.x, 0.0f, 640.0f);
 						ImGui::SliderFloat2(name8.c_str(), &ptr2.uvScale.x, 0.0f, 10.0f);
@@ -459,7 +459,7 @@ void SceneTester::Draw() {
 				ImGui::SliderFloat3(name3.c_str(), &ptr->transform.scale.x, -5.0f, 5.0f);
 				for (auto& ptr2 : ptr->materialConfig) {
 					if (ImGui::CollapsingHeader(name4.c_str())) {
-						ImGui::Checkbox(name5.c_str(), &ptr2.useOriginalTexture);
+						ImGui::Checkbox(name5.c_str(), &ptr2.useModelTexture);
 						ImGui::Combo(name6.c_str(), &ptr2.textureHandle, items, IM_ARRAYSIZE(items));
 						ImGui::SliderFloat2(name7.c_str(), &ptr2.uvTranslate.x, 0.0f, 640.0f);
 						ImGui::SliderFloat2(name8.c_str(), &ptr2.uvScale.x, 0.0f, 10.0f);
@@ -497,7 +497,7 @@ void SceneTester::Draw() {
 				ImGui::SliderFloat3(name3.c_str(), &ptr->transform.scale.x, -5.0f, 5.0f);
 				for (auto& ptr2 : ptr->materialConfig) {
 					if (ImGui::CollapsingHeader(name4.c_str())) {
-						ImGui::Checkbox(name5.c_str(), &ptr2.useOriginalTexture);
+						ImGui::Checkbox(name5.c_str(), &ptr2.useModelTexture);
 						ImGui::Combo(name6.c_str(), &ptr2.textureHandle, items, IM_ARRAYSIZE(items));
 						ImGui::SliderFloat2(name7.c_str(), &ptr2.uvTranslate.x, 0.0f, 640.0f);
 						ImGui::SliderFloat2(name8.c_str(), &ptr2.uvScale.x, 0.0f, 10.0f);
@@ -540,7 +540,7 @@ void SceneTester::Draw() {
 				ImGui::SliderFloat3(name3.c_str(), &ptr->transform.scale.x, -5.0f, 5.0f);
 				for (auto& ptr2 : ptr->materialConfig) {
 					if (ImGui::CollapsingHeader(name4.c_str())) {
-						ImGui::Checkbox(name5.c_str(), &ptr2.useOriginalTexture);
+						ImGui::Checkbox(name5.c_str(), &ptr2.useModelTexture);
 						ImGui::Combo(name6.c_str(), &ptr2.textureHandle, items, IM_ARRAYSIZE(items));
 						ImGui::SliderFloat2(name7.c_str(), &ptr2.uvTranslate.x, 0.0f, 640.0f);
 						ImGui::SliderFloat2(name8.c_str(), &ptr2.uvScale.x, 0.0f, 10.0f);
@@ -585,7 +585,7 @@ void SceneTester::Draw() {
 					std::string nName11 = "EnableLighting_" + std::to_string(i) + '_' + std::to_string(j);
 					std::string nName12 = "LightingItem_" + std::to_string(i) + '_' + std::to_string(j);
 					if (ImGui::CollapsingHeader(nName4.c_str())) {
-						ImGui::Checkbox(nName5.c_str(), &ptr2.useOriginalTexture);
+						ImGui::Checkbox(nName5.c_str(), &ptr2.useModelTexture);
 						ImGui::Combo(nName6.c_str(), &ptr2.textureHandle, items, IM_ARRAYSIZE(items));
 						ImGui::SliderFloat2(nName7.c_str(), &ptr2.uvTranslate.x, 0.0f, 640.0f);
 						ImGui::SliderFloat2(nName8.c_str(), &ptr2.uvScale.x, 0.0f, 10.0f);
