@@ -101,10 +101,11 @@ public:
 	void Draw2D(SpriteData* spriteData);
 	void Draw3D(ObjectData* objectData);
 
-	int GetModelTextureHandle(int modelHandle,int part);
 
+	//////////////////////////////モデル関連
 	int GetMuitModelNum(int modelHandle);
 	int SetModelObj(std::string path);
+	int GetModelTextureHandle(int modelHandle,int part);
 
 	int commonTextureHandleReader(int handle);
 	int commonModelHandleReader(int handle);
