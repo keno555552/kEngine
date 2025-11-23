@@ -82,15 +82,20 @@ int TextureManager::LoadCommonTexture(const std::string& filePath) {
 }
 
 int TextureManager::CheckSameCommonTextureLoaded(const std::string& filePath) {
-	auto it = std::find_if(textureDatas.begin(),
+	auto checker1 = std::find_if(textureDatas.begin(),
 		textureDatas.end(),
 		[&](const TextureData& data) { return data.filePath == filePath; });
 
-	if (it == textureDatas.end()) {
+	if (checker1 == textureDatas.end()) {
 		return -1;
 	} else {
-		int index = static_cast<int>(std::distance(textureDatas.begin(), it));
-		return commonTextureSRVMap_[index];
+		int textureDatasIndex = static_cast<int>(std::distance(textureDatas.begin(), checker1));
+		auto checker2 = std::find_if(commonTextureSRVMap_.begin(),
+			commonTextureSRVMap_.end(),
+			[&](const int& data) { return data == textureDatasIndex; });
+		int commonTextureIndex = static_cast<int>(std::distance(commonTextureSRVMap_.begin(), checker2));
+
+		return commonTextureIndex;
 	}
 }
 
