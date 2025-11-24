@@ -39,6 +39,7 @@ private:
 	Object* skydome_ = nullptr;
 	Player* player_ = nullptr;
 	SimpleSprite* sprite_ = nullptr;
+	SimpleSprite* sprite2_ = nullptr;
 
 
 

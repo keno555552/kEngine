@@ -21,7 +21,7 @@ ResourceManager::~ResourceManager() {
 	ClearPointer(meshBufferList_);
 	spriteMeshHandles_.clear();
 	modelGroupList_.clear();
-	simpleSpriteMesh_ = nullptr;
+	//ClearPointer(simpleSpriteMeshList_);
 
 	/// comptr自動解放
 	delete textureResource_;
@@ -341,7 +341,7 @@ int ResourceManager::CreateSimpleSpriteMeshResource() {
 	newSprite2D_->CreateIndexBufferView_(6);
 	newSprite2D_->SetKeep(true);
 	meshBufferList_.push_back(newSprite2D_);
-	simpleSpriteMesh_ = newSprite2D_;
+	simpleSpriteMeshList_.push_back(newSprite2D_);
 
 	return (int)meshBufferList_.size() - 1;
 }
@@ -534,8 +534,8 @@ bool ResourceManager::SetModelTexture(Model* model) {
 	return false;
 }
 
-void ResourceManager::ResizeSimpleSpriteMesh(DirectX::TexMetadata Metadata) {
-	simpleSpriteMesh_->SetSize(Vector2((float)Metadata.width, (float)Metadata.height));
+void ResourceManager::ResizeSimpleSpriteMesh(DirectX::TexMetadata Metadata,int counter) {
+	simpleSpriteMeshList_[counter]->SetSize(Vector2((float)Metadata.width, (float)Metadata.height));
 }
 
 int ResourceManager::GetTextureCounter() {
@@ -556,4 +556,20 @@ D3D12_CPU_DESCRIPTOR_HANDLE ResourceManager::GetTextureCPUDescriptorHandle(int h
 
 D3D12_GPU_DESCRIPTOR_HANDLE ResourceManager::GetTextureGPUDescriptorHandle(int handle) {
 	return TextureManager::GetInstance()->GetTextureGPUDescriptorHandle(handle);
+}
+
+void ResourceManager::CreateSpriteMesh() {
+	int counter = (int)instanceManager_->tile2DList_.size() - (int)simpleSpriteMeshList_.size();
+	if (counter == 0)return;
+	if (counter > 0){
+		for (int i = 0; i < counter; i++) {
+			CreateSimpleSpriteMeshResource();
+		}
+	} else {
+		for (int i = 0; i < -counter; i++) {
+			auto& it = simpleSpriteMeshList_.back();
+			simpleSpriteMeshList_.pop_back();
+			delete it;
+		}
+	}
 }

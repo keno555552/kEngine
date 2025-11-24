@@ -913,6 +913,9 @@ void DrawEngine::Draw2D() {
 	Matrix4x4 projectionMatrixSprtie = MakeOrthographicMatrix(0.0f, 0.0f, float(config::GetClientWidth()), float(config::GetClientHeight()), 0.0f, 100.0f);
 	Matrix4x4 viewProj = viewMatrixSprtie * projectionMatrixSprtie;
 
+
+	int simpleSpriteCounter{};
+	resourceManager_->CreateSpriteMesh();
 	for (auto& [materialIndex, group] : groupedTiles) {
 		MaterialConfig* material = resourceManager_->instanceManager_->materialConfigList_[materialIndex];
 
@@ -954,10 +957,10 @@ void DrawEngine::Draw2D() {
 
 		// Set VB/IB
 		int MeshBufferHandle = config::default_Sprite2D_MeshBufferHandle_;
-		resourceManager_->ResizeSimpleSpriteMesh(mataData);
-		D3D12_VERTEX_BUFFER_VIEW VertexBufferView = resourceManager_->simpleSpriteMesh_->GetVertexBufferView();
+		resourceManager_->ResizeSimpleSpriteMesh(mataData, simpleSpriteCounter);
+		D3D12_VERTEX_BUFFER_VIEW VertexBufferView = resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetVertexBufferView();
 		commandList_->IASetVertexBuffers(0, 1, &VertexBufferView);
-		D3D12_INDEX_BUFFER_VIEW IndexBufferView = resourceManager_->simpleSpriteMesh_->GetIndexBufferView();
+		D3D12_INDEX_BUFFER_VIEW IndexBufferView = resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetIndexBufferView();
 		commandList_->IASetIndexBuffer(&IndexBufferView);
 
 		int tileCount = (int)group.size();
@@ -977,7 +980,7 @@ void DrawEngine::Draw2D() {
 			Transform transformSprite = CreateDefaultTransform();
 			if (group[i] != nullptr) {
 				transformSprite.translate = group[i]->position;
-				transformSprite.scale = { group[i]->scale.x,group[i]->scale.y, 1};
+				transformSprite.scale = { group[i]->scale.x,group[i]->scale.y, 1 };
 				transformSprite.rotate = group[i]->rotate;
 			}
 
@@ -996,7 +999,7 @@ void DrawEngine::Draw2D() {
 		*instanceOffsetData_[offsetDataCounter_]->instanceOffset = static_cast<UINT>(wvpInstanceStartpoint);
 		instanceOffsetData_[offsetDataCounter_]->state = 1;
 
-		int vertexNum = resourceManager_->simpleSpriteMesh_->GetVertexNum();
+		int vertexNum = resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetVertexNum();
 
 		commandList_->SetGraphicsRootConstantBufferView(4, inUse->instanceOffsetResource->GetResource()->GetGPUVirtualAddress());
 
@@ -1004,6 +1007,7 @@ void DrawEngine::Draw2D() {
 		commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
 		commandList_->DrawIndexedInstanced(vertexNum, tileCount, 0, 0, 0);
 		offsetDataCounter_++;
+		simpleSpriteCounter++;
 	}
 }
 
@@ -1105,8 +1109,8 @@ void DrawEngine::Draw3D() {
 }
 
 void DrawEngine::DrawCall() {
-	Draw2D();
 	Draw3D();
+	Draw2D();
 }
 
 void DrawEngine::SetCamera(Camera* camera) {

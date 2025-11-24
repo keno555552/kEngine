@@ -56,10 +56,9 @@ public:
 	int LoadModel(std::string Path);
 
 public:
-	//////////////////////////////命令
+	//////////////////////////////エンジン内部命令
 
 	/// Texture指令
-
 	int LoadCommonTexture(const std::string& filePath);
 	int LoadModelTexture(const std::string& filePath);
 
@@ -73,7 +72,7 @@ public:
 
 	bool SetModelTexture(Model* model);
 
-	void ResizeSimpleSpriteMesh(DirectX::TexMetadata Metadata);
+	void ResizeSimpleSpriteMesh(DirectX::TexMetadata Metadata, int counter);
 
 	/// 暫くのCounter管理
 	int GetTextureCounter();
@@ -82,6 +81,8 @@ public:
 
 	D3D12_CPU_DESCRIPTOR_HANDLE GetTextureCPUDescriptorHandle(int handle);
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureGPUDescriptorHandle(int handle);
+
+	void CreateSpriteMesh();
 
 public:
 
@@ -112,7 +113,7 @@ public:
 	std::vector<MeshBuffer*> meshBufferList_;		/// すべでのモデルを収納するどころ		これを使って解放する
 	std::vector<Sprite2D*> spriteMeshHandles_;	/// スブライドのハンドルを収納する		解放に使えない
 	std::vector<ModelGroup*> modelGroupList_;		/// モデルグループを	収納する			解放に使えない
-	SimpleSpriteMesh* simpleSpriteMesh_ = nullptr;	/// デフォルトのスプライトメッシュ
+	std::vector < SimpleSpriteMesh*> simpleSpriteMeshList_;	/// デフォルトのスプライトメッシュ
 
 	/// ModelHandle
 	int modelHandleCounter_ = 0;

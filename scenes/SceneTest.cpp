@@ -29,6 +29,12 @@ SceneTest::SceneTest(kEngine* system){
 	sprite_->IntObject(system_);
 	sprite_->CreateDefaultData();
 	sprite_->objectParts_[0].materialConfig->textureHandle = tryTextureHandle_;
+
+	sprite2_ = new SimpleSprite;
+	sprite2_->IntObject(system_);
+	sprite2_->CreateDefaultData();
+	sprite2_->objectParts_[0].materialConfig->textureHandle = boxTextureHandle_;
+
 }
 
 SceneTest::~SceneTest() {
@@ -38,6 +44,7 @@ SceneTest::~SceneTest() {
 	delete player_;
 	delete skydome_;
 	delete sprite_;
+	delete sprite2_;
 }
 
 void SceneTest::Update() {
@@ -51,6 +58,7 @@ void SceneTest::Update() {
 	player_->Update(usingCamera_);
 
 	sprite_->Update(usingCamera_);
+	sprite2_->Update(usingCamera_);
 
 	if (system_->GetTriggerOn(DIK_0)) {
 		if (useDebugCamera)useDebugCamera = false;
@@ -66,6 +74,7 @@ void SceneTest::Draw() {
 	skydome_->Draw();
 	player_->Draw();
 	sprite_->Draw();
+	sprite2_->Draw();
 	//system_->Draw3D(skydome_);
 	//system_->Draw3D(player_);
 	//system_->Draw3D(model_);
