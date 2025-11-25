@@ -246,6 +246,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="kEngine\drawEngine\DrawData\CornerData.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -334,6 +335,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\drawEngine\ResourceManager\TextureManager\TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="kEngine\drawEngine\DrawData\CornerData.h" />
     <ClInclude Include="kEngine\core\driver\FrameRateLimiter.h" />
     <ClInclude Include="kEngine\core\driver\WinAPI.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\SimpleSpriteMesh.h" />

@@ -21,7 +21,7 @@ ResourceManager::~ResourceManager() {
 	ClearPointer(meshBufferList_);
 	spriteMeshHandles_.clear();
 	modelGroupList_.clear();
-	//ClearPointer(simpleSpriteMeshList_);
+	ClearPointer(simpleSpriteMeshList_);
 
 	/// comptr自動解放
 	delete textureResource_;
@@ -326,13 +326,6 @@ void ResourceManager::Collet3D(ObjectData* object) {
 
 
 int ResourceManager::CreateSimpleSpriteMeshResource() {
-	//Sprite2D* newSprite2D_ = new Sprite2D;
-	//newSprite2D_->CreateVertexResource_(Bdevice_);
-	//newSprite2D_->CreateVertexBufferView_(5);
-	//newSprite2D_->CreateIndexResource_(Bdevice_);
-	//newSprite2D_->CreateIndexBufferView_(12);
-	//meshBufferList_.push_back(newSprite2D_);
-	//return int(meshBufferList_.size() - 1);
 
 	SimpleSpriteMesh* newSprite2D_ = new SimpleSpriteMesh;
 	newSprite2D_->CreateVertexResource_(Bdevice_);
@@ -340,7 +333,7 @@ int ResourceManager::CreateSimpleSpriteMeshResource() {
 	newSprite2D_->CreateIndexResource_(Bdevice_);
 	newSprite2D_->CreateIndexBufferView_(6);
 	newSprite2D_->SetKeep(true);
-	meshBufferList_.push_back(newSprite2D_);
+	//meshBufferList_.push_back(newSprite2D_);
 	simpleSpriteMeshList_.push_back(newSprite2D_);
 
 	return (int)meshBufferList_.size() - 1;

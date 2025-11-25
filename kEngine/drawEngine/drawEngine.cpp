@@ -956,7 +956,6 @@ void DrawEngine::Draw2D() {
 		}
 
 		// Set VB/IB
-		int MeshBufferHandle = config::default_Sprite2D_MeshBufferHandle_;
 		resourceManager_->ResizeSimpleSpriteMesh(mataData, simpleSpriteCounter);
 		D3D12_VERTEX_BUFFER_VIEW VertexBufferView = resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetVertexBufferView();
 		commandList_->IASetVertexBuffers(0, 1, &VertexBufferView);

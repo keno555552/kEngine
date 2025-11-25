@@ -4,6 +4,7 @@
 #include "TransformationMatrix.h"
 #include "VertexResource.h"
 #include "Config.h"
+#include "DrawData/CornerData.h"
 
 class SimpleSpriteMesh :public MeshBuffer
 {
@@ -21,18 +22,7 @@ public:
 	bool operator==(const SimpleSpriteMesh target);
 
 private:
-	enum {
-		TOP_LEFT = 0,
-		BOTTOM_LEFT,
-		BOTTOM_RIGHT,
-		TOP_RIGHT
-	};
-
-private:
-	Vector2	coner[4] = { {  0,	 0 },
-						 {  0, 1 },
-						 { 1,1 },
-						 { 1,	 0 }};
+	CornerData conerData;
 	Vector2 TexcoordLT_ = {0,0};
 	Vector2 TexcoordRB_ = {1,1};
 

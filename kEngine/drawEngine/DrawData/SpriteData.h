@@ -6,13 +6,20 @@
 #include "TransformationMatrix.h"
 #include "MaterialConfig.h"
 #include "DrawData/ObjectData.h"
+#include "DrawData/CornerData.h"
 
 struct SpritePart
 {
+	///================= デイタ保存 =================///
 	Transform transform = CreateDefaultTransform();
 
 	Transform worldTransform = CreateDefaultTransform();
 
+	Vector2 anchorPoint = { 0.0f, 0.0f };
+
+	CornerData conerData;
+
+	///=============== 計算、資料渡し用 ==============///
 	std::shared_ptr<MaterialConfig>materialConfig;
 
 	ObjectPart* parentPart = nullptr;
