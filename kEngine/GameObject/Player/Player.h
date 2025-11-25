@@ -7,19 +7,19 @@
 #include "Scene.h"
 
 /// 移動速度
-static inline const float kAcceleration = 0.1f;
+static inline const float kAcceleration = 3.0f;
 /// 移動減衰
-static inline const float kAttenuation = 0.08f;
+static inline const float kAttenuation = 5.0f;
 /// 回転速度
-static inline const float kTimeTurn = 10.0f;
+static inline const float kTimeTurn = 0.15f;
 /// 移動限界速度
 static inline const float kLimitRunSpeed = 2.0f;
 /// 重力加速度
-static inline const float kGravityAcceleration = 0.1f;
+static inline const float kGravityAcceleration = 10.0f;
 /// 最大落下速度
-static inline const float kLimitFallSpeed = 5.0f;
+static inline const float kLimitFallSpeed = 10.0f;
 /// ジャンプ初速
-static inline const float kJumpAcceleration = 2.0f;
+static inline const float kJumpAcceleration = 5.0f;
 /// キャラクターの当たり判定サイズ
 static inline const float kPlayerWidth = 1.0f;
 static inline const float kPlayerHeight = 1.0f;
@@ -33,7 +33,7 @@ public:
 	Player(kEngine* system, const Vector3& position = Vector3{ 0,0,0 });
 
 	void Update(Camera* camera) override;
-	
+
 
 
 private:
@@ -96,19 +96,23 @@ private:
 
 	/// 経過時間
 
-		//////// プレイヤーデータ
-		/// 移動速度
+	//////// プレイヤーデータ
+	/// 移動速度
 	Vector3 velocity_ = {};
 	/// 方向/開始時の方向
 	LRDirection lrDirection_ = LRDirection::kRight;
 	// 旋回開始時の角度
 	float turnFirstRotationY_ = 0.0f;
 	// 旋回タイマー
-	float turnTimer_ = 0.0f;
+	float turnTimer_{};
 	// 接地状態フラグ
 	bool onGround_ = true;
 
 	float kBlank = 0.0f; // ジャンプ中のブランク時間
+
+private:
+	// 計算用
+	float deltaTime_{};
 
 private:
 	bool isDamage_ = false;

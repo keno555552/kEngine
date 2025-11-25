@@ -174,7 +174,7 @@ void InstanceManager::Add2DInstance(Transform wvpData, MaterialConfig material) 
 	/// レイヤー設定
 	if (wvpData.translate.z == 0) {
 		/// レイヤー指定がない場合は自動設定
-		instance.position.z = tileLayerCount * -0.01f;
+		instance.position.z = tileLayerCount * 0.01f;
 		tileLayerCount++;
 	} else {
 		/// レイヤー指定がある場合はその値を使用し、深度調整のみ行う

@@ -49,7 +49,7 @@ public:
 	int tileLayerCount = 0;
 	int spriteLayerCount = 0;
 
-	float layerdSpriteDepth_ = -0.4f;
+	float layerdSpriteDepth_ = 0.4f;
 
 private:
 

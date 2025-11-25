@@ -110,8 +110,8 @@ void DirectXController::EndFrame() {
 
 	// 次のフレーム用のコマンドリストを準備
 	hr = commandAllocator->Reset(); // 重置命令分配器，為下一幀準備
-	assert(SUCCEEDED(hr)); // 確保重置成功
-	hr = commandList->Reset(commandAllocator, nullptr); // 重置命令列表，準備記錄新的渲染命令
-	assert(SUCCEEDED(hr)); // 確保重置成功
+	assert(SUCCEEDED(hr)); // チェック
+	hr = commandList->Reset(commandAllocator, nullptr); // コマンドリストをリセット
+	assert(SUCCEEDED(hr)); // チェック
 
 }

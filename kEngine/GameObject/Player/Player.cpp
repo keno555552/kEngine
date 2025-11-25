@@ -8,10 +8,11 @@ Player::Player(kEngine* system, const Vector3& position) {
 	mainPosition.transform = CreateDefaultTransform();
 	mainPosition.transform.translate = position;
 
+	mainPosition.transform.rotate.y = std::numbers::pi_v<float> / 2.0f;
 }
 
 void Player::Update(Camera* camera) {
-
+	deltaTime_ = system_->GetDeltaTime();
 	BehaviorRootUpdate();
 
 	Object::Update(camera);
@@ -87,12 +88,12 @@ void Player::Move() {
 		}
 
 		// 加速/減速
-		velocity_.x += acceleration.x;
+		velocity_.x += acceleration.x * deltaTime_;
 
 		velocity_.x = std::clamp(velocity_.x, -kLimitRunSpeed, kLimitRunSpeed);
 	} else {
 		// 非入力時は移動減衰をかける
-		velocity_.x *= (1.0f - kAttenuation);
+		velocity_.x *= std::exp(-kAttenuation * deltaTime_);
 		if (velocity_.x < 0.01f && velocity_.x > -0.01f) {
 			velocity_.x = 0.0f;
 		}
@@ -106,8 +107,8 @@ void Player::Move() {
 	}
 
 	// 回転制御
-	if (turnTimer_ > 0.0f) {
-		turnTimer_ -= 1.0f;
+	if (turnTimer_ >= 0.0f) {
+		turnTimer_ -= deltaTime_;
 
 		float destinationRotationYTable[] = {
 			0.0f,                            // 右
@@ -131,7 +132,7 @@ void Player::Move() {
 
 	} else {
 		// 落下速度
-		velocity_.y -= kGravityAcceleration;
+		velocity_.y -= kGravityAcceleration * deltaTime_;
 		// 落下速度制限
 		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
 		// 空中
@@ -153,9 +154,9 @@ void Player::OnGroundChanger(const CollisionMapInfo& info) {
 			std::vector<Vector3> positionsNew(kNumCorner);
 			for (uint32_t i = 0; i < positionsNew.size(); i++) {
 				Vector3 translation_ = {};
-				translation_.x = mainPosition.transform.translate.x + info.moveVector.x* system_->GetDeltaTime();
-				translation_.y = mainPosition.transform.translate.y + info.moveVector.y* system_->GetDeltaTime();
-				translation_.z = mainPosition.transform.translate.z + info.moveVector.z* system_->GetDeltaTime();
+				translation_.x = mainPosition.transform.translate.x + info.moveVector.x* deltaTime_;
+				translation_.y = mainPosition.transform.translate.y + info.moveVector.y* deltaTime_;
+				translation_.z = mainPosition.transform.translate.z + info.moveVector.z* deltaTime_;
 				positionsNew[i] = CornerPosition(translation_, static_cast<Corner>(i));
 			}
 			bool hit = false;
@@ -197,9 +198,9 @@ void Player::MapCollisionDecideDown(CollisionMapInfo& info) {
 
 	for (uint32_t i = 0; i < positionsNew.size(); i++) {
 		Vector3 translation_ = {};
-		translation_.x = mainPosition.transform.translate.x + info.moveVector.x* system_->GetDeltaTime();
-		translation_.y = mainPosition.transform.translate.y + info.moveVector.y* system_->GetDeltaTime();
-		translation_.z = mainPosition.transform.translate.z + info.moveVector.z* system_->GetDeltaTime();
+		translation_.x = mainPosition.transform.translate.x + info.moveVector.x* deltaTime_;
+		translation_.y = mainPosition.transform.translate.y + info.moveVector.y* deltaTime_;
+		translation_.z = mainPosition.transform.translate.z + info.moveVector.z* deltaTime_;
 		positionsNew[i] = CornerPosition(translation_, static_cast<Corner>(i));
 	}
 	if (info.moveVector.y > 0)
@@ -251,7 +252,7 @@ void Player::MapCollisionDecideDown(CollisionMapInfo& info) {
 
 
 void Player::MovePlayerByResult(const CollisionMapInfo& info) {
-	mainPosition.transform.translate.x += info.moveVector.x * system_->GetDeltaTime();
-	mainPosition.transform.translate.y += info.moveVector.y * system_->GetDeltaTime();
-	mainPosition.transform.translate.z += info.moveVector.z * system_->GetDeltaTime();
+	mainPosition.transform.translate.x += info.moveVector.x * deltaTime_;
+	mainPosition.transform.translate.y += info.moveVector.y * deltaTime_;
+	mainPosition.transform.translate.z += info.moveVector.z * deltaTime_;
 }
