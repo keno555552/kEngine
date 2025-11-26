@@ -5,8 +5,10 @@
 
 Player::Player(kEngine* system, const Vector3& position) {
 	Object::IntObject(system);
+	Object::CreateDefaultData();
 	mainPosition.transform = CreateDefaultTransform();
 	mainPosition.transform.translate = position;
+	objectParts_[0].materialConfig->lightModelType = LightModelType::HalfLambert;
 
 	mainPosition.transform.rotate.y = std::numbers::pi_v<float> / 2.0f;
 }

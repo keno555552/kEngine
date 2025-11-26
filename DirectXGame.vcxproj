@@ -326,6 +326,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\drawEngine\DrawData\ObjectData.cpp" />
     <ClCompile Include="scenes\Scene1.cpp" />
     <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\Particle.cpp" />
+    <ClCompile Include="scenes\SceneTest2.cpp" />
     <ClCompile Include="scenes\SceneTestForGE.cpp" />
     <ClCompile Include="kEngine\drawEngine\ResourceManager\InstanceManager\SpriteInstance.cpp" />
     <ClCompile Include="kEngine\drawEngine\ResourceManager\WVPResource.cpp" />
@@ -399,6 +400,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\drawEngine\DrawData\ObjectData.h" />
     <ClInclude Include="scenes\Scene1.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\Particle.h" />
+    <ClInclude Include="scenes\SceneTest2.h" />
     <ClInclude Include="scenes\SceneTestForGE.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\InstanceManager\SpriteInstance.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\WVPResource.h" />

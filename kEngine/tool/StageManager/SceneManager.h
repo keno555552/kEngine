@@ -5,6 +5,7 @@
 #include "SceneTestForGE.h"
 #include "SceneTester.h"
 #include "SceneTest.h"
+#include "SceneTest2.h"
 
 class SceneManager {
 public:

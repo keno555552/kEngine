@@ -104,12 +104,10 @@ private:
 private:
 	enum class psoType {
 		NONE = -1,
-		defaultPSO = 0,
-		Normal_Lambert = 0,
-		Normal_HalfLambert,
-		Tile,
-		Particle_Lambert,
-		Particle_HalfLambert,
+		defaultPSO = 1,
+		Sprite2D = 0,
+		Lambert,
+		HalfLambert
 	};
 
 private:
@@ -176,7 +174,7 @@ private:
 	void SetLighting(DirectionalLight* directionalLight);
 
 
-	void PSODecition(MaterialConfig& material, bool isParticle = false);
+	void PSODecition(MaterialConfig& material);
 	//DirectX::ScratchImage LoadTextrueLow(const std::string& filePath);
 	//ID3D12Resource* CreateTextureResource(ID3D12Device* device, const DirectX::TexMetadata& metadata, ResourceManager::TextureInfo* saveData = nullptr);
 	//ID3D12Resource* UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages, ID3D12Device* device, ID3D12GraphicsCommandList* commandList);

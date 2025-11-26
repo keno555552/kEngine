@@ -5,11 +5,11 @@
 #include "DebugCamera.h"
 #include "Player\Player.h"
 
-class SceneTest :public Scene
+class SceneTest2 :public Scene
 {
 public:
-	SceneTest(kEngine* system);
-	~SceneTest();
+	SceneTest2(kEngine* system);
+	~SceneTest2();
 	void Update() override;
 	void Draw() override;
 
@@ -30,6 +30,7 @@ private:
 	/// =========== リソースハンドル ============///
 	/// モデルハンドル
 	int skydomeModelHandle_ = 0;
+	int sphereModelHandle_ = 0;
 
 	/// テキスチャーハンドル
 	int boxTextureHandle_ = 0;
@@ -37,11 +38,9 @@ private:
 
 	/// =========== ゲームオブジェクト ==========///
 	Object* skydome_ = nullptr;
-	Player* player_ = nullptr;
+	Object* plane_[5];
 	SimpleSprite* sprite_ = nullptr;
-	SimpleSprite* sprite2_ = nullptr;
-	SimpleSprite* sprite3_ = nullptr;
-	SimpleSprite* sprite4_ = nullptr;
+	SimpleSprite* testSprite_[5];
 
 
 

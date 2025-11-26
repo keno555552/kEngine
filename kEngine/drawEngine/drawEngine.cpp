@@ -42,14 +42,18 @@ void DrawEngine::Initialize
 
 	///
 	pso_->Initialize(directXDriver_);
-	for (int i = 0; i < (int)LightModelType::NumLightModels; i++) {
-		ID3D12PipelineState* graphicsPipelineState_ = pso_->createPSO((LightModelType)i);
+
+	///================== PSO関連 ==================
+	// 2D用PSO handle = 0
+	{
+		ID3D12PipelineState* graphicsPipelineState_ = pso_->createPSO(LightModelType::Sprite2D);
 		psoList_.push_back(graphicsPipelineState_);
 	}
-	ID3D12PipelineState* graphicsPipelineState_ = pso_->createPSO_Tile();
-	psoList_.push_back(graphicsPipelineState_);
+	// 3D用PSO
+	// Lambert handle = defaultPSO = 1
+	// HalfLambert handle = 2
 	for (int i = 0; i < (int)LightModelType::NumLightModels; i++) {
-		ID3D12PipelineState* graphicsPipelineState_ = pso_->createPSO_3DParticle((LightModelType)i);
+		ID3D12PipelineState* graphicsPipelineState_ = pso_->createPSO((LightModelType)i);
 		psoList_.push_back(graphicsPipelineState_);
 	}
 
@@ -176,44 +180,33 @@ void DrawEngine::SetDirectionalLight(DirectionalLight* light) {
 	}
 }
 
-void DrawEngine::PSODecition(MaterialConfig& material, bool isParticle) {
+void DrawEngine::PSODecition(MaterialConfig& material) {
 	bool psoChanged = false;
-	if (!isParticle) {
-		switch (material.lightModelType) {
-		case LightModelType::Lambert:
-			if (currentPSO_ != psoType::Normal_Lambert) {
-				commandList_->SetPipelineState(psoList_[(int)material.lightModelType]);
-				currentPSO_ = psoType::Normal_Lambert;
-				psoChanged = true;
-			}
-			break;
-		case LightModelType::HalfLambert:
-			if (currentPSO_ != psoType::Normal_HalfLambert) {
-				commandList_->SetPipelineState(psoList_[(int)material.lightModelType]);
-				currentPSO_ = psoType::Normal_HalfLambert;
-				psoChanged = true;
-			}
-			break;
+
+	LightModelType lightModelType = (LightModelType)(int)material.lightModelType;
+
+	switch (lightModelType) {
+	case LightModelType::Sprite2D:
+		if (currentPSO_ != psoType::Sprite2D) {
+			commandList_->SetPipelineState(psoList_[(int)LightModelType::Sprite2D]);
+			currentPSO_ = psoType::Sprite2D;
+			psoChanged = true;
 		}
-	} else {
-		switch (material.lightModelType) {
-		case LightModelType::Lambert:
-			if (currentPSO_ != psoType::Particle_Lambert) {
-				currentPSO_ = psoType::Particle_Lambert;
-				commandList_->SetPipelineState(psoList_[(int)currentPSO_]);
-				currentPSO_ = psoType::Particle_Lambert;
-				psoChanged = true;
-			}
-			break;
-		case LightModelType::HalfLambert:
-			if (currentPSO_ != psoType::Particle_HalfLambert) {
-				currentPSO_ = psoType::Particle_HalfLambert;
-				commandList_->SetPipelineState(psoList_[(int)currentPSO_]);
-				currentPSO_ = psoType::Particle_HalfLambert;
-				psoChanged = true;
-			}
-			break;
+		break;
+	case LightModelType::Lambert:
+		if (currentPSO_ != psoType::Lambert) {
+			commandList_->SetPipelineState(psoList_[(int)LightModelType::Lambert]);
+			currentPSO_ = psoType::Lambert;
+			psoChanged = true;
 		}
+		break;
+	case LightModelType::HalfLambert:
+		if (currentPSO_ != psoType::HalfLambert) {
+			commandList_->SetPipelineState(psoList_[(int)LightModelType::HalfLambert]);
+			currentPSO_ = psoType::HalfLambert;
+			psoChanged = true;
+		}
+		break;
 	}
 	if (psoChanged) {
 		rootSignature_ = pso_->getRootSignature((int)currentPSO_);
@@ -929,9 +922,9 @@ void DrawEngine::Draw2D() {
 
 		if (needSetMaterial) {
 			// Set PSO
-			commandList_->SetPipelineState(psoList_[(int)psoType::Tile]);
-			currentPSO_ = psoType::Tile;
-			rootSignature_ = pso_->getRootSignature((int)psoType::Tile);
+			commandList_->SetPipelineState(psoList_[(int)psoType::Sprite2D]);
+			currentPSO_ = psoType::Sprite2D;
+			rootSignature_ = pso_->getRootSignature((int)psoType::Sprite2D);
 			commandList_->SetGraphicsRootSignature(rootSignature_);
 
 			// Set Material
@@ -1038,7 +1031,7 @@ void DrawEngine::Draw3D() {
 
 		if (needSetMaterial) {
 			// Set PSO
-			PSODecition(*material, true);
+			PSODecition(*material);
 
 			// Set Material
 			SetMaterial(material->materialResourceHandle);

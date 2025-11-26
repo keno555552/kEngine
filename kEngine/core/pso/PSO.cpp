@@ -26,7 +26,7 @@ void PSO::Initialize(DirectXCore* directXDriver) {
 }
 
 ID3D12PipelineState* PSO::createPSO(LightModelType lightModelType) {
-	createRootSignature(false);
+	createRootSignature();
 	createInputLayout();
 	SetBlendState();
 	SetRasterizerState();
@@ -37,33 +37,7 @@ ID3D12PipelineState* PSO::createPSO(LightModelType lightModelType) {
 	return graphicsPipelineState_;
 }
 
-ID3D12PipelineState* PSO::createPSO_Tile() {
-
-	createRootSignature(true);
-	createInputLayout();
-	SetBlendState();
-	SetRasterizerState();
-	ShaderCompile_Particle2D();
-	SetDepthStencilState();
-
-	SetGraphicsPipelineState();
-	return graphicsPipelineState_;
-}
-
-ID3D12PipelineState* PSO::createPSO_3DParticle(LightModelType lightModelType) {
-
-	createRootSignature(true);
-	createInputLayout();
-	SetBlendState();
-	SetRasterizerState();
-	ShaderCompile_Particle3D(lightModelType);
-	SetDepthStencilState();
-
-	SetGraphicsPipelineState();
-	return graphicsPipelineState_;
-}
-
-ID3D12RootSignature* PSO::createRootSignature(bool isParticle) {
+ID3D12RootSignature* PSO::createRootSignature() {
 	///RootSignature作成
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
 	descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
@@ -96,23 +70,17 @@ ID3D12RootSignature* PSO::createRootSignature(bool isParticle) {
 	rootParameters[0].Descriptor.ShaderRegister = 0;                                                // レジスタ番号 0 とバインド
 
 	// Transform用
-	if (!isParticle) {
-		rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;								/// 
-		rootParameters[1].Descriptor.ShaderRegister = 0;													/// 
-		rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;									///
-	} else {
-		static D3D12_DESCRIPTOR_RANGE descriptorRangeForInstancing[1]{};
-		descriptorRangeForInstancing[0].BaseShaderRegister = 0;
-		descriptorRangeForInstancing[0].NumDescriptors = 1;
-		descriptorRangeForInstancing[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-		descriptorRangeForInstancing[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	static D3D12_DESCRIPTOR_RANGE descriptorRangeForInstancing[1]{};
+	descriptorRangeForInstancing[0].BaseShaderRegister = 0;
+	descriptorRangeForInstancing[0].NumDescriptors = 1;
+	descriptorRangeForInstancing[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	descriptorRangeForInstancing[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-		rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;						/// DescirptorTableを使う
-		rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;								/// VertexShaderで使う
-		rootParameters[1].DescriptorTable.pDescriptorRanges = descriptorRangeForInstancing;					/// Tableの中身の配列を指定
-		rootParameters[1].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeForInstancing);		/// Tableで利用する数
+	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;						/// DescirptorTableを使う
+	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;								/// VertexShaderで使う
+	rootParameters[1].DescriptorTable.pDescriptorRanges = descriptorRangeForInstancing;					/// Tableの中身の配列を指定
+	rootParameters[1].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeForInstancing);		/// Tableで利用する数
 
-	}
 
 	// Texture用
 	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;                   /// DescriptorTableを使う
@@ -182,7 +150,7 @@ void PSO::SetBlendState() {
 	//D3D12_BLEND_DESC blendDesc{};
 	blendDesc_ = {};
 	// すべての色要素を書き込む
-	blendDesc_.RenderTarget[0].RenderTargetWriteMask =D3D12_COLOR_WRITE_ENABLE_ALL;
+	blendDesc_.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 	blendDesc_.RenderTarget[0].BlendEnable = TRUE;
 	blendDesc_.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
 	blendDesc_.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
@@ -206,33 +174,19 @@ void PSO::SetRasterizerState() {
 void PSO::ShaderCompile(LightModelType lightModelType) {
 	/// Shaderをコンパイルする
 	vertexShaderBlob_ = {};
-	vertexShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Object3d.VS.hlsl", L"vs_6_0");
-	assert(vertexShaderBlob_ != nullptr);
-
 	pixelShaderBlob_ = {};
-	pixelShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Object3d.PS.hlsl", L"ps_6_0",lightModelType);
-	assert(pixelShaderBlob_ != nullptr);
-}
 
-void PSO::ShaderCompile_Particle2D() {
-	/// Shaderをコンパイルする
-	vertexShaderBlob_ = {};
-	vertexShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Tile2D.VS.hlsl", L"vs_6_0");
+	switch (lightModelType) {
+	case LightModelType::Sprite2D:
+		vertexShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Tile2D.VS.hlsl", L"vs_6_0");
+		pixelShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Tile2D.PS.hlsl", L"ps_6_0");
+		return;
+	case LightModelType::Lambert:
+	case LightModelType::HalfLambert:
+		vertexShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Particle.VS.hlsl", L"vs_6_0");
+		pixelShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Particle.PS.hlsl", L"ps_6_0", lightModelType);
+	}
 	assert(vertexShaderBlob_ != nullptr);
-
-	pixelShaderBlob_ = {};
-	pixelShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Tile2D.PS.hlsl", L"ps_6_0");
-	assert(pixelShaderBlob_ != nullptr);
-}
-
-void PSO::ShaderCompile_Particle3D(LightModelType lightModelType) {
-	/// Shaderをコンパイルする
-	vertexShaderBlob_ = {};
-	vertexShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Particle.VS.hlsl", L"vs_6_0");
-	assert(vertexShaderBlob_ != nullptr);
-
-	pixelShaderBlob_ = {};
-	pixelShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Particle.PS.hlsl", L"ps_6_0", lightModelType);
 	assert(pixelShaderBlob_ != nullptr);
 }
 
