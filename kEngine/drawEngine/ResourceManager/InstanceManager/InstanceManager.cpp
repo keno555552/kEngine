@@ -147,6 +147,8 @@ void InstanceManager::Add3DTileInstance(TransformationMatrix* wvpData, MaterialC
 	//		instance.materialConfigIndex = (int)std::distance(materialConfigList_.begin(), checker);
 	//		materialConfigList_[instance.materialConfigIndex]->drawState = STANDBY;
 	//	}
+	// 
+	// 
 	//
 	//	auto checker2 = std::find_if(tile3DList_.begin(),
 	//		tile3DList_.end(),

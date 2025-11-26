@@ -5,14 +5,16 @@
 #include "DebugCamera.h"
 #include "Player\Player.h"
 
-class SceneTest :public Scene
+class Effect1 :public Scene
 {
 public:
-	SceneTest(kEngine* system);
-	~SceneTest();
+	Effect1(kEngine* system);
+	~Effect1();
 	void Update() override;
 	void Draw() override;
 
+	void CameraPart();
+	void ImguiPart();
 
 private:
 	kEngine* system_ = nullptr;				// 借り
@@ -28,27 +30,18 @@ private:
 	/// =========== リソースハンドル ============///
 	/// モデルハンドル
 	int skydomeModelHandle_ = 0;
+	int sphereModelHandle_ = 0;
 
 	/// テキスチャーハンドル
 	int boxTextureHandle_ = 0;
-	int tryTextureHandle_ = 0;
 
 	/// =========== ゲームオブジェクト ==========///
 	Object* skydome_ = nullptr;
-	Player* player_ = nullptr;
-	SimpleSprite* sprite_ = nullptr;
-	SimpleSprite* sprite2_ = nullptr;
-	SimpleSprite* sprite3_ = nullptr;
-	SimpleSprite* sprite4_ = nullptr;
+	Object* plane_[200];
 
 
 
-	/// =============== フラグ ================///
+	/// =============== フラグ ===============///
 	bool useDebugCamera = false;
-
-private:
-	/// ============= シーン内命令 =============///
-	void CameraPart();
-	void ImguiPart();
 };
 

@@ -2,19 +2,14 @@
 
 SceneManager::SceneManager(kEngine* system) {
 	system_ = system;
-	sceneUsingHandle_ = SceneNum::S_TESTER;
+	//sceneUsingHandle_ = SceneNum::S_SELECT;
+	sceneUsingHandle_ = SceneNum::S_EFFECT1;
 
-	InitMaterialConfig(&materialConfig_);
-	materialConfig_.uvTransformMatrix =
-		MakeAffineMatrix(materialConfig_.uvScale, materialConfig_.uvRotate,
-			materialConfig_.uvTranslate);
-	materialConfig_.textureHandle =
-		system_->LoadTextrue("resources/TemplateResource/texture/uvChecker.png");
-	// materialConfig_.textureHandle =
-	// system_->LoadTextrue("resources/nullScene.png");
-
-	for (auto& ptr : stageIsClear_) {
-		ptr = false;
+	for (int i = 0; i < 10; ++i) {
+		stage[i] = false;
+		if (i == static_cast<int>(sceneUsingHandle_)) {
+			stage[i] = true;
+		}
 	}
 }
 
@@ -40,9 +35,9 @@ void SceneManager::SceneChanger() {
 	//	delete sceneUsing_, sceneUsing_ = nullptr;
 	//}
 
+	StageCheckBoxUpdate();
 
 	if (sceneUsing_ == nullptr) {
-
 
 		switch (sceneUsingHandle_) {
 		case SceneNum::S_END:
@@ -59,11 +54,14 @@ void SceneManager::SceneChanger() {
 			sceneUsing_ = new SceneTest2(system_);
 			// sceneUsing_ = new StageTestForGE(system_);
 			break;
-		case SceneNum::S_TITLE:
-
-			break;
-
 		case SceneNum::S_SELECT:
+			//sceneUsing_ = new Menu(system_);
+			break;
+		case SceneNum::S_EFFECT1:
+			sceneUsing_ = new Effect1(system_);
+			break;
+		case SceneNum::S_EFFECT2:
+			sceneUsing_ = new Effect2(system_);
 			break;
 		}
 	}
@@ -72,7 +70,6 @@ void SceneManager::SceneChanger() {
 
 void SceneManager::Update() {
 
-	winDataUpdate();
 	SceneChanger();
 	if (sceneUsing_ != nullptr) {
 		sceneUsing_->Update();
@@ -83,21 +80,10 @@ void SceneManager::Render() {
 	if (sceneUsing_ != nullptr) {
 		sceneUsing_->Draw();
 	} else {
-		if (sceneOld_ == nullptr) {
-			// ImGui::Begin("Position");
-			// ImGui::SliderFloat2("LT", &LT.x, 0, 1280.0f);
-			// ImGui::SliderFloat2("LB", &LB.x, 0, 1280.0f);
-			// ImGui::SliderFloat2("RT", &RT.x, 0, 1280.0f);
-			// ImGui::SliderFloat2("RB", &RB.x, 0, 1280.0f);
-			// ImGui::End();
-
-			system_->DrawSprite({ 0, 0 }, materialConfig_);
-			// system_->DrawSprite({ 0,0 }, materialConfig_, { 64,64 }, { 64,64 * 2 },
-			// { 64 * 2,64 }, { 64 * 2,64 * 2 }, 512, 512, { 0,0 }, { 64 * 2,64 * 2
-			// }); system_->DrawSprite({ 0,0 }, materialConfig_, LT, LB, RT, RB, 512,
-			// 512, { 0,0 }, { 64 * 2,64 * 2 });
-		}
 	}
+#ifdef USE_IMGUI
+	ImguiPart();
+#endif
 }
 
 bool SceneManager::GetIsEnd() {
@@ -105,38 +91,65 @@ bool SceneManager::GetIsEnd() {
 	return false;
 }
 
-void SceneManager::winDataUpdate() {
+void SceneManager::StageCheckBoxUpdate() {
+	int checker = 0;
+	int newStageNum = -1;
 
-	//switch (sceneUsingHandle_) {
-	//case SceneNum::S_STAGE01:
-	//	if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[0] = true;
-	//	break;
-	//case SceneNum::S_STAGE02:
-	//	if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[1] = true;
-	//	break;
-	//case SceneNum::S_STAGE03:
-	//	if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[2] = true;
-	//	break;
-	//case SceneNum::S_STAGE04:
-	//	if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[3] = true;
-	//	break;
-	//case SceneNum::S_STAGE05:
-	//	if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[4] = true;
-	//	break;
-	//case SceneNum::S_STAGE06:
-	//	if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[5] = true;
-	//	break;
-	//case SceneNum::S_STAGE07:
-	//	if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[6] = true;
-	//	break;
-	//case SceneNum::S_STAGE08:
-	//	if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[7] = true;
-	//	break;
-	//case SceneNum::S_STAGE09:
-	//	if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[8] = true;
-	//	break;
-	//case SceneNum::S_STAGE10:
-	//	if (sceneUsing_->GetIsWin() == IsWin::WIN) stageIsClear_[9] = true;
-	//	break;
-	//}
+	for (int i = 0; i < 10; ++i) {
+		if (stage[i]) {
+			checker++;
+			if (i != static_cast<int>(sceneUsingHandle_)) {
+				newStageNum = i;
+			}
+		}
+	}
+
+	if (checker > 1 && newStageNum != -1) {
+		ClearStage();
+		stage[newStageNum] = true;
+		sceneUsingHandle_ = static_cast<SceneNum>(newStageNum);
+	}
+
+	if (checker == 0) {
+		ClearStage();
+		stage[0] = true;
+		sceneUsingHandle_ = SceneNum::S_SELECT;
+	}
 }
+
+
+void SceneManager::ClearStage() {
+	for (auto& ptr : stage) {
+		ptr = false;
+	}
+	delete sceneUsing_, sceneUsing_ = nullptr;
+}
+
+#ifdef USE_IMGUI
+void SceneManager::ImguiPart() {
+	{
+		float fps = system_->GetFPS();
+		float fps1s = system_->GetFPSPerSecond();
+		float deltaTime = system_->GetDeltaTime();
+		ImGui::Begin("FPS");
+		ImGui::InputFloat("FPS", &fps);
+		ImGui::InputFloat("FPS_1s", &fps1s);
+		ImGui::InputFloat("deltaTime", &deltaTime);
+		ImGui::End();
+	}
+
+	{
+		ImGui::Begin("Stage");
+
+		ImGui::Checkbox("Menu", &stage[0]);
+		std::string stageName[3];
+		for (int i = 1; i < 3; i++) {
+			stageName[i] = "Effect_" + std::to_string(i);
+			ImGui::Checkbox(stageName[i].c_str(), &stage[i]);
+		}
+
+
+		ImGui::End();
+	}
+}
+#endif

@@ -5,14 +5,16 @@
 #include "DebugCamera.h"
 #include "Player\Player.h"
 
-class SceneTest :public Scene
+class Effect2:public Scene
 {
 public:
-	SceneTest(kEngine* system);
-	~SceneTest();
+	Effect2(kEngine* system);
+	~Effect2();
 	void Update() override;
 	void Draw() override;
 
+	void CameraPart();
+	void ImguiPart();
 
 private:
 	kEngine* system_ = nullptr;				// 借り
@@ -43,12 +45,11 @@ private:
 
 
 
-	/// =============== フラグ ================///
+	/// =============== フラグ ===============///
 	bool useDebugCamera = false;
 
-private:
-	/// ============= シーン内命令 =============///
-	void CameraPart();
-	void ImguiPart();
+
+
+
 };
 
