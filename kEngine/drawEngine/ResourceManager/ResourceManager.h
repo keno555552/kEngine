@@ -46,7 +46,7 @@ public:
 	void ColletSprite(Vector2 pos, MaterialConfig material);
 	void ColletModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = 0, bool useDefaultModel = false);
 	void Collet2DTile(Vector2 pos, MaterialConfig material);
-	void Collet3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = 0,bool useDefaultModel = false);
+	void Collet3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = 0, bool useDefaultModel = false);
 
 	void Collet2D(SpriteData* sprite);
 	void Collet3D(ObjectData* object);
@@ -72,7 +72,7 @@ public:
 
 	bool SetModelTexture(Model* model);
 
-	void ResizeSimpleSpriteMesh(DirectX::TexMetadata Metadata, int counter, CornerData corner = {}, Vector2 anchorPoint = {});
+	void ResizeSimpleSpriteMesh(DirectX::TexMetadata Metadata, int counter, CornerData corner, Vector2 anchorPoint, Vector2 cropLT, Vector2 cropSize);
 
 	/// 暫くのCounter管理
 	int GetTextureCounter();
@@ -121,7 +121,7 @@ public:
 
 private:
 	/// リソース作り
-	
+
 	int CreateSimpleSpriteMeshResource();
 	//int CreateSprite2DResource(Vector2 LTpos, Vector2 LBpos,
 	//	Vector2 RTpos, Vector2 RBpos,
@@ -151,8 +151,8 @@ private:
 	bool CheckInstance(std::vector< T* >& list, T target, bool useCustomCheck) {
 
 		auto checker = std::find_if(list.begin(),
-				list.end(),
-				[&](T* ptr) {return *ptr == target; });
+			list.end(),
+			[&](T* ptr) {return *ptr == target; });
 
 		return checker == list.end();
 	}

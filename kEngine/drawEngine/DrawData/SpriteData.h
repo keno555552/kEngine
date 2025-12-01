@@ -15,9 +15,16 @@ struct SpritePart
 
 	Transform worldTransform = CreateDefaultTransform();
 
-	Vector2 anchorPoint = { 0.0f, 0.0f };
+	/// 中心点調整
+	Vector2 anchorPoint{};
+	Vector2 worldAnchorPoint{};
 
-	CornerData conerData;
+	/// 四角デイタ
+	CornerData conerData{};
+
+	/// UVCrop用
+	Vector2 cropLT{};
+	Vector2 cropSize{};
 
 	///=============== 計算、資料渡し用 ==============///
 	std::shared_ptr<MaterialConfig>materialConfig;

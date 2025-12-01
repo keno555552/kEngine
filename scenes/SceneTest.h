@@ -32,6 +32,7 @@ private:
 	/// テキスチャーハンドル
 	int boxTextureHandle_ = 0;
 	int tryTextureHandle_ = 0;
+	int uvTextureHandle_ = 0;
 
 	/// =========== ゲームオブジェクト ==========///
 	Object* skydome_ = nullptr;

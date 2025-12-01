@@ -12,6 +12,7 @@ SceneTest::SceneTest(kEngine* system){
 
 	boxTextureHandle_ = system_->LoadTextrue("resources/texture/testBox.png");
 	tryTextureHandle_ = system_->LoadTextrue("resources/texture/Tryer.png");
+	uvTextureHandle_ = system_->LoadTextrue("resources/TemplateResource/texture/uvChecker.png");
 
 	//skydome_->CreateDefaultData();
 	skydome_ = new Object;
@@ -28,7 +29,7 @@ SceneTest::SceneTest(kEngine* system){
 	sprite_ = new SimpleSprite;
 	sprite_->IntObject(system_);
 	sprite_->CreateDefaultData();
-	sprite_->objectParts_[0].materialConfig->textureHandle = tryTextureHandle_;
+	sprite_->objectParts_[0].materialConfig->textureHandle = uvTextureHandle_;
 
 	sprite2_ = new SimpleSprite;
 	sprite2_->IntObject(system_);
@@ -143,6 +144,8 @@ void SceneTest::ImguiPart() {
 		ImGui::SliderFloat3("Scale",	&sprite_->mainPosition.transform.scale.x, 0.0f, 5.0f);
 
 		ImGui::SliderFloat3("AnchorPoint",	&sprite_->mainPosition.anchorPoint.x, -500.0f, 500.0f);
+		ImGui::SliderFloat2("CropLT",	&sprite_->objectParts_[0].cropLT.x, -500.0f, 500.0f);
+		ImGui::SliderFloat2("CropSize",	&sprite_->objectParts_[0].cropSize.x, -500.0f, 500.0f);
 
 		ImGui::Text("MaterialConfig");
 		ImGui::SliderFloat3("uvTranslate", & sprite_->objectParts_[0].materialConfig->uvTranslate.x, -5.0f, 5.0f);

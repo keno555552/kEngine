@@ -28,25 +28,19 @@ void SimpleSprite::Update(Camera* camera) {
 	}
 
 	mainPosition.materialConfig->MakeUVMatrix();
+	mainPosition.worldAnchorPoint = mainPosition.anchorPoint;
 
 
 	for (auto& part : objectParts_) {
 
-		if (part.anchorPoint != Vector2{ 0,0 }) {
-			float left = 0.0f - part.anchorPoint.x;
-			float right = 1.0f - part.anchorPoint.x;
-			float top = 0.0f - part.anchorPoint.y;
-			float bottom = 1.0f - part.anchorPoint.y;
-		}
-
-
 		part.worldTransform.scale		= part.transform.scale * mainPosition.transform.scale;
 		part.worldTransform.rotate		= part.transform.rotate + mainPosition.transform.rotate;
-		part.worldTransform.translate = part.transform.translate + mainPosition.transform.translate 
-										+ Vector3{part.anchorPoint.x,part.anchorPoint.y,0}
-										+ Vector3{ mainPosition.anchorPoint.x,mainPosition.anchorPoint.y,0};
+		part.worldTransform.translate = part.transform.translate + mainPosition.transform.translate;
+
 
 		part.materialConfig->MakeUVMatrix();
+
+		part.worldAnchorPoint = mainPosition.worldAnchorPoint + part.anchorPoint;
 	}
 
 }

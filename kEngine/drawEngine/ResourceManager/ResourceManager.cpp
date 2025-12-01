@@ -251,7 +251,7 @@ void ResourceManager::Collet2D(SpriteData* sprite) {
 		usingMaterial = *sprite->objectParts_[i].materialConfig;
 
 		/// Instance追加
-		instanceManager_->Add2DInstance(sprite->objectParts_[i].worldTransform, usingMaterial);
+		instanceManager_->Add2DInstance(sprite->objectParts_[i].worldTransform, usingMaterial, sprite->objectParts_[i].conerData,sprite->objectParts_[i].worldAnchorPoint, sprite->objectParts_[i].cropLT,sprite->objectParts_[i].cropSize);
 
 
 		int after = (int)instanceManager_->materialConfigList_.size();
@@ -527,13 +527,17 @@ bool ResourceManager::SetModelTexture(Model* model) {
 	return false;
 }
 
-void ResourceManager::ResizeSimpleSpriteMesh(DirectX::TexMetadata Metadata, int counter, CornerData corner, Vector2 anchorPoint) {
+void ResourceManager::ResizeSimpleSpriteMesh(DirectX::TexMetadata Metadata, int counter, CornerData corner, Vector2 anchorPoint, Vector2 cropLT, Vector2 cropSize) {
 	if (anchorPoint != Vector2{ 0, 0 }) {
-		simpleSpriteMeshList_[counter]->SetAnchor(anchorPoint);
-	} else if (!CheckCornerDataNull(corner)) {
+		simpleSpriteMeshList_[counter]->SetAnchor(Vector2((float)Metadata.width, (float)Metadata.height),anchorPoint);
+	} else if (!CheckCornerDataDefault(corner)) {
 		simpleSpriteMeshList_[counter]->SetSize(corner);
 	} else {
 		simpleSpriteMeshList_[counter]->SetSize(Vector2((float)Metadata.width, (float)Metadata.height));
+	}
+
+	if (cropLT != Vector2{} || cropSize != Vector2{}) {
+		simpleSpriteMeshList_[counter]->SetTexcoord(Vector2((float)Metadata.width, (float)Metadata.height), cropLT, cropSize);
 	}
 }
 

@@ -51,15 +51,16 @@ void SceneManager::SceneChanger() {
 
 		case SceneNum::S_TESTER:
 			//sceneUsing_ = new SceneTester(system_);
-			//sceneUsing_ = new SceneTest(system_);
-			sceneUsing_ = new SceneTest2(system_);
+			sceneUsing_ = new SceneTest(system_);
+			//sceneUsing_ = new SceneTest2(system_);
 			// sceneUsing_ = new StageTestForGE(system_);
 			break;
 		case SceneNum::S_SELECT:
 			//sceneUsing_ = new Menu(system_);
 			break;
 		case SceneNum::S_EFFECT1:
-			sceneUsing_ = new Effect1(system_);
+			sceneUsing_ = new SceneTest(system_);
+			//sceneUsing_ = new Effect1(system_);
 			break;
 		case SceneNum::S_EFFECT2:
 			sceneUsing_ = new Effect2(system_);
@@ -139,18 +140,18 @@ void SceneManager::ImguiPart() {
 		ImGui::End();
 	}
 
-	//{
-	//	ImGui::Begin("Stage");
-	//
-	//	ImGui::Checkbox("Menu", &stage[0]);
-	//	std::string stageName[3];
-	//	for (int i = 1; i < 3; i++) {
-	//		stageName[i] = "Effect_" + std::to_string(i);
-	//		ImGui::Checkbox(stageName[i].c_str(), &stage[i]);
-	//	}
-	//
-	//
-	//	ImGui::End();
-	//}
+	{
+		ImGui::Begin("Stage");
+	
+		ImGui::Checkbox("Menu", &stage[0]);
+		std::string stageName[3];
+		for (int i = 1; i < 3; i++) {
+			stageName[i] = "Effect_" + std::to_string(i);
+			ImGui::Checkbox(stageName[i].c_str(), &stage[i]);
+		}
+	
+	
+		ImGui::End();
+	}
 }
 #endif

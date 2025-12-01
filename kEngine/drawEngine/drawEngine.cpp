@@ -949,7 +949,7 @@ void DrawEngine::Draw2D() {
 		}
 
 		// Set VB/IB
-		resourceManager_->ResizeSimpleSpriteMesh(mataData, simpleSpriteCounter);
+		resourceManager_->ResizeSimpleSpriteMesh(mataData, simpleSpriteCounter, group[0]->cornerData, group[0]->anchorPoint,group[0]->cropLT,group[0]->cropSize);
 		D3D12_VERTEX_BUFFER_VIEW VertexBufferView = resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetVertexBufferView();
 		commandList_->IASetVertexBuffers(0, 1, &VertexBufferView);
 		D3D12_INDEX_BUFFER_VIEW IndexBufferView = resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetIndexBufferView();

@@ -10,6 +10,10 @@ struct SpriteInstance {
 
 	Vector2 anchorPoint;
 	CornerData cornerData;
+
+	Vector2 cropLT{};
+	Vector2 cropSize{};
+
 	int materialConfigIndex;
 	int resourceHandle;
 	int layer;

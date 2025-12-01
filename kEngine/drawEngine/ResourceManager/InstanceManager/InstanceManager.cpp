@@ -165,20 +165,19 @@ void InstanceManager::Add3DTileInstance(TransformationMatrix* wvpData, MaterialC
 
 
 
-void InstanceManager::Add2DInstance(Transform wvpData, MaterialConfig material, CornerData cornerData, Vector2 anchorPoint) {
+void InstanceManager::Add2DInstance(Transform wvpData, MaterialConfig material, CornerData cornerData, Vector2 anchorPoint, Vector2 cropLT, Vector2 cropSize) {
 	/// 2Dインスタンスを作る
 	SpriteInstance instance;
 	instance.position = { wvpData.translate.x, wvpData.translate.y };
 	instance.scale = { wvpData.scale.x,wvpData.scale.y };
 	instance.rotate = wvpData.rotate;
 	instance.drawState = STANDBY;
-	if (anchorPoint.x != 0 || anchorPoint.y != 0) {
-		if (!CheckCornerDataNull(cornerData)) {
-			instance.cornerData = cornerData;
-		} else {
-			instance.anchorPoint = anchorPoint;
-		}
-	}
+
+	instance.cornerData = cornerData;
+	instance.anchorPoint = anchorPoint;
+
+	instance.cropLT = cropLT;
+	instance.cropSize = cropSize;
 
 	/// レイヤー設定
 	if (wvpData.translate.z == 0) {

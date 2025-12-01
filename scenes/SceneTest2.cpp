@@ -127,7 +127,7 @@ void SceneTest2::ImguiPart() {
 		ImGui::SliderFloat3("Rotate", &sprite_->mainPosition.transform.rotate.x, 0.0f, 6.5f);
 		ImGui::SliderFloat3("Scale", &sprite_->mainPosition.transform.scale.x, 0.0f, 5.0f);
 
-		ImGui::SliderFloat3("AnchorPoint", &sprite_->mainPosition.anchorPoint.x, -500.0f, 500.0f);
+		ImGui::SliderFloat3("AnchorPoint", &sprite_->mainPosition.worldAnchorPoint.x, -500.0f, 500.0f);
 
 		ImGui::Text("MaterialConfig");
 		ImGui::SliderFloat3("uvTranslate", &sprite_->objectParts_[0].materialConfig->uvTranslate.x, -5.0f, 5.0f);

@@ -11,7 +11,8 @@ class SimpleSpriteMesh :public MeshBuffer
 public:
 	void SetSize(Vector2 RBpos);
 	void SetSize(CornerData corner);
-	void SetAnchor(Vector2 anchorPoint);
+	void SetAnchor(Vector2 RBpos, Vector2 anchorPoint);
+	void SetTexcoord(Vector2 textureSize,Vector2 cropLT, Vector2 cropSize);
 	ID3D12Resource* CreateVertexResource_(ID3D12Device* device)override;
 	void Mapping();
 	ID3D12Resource* CreateIndexResource_(ID3D12Device* device)override;
@@ -25,8 +26,10 @@ public:
 
 private:
 	CornerData conerData;
-	Vector2 TexcoordLT_ = {0,0};
-	Vector2 TexcoordRB_ = {1,1};
+	Vector2 Texcoord[4]{	{0,0},
+							{0,1},
+							{1,1},
+							{1,0}, };
 
 	bool keep_ = false;
 };
