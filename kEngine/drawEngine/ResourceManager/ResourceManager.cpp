@@ -527,8 +527,14 @@ bool ResourceManager::SetModelTexture(Model* model) {
 	return false;
 }
 
-void ResourceManager::ResizeSimpleSpriteMesh(DirectX::TexMetadata Metadata,int counter) {
-	simpleSpriteMeshList_[counter]->SetSize(Vector2((float)Metadata.width, (float)Metadata.height));
+void ResourceManager::ResizeSimpleSpriteMesh(DirectX::TexMetadata Metadata, int counter, CornerData corner, Vector2 anchorPoint) {
+	if (anchorPoint != Vector2{ 0, 0 }) {
+		simpleSpriteMeshList_[counter]->SetAnchor(anchorPoint);
+	} else if (!CheckCornerDataNull(corner)) {
+		simpleSpriteMeshList_[counter]->SetSize(corner);
+	} else {
+		simpleSpriteMeshList_[counter]->SetSize(Vector2((float)Metadata.width, (float)Metadata.height));
+	}
 }
 
 int ResourceManager::GetTextureCounter() {
@@ -554,7 +560,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE ResourceManager::GetTextureGPUDescriptorHandle(int h
 void ResourceManager::CreateSpriteMesh() {
 	int counter = (int)instanceManager_->tile2DList_.size() - (int)simpleSpriteMeshList_.size();
 	if (counter == 0)return;
-	if (counter > 0){
+	if (counter > 0) {
 		for (int i = 0; i < counter; i++) {
 			CreateSimpleSpriteMeshResource();
 		}

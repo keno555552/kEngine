@@ -40,7 +40,6 @@ private:
 	Object* plane_[200];
 
 
-
 	/// =============== フラグ ===============///
 	bool useDebugCamera = false;
 };

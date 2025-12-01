@@ -17,3 +17,5 @@ struct CornerData{
 						 CreateDefaultCornerData().coner[2],
 						 CreateDefaultCornerData().coner[3], };
 };
+
+bool CheckCornerDataNull(const CornerData& target);

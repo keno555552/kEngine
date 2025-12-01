@@ -2,10 +2,12 @@
 #include "Scene.h"
 #include "Object\Object.h"
 #include "Object\Sprite.h"
+#include "Particle\P_Fire\P_Fire.h"
 #include "DebugCamera.h"
 #include "Player\Player.h"
+#include <random>
 
-class Effect2:public Scene
+class Effect2 :public Scene
 {
 public:
 	Effect2(kEngine* system);
@@ -13,8 +15,6 @@ public:
 	void Update() override;
 	void Draw() override;
 
-	void CameraPart();
-	void ImguiPart();
 
 private:
 	kEngine* system_ = nullptr;				// 借り
@@ -30,26 +30,30 @@ private:
 	/// =========== リソースハンドル ============///
 	/// モデルハンドル
 	int skydomeModelHandle_ = 0;
+	int planeModelHandle_ = 0;
 
 	/// テキスチャーハンドル
 	int boxTextureHandle_ = 0;
-	int tryTextureHandle_ = 0;
 
-	/// =========== ゲームオブジェクト ==========///
+	/// =========== ゲームオブジェクト =========///
 	Object* skydome_ = nullptr;
-	Player* player_ = nullptr;
-	SimpleSprite* sprite_ = nullptr;
-	SimpleSprite* sprite2_ = nullptr;
-	SimpleSprite* sprite3_ = nullptr;
-	SimpleSprite* sprite4_ = nullptr;
+	P_Fire* fire_ = nullptr;
+	Object* plane_ = nullptr;
 
+	/// ============= ゲーム内データ ===========///
+	std::random_device seedGenerator;
+	std::mt19937 randomEngine{ seedGenerator() };
+	float randomNumber{};
 
 
 	/// =============== フラグ ===============///
 	bool useDebugCamera = false;
 
+	/// ============= シーン内命令 =============///
+	void CameraPart();
 
-
+#ifdef USE_IMGUI
+	void ImguiPart();
+#endif
 
 };
-

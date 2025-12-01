@@ -5,7 +5,8 @@ Effect1::Effect1(kEngine* system) {
 	system_ = system;
 	debugCamera_ = new DebugCamera(system);
 	camera_ = new Camera;
-	camera_->Move(Vector3(0.0f, 0.5f, -10.0f));
+	camera_->Move(Vector3(-2.736f, -4.474f, -27.334f));
+	camera_->Rotate(Vector3(-0.324f, 0.228f, 0.0f));
 
 	/// =========== リソースロード ============///
 	skydomeModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/skydome/skydome.obj");
@@ -26,8 +27,6 @@ Effect1::Effect1(kEngine* system) {
 		ptr->mainPosition.transform.translate = Vector3(0.2f * i, 0.2f * i, 0.2f * i);
 		i++;
 	}
-
-
 }
 
 Effect1::~Effect1() {
@@ -85,19 +84,31 @@ void Effect1::CameraPart() {
 
 #ifdef USE_IMGUI
 void Effect1::ImguiPart() {
+
+	Vector3 CameraPosition = usingCamera_->GetTransform().translate;
+	Vector3 CameraRotation = usingCamera_->GetTransform().rotate;
+	
 	ImGui::Begin("DebugCamera");
 	ImGui::Checkbox("isUse", &useDebugCamera);
+	ImGui::SliderFloat3("CameraPos", &CameraPosition.x , -5.0f, 5.0f);
+	ImGui::SliderFloat3("CameraRotate", &CameraRotation.x , -1.0f, 1.0f);
 	ImGui::End();
 
+	usingCamera_->SetCamera(Transform{ Vector3(1.0f,1.0f,1.0f),CameraRotation,CameraPosition });
 
 	{
 		ImGui::Begin("SpherePos");
 		int i = 0;
 		for (auto& ptr : plane_) {
 			std::string index = std::to_string(i);
-			std::string name1 = "SpherePos";
-			std::string name2 = "SpherePos";
+			std::string name = "Sphere";
+			std::string name1 = "Color";
+			std::string name2 = "Pos";
+			std::string name3 = "Rotate";
+			ImGui::Text((name + index).c_str());
 			ImGui::SliderFloat4((name1 + index).c_str(), &ptr->objectParts_[0].materialConfig->textureColor.x, 0.0f, 1.0f);
+			ImGui::SliderFloat3((name2 + index).c_str(), &ptr->objectParts_[0].transform.translate.x, 0.0f, 1.0f);
+			ImGui::SliderFloat3((name3 + index).c_str(), &ptr->objectParts_[0].transform.rotate.x, -1.0f, 1.0f);
 			i++;
 		}
 		ImGui::End();

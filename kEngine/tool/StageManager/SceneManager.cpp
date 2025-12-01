@@ -4,6 +4,7 @@ SceneManager::SceneManager(kEngine* system) {
 	system_ = system;
 	//sceneUsingHandle_ = SceneNum::S_SELECT;
 	sceneUsingHandle_ = SceneNum::S_EFFECT1;
+	//sceneUsingHandle_ = SceneNum::S_TESTER;
 
 	for (int i = 0; i < 10; ++i) {
 		stage[i] = false;
@@ -78,7 +79,7 @@ void SceneManager::Update() {
 
 void SceneManager::Render() {
 	if (sceneUsing_ != nullptr) {
-		sceneUsing_->Draw();
+ 		sceneUsing_->Draw();
 	} else {
 	}
 #ifdef USE_IMGUI
@@ -138,18 +139,18 @@ void SceneManager::ImguiPart() {
 		ImGui::End();
 	}
 
-	{
-		ImGui::Begin("Stage");
-
-		ImGui::Checkbox("Menu", &stage[0]);
-		std::string stageName[3];
-		for (int i = 1; i < 3; i++) {
-			stageName[i] = "Effect_" + std::to_string(i);
-			ImGui::Checkbox(stageName[i].c_str(), &stage[i]);
-		}
-
-
-		ImGui::End();
-	}
+	//{
+	//	ImGui::Begin("Stage");
+	//
+	//	ImGui::Checkbox("Menu", &stage[0]);
+	//	std::string stageName[3];
+	//	for (int i = 1; i < 3; i++) {
+	//		stageName[i] = "Effect_" + std::to_string(i);
+	//		ImGui::Checkbox(stageName[i].c_str(), &stage[i]);
+	//	}
+	//
+	//
+	//	ImGui::End();
+	//}
 }
 #endif

@@ -24,7 +24,7 @@ public:
 	//void UpdateTileInstance();
 	void Add3DTileInstance(TransformationMatrix* wvpData, MaterialConfig material, int vertexNum, int modelHandle = 0, bool useDefaultModel = false);
 
-	void Add2DInstance(Transform wvpData, MaterialConfig material);
+	void Add2DInstance(Transform wvpData, MaterialConfig material, CornerData cornerData = {}, Vector2 anchorPoint = {});
 	void Add3DInstance(TransformationMatrix wvpData, MaterialConfig material, int vertexNum, int modelHandle = 0, int modelGroupHandle = 0);
 	void SpriteLayerManagement();
 	//void ResmoveModelInstance();

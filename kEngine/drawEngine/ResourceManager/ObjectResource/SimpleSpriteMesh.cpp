@@ -15,6 +15,38 @@ void SimpleSpriteMesh::SetSize(Vector2 RBpos) {
 	Mapping();
 }
 
+void SimpleSpriteMesh::SetSize(CornerData corner) {
+
+	conerData = corner;
+
+	TexcoordLT_.x = 0;
+	TexcoordLT_.y = 0;
+	TexcoordRB_.x = 1;
+	TexcoordRB_.y = 1;
+
+	Mapping();
+}
+
+void SimpleSpriteMesh::SetAnchor(Vector2 anchorPoint) {
+
+	float left = 0.0f - anchorPoint.x;
+	float right = 1.0f - anchorPoint.x;
+	float top = 0.0f - anchorPoint.y;
+	float bottom = 1.0f - anchorPoint.y;
+
+	conerData.coner[(int)CornerName::TOP_LEFT] =		{ left,		top };
+	conerData.coner[(int)CornerName::BOTTOM_LEFT] =		{ left,		bottom };
+	conerData.coner[(int)CornerName::BOTTOM_RIGHT] =	{ right,	bottom };
+	conerData.coner[(int)CornerName::TOP_RIGHT] =		{ right,	top };
+
+	TexcoordLT_.x = 0;
+	TexcoordLT_.y = 0;
+	TexcoordRB_.x = 1;
+	TexcoordRB_.y = 1;
+
+	Mapping();
+}
+
 ID3D12Resource* SimpleSpriteMesh::CreateVertexResource_(ID3D12Device* device) {
 
 	vertexResource_->CreateResourceClass_(device, sizeof(VertexData) * 4);
