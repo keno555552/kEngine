@@ -34,18 +34,18 @@ SceneTest::SceneTest(kEngine* system){
 	sprite2_ = new SimpleSprite;
 	sprite2_->IntObject(system_);
 	sprite2_->CreateDefaultData();
-	sprite2_->objectParts_[0].materialConfig->textureHandle = boxTextureHandle_;
+	sprite2_->objectParts_[0].materialConfig->textureHandle = uvTextureHandle_;
 
 	sprite3_ = new SimpleSprite;
 	sprite3_->IntObject(system_);
 	sprite3_->CreateDefaultData();
-	sprite3_->objectParts_[0].materialConfig->textureHandle = boxTextureHandle_;
+	sprite3_->objectParts_[0].materialConfig->textureHandle = uvTextureHandle_;
 	sprite3_->mainPosition.transform.translate = Vector3(200.0f, 200.0f, 0.0f);
 
 	sprite4_ = new SimpleSprite;
 	sprite4_->IntObject(system_);
 	sprite4_->CreateDefaultData();
-	sprite4_->objectParts_[0].materialConfig->textureHandle = boxTextureHandle_;
+	sprite4_->objectParts_[0].materialConfig->textureHandle = uvTextureHandle_;
 	sprite4_->mainPosition.transform.translate = Vector3(400.0f, 400.0f, 0.0f);
 
 }
@@ -73,7 +73,7 @@ void SceneTest::Update() {
 	player_->Update(usingCamera_);
 
 	sprite_->Update(usingCamera_);
-	sprite2_->Update(usingCamera_);
+	//sprite2_->Update(usingCamera_);
 	sprite3_->Update(usingCamera_);
 	sprite4_->Update(usingCamera_);
 
@@ -92,8 +92,8 @@ void SceneTest::Draw() {
 	player_->Draw();
 	sprite_->Draw();
 	//sprite2_->Draw();
-	//sprite3_->Draw();
-	//sprite4_->Draw();
+	sprite3_->Draw();
+	sprite4_->Draw();
 	//system_->Draw3D(skydome_);
 	//system_->Draw3D(player_);
 	//system_->Draw3D(model_);
@@ -152,6 +152,48 @@ void SceneTest::ImguiPart() {
 		ImGui::SliderFloat3("uvScale", & sprite_->objectParts_[0].materialConfig->uvScale.x, -5.0f, 5.0f);
 		ImGui::SliderFloat3("uvRotate", & sprite_->objectParts_[0].materialConfig->uvRotate.x, -6.5f, 6.5f);
 		ImGui::ColorEdit4("Color", & sprite_->objectParts_[0].materialConfig->textureColor.x);
+
+
+
+		ImGui::SliderFloat3("2Pos",		&sprite3_->mainPosition.transform.translate.x, 0.0f, 1280.0f);
+		ImGui::SliderFloat3("2Rotate",	&sprite3_->mainPosition.transform.rotate.x, 0.0f, 6.5f);
+		ImGui::SliderFloat3("2Scale",	&sprite3_->mainPosition.transform.scale.x, 0.0f, 5.0f);
+
+		ImGui::SliderFloat3("2AnchorPoint",	&sprite3_->mainPosition.anchorPoint.x, -500.0f, 500.0f);
+		ImGui::SliderFloat2("2CropLT",	&sprite3_->objectParts_[0].cropLT.x, -500.0f, 500.0f);
+		ImGui::SliderFloat2("2CropSize",	&sprite3_->objectParts_[0].cropSize.x, -500.0f, 500.0f);
+
+		ImGui::Text("2MaterialConfig");
+		ImGui::SliderFloat3("2uvTranslate", & sprite3_->objectParts_[0].materialConfig->uvTranslate.x, -5.0f, 5.0f);
+		ImGui::SliderFloat3("2uvScale", & sprite3_->objectParts_[0].materialConfig->uvScale.x, -5.0f, 5.0f);
+		ImGui::SliderFloat3("2uvRotate", & sprite3_->objectParts_[0].materialConfig->uvRotate.x, -6.5f, 6.5f);
+		ImGui::ColorEdit4("2Color", & sprite3_->objectParts_[0].materialConfig->textureColor.x);
+
+
+
+
+		ImGui::SliderFloat3("3Pos",		&sprite4_->mainPosition.transform.translate.x, 0.0f, 1280.0f);
+		ImGui::SliderFloat3("3Rotate",	&sprite4_->mainPosition.transform.rotate.x, 0.0f, 6.5f);
+		ImGui::SliderFloat3("3Scale",	&sprite4_->mainPosition.transform.scale.x, 0.0f, 5.0f);
+							 
+		ImGui::SliderFloat3("3AnchorPoint",	&sprite4_->mainPosition.anchorPoint.x, -500.0f, 500.0f);
+		ImGui::SliderFloat2("3CropLT",	&sprite4_->objectParts_[0].cropLT.x, -500.0f, 500.0f);
+		ImGui::SliderFloat2("3CropSize",	&sprite4_->objectParts_[0].cropSize.x, -500.0f, 500.0f);
+
+		ImGui::Text("3MaterialConfig");
+		ImGui::SliderFloat3("3uvTranslate", & sprite4_->objectParts_[0].materialConfig->uvTranslate.x, -5.0f, 5.0f);
+		ImGui::SliderFloat3("3uvScale", & sprite4_->objectParts_[0].materialConfig->uvScale.x, -5.0f, 5.0f);
+		ImGui::SliderFloat3("3uvRotate", & sprite4_->objectParts_[0].materialConfig->uvRotate.x, -6.5f, 6.5f);
+		ImGui::ColorEdit4("3Color", & sprite4_->objectParts_[0].materialConfig->textureColor.x);
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		ImGui::End();
 	}
 }

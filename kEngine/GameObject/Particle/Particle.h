@@ -7,13 +7,14 @@
 #include "Scene.h"
 #include "randomMaker.h"
 
-class Particle :public Object
+class Particle : public Object
 {
 public:
 	void IntParticele(kEngine* system);
 	~Particle();
 
 	void Update(Camera* camera) override;
+	void Draw()override;
 
 	/// ========== 全体設定 ==========///
 	void SetCommonMaterialConfig(const MaterialConfig& material);
@@ -30,6 +31,7 @@ public:
 protected:
 	/// ========= 共通関数 ==========///
 	float defaultParticleInterval_ = 0.5f;
+	std::vector<Object*> particleObjectList_{};
 
 protected:
 

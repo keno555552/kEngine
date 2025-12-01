@@ -17,6 +17,12 @@ void Particle::Update(Camera* camera) {
 	Object::Update(camera);
 }
 
+void Particle::Draw() {
+	for (auto& obj : particleObjectList_) {
+		obj->Draw();
+	}
+}
+
 void Particle::SetCommonMaterialConfig(const MaterialConfig& material) {
 	*commonMaterialConfig = material;
 }

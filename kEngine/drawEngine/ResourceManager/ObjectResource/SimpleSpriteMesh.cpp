@@ -43,10 +43,10 @@ void SimpleSpriteMesh::SetTexcoord(Vector2 textureSize,Vector2 cropLT, Vector2 c
 	float topY = cropLT.y / textureSize.y;
 	float bottomY = (cropLT.y + cropSize.y) / textureSize.y;
 
-	Texcoord[(int)CornerName::TOP_LEFT] = { leftX,	  topY };
-	Texcoord[(int)CornerName::BOTTOM_LEFT] = { leftX,	  bottomY };
-	Texcoord[(int)CornerName::BOTTOM_RIGHT] = { rightX,	  bottomY };
-	Texcoord[(int)CornerName::TOP_RIGHT] = { rightX,	  topY };
+	Texcoord[(int)CornerName::TOP_LEFT] =		{ leftX,	topY };
+	Texcoord[(int)CornerName::BOTTOM_LEFT] =	{ leftX,	bottomY };
+	Texcoord[(int)CornerName::BOTTOM_RIGHT] =	{ rightX,	bottomY };
+	Texcoord[(int)CornerName::TOP_RIGHT] =		{ rightX,	topY };
 	
 	Mapping();
 }

@@ -328,6 +328,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\drawEngine\ResourceManager\InstanceManager\SpriteInstance.cpp" />
     <ClCompile Include="kEngine\drawEngine\ResourceManager\WVPResource.cpp" />
     <ClCompile Include="kEngine\GameObject\Particle\P_Fire\P_Fire.cpp" />
+    <ClCompile Include="ResourceLoader.cpp" />
     <ClCompile Include="scenes\CG4_HK_1\menu.cpp" />
     <ClCompile Include="scenes\CG4_HK_1\Effect1.cpp" />
     <ClCompile Include="scenes\CG4_HK_1\Effect2.cpp" />
@@ -404,6 +405,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\drawEngine\ResourceManager\InstanceManager\SpriteInstance.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\WVPResource.h" />
     <ClInclude Include="kEngine\GameObject\Particle\P_Fire\P_Fire.h" />
+    <ClInclude Include="ResourceLoader.h" />
     <ClInclude Include="scenes\CG4_HK_1\menu.h" />
     <ClInclude Include="scenes\CG4_HK_1\Effect1.h" />
     <ClInclude Include="scenes\CG4_HK_1\Effect2.h" />

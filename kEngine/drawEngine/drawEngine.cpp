@@ -948,58 +948,116 @@ void DrawEngine::Draw2D() {
 			material->drawState = InstanceManager::ISDRAW;
 		}
 
-		// Set VB/IB
-		resourceManager_->ResizeSimpleSpriteMesh(mataData, simpleSpriteCounter, group[0]->cornerData, group[0]->anchorPoint,group[0]->cropLT,group[0]->cropSize);
-		D3D12_VERTEX_BUFFER_VIEW VertexBufferView = resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetVertexBufferView();
-		commandList_->IASetVertexBuffers(0, 1, &VertexBufferView);
-		D3D12_INDEX_BUFFER_VIEW IndexBufferView = resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetIndexBufferView();
-		commandList_->IASetIndexBuffer(&IndexBufferView);
+		//// Set VB/IB
+		//resourceManager_->ResizeSimpleSpriteMesh(mataData, simpleSpriteCounter, group[simpleSpriteCounter]->cornerData, group[simpleSpriteCounter]->anchorPoint, group[simpleSpriteCounter]->cropLT, group[simpleSpriteCounter]->cropSize);
+		//D3D12_VERTEX_BUFFER_VIEW VertexBufferView = resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetVertexBufferView();
+		//commandList_->IASetVertexBuffers(0, 1, &VertexBufferView);
+		//D3D12_INDEX_BUFFER_VIEW IndexBufferView = resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetIndexBufferView();
+		//commandList_->IASetIndexBuffer(&IndexBufferView);
+		//
+		//int tileCount = (int)group.size();
+		//
+		//int wvpInstanceStartpoint = instance2DCounter_;
+		//
+		//for (int i = 0; i < group.size(); i++) {
+		//
+		//	int instanceCounter = instance2DCounter_;
+		//
+		//	// 単位行列を書き込んておく
+		//	if (tile2DInstancingData_[instanceCounter].WVP != Identity()) tile2DInstancingData_[instanceCounter].WVP = Identity();
+		//	if (tile2DInstancingData_[instanceCounter].world != Identity()) tile2DInstancingData_[instanceCounter].world = Identity();
+		//
+		//	// CPUで動かす用のTransformを作る。
+		//	Transform transformSprite = CreateDefaultTransform();
+		//	if (group[i] != nullptr) {
+		//		transformSprite.translate = group[i]->position;
+		//		transformSprite.scale = { group[i]->scale.x,group[i]->scale.y, 1 };
+		//		transformSprite.rotate = group[i]->rotate;
+		//	}
+		//
+		//	// Sprite用のworldViewProjectionMatrixを作る
+		//	Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
+		//	Matrix4x4 worldViewProjectionMatrixSprite = worldMatrixSprite * viewProj;
+		//	tile2DInstancingData_[instanceCounter].WVP = worldViewProjectionMatrixSprite;
+		//
+		//	group[i]->drawState = InstanceManager::ISDRAW;
+		//	instance2DCounter_++;
+		//}
+		//
+		////*instanceOffsetData_ = wvpInstanceStartpoint;
+		//OffsetData* inUse = nullptr;
+		//inUse = instanceOffsetData_[offsetDataCounter_];
+		//*instanceOffsetData_[offsetDataCounter_]->instanceOffset = static_cast<UINT>(wvpInstanceStartpoint);
+		//instanceOffsetData_[offsetDataCounter_]->state = 1;
+		//
+		//int vertexNum = resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetVertexNum();
+		//
+		//commandList_->SetGraphicsRootConstantBufferView(4, inUse->instanceOffsetResource->GetResource()->GetGPUVirtualAddress());
+		//
+		//commandList_->SetGraphicsRootDescriptorTable(1, Tile2DSrvHandleGPU_);
+		//commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
+		//commandList_->DrawIndexedInstanced(vertexNum, tileCount, 0, 0, 0);
+		//offsetDataCounter_++;
+		//simpleSpriteCounter++;
 
-		int tileCount = (int)group.size();
 
-		int wvpInstanceStartpoint = instance2DCounter_;
+		for (int i = 0; i < (int)group.size(); ++i) {
+			SpriteInstance* inst = group[i];
 
-		for (int i = 0; i < group.size(); i++) {
+			// 每個 instance 都重建 mesh
+			resourceManager_->ResizeSimpleSpriteMesh(
+				mataData,
+				simpleSpriteCounter,
+				inst->cornerData,
+				inst->anchorPoint,
+				inst->cropLT,
+				inst->cropSize
+			);
 
-			///int instanceCounter = max(instance2DCounter - 1,0);
-			int instanceCounter = instance2DCounter_;
+			D3D12_VERTEX_BUFFER_VIEW vbv =
+				resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetVertexBufferView();
+			D3D12_INDEX_BUFFER_VIEW ibv =
+				resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetIndexBufferView();
 
-			// 単位行列を書き込んておく
-			if (tile2DInstancingData_[instanceCounter].WVP != Identity()) tile2DInstancingData_[instanceCounter].WVP = Identity();
-			if (tile2DInstancingData_[instanceCounter].world != Identity()) tile2DInstancingData_[instanceCounter].world = Identity();
+			commandList_->IASetVertexBuffers(0, 1, &vbv);
+			commandList_->IASetIndexBuffer(&ibv);
 
-			// CPUで動かす用のTransformを作る。
-			Transform transformSprite = CreateDefaultTransform();
-			if (group[i] != nullptr) {
-				transformSprite.translate = group[i]->position;
-				transformSprite.scale = { group[i]->scale.x,group[i]->scale.y, 1 };
-				transformSprite.rotate = group[i]->rotate;
-			}
+			// 計算 transform
+			Transform t = CreateDefaultTransform();
+			t.translate = inst->position;
+			t.scale = { inst->scale.x, inst->scale.y, 1.0f };
+			t.rotate = inst->rotate;
 
-			// Sprite用のworldViewProjectionMatrixを作る
-			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
-			Matrix4x4 worldViewProjectionMatrixSprite = worldMatrixSprite * viewProj;
-			tile2DInstancingData_[instanceCounter].WVP = worldViewProjectionMatrixSprite;
+			Matrix4x4 world = MakeAffineMatrix(t.scale, t.rotate, t.translate);
+			Matrix4x4 wvp = world * viewProj;
 
-			group[i]->drawState = InstanceManager::ISDRAW;
-			instance2DCounter_++;
+			int instIdx = instance2DCounter_;
+			tile2DInstancingData_[instIdx].WVP = wvp;
+			tile2DInstancingData_[instIdx].world = world;
+
+			inst->drawState = InstanceManager::ISDRAW;
+			++instance2DCounter_;
+
+			// 設定 offset
+			OffsetData* inUse = instanceOffsetData_[offsetDataCounter_];
+			*inUse->instanceOffset = static_cast<UINT>(instIdx);
+			inUse->state = 1;
+
+			commandList_->SetGraphicsRootConstantBufferView(
+				4, inUse->instanceOffsetResource->GetResource()->GetGPUVirtualAddress());
+			commandList_->SetGraphicsRootDescriptorTable(1, Tile2DSrvHandleGPU_);
+			commandList_->SetGraphicsRootConstantBufferView(
+				3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
+
+			int vertexNum =
+				resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetVertexNum();
+
+			// 每個 instance 單獨 draw
+			commandList_->DrawIndexedInstanced(vertexNum, 1, 0, 0, 0);
+
+			++offsetDataCounter_;
+			++simpleSpriteCounter;
 		}
-
-		//*instanceOffsetData_ = wvpInstanceStartpoint;
-		OffsetData* inUse = nullptr;
-		inUse = instanceOffsetData_[offsetDataCounter_];
-		*instanceOffsetData_[offsetDataCounter_]->instanceOffset = static_cast<UINT>(wvpInstanceStartpoint);
-		instanceOffsetData_[offsetDataCounter_]->state = 1;
-
-		int vertexNum = resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetVertexNum();
-
-		commandList_->SetGraphicsRootConstantBufferView(4, inUse->instanceOffsetResource->GetResource()->GetGPUVirtualAddress());
-
-		commandList_->SetGraphicsRootDescriptorTable(1, Tile2DSrvHandleGPU_);
-		commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
-		commandList_->DrawIndexedInstanced(vertexNum, tileCount, 0, 0, 0);
-		offsetDataCounter_++;
-		simpleSpriteCounter++;
 	}
 }
 
