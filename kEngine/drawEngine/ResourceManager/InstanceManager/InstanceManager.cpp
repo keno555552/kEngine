@@ -147,6 +147,8 @@ void InstanceManager::Add3DTileInstance(TransformationMatrix* wvpData, MaterialC
 	//		instance.materialConfigIndex = (int)std::distance(materialConfigList_.begin(), checker);
 	//		materialConfigList_[instance.materialConfigIndex]->drawState = STANDBY;
 	//	}
+	// 
+	// 
 	//
 	//	auto checker2 = std::find_if(tile3DList_.begin(),
 	//		tile3DList_.end(),
@@ -163,13 +165,20 @@ void InstanceManager::Add3DTileInstance(TransformationMatrix* wvpData, MaterialC
 
 
 
-void InstanceManager::Add2DInstance(Transform wvpData, MaterialConfig material) {
+void InstanceManager::Add2DInstance(Transform wvpData, MaterialConfig material, CornerData cornerData, Vector2 anchorPoint) {
 	/// 2Dインスタンスを作る
 	SpriteInstance instance;
 	instance.position = { wvpData.translate.x, wvpData.translate.y };
 	instance.scale = { wvpData.scale.x,wvpData.scale.y };
-	instance.rotate = wvpData.rotate;					
+	instance.rotate = wvpData.rotate;
 	instance.drawState = STANDBY;
+	if (anchorPoint.x != 0 || anchorPoint.y != 0) {
+		if (!CheckCornerDataNull(cornerData)) {
+			instance.cornerData = cornerData;
+		} else {
+			instance.anchorPoint = anchorPoint;
+		}
+	}
 
 	/// レイヤー設定
 	if (wvpData.translate.z == 0) {
@@ -251,16 +260,16 @@ void InstanceManager::SpriteLayerManagement() {
 	/// スロットの基本値とステップ値、0から0.01ずつ減少
 	float baseZ = 0.0f;
 	const float slotStep = -0.01f;
-	
+
 	std::vector<SpriteInstance*> unlayered;
 	std::vector<SpriteInstance*> layered;
 
 	// position.zが-0.4f以下のスプライトとそれ以外で分ける
 	for (auto* sprite : spriteList_) {
 		if (sprite->position.z <= -0.4f)
-			layered.push_back(sprite); 
+			layered.push_back(sprite);
 		else
-			unlayered.push_back(sprite); 
+			unlayered.push_back(sprite);
 	}
 
 	/// slot設定

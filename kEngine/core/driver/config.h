@@ -11,7 +11,7 @@ class config
 private:
 	/// 描画設定
 	static const int k2DTileNumInstance_ = 10000;     /// Tileの最大インスタンス数
-	static const int k3DTileNumInstance_ = 100000;     /// Tileの最大インスタンス数
+	static const int k3DTileNumInstance_ = 10000;     /// Tileの最大インスタンス数
 
 	/// 最大マテリアル数設定
 	static const int kMaxMaterialNum_ = 10000;          /// 最大マテリアル数

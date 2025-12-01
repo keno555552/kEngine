@@ -7,7 +7,7 @@
 #include <vector>
 #include "SceneManager.h"
 
-const char kWindowTitle[] = "ENGINE";
+const char kWindowTitle[] = "LE2B_05_カン_ケンリャン";
 
 const int32_t kWindowWidth = 1280;
 const int32_t kWindowHeight = 720;

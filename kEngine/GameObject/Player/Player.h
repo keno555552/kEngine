@@ -6,6 +6,7 @@
 #include "kEngine.h"
 #include "Scene.h"
 
+
 /// 移動速度
 static inline const float kAcceleration = 3.0f;
 /// 移動減衰
@@ -33,8 +34,6 @@ public:
 	Player(kEngine* system, const Vector3& position = Vector3{ 0,0,0 });
 
 	void Update(Camera* camera) override;
-
-
 
 private:
 

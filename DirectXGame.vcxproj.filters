@@ -147,7 +147,7 @@
     <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\ModelGroup.cpp">
       <Filter>ソース ファイル\kEngine\DrawEngine\ResourceManager\ObjectResource</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\Particle.cpp">
+    <ClCompile Include="kEngine\GameObject\Particle\Particle.cpp">
       <Filter>ソース ファイル\kEngine\DrawEngine\ResourceManager\ObjectResource</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\Sphere.cpp">
@@ -235,12 +235,6 @@
       <Filter>ソース ファイル\kEngine\tool\StageManager</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\tool\StageManager\SceneTester.cpp">
-      <Filter>ソース ファイル\kEngine\tool\StageManager</Filter>
-    </ClCompile>
-    <ClCompile Include="scenes\SceneTestForGE.cpp">
-      <Filter>ソース ファイル\kEngine\tool\StageManager</Filter>
-    </ClCompile>
-    <ClCompile Include="scenes\Scene1.cpp">
       <Filter>ソース ファイル\kEngine\tool\StageManager</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\tool\TimeManager\TimeManager.cpp">
@@ -345,7 +339,19 @@
     <ClCompile Include="kEngine\drawEngine\DrawData\CornerData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="scenes\CG4_HK_1\Effect1.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
     <ClCompile Include="scenes\SceneTest2.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="scenes\CG4_HK_1\Effect2.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="scenes\CG4_HK_1\menu.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\GameObject\Particle\P_Fire\P_Fire.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -401,7 +407,7 @@
     <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\ModelGroup.h">
       <Filter>ヘッダー ファイル\kEngine\DrawEngine\ResourceManager\ObjectResource</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\Particle.h">
+    <ClInclude Include="kEngine\GameObject\Particle\Particle.h">
       <Filter>ヘッダー ファイル\kEngine\DrawEngine\ResourceManager\ObjectResource</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\Sphere.h">
@@ -466,12 +472,6 @@
     </ClInclude>
     <ClInclude Include="kEngine\tool\Camera\DebugCamera.h">
       <Filter>ヘッダー ファイル\kEngine\tool</Filter>
-    </ClInclude>
-    <ClInclude Include="scenes\Scene1.h">
-      <Filter>ヘッダー ファイル\kEngine\tool\StageManager</Filter>
-    </ClInclude>
-    <ClInclude Include="scenes\SceneTestForGE.h">
-      <Filter>ヘッダー ファイル\kEngine\tool\StageManager</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\tool\StageManager\SceneTester.h">
       <Filter>ヘッダー ファイル\kEngine\tool\StageManager</Filter>
@@ -563,7 +563,19 @@
     <ClInclude Include="kEngine\drawEngine\DrawData\CornerData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="scenes\CG4_HK_1\Effect1.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
     <ClInclude Include="scenes\SceneTest2.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="scenes\CG4_HK_1\Effect2.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="scenes\CG4_HK_1\menu.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\GameObject\Particle\P_Fire\P_Fire.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

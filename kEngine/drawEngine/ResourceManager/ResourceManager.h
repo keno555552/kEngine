@@ -72,7 +72,7 @@ public:
 
 	bool SetModelTexture(Model* model);
 
-	void ResizeSimpleSpriteMesh(DirectX::TexMetadata Metadata, int counter);
+	void ResizeSimpleSpriteMesh(DirectX::TexMetadata Metadata, int counter, CornerData corner = {}, Vector2 anchorPoint = {});
 
 	/// 暫くのCounter管理
 	int GetTextureCounter();

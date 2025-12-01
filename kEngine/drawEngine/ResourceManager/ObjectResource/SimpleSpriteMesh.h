@@ -10,6 +10,8 @@ class SimpleSpriteMesh :public MeshBuffer
 {
 public:
 	void SetSize(Vector2 RBpos);
+	void SetSize(CornerData corner);
+	void SetAnchor(Vector2 anchorPoint);
 	ID3D12Resource* CreateVertexResource_(ID3D12Device* device)override;
 	void Mapping();
 	ID3D12Resource* CreateIndexResource_(ID3D12Device* device)override;
