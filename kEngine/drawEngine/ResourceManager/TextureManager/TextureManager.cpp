@@ -176,7 +176,14 @@ int TextureManager::CheckSameModelTextureLoaded(const std::string& filePath) {
 		return -1;
 	} else {
 		int index = static_cast<int>(std::distance(textureDatas.begin(), it));
-		return modelTextureSRVMap_[index];
+		int findIndex = -1;
+		for (size_t i = 0; i < modelTextureSRVMap_.size(); i++) {
+			if (modelTextureSRVMap_[i] == index) {
+				findIndex = static_cast<int>(i);
+				break;
+			}
+		}
+		return findIndex;
 	}
 }
 

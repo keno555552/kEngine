@@ -132,7 +132,7 @@ private:
 	int CreateCubeResource();
 	int CreateSphereResource(int sudivision);
 
-	int CreateModelRosource(std::string Path);
+	int CreateModelResource(std::string Path);
 
 private:
 	////////////////////////////// 関数テンプレート

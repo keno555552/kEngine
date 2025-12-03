@@ -54,6 +54,12 @@ void MapChipField::LoadMapChipCsv(const std::string& filePath) {
 	}
 }
 
+void MapChipField::SetBlockSize(Vector2 size) {
+	// ブロックサイズ設定
+	kBlockWidth = size.x;
+	kBlockHeight = size.y;
+}
+
 MapChipType MapChipField::GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex) {
 	if ((xIndex < 0) || (kNumBlockHorizontal - 1 < xIndex)) {
 		return MapChipType::kBlank;
@@ -76,7 +82,7 @@ MapChipField::IndexSet MapChipField::GetMapChipIndexByPosition(const Vector3& po
 	return indexSet;
 }
 
-MapChipField::Rect MapChipField::GetRectByIndex(int xIndex, int yIndex) { 
+Rect MapChipField::GetRectByIndex(int xIndex, int yIndex) { 
 	Vector3 center = GetMapChipPositionByIndex(xIndex, yIndex);
 
 	Rect rect;

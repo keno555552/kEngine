@@ -2,13 +2,8 @@
 #include <vector>
 #include "MathsIncluder.h"
 #include <string>
-
-enum class MapChipType {
-	kBlank, // 空白
-	kBlock, // ブロック
-};
-
-
+#include "MapChipData.h"
+#include "../../GameObject/Object/Corner.h"
 
 struct MapChipData {
 	std::vector<std::vector<MapChipType>> data;
@@ -21,12 +16,6 @@ public:
 		int yIndex;
 	};
 
-	struct Rect {
-		float left;   // 右下
-		float right;  // 左下
-		float bottom; // 右上
-		float top;    // 左上
-	};
 
 public:
 
@@ -35,6 +24,8 @@ public:
 
 	/// 読み込み
 	void LoadMapChipCsv(const std::string& filePath);
+
+	void SetBlockSize(Vector2 size);
 
 	/// マップチップ種類を取得
 	MapChipType GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex);
@@ -53,11 +44,11 @@ public:
 
 private:
 	// 1ブロックのサイズ
-	static inline const float kBlockWidth = 2.0f;
-	static inline const float kBlockHeight = 2.0f;
+	float kBlockWidth = 2.0f;
+	float kBlockHeight = 2.0f;
 	// ブロックの個数
-	static inline const uint32_t kNumBlockVirtical = 35;
-	static inline const uint32_t kNumBlockHorizontal = 21;
+	uint32_t kNumBlockVirtical = 35;
+	uint32_t kNumBlockHorizontal = 21;
 
 	MapChipData mapChipData_;
 };

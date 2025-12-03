@@ -4,6 +4,7 @@
 #include "Object\Sprite.h"
 #include "DebugCamera.h"
 #include "Player\Player.h"
+#include "tool\MapChip\MapChipField.h"
 
 class SceneTest :public Scene
 {
@@ -28,6 +29,7 @@ private:
 	/// =========== リソースハンドル ============///
 	/// モデルハンドル
 	int skydomeModelHandle_ = 0;
+	int playerModelHandle_ = 0;
 
 	/// テキスチャーハンドル
 	int boxTextureHandle_ = 0;
@@ -39,9 +41,8 @@ private:
 	Player* player_ = nullptr;
 	SimpleSprite* sprite_ = nullptr;
 	SimpleSprite* sprite2_ = nullptr;
-	SimpleSprite* sprite3_ = nullptr;
-	SimpleSprite* sprite4_ = nullptr;
-
+	MapChipField* mapChipField_ = nullptr;
+	std::vector<std::vector<Object*>> blockObjectList_;
 
 
 	/// =============== フラグ ================///
@@ -51,5 +52,7 @@ private:
 	/// ============= シーン内命令 =============///
 	void CameraPart();
 	void ImguiPart();
+
+	void GenerateBlocks();
 };
 

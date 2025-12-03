@@ -50,6 +50,7 @@ public:
 	static int GetMaxSRVNum() { return kMaxSRVNum_; }
 
 public:
+	/// デフォルトメッシュバッファハンドル
 	static int default_Triangle_MeshBufferHandle_;
 	static int default_Sprite2D_MeshBufferHandle_;
 	static int default_Cube_MeshBufferHandle_;

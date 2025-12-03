@@ -5,6 +5,7 @@
 #include "Vector3.h"
 #include "kEngine.h"
 #include "Scene.h"
+#include "Object/Corner.h"
 
 
 /// 移動速度
@@ -53,20 +54,12 @@ private:
 		Vector3 moveVector = {}; // 移動量
 	};
 
-	/// 角
-	enum Corner {
-		kRightBottom, // 右下
-		kLeftBottom,  // 左下
-		kRightTop,    // 右上
-		kLeftTop,     // 左上
-
-		kNumCorner // 要素数
-	};
+	
 
 private:
 
 	void BehaviorRootUpdate();
-	Vector3 CornerPosition(const Vector3& center, Corner corner);
+	Vector3 CornerPosition(const Vector3& center, Corner4 corner);
 	void Move();
 	void OnGroundChanger(const CollisionMapInfo& info);
 	void MapCollisionDecideDown(CollisionMapInfo& info);

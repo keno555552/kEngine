@@ -9,6 +9,7 @@ SceneTest::SceneTest(kEngine* system){
 
 	/// =========== リソースロード ============///
 	skydomeModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/skydome/skydome.obj");
+	playerModelHandle_ = system_->SetModelObj ("resources/TemplateResource/object/charater/charater.obj");
 
 	boxTextureHandle_ = system_->LoadTextrue("resources/texture/testBox.png");
 	tryTextureHandle_ = system_->LoadTextrue("resources/texture/Tryer.png");
@@ -36,18 +37,14 @@ SceneTest::SceneTest(kEngine* system){
 	sprite2_->CreateDefaultData();
 	sprite2_->objectParts_[0].materialConfig->textureHandle = uvTextureHandle_;
 
-	sprite3_ = new SimpleSprite;
-	sprite3_->IntObject(system_);
-	sprite3_->CreateDefaultData();
-	sprite3_->objectParts_[0].materialConfig->textureHandle = uvTextureHandle_;
-	sprite3_->mainPosition.transform.translate = Vector3(200.0f, 200.0f, 0.0f);
 
-	sprite4_ = new SimpleSprite;
-	sprite4_->IntObject(system_);
-	sprite4_->CreateDefaultData();
-	sprite4_->objectParts_[0].materialConfig->textureHandle = uvTextureHandle_;
-	sprite4_->mainPosition.transform.translate = Vector3(400.0f, 400.0f, 0.0f);
+	/// マップチップの生成
+	mapChipField_ = new MapChipField();
+	mapChipField_->LoadMapChipCsv("resources/stage/blocks1.csv");
+	mapChipField_->SetBlockSize({ 1.0f,1.0f });
 
+	/// マップチップの初期化
+	GenerateBlocks();
 }
 
 SceneTest::~SceneTest() {
@@ -58,8 +55,6 @@ SceneTest::~SceneTest() {
 	delete skydome_;
 	delete sprite_;
 	delete sprite2_;
-	delete sprite3_;
-	delete sprite4_;
 }
 
 void SceneTest::Update() {
@@ -74,8 +69,15 @@ void SceneTest::Update() {
 
 	sprite_->Update(usingCamera_);
 	//sprite2_->Update(usingCamera_);
-	sprite3_->Update(usingCamera_);
-	sprite4_->Update(usingCamera_);
+	
+	/// ブロック更新
+	for (auto& row : blockObjectList_) {
+		for (auto& block : row) {
+			if (block) {
+				block->Update(usingCamera_);
+			}
+		}
+	}
 
 	if (system_->GetTriggerOn(DIK_0)) {
 		if (useDebugCamera)useDebugCamera = false;
@@ -90,13 +92,20 @@ void SceneTest::Draw() {
 	//system_->DrawModel(&skydome_->objectParts[0].transformationMatrix, &(skydome_->objectParts[0].materialConfig.get()), skydomeModelHandle_);
 	skydome_->Draw();
 	player_->Draw();
-	sprite_->Draw();
+	//sprite_->Draw();
 	//sprite2_->Draw();
-	sprite3_->Draw();
-	sprite4_->Draw();
 	//system_->Draw3D(skydome_);
 	//system_->Draw3D(player_);
 	//system_->Draw3D(model_);
+
+	/// ブロック描画
+	for (auto& row : blockObjectList_) {
+		for (auto& block : row) {
+			if (block) {
+				block->Draw();
+			}
+		}
+	}
 	
 #ifdef USE_IMGUI
 	/// imgui処理
@@ -120,17 +129,6 @@ void SceneTest::ImguiPart() {
 	ImGui::End();
 
 	{
-		float fps = system_->GetFPS();
-		float fps1s = system_->GetFPSPerSecond();
-		float deltaTime = system_->GetDeltaTime();
-		ImGui::Begin("FPS");
-		ImGui::InputFloat("FPS", &fps);
-		ImGui::InputFloat("FPS_1s", &fps1s);
-		ImGui::InputFloat("deltaTime", &deltaTime);
-		ImGui::End();
-	}
-
-	{
 		ImGui::Begin("PlayerPos");
 		ImGui::SliderFloat3("Pos", &player_->mainPosition.transform.translate.x, -1.0f, 1.0f);
 		ImGui::SliderFloat3("Rotate", &player_->mainPosition.transform.rotate.x, -1.0f, 1.0f);
@@ -152,49 +150,38 @@ void SceneTest::ImguiPart() {
 		ImGui::SliderFloat3("uvScale", & sprite_->objectParts_[0].materialConfig->uvScale.x, -5.0f, 5.0f);
 		ImGui::SliderFloat3("uvRotate", & sprite_->objectParts_[0].materialConfig->uvRotate.x, -6.5f, 6.5f);
 		ImGui::ColorEdit4("Color", & sprite_->objectParts_[0].materialConfig->textureColor.x);
-
-
-
-		ImGui::SliderFloat3("2Pos",		&sprite3_->mainPosition.transform.translate.x, 0.0f, 1280.0f);
-		ImGui::SliderFloat3("2Rotate",	&sprite3_->mainPosition.transform.rotate.x, 0.0f, 6.5f);
-		ImGui::SliderFloat3("2Scale",	&sprite3_->mainPosition.transform.scale.x, 0.0f, 5.0f);
-
-		ImGui::SliderFloat3("2AnchorPoint",	&sprite3_->mainPosition.anchorPoint.x, -500.0f, 500.0f);
-		ImGui::SliderFloat2("2CropLT",	&sprite3_->objectParts_[0].cropLT.x, -500.0f, 500.0f);
-		ImGui::SliderFloat2("2CropSize",	&sprite3_->objectParts_[0].cropSize.x, -500.0f, 500.0f);
-
-		ImGui::Text("2MaterialConfig");
-		ImGui::SliderFloat3("2uvTranslate", & sprite3_->objectParts_[0].materialConfig->uvTranslate.x, -5.0f, 5.0f);
-		ImGui::SliderFloat3("2uvScale", & sprite3_->objectParts_[0].materialConfig->uvScale.x, -5.0f, 5.0f);
-		ImGui::SliderFloat3("2uvRotate", & sprite3_->objectParts_[0].materialConfig->uvRotate.x, -6.5f, 6.5f);
-		ImGui::ColorEdit4("2Color", & sprite3_->objectParts_[0].materialConfig->textureColor.x);
-
-
-
-
-		ImGui::SliderFloat3("3Pos",		&sprite4_->mainPosition.transform.translate.x, 0.0f, 1280.0f);
-		ImGui::SliderFloat3("3Rotate",	&sprite4_->mainPosition.transform.rotate.x, 0.0f, 6.5f);
-		ImGui::SliderFloat3("3Scale",	&sprite4_->mainPosition.transform.scale.x, 0.0f, 5.0f);
-							 
-		ImGui::SliderFloat3("3AnchorPoint",	&sprite4_->mainPosition.anchorPoint.x, -500.0f, 500.0f);
-		ImGui::SliderFloat2("3CropLT",	&sprite4_->objectParts_[0].cropLT.x, -500.0f, 500.0f);
-		ImGui::SliderFloat2("3CropSize",	&sprite4_->objectParts_[0].cropSize.x, -500.0f, 500.0f);
-
-		ImGui::Text("3MaterialConfig");
-		ImGui::SliderFloat3("3uvTranslate", & sprite4_->objectParts_[0].materialConfig->uvTranslate.x, -5.0f, 5.0f);
-		ImGui::SliderFloat3("3uvScale", & sprite4_->objectParts_[0].materialConfig->uvScale.x, -5.0f, 5.0f);
-		ImGui::SliderFloat3("3uvRotate", & sprite4_->objectParts_[0].materialConfig->uvRotate.x, -6.5f, 6.5f);
-		ImGui::ColorEdit4("3Color", & sprite4_->objectParts_[0].materialConfig->textureColor.x);
-		
-		
-		
-		
-		
-		
-		
-		
-		
+	
 		ImGui::End();
 	}
 }
 #endif
+
+
+void SceneTest::GenerateBlocks() {
+	/// ボックス生成
+	// 要素数
+	uint32_t kNumBlockVertical = mapChipField_->GetNumBlockVirtical();
+	uint32_t kNumBlockHorizontal = mapChipField_->GetNumBlockHorizontal();
+
+	// 要素数を変更する
+	// 列数を設定(縦方向のブロック数)
+	blockObjectList_.resize(kNumBlockVertical);
+	for (uint32_t i = 0; i < kNumBlockVertical; i++) {
+		// 列数を設定(横方向のブロック数)
+		blockObjectList_[i].resize(kNumBlockHorizontal);
+	}
+	// いざボックス生成
+	for (uint32_t i = 0; i < kNumBlockVertical; i++) {
+		for (uint32_t j = 0; j < kNumBlockHorizontal; j++) {
+			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kBlock) {
+				blockObjectList_[i][j] = new Object();
+				blockObjectList_[i][j]->IntObject(system_);
+				blockObjectList_[i][j]->CreateDefaultData();
+				blockObjectList_[i][j]->modelHandle_ = config::default_Cube_MeshBufferHandle_;
+				blockObjectList_[i][j]->objectParts_[0].materialConfig->useModelTexture = false;
+				blockObjectList_[i][j]->objectParts_[0].materialConfig->textureHandle = uvTextureHandle_;
+				blockObjectList_[i][j]->mainPosition.transform.translate = mapChipField_->GetMapChipPositionByIndex(j, i);
+			}
+		}
+	}
+}

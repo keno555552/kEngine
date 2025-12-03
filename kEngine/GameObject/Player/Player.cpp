@@ -33,8 +33,8 @@ void Player::BehaviorRootUpdate() {
 	OnGroundChanger(collisionMapInfo);
 }
 
-Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
-	Vector3 offsetTable[kNumCorner] = {
+Vector3 Player::CornerPosition(const Vector3& center, Corner4 corner) {
+	Vector3 offsetTable[ (int)Corner4::kNumCorner] = {
 		{+kPlayerWidth / 2.0f, -kPlayerHeight / 2.0f, 0}, // kRightBottom
 		{-kPlayerWidth / 2.0f, -kPlayerHeight / 2.0f, 0}, // kLeftBottom
 		{+kPlayerWidth / 2.0f, +kPlayerHeight / 2.0f, 0}, // kRightTop
@@ -96,11 +96,11 @@ void Player::Move() {
 	} else {
 		// 非入力時は移動減衰をかける
 		velocity_.x *= std::exp(-kAttenuation * deltaTime_);
-		if (velocity_.x < 0.01f && velocity_.x > -0.01f) {
+		if (velocity_.x < 0.01f && velocity_.x > -0.01f) { 
 			velocity_.x = 0.0f;
 		}
 		//if (behavior_ != Behavior::kAttack) {
-		if (lrDirection_ != LRDirection::None) {
+		if (lrDirection_ != LRDirection::None) { 
 			lrDirection_ = LRDirection::None;
 			turnFirstRotationY_ = mainPosition.transform.rotate.y;
 			turnTimer_ = kTimeTurn;
@@ -153,13 +153,13 @@ void Player::OnGroundChanger(const CollisionMapInfo& info) {
 		} else {
 			//MapChipType mapChipType;
 			//MapChipField::IndexSet indexSet;
-			std::vector<Vector3> positionsNew(kNumCorner);
+			std::vector<Vector3> positionsNew((int)Corner4::kNumCorner);
 			for (uint32_t i = 0; i < positionsNew.size(); i++) {
 				Vector3 translation_ = {};
 				translation_.x = mainPosition.transform.translate.x + info.moveVector.x* deltaTime_;
 				translation_.y = mainPosition.transform.translate.y + info.moveVector.y* deltaTime_;
 				translation_.z = mainPosition.transform.translate.z + info.moveVector.z* deltaTime_;
-				positionsNew[i] = CornerPosition(translation_, static_cast<Corner>(i));
+				positionsNew[i] = CornerPosition(translation_, static_cast<Corner4>(i));
 			}
 			bool hit = false;
 			// 左下点の判定
@@ -168,7 +168,7 @@ void Player::OnGroundChanger(const CollisionMapInfo& info) {
 			//if (mapChipType == MapChipType::kBlock) {
 			//	hit = true;
 			//}
-			if (positionsNew[kLeftBottom].y <= 0) {
+			if (positionsNew[(int)Corner4::kLeftBottom].y <= 0) {
 				hit = true;
 			}
 			// 右下点の判定
@@ -177,7 +177,7 @@ void Player::OnGroundChanger(const CollisionMapInfo& info) {
 			//if (mapChipType == MapChipType::kBlock) {
 			//	hit = true;
 			//}
-			if (positionsNew[kRightBottom].y <= 0) {
+			if (positionsNew[(int)Corner4::kRightBottom].y <= 0) {
 				hit = true;
 			}
 
@@ -196,14 +196,14 @@ void Player::OnGroundChanger(const CollisionMapInfo& info) {
 
 void Player::MapCollisionDecideDown(CollisionMapInfo& info) {
 	/// 移動後の4つの角の座標
-	std::vector<Vector3> positionsNew(kNumCorner);
+	std::vector<Vector3> positionsNew((int)Corner4::kNumCorner);
 
 	for (uint32_t i = 0; i < positionsNew.size(); i++) {
 		Vector3 translation_ = {};
 		translation_.x = mainPosition.transform.translate.x + info.moveVector.x* deltaTime_;
 		translation_.y = mainPosition.transform.translate.y + info.moveVector.y* deltaTime_;
 		translation_.z = mainPosition.transform.translate.z + info.moveVector.z* deltaTime_;
-		positionsNew[i] = CornerPosition(translation_, static_cast<Corner>(i));
+		positionsNew[i] = CornerPosition(translation_, static_cast<Corner4>(i));
 	}
 	if (info.moveVector.y > 0)
 		return;
@@ -221,7 +221,7 @@ void Player::MapCollisionDecideDown(CollisionMapInfo& info) {
 	//if (mapChipType == MapChipType::kBlock && mapChipTypeNext != MapChipType::kBlock) {
 	//	hit = true;
 	//}
-	if (positionsNew[kLeftBottom].y <= 0) {
+	if (positionsNew[(int)Corner4::kLeftBottom].y <= 0) {
 		hit = true;
 	}
 	//// 右下点の判定
@@ -231,7 +231,7 @@ void Player::MapCollisionDecideDown(CollisionMapInfo& info) {
 	//if (mapChipType == MapChipType::kBlock && mapChipTypeNext != MapChipType::kBlock) {
 	//	hit = true;
 	//}
-	if (positionsNew[kRightBottom].y <= 0) {
+	if (positionsNew[(int)Corner4::kRightBottom].y <= 0) {
 		hit = true;
 	}
 	// ブロックにヒット?

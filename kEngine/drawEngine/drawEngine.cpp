@@ -766,11 +766,11 @@ void DrawEngine::DrawModel() {
 }
 
 void DrawEngine::Collect3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle) {
-	if (modelHandle == -1) {
-		resourceManager_->Collet3DTile(wvpData, { material }, config::default_Cube_MeshBufferHandle_, true);
-		return;
-	}
-	resourceManager_->Collet3DTile(wvpData, material, modelHandle);
+	//if (modelHandle == -1) {
+	//	resourceManager_->Collet3DTile(wvpData, { material }, config::default_Cube_MeshBufferHandle_, true);
+	//	return;
+	//}
+	//resourceManager_->Collet3DTile(wvpData, material, modelHandle);
 }
 
 void DrawEngine::Draw3DTile() {
@@ -948,58 +948,59 @@ void DrawEngine::Draw2D() {
 			material->drawState = InstanceManager::ISDRAW;
 		}
 
-		//// Set VB/IB
-		//resourceManager_->ResizeSimpleSpriteMesh(mataData, simpleSpriteCounter, group[simpleSpriteCounter]->cornerData, group[simpleSpriteCounter]->anchorPoint, group[simpleSpriteCounter]->cropLT, group[simpleSpriteCounter]->cropSize);
-		//D3D12_VERTEX_BUFFER_VIEW VertexBufferView = resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetVertexBufferView();
-		//commandList_->IASetVertexBuffers(0, 1, &VertexBufferView);
-		//D3D12_INDEX_BUFFER_VIEW IndexBufferView = resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetIndexBufferView();
-		//commandList_->IASetIndexBuffer(&IndexBufferView);
-		//
-		//int tileCount = (int)group.size();
-		//
-		//int wvpInstanceStartpoint = instance2DCounter_;
-		//
-		//for (int i = 0; i < group.size(); i++) {
-		//
-		//	int instanceCounter = instance2DCounter_;
-		//
-		//	// 単位行列を書き込んておく
-		//	if (tile2DInstancingData_[instanceCounter].WVP != Identity()) tile2DInstancingData_[instanceCounter].WVP = Identity();
-		//	if (tile2DInstancingData_[instanceCounter].world != Identity()) tile2DInstancingData_[instanceCounter].world = Identity();
-		//
-		//	// CPUで動かす用のTransformを作る。
-		//	Transform transformSprite = CreateDefaultTransform();
-		//	if (group[i] != nullptr) {
-		//		transformSprite.translate = group[i]->position;
-		//		transformSprite.scale = { group[i]->scale.x,group[i]->scale.y, 1 };
-		//		transformSprite.rotate = group[i]->rotate;
-		//	}
-		//
-		//	// Sprite用のworldViewProjectionMatrixを作る
-		//	Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
-		//	Matrix4x4 worldViewProjectionMatrixSprite = worldMatrixSprite * viewProj;
-		//	tile2DInstancingData_[instanceCounter].WVP = worldViewProjectionMatrixSprite;
-		//
-		//	group[i]->drawState = InstanceManager::ISDRAW;
-		//	instance2DCounter_++;
-		//}
-		//
-		////*instanceOffsetData_ = wvpInstanceStartpoint;
-		//OffsetData* inUse = nullptr;
-		//inUse = instanceOffsetData_[offsetDataCounter_];
-		//*instanceOffsetData_[offsetDataCounter_]->instanceOffset = static_cast<UINT>(wvpInstanceStartpoint);
-		//instanceOffsetData_[offsetDataCounter_]->state = 1;
-		//
-		//int vertexNum = resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetVertexNum();
-		//
-		//commandList_->SetGraphicsRootConstantBufferView(4, inUse->instanceOffsetResource->GetResource()->GetGPUVirtualAddress());
-		//
-		//commandList_->SetGraphicsRootDescriptorTable(1, Tile2DSrvHandleGPU_);
-		//commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
-		//commandList_->DrawIndexedInstanced(vertexNum, tileCount, 0, 0, 0);
-		//offsetDataCounter_++;
-		//simpleSpriteCounter++;
-
+		{
+			//// Set VB/IB
+			//resourceManager_->ResizeSimpleSpriteMesh(mataData, simpleSpriteCounter, group[simpleSpriteCounter]->cornerData, group[simpleSpriteCounter]->anchorPoint, group[simpleSpriteCounter]->cropLT, group[simpleSpriteCounter]->cropSize);
+			//D3D12_VERTEX_BUFFER_VIEW VertexBufferView = resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetVertexBufferView();
+			//commandList_->IASetVertexBuffers(0, 1, &VertexBufferView);
+			//D3D12_INDEX_BUFFER_VIEW IndexBufferView = resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetIndexBufferView();
+			//commandList_->IASetIndexBuffer(&IndexBufferView);
+			//
+			//int tileCount = (int)group.size();
+			//
+			//int wvpInstanceStartpoint = instance2DCounter_;
+			//
+			//for (int i = 0; i < group.size(); i++) {
+			//
+			//	int instanceCounter = instance2DCounter_;
+			//
+			//	// 単位行列を書き込んておく
+			//	if (tile2DInstancingData_[instanceCounter].WVP != Identity()) tile2DInstancingData_[instanceCounter].WVP = Identity();
+			//	if (tile2DInstancingData_[instanceCounter].world != Identity()) tile2DInstancingData_[instanceCounter].world = Identity();
+			//
+			//	// CPUで動かす用のTransformを作る。
+			//	Transform transformSprite = CreateDefaultTransform();
+			//	if (group[i] != nullptr) {
+			//		transformSprite.translate = group[i]->position;
+			//		transformSprite.scale = { group[i]->scale.x,group[i]->scale.y, 1 };
+			//		transformSprite.rotate = group[i]->rotate;
+			//	}
+			//
+			//	// Sprite用のworldViewProjectionMatrixを作る
+			//	Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
+			//	Matrix4x4 worldViewProjectionMatrixSprite = worldMatrixSprite * viewProj;
+			//	tile2DInstancingData_[instanceCounter].WVP = worldViewProjectionMatrixSprite;
+			//
+			//	group[i]->drawState = InstanceManager::ISDRAW;
+			//	instance2DCounter_++;
+			//}
+			//
+			////*instanceOffsetData_ = wvpInstanceStartpoint;
+			//OffsetData* inUse = nullptr;
+			//inUse = instanceOffsetData_[offsetDataCounter_];
+			//*instanceOffsetData_[offsetDataCounter_]->instanceOffset = static_cast<UINT>(wvpInstanceStartpoint);
+			//instanceOffsetData_[offsetDataCounter_]->state = 1;
+			//
+			//int vertexNum = resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetVertexNum();
+			//
+			//commandList_->SetGraphicsRootConstantBufferView(4, inUse->instanceOffsetResource->GetResource()->GetGPUVirtualAddress());
+			//
+			//commandList_->SetGraphicsRootDescriptorTable(1, Tile2DSrvHandleGPU_);
+			//commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
+			//commandList_->DrawIndexedInstanced(vertexNum, tileCount, 0, 0, 0);
+			//offsetDataCounter_++;
+			//simpleSpriteCounter++;
+		}
 
 		for (int i = 0; i < (int)group.size(); ++i) {
 			SpriteInstance* inst = group[i];
@@ -1179,25 +1180,6 @@ bool DrawEngine::SetModelTexture(Model* model) {
 
 int DrawEngine::SetModel(std::string Path) {
 
-	///// Resourceに同じものがあるがどうか捜索
-	//{
-	//	int i = 0;
-	//	for (auto* ptr : resourceManager_->modelGroupList_) {
-	//		if (Path == ptr->GetFullPath_()) {
-	//			return i;
-	//		}
-	//		i++;
-	//	}
-	//}
-	//
-	///// モデルの読み込み
-	//int ModelGroupHandle = resourceManager_->CreateModelRosource(Path);
-	//
-	///// 各モテルのテキスチャーを設定する
-	//for (int i = 0; i < resourceManager_->modelGroupList_[ModelGroupHandle]->GetModelNum(); i++) {
-	//	SetModelTexture(resourceManager_->modelGroupList_[ModelGroupHandle]->GetModel(i));
-	//}
-	//return ModelGroupHandle;
 	resourceManager_->TextuerCounterAdjust(descriptorIndex_);
 	int handle = resourceManager_->LoadModel(Path);
 	descriptorIndex_ = resourceManager_->GetTextureCounter();
@@ -1225,26 +1207,6 @@ int DrawEngine::GetMuitModelNum(int modelHandle) {
 
 
 int DrawEngine::LoadTexture(const std::string& filePath) {
-	//if (!resourceManager_->commonTextureFilePath_.empty()) {
-	//	for (int i = 0; i < resourceManager_->commonTextureFilePath_.size(); i++) {
-	//		if (resourceManager_->commonTextureFilePath_[i] == filePath) {
-	//			return i;
-	//		}
-	//	}
-	//}
-	//DirectX::ScratchImage mipImage = LoadTextrueLow(filePath);
-	//const DirectX::TexMetadata& metadata = mipImage.GetMetadata();
-	//Microsoft::WRL::ComPtr<ID3D12Resource> textrueResourceN;
-	//Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResourceN;
-	//textrueResourceN.Attach(CreateTextureResource(directXDriver_->GetDriver(), metadata));
-	//intermediateResourceN.Attach(UploadTextureData(textrueResourceN.Get(), mipImage, directXDriver_->GetDriver(), commandList_));
-	//resourceManager_->intermediateResource_->SaveResource_(intermediateResourceN);
-	//resourceManager_->textureResource_->SaveResource_(textrueResourceN);
-	//
-	//int handle = MakeTextureShaderResourceView(metadata, textrueResourceN.Get());
-	//
-	//resourceManager_->commonTextureFilePath_.push_back(filePath);
-	//return handle;
 
 	resourceManager_->TextuerCounterAdjust(descriptorIndex_);
 	int handle = resourceManager_->LoadCommonTexture(filePath);
@@ -1254,17 +1216,6 @@ int DrawEngine::LoadTexture(const std::string& filePath) {
 }
 
 int DrawEngine::LoadModelTexture(const std::string& filePath) {
-	//DirectX::ScratchImage mipImage = LoadTextrueLow(filePath);
-	//const DirectX::TexMetadata& metadata = mipImage.GetMetadata();
-	//Microsoft::WRL::ComPtr<ID3D12Resource> textrueResourceN;
-	//Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResourceN;
-	//textrueResourceN.Attach(CreateTextureResource(directXDriver_->GetDriver(), metadata));
-	//intermediateResourceN.Attach(UploadTextureData(textrueResourceN.Get(), mipImage, directXDriver_->GetDriver(), commandList_));
-	//resourceManager_->intermediateResource_->SaveResource_(intermediateResourceN);
-	//resourceManager_->textureResource_->SaveResource_(textrueResourceN);
-	//
-	//int handle = MakeModelShaderResourceView(metadata, textrueResourceN.Get());
-	//return handle;
 	resourceManager_->TextuerCounterAdjust(descriptorIndex_);
 	int handle = resourceManager_->LoadCommonTexture(filePath);
 	descriptorIndex_ = resourceManager_->GetTextureCounter();
@@ -1318,66 +1269,6 @@ void DrawEngine::SetLighting(DirectionalLight* directionalLight) {
 	lightingData->direction = Normalize(lightingData->direction);
 }
 
-//DirectX::ScratchImage DrawEngine::LoadTextrueLow(const std::string& filePath) {
-//	// テクスチャファイルを読んでプログラムで扱えるようにする
-//	DirectX::ScratchImage image{};
-//	std::wstring filePathW = ConvertString::SwitchStdStringWstring(filePath);
-//	HRESULT hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
-//	assert(SUCCEEDED(hr)); // 読み込めなかったらエラー
-//
-//	// ミップマップを生成する
-//	DirectX::ScratchImage mipImages{};
-//	hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), image.GetMetadata(),
-//		DirectX::TEX_FILTER_SRGB, 0, mipImages);
-//	assert(SUCCEEDED(hr)); // 生成できなかったらエラー
-//
-//	// ミップマップ付きのデータを返す
-//	return mipImages;
-//}
-
-//ID3D12Resource* DrawEngine::CreateTextureResource(ID3D12Device* device, const DirectX::TexMetadata& metadata, ResourceManager::TextureInfo* saveData) {
-//
-//	///  textureの元、時関があればこれをセーブして以降使う<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//	/// 1. metadataを基にResourceの設定
-//	D3D12_RESOURCE_DESC resourceDesc{};
-//	resourceDesc.Width = UINT(metadata.width); // Textureの幅
-//	resourceDesc.Height = UINT(metadata.height); // Textureの高さ
-//	resourceDesc.MipLevels = UINT16(metadata.mipLevels); // MipLevelの数
-//	resourceDesc.DepthOrArraySize = UINT16(metadata.arraySize); // 奥行きor配列Textureの配列数
-//	resourceDesc.Format = metadata.format; // TextureのFormat
-//	resourceDesc.SampleDesc.Count = 1; // サンプリングカウント。1固定。
-//	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION(metadata.dimension); // Textureの次元数。普段使ってるのは2次元
-//
-//	if (saveData != nullptr) {
-//		saveData->width = (int)resourceDesc.Width;
-//		saveData->height = (int)resourceDesc.Height;
-//	}
-//
-//
-//	/// 2.利用するHeapの設定
-//	D3D12_HEAP_PROPERTIES heapProperties{};
-//	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT; // VRAM上に作る
-//	//heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK; // WriteBackポリシーでCPUアクセス可能
-//	//heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_L0; //プロセッサの近くに配置
-//
-//	/// 3.Resourceを生成する
-//	ID3D12Resource* resource = nullptr;
-//	HRESULT hr = device->CreateCommittedResource(
-//		&heapProperties,					// Heapの設定
-//		D3D12_HEAP_FLAG_NONE,				// Heapの特殊な設定。特になし。
-//		&resourceDesc,						// Resourceの設定
-//		D3D12_RESOURCE_STATE_COPY_DEST,		// 初回のResourceState。Textureは基本読むだけ
-//		nullptr,							// Clear最適値。使わないのでnullptr
-//		IID_PPV_ARGS(&resource));			// 作成するResourceポインタへのポインタ
-//	assert(SUCCEEDED(hr));
-//
-//	char buffer[128];
-//	sprintf_s(buffer, "Create resource at %p\n", resource);
-//	OutputDebugStringA(buffer);
-//
-//	return resource;
-//}
-
 ID3D12Resource* DrawEngine::CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height) {
 
 	/// 1.生成するResourceの設定
@@ -1418,84 +1309,6 @@ ID3D12Resource* DrawEngine::CreateDepthStencilTextureResource(ID3D12Device* devi
 
 	return resource;
 }
-
-//[[nodiscard]]//<---c++属性,戻り値が無視されることを防ぐ
-//ID3D12Resource* DrawEngine::UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages, ID3D12Device* device, ID3D12GraphicsCommandList* commandList) {
-//
-//	// PrepareUploadを使って、DirectX12用のSubresource配列を作成する
-//	std::vector<D3D12_SUBRESOURCE_DATA> subresources;
-//	DirectX::PrepareUpload(device, mipImages.GetImages(), mipImages.GetImageCount(), mipImages.GetMetadata(), subresources);
-//	// Subresource配列を使って、コピー元のIntermediateResourceに必要のサイズを計算する
-//	uint64_t intermediateSize = GetRequiredIntermediateSize(texture, 0, UINT(subresources.size()));
-//	// 計算したサイズでIntermediateResourceを作成する
-//	ID3D12Resource* intermediateResource = CreateResource(device, intermediateSize);
-//	// UpdataSubresourcesを使って、IntermediateResourceにSubresource配列を書き込み,textureに転送し頭む積む
-//	UpdateSubresources(commandList, texture, intermediateResource, 0, 0, UINT(subresources.size()), subresources.data());
-//	// Tetureへの転送後は利用できるよう、D3D12_RESOURCE_STATE_COPY_DESTからD3D12_RESOURCE_STATE_GENERIC_READへResourceStateを変更する
-//	D3D12_RESOURCE_BARRIER barrier{};
-//	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-//	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-//	barrier.Transition.pResource = texture;
-//	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-//	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-//	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
-//	commandList->ResourceBarrier(1, &barrier);
-//	return intermediateResource;
-//}
-
-//int DrawEngine::MakeTextureShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResource) {
-//	//
-//	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-//	srvDesc.Format = metadata.format;
-//	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; // シェーダーでのコンポーネントマッピング
-//	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
-//	srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels); // 最初のMipLevelを使用
-//
-//	//
-//	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU_{};
-//	textureSrvHandleCPU_ = directXDriver_->GetCPUDescriptorHandle(directXDriver_->GetSrvDescriptorHeap(), directXDriver_->GetDesriptorSizeSRV(), descriptorIndex_);
-//	textureSrvHandleGPU_ = directXDriver_->GetGPUDescriptorHandle(directXDriver_->GetSrvDescriptorHeap(), directXDriver_->GetDesriptorSizeSRV(), descriptorIndex_);
-//
-//	//
-//	directXDriver_->GetDriver()->CreateShaderResourceView(
-//		textureResource,					// Resource
-//		&srvDesc,							// SRVの設定
-//		textureSrvHandleCPU_				// CPU用のハンドル
-//	);
-//
-//	int counter = descriptorIndex_;
-//	commonTextureSRVMap_.push_back(counter);
-//	descriptorIndex_++;
-//
-//	return (int)commonTextureSRVMap_.size() - 1;
-//}
-
-//int DrawEngine::MakeModelShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResource) {
-//	//
-//	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-//	srvDesc.Format = metadata.format;
-//	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; // シェーダーでのコンポーネントマッピング
-//	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
-//	srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels); // 最初のMipLevelを使用
-//
-//	//
-//	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU_{};
-//	textureSrvHandleCPU_ = directXDriver_->GetCPUDescriptorHandle(directXDriver_->GetSrvDescriptorHeap(), directXDriver_->GetDesriptorSizeSRV(), descriptorIndex_);
-//	textureSrvHandleGPU_ = directXDriver_->GetGPUDescriptorHandle(directXDriver_->GetSrvDescriptorHeap(), directXDriver_->GetDesriptorSizeSRV(), descriptorIndex_);
-//
-//	//
-//	directXDriver_->GetDriver()->CreateShaderResourceView(
-//		textureResource,					// Resource
-//		&srvDesc,							// SRVの設定
-//		textureSrvHandleCPU_				// CPU用のハンドル
-//	);
-//
-//	int counter = descriptorIndex_;
-//	modelTextureSRVMap_.push_back(counter);
-//	descriptorIndex_++;
-//
-//	return (int)modelTextureSRVMap_.size() - 1;
-//}
 
 D3D12_GPU_DESCRIPTOR_HANDLE DrawEngine::CreateTileWVPBuffer(ID3D12Resource* instancingResource) {
 	//

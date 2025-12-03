@@ -419,7 +419,7 @@ int ResourceManager::CreateSphereResource(int sudivision) {
 
 }
 
-int ResourceManager::CreateModelRosource(std::string Path) {
+int ResourceManager::CreateModelResource(std::string Path) {
 
 	ModelGroup* modelGroup = new ModelGroup;
 	modelGroup->SetModelObj(Path);
@@ -465,7 +465,7 @@ int ResourceManager::LoadModel(std::string Path) {
 	}
 
 	/// モデルの読み込み
-	int ModelGroupHandle = CreateModelRosource(Path);
+	int ModelGroupHandle = CreateModelResource(Path);
 
 	/// 各モテルのテキスチャーを設定する
 	for (int i = 0; i < modelGroupList_[ModelGroupHandle]->GetModelNum(); i++) {
