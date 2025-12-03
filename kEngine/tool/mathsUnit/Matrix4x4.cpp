@@ -466,6 +466,8 @@ Matrix4x4 Transpose(Matrix4x4 tranpose) {
 	return result;
 }
 
+
+
 Matrix4x4 MakeScaleMatrix4x4(const Vector3 scole) {
 	return Matrix4x4{ scole.x,    0.0f,    0.0f, 0.0f,
 						 0.0f, scole.y,    0.0f, 0.0f,
@@ -492,8 +494,6 @@ Matrix4x4 MakeRotateMatrix4x4(const Vector3 rotate) {
 	return Matrix4x4{ rX * (rY * rZ) };
 }
 
-
-
 Matrix4x4 MakeTranslateMatrix(const Vector3 translate) {
 	return Matrix4x4{ 1.0f,		  0.0f,		   0.0f, 0.0f,
 							 0.0f,		  1.0f,		   0.0f, 0.0f,
@@ -501,17 +501,37 @@ Matrix4x4 MakeTranslateMatrix(const Vector3 translate) {
 					  translate.x, translate.y,	translate.z, 1.0f };
 }
 
+
+
+Vector3 ExtractScale(const Matrix4x4 matrix4x4) {
+	return Vector3 { matrix4x4.m[0][0], matrix4x4.m[1][1], matrix4x4.m[2][2] };
+}
+
+Vector3 ExtractRotate(const Matrix4x4 matrix4x4) {
+	Vector3 rot;
+	rot.y = (float)asin(-matrix4x4.m[0][2]);                  // Y (pitch)
+	rot.x = (float)atan2(matrix4x4.m[1][2], matrix4x4.m[2][2]);         // X (yaw)
+	rot.z = (float)atan2(matrix4x4.m[0][1], matrix4x4.m[0][0]);         // Z (roll)
+	return rot;
+
+}
+
+Vector3 ExtractTranslate(const Matrix4x4 matrix4x4) {
+	return Vector3 { matrix4x4.m[3][0], matrix4x4.m[3][1], matrix4x4.m[3][2] };
+}
+
+
 #pragma endregion
 
 #pragma region カメラ改変陣列
 Matrix4x4 MakeAffineMatrix(Vector3 scole, Vector3 rotate, Vector3 translate) {
-	Matrix4x4 r1 = MakeScaleMatrix4x4(scole);
+	Matrix4x4 s = MakeScaleMatrix4x4(scole);
 
-	Matrix4x4 r2 = MakeRotateMatrix4x4(rotate);
+	Matrix4x4 r = MakeRotateMatrix4x4(rotate);
 
-	Matrix4x4 r3 = MakeTranslateMatrix(translate);
+	Matrix4x4 t = MakeTranslateMatrix(translate);
 
-	return Matrix4x4{ r2 * r1 * r3 };
+	return Matrix4x4{ r * s * t };
 }
 
 Matrix4x4 MatrixMix(Matrix4x4* matrix1, Matrix4x4* matrix2, Matrix4x4* matrix3, Matrix4x4* matrix4) {
@@ -552,7 +572,7 @@ Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, f
 Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip) {
 	return{ 2.0f / (right - left),0.0f,0.0f,0.0f,
 			0.0f,2.0f / (top - bottom),0.0f,0.0f,
-			0.0f,0.0f,1.0f / (farClip - nearClip),0.0f,
+			0.0f,0.0f,1.0f / (nearClip - farClip),0.0f,
 			(left + right) / (left - right),(top + bottom) / (bottom - top),nearClip / (nearClip - farClip),1.0f };
 }
 

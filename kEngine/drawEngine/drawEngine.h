@@ -1,18 +1,16 @@
 #pragma once
-#include "DircetXCore.h"
+#include "DirectXCore.h"
 #include "externals/DirectXTex/DirectXTex.h"
 #include "externals/DirectXTex/d3dx12.h"
 #include <vector>
 #include "Config.h"
-//#include "shader_compile.h"
 #include "PSO.h"
 #include "ResourceManager.h"
-#include "Vector4.h"
 #include "VertexData.h"
 #include "Material.h"
 #include "DirectionalLight.h"
 
-#include "Matrix4x4.h"
+#include "MathsIncluder.h"
 #include "TransformationMatrix.h"
 #include "ConvertString.h"
 #include "LightModelType.h"
@@ -20,7 +18,8 @@
 #include "VertexIndex.h"
 #include "Camera.h"
 
-
+#include "DrawData/ObjectData.h"
+#include "DrawData/SpriteData.h"
 #include <format>
 
 class DrawEngine
@@ -62,10 +61,22 @@ public:
 	void Collect3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = -1);
 	void Draw3DTile();
 
+
+
+	/// 描くものテータを収集する関数
+	void Collect2D(SpriteData* spriteData);
+	void Collect3D(ObjectData* object);
+
+	/// 全部描く関数
+	void Draw2D();
+	void Draw3D();
+	void DrawCall();
+
 	/// Camera
 	void SetCamera(Camera* camera);
 
 	/// リソースローディング
+	int GetModelTextureHandle(int modelHandle, int part);
 
 	int readModelTextureHandle(int Handle);
 	int readCommenTextureHandle(int Handle);
@@ -80,9 +91,9 @@ public:
 private:
 	
 	PSO* pso_ = new PSO;
-	ResourceManager* resourceManager_ = nullptr;
-	DirectXCore* directXDriver_ = nullptr;
-	ID3D12GraphicsCommandList* commandList_ = nullptr;
+	ResourceManager* resourceManager_{};
+	DirectXCore* directXDriver_{};					/*借り*/
+	ID3D12GraphicsCommandList* commandList_{};		/*借り*/
 
 	int kClientWidth_ = 0;
 	int kClientHeight_ = 0;
@@ -93,12 +104,10 @@ private:
 private:
 	enum class psoType {
 		NONE = -1,
-		defaultPSO = 0,
-		Normal_Lambert = 0,
-		Normal_HalfLambert,
-		Tile,
-		Particle_Lambert,
-		Particle_HalfLambert,
+		defaultPSO = 1,
+		Sprite2D = 0,
+		Lambert,
+		HalfLambert
 	};
 
 private:
@@ -109,7 +118,7 @@ private:
 
 private:
 	std::vector<ID3D12PipelineState*> psoList_;
-	ID3D12RootSignature* rootSignature_ = nullptr;
+	ID3D12RootSignature* rootSignature_ = nullptr; 			// Listからもセーブしたから解放しなくていい	
 	D3D12_VIEWPORT viewport{};
 	D3D12_RECT scissorRect{};
 
@@ -117,7 +126,7 @@ private:
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE Tile2DSrvHandleGPU_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE Tile3DSrvHandleGPU_{};
-	uint32_t textrueCounter = 1;
+	uint32_t descriptorIndex_ = 1;						// 0はImgui用に予約
 	std::vector<int> commonTextureSRVMap_;
 	std::vector<int> modelTextureSRVMap_;
 	int defaultTextureHandle_ = 0;						// white5x5
@@ -126,7 +135,8 @@ private:
 
 
 	///Lighting関連
-	DirectionalLight* directionalLightData = {};		// 外部から受ける
+	DirectionalLight* directionalLightData{};		// 外部から受ける
+	DirectionalLight* lightingData = nullptr;
 
 	/// 交換用容器
 	BasicResource* tile2DWVPResource_ = new BasicResource;
@@ -142,13 +152,12 @@ private:
 
 	//Material関連
 	Material* materialData = nullptr;
-	DirectionalLight* lightingData = nullptr;
 
 private:
 
 	struct OffsetData {
 		BasicResource* instanceOffsetResource = new BasicResource;
-		UINT* instanceOffset;
+		UINT* instanceOffset{};
 		int state = 0;// 0:未使用 1:使用中
 	};
 
@@ -165,12 +174,12 @@ private:
 	void SetLighting(DirectionalLight* directionalLight);
 
 
-	void PSODecition(MaterialConfig& material, bool isParticle = false);
-	DirectX::ScratchImage LoadTextrueLow(const std::string& filePath);
-	ID3D12Resource* CreateTextureResource(ID3D12Device* device, const DirectX::TexMetadata& metadata, ResourceManager::TextureInfo* saveData = nullptr);
-	ID3D12Resource* UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages, ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
-	int MakeTextureShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResource);
-	int MakeModelShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResource);
+	void PSODecition(MaterialConfig& material);
+	//DirectX::ScratchImage LoadTextrueLow(const std::string& filePath);
+	//ID3D12Resource* CreateTextureResource(ID3D12Device* device, const DirectX::TexMetadata& metadata, ResourceManager::TextureInfo* saveData = nullptr);
+	//ID3D12Resource* UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages, ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
+	//int MakeTextureShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResource);
+	//int MakeModelShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResource);
 	D3D12_GPU_DESCRIPTOR_HANDLE CreateTileWVPBuffer(ID3D12Resource* insstancingResource);
 	ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);
 	void MakeDepthStencilView();

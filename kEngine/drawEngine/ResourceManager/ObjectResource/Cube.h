@@ -4,8 +4,9 @@
 #include "TransformationMatrix.h"
 #include "VertexResource.h"
 #include "Config.h"
+#include "Model.h"
 
-class Cube :public MeshBuffer
+class Cube :public Model
 {
 public:
 	ID3D12Resource* CreateVertexResource_(ID3D12Device* device)override;

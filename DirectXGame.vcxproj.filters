@@ -138,30 +138,6 @@
     <ClCompile Include="main.cpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="externals\imgui\imgui.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_demo.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_draw.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_impl_dx12.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_impl_win32.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_tables.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_widgets.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\DrawData\SpriteData.cpp">
-      <Filter>ソース ファイル\kEngine\DrawEngine\DrawData</Filter>
-    </ClCompile>
     <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\Cube.cpp">
       <Filter>ソース ファイル\kEngine\DrawEngine\ResourceManager\ObjectResource</Filter>
     </ClCompile>
@@ -171,7 +147,7 @@
     <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\ModelGroup.cpp">
       <Filter>ソース ファイル\kEngine\DrawEngine\ResourceManager\ObjectResource</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\Particle.cpp">
+    <ClCompile Include="kEngine\GameObject\Particle\Particle.cpp">
       <Filter>ソース ファイル\kEngine\DrawEngine\ResourceManager\ObjectResource</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\Sphere.cpp">
@@ -201,10 +177,10 @@
     <ClCompile Include="kEngine\core\driver\config.cpp">
       <Filter>ソース ファイル\kEngine\core\driver</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\driver\DircetXCore.cpp">
+    <ClCompile Include="kEngine\core\driver\DirectXCore.cpp">
       <Filter>ソース ファイル\kEngine\core\driver</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\driver\DircetXController.cpp">
+    <ClCompile Include="kEngine\core\driver\DirectXController.cpp">
       <Filter>ソース ファイル\kEngine\core\driver</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\core\Input\inputManager.cpp">
@@ -261,12 +237,6 @@
     <ClCompile Include="kEngine\tool\StageManager\SceneTester.cpp">
       <Filter>ソース ファイル\kEngine\tool\StageManager</Filter>
     </ClCompile>
-    <ClCompile Include="scenes\SceneTestForGE.cpp">
-      <Filter>ソース ファイル\kEngine\tool\StageManager</Filter>
-    </ClCompile>
-    <ClCompile Include="scenes\Scene1.cpp">
-      <Filter>ソース ファイル\kEngine\tool\StageManager</Filter>
-    </ClCompile>
     <ClCompile Include="kEngine\tool\TimeManager\TimeManager.cpp">
       <Filter>ソース ファイル\kEngine\tool</Filter>
     </ClCompile>
@@ -321,6 +291,72 @@
     <ClCompile Include="kEngine\core\driver\FrameRateLimiter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="scenes\SceneTest.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\GameObject\Player\Player.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\tool\MapChip\MapChipField.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_tables.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_widgets.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_impl_win32.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_impl_dx12.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_draw.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_demo.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\drawEngine\DrawData\ObjectData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\GameObject\Object\Sprite.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\drawEngine\DrawData\SpriteData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\SimpleSpriteMesh.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\drawEngine\ResourceManager\TextureManager\TextureManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\drawEngine\DrawData\CornerData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="scenes\CG4_HK_1\Effect1.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="scenes\SceneTest2.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="scenes\CG4_HK_1\Effect2.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="scenes\CG4_HK_1\menu.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\GameObject\Particle\P_Fire\P_Fire.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceLoader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kEngine\tool\mathsUnit\Vector2.h">
@@ -365,9 +401,6 @@
     <ClInclude Include="externals\imgui\imstb_truetype.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\DrawData\SpriteData.h">
-      <Filter>ヘッダー ファイル\kEngine\DrawEngine\DrawData</Filter>
-    </ClInclude>
     <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\Cube.h">
       <Filter>ヘッダー ファイル\kEngine\DrawEngine\ResourceManager\ObjectResource</Filter>
     </ClInclude>
@@ -377,7 +410,7 @@
     <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\ModelGroup.h">
       <Filter>ヘッダー ファイル\kEngine\DrawEngine\ResourceManager\ObjectResource</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\Particle.h">
+    <ClInclude Include="kEngine\GameObject\Particle\Particle.h">
       <Filter>ヘッダー ファイル\kEngine\DrawEngine\ResourceManager\ObjectResource</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\Sphere.h">
@@ -410,10 +443,10 @@
     <ClInclude Include="kEngine\core\Input\inputManager.h">
       <Filter>ヘッダー ファイル\kEngine\core\Input</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\driver\DircetXCore.h">
+    <ClInclude Include="kEngine\core\driver\DirectXCore.h">
       <Filter>ヘッダー ファイル\kEngine\core\driver</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\driver\DircetXController.h">
+    <ClInclude Include="kEngine\core\driver\DirectXController.h">
       <Filter>ヘッダー ファイル\kEngine\core\driver</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\core\driver\config.h">
@@ -442,12 +475,6 @@
     </ClInclude>
     <ClInclude Include="kEngine\tool\Camera\DebugCamera.h">
       <Filter>ヘッダー ファイル\kEngine\tool</Filter>
-    </ClInclude>
-    <ClInclude Include="scenes\Scene1.h">
-      <Filter>ヘッダー ファイル\kEngine\tool\StageManager</Filter>
-    </ClInclude>
-    <ClInclude Include="scenes\SceneTestForGE.h">
-      <Filter>ヘッダー ファイル\kEngine\tool\StageManager</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\tool\StageManager\SceneTester.h">
       <Filter>ヘッダー ファイル\kEngine\tool\StageManager</Filter>
@@ -510,6 +537,51 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\core\driver\FrameRateLimiter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="scenes\SceneTest.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\GameObject\Player\Player.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\tool\MapChip\MapChipField.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\drawEngine\DrawData\ObjectData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\GameObject\Object\Sprite.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\drawEngine\DrawData\SpriteData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\SimpleSpriteMesh.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\drawEngine\ResourceManager\TextureManager\TextureManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\drawEngine\DrawData\CornerData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="scenes\CG4_HK_1\Effect1.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="scenes\SceneTest2.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="scenes\CG4_HK_1\Effect2.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="scenes\CG4_HK_1\menu.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\GameObject\Particle\P_Fire\P_Fire.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceLoader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

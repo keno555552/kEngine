@@ -12,7 +12,7 @@
 #include <dxcapi.h>
 #pragma comment(lib,"dxcompiler.lib")
 
-#include "DircetXCore.h"
+#include "DirectXCore.h"
 #include "config.h"
 #include <vector>
 
@@ -28,13 +28,9 @@ public:
 
 	ID3D12RootSignature* getRootSignature(int handle) { return rootSignatureList_[handle]; }
 
-	ID3D12RootSignature* createRootSignature(bool isParticle);
+	ID3D12RootSignature* createRootSignature();
 
 	ID3D12PipelineState* createPSO(LightModelType lightMadelType);
-
-	ID3D12PipelineState* createPSO_Tile();
-
-	ID3D12PipelineState* createPSO_3DParticle(LightModelType lightModelType);
 
 private:
 	//D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
@@ -58,8 +54,6 @@ private:
 	void SetBlendState();
 	void SetRasterizerState();
 	void ShaderCompile(LightModelType lightModelType);
-	void ShaderCompile_Particle2D();
-	void ShaderCompile_Particle3D(LightModelType lightModelType);
 	void SetDepthStencilState();
 	void SetGraphicsPipelineState();
 };

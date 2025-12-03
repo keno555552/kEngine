@@ -4,11 +4,11 @@
 
 struct ModelInstance
 {
-	TransformationMatrix* transformData;
+	TransformationMatrix transformData;
 	int materialConfigIndex;
 	int resourceHandle;
 	int modelHandle; /// modelHandleのハンドル
-	bool useDefaultModel;
+	int modelGroupHandle; /// modelHandleのハンドル
 	int vertexNum;
 	int drawState;
 

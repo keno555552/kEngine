@@ -1,4 +1,5 @@
 #include "Triangle.h"
+#include <d3d12.h>
 
 ID3D12Resource* Triangle::CreateVertexResource_(ID3D12Device* device) {
 	vertexResource_->CreateResourceClass_(device, sizeof(VertexData) * 6);
@@ -49,6 +50,8 @@ ID3D12Resource* Triangle::CreateVertexResource_(ID3D12Device* device) {
 	vertexData[2].normal = normal;
 
 	vertexResource_->GetResource()->Unmap(0, nullptr);
+
+	SetVertexNum(6);
 
 	return vertexResource_->GetResource().Get();
 }

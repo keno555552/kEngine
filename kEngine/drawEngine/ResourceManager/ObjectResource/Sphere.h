@@ -3,14 +3,14 @@
 #include "Transform.h"
 #include "TransformationMatrix.h"
 #include "VertexResource.h"
+#include "Model.h"
 #include "Config.h"
 
-class Sphere :public MeshBuffer
+class Sphere :public Model
 {
 public:
 	ID3D12Resource* CreateVertexResource_(ID3D12Device* device)override;
 	ID3D12Resource* CreateIndexResource_(ID3D12Device* device)override;
-	ID3D12Resource* SetWVPResource_(ID3D12Device* device, TransformationMatrix* wvpData);
 	int GetVertexNum() { return VertexNum_; }
 
 private:

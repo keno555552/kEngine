@@ -2,13 +2,11 @@
 
 enum class SceneNum {
 	S_END = -10,
-	S_TESTER = -1,
-	S_NONE = 0,
-	S_TITLE = 1,
+	S_TESTER = -2,
+	S_NONE = -1,
 	S_SELECT,
-	S_STAGE,
-	S_WIN,
-	S_GAMEOVER,
+	S_EFFECT1,
+	S_EFFECT2,
 };
 
 enum class ScenePhase {

@@ -1,26 +1,17 @@
 #include "DebugCamera.h"
 
-DebugCamera::DebugCamera(kEngine* system, float windowWidth, float windowHeight) {
+DebugCamera::DebugCamera(kEngine* system) {
 	system_ = system;
-	camera_ = new Camera(windowWidth, windowHeight);
 }
 
 DebugCamera::~DebugCamera() {
-	delete camera_;
 }
 
 void DebugCamera::Update() {
+	Camera::Update();
 	MouseControlUpdate();
 }
 
-TransformationMatrix
-DebugCamera::transformationMatrixTransform(Transform objTransform) {
-	return { camera_->transformationMatrixTransform(objTransform) };
-}
-
-void DebugCamera::SetCamera(Transform cameraTransform) {
-	camera_->SetCamera(cameraTransform);
-}
 
 void DebugCamera::MouseControlUpdate() {
 	float scale = 0.001f;
@@ -33,13 +24,13 @@ void DebugCamera::MouseControlUpdate() {
 	if (system_->GetIsPush(DIK_D) && isD_) cameraTransform.translate.x += 0.01f;
 	if (system_->GetIsPush(DIK_W) && isW_) cameraTransform.translate.y += 0.01f;
 	if (system_->GetIsPush(DIK_S) && isS_) cameraTransform.translate.y -= 0.01f;
-	if (system_->GetIsPush(DIK_Z) && isZ_) cameraTransform.rotate.y += 0.01f; 
-	if (system_->GetIsPush(DIK_C) && isC_) cameraTransform.rotate.y -= 0.01f; 
+	if (system_->GetIsPush(DIK_Z) && isZ_) cameraTransform.rotate.y += 0.01f;
+	if (system_->GetIsPush(DIK_C) && isC_) cameraTransform.rotate.y -= 0.01f;
 	cameraTransform.translate.z += system_->GetMouseScroll();
 
 	///マウス操作
 	//中鍵平行移動
-	if (system_->GetMouseIsPush(2) && isMouseM_){
+	if (system_->GetMouseIsPush(2) && isMouseM_) {
 		cameraTransform.translate.x += (float)system_->GetMousePosXIns() * -0.005f;
 		cameraTransform.translate.y += (float)system_->GetMousePosYIns() * 0.005f;
 	}
@@ -52,7 +43,7 @@ void DebugCamera::MouseControlUpdate() {
 	}
 
 	/// GamePad操作
-	if(config::GetKeyboardState() && isGamePad_){
+	if (config::GetKeyboardState() && isGamePad_) {
 		if (system_->GetGamepadLStick01X() != 0)				cameraTransform.translate.x += system_->GetGamepadLStick01X() / 50.0f;
 		if (system_->GetGamepadLStick01Y() != 0)				cameraTransform.translate.z += system_->GetGamepadLStick01Y() / 50.0f;
 		if (system_->GetGamepadIsPush(VK_PAD_LSHOULDER) != 0)	cameraTransform.translate.y += 0.01f;
@@ -71,16 +62,5 @@ void DebugCamera::MouseControlUpdate() {
 
 	Move(cameraTransform.translate);
 	Rotate(cameraTransform.rotate);
-
-	camera_->Update();
-}
-
-///<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<以降フレームの更新方法が変わったら、ここも変えよう
-void DebugCamera::Move(Vector3 speed) {
-	camera_->Move(speed);
-}
-
-void DebugCamera::Rotate(Vector3 Theta) {
-	camera_->Rotate(Theta);
 }
 

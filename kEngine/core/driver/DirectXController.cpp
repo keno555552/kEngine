@@ -1,25 +1,25 @@
-#include "DircetXController.h"
+#include "DirectXController.h"
 #include <pplwin.h>
 
-DircetXController::DircetXController() {
+DirectXController::DirectXController() {
 	static FixFPS fixFPS;
 	fixFPS.Initialize();
 	
 	timeBeginPeriod(1);
 }
 
-DircetXController::~DircetXController() {
+DirectXController::~DirectXController() {
 	Finalize();
 	timeEndPeriod(1);
 }
 
-void DircetXController::StartFrame() {
-	//static FrameRateLimiter limiter(60.0);
-	//limiter.Wait();
+void DirectXController::StartFrame() {
 
+#ifdef USE_IMGUI
 	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
+#endif
 
 	// これから書き込むバックバッファのインデックスを取得
 	UINT backBufferIndex = SwapChain->GetCurrentBackBufferIndex();
@@ -44,8 +44,8 @@ void DircetXController::StartFrame() {
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);
 	// 指定した色で画面全体をクリアする
-	//float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f }; // 青っぽい色。RGBAの順
-	float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f }; // 黒色。RGBAの順
+	float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f }; // 青っぽい色。RGBAの順
+	//float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f }; // 黒色。RGBAの順
 	commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 	commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
 
@@ -54,12 +54,14 @@ void DircetXController::StartFrame() {
 	commandList->SetDescriptorHeaps(1, descriptorHeaps);
 }
 
-void DircetXController::EndFrame() {
+void DirectXController::EndFrame() {
 
 #ifdef _DEBUG
+#ifdef USE_IMGUI
 	// 実際のcommandListのImGuiの描画コマンドを積む
 	ImGui::Render();
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
+#endif
 #endif
 
 	UINT backBufferIndex = SwapChain->GetCurrentBackBufferIndex();
@@ -87,8 +89,8 @@ void DircetXController::EndFrame() {
 	// GPUとOSに画面の交換を行うよう通知する
 	SwapChain->Present(1, 0);
 
-	static FixFPS fixFPS;
-	fixFPS.Update();
+	//static FixFPS fixFPS;
+	//fixFPS.Update();
 
 
 	// Fenceの値を更新
@@ -108,10 +110,8 @@ void DircetXController::EndFrame() {
 
 	// 次のフレーム用のコマンドリストを準備
 	hr = commandAllocator->Reset(); // 重置命令分配器，為下一幀準備
-	assert(SUCCEEDED(hr)); // 確保重置成功
-	hr = commandList->Reset(commandAllocator, nullptr); // 重置命令列表，準備記錄新的渲染命令
-	assert(SUCCEEDED(hr)); // 確保重置成功
+	assert(SUCCEEDED(hr)); // チェック
+	hr = commandList->Reset(commandAllocator, nullptr); // コマンドリストをリセット
+	assert(SUCCEEDED(hr)); // チェック
 
-	//static FrameRateLimiter limiter(60.0);
-	//limiter.Wait();
 }

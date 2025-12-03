@@ -11,7 +11,6 @@ public:
 	void SetSize(Vector2 LTpos, Vector2 LBpos, Vector2 RTpos, Vector2 RBpos, float TsizeX, float TsizeY,Vector2 TCLTPos, Vector2 TCRBPos);
 	ID3D12Resource* CreateVertexResource_(ID3D12Device* device)override;
 	ID3D12Resource* CreateIndexResource_(ID3D12Device* device)override;
-	ID3D12Resource* SetWVPResource_(ID3D12Device* device, Vector3 pos);
 
 	bool CheckSize(Vector2 LTpos, Vector2 LBpos, Vector2 RTpos, Vector2 RBpos, float TsizeX, float TsizeY, Vector2 TCLTPos, Vector2 TCRBPos);
 	void SetKeep(bool keep) { keep_ = keep; }
@@ -25,7 +24,6 @@ private:
 		TOP_RIGHT,
 		CENTER
 	};
-	void Set2DWVP(Vector3* wvpData);
 
 private:
 	Vector2	coner[4] = { {  0,	 0 },

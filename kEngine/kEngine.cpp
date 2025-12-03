@@ -3,19 +3,11 @@
 #pragma region システム管理
 
 kEngine::kEngine() {
-	dxComm = new DircetXController;
+	dxComm = new DirectXController;
 	drawEngine = new DrawEngine;
 	inputManager = new InputManager;
 	soundManager = new SoundManager;
 	timeManager = new TimeManager;
-
-	///Lighting
-	DirectionalLight directionalLight{
-		.color{1.0f,1.0f,1.0f,1.0f},
-		.direction{-0.5f,-0.5f,0.4f},
-		.intensity{1.0f}
-	};
-	SetDirectionalLight(&directionalLight);
 }
 
 kEngine::~kEngine() {
@@ -93,6 +85,18 @@ void kEngine::DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfi
 
 void kEngine::Draw3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material) {
 	drawEngine->Collect3DTile(wvpData, material);
+}
+
+void kEngine::Draw2D(SpriteData* spriteData) {
+	drawEngine->Collect2D(spriteData);
+}
+
+void kEngine::Draw3D(ObjectData* object) {
+	drawEngine->Collect3D(object);
+}
+
+int kEngine::GetModelTextureHandle(int modelHandle, int part) {
+	return drawEngine->GetModelTextureHandle(modelHandle, part);
 }
 
 int kEngine::GetMuitModelNum(int modelHandle) {

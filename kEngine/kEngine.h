@@ -1,5 +1,5 @@
 #pragma once
-#include "DircetXController.h"
+#include "DirectXController.h"
 #include "inputManager.h"
 #include "soundManager.h"
 #include "drawEngine.h"
@@ -85,8 +85,8 @@ public:
 	/// <param name="material"></param>
 	/// <param name="modelHandle"></param>
 	void DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle);
-
 	void DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material);
+
 
 	/// <summary>
 	/// 
@@ -94,6 +94,14 @@ public:
 	/// <param name="wvpData"></param>
 	/// <param name="material"></param>
 	void Draw3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material);
+
+
+
+
+	void Draw2D(SpriteData* spriteData);
+	void Draw3D(ObjectData* objectData);
+
+	int GetModelTextureHandle(int modelHandle,int part);
 
 	int GetMuitModelNum(int modelHandle);
 	int SetModelObj(std::string path);
@@ -194,7 +202,7 @@ public:
 #pragma endregion
 
 private:
-	DircetXController* dxComm = nullptr;
+	DirectXController* dxComm = nullptr;
 	DrawEngine* drawEngine = nullptr;
 	InputManager* inputManager = nullptr;
 	SoundManager* soundManager = nullptr;

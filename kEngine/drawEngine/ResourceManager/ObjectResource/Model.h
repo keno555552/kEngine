@@ -37,6 +37,7 @@ public:
 	UINT GetTextureHandle() { return textureHandle_; }
 	UINT GetVertexNum() { return VertexNum_; }
 	void SetModelObj(std::string Path);
+	void SetVertexNum(int num);
 
 private:
 	ModelData modelData_ = {};

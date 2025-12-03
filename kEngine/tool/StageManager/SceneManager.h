@@ -1,10 +1,12 @@
 #pragma once
 #include "MaterialConfig.h"
 #include "Scene.h"
-#include "Scene1.h"
-#include "SceneTestForGE.h"
 #include "SceneTester.h"
-
+#include "SceneTest.h"
+#include "SceneTest2.h"
+#include "CG4_HK_1/Menu.h"
+#include "CG4_HK_1/Effect1.h"
+#include "CG4_HK_1/Effect2.h"
 
 class SceneManager {
 public:
@@ -20,18 +22,17 @@ public:
 	SceneNum sceneUsingHandle_ = SceneNum::S_NONE;
 	void SceneChanger();
 
-	void winDataUpdate();
+	void StageCheckBoxUpdate();
+
 
 private:
 	Scene* sceneUsing_ = nullptr;
 	Scene* sceneOld_ = nullptr;
-	MaterialConfig materialConfig_;
-	int nullptrSceneHandle_ = 0;
 
 private:
 	kEngine* system_ = nullptr; // 借り
 	
-	bool stageIsClear_[10]{};
+	bool stage[10]{};
 
 	bool isFirst_ = true;
 
@@ -41,9 +42,9 @@ private:
 
 	bool isEnd_ = false;
 
+private:
+	/// ============= ステージマネージメント ============///
+	void ClearStage();
 
-		// Vector2 LT = {0,0};
-		// Vector2 LB = {0,64 };
-		// Vector2 RT = {64,0};
-		// Vector2 RB = {64,64};
+	void ImguiPart();
 };

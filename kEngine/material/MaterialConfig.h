@@ -6,7 +6,7 @@
 
 struct MaterialConfig
 {
-	bool useOriginalTexture = true;
+	bool useModelTexture = true;
 	int textureHandle = 0;
 
 	Vector3 uvTranslate = { 0,0,0 };
@@ -23,6 +23,8 @@ struct MaterialConfig
 
 	bool operator==(const MaterialConfig target);
 	bool operator!=(const MaterialConfig target);
+
+	void MakeUVMatrix();
 
 };
 

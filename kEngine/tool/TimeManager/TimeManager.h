@@ -120,7 +120,7 @@ public:
 	/// <param name="t">clockの最大時間</param>
 	/// <param name="r">変動率[1.0f以上]</param>
 	/// <returns>aからbまで今どれくらい進んでる値</returns>
-	float easyOut(int a, int b, float r);
+	float easyOut(float a, float b, float r);
 
 	/// <summary>
 	/// Timerに連れてAからBまで変動、段々早くなって、終わるの際段々遅くなる
@@ -179,7 +179,7 @@ private:
 /// <param name="t">clockの最大時間</param>
 /// <param name="r">変動率[1.0f以上]</param>
 /// <returns>aからbまで今どれくらい進んでる値</returns>
-float linearity(int a, int b, int c, int t);
+float linearity(float a, float b, float t);
 
 /// <summary>
 /// Timerに連れてAからBまで変動、段々遅くなーる
@@ -190,7 +190,7 @@ float linearity(int a, int b, int c, int t);
 /// <param name="t">clockの最大時間</param>
 /// <param name="r">変動率[1.0f以上]</param>
 /// <returns>aからbまで今どれくらい進んでる値</returns>
-float easyIn(int a, int b, int c, int t, float r);
+float easyIn(float a, float b, float t, float r);
 
 /// <summary>
 /// Timerに連れてAからBまで変動、段々早くなーる
@@ -201,7 +201,7 @@ float easyIn(int a, int b, int c, int t, float r);
 /// <param name="t">clockの最大時間</param>
 /// <param name="r">変動率[1.0f以上]</param>
 /// <returns>aからbまで今どれくらい進んでる値</returns>
-float easyOut(int a, int b, int c, int t, float r);
+float easyOut(float a, float b, float t, float r);
 
 /// <summary>
 /// Timerに連れてAからBまで変動、段々早くなって、終わるの際段々遅くなる

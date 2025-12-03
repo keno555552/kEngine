@@ -7,9 +7,8 @@ Transform CameraDefaultTransform() {
 	};
 }
 
-Camera::Camera(float windowWidth, float windowHeight) {
-
-	projectionMatrix_ = MakePerspectiveFovMatrix(0.45f, float(windowWidth) / float(windowHeight), 0.1f, 100.0f);
+Camera::Camera() {
+	projectionMatrix_ = MakePerspectiveFovMatrix(0.45f, float(config::GetClientWidth()) / float(config::GetClientHeight()), 0.1f, 100.0f);
 	cameraTransform_ = CameraDefaultTransform();
 	Update();
 	matRot_ = MakeRotateMatrix4x4(cameraTransform_.rotate);
@@ -28,6 +27,10 @@ TransformationMatrix Camera::transformationMatrixTransform(Transform objTransfor
 	Matrix4x4 worldViewProjectionMatrix = objWorldMatrix * (viewMatrix_ * projectionMatrix_);
 
 	return { worldViewProjectionMatrix, objWorldMatrix };
+}
+
+TransformationMatrix Camera::transformationMatrixTransform(Matrix4x4 worldMatrix) {
+	return { worldMatrix * (viewMatrix_ * projectionMatrix_), worldMatrix };
 }
 
 void Camera::SetCamera(Transform cameraTransform) {

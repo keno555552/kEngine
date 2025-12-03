@@ -3,6 +3,7 @@
 
 enum class LightModelType {
     NONE = -1,
+    Sprite2D,
     Lambert,
     HalfLambert,
     NumLightModels

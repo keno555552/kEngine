@@ -1,5 +1,5 @@
 #pragma once
-#include "DircetXCore.h"
+#include "DirectXCore.h"
 #include "tool/TimeManager/TimeManager.h"
 #include "config.h"
 #include <cassert>

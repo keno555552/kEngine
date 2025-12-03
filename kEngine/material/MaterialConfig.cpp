@@ -1,7 +1,7 @@
 #include "MaterialConfig.h"
 
 bool MaterialConfig::operator==(const MaterialConfig target) {
-	if (useOriginalTexture != target.useOriginalTexture)return false;
+	if (useModelTexture != target.useModelTexture)return false;
 	if (textureHandle != target.textureHandle)return false;
 	if (uvTranslate != target.uvTranslate)return false;
 	if (uvScale != target.uvScale)return false;
@@ -9,7 +9,6 @@ bool MaterialConfig::operator==(const MaterialConfig target) {
 	if (textureColor != target.textureColor)return false;
 	if (lightModelType != target.lightModelType)return false;
 	if (enableLighting != target.enableLighting)return false;
-	//if (materialResourceHandle != target.materialResourceHandle)return false;
 	return true;
 }
 
@@ -17,8 +16,12 @@ bool MaterialConfig::operator!=(const MaterialConfig target) {
 	return !(*this == target);
 }
 
+void MaterialConfig::MakeUVMatrix() {
+	uvTransformMatrix = MakeAffineMatrix(uvScale, uvRotate, uvTranslate);
+}
+
 void InitMaterialConfig(MaterialConfig* materialConfig) {
-	materialConfig->useOriginalTexture = true;
+	materialConfig->useModelTexture = true;
 	materialConfig->textureHandle = 0;
 	materialConfig->uvTranslate = { 0,0,0 };
 	materialConfig->uvScale = { 1,1,1 };

@@ -6,7 +6,7 @@ SceneTester::SceneTester(kEngine* system) {
 	float kWindowWidth = (float)config::GetClientWidth();
 	float kWindowHeight = (float)config::GetClientHeight();
 	system_->SetDirectionalLight(&directionalLight);
-	debugCamera_ = new DebugCamera(system_, kWindowWidth, kWindowHeight);
+	debugCamera_ = new DebugCamera(system_);
 
 
 	bunnyModelHandle_			= system_->SetModelObj("resources/TemplateResource/object/bunny/bunny.obj");
@@ -63,25 +63,25 @@ SceneTester::SceneTester(kEngine* system) {
 
 	//for (int i = 0; i < 1; i++) 
 	////for (int i = 0; i < 10; i++) 
-	for (int i = 0; i < 5; i++) 
-	{
-		InstanceObject* object = new InstanceObject;
-		MaterialConfig materialConfig;
-		InitMaterialConfig(&materialConfig);
-		object->materialConfig.push_back(materialConfig);
-		object->objectType = TILE;
-		//object->objectType = SPRITE;
-		object->transform.translate = { i * 100.0f, i * 100.0f, 0.0f };
-		object->transformationMatrix = debugCamera_->transformationMatrixTransform(object->transform);
-		objectGroup.push_back(object);
-	}
+	//for (int i = 0; i < 5; i++) 
 	//{
-	//	Object* object = new Object;
+	//	InstanceObject* object = new InstanceObject;
 	//	MaterialConfig materialConfig;
 	//	InitMaterialConfig(&materialConfig);
 	//	object->materialConfig.push_back(materialConfig);
-	//	//object->objectType = TILE;
-	//	object->objectType = SPRITE;
+	//	object->objectType = TILE;
+	//	//object->objectType = SPRITE;
+	//	object->transform.translate = { i * 100.0f, i * 100.0f, 0.0f };
+	//	object->transformationMatrix = debugCamera_->transformationMatrixTransform(object->transform);
+	//	objectGroup.push_back(object);
+	//}
+	//{
+	//	InstanceObject* object = new InstanceObject;
+	//	MaterialConfig materialConfig;
+	//	InitMaterialConfig(&materialConfig);
+	//	object->materialConfig.push_back(materialConfig);
+	//	object->objectType = TILE;
+	//	object->modelHandle = ModelType::CHARATER;
 	//	object->transform.translate = { 0,0,0 };
 	//	object->transformationMatrix = debugCamera_->transformationMatrixTransform(object->transform);
 	//	objectGroup.push_back(object);
@@ -91,7 +91,7 @@ SceneTester::SceneTester(kEngine* system) {
 	//for (int i = 0; i < 10; i++) 
 	//for (int i = 0; i < 200; i++) 
 	// {
-	//	Object* object = new Object;
+	//	InstanceObject* object = new InstanceObject;
 	//	MaterialConfig materialConfig;
 	//	InitMaterialConfig(&materialConfig);
 	//	object->materialConfig.push_back(materialConfig);
@@ -285,6 +285,7 @@ void SceneTester::Draw() {
 		}
 	}
 
+#ifdef USE_IMGUI
 	ImGui::Begin("ControlPanel");
 	//ImGui::Checkbox("isTemplate", &isTemplate);
 	{
@@ -377,7 +378,7 @@ void SceneTester::Draw() {
 				ImGui::SliderFloat3(name3.c_str(), &ptr->transform.scale.x, -5.0f, 5.0f);
 				for (auto& ptr2 : ptr->materialConfig) {
 					if (ImGui::CollapsingHeader(name4.c_str())) {
-						ImGui::Checkbox(name5.c_str(), &ptr2.useOriginalTexture);
+						ImGui::Checkbox(name5.c_str(), &ptr2.useModelTexture);
 						ImGui::Combo(name6.c_str(), &ptr2.textureHandle, items, IM_ARRAYSIZE(items));
 						ImGui::SliderFloat2(name7.c_str(), &ptr2.uvTranslate.x, 0.0f, 640.0f);
 						ImGui::SliderFloat2(name8.c_str(), &ptr2.uvScale.x, 0.0f, 10.0f);
@@ -420,7 +421,7 @@ void SceneTester::Draw() {
 				ImGui::SliderFloat3(name3.c_str(), &ptr->transform.scale.x, -5.0f, 5.0f);
 				for (auto& ptr2 : ptr->materialConfig) {
 					if (ImGui::CollapsingHeader(name4.c_str())) {
-						ImGui::Checkbox(name5.c_str(), &ptr2.useOriginalTexture);
+						ImGui::Checkbox(name5.c_str(), &ptr2.useModelTexture);
 						ImGui::Combo(name6.c_str(), &ptr2.textureHandle, items, IM_ARRAYSIZE(items));
 						ImGui::SliderFloat2(name7.c_str(), &ptr2.uvTranslate.x, 0.0f, 640.0f);
 						ImGui::SliderFloat2(name8.c_str(), &ptr2.uvScale.x, 0.0f, 10.0f);
@@ -458,7 +459,7 @@ void SceneTester::Draw() {
 				ImGui::SliderFloat3(name3.c_str(), &ptr->transform.scale.x, -5.0f, 5.0f);
 				for (auto& ptr2 : ptr->materialConfig) {
 					if (ImGui::CollapsingHeader(name4.c_str())) {
-						ImGui::Checkbox(name5.c_str(), &ptr2.useOriginalTexture);
+						ImGui::Checkbox(name5.c_str(), &ptr2.useModelTexture);
 						ImGui::Combo(name6.c_str(), &ptr2.textureHandle, items, IM_ARRAYSIZE(items));
 						ImGui::SliderFloat2(name7.c_str(), &ptr2.uvTranslate.x, 0.0f, 640.0f);
 						ImGui::SliderFloat2(name8.c_str(), &ptr2.uvScale.x, 0.0f, 10.0f);
@@ -496,7 +497,7 @@ void SceneTester::Draw() {
 				ImGui::SliderFloat3(name3.c_str(), &ptr->transform.scale.x, -5.0f, 5.0f);
 				for (auto& ptr2 : ptr->materialConfig) {
 					if (ImGui::CollapsingHeader(name4.c_str())) {
-						ImGui::Checkbox(name5.c_str(), &ptr2.useOriginalTexture);
+						ImGui::Checkbox(name5.c_str(), &ptr2.useModelTexture);
 						ImGui::Combo(name6.c_str(), &ptr2.textureHandle, items, IM_ARRAYSIZE(items));
 						ImGui::SliderFloat2(name7.c_str(), &ptr2.uvTranslate.x, 0.0f, 640.0f);
 						ImGui::SliderFloat2(name8.c_str(), &ptr2.uvScale.x, 0.0f, 10.0f);
@@ -539,7 +540,7 @@ void SceneTester::Draw() {
 				ImGui::SliderFloat3(name3.c_str(), &ptr->transform.scale.x, -5.0f, 5.0f);
 				for (auto& ptr2 : ptr->materialConfig) {
 					if (ImGui::CollapsingHeader(name4.c_str())) {
-						ImGui::Checkbox(name5.c_str(), &ptr2.useOriginalTexture);
+						ImGui::Checkbox(name5.c_str(), &ptr2.useModelTexture);
 						ImGui::Combo(name6.c_str(), &ptr2.textureHandle, items, IM_ARRAYSIZE(items));
 						ImGui::SliderFloat2(name7.c_str(), &ptr2.uvTranslate.x, 0.0f, 640.0f);
 						ImGui::SliderFloat2(name8.c_str(), &ptr2.uvScale.x, 0.0f, 10.0f);
@@ -584,7 +585,7 @@ void SceneTester::Draw() {
 					std::string nName11 = "EnableLighting_" + std::to_string(i) + '_' + std::to_string(j);
 					std::string nName12 = "LightingItem_" + std::to_string(i) + '_' + std::to_string(j);
 					if (ImGui::CollapsingHeader(nName4.c_str())) {
-						ImGui::Checkbox(nName5.c_str(), &ptr2.useOriginalTexture);
+						ImGui::Checkbox(nName5.c_str(), &ptr2.useModelTexture);
 						ImGui::Combo(nName6.c_str(), &ptr2.textureHandle, items, IM_ARRAYSIZE(items));
 						ImGui::SliderFloat2(nName7.c_str(), &ptr2.uvTranslate.x, 0.0f, 640.0f);
 						ImGui::SliderFloat2(nName8.c_str(), &ptr2.uvScale.x, 0.0f, 10.0f);
@@ -676,5 +677,5 @@ void SceneTester::Draw() {
 		ImGui::Text("%.1f,%.1f", timer_->parameter_, timer_->maxTime_);
 		ImGui::End();
 	}
-
+#endif
 }
