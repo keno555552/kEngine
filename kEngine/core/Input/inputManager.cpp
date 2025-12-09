@@ -86,7 +86,6 @@ void InputManager::CheckIsKeyboardConnet() {
 #pragma endregion
 
 #pragma region mouse関連
-
 int InputManager::mousePosX() {
 	return mousePos_.x;
 }

@@ -3,7 +3,6 @@
 Vector3 Vector3::operator+(const Vector3& target) {
 	return { x + target.x, y + target.y , z + target.z };
 }
-
 Vector3 Vector3::operator-(const Vector3& target) {
 	return { x - target.x, y - target.y , z - target.z };
 }
@@ -20,12 +19,31 @@ Vector3 Vector3::operator*(const float& target) {
 	return { x * target, y * target, z * target };
 }
 
+Vector3 Vector3::operator*=(const float& target)
+{
+	x *= target;
+	y *= target;
+	z *= target;
+	return *this;
+}
+
 Vector3 operator*(float scalar, const Vector3& vec) {
 	return { vec.x * scalar, vec.y * scalar, vec.z * scalar };
 }
 
 Vector3 Vector3::operator/(const float& target) {
 	return { x / target, y / target, z / target };
+}
+
+Vector3 Vector3::operator+=(const Vector3& target) {
+	*this = *this + target;
+	return *this;
+}
+
+
+Vector3 Vector3::operator*=(const Vector3& target) {
+	*this = *this * target;
+	return *this;
 }
 
 bool Vector3::operator==(const Vector3& target) {

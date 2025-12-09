@@ -188,6 +188,10 @@ bool kEngine::SoundGetSEMute()const { return soundManager->SoundGetSEMute(); }
 
 #pragma region 入力関連
 
+Vector2 kEngine::GetMousePosVector2() {
+	return Vector2 { (float)inputManager->mousePosX(), (float)inputManager->mousePosY() };
+}
+
 int kEngine::GetMousePosX() {
 	return inputManager->mousePosX();
 }

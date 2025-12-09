@@ -35,7 +35,7 @@ TransformationMatrix Camera::transformationMatrixTransform(Matrix4x4 worldMatrix
 
 void Camera::SetCamera(Transform cameraTransform) {
 	cameraTransform_ = cameraTransform;
-	Update();
+	Camera::Update();
 }
 
 
@@ -47,6 +47,11 @@ void Camera::Move(Vector3 speed) {
 
 void Camera::Rotate(Vector3 Theta) {
 	cameraTransform_.rotate = cameraTransform_.rotate + Theta;
+}
+
+void Camera::ResetCamera() { 
+	cameraTransform_ = defaultTransform_; 
+	Camera::Update();
 }
 
 

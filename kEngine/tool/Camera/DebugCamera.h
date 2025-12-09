@@ -15,6 +15,8 @@ public:
 	void MouseControlUpdate();
 
 	/// 操作設定
+	void isKeyAvailable(bool available);
+
 	void isKeyQAvailable(bool available) { isQ_ = available; }
 	void isKeyEAvailable(bool available) { isE_ = available; }
 	void isKeyAAvailable(bool available) { isA_ = available; }

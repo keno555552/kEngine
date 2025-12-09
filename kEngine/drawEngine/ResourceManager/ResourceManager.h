@@ -111,7 +111,7 @@ public:
 
 	/// 図形関係
 	std::vector<MeshBuffer*> meshBufferList_;		/// すべでのモデルを収納するどころ		これを使って解放する
-	std::vector<Sprite2D*> spriteMeshHandles_;	/// スブライドのハンドルを収納する		解放に使えない
+	std::vector<Sprite2DMesh*> spriteMeshHandles_;	/// スブライドのハンドルを収納する		解放に使えない
 	std::vector<ModelGroup*> modelGroupList_;		/// モデルグループを	収納する			解放に使えない
 	std::vector < SimpleSpriteMesh*> simpleSpriteMeshList_;	/// デフォルトのスプライトメッシュ
 

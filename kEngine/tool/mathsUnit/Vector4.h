@@ -14,4 +14,6 @@ struct Vector4
 	bool operator==(const Vector4& target);
 	bool operator!=(const Vector4& target);
 
+	void ColorBy255();
+	void ColorBy1();
 };

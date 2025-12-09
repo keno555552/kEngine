@@ -98,7 +98,13 @@ public:
 	/// <param name="a">始まりの数値</param>
 	/// <param name="b">最後の数値</param>
 	/// <returns>aからbまで今どれくらい進んでる値</returns>
-	float linearity(int a, int b);
+	float linearity(float a, float b);
+
+	/// <summary>
+	/// 線形移動
+	/// </summary>
+	/// <returns>0から1までの変化値</returns>
+	float linearity();
 
 	/// <summary>
 	/// Timerに連れてAからBまで変動、段々遅くなーる
@@ -112,6 +118,13 @@ public:
 	float easyIn(int a, int b, float r);
 
 	/// <summary>
+	/// Timerに連れてAからBまで変動、段々遅くなーる
+	/// </summary>
+	/// <param name="r">変動率[1.0f以上]</param>
+	/// <returns>0から1までの変化値</returns>
+	float easyIn(float r);
+
+	/// <summary>
 	/// Timerに連れてAからBまで変動、段々早くなーる
 	/// </summary>
 	/// <param name="a">始まりの数値</param>
@@ -121,6 +134,13 @@ public:
 	/// <param name="r">変動率[1.0f以上]</param>
 	/// <returns>aからbまで今どれくらい進んでる値</returns>
 	float easyOut(float a, float b, float r);
+
+	/// <summary>
+	/// Timerに連れてAからBまで変動、段々早くなーる
+	/// </summary>
+	/// <param name="r">変動率[1.0f以上]</param>
+	/// <returns>0から1までの変化値</returns>
+	float easyOut(float r);
 
 	/// <summary>
 	/// Timerに連れてAからBまで変動、段々早くなって、終わるの際段々遅くなる
@@ -134,6 +154,13 @@ public:
 	float easyInOut(int a, int b, float r);
 
 	/// <summary>
+	/// Timerに連れてAからBまで変動、段々早くなって、終わるの際段々遅くなる
+	/// </summary>
+	/// <param name="r">変動率[1.0f以上]</param>
+	/// <returns>0から1までの変化値</returns>
+	float easyInOut(float r);
+
+	/// <summary>
 	/// Timerに連れてAからBまで変動、一回後ろに行って、早く最後のどころに行く
 	/// </summary>
 	/// <param name="a">始まりの数値</param>
@@ -145,6 +172,13 @@ public:
 	float easyInBack(int a, int b, float r);
 
 	/// <summary>
+	/// Timerに連れてAからBまで変動、一回後ろに行って、早く最後のどころに行く
+	/// </summary>
+	/// <param name="r">変動率[1.0f以上]</param>
+	/// <returns>0から1までの変化値</returns>
+	float easyInBack(float r);
+
+	/// <summary>
 	/// Timerに連れてAからBまで変動、最後のどころに着いた後止めず、一定距離後戻る
 	/// </summary>
 	/// <param name="a">始まりの数値</param>
@@ -154,6 +188,13 @@ public:
 	/// <param name="r">変動率[1.0f以上]</param>
 	/// <returns>aからbまで今どれくらい進んでる値</returns>
 	float easyOutBack(int a, int b, float r);
+
+	/// <summary>
+	/// Timerに連れてAからBまで変動、最後のどころに着いた後止めず、一定距離後戻る
+	/// </summary>
+	/// <param name="r">変動率[1.0f以上]</param>
+	/// <returns>0から1までの変化値</returns>
+	float easyOutBack(float r);
 
 
 public:

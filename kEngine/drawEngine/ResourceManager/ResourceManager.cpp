@@ -371,7 +371,7 @@ int ResourceManager::CreateSimpleSpriteMeshResource() {
 
 
 int ResourceManager::CreateTriangleResource() {
-	Triangle* newTriangle = new Triangle;
+	TriangleMesh* newTriangle = new TriangleMesh;
 	newTriangle->CreateVertexResource_(Bdevice_);
 	newTriangle->CreateVertexBufferView_(6);
 	meshBufferList_.push_back(newTriangle);
@@ -386,7 +386,7 @@ int ResourceManager::CreateTriangleResource() {
 
 int ResourceManager::CreateCubeResource() {
 
-	Cube* newCube_ = new Cube;
+	CubeMesh* newCube_ = new CubeMesh;
 	newCube_->CreateVertexResource_(Bdevice_);
 	newCube_->CreateVertexBufferView_(24);
 	newCube_->CreateIndexResource_(Bdevice_);
@@ -405,7 +405,7 @@ int ResourceManager::CreateCubeResource() {
 int ResourceManager::CreateSphereResource(int sudivision) {
 	sudivision;
 
-	Sphere* newSphere = new Sphere;
+	SphereMesh* newSphere = new SphereMesh;
 	newSphere->CreateVertexResource_(Bdevice_);
 	newSphere->CreateIndexResource_(Bdevice_);
 	meshBufferList_.push_back(newSphere);

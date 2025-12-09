@@ -54,13 +54,27 @@ void DebugCamera::MouseControlUpdate() {
 
 	///元の位置に戻る
 	if (system_->GetIsPush(DIK_R) && isR_) {
-		SetCamera(CameraDefaultTransform());
+		ResetCamera();
 	}
 	if (system_->GetGamepadIsPush(VK_PAD_BACK) && isGamePad_) {
-		SetCamera(CameraDefaultTransform());
+		ResetCamera();
 	}
 
 	Move(cameraTransform.translate);
 	Rotate(cameraTransform.rotate);
+}
+
+void DebugCamera::isKeyAvailable(bool available) {
+	isQ_ = available;
+	isE_ = available;
+	isA_ = available;
+	isD_ = available;
+	isW_ = available;
+	isS_ = available;
+	isZ_ = available;
+	isC_ = available;
+	isR_ = available;
+	isMouseM_ = available;
+	isMouseR_ = available;
 }
 

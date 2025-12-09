@@ -97,7 +97,7 @@ public:
 
 
 
-
+	/// VVVV====== SpriteData/ObjectData描画,今上使えない ======VVVV///
 	void Draw2D(SpriteData* spriteData);
 	void Draw3D(ObjectData* objectData);
 
@@ -152,6 +152,7 @@ public:
 
 	/// 入力関連
 
+	Vector2 GetMousePosVector2();
 	int GetMousePosX();
 	int GetMousePosY();
 	int GetMousePosXIns();

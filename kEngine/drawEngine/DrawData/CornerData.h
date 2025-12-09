@@ -5,9 +5,7 @@ enum class CornerName{
 	TOP_LEFT = 0,
 	BOTTOM_LEFT,
 	BOTTOM_RIGHT,
-	TOP_RIGHT,
-
-	NumOfCorner,
+	TOP_RIGHT
 };
 
 struct CornerData;

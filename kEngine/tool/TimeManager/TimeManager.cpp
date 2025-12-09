@@ -117,11 +117,16 @@ int Timer::FrameChange() {
 	return ((int)parameter_ / 5);
 }
 
-float Timer::linearity(int a, int b) {
+float Timer::linearity(float a, float b) {
 	if (parameter_ <= 0.0f)return static_cast<float>(a);
 
 	float T = std::clamp(parameter_ / maxTime_,0.0f,1.0f);
 	return (1.0f - T) * a + (T)*b;
+}
+
+float Timer::linearity() {
+	if (parameter_ <= 0.0f)return static_cast<float>(0);
+	return std::clamp(parameter_ / maxTime_, 0.0f, 1.0f);
 }
 
 float Timer::easyIn(int a, int b, float r) {
@@ -132,12 +137,26 @@ float Timer::easyIn(int a, int b, float r) {
 	return (1.0f - easedT) * a + (easedT)*b;
 }
 
+float Timer::easyIn(float r) {
+	if (parameter_ <= 0.0f)return static_cast<float>(0);
+
+	float T = std::clamp(parameter_ / maxTime_, 0.0f, 1.0f);
+	return 1.0f - powf(1 - T, r);
+}
+
 float Timer::easyOut(float a, float b, float r) {
 	if (parameter_ <= 0.0f)return static_cast<float>(a);
 
 	float T = std::clamp(parameter_ / maxTime_, 0.0f, 1.0f);
 	float easedT = 1 - (1.0f - powf(T, r));
 	return (1.0f - easedT) * a + (easedT)*b;
+}
+
+float Timer::easyOut(float r) {
+	if (parameter_ <= 0.0f)return static_cast<float>(0);
+
+	float T = std::clamp(parameter_ / maxTime_, 0.0f, 1.0f);
+	return 1 - (1.0f - powf(T, r));
 }
 
 float Timer::easyInOut(int a, int b, float r) {
@@ -151,6 +170,17 @@ float Timer::easyInOut(int a, int b, float r) {
 	return (1.0f - easedT) * a + (easedT)*b;
 }
 
+float Timer::easyInOut(float r) {
+	float T = parameter_ / maxTime_;
+	float easedT = {};
+	if (T <= 0.5) {
+		return (1.0f - sqrtf(1.0f - powf(2.0f * T, r))) / 2;
+	} else {
+		return (sqrtf(1.0f - powf(-2 * T + 2, r)) + 1) / 2;
+	}
+	return 0;
+}
+
 float Timer::easyInBack(int a, int b, float r) {
 	float T = float(parameter_ / maxTime_);
 	float c1 = r;
@@ -159,12 +189,26 @@ float Timer::easyInBack(int a, int b, float r) {
 	return (1.0f - easedT) * a + (easedT)*b;
 }
 
+float Timer::easyInBack(float r) {
+	float T = parameter_ / maxTime_;
+	float c1 = r;
+	float c3 = c1 + 1;
+	return c3 * powf(T, 4) - c1 * powf(T, 3);
+}
+
 float Timer::easyOutBack(int a, int b, float r) {
 	float T = float(parameter_ / maxTime_);
 	float c1 = r;
 	float c3 = c1 + 1;
 	float easedT = 1 + c3 * powf(T - 1, 3) + c1 * powf(T - 1, 2);
 	return (1.0f - easedT) * a + (easedT)*b;
+}
+
+float Timer::easyOutBack(float r) {
+	float T = parameter_ / maxTime_;
+	float c1 = r;
+	float c3 = c1 + 1;
+	return 1 + c3 * powf(T - 1, 3) + c1 * powf(T - 1, 2);
 }
 
 #pragma endregion 

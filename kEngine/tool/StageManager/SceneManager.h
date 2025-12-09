@@ -1,12 +1,12 @@
 #pragma once
 #include "MaterialConfig.h"
 #include "Scene.h"
+#include "Scene1.h"
+#include "SceneTestForGE.h"
 #include "SceneTester.h"
 #include "SceneTest.h"
-#include "SceneTest2.h"
-#include "CG4_HK_1/Menu.h"
-#include "CG4_HK_1/Effect1.h"
-#include "CG4_HK_1/Effect2.h"
+#include "AnimationSystem/AnimationEditor.h"
+#include "DefaultMenu/DefaultMenu.h"
 
 class SceneManager {
 public:
@@ -31,6 +31,10 @@ private:
 
 private:
 	kEngine* system_ = nullptr; // 借り
+
+	DefaultMenu* defaultMenu_ = nullptr;
+
+	/// =============== ステージ管理 ===============///
 	
 	bool stage[10]{};
 
@@ -46,5 +50,7 @@ private:
 	/// ============= ステージマネージメント ============///
 	void ClearStage();
 
+#ifdef USE_IMGUI
 	void ImguiPart();
+#endif
 };

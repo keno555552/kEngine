@@ -2,16 +2,29 @@
 
 SceneManager::SceneManager(kEngine* system) {
 	system_ = system;
-	//sceneUsingHandle_ = SceneNum::S_SELECT;
-	sceneUsingHandle_ = SceneNum::S_EFFECT1;
+	//sceneUsingHandle_ = SceneNum::S_STAGE_01;
+	//sceneUsingHandle_ = SceneNum::S_BOSSTEST;
 	//sceneUsingHandle_ = SceneNum::S_TESTER;
+	//sceneUsingHandle_=SceneNum::S_TITLE;
+	sceneUsingHandle_ = SceneNum::S_STAGE_01;
 
-	for (int i = 0; i < 10; ++i) {
-		stage[i] = false;
-		if (i == static_cast<int>(sceneUsingHandle_)) {
-			stage[i] = true;
-		}
-	}
+
+
+
+	//InitMaterialConfig(&materialConfig_);
+	//materialConfig_.uvTransformMatrix =
+	//	MakeAffineMatrix(materialConfig_.uvScale, materialConfig_.uvRotate,
+	//		materialConfig_.uvTranslate);
+	//materialConfig_.textureHandle =
+	//	system_->LoadTextrue("resources/TemplateResource/texture/uvChecker.png");
+	// materialConfig_.textureHandle =
+	// system_->LoadTextrue("resources/nullScene.png");
+
+	//for (auto& ptr : stageIsClear_) {
+	//	ptr = false;
+	//}
+
+	defaultMenu_ = new DefaultMenu(system_);
 }
 
 SceneManager::~SceneManager() {
@@ -36,9 +49,20 @@ void SceneManager::SceneChanger() {
 	//	delete sceneUsing_, sceneUsing_ = nullptr;
 	//}
 
-	StageCheckBoxUpdate();
+	//StageCheckBoxUpdate();
 
 	if (sceneUsing_ == nullptr) {
+
+		if (sceneUsingHandle_ == SceneNum::S_TITLE || sceneUsingHandle_ == SceneNum::S_SELECT) {
+			if (defaultMenu_->GetCanOpen()) {
+				defaultMenu_->SetCanOpen(false);
+			}
+		} else {
+			if (!defaultMenu_->GetCanOpen()) {
+				defaultMenu_->SetCanOpen(true);
+			}
+		}
+
 
 		switch (sceneUsingHandle_) {
 		case SceneNum::S_END:
@@ -55,15 +79,27 @@ void SceneManager::SceneChanger() {
 			//sceneUsing_ = new SceneTest2(system_);
 			// sceneUsing_ = new StageTestForGE(system_);
 			break;
+
+		case SceneNum::S_TITLE:
+			break;
+
 		case SceneNum::S_SELECT:
-			//sceneUsing_ = new Menu(system_);
 			break;
-		case SceneNum::S_EFFECT1:
-			sceneUsing_ = new SceneTest(system_);
-			//sceneUsing_ = new Effect1(system_);
+
+		case SceneNum::S_STAGE_01:
+			sceneUsing_ = new Scene1(system_);
 			break;
-		case SceneNum::S_EFFECT2:
-			sceneUsing_ = new Effect2(system_);
+		case SceneNum::S_STAGE_02:
+			break;
+
+		case SceneNum::S_Result:
+			break;
+
+		case SceneNum::S_BOSSTEST:
+			break;
+
+		case SceneNum::S_ANIMATIONEDITOR:
+			sceneUsing_ = new AnimationEditor(system_);
 			break;
 		}
 	}
@@ -73,16 +109,23 @@ void SceneManager::SceneChanger() {
 void SceneManager::Update() {
 
 	SceneChanger();
-	if (sceneUsing_ != nullptr) {
-		sceneUsing_->Update();
+	if (!defaultMenu_->GetIsOpened()) {
+		if (sceneUsing_ != nullptr) {
+			sceneUsing_->Update();
+		}
 	}
+
+	defaultMenu_->Updata();
 }
 
 void SceneManager::Render() {
 	if (sceneUsing_ != nullptr) {
- 		sceneUsing_->Draw();
+		sceneUsing_->Draw();
 	} else {
 	}
+
+	defaultMenu_->Draw();
+
 #ifdef USE_IMGUI
 	ImguiPart();
 #endif
@@ -139,18 +182,26 @@ void SceneManager::ImguiPart() {
 		ImGui::InputFloat("deltaTime", &deltaTime);
 		ImGui::End();
 	}
-
 	{
-		ImGui::Begin("Stage");
-	
-		ImGui::Checkbox("Menu", &stage[0]);
-		std::string stageName[3];
-		for (int i = 1; i < 3; i++) {
-			stageName[i] = "Effect_" + std::to_string(i);
-			ImGui::Checkbox(stageName[i].c_str(), &stage[i]);
+
+		ImGui::Begin("MenuTest");
+		if (defaultMenu_->isClicked()) {
+			ImGui::Text("IsClicked: True");
+		} else {
+			ImGui::Text("IsClicked: False");
 		}
-	
-	
+
+		if (defaultMenu_->IsRetry()) {
+			ImGui::Text("IsRetry: True");
+		} else {
+			ImGui::Text("IsRetry: False");
+		}
+
+		if (defaultMenu_->IsBack()) {
+			ImGui::Text("IsBack: True");
+		} else {
+			ImGui::Text("IsBack: False");
+		}
 		ImGui::End();
 	}
 }

@@ -9,7 +9,7 @@
 #include "Camera.h"
 #include "DrawData/SpriteData.h"
 
-static const float layerDepth_Sprite = 0.01f;
+static const float layerDepth_Sprite = 0.0001f;
 
 class SimpleSprite : public SimpleSpriteData {
 public:

@@ -54,12 +54,6 @@ void MapChipField::LoadMapChipCsv(const std::string& filePath) {
 	}
 }
 
-void MapChipField::SetBlockSize(Vector2 size) {
-	// ブロックサイズ設定
-	kBlockWidth = size.x;
-	kBlockHeight = size.y;
-}
-
 MapChipType MapChipField::GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex) {
 	if ((xIndex < 0) || (kNumBlockHorizontal - 1 < xIndex)) {
 		return MapChipType::kBlank;
@@ -82,7 +76,7 @@ MapChipField::IndexSet MapChipField::GetMapChipIndexByPosition(const Vector3& po
 	return indexSet;
 }
 
-Rect MapChipField::GetRectByIndex(int xIndex, int yIndex) { 
+MapChipField::Rect MapChipField::GetRectByIndex(int xIndex, int yIndex) { 
 	Vector3 center = GetMapChipPositionByIndex(xIndex, yIndex);
 
 	Rect rect;
@@ -91,6 +85,15 @@ Rect MapChipField::GetRectByIndex(int xIndex, int yIndex) {
 	rect.top = center.y + (kBlockHeight / 2.0f);
 	rect.bottom = center.y - (kBlockHeight / 2.0f);
 	return rect;
+}
+
+
+void MapChipField::SetBlockWidth(float width) {
+	kBlockWidth = width;
+}
+
+void MapChipField::SetBlockHeight(float height) {
+	kBlockHeight = height;
 }
 
 // void GenerateBlocks(std::vector<std::vector<WorldTransform*>>& worldTransformBlocks) {

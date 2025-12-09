@@ -23,3 +23,25 @@ bool Vector4::operator==(const Vector4& target) {
 bool Vector4::operator!=(const Vector4& target) {
 	return !(*this == target);
 }
+
+void Vector4::ColorBy255() {
+	x = x * 255.0f;
+	y = y * 255.0f;
+	z = z * 255.0f;
+	w = w * 255.0f;
+}
+
+void Vector4::ColorBy1() {
+	x = x / 255.0f;
+	y = y / 255.0f;
+	z = z / 255.0f;
+	w = w / 255.0f;
+}
+
+//Vector4 Vector4::ColorBy144() {
+//	return { z * 144.0f, y * 144.0f, x * 144.0f, w * 144.0f };
+//}
+//
+//Vector4 Vector4::ColorBy1() {
+//	return { z / 144.0f, y / 144.0f, x / 144.0f, w / 144.0f };
+//}

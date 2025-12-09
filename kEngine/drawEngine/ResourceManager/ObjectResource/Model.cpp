@@ -144,6 +144,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 			// 基本的にobjファイルと同一階層にmtlは存在させるので、ディレクトリ名とファイル名を渡す
 			modelData.material = LoadMaterialTemplateFile(directoryPath, materialFilename);
 		}
+
 	}
 	///4. ModelDataを返す
 	return modelData;														// 構築したModelDataを返す
@@ -193,7 +194,6 @@ void Model::SetModelObj(std::string Path) {
 	std::filesystem::path path(Path);
 	directoryPath_ = path.parent_path().string();
 	objName_ = path.filename().string();
-
 }
 
 void Model::SetVertexNum(int num) {

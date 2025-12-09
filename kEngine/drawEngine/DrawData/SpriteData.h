@@ -29,7 +29,7 @@ struct SpritePart
 	///=============== 計算、資料渡し用 ==============///
 	std::shared_ptr<MaterialConfig>materialConfig;
 
-	ObjectPart* parentPart = nullptr;
+	SpritePart* parentPart = nullptr;
 };
 
 
@@ -40,12 +40,12 @@ struct SimpleSpritePart : SpritePart
 };
 
 class SpriteData {
-	public:
-	std::vector<SpritePart> objectParts_;
-	SpritePart mainPosition;
+public:
+	std::vector<SpritePart> objectParts_{};
+	SpritePart mainPosition{};
 	int modelHandle_ = 0;
 	bool isDelete_ = false;
-	SpritePart* followObject_;
+	SpriteData* followObject_{};
 };
 
 class SimpleSpriteData : public SpriteData {

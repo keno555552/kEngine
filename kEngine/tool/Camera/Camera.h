@@ -30,6 +30,11 @@ public:
 	Matrix4x4 GetProjectionMatrix() const { return projectionMatrix_; }
 	Transform GetTransform() const { return cameraTransform_; }
 
+	/// リセット
+	void SetDefaultTransform(Transform defaultTransform) { defaultTransform_ = defaultTransform; }
+	Transform GetDefaultTransform() const { return defaultTransform_; }
+	void ResetCamera(); 
+
 private:
 
 	/// 累積回転行列
@@ -37,6 +42,9 @@ private:
 
 	/// カメラ変数を作る
 	Transform cameraTransform_;
+
+	/// リセット用カメラ変数
+	Transform defaultTransform_;
 
 	/// ProjectionMatrix
 	Matrix4x4 projectionMatrix_{};

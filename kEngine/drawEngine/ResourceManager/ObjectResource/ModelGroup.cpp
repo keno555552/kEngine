@@ -97,13 +97,15 @@ std::vector<ModelData> LoadMuitObjFile(const std::string& directoryPath, const s
 			modelData.material.mtlName_ = materialName;
 
 		} else if (identifier == "o") {
-			if (!startCopy) {
-				startCopy = true; continue;
-			} else {
-				startCopy = false;
+			//if (!startCopy) {
+			//	startCopy = true; continue;
+			//} else {
+			//	startCopy = false;
+			//}
+			if (!modelData.vertices.empty()) {
+				modelData.material = LoadTargetMaterialTemplateFile(directoryPath, materialFilename, modelData.material.mtlName_);
+				modelGroup.push_back(modelData);
 			}
-			modelData.material = LoadTargetMaterialTemplateFile(directoryPath, materialFilename, modelData.material.mtlName_);
-			modelGroup.push_back(modelData);
 			modelData = {};
 			//positions.clear();
 			//normals.clear();

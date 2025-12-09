@@ -41,7 +41,8 @@ SceneTest::SceneTest(kEngine* system){
 	/// マップチップの生成
 	mapChipField_ = new MapChipField();
 	mapChipField_->LoadMapChipCsv("resources/stage/blocks1.csv");
-	mapChipField_->SetBlockSize({ 1.0f,1.0f });
+	mapChipField_->SetBlockWidth(1.0f);
+	mapChipField_->SetBlockHeight(1.0f);
 
 	/// マップチップの初期化
 	GenerateBlocks();

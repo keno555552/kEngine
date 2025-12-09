@@ -8,7 +8,7 @@
 #include "kEngine.h"
 #include "Camera.h"
 #include "DrawData/ObjectData.h"
-
+#include "crashDecision/crashDecision.h"
 
 class Object : public ObjectData {
 public:
@@ -22,6 +22,21 @@ public:
 
 	void CreateDefaultData();
 	void CreateModelData(int modelHandle);
+
+	///衝突したときめり込まない場合 
+	virtual void Conflict(const std::vector<Object*>& obj);
+	virtual  Object* Collision(const Object* obj);
+
+	/// <summary>
+	/// 複数衝突したオブジェクトのポインターを渡す
+	/// </summary>
+	/// <param name="obj"></param>
+	/// <returns></returns>
+	virtual  Object*  Collision(const std::vector<Object*>& obj);
+	// obj の transform から AABB を計算して返す
+    AABB GetAABB(const Object* obj) const;
+
+	void CopyObject(Object* target);
 
 protected:
 	kEngine* system_ = nullptr; /// 借り
