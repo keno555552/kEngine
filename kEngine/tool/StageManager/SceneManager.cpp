@@ -4,8 +4,8 @@ SceneManager::SceneManager(kEngine* system) {
 	system_ = system;
 	//sceneUsingHandle_ = SceneNum::S_STAGE_01;
 	//sceneUsingHandle_ = SceneNum::S_BOSSTEST;
-	//sceneUsingHandle_ = SceneNum::S_TESTER;
-	sceneUsingHandle_ = SceneNum::S_TITLE;
+	sceneUsingHandle_ = SceneNum::S_TESTER;
+	//sceneUsingHandle_ = SceneNum::S_TITLE;
 	//sceneUsingHandle_ = SceneNum::S_STAGE_01;
 	
 	
@@ -94,9 +94,10 @@ void SceneManager::SceneChanger() {
 
 		case SceneNum::S_TESTER:
 			//sceneUsing_ = new SceneTester(system_);
-			sceneUsing_ = new SceneTest(system_);
+			//sceneUsing_ = new SceneTest(system_);
 			//sceneUsing_ = new SceneTest2(system_);
 			// sceneUsing_ = new StageTestForGE(system_);
+			sceneUsing_ = new Effect2(system_);
 			break;
 
 		case SceneNum::S_TITLE:
@@ -107,7 +108,7 @@ void SceneManager::SceneChanger() {
 			break;
 
 		case SceneNum::S_STAGE_01:
-			sceneUsing_ = new SceneTest(system_);
+			//sceneUsing_ = new SceneTest(system_);
 			//sceneUsing_ = new Scene1(system_);
 			break;
 		case SceneNum::S_STAGE_02:
@@ -139,9 +140,9 @@ void SceneManager::Update() {
 		}
 	}
 
-	helperSprite_->Update(nullptr);
+	//helperSprite_->Update(nullptr);
 
-	defaultMenu_->Updata();
+	//defaultMenu_->Updata();
 }
 
 void SceneManager::Render() {
@@ -150,9 +151,9 @@ void SceneManager::Render() {
 	} else {
 	}
 
-	helperSprite_->Draw();
+	//helperSprite_->Draw();
 
-	defaultMenu_->Draw();
+	//defaultMenu_->Draw();
 
 #ifdef USE_IMGUI
 	ImguiPart();

@@ -4,6 +4,7 @@
 #include "Object\Sprite.h"
 #include "DebugCamera.h"
 #include "Player\Player.h"
+#include "Particle\P_Fire\P_Fire.h"
 
 class SceneTest2 :public Scene
 {

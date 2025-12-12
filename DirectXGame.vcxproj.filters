@@ -339,9 +339,6 @@
     <ClCompile Include="scenes\CG4_HK_1\menu.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\GameObject\Particle\P_Fire\P_Fire.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="ResourceLoader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -394,6 +391,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="scenes\SceneTitle.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\GameObject\Particle\P_Ball\P_Ball.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -605,9 +605,6 @@
     <ClInclude Include="scenes\CG4_HK_1\menu.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\GameObject\Particle\P_Fire\P_Fire.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="ResourceLoader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -666,6 +663,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="scenes\SceneTitle.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\GameObject\Particle\P_Ball\P_Ball.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

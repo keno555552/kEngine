@@ -7,8 +7,10 @@
 #include "SceneTestForGE.h"
 #include "SceneTester.h"
 #include "SceneTest.h"
+#include "SceneTest2.h"
 #include "AnimationSystem/AnimationEditor.h"
 #include "DefaultMenu/DefaultMenu.h"
+#include "CG4_HK_1/Effect2.h"
 
 class SceneManager {
 public:

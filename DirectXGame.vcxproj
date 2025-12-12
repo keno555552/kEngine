@@ -338,8 +338,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\GameObject\Particle\Particle.cpp" />
     <ClCompile Include="kEngine\drawEngine\ResourceManager\InstanceManager\SpriteInstance.cpp" />
     <ClCompile Include="kEngine\drawEngine\ResourceManager\WVPResource.cpp" />
-    <ClCompile Include="kEngine\GameObject\Particle\P_Fire\P_Fire.cpp" />
     <ClCompile Include="kEngine\tool\MapChip\MapChipData.cpp" />
+    <ClCompile Include="kEngine\GameObject\Particle\P_Ball\P_Ball.cpp" />
     <ClCompile Include="ResourceLoader.cpp" />
     <ClCompile Include="scenes\CG4_HK_1\menu.cpp" />
     <ClCompile Include="scenes\CG4_HK_1\Effect1.cpp" />
@@ -430,8 +430,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\GameObject\Particle\Particle.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\InstanceManager\SpriteInstance.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\WVPResource.h" />
-    <ClInclude Include="kEngine\GameObject\Particle\P_Fire\P_Fire.h" />
     <ClInclude Include="kEngine\tool\MapChip\MapChipData.h" />
+    <ClInclude Include="kEngine\GameObject\Particle\P_Ball\P_Ball.h" />
     <ClInclude Include="ResourceLoader.h" />
     <ClInclude Include="scenes\CG4_HK_1\menu.h" />
     <ClInclude Include="scenes\CG4_HK_1\Effect1.h" />

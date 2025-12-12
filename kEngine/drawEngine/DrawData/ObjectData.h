@@ -27,6 +27,8 @@ public:
 
 	bool isDelete_ = false;
 
+	bool isBillboard_ = false;
+
 	ObjectPart* followObject_ = nullptr;
 };
 

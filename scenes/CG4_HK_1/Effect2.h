@@ -5,6 +5,7 @@
 #include "Particle\P_Fire\P_Fire.h"
 #include "DebugCamera.h"
 #include "Player\Player.h"
+#include "Particle\P_Ball\P_Ball.h"
 #include <random>
 
 class Effect2 :public Scene
@@ -37,7 +38,7 @@ private:
 
 	/// =========== ゲームオブジェクト =========///
 	Object* skydome_ = nullptr;
-	P_Fire* fire_ = nullptr;
+	P_Ball* ball_ = nullptr;
 	Object* plane_ = nullptr;
 
 	/// ============= ゲーム内データ ===========///
@@ -48,6 +49,7 @@ private:
 
 	/// =============== フラグ ===============///
 	bool useDebugCamera = false;
+	bool isWind_ = false;
 
 	/// ============= シーン内命令 =============///
 	void CameraPart();

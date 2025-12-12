@@ -18,11 +18,7 @@ Effect2::Effect2(kEngine* system) {
 	skydome_->CreateModelData(skydomeModelHandle_);
 	skydome_->objectParts_[0].materialConfig->enableLighting = false;
 
-	fire_ = new P_Fire;
-	fire_->IntFire(system_);
-	fire_->CreateModelData(planeModelHandle_);
-	fire_->SetCommonMaterialConfig(*fire_->objectParts_[0].materialConfig);
-	fire_->objectParts_.clear();
+	ball_ = new P_Ball(system_);
 
 	plane_ = new Object;
 	plane_->IntObject(system_);
@@ -34,7 +30,7 @@ Effect2::~Effect2() {
 	delete debugCamera_;
 
 	delete skydome_;
-	delete fire_;
+	//delete fire_;
 }
 
 void Effect2::Update() {
@@ -46,7 +42,14 @@ void Effect2::Update() {
 
 	plane_->Update(usingCamera_);
 
-	fire_->Update(usingCamera_);
+
+	if (isWind_) {
+		std::vector<Object*> list = ball_->GetObjectList();
+		for (auto& obj : list) {
+			obj->mainPosition.transform.translate.x -= 3 * system_->GetDeltaTime();
+		}
+	}
+	ball_->Update(usingCamera_);
 
 
 
@@ -68,7 +71,7 @@ void Effect2::Draw() {
 	skydome_->Draw();
 	//plane_->Draw();
 
-	fire_->Draw();
+	ball_->Draw();
 
 #ifdef USE_IMGUI
 	/// imgui処理
@@ -89,12 +92,13 @@ void Effect2::CameraPart() {
 void Effect2::ImguiPart() {
 	ImGui::Begin("DebugCamera");
 	ImGui::Checkbox("isUse", &useDebugCamera);
+	ImGui::Checkbox("isWind", &isWind_);
 	ImGui::End();
 
-	int num = fire_->GetParticleNum();
-	ImGui::Begin("RandomTest");
-	ImGui::Text("ParticleNumber = %d", num);
-	ImGui::End();
+	//int num = fire_->GetParticleNum();
+	//ImGui::Begin("RandomTest");
+	//ImGui::Text("ParticleNumber = %d", num);
+	//ImGui::End();
 
 }
 #endif
