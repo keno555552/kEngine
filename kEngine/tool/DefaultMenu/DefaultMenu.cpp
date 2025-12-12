@@ -250,7 +250,7 @@ void DefaultMenu::Updata() {
 		}
 	}
 
-	if(!isOpened_){
+	if (!isOpened_) {
 		if (animationTimer_->parameter_ == animationTimer_->maxTime_) {
 			return;
 		}
@@ -261,6 +261,8 @@ void DefaultMenu::Updata() {
 	isConfirm_ = false;
 	switch (phase_) {
 	case MenuPhase::ENTRY:
+		if (!isPause_)isPause_ = true;
+
 		animationTimer_->ToMix();
 		T = animationTimer_->easyIn(2.0f);
 		sMenuBG_->mainPosition.transform.translate.y = easyIn(startTransform_.translate.y, menuNormalPos_.y, T, 2.0f);
@@ -271,6 +273,7 @@ void DefaultMenu::Updata() {
 		ChangeSelect();
 		break;
 	case MenuPhase::PROGRESS:
+		if (!isPause_)isPause_ = true;
 
 		CheckClick();
 		ChangeSelect();
@@ -278,6 +281,8 @@ void DefaultMenu::Updata() {
 
 		break;
 	case MenuPhase::TRANSITION:
+		if (isPause_)isPause_ = false;
+
 		animationTimer_->ToMix();
 		T = animationTimer_->easyOut(2.0f);
 		sMenuBG_->mainPosition.transform.translate.y = easyOut(startTransform_.translate.y, menuStartPos_.y, T, 2.0f);
@@ -287,6 +292,7 @@ void DefaultMenu::Updata() {
 		}
 		break;
 	case MenuPhase::EXIT:
+		if (isPause_)isPause_ = false;
 		isOpened_ = false;
 		break;
 	}
@@ -420,13 +426,6 @@ void DefaultMenu::ChangeSelect() {
 		}
 		buttonTimer_->Reset0();
 	}
-	//if (clickLeft_ ||
-	//	clickRight_ ||
-	//	clickUp_ ||
-	//	clickDown_) {
-	//	buttonTimer_->Reset0();
-	//	//system_->SoundPlaySE(SH_menuSE_, SEVolume_);
-	//}
 	ChangeButtonLight();
 }
 

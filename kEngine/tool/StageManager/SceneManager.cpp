@@ -5,11 +5,10 @@ SceneManager::SceneManager(kEngine* system) {
 	//sceneUsingHandle_ = SceneNum::S_STAGE_01;
 	//sceneUsingHandle_ = SceneNum::S_BOSSTEST;
 	//sceneUsingHandle_ = SceneNum::S_TESTER;
-	//sceneUsingHandle_=SceneNum::S_TITLE;
-	sceneUsingHandle_ = SceneNum::S_STAGE_01;
-
-
-
+	sceneUsingHandle_ = SceneNum::S_TITLE;
+	//sceneUsingHandle_ = SceneNum::S_STAGE_01;
+	
+	
 
 	//InitMaterialConfig(&materialConfig_);
 	//materialConfig_.uvTransformMatrix =
@@ -23,6 +22,15 @@ SceneManager::SceneManager(kEngine* system) {
 	//for (auto& ptr : stageIsClear_) {
 	//	ptr = false;
 	//}
+
+	helperTextureHandle_ = system_->LoadTextrue("resources/texture/helper.png");
+	helperSprite_ = new SimpleSprite;
+	helperSprite_->IntObject(system_);
+	helperSprite_->CreateDefaultData();
+	helperSprite_->mainPosition.transform.scale = { 0.5f,0.5f,1.0f };
+	helperSprite_->mainPosition.transform.translate = { 0.0f,550.0f,0.0f };
+	helperSprite_->objectParts_[0].materialConfig->textureHandle = helperTextureHandle_;
+
 
 	defaultMenu_ = new DefaultMenu(system_);
 }
@@ -48,6 +56,17 @@ void SceneManager::SceneChanger() {
 	//	isReset_ = true;
 	//	delete sceneUsing_, sceneUsing_ = nullptr;
 	//}
+
+	if (sceneUsing_ != nullptr) {
+		if (defaultMenu_->IsBack()) {
+			sceneUsing_->SetNextStage(SceneNum::S_TITLE);
+			sceneUsing_->SetScenePhase(ScenePhase::EXIT);
+		}
+		if (defaultMenu_->IsRetry()) {
+			delete sceneUsing_, sceneUsing_ = nullptr;
+		}
+	}
+
 
 	//StageCheckBoxUpdate();
 
@@ -81,18 +100,21 @@ void SceneManager::SceneChanger() {
 			break;
 
 		case SceneNum::S_TITLE:
+			sceneUsing_ = new SceneTitle(system_);
 			break;
 
 		case SceneNum::S_SELECT:
 			break;
 
 		case SceneNum::S_STAGE_01:
-			sceneUsing_ = new Scene1(system_);
+			sceneUsing_ = new SceneTest(system_);
+			//sceneUsing_ = new Scene1(system_);
 			break;
 		case SceneNum::S_STAGE_02:
 			break;
 
 		case SceneNum::S_Result:
+			sceneUsing_ = new SceneResult(system_);
 			break;
 
 		case SceneNum::S_BOSSTEST:
@@ -108,12 +130,16 @@ void SceneManager::SceneChanger() {
 
 void SceneManager::Update() {
 
+
 	SceneChanger();
-	if (!defaultMenu_->GetIsOpened()) {
+
+	if (!defaultMenu_->GetIsPause()) {
 		if (sceneUsing_ != nullptr) {
 			sceneUsing_->Update();
 		}
 	}
+
+	helperSprite_->Update(nullptr);
 
 	defaultMenu_->Updata();
 }
@@ -123,6 +149,8 @@ void SceneManager::Render() {
 		sceneUsing_->Draw();
 	} else {
 	}
+
+	helperSprite_->Draw();
 
 	defaultMenu_->Draw();
 
@@ -183,7 +211,6 @@ void SceneManager::ImguiPart() {
 		ImGui::End();
 	}
 	{
-
 		ImGui::Begin("MenuTest");
 		if (defaultMenu_->isClicked()) {
 			ImGui::Text("IsClicked: True");

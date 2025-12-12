@@ -34,8 +34,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		system->EndFrame();
 
 		///// 終了条件
-		if (system->GetTriggerOn(DIK_ESCAPE) ||
-			system->GetGamepadTriggerOn(VK_PAD_START) ||
+		if (/*system->GetTriggerOn(DIK_ESCAPE) ||
+			system->GetGamepadTriggerOn(VK_PAD_START) ||*/
 			system->ProcessMessage()) {
 			break;
 		}

@@ -44,14 +44,7 @@ void DrawEngine::Initialize
 	pso_->Initialize(directXDriver_);
 
 	///================== PSO関連 ==================
-	// 2D用PSO handle = 0
-	{
-		ID3D12PipelineState* graphicsPipelineState_ = pso_->createPSO(LightModelType::Sprite2D);
-		psoList_.push_back(graphicsPipelineState_);
-	}
-	// 3D用PSO
-	// Lambert handle = defaultPSO = 1
-	// HalfLambert handle = 2
+	// PSOつくり
 	for (int i = 0; i < (int)LightModelType::NumLightModels; i++) {
 		ID3D12PipelineState* graphicsPipelineState_ = pso_->createPSO((LightModelType)i);
 		psoList_.push_back(graphicsPipelineState_);

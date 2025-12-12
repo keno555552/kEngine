@@ -17,17 +17,17 @@ void InstanceManager::Update() {
 	UpdateInstance(tile3DList_);
 
 
-	if (tileLayerCount > 1) {
-		tileLayerCount = (int)tile2DList_[tile2DList_.size() - 1]->position.z;
+	if (tileLayerCount != 0) {
+		tileLayerCount = 0;
 	}
 	if (spriteLayerCount > 1) {
-		spriteLayerCount = (int)(spriteList_[spriteList_.size() - 1]->position.z + 0.001f);
+		spriteLayerCount = (int)(spriteList_[spriteList_.size() - 1]->position.z + 0.0001f);
 	}
 }
 
 void InstanceManager::AddSpriteInstance(Vector2 pos, MaterialConfig material) {
 	SpriteInstance instance;
-	instance.position = { pos.x,pos.y,(float)tileLayerCount * -0.001f };
+	instance.position = { pos.x,pos.y,(float)tileLayerCount * -0.0001f };
 	instance.scale = { 1.0f,1.0f };		/// まだ使ってない
 	instance.rotate = { 0.0f,0.0f,0.0f };  /// まだ使ってない
 	instance.layer = 0;					/// まだ使ってない
@@ -94,7 +94,7 @@ void InstanceManager::AddModelInstance(TransformationMatrix* wvpData, MaterialCo
 
 void InstanceManager::Add2DTileInstance(Vector2 pos, MaterialConfig material) {
 	SpriteInstance instance;
-	instance.position = { pos.x,pos.y,(float)tileLayerCount * -0.01f };
+	instance.position = { pos.x,pos.y,(float)tileLayerCount * -0.0001f };
 	instance.scale = { 1.0f,1.0f };		/// まだ使ってない
 	instance.rotate = { 0.0f,0.0f,0.0f };  /// まだ使ってない
 	instance.layer = 0;					/// まだ使ってない
@@ -182,7 +182,7 @@ void InstanceManager::Add2DInstance(Transform wvpData, MaterialConfig material, 
 	/// レイヤー設定
 	if (wvpData.translate.z == 0) {
 		/// レイヤー指定がない場合は自動設定
-		instance.position.z = tileLayerCount * 0.01f;
+		instance.position.z = tileLayerCount * 0.0001f + 0.0002f;
 		tileLayerCount++;
 	} else {
 		/// レイヤー指定がある場合はその値を使用し、深度調整のみ行う
@@ -254,7 +254,7 @@ void InstanceManager::Add3DInstance(TransformationMatrix wvpData, MaterialConfig
 }
 
 void InstanceManager::SpriteLayerManagement() {
-	if (spriteList_.empty()) return;
+	if (tile2DList_.empty()) return;
 
 	/// スロットの基本値とステップ値、0から0.01ずつ減少
 	float baseZ = 0.0f;
@@ -264,7 +264,7 @@ void InstanceManager::SpriteLayerManagement() {
 	std::vector<SpriteInstance*> layered;
 
 	// position.zが-0.4f以下のスプライトとそれ以外で分ける
-	for (auto* sprite : spriteList_) {
+	for (auto* sprite : tile2DList_) {
 		if (sprite->position.z <= -0.4f)
 			layered.push_back(sprite);
 		else
@@ -282,7 +282,7 @@ void InstanceManager::SpriteLayerManagement() {
 	}
 
 	/// 最後に資料をspriteList_にまとめ直す
-	spriteList_.clear();
-	spriteList_.insert(spriteList_.end(), unlayered.begin(), unlayered.end());
-	spriteList_.insert(spriteList_.end(), layered.begin(), layered.end());
+	tile2DList_.clear();
+	tile2DList_.insert(tile2DList_.end(), unlayered.begin(), unlayered.end());
+	tile2DList_.insert(tile2DList_.end(), layered.begin(), layered.end());
 }

@@ -27,7 +27,7 @@ public:
 	void Updata();
 	void Draw();
 
-	bool GetIsOpened() const { return isOpened_; }
+	bool GetIsPause() const { return isPause_; }
 
 	void SetCanOpen(bool state) { canOpen_ = state; }
 	bool GetCanOpen() const { return canOpen_; }
@@ -121,6 +121,7 @@ private:
 	/// =============== フラグ ===============///
 	bool canOpen_ = true;
 	bool isOpened_ = false;
+	bool isPause_ = false;
 	bool isConfirm_ = false;
 
 	bool clickLeft_ = false;

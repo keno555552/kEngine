@@ -1,6 +1,6 @@
 #include "SceneTest.h"
 
-SceneTest::SceneTest(kEngine* system){
+SceneTest::SceneTest(kEngine* system) {
 	/// =========== システム初期化 ============///
 	system_ = system;
 	debugCamera_ = new DebugCamera(system);
@@ -9,7 +9,7 @@ SceneTest::SceneTest(kEngine* system){
 
 	/// =========== リソースロード ============///
 	skydomeModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/skydome/skydome.obj");
-	playerModelHandle_ = system_->SetModelObj ("resources/TemplateResource/object/charater/charater.obj");
+	playerModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/charater/charater.obj");
 
 	boxTextureHandle_ = system_->LoadTextrue("resources/texture/testBox.png");
 	tryTextureHandle_ = system_->LoadTextrue("resources/texture/Tryer.png");
@@ -21,11 +21,11 @@ SceneTest::SceneTest(kEngine* system){
 	skydome_->CreateModelData(skydomeModelHandle_);
 	skydome_->objectParts_[0].materialConfig->enableLighting = false;
 
-	player_ = new Player(system,Vector3(0,0.5f,0));
-	player_->CreateDefaultData();
-	player_->modelHandle_ = config::default_Cube_MeshBufferHandle_;
-	player_->objectParts_[0].materialConfig->useModelTexture = false;
-	player_->objectParts_[0].materialConfig->textureHandle = boxTextureHandle_;
+	player_ = new Player(system, Vector3(2.0f, 0.5f, 0));
+	player_->CreateModelData(playerModelHandle_);
+	player_->mainPosition.transform.scale = Vector3(0.5f, 0.5f, 0.5f);
+	//player_->CreateDefaultData();
+	//player_->modelHandle_ = playerModelHandle_;
 
 	sprite_ = new SimpleSprite;
 	sprite_->IntObject(system_);
@@ -56,6 +56,7 @@ SceneTest::~SceneTest() {
 	delete skydome_;
 	delete sprite_;
 	delete sprite2_;
+	delete mapChipField_;
 }
 
 void SceneTest::Update() {
@@ -70,7 +71,7 @@ void SceneTest::Update() {
 
 	sprite_->Update(usingCamera_);
 	//sprite2_->Update(usingCamera_);
-	
+
 	/// ブロック更新
 	for (auto& row : blockObjectList_) {
 		for (auto& block : row) {
@@ -83,6 +84,10 @@ void SceneTest::Update() {
 	if (system_->GetTriggerOn(DIK_0)) {
 		if (useDebugCamera)useDebugCamera = false;
 		else useDebugCamera = true;
+	}
+
+	if (system_->GetTriggerOn(DIK_SPACE)) {
+		ChangeNextStage(SceneNum::S_Result);
 	}
 }
 
@@ -107,7 +112,7 @@ void SceneTest::Draw() {
 			}
 		}
 	}
-	
+
 #ifdef USE_IMGUI
 	/// imgui処理
 	ImguiPart();
@@ -118,6 +123,11 @@ void SceneTest::CameraPart() {
 	if (useDebugCamera) {
 		usingCamera_ = debugCamera_;
 	} else {
+		Transform cameraTransform = CreateDefaultTransform();
+		cameraTransform.translate.x = player_->mainPosition.transform.translate.x;
+		cameraTransform.translate.y = player_->mainPosition.transform.translate.y + 0.5f;
+		cameraTransform.translate.z = player_->mainPosition.transform.translate.z - 15.0f;
+		camera_->SetCamera(cameraTransform);
 		usingCamera_ = camera_;
 	}
 	usingCamera_->Update();
@@ -126,7 +136,7 @@ void SceneTest::CameraPart() {
 #ifdef USE_IMGUI
 void SceneTest::ImguiPart() {
 	ImGui::Begin("DebugCamera");
-	ImGui::Checkbox("isUse",&useDebugCamera);
+	ImGui::Checkbox("isUse", &useDebugCamera);
 	ImGui::End();
 
 	{
@@ -138,20 +148,20 @@ void SceneTest::ImguiPart() {
 
 	{
 		ImGui::Begin("SpritePos");
-		ImGui::SliderFloat3("Pos",		&sprite_->mainPosition.transform.translate.x, 0.0f, 1280.0f);
-		ImGui::SliderFloat3("Rotate",	&sprite_->mainPosition.transform.rotate.x, 0.0f, 6.5f);
-		ImGui::SliderFloat3("Scale",	&sprite_->mainPosition.transform.scale.x, 0.0f, 5.0f);
+		ImGui::SliderFloat3("Pos", &sprite_->mainPosition.transform.translate.x, 0.0f, 1280.0f);
+		ImGui::SliderFloat3("Rotate", &sprite_->mainPosition.transform.rotate.x, 0.0f, 6.5f);
+		ImGui::SliderFloat3("Scale", &sprite_->mainPosition.transform.scale.x, 0.0f, 5.0f);
 
-		ImGui::SliderFloat3("AnchorPoint",	&sprite_->mainPosition.anchorPoint.x, -500.0f, 500.0f);
-		ImGui::SliderFloat2("CropLT",	&sprite_->objectParts_[0].cropLT.x, -500.0f, 500.0f);
-		ImGui::SliderFloat2("CropSize",	&sprite_->objectParts_[0].cropSize.x, -500.0f, 500.0f);
+		ImGui::SliderFloat3("AnchorPoint", &sprite_->mainPosition.anchorPoint.x, -500.0f, 500.0f);
+		ImGui::SliderFloat2("CropLT", &sprite_->objectParts_[0].cropLT.x, -500.0f, 500.0f);
+		ImGui::SliderFloat2("CropSize", &sprite_->objectParts_[0].cropSize.x, -500.0f, 500.0f);
 
 		ImGui::Text("MaterialConfig");
-		ImGui::SliderFloat3("uvTranslate", & sprite_->objectParts_[0].materialConfig->uvTranslate.x, -5.0f, 5.0f);
-		ImGui::SliderFloat3("uvScale", & sprite_->objectParts_[0].materialConfig->uvScale.x, -5.0f, 5.0f);
-		ImGui::SliderFloat3("uvRotate", & sprite_->objectParts_[0].materialConfig->uvRotate.x, -6.5f, 6.5f);
-		ImGui::ColorEdit4("Color", & sprite_->objectParts_[0].materialConfig->textureColor.x);
-	
+		ImGui::SliderFloat3("uvTranslate", &sprite_->objectParts_[0].materialConfig->uvTranslate.x, -5.0f, 5.0f);
+		ImGui::SliderFloat3("uvScale", &sprite_->objectParts_[0].materialConfig->uvScale.x, -5.0f, 5.0f);
+		ImGui::SliderFloat3("uvRotate", &sprite_->objectParts_[0].materialConfig->uvRotate.x, -6.5f, 6.5f);
+		ImGui::ColorEdit4("Color", &sprite_->objectParts_[0].materialConfig->textureColor.x);
+
 		ImGui::End();
 	}
 }
@@ -180,7 +190,7 @@ void SceneTest::GenerateBlocks() {
 				blockObjectList_[i][j]->CreateDefaultData();
 				blockObjectList_[i][j]->modelHandle_ = config::default_Cube_MeshBufferHandle_;
 				blockObjectList_[i][j]->objectParts_[0].materialConfig->useModelTexture = false;
-				blockObjectList_[i][j]->objectParts_[0].materialConfig->textureHandle = uvTextureHandle_;
+				blockObjectList_[i][j]->objectParts_[0].materialConfig->textureHandle = boxTextureHandle_;
 				blockObjectList_[i][j]->mainPosition.transform.translate = mapChipField_->GetMapChipPositionByIndex(j, i);
 			}
 		}

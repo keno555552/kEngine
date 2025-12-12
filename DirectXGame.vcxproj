@@ -345,11 +345,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="scenes\CG4_HK_1\Effect1.cpp" />
     <ClCompile Include="scenes\CG4_HK_1\Effect2.cpp" />
     <ClCompile Include="scenes\Scene1.cpp" />
+    <ClCompile Include="scenes\SceneResult.cpp" />
     <ClCompile Include="scenes\SceneTest.cpp" />
     <ClCompile Include="kEngine\GameObject\Object\Sprite.cpp" />
     <ClCompile Include="kEngine\drawEngine\DrawData\SpriteData.cpp" />
     <ClCompile Include="kEngine\drawEngine\ResourceManager\TextureManager\TextureManager.cpp" />
     <ClCompile Include="scenes\SceneTest2.cpp" />
+    <ClCompile Include="scenes\SceneTitle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imgui_stdlib.h" />
@@ -435,11 +437,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="scenes\CG4_HK_1\Effect1.h" />
     <ClInclude Include="scenes\CG4_HK_1\Effect2.h" />
     <ClInclude Include="scenes\Scene1.h" />
+    <ClInclude Include="scenes\SceneResult.h" />
     <ClInclude Include="scenes\SceneTest.h" />
     <ClInclude Include="kEngine\GameObject\Object\Sprite.h" />
     <ClInclude Include="kEngine\drawEngine\DrawData\SpriteData.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\TextureManager\TextureManager.h" />
     <ClInclude Include="scenes\SceneTest2.h" />
+    <ClInclude Include="scenes\SceneTitle.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\LightingLambert\HalfLambert.hlsl">

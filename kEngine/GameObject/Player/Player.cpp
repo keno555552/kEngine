@@ -10,7 +10,7 @@ Player::Player(kEngine* system, const Vector3& position) {
 	mainPosition.transform.translate = position;
 	objectParts_[0].materialConfig->lightModelType = LightModelType::HalfLambert;
 
-	mainPosition.transform.rotate.y = std::numbers::pi_v<float> / 2.0f;
+	mainPosition.transform.rotate.y = 0.0f;
 }
 
 void Player::Update(Camera* camera) {
@@ -111,11 +111,12 @@ void Player::Move() {
 	// 回転制御
 	if (turnTimer_ >= 0.0f) {
 		turnTimer_ -= deltaTime_;
+		std::min(turnTimer_, 0.0f);
 
 		float destinationRotationYTable[] = {
-			0.0f,                            // 右
-			std::numbers::pi_v<float>,       // 左
-			std::numbers::pi_v<float> / 2.0f // なし
+			-std::numbers::pi_v<float> / 2.0f,                            // 右
+			std::numbers::pi_v<float> /2.0f,       // 左
+			0.0f // なし
 		};
 		// 状態に応じた角度を取得する
 		float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];

@@ -1,7 +1,9 @@
 #pragma once
 #include "MaterialConfig.h"
 #include "Scene.h"
+#include "SceneTitle.h"
 #include "Scene1.h"
+#include "SceneResult.h"
 #include "SceneTestForGE.h"
 #include "SceneTester.h"
 #include "SceneTest.h"
@@ -33,6 +35,16 @@ private:
 	kEngine* system_ = nullptr; // 借り
 
 	DefaultMenu* defaultMenu_ = nullptr;
+
+	/// ========= リソースハンドル ========= ///
+
+	int helperTextureHandle_ = 0;
+
+	/// ============ オブジェクト =========== ///
+
+	SimpleSprite* helperSprite_ = nullptr;
+	Vector2 helperSpriteScale_ = { 1.0f,1.0f };
+	Vector2 helperSpritePos_ = { 50.0f,50.0f };
 
 	/// =============== ステージ管理 ===============///
 	
