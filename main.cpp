@@ -22,7 +22,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	///========================Main処理=====================///
 	while (true) {
 
-
 		///====================ゲーム処理====================///
 		sceneManager->Update();
 
