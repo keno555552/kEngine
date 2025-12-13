@@ -7,18 +7,23 @@ Transform CameraDefaultTransform() {
 	};
 }
 
-Camera::Camera() {
-	projectionMatrix_ = MakePerspectiveFovMatrix(0.45f, float(config::GetClientWidth()) / float(config::GetClientHeight()), 0.1f, 100.0f);
-	cameraTransform_ = CameraDefaultTransform();
-	Update();
-	matRot_ = MakeRotateMatrix4x4(cameraTransform_.rotate);
-}
+Camera::Camera()
+	:fovY_(0.45f)
+	, aspect_(float(config::GetClientWidth()) / float(config::GetClientHeight()))
+	, nearClip_(0.1f)
+	, farClip_(100.0f)
+	, projectionMatrix_(MakePerspectiveFovMatrix(0.45f, float(config::GetClientWidth()) / float(config::GetClientHeight()), 0.1f, 100.0f))
+	, cameraTransform_(CameraDefaultTransform())
+	, matRot_(MakeRotateMatrix4x4(cameraTransform_.rotate))
+{ Update(); }
 
 void Camera::Update() {
+	/// ProjectionMatrix更新
+	projectionMatrix_ = MakePerspectiveFovMatrix(fovY_, aspect_, nearClip_, farClip_);
 	/// カメラMatrix更新
-	Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform_.scale, cameraTransform_.rotate, cameraTransform_.translate);
+	worldMatrix_ = MakeAffineMatrix(cameraTransform_.scale, cameraTransform_.rotate, cameraTransform_.translate);
 	/// ビュー行列更新
-	viewMatrix_ = Inverse(cameraMatrix);
+	viewMatrix_ = Inverse(worldMatrix_);
 }
 
 TransformationMatrix Camera::transformationMatrixTransform(Transform objTransform) {
@@ -49,8 +54,8 @@ void Camera::Rotate(Vector3 Theta) {
 	cameraTransform_.rotate = cameraTransform_.rotate + Theta;
 }
 
-void Camera::ResetCamera() { 
-	cameraTransform_ = defaultTransform_; 
+void Camera::ResetCamera() {
+	cameraTransform_ = defaultTransform_;
 	Camera::Update();
 }
 
