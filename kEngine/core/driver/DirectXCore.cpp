@@ -307,7 +307,7 @@ void DirectXCore::SetXInput() {
 }
 
 
-ID3D12CommandQueue* DirectXCore::CreateCommandQueue(ID3D12Device* device) {
+ID3D12CommandQueue* DirectXCore::CreateCommandQueue() {
 	// コマンドキューを生成する
 	ID3D12CommandQueue* commandQueue = nullptr;
 	D3D12_COMMAND_QUEUE_DESC commandQueueDesc{};
@@ -319,7 +319,7 @@ ID3D12CommandQueue* DirectXCore::CreateCommandQueue(ID3D12Device* device) {
 	return commandQueue;
 }
 
-ID3D12CommandAllocator* DirectXCore::CreateCommandAllocator(ID3D12Device* device) {
+ID3D12CommandAllocator* DirectXCore::CreateCommandAllocator() {
 	// コマンドアロケータを生成する
 	ID3D12CommandAllocator* commandAllocator = nullptr;
 	HRESULT hr = device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator));
@@ -329,7 +329,7 @@ ID3D12CommandAllocator* DirectXCore::CreateCommandAllocator(ID3D12Device* device
 	return commandAllocator;
 }
 
-ID3D12GraphicsCommandList* DirectXCore::CreateCommandList(ID3D12Device* device, ID3D12CommandAllocator* commandAllocator) {
+ID3D12GraphicsCommandList* DirectXCore::CreateCommandList(ID3D12CommandAllocator* commandAllocator) {
 	// コマンドリストを生成する
 	ID3D12GraphicsCommandList* commandList = nullptr;
 	HRESULT hr = device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator, nullptr, IID_PPV_ARGS(&commandList));
@@ -357,7 +357,7 @@ IDXGISwapChain4* DirectXCore::CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12
 	return swapChain;
 }
 
-ID3D12DescriptorHeap* DirectXCore::CreateDescriptorHeap(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible) {
+ID3D12DescriptorHeap* DirectXCore::CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible) {
 	ID3D12DescriptorHeap* descriptorHeap = nullptr;
 	D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc{};
 	descriptorHeapDesc.Type = heapType;
@@ -369,7 +369,7 @@ ID3D12DescriptorHeap* DirectXCore::CreateDescriptorHeap(ID3D12Device* device, D3
 	return descriptorHeap;
 }
 
-void DirectXCore::CreateRenderTargetViews(ID3D12Device* device, IDXGISwapChain4* swapChain, ID3D12DescriptorHeap* rtvDescriptorHeap) {
+void DirectXCore::CreateRenderTargetViews(IDXGISwapChain4* swapChain, ID3D12DescriptorHeap* rtvDescriptorHeap) {
 	// SwapChainからResourceを引っ張ってくる
 	HRESULT hr = swapChain->GetBuffer(0, IID_PPV_ARGS(&swapChainResources[0]));
 	// うまく取得できなければ起動できない
@@ -399,7 +399,7 @@ void DirectXCore::CreateRenderTargetViews(ID3D12Device* device, IDXGISwapChain4*
 	device->CreateRenderTargetView(swapChainResources[1], &rtvDesc, rtvHandles[1]);
 }
 
-ID3D12Fence* DirectXCore::CreateFence(ID3D12Device* device) {
+ID3D12Fence* DirectXCore::CreateFence() {
 	///初期値0でFenceを作る
 	//ID3D12Fence* fence = nullptr;
 	//uint64_t fenceValue = 0;
@@ -463,43 +463,25 @@ void DirectXCore::InitializeDrive(const char* kClientTitle, int kClientWidth, in
 	assert(useAdapter != nullptr);
 
 	device = CreateDevice(useAdapter);
-	commandQueue = CreateCommandQueue(device);
-	commandAllocator = CreateCommandAllocator(device);
-	commandList = CreateCommandList(device, commandAllocator);
+	commandQueue = CreateCommandQueue();
+	commandAllocator = CreateCommandAllocator();
+	commandList = CreateCommandList(commandAllocator);
 
 	SwapChain = CreateSwapChain(dxgiFactory, commandQueue, winAPI_->GetHWND(), kClientWidth, kClientHeight);
 	//DescriptorHeap = CreateDescriptorHeap(device);
-	rtvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
-	srvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, config::GetMaxSRVNum(), true);
-	dsvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
+	rtvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
+	srvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, config::GetMaxSRVNum(), true);
+	dsvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
 
-	CreateRenderTargetViews(device, SwapChain, rtvDescriptorHeap);
+	CreateRenderTargetViews(SwapChain, rtvDescriptorHeap);
 
-	fence = CreateFence(device);
+	fence = CreateFence();
 
-
-#ifdef USE_IMGUI
-		///Imgui
-		// ImGuiの初期化。詳細はさして重要ではないので解説は省略する。
-		// こういうもんである
-		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
-		ImGui::StyleColorsDark();
-		ImGui_ImplWin32_Init(winAPI_->GetHWND());
-		ImGui_ImplDX12_Init(device,
-			swapChainDesc.BufferCount,
-			rtvDesc.Format,
-			srvDescriptorHeap,
-			srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-			srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-#endif
-
-		// DirectX入力装置の初期化
-		InitializeDirectXInput();
-		SetDirectXInput(Keyboard, keyBoardDevice);
-		SetDirectXInput(Mouse, mouseDevice);
-		// SetDirectXInput(GamePad, gamepadDevice); //XInput優先
-
+	// DirectX入力装置の初期化
+	InitializeDirectXInput();
+	SetDirectXInput(Keyboard, keyBoardDevice);
+	SetDirectXInput(Mouse, mouseDevice);
+	// SetDirectXInput(GamePad, gamepadDevice); //XInput優先
 
 }
 
@@ -509,13 +491,6 @@ bool DirectXCore::ProcessMessage() {
 
 void DirectXCore::Finalize() {
 
-#ifdef USE_IMGUI
-	/// ImGuiの終了処理。詳細はさして重要ではないので解説は省略する。
-	// こういうもんである。初期化と逆順に行う
-	ImGui_ImplDX12_Shutdown();
-	ImGui_ImplWin32_Shutdown();
-	ImGui::DestroyContext();
-#endif
 
 	/// すべでのものの解放
 	if (dxgiFactory)			dxgiFactory->Release();

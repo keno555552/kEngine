@@ -114,7 +114,7 @@ ID3D12RootSignature* PSO::createRootSignature() {
 	}
 	// バイナリを元に生成
 	rootSignature_ = nullptr;
-	hr = directXDriver_->GetDriver()->CreateRootSignature(0, signatureBlob_->GetBufferPointer(), signatureBlob_->GetBufferSize(), IID_PPV_ARGS(&rootSignature_));
+	hr = directXDriver_->GetDevice()->CreateRootSignature(0, signatureBlob_->GetBufferPointer(), signatureBlob_->GetBufferSize(), IID_PPV_ARGS(&rootSignature_));
 	assert(SUCCEEDED(hr));
 
 	rootSignatureList_.push_back(rootSignature_);
@@ -224,7 +224,7 @@ void PSO::SetGraphicsPipelineState() {
 
 	// 実際に生成
 	graphicsPipelineState_ = nullptr;
-	HRESULT hr = directXDriver_->GetDriver()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState_));
+	HRESULT hr = directXDriver_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState_));
 	assert(SUCCEEDED(hr));
 }
 

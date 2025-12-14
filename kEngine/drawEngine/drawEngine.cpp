@@ -52,7 +52,7 @@ void DrawEngine::Initialize
 
 	rootSignature_ = pso_->getRootSignature((int)psoType::defaultPSO);
 
-	depthStencilResource = CreateDepthStencilTextureResource(directXDriver_->GetDriver(), kClientWidth, kClientHeight);
+	depthStencilResource = CreateDepthStencilTextureResource(directXDriver_->GetDevice(), kClientWidth, kClientHeight);
 	MakeDepthStencilView();
 
 	///
@@ -72,7 +72,7 @@ void DrawEngine::Initialize
 
 
 	/// Tile用wvpBufferを作成
-	tile2DWVPResource_->CreateResourceClass_(directXDriver_->GetDriver(), sizeof(TransformationMatrix) * config::Get2DTileNumInstance());
+	tile2DWVPResource_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(TransformationMatrix) * config::Get2DTileNumInstance());
 	tile2DWVPResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&tile2DInstancingData_));
 	for (int index = 0; index < config::Get2DTileNumInstance(); ++index) {
 		tile2DInstancingData_[index].WVP = Identity();
@@ -80,7 +80,7 @@ void DrawEngine::Initialize
 	}
 	Tile2DSrvHandleGPU_ = CreateTileWVPBuffer(tile2DWVPResource_->GetResource().Get());
 
-	tile3DWVPResource_->CreateResourceClass_(directXDriver_->GetDriver(), sizeof(TransformationMatrix) * config::Get3DTileNumInstance());
+	tile3DWVPResource_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(TransformationMatrix) * config::Get3DTileNumInstance());
 	tile3DWVPResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&tile3DInstancingData_));
 	for (int index = 0; index < config::Get3DTileNumInstance(); ++index) {
 		tile3DInstancingData_[index].WVP = Identity();
@@ -92,7 +92,7 @@ void DrawEngine::Initialize
 	for (int i = 0; i < config::GetMaxMaterialNum(); i++) {
 		OffsetData* offsetData = new OffsetData;
 		UINT* offset = nullptr;
-		offsetData->instanceOffsetResource->CreateResourceClass_(directXDriver_->GetDriver(), 256);
+		offsetData->instanceOffsetResource->CreateResourceClass_(directXDriver_->GetDevice(), 256);
 		offsetData->instanceOffsetResource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&offset));
 		offsetData->instanceOffset = offset;
 		offsetData->state = 0;
@@ -1251,7 +1251,7 @@ void DrawEngine::SetMaterial(int MaterialHandle) {
 void DrawEngine::InitializeLighting() {
 
 	// マテリアルにデータを書き込む
-	resourceManager_->lightingResource_->CreateResourceClass_(directXDriver_->GetDriver(), sizeof(DirectionalLight));
+	resourceManager_->lightingResource_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(DirectionalLight));
 	resourceManager_->lightingResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&lightingData));
 }
 
@@ -1319,7 +1319,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE DrawEngine::CreateTileWVPBuffer(ID3D12Resource* inst
 	D3D12_GPU_DESCRIPTOR_HANDLE SrvHandleGPU_ = directXDriver_->GetGPUDescriptorHandle(directXDriver_->GetSrvDescriptorHeap(), directXDriver_->GetDesriptorSizeSRV(), descriptorIndex_);
 
 	//
-	directXDriver_->GetDriver()->CreateShaderResourceView(
+	directXDriver_->GetDevice()->CreateShaderResourceView(
 		instancingResource,					// ID3D12Resource
 		&instancingSrvDesc,					// SRVの設定
 		SrvHandleCPU_						// CPU用のハンドル
@@ -1336,7 +1336,7 @@ void DrawEngine::MakeDepthStencilView() {
 	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 	// DSVHeap先頭にDSVをつくる
-	directXDriver_->GetDriver()->CreateDepthStencilView(
+	directXDriver_->GetDevice()->CreateDepthStencilView(
 		depthStencilResource, &dsvDesc, directXDriver_->GetDsvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart()
 	);
 }

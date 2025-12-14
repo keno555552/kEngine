@@ -249,6 +249,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imgui\imgui_stdlib.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="kEngine\core\driver\ImGuiManager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\CubeMesh.cpp" />
     <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\SphereMesh.cpp" />
     <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\Sprite2DMesh.cpp" />
@@ -352,11 +355,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\drawEngine\ResourceManager\TextureManager\TextureManager.cpp" />
     <ClCompile Include="scenes\SceneTest2.cpp" />
     <ClCompile Include="scenes\SceneTitle.cpp" />
+    <ClCompile Include="kEngine\core\driver\SrvManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imgui_stdlib.h" />
     <ClInclude Include="externals\nlohmann\json.hpp" />
     <ClInclude Include="externals\nlohmann\json_fwd.hpp" />
+    <ClInclude Include="kEngine\core\driver\ImGuiManager.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\CubeMesh.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\SphereMesh.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\Sprite2DMesh.h" />
@@ -444,6 +449,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\drawEngine\ResourceManager\TextureManager\TextureManager.h" />
     <ClInclude Include="scenes\SceneTest2.h" />
     <ClInclude Include="scenes\SceneTitle.h" />
+    <ClInclude Include="kEngine\core\driver\SrvManager.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\LightingLambert\HalfLambert.hlsl">

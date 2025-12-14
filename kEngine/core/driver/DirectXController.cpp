@@ -1,5 +1,6 @@
 #include "DirectXController.h"
 #include <pplwin.h>
+#include <cassert>
 
 DirectXController::DirectXController() {
 	static FixFPS fixFPS;
@@ -9,6 +10,11 @@ DirectXController::DirectXController() {
 }
 
 DirectXController::~DirectXController() {
+
+#ifdef USE_IMGUI
+	ImGuiManager::Shutdown();
+#endif
+
 	Finalize();
 	timeEndPeriod(1);
 }
@@ -16,9 +22,7 @@ DirectXController::~DirectXController() {
 void DirectXController::StartFrame() {
 
 #ifdef USE_IMGUI
-	ImGui_ImplDX12_NewFrame();
-	ImGui_ImplWin32_NewFrame();
-	ImGui::NewFrame();
+	ImGuiManager::BeginFrame();
 #endif
 
 	// これから書き込むバックバッファのインデックスを取得
@@ -58,9 +62,7 @@ void DirectXController::EndFrame() {
 
 #ifdef _DEBUG
 #ifdef USE_IMGUI
-	// 実際のcommandListのImGuiの描画コマンドを積む
-	ImGui::Render();
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
+	ImGuiManager::EndFrame(commandList);
 #endif
 #endif
 

@@ -29,7 +29,9 @@ void P_Ball::Draw() {
 
 	Particle::Draw();
 
+#ifdef USE_IMGUI
 	ImguiPart();
+#endif
 }
 
 void P_Ball::SetTextureHandle(int handle) {
@@ -47,7 +49,7 @@ void P_Ball::CreateBall() {
 	/// 作成判定
 	if (createTimer.parameter_ == 0) {
 
-		for (int i = 0; i < (int)createNumber_;i++) {
+		for (int i = 0; i < (int)createNumber_; i++) {
 			// 最大数チェック
 			if ((int)particleObjectList_.size() >= maxParticleNum) return;
 			Particle::AddObject();
@@ -109,6 +111,7 @@ void P_Ball::DeleteBall() {
 	}
 }
 
+#ifdef USE_IMGUI
 void P_Ball::ImguiPart() {
 
 	ImGui::Begin("FireMain");
@@ -136,3 +139,4 @@ void P_Ball::ImguiPart() {
 	ImGui::End();
 
 }
+#endif

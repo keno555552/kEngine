@@ -2,6 +2,7 @@
 #include "DirectXController.h"
 #include "inputManager.h"
 #include "soundManager.h"
+#include "SrvManager.h"
 #include "drawEngine.h"
 #include "TransformationMatrix.h"
 #include "Vector2.h"
@@ -203,10 +204,25 @@ public:
 #pragma endregion
 
 private:
+
+	/// ============ コアシステム ============///
 	DirectXController* dxComm = nullptr;
+
+	/// ============ 描画関連 ============///
+
+	/// 資源管理
+	SrvManager* srvManager = nullptr;
+
+	/// 描画ロジック
 	DrawEngine* drawEngine = nullptr;
+
+	/// ============ 入力関連 ============///
 	InputManager* inputManager = nullptr;
+
+	/// ============ 音関連 ============///
 	SoundManager* soundManager = nullptr;
+
+	/// ============ 時間関連 ============///
 	TimeManager* timeManager = nullptr;
 
 };

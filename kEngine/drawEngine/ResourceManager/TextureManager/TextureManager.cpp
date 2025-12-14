@@ -21,7 +21,7 @@ TextureManager* TextureManager::GetInstance() {
 
 void TextureManager::Initialize(DirectXCore* core) {
 	core_ = core;
-	device_ = core->GetDriver();
+	device_ = core->GetDevice();
 	textureDatas.reserve(config::GetMaxSRVNum());
 	descriptorIndex_ = 0;
 }

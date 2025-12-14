@@ -4,7 +4,7 @@
 ResourceManager::ResourceManager(DirectXCore* device) {
 
 	core_ = device;
-	Bdevice_ = core_->GetDriver();
+	Bdevice_ = core_->GetDevice();
 
 	//wvpResource_ = new WVPResource(Bdevice_);
 	config::default_Sprite2D_MeshBufferHandle_ = CreateSimpleSpriteMeshResource();

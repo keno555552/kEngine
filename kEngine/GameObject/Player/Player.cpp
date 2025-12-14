@@ -111,7 +111,7 @@ void Player::Move() {
 	// 回転制御
 	if (turnTimer_ >= 0.0f) {
 		turnTimer_ -= deltaTime_;
-		std::min(turnTimer_, 0.0f);
+		turnTimer_ = std::min(turnTimer_, 0.0f);
 
 		float destinationRotationYTable[] = {
 			-std::numbers::pi_v<float> / 2.0f,                            // 右
