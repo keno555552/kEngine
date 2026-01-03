@@ -4,6 +4,7 @@
 
 kEngine::kEngine() {
 	dxComm = new DirectXController;
+	srvManager = new SrvManager;
 	drawEngine = new DrawEngine;
 	inputManager = new InputManager;
 	soundManager = new SoundManager;
@@ -11,16 +12,33 @@ kEngine::kEngine() {
 }
 
 kEngine::~kEngine() {
-	delete drawEngine;
-	delete inputManager;
-	delete soundManager;
+#ifdef USE_IMGUI
+	ImGuiManager::Shutdown();
+#endif
+
 	delete timeManager;
+	delete soundManager;
+	delete inputManager;
+	delete drawEngine;
+	delete srvManager;
 	delete dxComm;
 }
 
 void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClientHeight) {
 	dxComm->InitializeDrive(kClientTitle, kClientWidth, kClientHeight);
-	drawEngine->Initialize(kClientTitle, kClientWidth, kClientHeight, dxComm);
+	srvManager->Initialize(dxComm);
+
+#ifdef USE_IMGUI
+	int srvIndex = srvManager->Allocate(); // ImGui用に1個確保
+	ImGuiManager::Initialize(dxComm->GetHWND(),
+		dxComm->GetDevice(),
+		dxComm->GetCommandQueue(),
+		srvManager->GetDescriptorHeap().Get(),
+		srvManager->GetCPUDescriptorHandle(srvIndex),
+		srvManager->GetGPUDescriptorHandle(srvIndex));
+#endif
+
+	drawEngine->Initialize(kClientTitle, kClientWidth, kClientHeight, dxComm, srvManager);
 	inputManager->Initialize(dxComm, timeManager);
 }
 
@@ -189,7 +207,7 @@ bool kEngine::SoundGetSEMute()const { return soundManager->SoundGetSEMute(); }
 #pragma region 入力関連
 
 Vector2 kEngine::GetMousePosVector2() {
-	return Vector2 { (float)inputManager->mousePosX(), (float)inputManager->mousePosY() };
+	return Vector2{ (float)inputManager->mousePosX(), (float)inputManager->mousePosY() };
 }
 
 int kEngine::GetMousePosX() {

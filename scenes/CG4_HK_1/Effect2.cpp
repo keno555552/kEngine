@@ -30,6 +30,8 @@ Effect2::~Effect2() {
 	delete debugCamera_;
 
 	delete skydome_;
+	delete ball_;
+	delete plane_;
 	//delete fire_;
 }
 

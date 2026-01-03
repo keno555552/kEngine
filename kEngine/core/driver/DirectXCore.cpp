@@ -49,7 +49,6 @@ DirectXCore::DirectXCore() {
 	swapChainResources[1] = {};
 	//DescriptorHeap = {};
 	rtvDescriptorHeap = {};
-	srvDescriptorHeap = {};
 	dsvDescriptorHeap = {};
 	rtvHandles[0] = {};
 	rtvHandles[1] = {};
@@ -77,10 +76,6 @@ DirectXCore::~DirectXCore() {
 	//if (DescriptorHeap)			DescriptorHeap->Release();
 	//if (fence)					fence->Release();
 	//CloseHandle(fenceEvent);
-}
-
-uint32_t DirectXCore::GetDesriptorSizeSRV() {
-	return device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 }
 
 uint32_t DirectXCore::GetDesriptorSizeRTV() {
@@ -470,7 +465,6 @@ void DirectXCore::InitializeDrive(const char* kClientTitle, int kClientWidth, in
 	SwapChain = CreateSwapChain(dxgiFactory, commandQueue, winAPI_->GetHWND(), kClientWidth, kClientHeight);
 	//DescriptorHeap = CreateDescriptorHeap(device);
 	rtvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
-	srvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, config::GetMaxSRVNum(), true);
 	dsvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
 
 	CreateRenderTargetViews(SwapChain, rtvDescriptorHeap);
@@ -493,9 +487,6 @@ void DirectXCore::Finalize() {
 
 
 	/// すべでのものの解放
-	if (dxgiFactory)			dxgiFactory->Release();
-	if (useAdapter)				useAdapter->Release();
-	if (device)					device->Release();
 	if (commandQueue)			commandQueue->Release();
 	if (commandAllocator)		commandAllocator->Release();
 	if (commandList)			commandList->Release();
@@ -503,13 +494,17 @@ void DirectXCore::Finalize() {
 	if (swapChainResources[0])	swapChainResources[0]->Release();
 	if (swapChainResources[1])	swapChainResources[1]->Release();
 	if (rtvDescriptorHeap)		rtvDescriptorHeap->Release();
-	if (srvDescriptorHeap)		srvDescriptorHeap->Release();
 	if (dsvDescriptorHeap)		dsvDescriptorHeap->Release();
-	if (fence)					fence->Release();
 	if (directInput)			directInput->Release();
 	if (keyBoardDevice) { keyBoardDevice->Unacquire();  keyBoardDevice->Release(); }
 	if (mouseDevice) { mouseDevice->Unacquire();  mouseDevice->Release(); }
 	if (gamepadDevice) { gamepadDevice->Unacquire();  gamepadDevice->Release(); }
+
+	if (fence)					fence->Release();
+
+	if (device)					device->Release();
+	if (useAdapter)				useAdapter->Release();
+	if (dxgiFactory)			dxgiFactory->Release();
 	CloseHandle(fenceEvent);
 
 #ifdef _DEBUG

@@ -11,6 +11,7 @@
 #include "config.h"
 #include "DrawData/ObjectData.h"
 #include "DrawData/SpriteData.h"
+#include "SrvManager.h"
 
 class ResourceManager
 {
@@ -29,7 +30,7 @@ public:
 
 public:
 	/// 一回だけ作成するResource
-	ResourceManager(DirectXCore* device);
+	ResourceManager(DirectXCore* device, SrvManager* srvManager);
 	/// 最後で解放するResource
 	~ResourceManager();
 
@@ -100,7 +101,6 @@ public:
 	/// Material関係
 	std::vector<BasicResource*> materialResourceList_;
 
-	//WVPResource* wvpResource_ = nullptr;
 
 	//////////////////////////////InstanceBuffer関係
 
@@ -123,11 +123,6 @@ private:
 	/// リソース作り
 
 	int CreateSimpleSpriteMeshResource();
-	//int CreateSprite2DResource(Vector2 LTpos, Vector2 LBpos,
-	//	Vector2 RTpos, Vector2 RBpos,
-	//	float TsizeX, float TsizeY,
-	//	Vector2 TCLTPos, Vector2 TCRBPos);
-	//int CreateSprite2DResource(const DirectX::TexMetadata mipData);
 	int CreateTriangleResource();
 	int CreateCubeResource();
 	int CreateSphereResource(int sudivision);

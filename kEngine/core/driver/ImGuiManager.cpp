@@ -4,7 +4,12 @@ bool ImGuiManager::HandleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
     return ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam);
 }
 
-void ImGuiManager::Initialize(HWND hwnd, ID3D12Device* device, ID3D12CommandQueue* queue, ID3D12DescriptorHeap* srvHeap) {
+void ImGuiManager::Initialize(HWND hwnd, 
+                              ID3D12Device* device, 
+                              ID3D12CommandQueue* queue, 
+	                          ID3D12DescriptorHeap* srvHeap,
+                              D3D12_CPU_DESCRIPTOR_HANDLE CPUDescriptorHandle, 
+                              D3D12_GPU_DESCRIPTOR_HANDLE GPUDescriptorHandle) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
@@ -12,10 +17,10 @@ void ImGuiManager::Initialize(HWND hwnd, ID3D12Device* device, ID3D12CommandQueu
     ImGui_ImplDX12_Init(
         device, 
         2,
-        DXGI_FORMAT_R8G8B8A8_UNORM, 
+        DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
         srvHeap,
-        srvHeap->GetCPUDescriptorHandleForHeapStart(),
-        srvHeap->GetGPUDescriptorHandleForHeapStart());
+        CPUDescriptorHandle,
+        GPUDescriptorHandle);
 }
 
 /// IMGUI_CHECKVERSION();

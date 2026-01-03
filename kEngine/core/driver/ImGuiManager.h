@@ -10,7 +10,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 class ImGuiManager {
 public:
     static bool HandleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
-    static void Initialize(HWND hwnd, ID3D12Device* device, ID3D12CommandQueue* queue, ID3D12DescriptorHeap* srvHeap);
+    static void Initialize(HWND hwnd, ID3D12Device* device, ID3D12CommandQueue* queue, ID3D12DescriptorHeap* srvHeap, D3D12_CPU_DESCRIPTOR_HANDLE CPUDescriptorHandle, D3D12_GPU_DESCRIPTOR_HANDLE GPUDescriptorHandle);
     static void BeginFrame();
     static void EndFrame(ID3D12GraphicsCommandList* commandList);
     static void Shutdown();

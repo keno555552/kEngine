@@ -22,12 +22,14 @@
 #include "DrawData/SpriteData.h"
 #include <format>
 
+#include "SrvManager.h"
+
 class DrawEngine
 {
 public:
 	~DrawEngine();
 
-	void Initialize(const char* kClientTitle, int kClientWidth, int kClientHeight, DirectXCore* directXDirver);
+	void Initialize(const char* kClientTitle, int kClientWidth, int kClientHeight, DirectXCore* directXDirver,SrvManager* srvManager);
 
 	void PreDraw();
 	void CommitDraw();
@@ -94,6 +96,7 @@ private:
 	ResourceManager* resourceManager_{};
 	DirectXCore* directXDriver_{};					/*借り*/
 	ID3D12GraphicsCommandList* commandList_{};		/*借り*/
+	SrvManager* srvManager_{};						/*借り*/
 
 	int kClientWidth_ = 0;
 	int kClientHeight_ = 0;
@@ -173,14 +176,7 @@ private:
 	void InitializeLighting();
 	void SetLighting(DirectionalLight* directionalLight);
 
-
 	void PSODecition(MaterialConfig& material);
-	//DirectX::ScratchImage LoadTextrueLow(const std::string& filePath);
-	//ID3D12Resource* CreateTextureResource(ID3D12Device* device, const DirectX::TexMetadata& metadata, ResourceManager::TextureInfo* saveData = nullptr);
-	//ID3D12Resource* UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages, ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
-	//int MakeTextureShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResource);
-	//int MakeModelShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResource);
-	D3D12_GPU_DESCRIPTOR_HANDLE CreateTileWVPBuffer(ID3D12Resource* insstancingResource);
 	ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);
 	void MakeDepthStencilView();
 

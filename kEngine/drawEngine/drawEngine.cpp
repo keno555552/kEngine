@@ -25,17 +25,21 @@ DrawEngine::~DrawEngine() {
 		ptr = nullptr;
 	}
 
-	depthStencilResource->Release();
+	if(depthStencilResource){
+		depthStencilResource->Release();
+		depthStencilResource = nullptr;
+	}
 
 	delete resourceManager_;
 
 }
 
 void DrawEngine::Initialize
-(const char* kClientTitle, int kClientWidth, int kClientHeight, DirectXCore* directXDriver) {
+(const char* kClientTitle, int kClientWidth, int kClientHeight, DirectXCore* directXDriver, SrvManager* srvManager) {
 	directXDriver_ = directXDriver;
 	commandList_ = directXDriver_->GetCommandList();
-	resourceManager_ = new ResourceManager(directXDriver_);
+	srvManager_ = srvManager;
+	resourceManager_ = new ResourceManager(directXDriver_, srvManager);
 	///
 	kClientWidth_ = kClientWidth;
 	kClientHeight_ = kClientHeight;
@@ -78,7 +82,10 @@ void DrawEngine::Initialize
 		tile2DInstancingData_[index].WVP = Identity();
 		tile2DInstancingData_[index].world = Identity();
 	}
-	Tile2DSrvHandleGPU_ = CreateTileWVPBuffer(tile2DWVPResource_->GetResource().Get());
+	int srvHandleIndex = srvManager_->Allocate();
+	srvManager_->CreateSRVforStructuredBuffer(srvHandleIndex, tile2DWVPResource_->GetResource().Get(), config::Get2DTileNumInstance(), sizeof(TransformationMatrix));  // 修正：使用正確的 tile2DWVPResource_
+
+	Tile2DSrvHandleGPU_ = srvManager_->GetGPUDescriptorHandle(srvHandleIndex);
 
 	tile3DWVPResource_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(TransformationMatrix) * config::Get3DTileNumInstance());
 	tile3DWVPResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&tile3DInstancingData_));
@@ -86,7 +93,10 @@ void DrawEngine::Initialize
 		tile3DInstancingData_[index].WVP = Identity();
 		tile3DInstancingData_[index].world = Identity();
 	}
-	Tile3DSrvHandleGPU_ = CreateTileWVPBuffer(tile3DWVPResource_->GetResource().Get());
+	srvHandleIndex = srvManager_->Allocate();
+	srvManager_->CreateSRVforStructuredBuffer(srvHandleIndex, tile3DWVPResource_->GetResource().Get(), config::Get3DTileNumInstance(), sizeof(TransformationMatrix));
+
+	Tile3DSrvHandleGPU_ = srvManager_->GetGPUDescriptorHandle(srvHandleIndex);
 
 	/// InstanceOffset用バッファを作成
 	for (int i = 0; i < config::GetMaxMaterialNum(); i++) {
@@ -117,6 +127,10 @@ void DrawEngine::Initialize
 }
 
 void DrawEngine::PreDraw() {
+	// 描画用のDescriptorHeapの設定
+	ID3D12DescriptorHeap* descriptorHeaps[] = { srvManager_->GetDescriptorHeap().Get()};  // 現在使用正確的 getter 函式
+	commandList_->SetDescriptorHeaps(1, descriptorHeaps);
+
 	commandList_->RSSetViewports(1, &viewport);  // Viewportを設定
 	commandList_->RSSetScissorRects(1, &scissorRect);  // Scissorを設定
 	/// RootSignatureを設定。PSOに設定しているけど別途設定が必要
@@ -363,7 +377,6 @@ void DrawEngine::DrawSprite() {
 		//	// Sprite用のworldViewProjectionMatrixを作る
 		//	Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
 		//	Matrix4x4 worldViewProjectionMatrixSprite = worldMatrixSprite * viewProj;
-		//	tileInstancingData_[i].WVP = worldViewProjectionMatrixSprite;
 		//
 		//	group[i]->drawState = InstanceManager::ISDRAW;
 		//}
@@ -846,7 +859,6 @@ void DrawEngine::Draw3DTile() {
 	//			tile3DInstancingData_[instance3DCounter_].world = instances[i]->transformData.world;
 	//
 	//			instances[i]->drawState = InstanceManager::ISDRAW;
-	//			instancesCounter++;
 	//			instance3DCounter_++;
 	//		}
 	//
@@ -899,10 +911,13 @@ void DrawEngine::Draw2D() {
 	Matrix4x4 projectionMatrixSprtie = MakeOrthographicMatrix(0.0f, 0.0f, float(config::GetClientWidth()), float(config::GetClientHeight()), 0.0f, 100.0f);
 	Matrix4x4 viewProj = viewMatrixSprtie * projectionMatrixSprtie;
 
-
 	int simpleSpriteCounter{};
 	resourceManager_->CreateSpriteMesh();
-	for (auto& [materialIndex, group] : groupedTiles) {
+	
+	for (auto& groupPair : groupedTiles) {  // 修正結構綁定語法問題
+		int materialIndex = groupPair.first;
+		std::vector<SpriteInstance*>& group = groupPair.second;
+		
 		MaterialConfig* material = resourceManager_->instanceManager_->materialConfigList_[materialIndex];
 
 		bool needSetMaterial =
@@ -921,7 +936,6 @@ void DrawEngine::Draw2D() {
 			commandList_->SetGraphicsRootSignature(rootSignature_);
 
 			// Set Material
-
 			SetMaterial(material->materialResourceHandle);
 
 			// Set Texture
@@ -939,60 +953,6 @@ void DrawEngine::Draw2D() {
 			lastMaterialState_.lightModel = material->lightModelType;
 
 			material->drawState = InstanceManager::ISDRAW;
-		}
-
-		{
-			//// Set VB/IB
-			//resourceManager_->ResizeSimpleSpriteMesh(mataData, simpleSpriteCounter, group[simpleSpriteCounter]->cornerData, group[simpleSpriteCounter]->anchorPoint, group[simpleSpriteCounter]->cropLT, group[simpleSpriteCounter]->cropSize);
-			//D3D12_VERTEX_BUFFER_VIEW VertexBufferView = resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetVertexBufferView();
-			//commandList_->IASetVertexBuffers(0, 1, &VertexBufferView);
-			//D3D12_INDEX_BUFFER_VIEW IndexBufferView = resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetIndexBufferView();
-			//commandList_->IASetIndexBuffer(&IndexBufferView);
-			//
-			//int tileCount = (int)group.size();
-			//
-			//int wvpInstanceStartpoint = instance2DCounter_;
-			//
-			//for (int i = 0; i < group.size(); i++) {
-			//
-			//	int instanceCounter = instance2DCounter_;
-			//
-			//	// 単位行列を書き込んておく
-			//	if (tile2DInstancingData_[instanceCounter].WVP != Identity()) tile2DInstancingData_[instanceCounter].WVP = Identity();
-			//	if (tile2DInstancingData_[instanceCounter].world != Identity()) tile2DInstancingData_[instanceCounter].world = Identity();
-			//
-			//	// CPUで動かす用のTransformを作る。
-			//	Transform transformSprite = CreateDefaultTransform();
-			//	if (group[i] != nullptr) {
-			//		transformSprite.translate = group[i]->position;
-			//		transformSprite.scale = { group[i]->scale.x,group[i]->scale.y, 1 };
-			//		transformSprite.rotate = group[i]->rotate;
-			//	}
-			//
-			//	// Sprite用のworldViewProjectionMatrixを作る
-			//	Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
-			//	Matrix4x4 worldViewProjectionMatrixSprite = worldMatrixSprite * viewProj;
-			//	tile2DInstancingData_[instanceCounter].WVP = worldViewProjectionMatrixSprite;
-			//
-			//	group[i]->drawState = InstanceManager::ISDRAW;
-			//	instance2DCounter_++;
-			//}
-			//
-			////*instanceOffsetData_ = wvpInstanceStartpoint;
-			//OffsetData* inUse = nullptr;
-			//inUse = instanceOffsetData_[offsetDataCounter_];
-			//*instanceOffsetData_[offsetDataCounter_]->instanceOffset = static_cast<UINT>(wvpInstanceStartpoint);
-			//instanceOffsetData_[offsetDataCounter_]->state = 1;
-			//
-			//int vertexNum = resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter]->GetVertexNum();
-			//
-			//commandList_->SetGraphicsRootConstantBufferView(4, inUse->instanceOffsetResource->GetResource()->GetGPUVirtualAddress());
-			//
-			//commandList_->SetGraphicsRootDescriptorTable(1, Tile2DSrvHandleGPU_);
-			//commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
-			//commandList_->DrawIndexedInstanced(vertexNum, tileCount, 0, 0, 0);
-			//offsetDataCounter_++;
-			//simpleSpriteCounter++;
 		}
 
 		for (int i = 0; i < (int)group.size(); ++i) {
@@ -1089,12 +1049,10 @@ void DrawEngine::Draw3D() {
 			SetMaterial(material->materialResourceHandle);
 
 			// Set Texture
-			int textureHandle;
-			if (material->useModelTexture)	textureHandle = resourceManager_->ReadModelTextureHandle(material->textureHandle);
-			else								textureHandle = resourceManager_->ReadCommenTextureHandle(material->textureHandle);
+			int textureHandle = material->textureHandle;
 			DirectX::TexMetadata checker = resourceManager_->GetTextureMetadata(textureHandle);
-			textureSrvHandleGPU_ = resourceManager_->GetTextureGPUDescriptorHandle(textureHandle);
-			commandList_->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU_);
+			D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = resourceManager_->GetTextureGPUDescriptorHandle(textureHandle);
+			commandList_->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
 			// Update cache
 			lastMaterialState_.materialIndex = materialIndex;
@@ -1291,7 +1249,7 @@ ID3D12Resource* DrawEngine::CreateDepthStencilTextureResource(ID3D12Device* devi
 		&heapProperties,					// Heapの設定
 		D3D12_HEAP_FLAG_NONE,				// Heapの特殊な設定。特になし。
 		&resourceDesc,						// Resourceの設定
-		D3D12_RESOURCE_STATE_DEPTH_WRITE,	// 深度値を書き込む状態にしておく
+		D3D12_RESOURCE_STATE_DEPTH_WRITE,	// 深度値を書き込む状態にしてお
 		&depthClearValue,					// Clear最適値
 		IID_PPV_ARGS(&resource));			// 作成するResourceポインタへのポインタ
 	assert(SUCCEEDED(hr));
@@ -1301,33 +1259,6 @@ ID3D12Resource* DrawEngine::CreateDepthStencilTextureResource(ID3D12Device* devi
 	OutputDebugStringA(buffer);
 
 	return resource;
-}
-
-D3D12_GPU_DESCRIPTOR_HANDLE DrawEngine::CreateTileWVPBuffer(ID3D12Resource* instancingResource) {
-	//
-	D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc{};
-	instancingSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
-	instancingSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	instancingSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-	instancingSrvDesc.Buffer.FirstElement = 0;
-	instancingSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-	instancingSrvDesc.Buffer.NumElements = config::Get2DTileNumInstance();
-	instancingSrvDesc.Buffer.StructureByteStride = sizeof(TransformationMatrix);
-
-	//
-	D3D12_CPU_DESCRIPTOR_HANDLE SrvHandleCPU_ = directXDriver_->GetCPUDescriptorHandle(directXDriver_->GetSrvDescriptorHeap(), directXDriver_->GetDesriptorSizeSRV(), descriptorIndex_);
-	D3D12_GPU_DESCRIPTOR_HANDLE SrvHandleGPU_ = directXDriver_->GetGPUDescriptorHandle(directXDriver_->GetSrvDescriptorHeap(), directXDriver_->GetDesriptorSizeSRV(), descriptorIndex_);
-
-	//
-	directXDriver_->GetDevice()->CreateShaderResourceView(
-		instancingResource,					// ID3D12Resource
-		&instancingSrvDesc,					// SRVの設定
-		SrvHandleCPU_						// CPU用のハンドル
-	);
-
-	descriptorIndex_++;
-
-	return SrvHandleGPU_;
 }
 
 void DrawEngine::MakeDepthStencilView() {
@@ -1340,5 +1271,6 @@ void DrawEngine::MakeDepthStencilView() {
 		depthStencilResource, &dsvDesc, directXDriver_->GetDsvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart()
 	);
 }
+
 
 

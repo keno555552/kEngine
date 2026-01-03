@@ -1,9 +1,16 @@
 #pragma once
-#include "DirectXCore.h"
+#include <wrl/client.h>
+#include <cstdint>
+#include <d3d12.h>
+
+// 前向宣告，避免循環引用
+class DirectXCore;
 
 class SrvManager
 {
 public:
+	~SrvManager();  // 添加解構函式聲明
+	
 	void Initialize(DirectXCore* core);
 
 	uint32_t Allocate();
@@ -17,6 +24,15 @@ public:
 
 	/// SRV生成 (Structured Buffer用)
 	void CreateSRVforStructuredBuffer(uint32_t srvIndex, ID3D12Resource* pResource, UINT numElements, UINT structureByteStride);
+
+	/// SRV heap 檢查
+	bool CheckSRVHeapFull();  // 添加缺失的函式聲明
+	
+	/// 取得 descriptor size
+	uint32_t GetDesriptorSizeSRV();  // 添加缺失的函式聲明
+	
+	/// 取得 descriptor heap
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetDescriptorHeap() { return descriptorHeap; }
 
 	/// =========== 描画用コマンドリスト設定 ===========///
 

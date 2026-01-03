@@ -1,5 +1,5 @@
 #include "SrvManager.h"
-#include "DirectXCore.h"  // 實作檔中包含完整的 DirectXCore.h
+#include "DirectXCore.h"
 #include <cassert>
 
 
@@ -22,6 +22,10 @@ void SrvManager::Initialize(DirectXCore* core) {
 	descriptorSize = directXCore_->GetDevice()->GetDescriptorHandleIncrementSize(
 		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
 	);
+}
+
+SrvManager::~SrvManager() {
+	descriptorHeap.Reset(); // ComPtr 自動釋放
 }
 
 uint32_t SrvManager::Allocate() {
@@ -49,6 +53,10 @@ D3D12_GPU_DESCRIPTOR_HANDLE SrvManager::GetGPUDescriptorHandle(uint32_t index) {
 	D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
 	handleGPU.ptr += (descriptorSize * index);
 	return handleGPU;
+}
+
+uint32_t SrvManager::GetDesriptorSizeSRV() {
+	return descriptorSize;
 }
 
 void SrvManager::CreateSRVforTexture2D(uint32_t srvIndex, ID3D12Resource* pResource, DXGI_FORMAT Format, UINT MipLevels) {
@@ -80,6 +88,11 @@ void SrvManager::CreateSRVforStructuredBuffer(uint32_t srvIndex, ID3D12Resource*
 		&srvDesc,
 		GetCPUDescriptorHandle(srvIndex)
 	);
+}
+
+bool SrvManager::CheckSRVHeapFull() {
+	if (useIndex >= kMaxSRVCount) return true;
+	return false;
 }
 
 void SrvManager::SetGraphicsRootDescriptorTable(UINT RootParameterIndex, uint32_t srvIndex) {

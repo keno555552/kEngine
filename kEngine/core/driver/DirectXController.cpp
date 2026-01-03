@@ -11,12 +11,8 @@ DirectXController::DirectXController() {
 
 DirectXController::~DirectXController() {
 
-#ifdef USE_IMGUI
-	ImGuiManager::Shutdown();
-#endif
-
-	Finalize();
 	timeEndPeriod(1);
+	Finalize();
 }
 
 void DirectXController::StartFrame() {
@@ -49,13 +45,9 @@ void DirectXController::StartFrame() {
 	commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);
 	// 指定した色で画面全体をクリアする
 	float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f }; // 青っぽい色。RGBAの順
-	//float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f }; // 黒色。RGBAの順
+	//float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f }; // 黑色。RGBAの順
 	commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 	commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
-
-	// 描画用のDescriptorHeapの設定
-	ID3D12DescriptorHeap* descriptorHeaps[] = { srvDescriptorHeap };
-	commandList->SetDescriptorHeaps(1, descriptorHeaps);
 }
 
 void DirectXController::EndFrame() {

@@ -33,8 +33,7 @@
 bool CheakXInputDeviceConnected();
 #pragma endregion
 
-
-
+#pragma region DirectXCommon
 
 class DirectXCore {
 public:
@@ -44,10 +43,8 @@ public:
 	/// Getter
 	ID3D12Device* GetDevice() { return device; };
 	HWND GetHWND() { return winAPI_->GetHWND(); };
-	ID3D12DescriptorHeap* GetSrvDescriptorHeap() { return srvDescriptorHeap; };
 	ID3D12DescriptorHeap* GetDsvDescriptorHeap() { return dsvDescriptorHeap; };
 	ID3D12DescriptorHeap* GetRtvDescriptorHeap() { return rtvDescriptorHeap; };
-	uint32_t GetDesriptorSizeSRV();
 	uint32_t GetDesriptorSizeRTV();
 	uint32_t GetDesriptorSizeDSV();
 
@@ -55,6 +52,7 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index);
 
 	ID3D12GraphicsCommandList* GetCommandList() { return commandList; }
+	ID3D12CommandQueue* GetCommandQueue() { return commandQueue; }
 
 	bool isDirectInputCreated();
 	IDirectInput8* GetDirectInput() { return directInput; }
@@ -98,7 +96,6 @@ protected:
 	ID3D12Resource* swapChainResources[2];
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 	ID3D12DescriptorHeap* rtvDescriptorHeap;
-	ID3D12DescriptorHeap* srvDescriptorHeap;
 	ID3D12DescriptorHeap* dsvDescriptorHeap;
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
 	ID3D12Fence* fence;
@@ -111,8 +108,6 @@ protected:
 	IDirectInputDevice8* keyBoardDevice;
 	IDirectInputDevice8* mouseDevice;
 	IDirectInputDevice8* gamepadDevice;
-
-
 
 //protected:
 public:
@@ -143,5 +138,7 @@ public:
 	ID3D12Fence* CreateFence();
 
 };
+
+#pragma endregion
 
 

@@ -1,18 +1,17 @@
 #include "ResourceManager.h"
 #include <Object/Object.h>
 
-ResourceManager::ResourceManager(DirectXCore* device) {
+ResourceManager::ResourceManager(DirectXCore* device, SrvManager* srvManager) {
 
 	core_ = device;
 	Bdevice_ = core_->GetDevice();
 
-	//wvpResource_ = new WVPResource(Bdevice_);
 	config::default_Sprite2D_MeshBufferHandle_ = CreateSimpleSpriteMeshResource();
 	config::default_Triangle_MeshBufferHandle_ = CreateTriangleResource();
 	config::default_Cube_MeshBufferHandle_ = CreateCubeResource();
 	config::default_Sphere_MeshBufferHandle_ = CreateSphereResource(1);
 
-	TextureManager::GetInstance()->Initialize(device);
+	TextureManager::GetInstance()->Initialize(device, srvManager);
 }
 
 ResourceManager::~ResourceManager() {
@@ -30,9 +29,6 @@ ResourceManager::~ResourceManager() {
 	/// TextureManager解放
 	TextureManager::GetInstance()->Finalize();
 
-	/// WVPResource解放
-	//delete wvpResource_;
-
 	/// InstanceManager解放
 	delete instanceManager_;
 }
@@ -44,7 +40,6 @@ void ResourceManager::CreateTurnResource() {
 void ResourceManager::ClearTurnResource() {
 	TextureManager::GetInstance()->EndUploadingTexture();
 	instanceManager_->Update();
-	//wvpResource_->ClearWVPResource();
 }
 
 
@@ -338,36 +333,6 @@ int ResourceManager::CreateSimpleSpriteMeshResource() {
 
 	return (int)meshBufferList_.size() - 1;
 }
-
-//int ResourceManager::CreateSprite2DResource(Vector2 LTpos, Vector2 LBpos,
-//	Vector2 RTpos, Vector2 RBpos,
-//	float TsizeX, float TsizeY,
-//	Vector2 TCLTPos, Vector2 TCRBPos) {
-//
-//	Sprite2D* newSprite2D_ = new Sprite2D;
-//	newSprite2D_->SetSize(LTpos, LBpos, RTpos, RBpos, TsizeX, TsizeY, TCLTPos, TCRBPos);
-//	newSprite2D_->CreateVertexResource_(Bdevice_);
-//	newSprite2D_->CreateVertexBufferView_(5);
-//	newSprite2D_->CreateIndexResource_(Bdevice_);
-//	newSprite2D_->CreateIndexBufferView_(12);
-//	newSprite2D_->SetKeep(true);
-//	meshBufferList_.push_back(newSprite2D_);
-//
-//	return int(meshBufferList_.size() - 1);
-//}
-//
-//int ResourceManager::CreateSprite2DResource(const DirectX::TexMetadata mipData) {
-//	SimpleSpriteMesh* newSprite2D_ = new SimpleSpriteMesh;
-//	newSprite2D_->SetSize(Vector2(mipData.width,mipData.height));
-//	newSprite2D_->CreateVertexResource_(Bdevice_);
-//	newSprite2D_->CreateVertexBufferView_(4);
-//	newSprite2D_->CreateIndexResource_(Bdevice_);
-//	newSprite2D_->CreateIndexBufferView_(6);
-//	newSprite2D_->SetKeep(true);
-//	meshBufferList_.push_back(newSprite2D_);
-//
-//	return int(meshBufferList_.size() - 1);
-//}
 
 
 int ResourceManager::CreateTriangleResource() {

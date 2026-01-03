@@ -9,6 +9,11 @@
 #include "materialconfig.h"
 #include "tool/TimeManager/TimeManager.h"
 
+#ifdef USE_IMGUI
+#include "ImGuiManager.h"
+#endif // USE_IMGUI
+
+
 class kEngine
 {
 public:
