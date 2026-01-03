@@ -914,7 +914,7 @@ void DrawEngine::Draw2D() {
 	int simpleSpriteCounter{};
 	resourceManager_->CreateSpriteMesh();
 	
-	for (auto& groupPair : groupedTiles) {  // 修正結構綁定語法問題
+	for (auto& groupPair : groupedTiles) {  
 		int materialIndex = groupPair.first;
 		std::vector<SpriteInstance*>& group = groupPair.second;
 		
@@ -939,15 +939,14 @@ void DrawEngine::Draw2D() {
 			SetMaterial(material->materialResourceHandle);
 
 			// Set Texture
-			int textureHandle;
-			textureHandle = resourceManager_->ReadCommenTextureHandle(material->textureHandle);
+			int textureHandle = material->textureHandle;
 			textureSrvHandleGPU_ = resourceManager_->GetTextureGPUDescriptorHandle(textureHandle);
 			commandList_->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU_);
 
 			/// mataDataを取得
 			mataData = resourceManager_->GetTextureMetadata(textureHandle);
 
-			// Update cache
+			/// Update cache
 			lastMaterialState_.materialIndex = materialIndex;
 			lastMaterialState_.textureHandle = material->textureHandle;
 			lastMaterialState_.lightModel = material->lightModelType;
@@ -958,7 +957,6 @@ void DrawEngine::Draw2D() {
 		for (int i = 0; i < (int)group.size(); ++i) {
 			SpriteInstance* inst = group[i];
 
-			// 每個 instance 都重建 mesh
 			resourceManager_->ResizeSimpleSpriteMesh(
 				mataData,
 				simpleSpriteCounter,
