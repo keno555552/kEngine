@@ -2,6 +2,7 @@
 #include <wrl/client.h>
 #include <cstdint>
 #include <d3d12.h>
+#include <vector>
 
 // 前向宣告，避免循環引用
 class DirectXCore;
@@ -25,11 +26,14 @@ public:
 	/// SRV生成 (Structured Buffer用)
 	void CreateSRVforStructuredBuffer(uint32_t srvIndex, ID3D12Resource* pResource, UINT numElements, UINT structureByteStride);
 
+	/// SRV解放
+	void Free(uint32_t srvIndex);
+
 	/// SRV heap 檢查
-	bool CheckSRVHeapFull();  // 添加缺失的函式聲明
+	bool CheckSRVHeapFull();
 	
 	/// 取得 descriptor size
-	uint32_t GetDesriptorSizeSRV();  // 添加缺失的函式聲明
+	uint32_t GetDesriptorSizeSRV();
 	
 	/// 取得 descriptor heap
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetDescriptorHeap() { return descriptorHeap; }
@@ -42,17 +46,20 @@ public:
 private:
 	DirectXCore* directXCore_ = nullptr;
 
-	// 最大SRV数（最大テクスチャ枚数）
+	/// 最大SRV数（最大テクスチャ枚数）
 	static const uint32_t kMaxSRVCount;
 
-	// SRV用のデスクリプタサイズ
+	/// SRV用のデスクリプタサイズ
 	uint32_t descriptorSize;
 
-	// SRV用デスクリプタヒープ
+	/// SRV用デスクリプタヒープ
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap;
 
+	/// 廃棄SRV管理配列
+	std::vector<uint32_t> freeIndices;
+
 	// 次に使用するSRVインデックス
-	uint32_t useIndex = 0;
+	uint32_t nextNewIndex = 0;
 
 };
 
