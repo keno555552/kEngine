@@ -22,8 +22,9 @@ SoundManager::~SoundManager() {
 int SoundManager::SoundLoadSE(const char* filename) {
 	{
 		int i = 0;
+		std::string fname = filename;
 		for (auto& ptr : sounds_) {
-			if (ptr->GetFileName() == filename) {
+			if(ptr->GetFileName() == filename) {
 				return i;
 			}
 			i++;
@@ -32,8 +33,7 @@ int SoundManager::SoundLoadSE(const char* filename) {
 	SoundUnit* sound = new SoundUnit;
 	sound->SoundLoad(filename);
 	sounds_.push_back(sound);
-	resourceCounter++;
-	return resourceCounter;
+	return resourceCounter++;
 }
 
 
