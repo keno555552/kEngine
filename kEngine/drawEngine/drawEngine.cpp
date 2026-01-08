@@ -1186,7 +1186,7 @@ D3D12_VIEWPORT DrawEngine::createViewport(int kClientWidth, int kClientHeight) {
 D3D12_RECT DrawEngine::createScissorRect(int kClientWidth, int kClientHeight) {
 	// シザー矩形
 	//D3D12_RECT scissorRect{};
-	// 基本的にビューポートと同じ矩形が構成されるようにする
+	// 基本的にビューポートと同	じ矩形が構成されるようにする
 	scissorRect.left = 0;
 	scissorRect.right = kClientWidth;
 	scissorRect.top = 0;

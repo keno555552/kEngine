@@ -246,6 +246,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="kEngine\GameObject\BackPoint\BackPoint.cpp" />
+    <ClCompile Include="kEngine\GameObject\Enemy\Enemy.cpp" />
+    <ClCompile Include="kEngine\GameObject\Bullet\Bullet.cpp" />
+    <ClCompile Include="kEngine\tool\CollisionManager\CollisionManager.cpp" />
     <ClCompile Include="externals\imgui\imgui_stdlib.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -345,6 +349,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\tool\MapChip\MapChipData.cpp" />
     <ClCompile Include="kEngine\GameObject\Particle\P_Ball\P_Ball.cpp" />
     <ClCompile Include="ResourceLoader.cpp" />
+    <ClCompile Include="scenes\sceneLose.cpp" />
     <ClCompile Include="scenes\CG4_HK_1\menu.cpp" />
     <ClCompile Include="scenes\CG4_HK_1\Effect1.cpp" />
     <ClCompile Include="scenes\CG4_HK_1\Effect2.cpp" />
@@ -357,8 +362,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="scenes\SceneTest2.cpp" />
     <ClCompile Include="scenes\SceneTitle.cpp" />
     <ClCompile Include="kEngine\core\driver\SrvManager.cpp" />
+    <ClCompile Include="kEngine\GameObject\Targeter\Targeter.cpp" />
+    <ClCompile Include="scenes\SceneWin.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="kEngine\GameObject\BackPoint\BackPoint.h" />
+    <ClInclude Include="kEngine\GameObject\Enemy\Enemy.h" />
+    <ClInclude Include="kEngine\GameObject\Bullet\Bullet.h" />
+    <ClInclude Include="kEngine\tool\CollisionManager\CollisionManager.h" />
     <ClInclude Include="externals\imgui\imgui_stdlib.h" />
     <ClInclude Include="externals\nlohmann\json.hpp" />
     <ClInclude Include="externals\nlohmann\json_fwd.hpp" />
@@ -440,6 +451,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\tool\MapChip\MapChipData.h" />
     <ClInclude Include="kEngine\GameObject\Particle\P_Ball\P_Ball.h" />
     <ClInclude Include="ResourceLoader.h" />
+    <ClInclude Include="scenes\sceneLose.h" />
     <ClInclude Include="scenes\CG4_HK_1\menu.h" />
     <ClInclude Include="scenes\CG4_HK_1\Effect1.h" />
     <ClInclude Include="scenes\CG4_HK_1\Effect2.h" />
@@ -452,6 +464,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="scenes\SceneTest2.h" />
     <ClInclude Include="scenes\SceneTitle.h" />
     <ClInclude Include="kEngine\core\driver\SrvManager.h" />
+    <ClInclude Include="kEngine\GameObject\Targeter\Targeter.h" />
+    <ClInclude Include="scenes\SceneWin.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\LightingLambert\HalfLambert.hlsl">

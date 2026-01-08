@@ -6,10 +6,11 @@ enum class SceneNum {
 	S_NONE = -1,
 	S_TITLE,
 	S_SELECT,
+	S_STAGE_REST,
 	S_STAGE_01,
 	S_STAGE_02,
 	S_WIN,
-	S_GAMEOVER,
+	S_LOSE,
 	S_Result,
 
 	S_BOSSTEST,

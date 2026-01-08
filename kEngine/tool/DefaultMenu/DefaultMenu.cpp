@@ -220,20 +220,20 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 	sMenuVolumeBarS->Update(nullptr);
 
 	/// ================ testSound ================///
-	//SH_menuSE_ = system_->SoundLoadSE("resources/TemplateResource/sound/SE/game_start.wav");
-	//SH_menuBGM_ = system_->SoundLoadSE("resources/TemplateResource/sound/BGM/Ordinary_Magic.wav");
-	//
-	//system_->SoundSetMasterVolume(masterVolume_);
-	//system_->SoundSetBGMVolume(masterVolume_);
-	//system_->SoundSetSEVolume(masterVolume_);
+	SH_Select_ = system_->SoundLoadSE("resources/sound/SE/menuSelect.wav");
+	SH_Decide_ = system_->SoundLoadSE("resources/sound/SE/menuChoose.wav");
+
+	system_->SoundSetMasterVolume(masterVolume_);
+	system_->SoundSetBGMVolume(masterVolume_);
+	system_->SoundSetSEVolume(masterVolume_);
 
 }
 
 void DefaultMenu::Updata() {
 
 	/// ============ メニュー開閉 ============///
-	if (canOpen_) {
-		if (system_->GetTriggerOn(DIK_ESCAPE)) {
+	if (canOpen_ || clickOpenMenu_) {
+		if (system_->GetTriggerOn(DIK_ESCAPE) || clickOpenMenu_) {
 			animationTimer_->Reset0();
 			if (isOpened_) {
 				phase_ = MenuPhase::TRANSITION;
@@ -247,6 +247,7 @@ void DefaultMenu::Updata() {
 				lastSelectedMenuIndex_ = selectedMenuIndex_;
 				selectedMenuIndex_ = (int)ButtonIndex::Close;
 			}
+			clickOpenMenu_ = false;
 		}
 	}
 
@@ -435,6 +436,10 @@ void DefaultMenu::CheckClick() {
 	clickUp_ = system_->GetTriggerOn(DIK_UP) || system_->GetTriggerOn(DIK_W);
 	clickDown_ = system_->GetTriggerOn(DIK_DOWN) || system_->GetTriggerOn(DIK_S);
 	clickDecide_ = system_->GetTriggerOn(DIK_RETURN) || system_->GetTriggerOn(DIK_SPACE);
+
+	if (clickLeft_ || clickRight_ || clickUp_ || clickDown_)system_->SoundPlaySE(SH_Select_);
+	if (clickDecide_)system_->SoundPlaySE(SH_Decide_);
+
 }
 
 void DefaultMenu::WorkChange() {
@@ -451,12 +456,12 @@ void DefaultMenu::WorkChange() {
 		break;
 
 	case (int)ButtonIndex::Retry:
-		if (clickDecide_) {
-			isConfirm_ = true;
-			animationTimer_->Reset0();
-			phase_ = MenuPhase::TRANSITION;
-			startTransform_ = sMenuBG_->mainPosition.transform;
-		}
+		//if (clickDecide_ && !isTitle_) {
+		//	isConfirm_ = true;
+		//	animationTimer_->Reset0();
+		//	phase_ = MenuPhase::TRANSITION;
+		//	startTransform_ = sMenuBG_->mainPosition.transform;
+		//}
 		break;
 
 	case (int)ButtonIndex::Back:

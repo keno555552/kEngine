@@ -2,11 +2,16 @@
 #include <fstream>
 #include <map>
 #include <sstream>
+#include <string>
 
 namespace {
 std::map<std::string, MapChipType> mapChipTable = {
     {"0", MapChipType::kBlank},
-    {"1", MapChipType::kBlock},
+    {"1", MapChipType::kDirt},
+	{"2", MapChipType::kRock},
+	{"7", MapChipType::kEnemy},
+	{"8", MapChipType::kPlayer},
+	{"9", MapChipType::kBackPoint},
 };
 }
 
@@ -20,33 +25,39 @@ void MapChipField::ResetMapChipData() {
 }
 
 void MapChipField::LoadMapChipCsv(const std::string& filePath) {
-	// マップチップデータをリセット
+	std::ifstream file(filePath);
+	if (!file.is_open()) { return; }
+
+	// 先讀入所有行以判斷列數/行數
+	std::vector<std::string> lines;
+	std::string line;
+	while (getline(file, line)) {
+		if (!line.empty()) { lines.push_back(line); }
+	}
+	file.close();
+	if (lines.empty()) { return; }
+
+	// 計算尺寸
+	uint32_t newVertical = static_cast<uint32_t>(lines.size());
+	uint32_t newHorizontal = 0;
+	{
+		std::istringstream ls(lines[0]);
+		std::string word;
+		while (getline(ls, word, ',')) { ++newHorizontal; }
+	}
+	if (newHorizontal == 0) { return; }
+
+	// 更新尺寸並重置資料
+	kNumBlockVirtical = newVertical;
+	kNumBlockHorizontal = newHorizontal;
 	ResetMapChipData();
 
-	// ファイルを開く
-	std::ifstream file;
-	file.open(filePath);
-	//assert(file.is_open());
-
-	// マップチップCSV
-	std::stringstream mapChipCsv;
-	// ファイルの内容を文字列ストリームにコピー
-	mapChipCsv << file.rdbuf();
-	// ファイルを閉じる
-	file.close();
-
-	// CSVからマップチップデータを読み込む
-	for (uint32_t i = 0; i < kNumBlockVirtical; ++i) {
-		std::string line;
-		getline(mapChipCsv, line);
-
-		// 1行分の文字列をストリームに変換して解析しやすくする
-		std::istringstream line_stream(line);
-
+	// 解析 CSV
+	for (uint32_t i = 0; i < kNumBlockVirtical && i < lines.size(); ++i) {
+		std::istringstream line_stream(lines[i]);
 		for (uint32_t j = 0; j < kNumBlockHorizontal; ++j) {
 			std::string word;
 			getline(line_stream, word, ',');
-
 			if (mapChipTable.contains(word)) {
 				mapChipData_.data[i][j] = mapChipTable[word];
 			}
@@ -62,6 +73,16 @@ MapChipType MapChipField::GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex
 		return MapChipType::kBlank;
 	}
 	return mapChipData_.data[yIndex][xIndex];
+}
+
+void MapChipField::SetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex, MapChipType type) {
+	if ((xIndex < 0) || (kNumBlockHorizontal - 1 < xIndex)) {
+		return;
+	}
+	if ((yIndex < 0) || (kNumBlockVirtical - 1 < yIndex)) {
+		return;
+	}
+	mapChipData_.data[yIndex][xIndex] = type;
 }
 
 Vector3 MapChipField::GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex) { return Vector3(kBlockWidth * xIndex, kBlockHeight * (kNumBlockVirtical - 1 - yIndex), 0); }

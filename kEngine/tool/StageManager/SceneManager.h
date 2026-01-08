@@ -8,6 +8,8 @@
 #include "SceneTester.h"
 #include "SceneTest.h"
 #include "SceneTest2.h"
+#include "SceneWin.h"
+#include "SceneLose.h"
 #include "AnimationSystem/AnimationEditor.h"
 #include "DefaultMenu/DefaultMenu.h"
 #include "CG4_HK_1/Effect2.h"

@@ -253,16 +253,6 @@ bool Matrix4x4::operator!=(const Matrix4x4& target) {
 	return !(*this == target);
 }
 
-Matrix4x4 operator*(float scalar, const Matrix4x4& vec) {
-	Matrix4x4 resuit = {};
-	for (int x = 0; x < 4; x++) {
-		for (int y = 0; y < 4; y++) {
-			resuit.m[x][y] = vec.m[x][y] * scalar;
-		}
-	}
-	return resuit;
-}
-
 #pragma region 陣列転換
 Matrix4x4 MakeTranslateMatrix4x4(const Vector3 translate) {
 	return Matrix4x4{ 1.0f,		  0.0f,		   0.0f, 0.0f,

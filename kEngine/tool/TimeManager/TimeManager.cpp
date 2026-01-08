@@ -4,8 +4,12 @@
 void TimeManager::Update() {
 	auto now = std::chrono::steady_clock::now();
 	std::chrono::duration<float> elapsed = now - lastUpdateTime;
-	deltaTime_ = elapsed.count();
 	lastUpdateTime = now;
+
+	deltaTime_ = elapsed.count();
+	// clamp to avoid giant jumps (e.g., first frame or stalls)
+	const float kMaxDelta = 0.05f; // 50ms, ~20 FPS floor
+	if (deltaTime_ > kMaxDelta) deltaTime_ = kMaxDelta;
 
 	oneScondCounter_ += deltaTime_;
 
@@ -228,7 +232,7 @@ float easyOut(float a, float b, float t, float r) {
 	return (1.0f - easedT) * a + (easedT)*b;
 }
 
-float easyInOut(int a, int b, int c, int t, float r) {
+float easyInOut(float a, float b, float c, float t, float r) {
 	float time = float(c) / t;
 	float easedT = {};
 	if (time <= 0.5) {

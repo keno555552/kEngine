@@ -31,6 +31,8 @@ public:
 
 	void SetCanOpen(bool state) { canOpen_ = state; }
 	bool GetCanOpen() const { return canOpen_; }
+	void SetClickOpenMenu(bool state) { clickOpenMenu_ = state; }
+	void SetIsTitle(bool isTitle) { isTitle_ = isTitle; }
 	int GetSelectedIndex() const { return selectedMenuIndex_; }
 	bool isClicked() const { return isConfirm_; }
 
@@ -81,8 +83,9 @@ private:
 	int	TH_menuVolumeBar = 0;
 
 	// テスト用サウンドハンドル
-	//int SH_menuSE_ = 0;
-	//int SH_menuBGM_ = 0;
+	int SH_Select_{};
+	int SH_Decide_{};
+
 
 	/// ============ オブジェクト ============///
 	/// 背景スプライト+mainPosition
@@ -123,7 +126,9 @@ private:
 	bool isOpened_ = false;
 	bool isPause_ = false;
 	bool isConfirm_ = false;
+	bool isTitle_ = false;
 
+	bool clickOpenMenu_ = false;
 	bool clickLeft_ = false;
 	bool clickRight_ = false;
 	bool clickUp_ = false;

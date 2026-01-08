@@ -2,22 +2,91 @@
 #include "Player.h"
 #include <algorithm>
 #include <numbers>
+#include "Bullet/Bullet.h"
 
 Player::Player(kEngine* system, const Vector3& position) {
 	Object::IntObject(system);
 	Object::CreateDefaultData();
-	mainPosition.transform = CreateDefaultTransform();
 	mainPosition.transform.translate = position;
 	objectParts_[0].materialConfig->lightModelType = LightModelType::HalfLambert;
 
 	mainPosition.transform.rotate.y = 0.0f;
+
+	shootCD_.Init0(kShootInterval, system_->GetTimeManager());
+	damageEffectTimer_.InitM(kPlayerDamageEffectTime, system_->GetTimeManager());
+
+	MH_pickaxe_ = system_->SetModelObj("resources/object/pickaxe/pickaxe.obj");
+
+	TH_player_ = system_->LoadTextrue("resources/object/player/playerUV.png");
+	TH_White5x5_ = system_->LoadTextrue("resources/TemplateResource/texture/white5x5.png");
+
+	SH_JUMP_ = system_->SoundLoadSE("resources/sound/SE/player_jump.wav");
+	SH_SHOOT_ = system_->SoundLoadSE("resources/sound/SE/player_attack.wav");
+	SH_DAMAGE_ = system_->SoundLoadSE("resources/sound/SE/playerDamage.wav");
+
+	nearAttackChangeTimer_.InitM(kNearAttackChangeTime, system_->GetTimeManager());
+	nearAttackEffectTimer_.InitM(kNearAttackEffectTime, system_->GetTimeManager());
 }
 
 void Player::Update(Camera* camera) {
 	deltaTime_ = system_->GetDeltaTime();
 	BehaviorRootUpdate();
 
+	DamageAndEffectPart();
+
 	Object::Update(camera);
+}
+
+AABB& Player::GetAABB() {
+
+	const Vector3& s = mainPosition.transform.scale;
+	float halfWidth = kPlayerWidth * std::abs(s.x) * 0.5f;
+	float halfHeight = kPlayerHeight * std::abs(s.y) * 0.5f;
+	float halfDepth = kPlayerWidth * std::abs(s.z) * 0.5f;
+
+	hitBox_.min = mainPosition.transform.translate - Vector3(halfWidth, halfHeight, halfDepth);
+	hitBox_.max = mainPosition.transform.translate + Vector3(halfWidth, halfHeight, halfDepth);
+
+	return hitBox_;
+}
+
+AABB& Player::GetMapChipAABB() {
+
+	const Vector3& s = mainPosition.transform.scale;
+	float halfWidth = kPlayerWidth * s.x * kPlayerHitBoxScale;
+	float halfHeight = kPlayerHeight * s.y * kPlayerHitBoxScale;
+	float halfDepth = kPlayerWidth * s.z * kPlayerHitBoxScale;
+
+	hitBox_.min = mainPosition.transform.translate - Vector3(halfWidth, halfHeight, halfDepth);
+	hitBox_.max = mainPosition.transform.translate + Vector3(halfWidth, halfHeight, halfDepth);
+
+	return hitBox_;
+}
+
+void Player::GetDamage(float damage) {
+	disableDamage_ = true;
+	damageEffectTimer_.Reset0();
+	HP_ -= damage;
+
+	/// 音再生
+	system_->SoundPlaySE(SH_DAMAGE_);
+}
+
+void Player::Shoot(Vector3 mousePos) {
+
+	/// 出来ない条件に該当したら終了
+	if (bulletList_ == nullptr)return;
+	if (playerState_ == PlayerState::kAttark || playerState_ == PlayerState::kDamage) return;
+	if (shootCD_.parameter_ != shootCD_.maxTime_)return;
+
+	/// 弾の生成
+	Vector3 shootDirection = mousePos - mainPosition.transform.translate;
+	Bullet* newBullet = new Bullet(system_, mainPosition.transform.translate, Normalize(shootDirection));
+	bulletList_->emplace_back(newBullet);
+	shootCD_.Reset0();
+
+	/// 音再生
+	system_->SoundPlaySE(SH_SHOOT_);
 }
 
 void Player::BehaviorRootUpdate() {
@@ -26,15 +95,20 @@ void Player::BehaviorRootUpdate() {
 	/// 移動量に速度の値をコピー
 	collisionMapInfo.moveVector = velocity_;
 
-	/// マップ衝突チェック
+	/// 移動関連
 	Move();
 	MapCollisionDecideDown(collisionMapInfo);
 	MovePlayerByResult(collisionMapInfo);
 	OnGroundChanger(collisionMapInfo);
+
+	///射撃CD更新
+	ShootUpdate();
+
+	/// 
 }
 
 Vector3 Player::CornerPosition(const Vector3& center, Corner4 corner) {
-	Vector3 offsetTable[ (int)Corner4::kNumCorner] = {
+	Vector3 offsetTable[(int)Corner4::kNumCorner] = {
 		{+kPlayerWidth / 2.0f, -kPlayerHeight / 2.0f, 0}, // kRightBottom
 		{-kPlayerWidth / 2.0f, -kPlayerHeight / 2.0f, 0}, // kLeftBottom
 		{+kPlayerWidth / 2.0f, +kPlayerHeight / 2.0f, 0}, // kRightTop
@@ -50,7 +124,6 @@ Vector3 Player::CornerPosition(const Vector3& center, Corner4 corner) {
 }
 
 void Player::Move() {
-	bool landing = false;
 	/// 移動
 	// 左右移動捜索
 	if (system_->GetIsPush(DIK_D) || system_->GetIsPush(DIK_A)) {
@@ -96,95 +169,55 @@ void Player::Move() {
 	} else {
 		// 非入力時は移動減衰をかける
 		velocity_.x *= std::exp(-kAttenuation * deltaTime_);
-		if (velocity_.x < 0.01f && velocity_.x > -0.01f) { 
+		if (velocity_.x < 0.01f && velocity_.x > -0.01f) {
 			velocity_.x = 0.0f;
 		}
-		//if (behavior_ != Behavior::kAttack) {
-		if (lrDirection_ != LRDirection::None) { 
+		if (lrDirection_ != LRDirection::None) {
 			lrDirection_ = LRDirection::None;
 			turnFirstRotationY_ = mainPosition.transform.rotate.y;
 			turnTimer_ = kTimeTurn;
 		}
-		//}
 	}
 
 	// 回転制御
-	if (turnTimer_ >= 0.0f) {
+	if (turnTimer_ > 0.0f) {
 		turnTimer_ -= deltaTime_;
-		turnTimer_ = std::min(turnTimer_, 0.0f);
+		turnTimer_ = std::max(turnTimer_, 0.0f);
 
 		float destinationRotationYTable[] = {
 			-std::numbers::pi_v<float> / 2.0f,                            // 右
-			std::numbers::pi_v<float> /2.0f,       // 左
+			std::numbers::pi_v<float> / 2.0f,                             // 左
 			0.0f // なし
 		};
 		// 状態に応じた角度を取得する
 		float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
-		// 自キャラの角度を設定する
-		mainPosition.transform.rotate.y = turnFirstRotationY_ * (turnTimer_ / kTimeTurn) + destinationRotationY * (1 - turnTimer_ / kTimeTurn);
+		float ratio = turnTimer_ / kTimeTurn; // 1 -> 0
+		// 自キャラの角度を設定する（線形補間）
+		mainPosition.transform.rotate.y = turnFirstRotationY_ * ratio + destinationRotationY * (1.0f - ratio);
 	}
 
-
 	if (onGround_) {
-
 		// ジャンプ
 		if (system_->GetIsPush(DIK_W)) {
 			// ジャンプ初速を加える
 			velocity_.y += kJumpAcceleration;
-		}
 
+			/// 音再生
+			system_->SoundPlaySE(SH_JUMP_);
+		}
 	} else {
 		// 落下速度
 		velocity_.y -= kGravityAcceleration * deltaTime_;
 		// 落下速度制限
 		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
-		// 空中
-		if (velocity_.y < 0) {
-			if ((mainPosition.transform.translate.y + velocity_.y) <= 2.0f) {
-				landing = true;
-			}
-		}
 	}
 }
 
 void Player::OnGroundChanger(const CollisionMapInfo& info) {
+	// CollisionManager 已判定 floorHit，這裡只根據 floorHit 切換狀態
 	if (onGround_) {
 		if (velocity_.y > 0.0f) {
 			onGround_ = false;
-		} else {
-			//MapChipType mapChipType;
-			//MapChipField::IndexSet indexSet;
-			std::vector<Vector3> positionsNew((int)Corner4::kNumCorner);
-			for (uint32_t i = 0; i < positionsNew.size(); i++) {
-				Vector3 translation_ = {};
-				translation_.x = mainPosition.transform.translate.x + info.moveVector.x* deltaTime_;
-				translation_.y = mainPosition.transform.translate.y + info.moveVector.y* deltaTime_;
-				translation_.z = mainPosition.transform.translate.z + info.moveVector.z* deltaTime_;
-				positionsNew[i] = CornerPosition(translation_, static_cast<Corner4>(i));
-			}
-			bool hit = false;
-			// 左下点の判定
-			//indexSet = mapChipField_->GetMapChipIndexByPosition(positionsNew[kLeftBottom]);
-			//mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
-			//if (mapChipType == MapChipType::kBlock) {
-			//	hit = true;
-			//}
-			if (positionsNew[(int)Corner4::kLeftBottom].y <= 0) {
-				hit = true;
-			}
-			// 右下点の判定
-			//indexSet = mapChipField_->GetMapChipIndexByPosition(positionsNew[kRightBottom]);
-			//mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
-			//if (mapChipType == MapChipType::kBlock) {
-			//	hit = true;
-			//}
-			if (positionsNew[(int)Corner4::kRightBottom].y <= 0) {
-				hit = true;
-			}
-
-			if (!hit) {
-				onGround_ = false;
-			}
 		}
 	} else {
 		if (info.floorHit) {
@@ -201,61 +234,69 @@ void Player::MapCollisionDecideDown(CollisionMapInfo& info) {
 
 	for (uint32_t i = 0; i < positionsNew.size(); i++) {
 		Vector3 translation_ = {};
-		translation_.x = mainPosition.transform.translate.x + info.moveVector.x* deltaTime_;
-		translation_.y = mainPosition.transform.translate.y + info.moveVector.y* deltaTime_;
-		translation_.z = mainPosition.transform.translate.z + info.moveVector.z* deltaTime_;
+		translation_.x = mainPosition.transform.translate.x + info.moveVector.x * deltaTime_;
+		translation_.y = mainPosition.transform.translate.y + info.moveVector.y * deltaTime_;
+		translation_.z = mainPosition.transform.translate.z + info.moveVector.z * deltaTime_;
 		positionsNew[i] = CornerPosition(translation_, static_cast<Corner4>(i));
 	}
-	if (info.moveVector.y > 0)
+	// 這裡不再做 y<=0 萠地判定，floorHit 由 CollisionManager 決定
+	if (info.moveVector.y > 0) {
 		return;
-
-	// 当たり判定を行う
-	bool hit = false;
-
-	//MapChipType mapChipType;
-	//MapChipType mapChipTypeNext;
-	//MapChipField::IndexSet indexSet;
-	//// 左下点の判定
-	//indexSet = mapChipField_->GetMapChipIndexByPosition(positionsNew[kLeftBottom]);
-	//mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
-	//mapChipTypeNext = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex - 1);
-	//if (mapChipType == MapChipType::kBlock && mapChipTypeNext != MapChipType::kBlock) {
-	//	hit = true;
-	//}
-	if (positionsNew[(int)Corner4::kLeftBottom].y <= 0) {
-		hit = true;
-	}
-	//// 右下点の判定
-	//indexSet = mapChipField_->GetMapChipIndexByPosition(positionsNew[kRightBottom]);
-	//mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
-	//mapChipTypeNext = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex - 1);
-	//if (mapChipType == MapChipType::kBlock && mapChipTypeNext != MapChipType::kBlock) {
-	//	hit = true;
-	//}
-	if (positionsNew[(int)Corner4::kRightBottom].y <= 0) {
-		hit = true;
-	}
-	// ブロックにヒット?
-	if (hit) {
-		//// めり込みを排除する方向に移動量を設定する
-		//indexSet = mapChipField_->GetMapChipIndexByPosition(positionsNew[kLeftBottom]);
-		//MapChipField::IndexSet indexSetNow = mapChipField_->GetMapChipIndexByPosition(worldTransform_.translation_);
-		//if (indexSetNow.yIndex != indexSet.yIndex) {
-		//	// めり込み先ブロックの矩形取得
-		//	MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
-		//	info.moveVector.y = std::max(0.0f, rect.top - (kPlayerHeight / 2.0f) - worldTransform_.translation_.y);
-		//	// 床判定であることを記録する
-		//	info.floorHit = true;
-		//}
-		info.moveVector.y = std::max(0.0f, 0.0f - (kPlayerHeight / 2.0f) - mainPosition.transform.translate.y);
-		info.floorHit = true;
 	}
 }
-
-
 
 void Player::MovePlayerByResult(const CollisionMapInfo& info) {
 	mainPosition.transform.translate.x += info.moveVector.x * deltaTime_;
 	mainPosition.transform.translate.y += info.moveVector.y * deltaTime_;
 	mainPosition.transform.translate.z += info.moveVector.z * deltaTime_;
+}
+
+void Player::ShootUpdate() {
+
+	if (shootCD_.parameter_ != shootCD_.maxTime_) shootCD_.ToMix();
+
+}
+
+void Player::NearAttackUpdate() {
+
+	/// 近接攻撃触発
+	if (system_->GetTriggerOn(DIK_SPACE)) {
+		if (!isNearAttack_) {
+			nearAttackChangeTimer_.Reset0();
+			isNearAttack_ = true;
+
+		}
+	}
+
+
+
+}
+
+void Player::DamageAndEffectPart() {
+	if (damageEffectTimer_.parameter_ == damageEffectTimer_.maxTime_) {
+		return;
+	}
+
+	damageEffectTimer_.ToMix();
+
+	const float kFlashPeriod = 0.2f; // seconds
+	float t = std::fmod(damageEffectTimer_.parameter_, kFlashPeriod);
+	bool flashOn = (t < kFlashPeriod * 0.5f);
+
+	if (flashOn) {
+		objectParts_[0].materialConfig->useModelTexture = false;
+		objectParts_[0].materialConfig->enableLighting = false;
+		objectParts_[0].materialConfig->textureHandle = TH_White5x5_;
+	} else {
+		objectParts_[0].materialConfig->useModelTexture = true;
+		objectParts_[0].materialConfig->enableLighting = true;
+		objectParts_[0].materialConfig->textureHandle = TH_player_;
+	}
+
+	if (damageEffectTimer_.parameter_ == damageEffectTimer_.maxTime_) {
+		disableDamage_ = false;
+		objectParts_[0].materialConfig->useModelTexture = true;
+		objectParts_[0].materialConfig->enableLighting = true;
+		objectParts_[0].materialConfig->textureHandle = TH_player_;
+	}
 }

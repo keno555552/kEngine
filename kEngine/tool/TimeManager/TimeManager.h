@@ -253,7 +253,7 @@ float easyOut(float a, float b, float t, float r);
 /// <param name="t">clockの最大時間</param>
 /// <param name="r">変動率[1.0f以上]</param>
 /// <returns>aからbまで今どれくらい進んでる値</returns>
-float easyInOut(int a, int b, int c, int t, float r);
+float easyInOut(float a, float b, float c, float t, float r);
 
 /// <summary>
 /// Timerに連れてAからBまで変動、一回後ろに行って、早く最後のどころに行く

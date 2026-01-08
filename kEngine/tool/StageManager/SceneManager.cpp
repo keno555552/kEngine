@@ -2,13 +2,13 @@
 
 SceneManager::SceneManager(kEngine* system) {
 	system_ = system;
-	//sceneUsingHandle_ = SceneNum::S_STAGE_01;
 	//sceneUsingHandle_ = SceneNum::S_BOSSTEST;
-	sceneUsingHandle_ = SceneNum::S_TESTER;
-	//sceneUsingHandle_ = SceneNum::S_TITLE;
+	//sceneUsingHandle_ = SceneNum::S_TESTER;
+	sceneUsingHandle_ = SceneNum::S_TITLE;
 	//sceneUsingHandle_ = SceneNum::S_STAGE_01;
-	
-	
+	//sceneUsingHandle_ = SceneNum::S_LOSE;
+
+
 
 	//InitMaterialConfig(&materialConfig_);
 	//materialConfig_.uvTransformMatrix =
@@ -46,8 +46,12 @@ void SceneManager::SceneChanger() {
 
 	if (sceneUsing_ != nullptr) {
 		if (sceneUsing_->GetScenePhase() == ScenePhase::EXIT) {
-			sceneUsingHandle_ = sceneUsing_->GetNextStage();
-			delete sceneUsing_, sceneUsing_ = nullptr;
+			if (sceneUsing_->GetNextStage() != SceneNum::S_END) {
+				sceneUsingHandle_ = sceneUsing_->GetNextStage();
+				delete sceneUsing_, sceneUsing_ = nullptr;
+			} else {
+				sceneUsingHandle_ = SceneNum::S_END;
+			}
 		}
 	}
 
@@ -63,7 +67,7 @@ void SceneManager::SceneChanger() {
 			sceneUsing_->SetScenePhase(ScenePhase::EXIT);
 		}
 		if (defaultMenu_->IsRetry()) {
-			delete sceneUsing_, sceneUsing_ = nullptr;
+			//delete sceneUsing_, sceneUsing_ = nullptr;
 		}
 	}
 
@@ -72,7 +76,10 @@ void SceneManager::SceneChanger() {
 
 	if (sceneUsing_ == nullptr) {
 
-		if (sceneUsingHandle_ == SceneNum::S_TITLE || sceneUsingHandle_ == SceneNum::S_SELECT) {
+		if (sceneUsingHandle_ == SceneNum::S_TITLE || 
+			sceneUsingHandle_ == SceneNum::S_SELECT||
+			sceneUsingHandle_ == SceneNum::S_WIN||
+			sceneUsingHandle_ == SceneNum::S_LOSE) {
 			if (defaultMenu_->GetCanOpen()) {
 				defaultMenu_->SetCanOpen(false);
 			}
@@ -82,6 +89,7 @@ void SceneManager::SceneChanger() {
 			}
 		}
 
+		defaultMenu_->SetIsTitle(false);
 
 		switch (sceneUsingHandle_) {
 		case SceneNum::S_END:
@@ -94,31 +102,44 @@ void SceneManager::SceneChanger() {
 
 		case SceneNum::S_TESTER:
 			//sceneUsing_ = new SceneTester(system_);
-			//sceneUsing_ = new SceneTest(system_);
-			sceneUsing_ = new SceneTest2(system_);
+			sceneUsing_ = new SceneTest(system_);
+			//sceneUsing_ = new SceneTest2(system_);
 			//sceneUsing_ = new StageTestForGE(system_);
 			//sceneUsing_ = new Effect2(system_);
 			break;
 
 		case SceneNum::S_TITLE:
 			sceneUsing_ = new SceneTitle(system_);
+			if (auto* title = dynamic_cast<SceneTitle*>(sceneUsing_)) {
+				title->GetMenu(defaultMenu_);
+				defaultMenu_->SetIsTitle(true);
+			}
+
 			break;
 
 		case SceneNum::S_SELECT:
 			break;
 
+		case SceneNum::S_STAGE_REST:
+			break;
+
 		case SceneNum::S_STAGE_01:
 			//sceneUsing_ = new SceneTest(system_);
-			//sceneUsing_ = new Scene1(system_);
+			sceneUsing_ = new Scene1(system_);
 			break;
 		case SceneNum::S_STAGE_02:
 			break;
 
 		case SceneNum::S_Result:
-			sceneUsing_ = new SceneResult(system_);
+			//sceneUsing_ = new SceneResult(system_);
 			break;
 
-		case SceneNum::S_BOSSTEST:
+		case SceneNum::S_WIN:
+			sceneUsing_ = new SceneWin(system_);
+			break;
+
+		case SceneNum::S_LOSE:
+			sceneUsing_ = new SceneLose(system_);
 			break;
 
 		case SceneNum::S_ANIMATIONEDITOR:
@@ -142,7 +163,7 @@ void SceneManager::Update() {
 
 	//helperSprite_->Update(nullptr);
 
-	//defaultMenu_->Updata();
+	defaultMenu_->Updata();
 }
 
 void SceneManager::Render() {
@@ -154,7 +175,7 @@ void SceneManager::Render() {
 
 	//helperSprite_->Draw();
 
-	//defaultMenu_->Draw();
+	defaultMenu_->Draw();
 
 #ifdef USE_IMGUI
 	ImguiPart();

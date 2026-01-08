@@ -5,7 +5,12 @@
 
 enum class MapChipType {
 	kBlank, // 空白
-	kBlock, // ブロック
+	kDirt, // ブロック
+	kRock, // 岩
+	kEnemy = 7,
+	kPlayer = 8,
+	kBackPoint = 9,
+	NumOfTypes,
 };
 
 
@@ -39,6 +44,9 @@ public:
 	/// マップチップ種類を取得
 	MapChipType GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex);
 
+	/// マップチップ種類を設定
+	void SetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex, MapChipType type);
+
 	/// マップチップ座標を取得
 	Vector3 GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex);
 
@@ -56,6 +64,9 @@ public:
 	///　ブロック数取得
 	uint32_t GetNumBlockVirtical() { return kNumBlockVirtical; }
 	uint32_t GetNumBlockHorizontal() { return kNumBlockHorizontal; }
+
+	/// マップチップデータ取得
+	MapChipData& GetMapChipData() { return mapChipData_; }
 
 private:
 	// 1ブロックのサイズ

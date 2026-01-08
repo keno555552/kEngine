@@ -36,6 +36,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///// 終了条件
 		if (/*system->GetTriggerOn(DIK_ESCAPE) ||
 			system->GetGamepadTriggerOn(VK_PAD_START) ||*/
+			sceneManager->GetIsEnd() ||
 			system->ProcessMessage()) {
 			break;
 		}
