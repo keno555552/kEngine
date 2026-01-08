@@ -6,6 +6,7 @@ class SceneManager;
 class Scene
 {
 public:
+	virtual ~Scene() = default;
 
 	ScenePhase phase_ = ScenePhase::PREPARE;
 

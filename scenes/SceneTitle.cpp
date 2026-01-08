@@ -91,8 +91,6 @@ SceneTitle::SceneTitle(kEngine* system) {
 SceneTitle::~SceneTitle() {
 
 	system_->SoundStop(SH_BGM_);
-	system_->SoundStop(SH_Select_);
-	system_->SoundStop(SH_Decide_);
 
 	delete camera_;
 	delete debugCamera_;
