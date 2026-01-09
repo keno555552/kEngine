@@ -4,8 +4,9 @@
 #include "Matrix4x4.h"
 #include "LightModelType.h"
 
-struct MaterialConfig
+class MaterialConfig
 {
+public:
 	bool useModelTexture = true;
 	int textureHandle = 0;
 
