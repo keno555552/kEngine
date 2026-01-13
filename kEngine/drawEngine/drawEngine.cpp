@@ -17,6 +17,9 @@ DrawEngine::~DrawEngine() {
 	delete tile2DWVPResource_;
 	delete tile3DWVPResource_;
 
+	delete defaultCamera_;
+	delete cameraBuffer_;
+
 	for (auto& ptr : instanceOffsetData_) {
 		delete ptr->instanceOffsetResource;
 		ptr->instanceOffsetResource = nullptr;
@@ -25,7 +28,7 @@ DrawEngine::~DrawEngine() {
 		ptr = nullptr;
 	}
 
-	if(depthStencilResource){
+	if (depthStencilResource) {
 		depthStencilResource->Release();
 		depthStencilResource = nullptr;
 	}
@@ -118,7 +121,11 @@ void DrawEngine::Initialize
 	//debugController1->SetEnableGPUBasedValidation(TRUE);
 
 	/// カメラのスベア
-	saveCamera_ = new Camera;
+	defaultCamera_ = new Camera;
+
+	cameraBuffer_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(CameraForGPU));
+	cameraBuffer_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&cameraPtr_));
+	
 
 	/// デフォルトのモデルを設定
 	SetModel("resources/TemplateResource/object/plane/plane.obj");
@@ -128,7 +135,7 @@ void DrawEngine::Initialize
 
 void DrawEngine::PreDraw() {
 	// 描画用のDescriptorHeapの設定
-	ID3D12DescriptorHeap* descriptorHeaps[] = { srvManager_->GetDescriptorHeap().Get()};  // 現在使用正確的 getter 函式
+	ID3D12DescriptorHeap* descriptorHeaps[] = { srvManager_->GetDescriptorHeap().Get() };  // 現在使用正確的 getter 函式
 	commandList_->SetDescriptorHeaps(1, descriptorHeaps);
 
 	commandList_->RSSetViewports(1, &viewport);  // Viewportを設定
@@ -153,6 +160,9 @@ void DrawEngine::PreDraw() {
 
 	/// Lighting
 	SetLighting(directionalLightData);
+
+	/// Set Camera
+	SetCameraForGPU();
 
 }
 
@@ -214,6 +224,12 @@ void DrawEngine::PSODecition(MaterialConfig& material) {
 			psoChanged = true;
 		}
 		break;
+	case LightModelType::PhongReflection:
+		if (currentPSO_ != psoType::PhongReflection) {
+			commandList_->SetPipelineState(psoList_[(int)LightModelType::PhongReflection]);
+			currentPSO_ = psoType::PhongReflection;
+			psoChanged = true;
+		}
 	}
 	if (psoChanged) {
 		rootSignature_ = pso_->getRootSignature((int)currentPSO_);
@@ -913,11 +929,11 @@ void DrawEngine::Draw2D() {
 
 	int simpleSpriteCounter{};
 	resourceManager_->CreateSpriteMesh();
-	
-	for (auto& groupPair : groupedTiles) {  
+
+	for (auto& groupPair : groupedTiles) {
 		int materialIndex = groupPair.first;
 		std::vector<SpriteInstance*>& group = groupPair.second;
-		
+
 		MaterialConfig* material = resourceManager_->instanceManager_->materialConfigList_[materialIndex];
 
 		bool needSetMaterial =
@@ -1115,7 +1131,6 @@ void DrawEngine::DrawCall() {
 
 void DrawEngine::SetCamera(Camera* camera) {
 	instanceCamera_ = camera;
-	*saveCamera_ = *camera;
 }
 
 bool DrawEngine::SetModelTexture(Model* model) {
@@ -1202,6 +1217,17 @@ void DrawEngine::SetMaterial(int MaterialHandle) {
 		return;
 	}
 	commandList_->SetGraphicsRootConstantBufferView(0, resourceManager_->materialResourceList_[MaterialHandle]->GetResource()->GetGPUVirtualAddress());
+}
+
+void DrawEngine::SetCameraForGPU() {
+
+	if (instanceCamera_) {
+		cameraPtr_->worldPosition = instanceCamera_->GetTransform().translate;
+	} else {
+		cameraPtr_->worldPosition = defaultCamera_->GetTransform().translate;
+	}
+
+	commandList_->SetGraphicsRootConstantBufferView(5, cameraBuffer_->GetResource()->GetGPUVirtualAddress());
 }
 
 void DrawEngine::InitializeLighting() {

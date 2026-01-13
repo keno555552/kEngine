@@ -9,6 +9,7 @@ bool MaterialConfig::operator==(const MaterialConfig target) {
 	if (textureColor != target.textureColor)return false;
 	if (lightModelType != target.lightModelType)return false;
 	if (enableLighting != target.enableLighting)return false;
+	if (shininess != target.shininess)return false;
 	return true;
 }
 
@@ -32,6 +33,7 @@ void InitMaterialConfig(MaterialConfig* materialConfig) {
 	materialConfig->enableLighting = true;
 	materialConfig->materialResourceHandle = -1;
 	materialConfig->drawState = 0;
+	materialConfig->shininess = 32.0f;
 }
 
 MaterialConfig InitMaterialConfig() {

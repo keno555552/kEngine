@@ -66,6 +66,9 @@ IDxcBlob* Shader_compile::CompileShader(// CompilerするShaderファイルへ�
 	} else if (modelType == LightModelType::HalfLambert) {
 		arguments.push_back(L"-D");
 		arguments.push_back(L"LIGHT_MODEL_HALF=1");
+	} else if (modelType == LightModelType::PhongReflection) {
+		arguments.push_back(L"-D");
+		arguments.push_back(L"LIGHT_MODEL_PHONG=1");
 	}
 	hr = dxcCompiler->Compile(
 		&shaderSourceBuffer, // 読み込んだファイル
@@ -89,6 +92,7 @@ IDxcBlob* Shader_compile::CompileShader(// CompilerするShaderファイルへ�
 		// 警告・エラーダメゼッタイ
 		assert(false);
 	}
+
 
 	/// 4.Compile結果を受け取って返す
 	// コンパイル結果から実行用のバイナリ部分を取得

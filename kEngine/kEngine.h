@@ -112,6 +112,8 @@ public:
 	int GetMuitModelNum(int modelHandle);
 	int SetModelObj(std::string path);
 
+	void SetCamera(Camera* camera);
+
 	int commonTextureHandleReader(int handle);
 	int commonModelHandleReader(int handle);
 

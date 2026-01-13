@@ -455,6 +455,52 @@ Matrix4x4 Inverse(Matrix4x4 matrix) {
 	};
 }
 
+//Matrix4x4 Inverse(Matrix4x4 m) {
+//	// 取出 3×3 rotation-scale
+//	float a00 = m.m[0][0], a01 = m.m[0][1], a02 = m.m[0][2];
+//	float a10 = m.m[1][0], a11 = m.m[1][1], a12 = m.m[1][2];
+//	float a20 = m.m[2][0], a21 = m.m[2][1], a22 = m.m[2][2];
+//
+//	// 計算 3×3 的 determinant
+//	float det =
+//		a00 * (a11 * a22 - a12 * a21) -
+//		a01 * (a10 * a22 - a12 * a20) +
+//		a02 * (a10 * a21 - a11 * a20);
+//
+//	float invDet = 1.0f / det;
+//
+//	// 3×3 inverse
+//	Matrix4x4 r = {};
+//	r.m[0][0] = (a11 * a22 - a12 * a21) * invDet;
+//	r.m[0][1] = -(a01 * a22 - a02 * a21) * invDet;
+//	r.m[0][2] = (a01 * a12 - a02 * a11) * invDet;
+//
+//	r.m[1][0] = -(a10 * a22 - a12 * a20) * invDet;
+//	r.m[1][1] = (a00 * a22 - a02 * a20) * invDet;
+//	r.m[1][2] = -(a00 * a12 - a02 * a10) * invDet;
+//
+//	r.m[2][0] = (a10 * a21 - a11 * a20) * invDet;
+//	r.m[2][1] = -(a00 * a21 - a01 * a20) * invDet;
+//	r.m[2][2] = (a00 * a11 - a01 * a10) * invDet;
+//
+//	// 平移部分
+//	float tx = m.m[0][3];
+//	float ty = m.m[1][3];
+//	float tz = m.m[2][3];
+//
+//	r.m[0][3] = -(r.m[0][0] * tx + r.m[0][1] * ty + r.m[0][2] * tz);
+//	r.m[1][3] = -(r.m[1][0] * tx + r.m[1][1] * ty + r.m[1][2] * tz);
+//	r.m[2][3] = -(r.m[2][0] * tx + r.m[2][1] * ty + r.m[2][2] * tz);
+//
+//	// 最後一行
+//	r.m[3][0] = 0;
+//	r.m[3][1] = 0;
+//	r.m[3][2] = 0;
+//	r.m[3][3] = 1;
+//
+//	return r;
+//}
+
 Matrix4x4 Transpose(Matrix4x4 tranpose) {
 	Matrix4x4 result = {};
 	Matrix4x4 a = tranpose;

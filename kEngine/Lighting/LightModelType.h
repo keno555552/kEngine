@@ -6,6 +6,7 @@ enum class LightModelType {
     Sprite2D,
     Lambert,
     HalfLambert,
+    PhongReflection,
     NumLightModels
 };
 

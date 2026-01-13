@@ -17,6 +17,7 @@
 #include "MaterialConfig.h"
 #include "VertexIndex.h"
 #include "Camera.h"
+#include "DrawData/CameraForGPU.h"
 
 #include "DrawData/ObjectData.h"
 #include "DrawData/SpriteData.h"
@@ -110,7 +111,8 @@ private:
 		defaultPSO = 1,
 		Sprite2D = 0,
 		Lambert,
-		HalfLambert
+		HalfLambert,
+		PhongReflection,
 	};
 
 private:
@@ -151,7 +153,9 @@ private:
 
 	/// カメラ
 	Camera* instanceCamera_ = nullptr; // 実体は外でもつ
-	Camera* saveCamera_ = nullptr; //　仮カメラ、カメラがない時使う 
+	Camera* defaultCamera_ = nullptr; //　仮カメラ、カメラがない時使う 
+	CameraForGPU* cameraPtr_ = nullptr;
+	BasicResource* cameraBuffer_ = new BasicResource;
 
 	//Material関連
 	Material* materialData = nullptr;
@@ -173,6 +177,7 @@ private:
 	D3D12_VIEWPORT createViewport(int kClientWidth, int kClientHeight);
 	D3D12_RECT createScissorRect(int kClientWidth, int kClientHeight);
 	void SetMaterial(int MaterialHandle);
+	void SetCameraForGPU();
 	void InitializeLighting();
 	void SetLighting(DirectionalLight* directionalLight);
 

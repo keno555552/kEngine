@@ -2,8 +2,9 @@
 
 std::string GetLightModelMacro(LightModelType model) {
     switch (model) {
-    case LightModelType::Lambert:     return "LM_LAMBERT";
-    case LightModelType::HalfLambert: return "LM_HALF";
-    default:                          return "LM_DEFAULT";
+    case LightModelType::Lambert:           return "LM_LAMBERT";
+    case LightModelType::HalfLambert:       return "LM_HALF";
+	case LightModelType::PhongReflection:   return "LM_Phong";
+    default:                                return "LM_DEFAULT";
     }
 }

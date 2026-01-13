@@ -125,6 +125,10 @@ int kEngine::SetModelObj(std::string path) {
 	return drawEngine->SetModel(path);
 }
 
+void kEngine::SetCamera(Camera* camera) {
+	drawEngine->SetCamera(camera);
+}
+
 int kEngine::commonTextureHandleReader(int handle) {
 	return drawEngine->readCommenTextureHandle(handle);
 };
