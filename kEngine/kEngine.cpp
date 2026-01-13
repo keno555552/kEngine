@@ -19,12 +19,17 @@ kEngine::~kEngine() {
 	delete timeManager;
 	delete soundManager;
 	delete inputManager;
+	delete resourceManager;
 	delete drawEngine;
 	delete srvManager;
 	delete dxComm;
 }
 
 void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClientHeight) {
+	config::SaveClientTitle(kClientTitle);
+	config::SaveClientWidth(kClientWidth);
+	config::SaveClientHeight(kClientHeight);
+
 	dxComm->InitializeDrive(kClientTitle, kClientWidth, kClientHeight);
 	srvManager->Initialize(dxComm);
 
@@ -38,7 +43,10 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 		srvManager->GetGPUDescriptorHandle(srvIndex));
 #endif
 
-	drawEngine->Initialize(kClientTitle, kClientWidth, kClientHeight, dxComm, srvManager);
+	
+	resourceManager = new ResourceManager(dxComm, srvManager);
+
+	drawEngine->Initialize(kClientTitle, kClientWidth, kClientHeight, dxComm, srvManager,resourceManager);
 	inputManager->Initialize(dxComm, timeManager);
 }
 

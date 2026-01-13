@@ -30,7 +30,7 @@ class DrawEngine
 public:
 	~DrawEngine();
 
-	void Initialize(const char* kClientTitle, int kClientWidth, int kClientHeight, DirectXCore* directXDirver,SrvManager* srvManager);
+	void Initialize(const char* kClientTitle, int kClientWidth, int kClientHeight, DirectXCore* directXDirver,SrvManager* srvManager, ResourceManager* resourceManager);
 
 	void PreDraw();
 	void CommitDraw();

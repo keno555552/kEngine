@@ -219,6 +219,9 @@ private:
 
 	/// 資源管理
 	SrvManager* srvManager = nullptr;
+	ResourceManager* resourceManager = nullptr;
+	InstanceManager* instanceManager = nullptr;
+	TextureManager* textureManager = nullptr;
 
 	/// 描画ロジック
 	DrawEngine* drawEngine = nullptr;

@@ -33,16 +33,15 @@ DrawEngine::~DrawEngine() {
 		depthStencilResource = nullptr;
 	}
 
-	delete resourceManager_;
 
 }
 
 void DrawEngine::Initialize
-(const char* kClientTitle, int kClientWidth, int kClientHeight, DirectXCore* directXDriver, SrvManager* srvManager) {
+(const char* kClientTitle, int kClientWidth, int kClientHeight, DirectXCore* directXDriver, SrvManager* srvManager, ResourceManager* resourceManager) {
 	directXDriver_ = directXDriver;
 	commandList_ = directXDriver_->GetCommandList();
 	srvManager_ = srvManager;
-	resourceManager_ = new ResourceManager(directXDriver_, srvManager);
+	resourceManager_ = resourceManager;
 	///
 	kClientWidth_ = kClientWidth;
 	kClientHeight_ = kClientHeight;

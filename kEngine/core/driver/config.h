@@ -20,6 +20,7 @@ private:
 	static const int kMaxSRVNum_ = 512;              /// 最大SRV数(最大テキスチャ枚数)
 
 private:
+	static char* clientTitle_;
 	static int clientWidth_;
 	static int clientHeight_;
 
@@ -30,6 +31,8 @@ private:
 	static int XInputDriverIP_;
 
 public:
+	static void SaveClientTitle(const char* clientTitle);
+	static const char* GetClientTitle() { return clientTitle_; }
 	static void SaveClientWidth(int clientWidth) { clientWidth_ = clientWidth; }
 	static int GetClientWidth() { return clientWidth_; }
 	static void SaveClientHeight(int clientHeight) { clientHeight_ = clientHeight; }
