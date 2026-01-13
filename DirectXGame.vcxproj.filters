@@ -222,9 +222,6 @@
     <ClCompile Include="kEngine\tool\StageManager\SceneManager.cpp">
       <Filter>ソース ファイル\kEngine\tool\StageManager</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\StageManager\SceneTester.cpp">
-      <Filter>ソース ファイル\kEngine\tool\StageManager</Filter>
-    </ClCompile>
     <ClCompile Include="kEngine\tool\TimeManager\TimeManager.cpp">
       <Filter>ソース ファイル\kEngine\tool</Filter>
     </ClCompile>
@@ -517,9 +514,6 @@
     </ClInclude>
     <ClInclude Include="kEngine\tool\Camera\DebugCamera.h">
       <Filter>ヘッダー ファイル\kEngine\tool</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\tool\StageManager\SceneTester.h">
-      <Filter>ヘッダー ファイル\kEngine\tool\StageManager</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\tool\StageManager\SceneManager.h">
       <Filter>ヘッダー ファイル\kEngine\tool\StageManager</Filter>

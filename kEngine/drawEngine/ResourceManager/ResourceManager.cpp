@@ -1,17 +1,16 @@
 #include "ResourceManager.h"
 #include <Object/Object.h>
 
-ResourceManager::ResourceManager(DirectXCore* device, SrvManager* srvManager) {
+ResourceManager::ResourceManager(DirectXCore* device, InstanceManager* instanceManager) {
 
 	core_ = device;
 	Bdevice_ = core_->GetDevice();
+	instanceManager_ = instanceManager;
 
 	config::default_Sprite2D_MeshBufferHandle_ = CreateSimpleSpriteMeshResource();
 	config::default_Triangle_MeshBufferHandle_ = CreateTriangleResource();
 	config::default_Cube_MeshBufferHandle_ = CreateCubeResource();
 	config::default_Sphere_MeshBufferHandle_ = CreateSphereResource(1);
-
-	TextureManager::GetInstance()->Initialize(device, srvManager);
 }
 
 ResourceManager::~ResourceManager() {
@@ -23,14 +22,7 @@ ResourceManager::~ResourceManager() {
 	ClearPointer(simpleSpriteMeshList_);
 
 	/// comptr自動解放
-	delete textureResource_;
 	delete lightingResource_;
-
-	/// TextureManager解放
-	TextureManager::GetInstance()->Finalize();
-
-	/// InstanceManager解放
-	delete instanceManager_;
 }
 
 void ResourceManager::CreateTurnResource() {

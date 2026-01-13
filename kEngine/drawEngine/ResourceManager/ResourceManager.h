@@ -30,7 +30,7 @@ public:
 
 public:
 	/// 一回だけ作成するResource
-	ResourceManager(DirectXCore* device, SrvManager* srvManager);
+	ResourceManager(DirectXCore* device, InstanceManager* instanceManager);
 	/// 最後で解放するResource
 	~ResourceManager();
 
@@ -92,8 +92,6 @@ public:
 	ID3D12Device* Bdevice_ = nullptr;
 
 	//////////////////////////////Texture関係
-	/// テクスチャ関係
-	BasicResource* textureResource_ = new BasicResource; ///テキスチャーの収納のどころ
 
 	/// Lighting関係
 	BasicResource* lightingResource_ = new BasicResource;
@@ -105,15 +103,15 @@ public:
 	//////////////////////////////InstanceBuffer関係
 
 	/// Instance管理
-	InstanceManager* instanceManager_ = new InstanceManager;
+	InstanceManager* instanceManager_{}; /*借り*/
 
 	//////////////////////////////Vertex\Index関係
 
 	/// 図形関係
-	std::vector<MeshBuffer*> meshBufferList_;		/// すべでのモデルを収納するどころ		これを使って解放する
-	std::vector<Sprite2DMesh*> spriteMeshHandles_;	/// スブライドのハンドルを収納する		解放に使えない
-	std::vector<ModelGroup*> modelGroupList_;		/// モデルグループを	収納する			解放に使えない
-	std::vector < SimpleSpriteMesh*> simpleSpriteMeshList_;	/// デフォルトのスプライトメッシュ
+	std::vector	<MeshBuffer*> meshBufferList_;		/// すべでのモデルを収納するどころ		これを使って解放する
+	std::vector	<Sprite2DMesh*> spriteMeshHandles_;	/// スブライドのハンドルを収納する		解放に使えない
+	std::vector	<ModelGroup*> modelGroupList_;		/// モデルグループを	収納する			解放に使えない
+	std::vector <SimpleSpriteMesh*> simpleSpriteMeshList_;	/// デフォルトのスプライトメッシュ
 
 	/// ModelHandle
 	int modelHandleCounter_ = 0;

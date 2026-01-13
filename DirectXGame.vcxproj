@@ -329,7 +329,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\drawEngine\ResourceManager\ResourceManager.cpp" />
     <ClCompile Include="kEngine\tool\StageManager\SceneManager.cpp" />
     <ClCompile Include="kEngine\core\pso\shader_compile.cpp" />
-    <ClCompile Include="kEngine\tool\StageManager\SceneTester.cpp" />
     <ClCompile Include="kEngine\tool\mathsUnit\Transform.cpp" />
     <ClCompile Include="kEngine\tool\mathsUnit\Vector2.cpp" />
     <ClCompile Include="kEngine\tool\mathsUnit\Vector3.cpp" />
@@ -420,7 +419,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\tool\mathsUnit\Matrix4x4.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\ResourceManager.h" />
     <ClInclude Include="kEngine\tool\StageManager\SceneManager.h" />
-    <ClInclude Include="kEngine\tool\StageManager\SceneTester.h" />
     <ClInclude Include="kEngine\tool\mathsUnit\Transform.h" />
     <ClInclude Include="kEngine\tool\mathsUnit\Vector2.h" />
     <ClInclude Include="kEngine\tool\mathsUnit\Vector3.h" />
