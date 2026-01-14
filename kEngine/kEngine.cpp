@@ -9,10 +9,8 @@ kEngine::kEngine() {
 	inputManager = new InputManager;
 	soundManager = new SoundManager;
 	timeManager = new TimeManager;
-	TextureManager::GetInstance()->Initialize(dxComm,srvManager);
-	instanceManager = new InstanceManager;
-	resourceManager = new ResourceManager(dxComm, instanceManager);
 }
+
 
 kEngine::~kEngine() {
 #ifdef USE_IMGUI
@@ -48,8 +46,9 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 		srvManager->GetGPUDescriptorHandle(srvIndex));
 #endif
 
-	textureManager->Initialize(dxComm, srvManager);
-
+	TextureManager::GetInstance()->Initialize(dxComm, srvManager);
+	instanceManager = new InstanceManager();
+	resourceManager = new ResourceManager(dxComm, instanceManager);
 	drawEngine->Initialize(kClientTitle, kClientWidth, kClientHeight, dxComm, srvManager,resourceManager);
 	inputManager->Initialize(dxComm, timeManager);
 }
