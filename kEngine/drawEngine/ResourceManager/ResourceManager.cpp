@@ -4,7 +4,7 @@
 ResourceManager::ResourceManager(DirectXCore* device, InstanceManager* instanceManager) {
 
 	core_ = device;
-	Bdevice_ = core_->GetDevice();
+	BDevice_ = core_->GetDevice();
 	instanceManager_ = instanceManager;
 
 	config::default_Sprite2D_MeshBufferHandle_ = CreateSimpleSpriteMeshResource();
@@ -62,7 +62,7 @@ void ResourceManager::Collet2DTile(Vector2 pos, MaterialConfig material) {
 	if (materialNum < (int)instanceManager_->materialConfigList_.size()) {
 		/// 新しいResourceを追加
 		BasicResource* newResource = new BasicResource;
-		newResource->CreateResourceClass_(Bdevice_, sizeof(Material));
+		newResource->CreateResourceClass_(BDevice_, sizeof(Material));
 		materialResourceList_.push_back(newResource);
 
 		/// MaterialとMapする
@@ -123,7 +123,7 @@ void ResourceManager::ColletModel(TransformationMatrix* wvpData, std::vector<Mat
 		if (after > before) {
 			/// 新しいResourceを追加
 			BasicResource* newResource = new BasicResource;
-			newResource->CreateResourceClass_(Bdevice_, sizeof(Material));
+			newResource->CreateResourceClass_(BDevice_, sizeof(Material));
 			materialResourceList_.push_back(newResource);
 
 			/// MaterialとMapする
@@ -189,7 +189,7 @@ void ResourceManager::Collet3DTile(TransformationMatrix* wvpData, std::vector<Ma
 		if (after > before) {
 			/// 新しいResourceを追加
 			BasicResource* newResource = new BasicResource;
-			newResource->CreateResourceClass_(Bdevice_, sizeof(Material));
+			newResource->CreateResourceClass_(BDevice_, sizeof(Material));
 			materialResourceList_.push_back(newResource);
 
 			/// MaterialとMapする
@@ -214,7 +214,7 @@ void ResourceManager::Collet2D(SpriteData* sprite) {
 	if (materialNum < (int)instanceManager_->materialConfigList_.size()) {
 		/// 新しいResourceを追加
 		BasicResource* newResource = new BasicResource;
-		newResource->CreateResourceClass_(Bdevice_, sizeof(Material));
+		newResource->CreateResourceClass_(BDevice_, sizeof(Material));
 		materialResourceList_.push_back(newResource);
 
 		/// MaterialとMapする
@@ -247,7 +247,7 @@ void ResourceManager::Collet2D(SpriteData* sprite) {
 		if (after > before) {
 			/// 新しいResourceを追加
 			BasicResource* newResource = new BasicResource;
-			newResource->CreateResourceClass_(Bdevice_, sizeof(Material));
+			newResource->CreateResourceClass_(BDevice_, sizeof(Material));
 			materialResourceList_.push_back(newResource);
 
 			/// MaterialとMapする
@@ -294,7 +294,7 @@ void ResourceManager::Collet3D(ObjectData* object) {
 		if (after > before) {
 			/// 新しいResourceを追加
 			BasicResource* newResource = new BasicResource;
-			newResource->CreateResourceClass_(Bdevice_, sizeof(Material));
+			newResource->CreateResourceClass_(BDevice_, sizeof(Material));
 			materialResourceList_.push_back(newResource);
 
 			/// MaterialとMapする
@@ -315,9 +315,9 @@ void ResourceManager::Collet3D(ObjectData* object) {
 int ResourceManager::CreateSimpleSpriteMeshResource() {
 
 	SimpleSpriteMesh* newSprite2D_ = new SimpleSpriteMesh;
-	newSprite2D_->CreateVertexResource_(Bdevice_);
+	newSprite2D_->CreateVertexResource_(BDevice_);
 	newSprite2D_->CreateVertexBufferView_(4);
-	newSprite2D_->CreateIndexResource_(Bdevice_);
+	newSprite2D_->CreateIndexResource_(BDevice_);
 	newSprite2D_->CreateIndexBufferView_(6);
 	newSprite2D_->SetKeep(true);
 	//meshBufferList_.push_back(newSprite2D_);
@@ -329,7 +329,7 @@ int ResourceManager::CreateSimpleSpriteMeshResource() {
 
 int ResourceManager::CreateTriangleResource() {
 	TriangleMesh* newTriangle = new TriangleMesh;
-	newTriangle->CreateVertexResource_(Bdevice_);
+	newTriangle->CreateVertexResource_(BDevice_);
 	newTriangle->CreateVertexBufferView_(6);
 	meshBufferList_.push_back(newTriangle);
 
@@ -344,9 +344,9 @@ int ResourceManager::CreateTriangleResource() {
 int ResourceManager::CreateCubeResource() {
 
 	CubeMesh* newCube_ = new CubeMesh;
-	newCube_->CreateVertexResource_(Bdevice_);
+	newCube_->CreateVertexResource_(BDevice_);
 	newCube_->CreateVertexBufferView_(24);
-	newCube_->CreateIndexResource_(Bdevice_);
+	newCube_->CreateIndexResource_(BDevice_);
 	newCube_->CreateIndexBufferView_(36);
 	meshBufferList_.push_back(newCube_);
 
@@ -363,8 +363,8 @@ int ResourceManager::CreateSphereResource(int sudivision) {
 	sudivision;
 
 	SphereMesh* newSphere = new SphereMesh;
-	newSphere->CreateVertexResource_(Bdevice_);
-	newSphere->CreateIndexResource_(Bdevice_);
+	newSphere->CreateVertexResource_(BDevice_);
+	newSphere->CreateIndexResource_(BDevice_);
 	meshBufferList_.push_back(newSphere);
 
 	ModelGroup* modelGroup = new ModelGroup;
@@ -400,7 +400,7 @@ int ResourceManager::CreateModelResource(std::string Path) {
 		Model* newModel = new Model;
 		newModel->GetModelData(ptr);
 		newModel->SetModelObj(Path);
-		newModel->CreateVertexResourceG_(Bdevice_);
+		newModel->CreateVertexResourceG_(BDevice_);
 		modelGroup->PushModel(newModel);
 		meshBufferList_.push_back(newModel);
 		modelGroup->PushModelHandle((int)meshBufferList_.size() - 1);
@@ -471,7 +471,7 @@ int ResourceManager::ReadModelTextureHandle(int index) {
 	return TextureManager::GetInstance()->GetModelTextureHandle(index);
 }
 
-int ResourceManager::ReadCommenTextureHandle(int index) {
+int ResourceManager::ReadCommonTextureHandle(int index) {
 	return TextureManager::GetInstance()->GetCommonTextureHandle(index);
 }
 
@@ -506,7 +506,7 @@ void ResourceManager::TextureCounterPlus(int index) {
 	TextureManager::GetInstance()->TextureCounterPlus(index);
 }
 
-void ResourceManager::TextuerCounterAdjust(int index) {
+void ResourceManager::TextureCounterAdjust(int index) {
 	TextureManager::GetInstance()->TextuerCounterAdjust(index);
 }
 

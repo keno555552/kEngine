@@ -187,7 +187,7 @@ void Object::Draw() {
 
 void Object::CreateModelData(int modelHandle) {
 	modelHandle_ = modelHandle;
-	int numOfPart = system_->GetMuitModelNum(modelHandle_);
+	int numOfPart = system_->GetMutiModelNum(modelHandle_);
 
 	mainPosition.materialConfig = std::make_shared<MaterialConfig>();
 	InitMaterialConfig(mainPosition.materialConfig.get());

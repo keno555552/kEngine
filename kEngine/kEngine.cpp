@@ -9,6 +9,9 @@ kEngine::kEngine() {
 	inputManager = new InputManager;
 	soundManager = new SoundManager;
 	timeManager = new TimeManager;
+	textureManager = TextureManager::GetInstance();
+	instanceManager = new InstanceManager;
+	resourceManager = new ResourceManager(dxComm, instanceManager);
 }
 
 kEngine::~kEngine() {
@@ -45,9 +48,7 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 		srvManager->GetGPUDescriptorHandle(srvIndex));
 #endif
 
-	instanceManager = new InstanceManager;
 	textureManager->Initialize(dxComm, srvManager);
-	resourceManager = new ResourceManager(dxComm, instanceManager);
 
 	drawEngine->Initialize(kClientTitle, kClientWidth, kClientHeight, dxComm, srvManager,resourceManager);
 	inputManager->Initialize(dxComm, timeManager);
@@ -90,7 +91,7 @@ int kEngine::GetModelTextureHandle(int modelHandle, int part) {
 	return resourceManager->GetTextureHandleFromModelGroup(modelHandle, part);
 }
 
-int kEngine::GetMuitModelNum(int modelHandle) {
+int kEngine::GetMutiModelNum(int modelHandle) {
 	return resourceManager->modelGroupList_[modelHandle]->GetModelNum();
 }
 
@@ -110,7 +111,7 @@ int kEngine::commonModelHandleReader(int handle) {
 	return resourceManager->ReadModelTextureHandle(handle);
 };
 
-int kEngine::LoadTextrue(const std::string& filePath) {
+int kEngine::LoadTexture(const std::string& filePath) {
 	return resourceManager->LoadCommonTexture(filePath);
 }
 

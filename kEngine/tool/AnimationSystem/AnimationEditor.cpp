@@ -95,12 +95,12 @@ void AnimationEditor::SetupAnimationEditor() {
 	/// ===== テキスチャローディング ===///
 	std::string mainPath = "resources/TemplateResource/texture/animationEditor/";
 
-	mainTimeBarTH_ = system_->LoadTextrue(mainPath + "mainTimeBar.png");
-	mainNeedleTH_ = system_->LoadTextrue(mainPath + "mainNeedle.png");
-	markerTH_ = system_->LoadTextrue(mainPath + "marker.png");
-	pingTH_ = system_->LoadTextrue(mainPath + "ping.png");
-	pingFirstTH_ = system_->LoadTextrue(mainPath + "pingFirst.png");
-	pingLastTH_ = system_->LoadTextrue(mainPath + "pingLast.png");
+	mainTimeBarTH_ = system_->LoadTexture(mainPath + "mainTimeBar.png");
+	mainNeedleTH_ = system_->LoadTexture(mainPath + "mainNeedle.png");
+	markerTH_ = system_->LoadTexture(mainPath + "marker.png");
+	pingTH_ = system_->LoadTexture(mainPath + "ping.png");
+	pingFirstTH_ = system_->LoadTexture(mainPath + "pingFirst.png");
+	pingLastTH_ = system_->LoadTexture(mainPath + "pingLast.png");
 
 	std::string modelPath = "resources/TemplateResource/object/";
 	Skydome_modelHandle_ = system_->SetModelObj(modelPath + "animationEditor/studioBG/studioBG.obj");

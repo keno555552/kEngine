@@ -23,7 +23,7 @@ SceneManager::SceneManager(kEngine* system) {
 	//	ptr = false;
 	//}
 
-	helperTextureHandle_ = system_->LoadTextrue("resources/texture/helper.png");
+	helperTextureHandle_ = system_->LoadTexture("resources/texture/helper.png");
 	helperSprite_ = new SimpleSprite;
 	helperSprite_->IntObject(system_);
 	helperSprite_->CreateDefaultData();
@@ -178,7 +178,7 @@ void SceneManager::Render() {
 	defaultMenu_->Draw();
 
 #ifdef USE_IMGUI
-	ImguiPart();
+	ImGuiPart();
 #endif
 }
 
@@ -222,7 +222,7 @@ void SceneManager::ClearStage() {
 }
 
 #ifdef USE_IMGUI
-void SceneManager::ImguiPart() {
+void SceneManager::ImGuiPart() {
 	{
 		float fps = system_->GetFPS();
 		float fps1s = system_->GetFPSPerSecond();

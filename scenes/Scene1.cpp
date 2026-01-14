@@ -27,17 +27,17 @@ Scene1::Scene1(kEngine* system) {
 	MH_enemy_ = system_->SetModelObj((basePath + objectPath + "enemy/enemy.obj").c_str());
 	MH_backPoint_ = system_->SetModelObj((basePath + objectPath + "backSign/backSign.obj").c_str());
 
-	TH_box_ = system_->LoadTextrue((basePath + texturePath + "testBox.png").c_str());
-	TH_try_ = system_->LoadTextrue((basePath + texturePath + "Tryer.png").c_str());
-	TH_uv_ = system_->LoadTextrue((basePath + templatePath + texturePath + "uvChecker.png").c_str());
+	TH_box_ = system_->LoadTexture((basePath + texturePath + "testBox.png").c_str());
+	TH_try_ = system_->LoadTexture((basePath + texturePath + "Tryer.png").c_str());
+	TH_uv_ = system_->LoadTexture((basePath + templatePath + texturePath + "uvChecker.png").c_str());
 
-	TH_dirt_ = system_->LoadTextrue((basePath + texturePath + blockPath + "dirt.png").c_str());
-	TH_rock_ = system_->LoadTextrue((basePath + texturePath + blockPath + "stone.png").c_str());
+	TH_dirt_ = system_->LoadTexture((basePath + texturePath + blockPath + "dirt.png").c_str());
+	TH_rock_ = system_->LoadTexture((basePath + texturePath + blockPath + "stone.png").c_str());
 
-	TH_buleSkySkydome_ = system_->LoadTextrue((basePath + texturePath + "sky/bluesky.png").c_str());
+	TH_buleSkySkydome_ = system_->LoadTexture((basePath + texturePath + "sky/bluesky.png").c_str());
 
-	TH_hpUI_ = system_->LoadTextrue((basePath + texturePath + "Armer_1.png").c_str());
-	TH_hpUI_empty_ = system_->LoadTextrue((basePath + texturePath + "Armer_0.png").c_str());
+	TH_hpUI_ = system_->LoadTexture((basePath + texturePath + "Armer_1.png").c_str());
+	TH_hpUI_empty_ = system_->LoadTexture((basePath + texturePath + "Armer_0.png").c_str());
 
 	SH_BGM_ = system_->SoundLoadSE((basePath + soundPath + BGMPath + "Stage.wav").c_str());
 	SE_killEnemy_ = system_->SoundLoadSE((basePath + soundPath + SEPath + "killEnemy.wav").c_str());

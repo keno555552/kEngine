@@ -5,7 +5,7 @@ P_Ball::P_Ball(kEngine* system) :Particle(system) {
 	createTimer.Init0(defaultParticleInterval_, system_->GetTimeManager());
 
 	defaultModelHandle = system_->SetModelObj("resources/TemplateResource/object/plane/plane.obj");
-	defaultTextureHandle = system_->LoadTextrue("resources/TemplateResource/texture/circle.png");
+	defaultTextureHandle = system_->LoadTexture("resources/TemplateResource/texture/circle.png");
 	commonMaterialConfig->useModelTexture = false;
 	commonMaterialConfig->textureHandle = defaultTextureHandle;
 

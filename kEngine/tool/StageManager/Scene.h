@@ -8,8 +8,6 @@ class Scene
 public:
 	virtual ~Scene() = default;
 
-	virtual ~Scene() = default;
-
 	ScenePhase phase_ = ScenePhase::PREPARE;
 
 public:

@@ -17,8 +17,8 @@ Player::Player(kEngine* system, const Vector3& position) {
 
 	MH_pickaxe_ = system_->SetModelObj("resources/object/pickaxe/pickaxe.obj");
 
-	TH_player_ = system_->LoadTextrue("resources/object/player/playerUV.png");
-	TH_White5x5_ = system_->LoadTextrue("resources/TemplateResource/texture/white5x5.png");
+	TH_player_ = system_->LoadTexture("resources/object/player/playerUV.png");
+	TH_White5x5_ = system_->LoadTexture("resources/TemplateResource/texture/white5x5.png");
 
 	SH_JUMP_ = system_->SoundLoadSE("resources/sound/SE/player_jump.wav");
 	SH_SHOOT_ = system_->SoundLoadSE("resources/sound/SE/player_attack.wav");

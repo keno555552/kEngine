@@ -12,7 +12,7 @@ Effect1::Effect1(kEngine* system) {
 	skydomeModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/skydome/skydome.obj");
 	sphereModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/plane/plane.obj");
 
-	boxTextureHandle_ = system_->LoadTextrue("resources/texture/testBox.png");
+	boxTextureHandle_ = system_->LoadTexture("resources/texture/testBox.png");
 
 	skydome_ = new Object;
 	skydome_->IntObject(system_);

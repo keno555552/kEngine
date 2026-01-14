@@ -24,14 +24,14 @@ SceneTest::SceneTest(kEngine* system) {
 	MH_object_ = system_->SetModelObj((basePath + objectPath + "pickaxe/pickaxe.obj").c_str());
 	MH_enemy_ = system_->SetModelObj((basePath + objectPath + "enemy/enemy.obj").c_str());
 
-	TH_box_ = system_->LoadTextrue((basePath + texturePath + "testBox.png").c_str());
-	TH_try_ = system_->LoadTextrue((basePath + texturePath + "Tryer.png").c_str());
-	TH_uv_ = system_->LoadTextrue((basePath + templatePath + texturePath + "uvChecker.png").c_str());
+	TH_box_ = system_->LoadTexture((basePath + texturePath + "testBox.png").c_str());
+	TH_try_ = system_->LoadTexture((basePath + texturePath + "Tryer.png").c_str());
+	TH_uv_ = system_->LoadTexture((basePath + templatePath + texturePath + "uvChecker.png").c_str());
 
-	TH_dirt_ = system_->LoadTextrue((basePath + texturePath + blockPath + "dirt.png").c_str());
-	TH_rock_ = system_->LoadTextrue((basePath + texturePath + blockPath + "stone.png").c_str());
+	TH_dirt_ = system_->LoadTexture((basePath + texturePath + blockPath + "dirt.png").c_str());
+	TH_rock_ = system_->LoadTexture((basePath + texturePath + blockPath + "stone.png").c_str());
 
-	TH_buleSkySkydome_ = system_->LoadTextrue((basePath + texturePath + "sky/bluesky.png").c_str());
+	TH_buleSkySkydome_ = system_->LoadTexture((basePath + texturePath + "sky/bluesky.png").c_str());
 
 	//skydome_->CreateDefaultData();
 	skydome_ = new Object;
@@ -261,8 +261,6 @@ void SceneTest::ImguiPart() {
 		ImGui::SliderFloat3("TargeterRotate", &targeter_->mainPosition.transform.rotate.x, 0.0f, 5.0f);
 		ImGui::Text("Player HP = %d", hp);
 		ImGui::End();
-
-	{
 		ImGui::Begin("MaterialConfig");
 		ImGui::SliderFloat3("uvScale", &underGround_BG_->objectParts_[0].materialConfig->uvScale.x, -50.0f, 50.0f);
 		ImGui::End();

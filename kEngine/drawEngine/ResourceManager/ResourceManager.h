@@ -69,7 +69,7 @@ public:
 	DirectX::TexMetadata GetTextureMetadata(int textureHandle);
 
 	int ReadModelTextureHandle(int index);
-	int ReadCommenTextureHandle(int index);
+	int ReadCommonTextureHandle(int index);
 
 	bool SetModelTexture(Model* model);
 
@@ -78,7 +78,7 @@ public:
 	/// 暫くのCounter管理
 	int GetTextureCounter();
 	void TextureCounterPlus(int index = 1);
-	void TextuerCounterAdjust(int index);
+	void TextureCounterAdjust(int index);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE GetTextureCPUDescriptorHandle(int handle);
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureGPUDescriptorHandle(int handle);
@@ -89,7 +89,7 @@ public:
 
 	/// 借りのDevice
 	DirectXCore* core_ = nullptr;
-	ID3D12Device* Bdevice_ = nullptr;
+	ID3D12Device* BDevice_ = nullptr;
 
 	//////////////////////////////Texture関係
 

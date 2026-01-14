@@ -13,9 +13,9 @@ SceneWin::SceneWin(kEngine* kEngine) {
 	std::string BGMPath = "BGM/";
 	std::string SEPath = "SE/";
 
-	TH_win_ = kEngine->LoadTextrue((basePath + texturePath + resultPath + "Result_Win.png").c_str());
-	TH_BG_ = kEngine->LoadTextrue((basePath + texturePath + resultPath + "Result_BG.png").c_str());
-	TH_pressKey_ = kEngine->LoadTextrue((basePath + texturePath + resultPath + "Result_BackToTitle.png").c_str());
+	TH_win_ = kEngine->LoadTexture((basePath + texturePath + resultPath + "Result_Win.png").c_str());
+	TH_BG_ = kEngine->LoadTexture((basePath + texturePath + resultPath + "Result_BG.png").c_str());
+	TH_pressKey_ = kEngine->LoadTexture((basePath + texturePath + resultPath + "Result_BackToTitle.png").c_str());
 
 	SH_BGM_ = kEngine->SoundLoadSE((basePath + soundPath + BGMPath + "Win.wav").c_str());
 

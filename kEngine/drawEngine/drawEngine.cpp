@@ -85,7 +85,7 @@ void DrawEngine::Initialize
 		tile2DInstancingData_[index].world = Identity();
 	}
 	int srvHandleIndex = srvManager_->Allocate();
-	srvManager_->CreateSRVforStructuredBuffer(srvHandleIndex, tile2DWVPResource_->GetResource().Get(), config::Get2DTileNumInstance(), sizeof(TransformationMatrix));  // 修正：使用正確的 tile2DWVPResource_
+	srvManager_->CreateSRVForStructuredBuffer(srvHandleIndex, tile2DWVPResource_->GetResource().Get(), config::Get2DTileNumInstance(), sizeof(TransformationMatrix));  // 修正：使用正確的 tile2DWVPResource_
 
 	Tile2DSrvHandleGPU_ = srvManager_->GetGPUDescriptorHandle(srvHandleIndex);
 
@@ -96,7 +96,7 @@ void DrawEngine::Initialize
 		tile3DInstancingData_[index].world = Identity();
 	}
 	srvHandleIndex = srvManager_->Allocate();
-	srvManager_->CreateSRVforStructuredBuffer(srvHandleIndex, tile3DWVPResource_->GetResource().Get(), config::Get3DTileNumInstance(), sizeof(TransformationMatrix));
+	srvManager_->CreateSRVForStructuredBuffer(srvHandleIndex, tile3DWVPResource_->GetResource().Get(), config::Get3DTileNumInstance(), sizeof(TransformationMatrix));
 
 	Tile3DSrvHandleGPU_ = srvManager_->GetGPUDescriptorHandle(srvHandleIndex);
 
@@ -1150,7 +1150,7 @@ bool DrawEngine::SetModelTexture(Model* model) {
 
 int DrawEngine::SetModel(std::string Path) {
 
-	resourceManager_->TextuerCounterAdjust(descriptorIndex_);
+	resourceManager_->TextureCounterAdjust(descriptorIndex_);
 	int handle = resourceManager_->LoadModel(Path);
 	descriptorIndex_ = resourceManager_->GetTextureCounter();
 

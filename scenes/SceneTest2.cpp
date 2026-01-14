@@ -11,8 +11,8 @@ SceneTest2::SceneTest2(kEngine* system) {
 	skydomeModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/skydome/skydome.obj");
 	sphereModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/plane/plane.obj");
 
-	boxTextureHandle_ = system_->LoadTextrue("resources/texture/testBox.png");
-	tryTextureHandle_ = system_->LoadTextrue("resources/texture/Tryer.png");
+	boxTextureHandle_ = system_->LoadTexture("resources/texture/testBox.png");
+	tryTextureHandle_ = system_->LoadTexture("resources/texture/Tryer.png");
 
 	skydome_ = new Object;
 	skydome_->IntObject(system_);

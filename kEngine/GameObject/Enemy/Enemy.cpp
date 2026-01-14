@@ -6,8 +6,8 @@ Enemy::Enemy(kEngine* system, const Vector3& position) {
 	Object::CreateDefaultData();
 	mainPosition.transform.translate = position;
 
-	TH_White5x5_ = system_->LoadTextrue("resources/TemplateResource/texture/white5x5.png");
-	TH_Model_ = system_->LoadTextrue("resources/object/enemy/enemy.png");
+	TH_White5x5_ = system_->LoadTexture("resources/TemplateResource/texture/white5x5.png");
+	TH_Model_ = system_->LoadTexture("resources/object/enemy/enemy.png");
 
 	SH_Damage_ = system_->SoundLoadSE("resources/sound/SE/enemyDamage.wav");
 

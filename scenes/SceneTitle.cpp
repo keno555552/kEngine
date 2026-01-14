@@ -24,14 +24,14 @@ SceneTitle::SceneTitle(kEngine* system) {
 	MH_skydome_ = system_->SetModelObj((basePath + templatePath + objectPath + "skydome/skydome.obj").c_str());
 	MH_ground_ = system_->SetModelObj((basePath + objectPath + "ground/ground.obj").c_str());
 
-	TH_buleSkySkydome_ = system_->LoadTextrue((basePath + texturePath + "sky/bluesky.png").c_str());
-	TH_title = system_->LoadTextrue((basePath + texturePath + "title.png").c_str());
+	TH_buleSkySkydome_ = system_->LoadTexture((basePath + texturePath + "sky/bluesky.png").c_str());
+	TH_title = system_->LoadTexture((basePath + texturePath + "title.png").c_str());
 
-	TH_startButton_ = system_->LoadTextrue((basePath + texturePath + buttonPath + "startButton.png").c_str());
-	TH_settingButton_ = system_->LoadTextrue((basePath + texturePath + buttonPath + "settingButton.png").c_str());
-	TH_quitButton_ = system_->LoadTextrue((basePath + texturePath + buttonPath + "quitButton.png").c_str());
-	TH_buttonBack_notSelect_ = system_->LoadTextrue((basePath + texturePath + buttonPath + "buttonNotSelect.png").c_str());
-	TH_buttonBack_Select_ = system_->LoadTextrue((basePath + texturePath + buttonPath + "buttonSelect.png").c_str());
+	TH_startButton_ = system_->LoadTexture((basePath + texturePath + buttonPath + "startButton.png").c_str());
+	TH_settingButton_ = system_->LoadTexture((basePath + texturePath + buttonPath + "settingButton.png").c_str());
+	TH_quitButton_ = system_->LoadTexture((basePath + texturePath + buttonPath + "quitButton.png").c_str());
+	TH_buttonBack_notSelect_ = system_->LoadTexture((basePath + texturePath + buttonPath + "buttonNotSelect.png").c_str());
+	TH_buttonBack_Select_ = system_->LoadTexture((basePath + texturePath + buttonPath + "buttonSelect.png").c_str());
 
 	SH_BGM_ = system_->SoundLoadSE((basePath + soundPath + BGMPath + "Title.wav").c_str());
 	SH_Select_ = system_->SoundLoadSE((basePath + soundPath + SEPath + "menuSelect.wav").c_str());

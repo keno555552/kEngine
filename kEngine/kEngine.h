@@ -4,6 +4,9 @@
 #include "soundManager.h"
 #include "SrvManager.h"
 #include "drawEngine.h"
+#include "ResourceManager/ResourceManager.h"
+#include "ResourceManager/InstanceManager/InstanceManager.h"
+#include "ResourceManager/TextureManager/TextureManager.h"
 #include "TransformationMatrix.h"
 #include "Vector2.h"
 #include "materialconfig.h"
@@ -45,7 +48,7 @@ public:
 
 	int GetModelTextureHandle(int modelHandle,int part);
 
-	int GetMuitModelNum(int modelHandle);
+	int GetMutiModelNum(int modelHandle);
 	int SetModelObj(std::string path);
 
 	void SetCamera(Camera* camera);
@@ -53,7 +56,7 @@ public:
 	int commonTextureHandleReader(int handle);
 	int commonModelHandleReader(int handle);
 
-	int LoadTextrue(const std::string& filePath);
+	int LoadTexture(const std::string& filePath);
 
 #pragma endregion
 
