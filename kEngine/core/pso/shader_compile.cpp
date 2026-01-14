@@ -69,6 +69,9 @@ IDxcBlob* Shader_compile::CompileShader(// CompilerするShaderファイルへ�
 	} else if (modelType == LightModelType::PhongReflection) {
 		arguments.push_back(L"-D");
 		arguments.push_back(L"LIGHT_MODEL_PHONG=1");
+	} else if (modelType == LightModelType::BlinnPhongReflection) {
+		arguments.push_back(L"-D");
+		arguments.push_back(L"LIGHT_MODEL_BLINN_PHONG=1");
 	}
 	hr = dxcCompiler->Compile(
 		&shaderSourceBuffer, // 読み込んだファイル

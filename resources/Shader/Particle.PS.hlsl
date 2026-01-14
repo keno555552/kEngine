@@ -11,6 +11,10 @@
 #include "./LightingLambert/PhongReflection.hlsl"
 #endif
 
+#if defined(LIGHT_MODEL_BLINN_PHONG)
+#include "./LightingLambert/BlinnPhongReflection.hlsl"
+#endif
+
 struct Material
 {
     float4 color;
@@ -71,6 +75,17 @@ PixelShaderOutput main(VertexShaderOutput input)
                                                 input.worldPosition,
                                                 gCamera.position,
                                                 gMaterial.shininess);
+        totalWeight += 1.0f;
+#endif 
+       
+#if defined (LIGHT_MODEL_BLINN_PHONG)
+
+        result += ApplyLighting_BlinnPhongReflection(normalize(input.normal),
+                                                    (-gDirectionalLight.direction),
+                                                    gDirectionalLight.color.rgb,
+                                                    input.worldPosition,
+                                                    gCamera.position,
+                                                    gMaterial.shininess);
         totalWeight += 1.0f;
 #endif 
        

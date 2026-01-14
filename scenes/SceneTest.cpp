@@ -27,7 +27,7 @@ SceneTest::SceneTest(kEngine* system) {
 	player_->CreateModelData(playerModelHandle_);
 	player_->mainPosition.transform.scale = Vector3(0.5f, 0.5f, 0.5f);
 	for (auto parts : player_->objectParts_) {
-		parts.materialConfig->lightModelType = LightModelType::PhongReflection;
+		parts.materialConfig->lightModelType = LightModelType::BlinnPhongReflection;
 	}
 
 
@@ -159,9 +159,9 @@ void SceneTest::ImguiPart() {
 		ImGui::SliderFloat("shininess", &shininess, 0.0f, 256.0f);
 		ImGui::End();
 
-		player_->mainPosition.transform.scale.x = scale;
-		player_->mainPosition.transform.scale.y = scale;
-		player_->mainPosition.transform.scale.z = scale;
+		//player_->mainPosition.transform.scale.x = scale;
+		//player_->mainPosition.transform.scale.y = scale;
+		//player_->mainPosition.transform.scale.z = scale;
 
 		for (auto& parts : player_->objectParts_) {
 			parts.materialConfig->shininess = shininess;

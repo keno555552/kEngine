@@ -1,6 +1,7 @@
 #include "MaterialConfig.h"
 
-bool MaterialConfig::operator==(const MaterialConfig target) {
+
+bool MaterialConfig::operator==(const MaterialConfig& target)const {
 	if (useModelTexture != target.useModelTexture)return false;
 	if (textureHandle != target.textureHandle)return false;
 	if (uvTranslate != target.uvTranslate)return false;
@@ -13,7 +14,7 @@ bool MaterialConfig::operator==(const MaterialConfig target) {
 	return true;
 }
 
-bool MaterialConfig::operator!=(const MaterialConfig target) {
+bool MaterialConfig::operator!=(const MaterialConfig& target) const {
 	return !(*this == target);
 }
 

@@ -229,6 +229,12 @@ void DrawEngine::PSODecition(MaterialConfig& material) {
 			currentPSO_ = psoType::PhongReflection;
 			psoChanged = true;
 		}
+	case LightModelType::BlinnPhongReflection:
+		if (currentPSO_ != psoType::BlinnPhongReflection) {
+			commandList_->SetPipelineState(psoList_[(int)LightModelType::BlinnPhongReflection]);
+			currentPSO_ = psoType::BlinnPhongReflection;
+			psoChanged = true;
+		}
 	}
 	if (psoChanged) {
 		rootSignature_ = pso_->getRootSignature((int)currentPSO_);
@@ -1100,6 +1106,7 @@ void DrawEngine::Draw3D() {
 
 				tile3DInstancingData_[instance3DCounter_].WVP = instances[i]->transformData.WVP;
 				tile3DInstancingData_[instance3DCounter_].world = instances[i]->transformData.world;
+				tile3DInstancingData_[instance3DCounter_].WorldInverseTranspose = instances[i]->transformData.WorldInverseTranspose;
 
 				instances[i]->drawState = InstanceManager::ISDRAW;
 				instancesCounter++;
@@ -1164,26 +1171,8 @@ int DrawEngine::readModelTextureHandle(int handle) {
 	//return modelTextureSRVMap_[handle];
 }
 
-int DrawEngine::GetMuitModelNum(int modelHandle) {
-	return resourceManager_->modelGroupList_[modelHandle]->GetModelNum();
-}
-
-
-int DrawEngine::LoadTexture(const std::string& filePath) {
-
-	resourceManager_->TextuerCounterAdjust(descriptorIndex_);
-	int handle = resourceManager_->LoadCommonTexture(filePath);
-	descriptorIndex_ = resourceManager_->GetTextureCounter();
-
-	return handle;
-}
-
 int DrawEngine::LoadModelTexture(const std::string& filePath) {
-	resourceManager_->TextuerCounterAdjust(descriptorIndex_);
-	int handle = resourceManager_->LoadCommonTexture(filePath);
-	descriptorIndex_ = resourceManager_->GetTextureCounter();
-
-	return handle;
+	return resourceManager_->LoadCommonTexture(filePath);
 }
 
 D3D12_VIEWPORT DrawEngine::createViewport(int kClientWidth, int kClientHeight) {

@@ -36,25 +36,25 @@ void ResourceManager::ClearTurnResource() {
 
 
 
-void ResourceManager::ColletSprite(Vector2 pos, MaterialConfig material) {
-	int materialNum = (int)instanceManager_->materialConfigList_.size();
-	instanceManager_->AddSpriteInstance(pos, material);
-	if (materialNum < (int)instanceManager_->materialConfigList_.size()) {
-		/// 新しいResourceを追加
-		BasicResource* newResource = new BasicResource;
-		newResource->CreateResourceClass_(Bdevice_, sizeof(Material));
-		materialResourceList_.push_back(newResource);
-
-		/// MaterialとMapする
-		Material* newData = nullptr;
-		newResource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&newData));
-		newData->inputMaterialConfig(material);
-		newResource->GetResource()->Unmap(0, nullptr);
-
-		/// instanceにResourceのHandleを設定
-		instanceManager_->materialConfigList_.back()->materialResourceHandle = materialNum;
-	}
-}
+//void ResourceManager::ColletSprite(Vector2 pos, MaterialConfig material) {
+//	int materialNum = (int)instanceManager_->materialConfigList_.size();
+//	instanceManager_->AddSpriteInstance(pos, material);
+//	if (materialNum < (int)instanceManager_->materialConfigList_.size()) {
+//		/// 新しいResourceを追加
+//		BasicResource* newResource = new BasicResource;
+//		newResource->CreateResourceClass_(Bdevice_, sizeof(Material));
+//		materialResourceList_.push_back(newResource);
+//
+//		/// MaterialとMapする
+//		Material* newData = nullptr;
+//		newResource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&newData));
+//		newData->inputMaterialConfig(material);
+//		newResource->GetResource()->Unmap(0, nullptr);
+//
+//		/// instanceにResourceのHandleを設定
+//		instanceManager_->materialConfigList_.back()->materialResourceHandle = materialNum;
+//	}
+//}
 
 void ResourceManager::Collet2DTile(Vector2 pos, MaterialConfig material) {
 	int materialNum = (int)instanceManager_->materialConfigList_.size();

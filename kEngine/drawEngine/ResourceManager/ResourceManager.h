@@ -44,7 +44,7 @@ public:
 	//////////////////////////////命令
 
 	/// Resource Collect
-	void ColletSprite(Vector2 pos, MaterialConfig material);
+	//void ColletSprite(Vector2 pos, MaterialConfig material);
 	void ColletModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = 0, bool useDefaultModel = false);
 	void Collet2DTile(Vector2 pos, MaterialConfig material);
 	void Collet3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = 0, bool useDefaultModel = false);

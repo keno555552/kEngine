@@ -7,6 +7,7 @@ enum class LightModelType {
     Lambert,
     HalfLambert,
     PhongReflection,
+    BlinnPhongReflection,
     NumLightModels
 };
 

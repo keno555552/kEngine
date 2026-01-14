@@ -86,8 +86,6 @@ public:
 
 	bool SetModelTexture(Model* model);
 	int SetModel(std::string Path);
-	int GetMuitModelNum(int modelHandle);
-	int LoadTexture(const std::string& filePath);
 	int LoadModelTexture(const std::string& filePath);
 
 
@@ -113,6 +111,7 @@ private:
 		Lambert,
 		HalfLambert,
 		PhongReflection,
+		BlinnPhongReflection,
 	};
 
 private:

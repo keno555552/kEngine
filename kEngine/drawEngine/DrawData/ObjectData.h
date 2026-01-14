@@ -14,6 +14,8 @@ struct ObjectPart {
 	std::shared_ptr<MaterialConfig>materialConfig;
 
 	ObjectPart* parentPart = nullptr;
+
+	bool operator==(const ObjectPart& target);
 };
 
 

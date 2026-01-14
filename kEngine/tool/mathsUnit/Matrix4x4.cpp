@@ -239,7 +239,7 @@ Matrix4x4& Matrix4x4::operator=(const Matrix4x4& target) {
 	return *this;
 }
 
-bool Matrix4x4::operator==(const Matrix4x4& target) {
+bool Matrix4x4::operator==(const Matrix4x4& target)const {
 
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
@@ -249,7 +249,7 @@ bool Matrix4x4::operator==(const Matrix4x4& target) {
 	return true;
 }
 
-bool Matrix4x4::operator!=(const Matrix4x4& target) {
+bool Matrix4x4::operator!=(const Matrix4x4& target)const {
 	return !(*this == target);
 }
 

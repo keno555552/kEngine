@@ -17,8 +17,8 @@ typedef struct Vector3 {
 	Vector3 operator/(const float& target);
 	Vector3 operator+=(const Vector3& target);
 	Vector3 operator*=(const Vector3& target);
-	bool operator==(const Vector3& target);
-	bool operator!=(const Vector3& target);
+	bool operator==(const Vector3& target)const;
+	bool operator!=(const Vector3& target)const;
 
 
 	///int

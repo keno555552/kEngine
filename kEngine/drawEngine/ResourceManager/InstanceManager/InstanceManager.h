@@ -8,8 +8,12 @@
 #include "SpriteInstance.h"
 #include "ModelInstance.h"
 #include "Transform.h"
-#include <algorithm>
 
+#include <algorithm>
+#include <map>
+#include <unordered_map>
+
+struct ObjectPart;
 class InstanceManager
 {
 public:
@@ -17,7 +21,7 @@ public:
 
 	void Update();
 
-	void AddSpriteInstance(Vector2 pos, MaterialConfig material);
+	//void AddSpriteInstance(Vector2 pos, MaterialConfig material);
 	void AddModelInstance(TransformationMatrix* wvpData, MaterialConfig material, int vertexNum, int modelHandle = 0, bool useDefaultModel = false);
 	void Add2DTileInstance(Vector2 pos, MaterialConfig material);
 	//void ResmoveSpriteInstance();
@@ -44,6 +48,10 @@ public:
 	std::vector< SpriteInstance* > tile2DList_;
 	std::vector< ModelInstance*> modelList_;
 	std::vector< ModelInstance*> tile3DList_;
+
+	std::unordered_map<MaterialConfig, std::vector<ObjectPart*>, MaterialConfigHash> opaqueMaterialBuckets_;
+	std::vector<ObjectPart*> transparentObjectParts_;
+
 
 public:
 	int tileLayerCount = 0;
