@@ -40,8 +40,8 @@ private:
 	ID3DBlob* errorBlob_ = nullptr;
 	std::vector<ID3D12RootSignature*> rootSignatureList_;
 	ID3D12RootSignature* rootSignature_;					///Listからもセーブしたから解放しなくていい
-	D3D12_INPUT_ELEMENT_DESC inputElementDescs_[3] = {};
-	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc_ = {};
+	D3D12_INPUT_ELEMENT_DESC inputElementDESCs_[3] = {};
+	D3D12_INPUT_LAYOUT_DESC inputLayoutDESC_ = {};
 	D3D12_BLEND_DESC blendDesc_ = {};
 	D3D12_RASTERIZER_DESC rasterizerDesc_ = {};
 	IDxcBlob* vertexShaderBlob_ = nullptr;

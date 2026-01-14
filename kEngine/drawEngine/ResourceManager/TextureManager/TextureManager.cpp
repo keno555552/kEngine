@@ -122,7 +122,7 @@ uint32_t TextureManager::MakeCommonTextureShaderResourceView(TextureData* textur
 	/// SRV作成
 	uint32_t srvIndex = srvManager_->Allocate();
 
-	srvManager_->CreateSRVForTexture2D(srvIndex, textureData->resource.Get(), textureData->metadata.format, UINT(textureData->metadata.mipLevels));
+	srvManager_->CreateSRVforTexture2D(srvIndex, textureData->resource.Get(), textureData->metadata.format, UINT(textureData->metadata.mipLevels));
 
 	/// テクスチャハンドルを設定
 	filePathToHandle_[textureData->filePath] = nextTextureHandle_;
@@ -194,7 +194,7 @@ uint32_t TextureManager::MakeModelTextureShaderResourceView(TextureData* texture
 	/// SRV作成
 	uint32_t srvIndex = srvManager_->Allocate();
 
-	srvManager_->CreateSRVForTexture2D(srvIndex, textureData->resource.Get(), textureData->metadata.format, UINT(textureData->metadata.mipLevels));
+	srvManager_->CreateSRVforTexture2D(srvIndex, textureData->resource.Get(), textureData->metadata.format, UINT(textureData->metadata.mipLevels));
 
 	/// テクスチャハンドルを設定
 	filePathToHandle_[textureData->filePath] = nextTextureHandle_;

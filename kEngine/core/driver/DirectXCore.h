@@ -30,7 +30,7 @@
 #include <dxgidebug.h>
 
 #pragma region Input
-bool CheckXInputDeviceConnected();
+bool CheakXInputDeviceConnected();
 #pragma endregion
 
 #pragma region DirectXCommon
@@ -45,8 +45,8 @@ public:
 	HWND GetHWND() { return winAPI_->GetHWND(); };
 	ID3D12DescriptorHeap* GetDsvDescriptorHeap() { return dsvDescriptorHeap; };
 	ID3D12DescriptorHeap* GetRtvDescriptorHeap() { return rtvDescriptorHeap; };
-	uint32_t GetDescriptorSizeRTV();
-	uint32_t GetDescriptorSizeDSV();
+	uint32_t GetDesriptorSizeRTV();
+	uint32_t GetDesriptorSizeDSV();
 
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index);
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index);
