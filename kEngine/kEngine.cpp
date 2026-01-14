@@ -9,7 +9,7 @@ kEngine::kEngine() {
 	inputManager = new InputManager;
 	soundManager = new SoundManager;
 	timeManager = new TimeManager;
-	textureManager = TextureManager::GetInstance();
+	TextureManager::GetInstance()->Initialize(dxComm,srvManager);
 	instanceManager = new InstanceManager;
 	resourceManager = new ResourceManager(dxComm, instanceManager);
 }
