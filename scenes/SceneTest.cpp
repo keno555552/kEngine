@@ -27,7 +27,7 @@ SceneTest::SceneTest(kEngine* system) {
 	player_->CreateModelData(playerModelHandle_);
 	player_->mainPosition.transform.scale = Vector3(0.5f, 0.5f, 0.5f);
 	for (auto parts : player_->objectParts_) {
-		parts.materialConfig->lightModelType = LightModelType::BlinnPhongReflection;
+		parts.materialConfig->lightModelType = LightModelType::PhongReflection;
 	}
 
 
@@ -122,8 +122,8 @@ void SceneTest::Draw() {
 	}
 
 #ifdef USE_IMGUI
-	/// imgui処理
-	ImguiPart();
+	/// ImGui処理
+	ImGuiPart();
 #endif
 }
 
@@ -143,7 +143,7 @@ void SceneTest::CameraPart() {
 }
 
 #ifdef USE_IMGUI
-void SceneTest::ImguiPart() {
+void SceneTest::ImGuiPart() {
 	ImGui::Begin("DebugCamera");
 	ImGui::Checkbox("isUse", &useDebugCamera);
 	ImGui::End();

@@ -51,7 +51,7 @@ private:
 private:
 	/// ============= シーン内命令 =============///
 	void CameraPart();
-	void ImguiPart();
+	void ImGuiPart();
 
 	void GenerateBlocks();
 };

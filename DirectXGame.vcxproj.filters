@@ -731,5 +731,6 @@
       <Filter>リソース ファイル\Map</Filter>
     </None>
     <None Include="resources\Shader\Tile2D.hlsli" />
+    <None Include="resources\Shader\LightingLambert\PhongReflection.hlsli" />
   </ItemGroup>
 </Project>

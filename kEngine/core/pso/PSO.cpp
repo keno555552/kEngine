@@ -76,7 +76,7 @@ ID3D12RootSignature* PSO::createRootSignature() {
 	descriptorRangeForInstancing[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	descriptorRangeForInstancing[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;						/// DescirptorTableを使う
+	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;						/// DescriptorTableを使う
 	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;								/// VertexShaderで使う
 	rootParameters[1].DescriptorTable.pDescriptorRanges = descriptorRangeForInstancing;					/// Tableの中身の配列を指定
 	rootParameters[1].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeForInstancing);		/// Tableで利用する数
@@ -128,26 +128,26 @@ ID3D12RootSignature* PSO::createRootSignature() {
 
 void PSO::createInputLayout() {
 	///InputLayout
-	//D3D12_INPUT_ELEMENT_DESC inputElementDescs[2] = {};
-	inputElementDescs_[0] = {};
-	inputElementDescs_[0].SemanticName = "POSITION";
-	inputElementDescs_[0].SemanticIndex = 0;
-	inputElementDescs_[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	inputElementDescs_[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-	inputElementDescs_[1] = {};
-	inputElementDescs_[1].SemanticName = "TEXCOORD";
-	inputElementDescs_[1].SemanticIndex = 0;
-	inputElementDescs_[1].Format = DXGI_FORMAT_R32G32_FLOAT;
-	inputElementDescs_[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-	inputElementDescs_[2] = {};
-	inputElementDescs_[2].SemanticName = "NORMAL";
-	inputElementDescs_[2].SemanticIndex = 0;
-	inputElementDescs_[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-	inputElementDescs_[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	//D3D12_INPUT_ELEMENT_DESC inputElementDESCs[2] = {};
+	inputElementDESCs_[0] = {};
+	inputElementDESCs_[0].SemanticName = "POSITION";
+	inputElementDESCs_[0].SemanticIndex = 0;
+	inputElementDESCs_[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	inputElementDESCs_[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDESCs_[1] = {};
+	inputElementDESCs_[1].SemanticName = "TEXCOORD";
+	inputElementDESCs_[1].SemanticIndex = 0;
+	inputElementDESCs_[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	inputElementDESCs_[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDESCs_[2] = {};
+	inputElementDESCs_[2].SemanticName = "NORMAL";
+	inputElementDESCs_[2].SemanticIndex = 0;
+	inputElementDESCs_[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	inputElementDESCs_[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
-	inputLayoutDesc_ = {};
-	inputLayoutDesc_.pInputElementDescs = inputElementDescs_;
-	inputLayoutDesc_.NumElements = _countof(inputElementDescs_);
+	inputLayoutDESC_ = {};
+	inputLayoutDESC_.pInputElementDescs = inputElementDESCs_;
+	inputLayoutDESC_.NumElements = _countof(inputElementDESCs_);
 }
 
 void PSO::SetBlendState() {
@@ -166,7 +166,7 @@ void PSO::SetBlendState() {
 }
 
 void PSO::SetRasterizerState() {
-	// RasiterzerStateの設定
+	// RasterizerStateの設定
 	//D3D12_RASTERIZER_DESC rasterizerDesc{};
 	rasterizerDesc_ = {};
 	/// 裏面（時計回り）を表示しない
@@ -213,7 +213,7 @@ void PSO::SetGraphicsPipelineState() {
 	// graphicsPipelineStateに設定する情報をまとめる
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
 	graphicsPipelineStateDesc.pRootSignature = rootSignature_; // RootSignature
-	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc_; // InputLayout
+	graphicsPipelineStateDesc.InputLayout = inputLayoutDESC_; // InputLayout
 	graphicsPipelineStateDesc.VS = { vertexShaderBlob_->GetBufferPointer(), vertexShaderBlob_->GetBufferSize() }; // VertexShader
 	graphicsPipelineStateDesc.PS = { pixelShaderBlob_->GetBufferPointer(), pixelShaderBlob_->GetBufferSize() }; // PixelShader
 	graphicsPipelineStateDesc.BlendState = blendDesc_; // BlendState

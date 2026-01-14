@@ -65,6 +65,6 @@ private:
 	void ClearStage();
 
 #ifdef USE_IMGUI
-	void ImguiPart();
+	void ImGuiPart();
 #endif
 };
