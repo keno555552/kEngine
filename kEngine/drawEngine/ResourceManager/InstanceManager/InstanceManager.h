@@ -24,14 +24,14 @@ public:
 	//void AddSpriteInstance(Vector2 pos, MaterialConfig material);
 	void AddModelInstance(TransformationMatrix* wvpData, MaterialConfig material, int vertexNum, int modelHandle = 0, bool useDefaultModel = false);
 	void Add2DTileInstance(Vector2 pos, MaterialConfig material);
-	//void ResmoveSpriteInstance();
+	//void RemoveSpriteInstance();
 	//void UpdateTileInstance();
 	void Add3DTileInstance(TransformationMatrix* wvpData, MaterialConfig material, int vertexNum, int modelHandle = 0, bool useDefaultModel = false);
 
 	void Add2DInstance(Transform wvpData, MaterialConfig material, CornerData cornerData = {}, Vector2 anchorPoint = {}, Vector2 cropLT = {}, Vector2 cropSize = {});
 	void Add3DInstance(TransformationMatrix wvpData, MaterialConfig material, int vertexNum, int modelHandle = 0, int modelGroupHandle = 0);
 	void SpriteLayerManagement();
-	//void ResmoveModelInstance();
+	//void RemoveModelInstance();
 	//void UpdateModelInstance();
 
 public:
@@ -57,7 +57,7 @@ public:
 	int tileLayerCount = 0;
 	int spriteLayerCount = 0;
 
-	float layerdSpriteDepth_ = 0.4f;
+	float layeredSpriteDepth_ = 0.4f;
 
 private:
 

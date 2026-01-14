@@ -82,7 +82,7 @@ public:
 	int GetModelTextureHandle(int modelHandle, int part);
 
 	int readModelTextureHandle(int Handle);
-	int readCommenTextureHandle(int Handle);
+	int readCommonTextureHandle(int Handle);
 
 	bool SetModelTexture(Model* model);
 	int SetModel(std::string Path);
@@ -100,8 +100,8 @@ private:
 	int kClientWidth_ = 0;
 	int kClientHeight_ = 0;
 
-	int kMaxSudivision_ = 18;
-	int kSudivision_ = 0;
+	int kMaxSubdivision_ = 18;
+	int kSubdivision_ = 0;
 
 private:
 	enum class psoType {
@@ -126,11 +126,11 @@ private:
 	D3D12_VIEWPORT viewport{};
 	D3D12_RECT scissorRect{};
 
-	/// Textrue関連
+	/// Texture関連
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE Tile2DSrvHandleGPU_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE Tile3DSrvHandleGPU_{};
-	uint32_t descriptorIndex_ = 1;						// 0はImgui用に予約
+	uint32_t descriptorIndex_ = 1;						// 0はImGui用に予約
 	std::vector<int> commonTextureSRVMap_;
 	std::vector<int> modelTextureSRVMap_;
 	int defaultTextureHandle_ = 0;						// white5x5
@@ -180,11 +180,9 @@ private:
 	void InitializeLighting();
 	void SetLighting(DirectionalLight* directionalLight);
 
-	void PSODecition(MaterialConfig& material);
+	void PSODecision(MaterialConfig& material);
 	ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);
 	void MakeDepthStencilView();
-
-	//Vector2 calTextruePos(Vector2 pos);
 
 private:
 	bool isFinish = false;

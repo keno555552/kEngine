@@ -187,7 +187,7 @@ void InstanceManager::Add2DInstance(Transform wvpData, MaterialConfig material, 
 		tileLayerCount++;
 	} else {
 		/// レイヤー指定がある場合はその値を使用し、深度調整のみ行う
-		instance.position.z = layerdSpriteDepth_ + wvpData.translate.z;
+		instance.position.z = layeredSpriteDepth_ + wvpData.translate.z;
 	}
 
 	/// マテリアル設定
