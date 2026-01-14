@@ -365,3 +365,4 @@ FodyWeavers.xsd
 # Imgui
 imgui.ini
 /resources/Shader/LightingLambert/PhongReflection.hlsl
+/kEngine/core/driver/DirectXController.cpp
