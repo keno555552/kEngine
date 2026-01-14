@@ -21,7 +21,7 @@ ResourceManager::~ResourceManager() {
 	modelGroupList_.clear();
 	ClearPointer(simpleSpriteMeshList_);
 
-	/// comptr自動解放
+	/// ComPtr自動解放
 	delete lightingResource_;
 }
 
