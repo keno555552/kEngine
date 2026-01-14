@@ -1,17 +1,16 @@
 #include "ResourceManager.h"
 #include <Object/Object.h>
 
-ResourceManager::ResourceManager(DirectXCore* device, SrvManager* srvManager) {
+ResourceManager::ResourceManager(DirectXCore* device, InstanceManager* instanceManager) {
 
 	core_ = device;
 	Bdevice_ = core_->GetDevice();
+	instanceManager_ = instanceManager;
 
 	config::default_Sprite2D_MeshBufferHandle_ = CreateSimpleSpriteMeshResource();
 	config::default_Triangle_MeshBufferHandle_ = CreateTriangleResource();
 	config::default_Cube_MeshBufferHandle_ = CreateCubeResource();
 	config::default_Sphere_MeshBufferHandle_ = CreateSphereResource(1);
-
-	TextureManager::GetInstance()->Initialize(device, srvManager);
 }
 
 ResourceManager::~ResourceManager() {
@@ -23,14 +22,7 @@ ResourceManager::~ResourceManager() {
 	ClearPointer(simpleSpriteMeshList_);
 
 	/// comptr自動解放
-	delete textureResource_;
 	delete lightingResource_;
-
-	/// TextureManager解放
-	TextureManager::GetInstance()->Finalize();
-
-	/// InstanceManager解放
-	delete instanceManager_;
 }
 
 void ResourceManager::CreateTurnResource() {
@@ -44,25 +36,25 @@ void ResourceManager::ClearTurnResource() {
 
 
 
-void ResourceManager::ColletSprite(Vector2 pos, MaterialConfig material) {
-	int materialNum = (int)instanceManager_->materialConfigList_.size();
-	instanceManager_->AddSpriteInstance(pos, material);
-	if (materialNum < (int)instanceManager_->materialConfigList_.size()) {
-		/// 新しいResourceを追加
-		BasicResource* newResource = new BasicResource;
-		newResource->CreateResourceClass_(Bdevice_, sizeof(Material));
-		materialResourceList_.push_back(newResource);
-
-		/// MaterialとMapする
-		Material* newData = nullptr;
-		newResource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&newData));
-		newData->inputMaterialConfig(material);
-		newResource->GetResource()->Unmap(0, nullptr);
-
-		/// instanceにResourceのHandleを設定
-		instanceManager_->materialConfigList_.back()->materialResourceHandle = materialNum;
-	}
-}
+//void ResourceManager::ColletSprite(Vector2 pos, MaterialConfig material) {
+//	int materialNum = (int)instanceManager_->materialConfigList_.size();
+//	instanceManager_->AddSpriteInstance(pos, material);
+//	if (materialNum < (int)instanceManager_->materialConfigList_.size()) {
+//		/// 新しいResourceを追加
+//		BasicResource* newResource = new BasicResource;
+//		newResource->CreateResourceClass_(Bdevice_, sizeof(Material));
+//		materialResourceList_.push_back(newResource);
+//
+//		/// MaterialとMapする
+//		Material* newData = nullptr;
+//		newResource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&newData));
+//		newData->inputMaterialConfig(material);
+//		newResource->GetResource()->Unmap(0, nullptr);
+//
+//		/// instanceにResourceのHandleを設定
+//		instanceManager_->materialConfigList_.back()->materialResourceHandle = materialNum;
+//	}
+//}
 
 void ResourceManager::Collet2DTile(Vector2 pos, MaterialConfig material) {
 	int materialNum = (int)instanceManager_->materialConfigList_.size();

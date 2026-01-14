@@ -62,7 +62,7 @@ ID3D12RootSignature* PSO::createRootSignature() {
 	descriptionRootSignature.NumStaticSamplers = _countof(staticSampler);
 
 	/// RootParameter作成。PixelShaderのMaterialとVertexShaderのTransform
-	D3D12_ROOT_PARAMETER rootParameters[5] = {};                                                    ///4になった
+	D3D12_ROOT_PARAMETER rootParameters[6] = {};                                                    
 
 	// Material用
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;                                // CBV を使う
@@ -83,20 +83,25 @@ ID3D12RootSignature* PSO::createRootSignature() {
 
 
 	// Texture用
-	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;                   /// DescriptorTableを使う
-	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;                             /// PixelShaderで使う
-	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;                          /// Tableの中身の配列を指定
-	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);              /// Tableで利用する数
+	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;						/// DescriptorTableを使う
+	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;									/// PixelShaderで使う
+	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;								/// Tableの中身の配列を指定
+	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);					/// Tableで利用する数
 
 	// Lighting用
-	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;                                /// CBV を使う
-	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;                             /// PixelShaderで使う
+	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;									/// CBV を使う
+	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;									/// PixelShaderで使う
 	rootParameters[3].Descriptor.ShaderRegister = 1;
 
 	// slot 4: InstanceOffset (b1, VertexShader)
 	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 	rootParameters[4].Descriptor.ShaderRegister = 1;
+
+	// Camera 用 (b2)
+	rootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;									/// 或 ALL
+	rootParameters[5].Descriptor.ShaderRegister = 2;													/// b2
 
 
 
@@ -183,8 +188,11 @@ void PSO::ShaderCompile(LightModelType lightModelType) {
 		return;
 	case LightModelType::Lambert:
 	case LightModelType::HalfLambert:
+	case LightModelType::PhongReflection:
+	case LightModelType::BlinnPhongReflection:
 		vertexShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Particle.VS.hlsl", L"vs_6_0");
 		pixelShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Particle.PS.hlsl", L"ps_6_0", lightModelType);
+		break;
 	}
 	assert(vertexShaderBlob_ != nullptr);
 	assert(pixelShaderBlob_ != nullptr);

@@ -1,6 +1,7 @@
 #include "MaterialConfig.h"
 
-bool MaterialConfig::operator==(const MaterialConfig target) {
+
+bool MaterialConfig::operator==(const MaterialConfig& target)const {
 	if (useModelTexture != target.useModelTexture)return false;
 	if (textureHandle != target.textureHandle)return false;
 	if (uvTranslate != target.uvTranslate)return false;
@@ -9,10 +10,11 @@ bool MaterialConfig::operator==(const MaterialConfig target) {
 	if (textureColor != target.textureColor)return false;
 	if (lightModelType != target.lightModelType)return false;
 	if (enableLighting != target.enableLighting)return false;
+	if (shininess != target.shininess)return false;
 	return true;
 }
 
-bool MaterialConfig::operator!=(const MaterialConfig target) {
+bool MaterialConfig::operator!=(const MaterialConfig& target) const {
 	return !(*this == target);
 }
 
@@ -32,6 +34,7 @@ void InitMaterialConfig(MaterialConfig* materialConfig) {
 	materialConfig->enableLighting = true;
 	materialConfig->materialResourceHandle = -1;
 	materialConfig->drawState = 0;
+	materialConfig->shininess = 32.0f;
 }
 
 MaterialConfig InitMaterialConfig() {

@@ -423,9 +423,6 @@ void DirectXCore::InitializeDrive(const char* kClientTitle, int kClientWidth, in
 	winAPI_ = new WinAPI();
 	winAPI_->Initialize(kClientTitle, kClientWidth, kClientHeight);
 
-	config::SaveClientWidth(kClientWidth);
-	config::SaveClientHeight(kClientHeight);
-
 	/// DXGIファクトリーの生成
 	dxgiFactory = nullptr;
 	// HRESULTはWindows系のエラーコードであり、

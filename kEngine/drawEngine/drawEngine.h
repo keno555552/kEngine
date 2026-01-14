@@ -17,6 +17,7 @@
 #include "MaterialConfig.h"
 #include "VertexIndex.h"
 #include "Camera.h"
+#include "DrawData/CameraForGPU.h"
 
 #include "DrawData/ObjectData.h"
 #include "DrawData/SpriteData.h"
@@ -29,7 +30,7 @@ class DrawEngine
 public:
 	~DrawEngine();
 
-	void Initialize(const char* kClientTitle, int kClientWidth, int kClientHeight, DirectXCore* directXDirver,SrvManager* srvManager);
+	void Initialize(const char* kClientTitle, int kClientWidth, int kClientHeight, DirectXCore* directXDirver,SrvManager* srvManager, ResourceManager* resourceManager);
 
 	void PreDraw();
 	void CommitDraw();
@@ -81,12 +82,10 @@ public:
 	int GetModelTextureHandle(int modelHandle, int part);
 
 	int readModelTextureHandle(int Handle);
-	int readCommenTextureHandle(int Handle);
+	int readCommonTextureHandle(int Handle);
 
 	bool SetModelTexture(Model* model);
 	int SetModel(std::string Path);
-	int GetMuitModelNum(int modelHandle);
-	int LoadTexture(const std::string& filePath);
 	int LoadModelTexture(const std::string& filePath);
 
 
@@ -101,8 +100,8 @@ private:
 	int kClientWidth_ = 0;
 	int kClientHeight_ = 0;
 
-	int kMaxSudivision_ = 18;
-	int kSudivision_ = 0;
+	int kMaxSubdivision_ = 18;
+	int kSubdivision_ = 0;
 
 private:
 	enum class psoType {
@@ -110,7 +109,9 @@ private:
 		defaultPSO = 1,
 		Sprite2D = 0,
 		Lambert,
-		HalfLambert
+		HalfLambert,
+		PhongReflection,
+		BlinnPhongReflection,
 	};
 
 private:
@@ -125,11 +126,11 @@ private:
 	D3D12_VIEWPORT viewport{};
 	D3D12_RECT scissorRect{};
 
-	/// Textrue関連
+	/// Texture関連
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE Tile2DSrvHandleGPU_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE Tile3DSrvHandleGPU_{};
-	uint32_t descriptorIndex_ = 1;						// 0はImgui用に予約
+	uint32_t descriptorIndex_ = 1;						// 0はImGui用に予約
 	std::vector<int> commonTextureSRVMap_;
 	std::vector<int> modelTextureSRVMap_;
 	int defaultTextureHandle_ = 0;						// white5x5
@@ -151,7 +152,9 @@ private:
 
 	/// カメラ
 	Camera* instanceCamera_ = nullptr; // 実体は外でもつ
-	Camera* saveCamera_ = nullptr; //　仮カメラ、カメラがない時使う 
+	Camera* defaultCamera_ = nullptr; //　仮カメラ、カメラがない時使う 
+	CameraForGPU* cameraPtr_ = nullptr;
+	BasicResource* cameraBuffer_ = new BasicResource;
 
 	//Material関連
 	Material* materialData = nullptr;
@@ -173,14 +176,13 @@ private:
 	D3D12_VIEWPORT createViewport(int kClientWidth, int kClientHeight);
 	D3D12_RECT createScissorRect(int kClientWidth, int kClientHeight);
 	void SetMaterial(int MaterialHandle);
+	void SetCameraForGPU();
 	void InitializeLighting();
 	void SetLighting(DirectionalLight* directionalLight);
 
-	void PSODecition(MaterialConfig& material);
+	void PSODecision(MaterialConfig& material);
 	ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);
 	void MakeDepthStencilView();
-
-	//Vector2 calTextruePos(Vector2 pos);
 
 private:
 	bool isFinish = false;

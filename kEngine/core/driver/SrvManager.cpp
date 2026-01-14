@@ -30,16 +30,23 @@ SrvManager::~SrvManager() {
 
 uint32_t SrvManager::Allocate() {
 
-	assert(useIndex < kMaxSRVCount);
-	// 上限に達していないかチェックしてassert
+	assert(nextNewIndex < kMaxSRVCount);
+	/// 上限に達していないかチェックしてassert
 
-	// return する番号を一旦記録しておく
-	int index = useIndex;
+	/// freeIndicesに廃棄された番号があればそれを返す
+	if (!freeIndices.empty()) {
+		uint32_t index = freeIndices.back();
+		freeIndices.pop_back();
+		return index;
+	}
 
-	// 次回のために番号を1進める
-	useIndex++;
+	/// return する番号を一旦記録しておく
+	int index = nextNewIndex;
 
-	// 上で記録した番号をreturn
+	/// 次回のために番号を1進める
+	nextNewIndex++;
+
+	/// 上で記録した番号をreturn
 	return index;
 }
 
@@ -90,8 +97,13 @@ void SrvManager::CreateSRVforStructuredBuffer(uint32_t srvIndex, ID3D12Resource*
 	);
 }
 
+void SrvManager::Free(uint32_t srvIndex) {
+	// 廃棄されたSRVインデックスをfreeIndicesに追加
+	freeIndices.push_back(srvIndex);
+}
+
 bool SrvManager::CheckSRVHeapFull() {
-	if (useIndex >= kMaxSRVCount) return true;
+	if (nextNewIndex >= kMaxSRVCount) return true;
 	return false;
 }
 

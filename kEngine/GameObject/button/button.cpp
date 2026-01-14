@@ -181,7 +181,7 @@ void Button::Render()
 		//Novice::DrawSprite(int(pos_.x - width_ / 2), int(pos_.y - height_ / 2), textureC_, 1.0f, 1.0f, 0.0f, 0xFFFFFFFF);
 	}
 
-	system_->DrawSprite({ (pos_.x - width_ / 2.0f), (pos_.y - height_ / 2.0f) }, material_);
+	//system_->DrawSprite({ (pos_.x - width_ / 2.0f), (pos_.y - height_ / 2.0f) }, material_);
 
 	///Test用
 	//Novice::ScreenPrintf(0, 0, "%d", isPress_);

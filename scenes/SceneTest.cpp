@@ -6,6 +6,8 @@ SceneTest::SceneTest(kEngine* system) {
 	debugCamera_ = new DebugCamera(system);
 	camera_ = new Camera;
 	camera_->Move(Vector3(0.0f, 0.5f, -10.0f));
+	usingCamera_ = camera_;
+	system_->SetCamera(usingCamera_);
 
 	/// =========== リソースロード ============///
 	std::string basePath = "resources/";
@@ -242,6 +244,7 @@ void SceneTest::CameraPart() {
 		usingCamera_ = camera_;
 	}
 	usingCamera_->Update();
+	system_->SetCamera(usingCamera_);
 }
 
 #ifdef USE_IMGUI
@@ -258,13 +261,13 @@ void SceneTest::ImguiPart() {
 		ImGui::SliderFloat3("TargeterRotate", &targeter_->mainPosition.transform.rotate.x, 0.0f, 5.0f);
 		ImGui::Text("Player HP = %d", hp);
 		ImGui::End();
-	}
 
 	{
 		ImGui::Begin("MaterialConfig");
 		ImGui::SliderFloat3("uvScale", &underGround_BG_->objectParts_[0].materialConfig->uvScale.x, -50.0f, 50.0f);
 		ImGui::End();
 	}
+
 }
 #endif
 

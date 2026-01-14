@@ -9,7 +9,10 @@ struct Material
 	Vector4 color;
 	int32_t enableLighting;
 	float padding[3];
+
 	Matrix4x4 uvTransform;
+	float shininess;
+	float padding1[3];
 
 	bool operator==(const Material target);
 	bool operator!=(const Material target);

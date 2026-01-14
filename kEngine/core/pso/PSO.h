@@ -28,13 +28,14 @@ public:
 
 	ID3D12RootSignature* getRootSignature(int handle) { return rootSignatureList_[handle]; }
 
-	ID3D12RootSignature* createRootSignature();
+	ID3D12RootSignature* createRootSignature(); // <<<<<<
 
 	ID3D12PipelineState* createPSO(LightModelType lightMadelType);
 
 private:
 	//D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
 	DirectXCore* directXDriver_;
+	std::string LMName_;
 	ID3DBlob* signatureBlob_ = nullptr;
 	ID3DBlob* errorBlob_ = nullptr;
 	std::vector<ID3D12RootSignature*> rootSignatureList_;

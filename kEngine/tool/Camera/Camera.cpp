@@ -35,7 +35,9 @@ TransformationMatrix Camera::transformationMatrixTransform(Transform objTransfor
 }
 
 TransformationMatrix Camera::transformationMatrixTransform(Matrix4x4 worldMatrix) {
-	return { worldMatrix * (viewMatrix_ * projectionMatrix_), worldMatrix };
+	//Matrix4x4 worldInverse = Inverse(worldMatrix);
+	//Matrix4x4 worldInverseTranspose = Transpose(worldInverse);
+	return { worldMatrix * (viewMatrix_ * projectionMatrix_), worldMatrix,Inverse(Transpose(worldMatrix)) };
 }
 
 void Camera::SetCamera(Transform cameraTransform) {

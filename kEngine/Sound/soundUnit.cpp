@@ -85,6 +85,23 @@ SoundData SoundUnit::SoundLoad(const char* filename) {
 
 void SoundUnit::SoundUnload() {
 	/// バッファのメモリを解放
+	if (pSourceVoice_) {
+		pSourceVoice_->Stop();
+		pSourceVoice_->FlushSourceBuffers();
+		pSourceVoice_->DestroyVoice();
+		pSourceVoice_ = nullptr;
+	}
+	if (!pSourceVoiceGroup.empty()) {
+		for (auto ptr : pSourceVoiceGroup) {
+			if (ptr) {
+				ptr->Stop();
+				ptr->FlushSourceBuffers();
+				ptr->DestroyVoice();
+			}
+		}
+		pSourceVoiceGroup.clear();
+	}
+
 	delete[] soundData->pBuffer;
 
 	soundData->pBuffer = 0;
@@ -101,6 +118,7 @@ void SoundUnit::SoundPlaySE(IXAudio2* xAudio2, float cVolume, float volume) {
 	IXAudio2SourceVoice* pSourceVoice = nullptr;
 	result = xAudio2->CreateSourceVoice(&pSourceVoice, &soundData->wfex, 0, XAUDIO2_DEFAULT_FREQ_RATIO, nullptr);
 	pSourceVoiceGroup.push_back(pSourceVoice);
+// <<6
 	assert(SUCCEEDED(result));
 
 	soundType = Type::SE;
