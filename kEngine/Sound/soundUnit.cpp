@@ -115,6 +115,7 @@ void SoundUnit::SoundPlaySE(IXAudio2* xAudio2, float cVolume, float volume) {
 	HRESULT result;
 
 	/// 波形フォーマットを元にSourceVoiceの生成（SE は再生中フラグ不要なので callback なし）
+// >>6
 	IXAudio2SourceVoice* pSourceVoice = nullptr;
 	result = xAudio2->CreateSourceVoice(&pSourceVoice, &soundData->wfex, 0, XAUDIO2_DEFAULT_FREQ_RATIO, nullptr);
 	pSourceVoiceGroup.push_back(pSourceVoice);

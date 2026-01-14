@@ -4,6 +4,7 @@ struct TransformationMatrix
 {
     float4x4 WVP;
     float4x4 world;
+    float4x4 worldInversTranspose;
 };
 
 StructuredBuffer<TransformationMatrix> gTransformationMatrices : register(t0);

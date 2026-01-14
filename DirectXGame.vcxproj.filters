@@ -827,6 +827,8 @@
     <FxCompile Include="resources\Shader\Tile2D.VS.hlsl" />
     <FxCompile Include="resources\Shader\LightingLambert\PhongReflection.hlsl" />
     <FxCompile Include="resources\Shader\LightingLambert\BlinnPhongReflection.hlsl" />
+    <FxCompile Include="resources\Shader\Particle.PS.hlsl" />
+    <FxCompile Include="resources\Shader\Particle.VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
