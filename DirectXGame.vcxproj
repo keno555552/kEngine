@@ -382,7 +382,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="scenes\SceneTest2.cpp" />
     <ClCompile Include="scenes\SceneTitle.cpp" />
     <ClCompile Include="kEngine\core\driver\SrvManager.cpp" />
-    <ClCompile Include="kEngine\GameObject\Targeter\Targeter.cpp" />
+    <ClCompile Include="kEngine\GameObject\Sight\Sight.cpp" />
     <ClCompile Include="scenes\SceneWin.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -491,7 +491,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="scenes\SceneTest2.h" />
     <ClInclude Include="scenes\SceneTitle.h" />
     <ClInclude Include="kEngine\core\driver\SrvManager.h" />
-    <ClInclude Include="kEngine\GameObject\Targeter\Targeter.h" />
+    <ClInclude Include="kEngine\GameObject\Sight\Sight.h" />
     <ClInclude Include="scenes\SceneWin.h" />
   </ItemGroup>
   <ItemGroup>

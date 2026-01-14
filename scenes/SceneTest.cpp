@@ -18,7 +18,7 @@ SceneTest::SceneTest(kEngine* system) {
 
 	MH_skydome_ = system_->SetModelObj((basePath + templatePath + objectPath + "skydome/skydome.obj").c_str());
 	MH_player_ = system_->SetModelObj((basePath + objectPath + "player/player.obj").c_str());
-	MH_targeter_ = system_->SetModelObj((basePath + objectPath + "targeter/targeter.obj").c_str());
+	MH_sight_ = system_->SetModelObj((basePath + objectPath + "targeter/targeter.obj").c_str());
 	MH_underGround_ = system_->SetModelObj((basePath + objectPath + "underground_BG/underground_BG.obj").c_str());
 	MH_bullet_ = system_->SetModelObj((basePath + objectPath + "bullet/bullet.obj").c_str());
 	MH_object_ = system_->SetModelObj((basePath + objectPath + "pickaxe/pickaxe.obj").c_str());
@@ -62,11 +62,11 @@ SceneTest::SceneTest(kEngine* system) {
 	//MH_enemy_ = system_->SetModelObj("resources/object/player/player.obj");
 
 
-	targeter_ = new Targeter(system, player_);
-	targeter_->IntObject(system_);
-	targeter_->CreateModelData(MH_targeter_);
-	targeter_->mainPosition.transform.scale = { 0.5f, 0.5f, 0.5f };
-	targeter_->objectParts_[0].materialConfig->textureColor = { 0.8f,0.2f,0.2f,1.0f };
+	sight_ = new Sight(system, player_);
+	sight_->IntObject(system_);
+	sight_->CreateModelData(MH_sight_);
+	sight_->mainPosition.transform.scale = { 0.5f, 0.5f, 0.5f };
+	sight_->objectParts_[0].materialConfig->textureColor = { 0.8f,0.2f,0.2f,1.0f };
 
 	//object_ = new Object;
 	//object_->IntObject(system_);
@@ -94,7 +94,7 @@ SceneTest::~SceneTest() {
 	delete camera_;
 	delete debugCamera_;
 
-	delete targeter_;
+	delete sight_;
 
 	delete player_;
 	delete skydome_;
@@ -123,11 +123,11 @@ void SceneTest::Update() {
 	player_->Update(usingCamera_);
 
 	/// targeter更新
-	targeter_->Update(usingCamera_);
+	sight_->Update(usingCamera_);
 
 	/// Bullet更新
 	if (system_->GetMouseIsPush(0)) {
-		player_->Shoot(targeter_->GetMouseOnPlane());
+		player_->Shoot(sight_->GetMouseOnPlane());
 	}
 
 	/// Enemy更新
@@ -193,7 +193,7 @@ void SceneTest::Draw() {
 	skydome_->Draw();
 	underGround_BG_->Draw();
 	player_->Draw();
-	targeter_->Draw();
+	sight_->Draw();
 	//system_->Draw3D(skydome_);
 	//system_->Draw3D(player_);
 	//system_->Draw3D(model_);
@@ -228,7 +228,7 @@ void SceneTest::Draw() {
 
 #ifdef USE_IMGUI
 	/// imgui処理
-	ImguiPart();
+	ImGuiPart();
 #endif
 }
 
@@ -248,7 +248,7 @@ void SceneTest::CameraPart() {
 }
 
 #ifdef USE_IMGUI
-void SceneTest::ImguiPart() {
+void SceneTest::ImGuiPart() {
 	ImGui::Begin("DebugCamera");
 	ImGui::Checkbox("isUse", &useDebugCamera);
 	ImGui::End();
@@ -258,7 +258,7 @@ void SceneTest::ImguiPart() {
 		ImGui::Begin("PlayerPos");
 		ImGui::SliderFloat3("Pos", &player_->mainPosition.transform.translate.x, -1.0f, 1.0f);
 		ImGui::SliderFloat3("Rotate", &player_->mainPosition.transform.rotate.x, -1.0f, 1.0f);
-		ImGui::SliderFloat3("TargeterRotate", &targeter_->mainPosition.transform.rotate.x, 0.0f, 5.0f);
+		ImGui::SliderFloat3("TargeterRotate", &sight_->mainPosition.transform.rotate.x, 0.0f, 5.0f);
 		ImGui::Text("Player HP = %d", hp);
 		ImGui::End();
 		ImGui::Begin("MaterialConfig");

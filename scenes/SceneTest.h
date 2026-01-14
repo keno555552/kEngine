@@ -2,7 +2,7 @@
 #include "Scene.h"
 #include "Object\Object.h"
 #include "Object\Sprite.h"
-#include "Targeter\Targeter.h"
+#include "Sight\Sight.h"
 #include "Bullet\Bullet.h"
 #include "DebugCamera.h"
 #include "Player\Player.h"
@@ -34,7 +34,7 @@ private:
 	/// モデルハンドル
 	int MH_skydome_ = 0;
 	int MH_player_ = 0;
-	int MH_targeter_ = 0;
+	int MH_sight_ = 0;
 	int MH_underGround_ = 0;
 	int MH_bullet_ = 0;
 	int MH_object_{};
@@ -56,7 +56,7 @@ private:
 
 	Object* underGround_BG_ = nullptr;
 
-	Targeter* targeter_ = nullptr;
+	Sight* sight_ = nullptr;
 
 	Player* player_ = nullptr;
 	MapChipField* mapChipField_ = nullptr;
@@ -73,7 +73,7 @@ private:
 private:
 	/// ============= シーン内命令 =============///
 	void CameraPart();
-	void ImguiPart();
+	void ImGuiPart();
 
 	void GenerateMap();
 };

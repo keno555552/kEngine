@@ -15,9 +15,10 @@ Player::Player(kEngine* system, const Vector3& position) {
 	shootCD_.Init0(kShootInterval, system_->GetTimeManager());
 	damageEffectTimer_.InitM(kPlayerDamageEffectTime, system_->GetTimeManager());
 
+	MH_playerModel_ = system_->SetModelObj("resources/object/player/player.obj");
 	MH_pickaxe_ = system_->SetModelObj("resources/object/pickaxe/pickaxe.obj");
 
-	TH_player_ = system_->LoadTexture("resources/object/player/playerUV.png");
+	TH_playerTexture_ = system_->LoadTexture("resources/object/player/playerUV.png");
 	TH_White5x5_ = system_->LoadTexture("resources/TemplateResource/texture/white5x5.png");
 
 	SH_JUMP_ = system_->SoundLoadSE("resources/sound/SE/player_jump.wav");
@@ -290,13 +291,13 @@ void Player::DamageAndEffectPart() {
 	} else {
 		objectParts_[0].materialConfig->useModelTexture = true;
 		objectParts_[0].materialConfig->enableLighting = true;
-		objectParts_[0].materialConfig->textureHandle = TH_player_;
+		objectParts_[0].materialConfig->textureHandle = TH_playerTexture_;
 	}
 
 	if (damageEffectTimer_.parameter_ == damageEffectTimer_.maxTime_) {
 		disableDamage_ = false;
 		objectParts_[0].materialConfig->useModelTexture = true;
 		objectParts_[0].materialConfig->enableLighting = true;
-		objectParts_[0].materialConfig->textureHandle = TH_player_;
+		objectParts_[0].materialConfig->textureHandle = TH_playerTexture_;
 	}
 }

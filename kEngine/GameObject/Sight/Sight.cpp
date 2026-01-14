@@ -1,4 +1,4 @@
-#include "Targeter.h"
+#include "Sight.h"
 #include "Player/Player.h"
 #include "tool/mathsUnit/Matrix4x4.h"
 #include "tool/mathsUnit/Vector4.h"
@@ -7,16 +7,16 @@
 #include <numbers>
 #include <cmath>
 
-Targeter::Targeter(kEngine* system, Player* player) :
+Sight::Sight(kEngine* system, Player* player) :
 	player_(player)
 {
 	system_ = system;
 }
 
-Targeter::~Targeter() {
+Sight::~Sight() {
 }
 
-void Targeter::Update(Camera* camera) {
+void Sight::Update(Camera* camera) {
 
 	if (player_ != nullptr) {
 		mainPosition.transform.translate = player_->mainPosition.transform.translate;

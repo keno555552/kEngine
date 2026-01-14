@@ -107,10 +107,18 @@ private:
 	void DamageAndEffectPart();
 
 private:
+	///モデルハンドル
+	int MH_playerModel_{};
+	int MH_pickaxe_{};
+
 	/// テキスチャハンドル
-	int TH_player_{};
+	int TH_playerTexture_{};
 	int TH_White5x5_{};
 
+	///サントハンドル
+	int SH_JUMP_ = 0;
+	int SH_SHOOT_ = 0;
+	int SH_DAMAGE_ = 0;
 private:
 	/////// State
 	/// HP
@@ -140,13 +148,7 @@ private:
 
 private:
 
-	///モデルハンドル
-	int MH_pickaxe_ = 0;
 
-	///テキスチャハンドル
-	int SH_JUMP_ = 0;
-	int SH_SHOOT_ = 0;
-	int SH_DAMAGE_ = 0;
 
 	/// オブジェクト
 	Object* pickaxe_ = nullptr;

@@ -15,9 +15,9 @@ SceneManager::SceneManager(kEngine* system) {
 	//	MakeAffineMatrix(materialConfig_.uvScale, materialConfig_.uvRotate,
 	//		materialConfig_.uvTranslate);
 	//materialConfig_.textureHandle =
-	//	system_->LoadTextrue("resources/TemplateResource/texture/uvChecker.png");
+	//	system_->LoadTexture("resources/TemplateResource/texture/uvChecker.png");
 	// materialConfig_.textureHandle =
-	// system_->LoadTextrue("resources/nullScene.png");
+	// system_->LoadTexture("resources/nullScene.png");
 
 	//for (auto& ptr : stageIsClear_) {
 	//	ptr = false;

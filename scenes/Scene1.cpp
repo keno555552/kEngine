@@ -20,7 +20,7 @@ Scene1::Scene1(kEngine* system) {
 
 	MH_skydome_ = system_->SetModelObj((basePath + templatePath + objectPath + "skydome/skydome.obj").c_str());
 	MH_player_ = system_->SetModelObj((basePath + objectPath + "player/player.obj").c_str());
-	MH_targeter_ = system_->SetModelObj((basePath + objectPath + "targeter/targeter.obj").c_str());
+	MH_sight_ = system_->SetModelObj((basePath + objectPath + "targeter/targeter.obj").c_str());
 	MH_underGround_ = system_->SetModelObj((basePath + objectPath + "underground_BG/underground_BG.obj").c_str());
 	MH_bullet_ = system_->SetModelObj((basePath + objectPath + "bullet/bullet.obj").c_str());
 	MH_object_ = system_->SetModelObj((basePath + objectPath + "pickaxe/pickaxe.obj").c_str());
@@ -81,16 +81,16 @@ Scene1::Scene1(kEngine* system) {
 	}
 
 
-	targeter_ = new Targeter(system, player_);
-	targeter_->IntObject(system_);
-	targeter_->CreateModelData(MH_targeter_);
-	targeter_->mainPosition.transform.scale = { 0.5f, 0.5f, 0.5f };
-	targeter_->objectParts_[0].materialConfig->textureColor = { 0.8f,0.2f,0.2f,1.0f };
+	sight_ = new Sight(system, player_);
+	sight_->IntObject(system_);
+	sight_->CreateModelData(MH_sight_);
+	sight_->mainPosition.transform.scale = { 0.5f, 0.5f, 0.5f };
+	sight_->objectParts_[0].materialConfig->textureColor = { 0.8f,0.2f,0.2f,1.0f };
 
-	backsign_ = new Object;
-	backsign_->IntObject(system_);
-	backsign_->CreateModelData(MH_backPoint_);
-	backsign_->mainPosition.transform.scale = { 0.5f,0.5f,0.5f };
+	backSign_ = new Object;
+	backSign_->IntObject(system_);
+	backSign_->CreateModelData(MH_backPoint_);
+	backSign_->mainPosition.transform.scale = { 0.5f,0.5f,0.5f };
 
 
 	/// マップチップの生成
@@ -120,7 +120,7 @@ Scene1::~Scene1() {
 	delete camera_;
 	delete debugCamera_;
 
-	delete targeter_;
+	delete sight_;
 
 	delete player_;
 	delete skydome_;
@@ -163,12 +163,12 @@ void Scene1::Update() {
 	/// player更新
 	player_->Update(usingCamera_);
 
-	/// targeter更新
-	targeter_->Update(usingCamera_);
+	/// Sight更新
+	sight_->Update(usingCamera_);
 
 	/// Bullet更新
 	if (system_->GetMouseIsPush(0)) {
-		player_->Shoot(targeter_->GetMouseOnPlane());
+		player_->Shoot(sight_->GetMouseOnPlane());
 	}
 
 	/// Enemy更新
@@ -207,8 +207,8 @@ void Scene1::Update() {
 		backPoint_->Update(usingCamera_);
 		if (backPoint_->GetIsBack()) {
 
-			backsign_->mainPosition.transform.translate = backPoint_->mainPosition.transform.translate + Vector3{ 0,0, -1.0f };
-			backsign_->Update(usingCamera_);
+			backSign_->mainPosition.transform.translate = backPoint_->mainPosition.transform.translate + Vector3{ 0,0, -1.0f };
+			backSign_->Update(usingCamera_);
 
 			if (system_->GetTriggerOn(DIK_SPACE)) {
 				system_->SoundStop(SH_BGM_);
@@ -265,7 +265,7 @@ void Scene1::Draw() {
 	skydome_->Draw();
 	underGround_BG_->Draw();
 	player_->Draw();
-	targeter_->Draw();
+	sight_->Draw();
 
 	//system_->Draw3D(skydome_);
 	//system_->Draw3D(player_);
@@ -302,7 +302,7 @@ void Scene1::Draw() {
 	if (backPoint_) {
 		backPoint_->Draw();
 		if (backPoint_->GetIsBack()) {
-			backsign_->Draw();
+			backSign_->Draw();
 		}
 	}
 
@@ -311,8 +311,8 @@ void Scene1::Draw() {
 	}
 
 #ifdef USE_IMGUI
-	/// imgui処理
-	ImguiPart();
+	/// ImGui処理
+	ImGuiPart();
 #endif
 }
 
@@ -331,7 +331,7 @@ void Scene1::CameraPart() {
 }
 
 #ifdef USE_IMGUI
-void Scene1::ImguiPart() {
+void Scene1::ImGuiPart() {
 	ImGui::Begin("DebugCamera");
 	ImGui::Checkbox("isUse", &useDebugCamera);
 	ImGui::End();
@@ -341,7 +341,7 @@ void Scene1::ImguiPart() {
 		ImGui::Begin("PlayerPos");
 		ImGui::SliderFloat3("Pos", &player_->mainPosition.transform.translate.x, -1.0f, 1.0f);
 		ImGui::SliderFloat3("Rotate", &player_->mainPosition.transform.rotate.x, -1.0f, 1.0f);
-		ImGui::SliderFloat3("TargeterRotate", &targeter_->mainPosition.transform.rotate.x, 0.0f, 5.0f);
+		ImGui::SliderFloat3("TargeterRotate", &sight_->mainPosition.transform.rotate.x, 0.0f, 5.0f);
 		ImGui::Text("Player HP = %d", hp);
 		ImGui::End();
 	}

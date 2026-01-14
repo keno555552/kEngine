@@ -10,7 +10,7 @@ public:
 	/// Texture関連
 	bool useModelTexture = true;
 	int textureHandle = 0;
-
+            
 	/// UV関連
 	Vector3 uvTranslate = { 0,0,0 };
 	Vector3 uvScale = { 1,1,1 };

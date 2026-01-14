@@ -2,11 +2,11 @@
 #include "Object\Object.h"
 
 class Player;
-class Targeter :public Object
+class Sight :public Object
 {
 public:
-	Targeter(kEngine* system, Player* player);
-	~Targeter();
+	Sight(kEngine* system, Player* player);
+	~Sight();
 	void Update(Camera* camera) override;
 
 	Vector3 GetMouseOnPlane() const { return mouseOnPlane_; }
