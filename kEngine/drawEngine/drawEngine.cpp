@@ -926,115 +926,14 @@ void DrawEngine::Draw2D() {
 
 	if (drawDataCollector_->GetOpaqueBuckets2D().empty())return;
 
-	auto& opaqueBuckets2D_ = drawDataCollector_->GetOpaqueBuckets2D();
-
-	/// TileSRV
-	commandList_->SetGraphicsRootDescriptorTable(1, Tile2DSrvHandleGPU_);
-
-	/// Lighting
-	commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
-
-	for (auto& [psoID, materialBuckets] : opaqueBuckets2D_) {
-
-		/// Set PSO
-		PSODecision((int)psoID);
-
-		for (auto& [materialID, RenderDataGroup] : materialBuckets) {
-
-			if (RenderDataGroup.empty()) continue;
-
-
-			SetMaterial(materialID);
-
-			SetTexture(materialID);
-
-			/// 透明度によってブレンドモードを変更
-			int materialIndex = resourceManager_->idToIndex_[materialID];
-			float alpha = resourceManager_->materialList_[materialIndex].cpuMaterial.get()->color.w;
-
-
-			/// 透明ものの描画
-			if (alpha < 1.0f) {
-				for (auto& [meshBuffer, RenderData] : RenderDataGroup) {
-
-					/// MeshIndex 數量
-					int meshIndexCount = RenderData[0].mesh->GetIndexNum();
-
-					/// VBV/IBV 設定
-					D3D12_VERTEX_BUFFER_VIEW vbv = RenderData[0].mesh->GetVertexBufferView();
-					D3D12_INDEX_BUFFER_VIEW ibv = RenderData[0].mesh->GetIndexBufferView();
-					commandList_->IASetVertexBuffers(0, 1, &vbv);
-					commandList_->IASetIndexBuffer(&ibv);
-
-					for (auto& object : RenderData) {
-
-
-						/// WVP 設定
-						int instIdx = instance2DCounter_;
-						tile2DInstancingData_[instance2DCounter_].WVP = object.transformData.WVP;
-						tile2DInstancingData_[instance2DCounter_].world = object.transformData.world;
-						++instance2DCounter_;
-
-						/// OffsetData 設定
-						OffsetData* inUse = instanceOffsetData_[offsetDataCounter_];
-						*inUse->instanceOffset = static_cast<UINT>(instIdx);
-						inUse->state = 1;
-						commandList_->SetGraphicsRootConstantBufferView(4, inUse->instanceOffsetResource->GetResource()->GetGPUVirtualAddress());
-
-						/// Draw
-						commandList_->DrawIndexedInstanced(meshIndexCount, 1, 0, 0, 0);
-
-						++offsetDataCounter_;
-
-					}
-				}
-
-				/// 不透明ものの描画
-			} else {
-				for (auto& [meshBuffer, RenderData] : RenderDataGroup) {
-
-					/// Instancing 用のデータを準備
-					int instancesCounter = 0;
-
-					/// MeshIndex 數量
-					int meshIndexCount = RenderData[0].mesh->GetIndexNum();
-
-					/// VBV/IBV 設定
-					D3D12_VERTEX_BUFFER_VIEW vbv = RenderData[0].mesh->GetVertexBufferView();
-					D3D12_INDEX_BUFFER_VIEW ibv = RenderData[0].mesh->GetIndexBufferView();
-					commandList_->IASetVertexBuffers(0, 1, &vbv);
-					commandList_->IASetIndexBuffer(&ibv);
-
-					/// インスタンスの開始位置を保存
-					int instIdx = instance2DCounter_;
-
-					/// WVP計算
-					for (auto& object : RenderData) {
-						tile2DInstancingData_[instance2DCounter_].WVP = object.transformData.WVP;;
-						tile2DInstancingData_[instance2DCounter_].world = object.transformData.world;
-
-						instancesCounter++;
-						instance2DCounter_++;
-					}
-
-					/// 設定 offset
-					OffsetData* inUse = instanceOffsetData_[offsetDataCounter_];
-					*inUse->instanceOffset = static_cast<UINT>(instIdx);
-					inUse->state = 1;
-					commandList_->SetGraphicsRootConstantBufferView(4, inUse->instanceOffsetResource->GetResource()->GetGPUVirtualAddress());
-
-					++offsetDataCounter_;
-
-					commandList_->DrawIndexedInstanced(meshIndexCount, instancesCounter, 0, 0, 0);
-				}
-			}
-		}
-	}
+	Draw2DOpaque();
+	Draw2DTransparent();
+	
 }
 
 void DrawEngine::Draw2DTransparent() {
 
-	auto& transparent2D_ = drawDataCollector_->GetTransparentObjectParts3D();
+	auto& transparent2D_ = drawDataCollector_->GetTransparentObjectParts2D();
 
 	/// TileSRV
 	commandList_->SetGraphicsRootDescriptorTable(1, Tile3DSrvHandleGPU_);
@@ -1063,11 +962,11 @@ void DrawEngine::Draw2DTransparent() {
 
 
 		/// WVP 設定
-		int instIdx = instance3DCounter_;
-		tile3DInstancingData_[instance3DCounter_].WVP = object.transformData.WVP;
-		tile3DInstancingData_[instance3DCounter_].world = object.transformData.world;
-		tile3DInstancingData_[instance3DCounter_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
-		++instance3DCounter_;
+		int instIdx = instance2DCounter_;
+		tile2DInstancingData_[instance2DCounter_].WVP = object.transformData.WVP;
+		tile2DInstancingData_[instance2DCounter_].world = object.transformData.world;
+		tile2DInstancingData_[instance2DCounter_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
+		++instance2DCounter_;
 
 		/// OffsetData 設定
 		OffsetData* inUse = instanceOffsetData_[offsetDataCounter_];
@@ -1088,6 +987,82 @@ void DrawEngine::Draw2DTransparent() {
 }
 
 void DrawEngine::Draw2DOpaque() {
+	auto& transparentObjectParts2D_ = drawDataCollector_->GetOpaqueBuckets3D();
+
+	/// TileSRV
+	commandList_->SetGraphicsRootDescriptorTable(1, Tile2DSrvHandleGPU_);
+
+	/// Lighting
+	commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
+
+	for (auto& [psoID, materialBuckets] : transparentObjectParts2D_) {
+
+		/// Set PSO
+		PSODecision((int)psoID);
+
+		for (auto& [materialID, RenderDataGroup] : materialBuckets) {
+
+			if (RenderDataGroup.empty()) continue;
+
+
+			SetMaterial(materialID);
+
+			SetTexture(materialID);
+
+			/// 透明度によってブレンドモードを変更
+			int materialIndex = resourceManager_->idToIndex_[materialID];
+			float alpha = resourceManager_->materialList_[materialIndex].cpuMaterial.get()->color.w;
+
+
+
+			/// 不透明ものの描画
+
+			for (auto& [meshBuffer, RenderData] : RenderDataGroup) {
+
+				/// Instancing 用のデータを準備
+				int instancesCounter = 0;
+
+				/// MeshIndex 數量
+				int meshIndexCount = RenderData[0].mesh->GetIndexNum();
+
+				/// VBV/IBV 設定
+				D3D12_VERTEX_BUFFER_VIEW vbv = RenderData[0].mesh->GetVertexBufferView();
+				D3D12_INDEX_BUFFER_VIEW ibv = RenderData[0].mesh->GetIndexBufferView();
+				commandList_->IASetVertexBuffers(0, 1, &vbv);
+				commandList_->IASetIndexBuffer(&ibv);
+
+				/// インスタンスの開始位置を保存
+				int instIdx = instance2DCounter_;
+
+				/// WVP計算
+				for (auto& object : RenderData) {
+					tile2DInstancingData_[instance2DCounter_].WVP = object.transformData.WVP;;
+					tile2DInstancingData_[instance2DCounter_].world = object.transformData.world;
+					tile2DInstancingData_[instance2DCounter_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
+
+					instancesCounter++;
+					instance2DCounter_++;
+				}
+
+				/// 設定 offset
+				OffsetData* inUse = instanceOffsetData_[offsetDataCounter_];
+				*inUse->instanceOffset = static_cast<UINT>(instIdx);
+				inUse->state = 1;
+				commandList_->SetGraphicsRootConstantBufferView(4, inUse->instanceOffsetResource->GetResource()->GetGPUVirtualAddress());
+
+				++offsetDataCounter_;
+
+
+				if (meshIndexCount != 0) {
+					commandList_->DrawIndexedInstanced(meshIndexCount, instancesCounter, 0, 0, 0);
+				} else {
+					int meshVertexCount = RenderData[0].mesh->GetVertexNum();
+					commandList_->DrawInstanced(meshVertexCount, instancesCounter, 0, 0);
+				}
+				//Logger::Log("Draw3D: pso=%d mat=%u meshID=%d instances=%d",(int)psoID, materialID, meshBuffer, instancesCounter);
+			}
+		}
+	}
 }
 
 /// ===========================================================================!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
