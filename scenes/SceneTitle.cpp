@@ -3,7 +3,7 @@
 SceneTitle::SceneTitle(kEngine* system) {
 	system_ = system;
 
-	testTextTitle = system_->LoadTextrue("resources/texture/sceneTest/title.png");
+	testTextTitle = system_->LoadTexture("resources/texture/sceneTest/title.png");
 
 	sprite_->IntObject(system_);
 	sprite_->CreateDefaultData();

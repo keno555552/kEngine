@@ -408,6 +408,18 @@
     <ClCompile Include="kEngine\drawEngine\DrawData\CameraData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="kEngine\Collector\DrawData\DrawDataCollector.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\RenderData\RenderData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\core\pso\PSOID.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Manager\CameraManager\CameraManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kEngine\tool\mathsUnit\Vector2.h">
@@ -692,6 +704,18 @@
     <ClInclude Include="kEngine\drawEngine\DrawData\CameraData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="kEngine\Collector\DrawData\DrawDataCollector.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\RenderData\RenderData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\core\pso\PSOID.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Manager\CameraManager\CameraManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\LightingLambert\HalfLambert.hlsl">
@@ -731,6 +755,5 @@
       <Filter>リソース ファイル\Map</Filter>
     </None>
     <None Include="resources\Shader\Tile2D.hlsli" />
-    <None Include="resources\Shader\LightingLambert\PhongReflection.hlsli" />
   </ItemGroup>
 </Project>

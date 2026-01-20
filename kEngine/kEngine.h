@@ -8,10 +8,20 @@
 #include "Vector2.h"
 #include "materialconfig.h"
 #include "tool/TimeManager/TimeManager.h"
+#include "DrawDataCollector.h"
+#include "CameraManager.h"
 
 #ifdef USE_IMGUI
 #include "ImGuiManager.h"
 #endif // USE_IMGUI
+#include <string>
+#include "DrawData/ObjectData.h"
+#include "DrawData/SpriteData.h"
+#include "InstanceManager.h"
+#include "ResourceManager/ResourceManager.h"
+#include "TextureManager/TextureManager.h"
+#include "Lighting/DirectionalLight.h"
+#include "Camera.h"
 
 
 class kEngine
@@ -43,17 +53,21 @@ public:
 	void Draw2D(SpriteData* spriteData);
 	void Draw3D(ObjectData* objectData);
 
-	int GetModelTextureHandle(int modelHandle,int part);
+	int GetModelTextureHandle(int modelHandle, int part);
 
-	int GetMuitModelNum(int modelHandle);
+	int GetMutiModelNum(int modelHandle);
 	int SetModelObj(std::string path);
 
+	DebugCamera* CreateDebugCamera();
+	Camera* CreateCamera();
+	void DestroyCamera(Camera* camera);
 	void SetCamera(Camera* camera);
+	void ResetToDefaultCamera();
 
 	int commonTextureHandleReader(int handle);
 	int commonModelHandleReader(int handle);
 
-	int LoadTextrue(const std::string& filePath);
+	int LoadTexture(const std::string& filePath);
 
 #pragma endregion
 
@@ -147,7 +161,6 @@ public:
 #pragma endregion
 
 private:
-
 	/// ============ コアシステム ============///
 	DirectXController* dxComm = nullptr;
 
@@ -158,6 +171,10 @@ private:
 	ResourceManager* resourceManager = nullptr;
 	InstanceManager* instanceManager = nullptr;
 	TextureManager* textureManager = nullptr;
+	DrawDataCollector* drawDataCollector = nullptr;
+
+	/// カメラ管理
+	CameraManager* cameraManager = nullptr;
 
 	/// 描画ロジック
 	DrawEngine* drawEngine = nullptr;
@@ -170,5 +187,4 @@ private:
 
 	/// ============ 時間関連 ============///
 	TimeManager* timeManager = nullptr;
-
 };

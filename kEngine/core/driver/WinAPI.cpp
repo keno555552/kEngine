@@ -1,4 +1,7 @@
 #include "WinAPI.h"
+#ifdef USE_IMGUI
+#include "ImGuiManager.h"
+#endif
 
 WinAPI::~WinAPI() {
 }

@@ -16,8 +16,6 @@ Player::Player(kEngine* system, const Vector3& position) {
 void Player::Update(Camera* camera) {
 	deltaTime_ = system_->GetDeltaTime();
 	BehaviorRootUpdate();
-
-	Object::Update(camera);
 }
 
 void Player::BehaviorRootUpdate() {

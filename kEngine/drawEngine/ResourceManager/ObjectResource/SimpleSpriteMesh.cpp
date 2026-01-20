@@ -54,6 +54,7 @@ void SimpleSpriteMesh::SetTexcoord(Vector2 textureSize,Vector2 cropLT, Vector2 c
 ID3D12Resource* SimpleSpriteMesh::CreateVertexResource_(ID3D12Device* device) {
 
 	vertexResource_->CreateResourceClass_(device, sizeof(VertexData) * 4);
+	vertexNum_ = 4;
 
 	Mapping();
 
@@ -81,6 +82,7 @@ void SimpleSpriteMesh::Mapping() {
 
 ID3D12Resource* SimpleSpriteMesh::CreateIndexResource_(ID3D12Device* device) {
 	indexResource_->CreateResourceClass_(device, sizeof(uint32_t) * 6);
+	indexNum_ = 6;
 
 	indexBufferView = {};
 	/// リソースの先頭のアドレスから使う

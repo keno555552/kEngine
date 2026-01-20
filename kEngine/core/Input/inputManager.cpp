@@ -908,7 +908,7 @@ bool InputManager::CheckIsGamepadConnet() {
 
 	if (!isXInput && !isDInput) {
 		bool boool = false;
-		config::SetConnetGamePad(&boool);
+		config::SetConnectGamePad(&boool);
 		return false;
 	}
 	return true;

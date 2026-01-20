@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "Logger.h"
 
 Transform CameraDefaultTransform() {
 	return { { 1.0f, 1.0f, 1.0f },   // scale
@@ -14,16 +15,21 @@ Camera::Camera()
 	, farClip_(100.0f)
 	, projectionMatrix_(MakePerspectiveFovMatrix(0.45f, float(config::GetClientWidth()) / float(config::GetClientHeight()), 0.1f, 100.0f))
 	, cameraTransform_(CameraDefaultTransform())
-	, matRot_(MakeRotateMatrix4x4(cameraTransform_.rotate))
-{ Update(); }
+	, defaultTransform_(CameraDefaultTransform())
+	, matRot_(MakeRotateMatrix4x4(cameraTransform_.rotate)) {
+}
 
 void Camera::Update() {
 	/// ProjectionMatrix更新
 	projectionMatrix_ = MakePerspectiveFovMatrix(fovY_, aspect_, nearClip_, farClip_);
 	/// カメラMatrix更新
+	if (cameraTransform_.scale != Vector3{ 1,1,1 })cameraTransform_.scale = { 1,1,1 }; /// カメラのスケールは1固定
 	worldMatrix_ = MakeAffineMatrix(cameraTransform_.scale, cameraTransform_.rotate, cameraTransform_.translate);
 	/// ビュー行列更新
 	viewMatrix_ = Inverse(worldMatrix_);
+	/// 更新フラグオフ
+	dirty_ = false;
+	Logger::Log("[kInfo]Camera:Camera Updated.");
 }
 
 TransformationMatrix Camera::transformationMatrixTransform(Transform objTransform) {
@@ -32,33 +38,92 @@ TransformationMatrix Camera::transformationMatrixTransform(Transform objTransfor
 	Matrix4x4 worldViewProjectionMatrix = objWorldMatrix * (viewMatrix_ * projectionMatrix_);
 
 	return { worldViewProjectionMatrix, objWorldMatrix };
+
 }
 
 TransformationMatrix Camera::transformationMatrixTransform(Matrix4x4 worldMatrix) {
-	//Matrix4x4 worldInverse = Inverse(worldMatrix);
-	//Matrix4x4 worldInverseTranspose = Transpose(worldInverse);
-	return { worldMatrix * (viewMatrix_ * projectionMatrix_), worldMatrix,Inverse(Transpose(worldMatrix)) };
+	//return { worldMatrix * (viewMatrix_ * projectionMatrix_), worldMatrix,Inverse(Transpose(worldMatrix)) };
+	return{ worldMatrix * (viewMatrix_ * projectionMatrix_),worldMatrix,worldMatrix.Inverse().Transpose() };
 }
 
 void Camera::SetCamera(Transform cameraTransform) {
-	cameraTransform_ = cameraTransform;
-	Camera::Update();
+	cameraTransform_.rotate = cameraTransform.rotate;
+	cameraTransform_.translate = cameraTransform.translate;
+	dirty_ = true;
 }
 
 
-///<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<以降フレームの更新方法が変わったら、ここも変えよう
+void Camera::SetRotation(Vector3 theta) {
+	cameraTransform_.rotate = theta;
+	dirty_ = true;
+}
+
+void Camera::SetTranslate(Vector3 translate) {
+	cameraTransform_.translate = translate;
+	dirty_ = true;
+}
+
+void Camera::SetFovY(float fovY) {
+	if (fovY <= 0.0f || fovY >= 3.13f) return; // 異常値回避
+	fovY_ = fovY;
+	dirty_ = true;
+}
+
+void Camera::SetAspect(float aspect) {
+	if (aspect <= 0.0f) return; // 0以下回避
+	aspect_ = aspect;
+	dirty_ = true;
+}
+
+void Camera::SetNearClip(float nearClip) {
+	if (nearClip <= 0.0f) return; // 0以下回避
+	nearClip_ = nearClip;
+	dirty_ = true;
+}
+
+void Camera::SetFarClip(float farClip) {
+	if (farClip <= nearClip_) return; // far <= near 回避
+	farClip_ = farClip;
+	dirty_ = true;
+}
+
+
 void Camera::Move(Vector3 speed) {
 	Matrix4x4 handle = MakeTranslateMatrix4x4(speed) * MakeRotateMatrix4x4(cameraTransform_.rotate);
 	cameraTransform_.translate = cameraTransform_.translate + MakeTranslateVector3(handle);
+	dirty_ = true;
 }
 
 void Camera::Rotate(Vector3 Theta) {
 	cameraTransform_.rotate = cameraTransform_.rotate + Theta;
+	dirty_ = true;
+}
+
+Matrix4x4 Camera::GetWorldMatrix() {
+	if (dirty_)Update();
+	return worldMatrix_;
+}
+
+Matrix4x4 Camera::GetViewMatrix() {
+	if (dirty_)Update();
+	return viewMatrix_;
+}
+
+Matrix4x4 Camera::GetProjectionMatrix() {
+	if (dirty_)Update();
+	return projectionMatrix_;
+}
+
+Transform Camera::GetTransform() {
+	if (dirty_)Update();
+	return cameraTransform_;
 }
 
 void Camera::ResetCamera() {
 	cameraTransform_ = defaultTransform_;
-	Camera::Update();
+	dirty_ = true;
 }
+
+
 
 

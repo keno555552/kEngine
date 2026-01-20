@@ -23,7 +23,7 @@ SceneManager::SceneManager(kEngine* system) {
 	//	ptr = false;
 	//}
 
-	helperTextureHandle_ = system_->LoadTextrue("resources/texture/helper.png");
+	helperTextureHandle_ = system_->LoadTexture("resources/texture/helper.png");
 	helperSprite_ = new SimpleSprite;
 	helperSprite_->IntObject(system_);
 	helperSprite_->CreateDefaultData();
@@ -94,10 +94,10 @@ void SceneManager::SceneChanger() {
 
 		case SceneNum::S_TESTER:
 			//sceneUsing_ = new SceneTester(system_);
-			sceneUsing_ = new SceneTest(system_);
+			//sceneUsing_ = new SceneTest(system_);
 			//sceneUsing_ = new SceneTest2(system_);
 			//sceneUsing_ = new StageTestForGE(system_);
-			//sceneUsing_ = new Effect2(system_);
+			sceneUsing_ = new Effect2(system_);
 			break;
 
 		case SceneNum::S_TITLE:

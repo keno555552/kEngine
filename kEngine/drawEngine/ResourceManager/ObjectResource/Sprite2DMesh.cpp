@@ -21,6 +21,7 @@ void Sprite2DMesh::SetSize(Vector2 LTpos, Vector2 LBpos,Vector2 RTpos, Vector2 R
 ID3D12Resource* Sprite2DMesh::CreateVertexResource_(ID3D12Device* device) {
 
 	vertexResource_->CreateResourceClass_(device, sizeof(VertexData) * 5);
+	vertexNum_ = 5;
 	//CreateVertexBufferView_(6);
 
 	VertexData* vertexDataSprite = nullptr;
@@ -49,7 +50,7 @@ ID3D12Resource* Sprite2DMesh::CreateVertexResource_(ID3D12Device* device) {
 
 ID3D12Resource* Sprite2DMesh::CreateIndexResource_(ID3D12Device* device) {
 	indexResource_->CreateResourceClass_(device, sizeof(uint32_t) * 3 * 4);
-
+	indexNum_ = 3 * 4;
 	indexBufferView = {};
 	/// リソースの先頭のアドレスから使う
 	indexBufferView.BufferLocation = indexResource_->GetResource()->GetGPUVirtualAddress();

@@ -1,12 +1,13 @@
 #pragma once
 #include "Camera.h"
-#include "kEngine.h"
 
+class kEngine;
 class DebugCamera :public Camera {
 public:
-	/// 初期化
-	DebugCamera(kEngine* system);
-	~DebugCamera();
+
+	/// CameraManagerからのみ生成・破棄可能
+	friend class CameraManager;
+	friend class kEngine;
 
 	/// 更新
 	void Update() override;
@@ -29,6 +30,10 @@ public:
 	void isMouseRightvailable(bool available) { isQ_ = available; }
 	void isGamePadAvailable(bool available) { isQ_ = available; }
 
+private:
+	/// 初期化
+	DebugCamera(kEngine* system);
+	~DebugCamera() = default;
 private:
 	kEngine* system_ = nullptr;
 

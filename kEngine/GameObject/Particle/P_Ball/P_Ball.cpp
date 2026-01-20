@@ -5,9 +5,10 @@ P_Ball::P_Ball(kEngine* system) :Particle(system) {
 	createTimer.Init0(defaultParticleInterval_, system_->GetTimeManager());
 
 	defaultModelHandle = system_->SetModelObj("resources/TemplateResource/object/plane/plane.obj");
-	defaultTextureHandle = system_->LoadTextrue("resources/TemplateResource/texture/circle.png");
+	defaultTextureHandle = system_->LoadTexture("resources/TemplateResource/texture/circle.png");
 	commonMaterialConfig->useModelTexture = false;
 	commonMaterialConfig->textureHandle = defaultTextureHandle;
+	commonMaterialConfig->textureColor.w = 0.5f;
 
 }
 
@@ -80,7 +81,7 @@ void P_Ball::CreateBall() {
 				float R = randomMaker_->randomFloat(0, 1.0f);
 				float G = randomMaker_->randomFloat(0, 1.0f);
 				float B = randomMaker_->randomFloat(0, 1.0f);
-				newPart->part->objectParts_[0].materialConfig->textureColor = Vector4(R, G, B, 1.0f);
+				newPart->part->objectParts_[0].materialConfig->textureColor = Vector4(R, G, B, 0.3f);
 			}
 		}
 

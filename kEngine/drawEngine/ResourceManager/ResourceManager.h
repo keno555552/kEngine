@@ -12,6 +12,7 @@
 #include "DrawData/ObjectData.h"
 #include "DrawData/SpriteData.h"
 #include "SrvManager.h"
+using MaterialID = int;
 
 class ResourceManager
 {
@@ -69,7 +70,7 @@ public:
 	DirectX::TexMetadata GetTextureMetadata(int textureHandle);
 
 	int ReadModelTextureHandle(int index);
-	int ReadCommenTextureHandle(int index);
+	int ReadCommonTextureHandle(int index);
 
 	bool SetModelTexture(Model* model);
 
@@ -78,18 +79,22 @@ public:
 	/// 暫くのCounter管理
 	int GetTextureCounter();
 	void TextureCounterPlus(int index = 1);
-	void TextuerCounterAdjust(int index);
+	void TextureCounterAdjust(int index);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE GetTextureCPUDescriptorHandle(int handle);
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureGPUDescriptorHandle(int handle);
 
-	void CreateSpriteMesh();
+	void ResizeSpriteMesh(int spriteNumber);
+	void DeleteExtraSpriteMesh(int spriteNumber);
+
+	int InputMaterialConfig(std::shared_ptr<MaterialConfig> material);
+
 
 public:
 
 	/// 借りのDevice
 	DirectXCore* core_ = nullptr;
-	ID3D12Device* Bdevice_ = nullptr;
+	ID3D12Device* BDevice_ = nullptr;
 
 	//////////////////////////////Texture関係
 
@@ -98,6 +103,18 @@ public:
 
 	/// Material関係
 	std::vector<BasicResource*> materialResourceList_;
+
+	struct MaterialEntry {
+		MaterialID materialID{};
+		std::weak_ptr<MaterialConfig> config{}; // 外部設定
+		std::unique_ptr <Material> cpuMaterial{};                // CPU 資料
+		BasicResource* gpuMaterial{};           // GPU buffer
+		int textureHandle{};                    // 使用的貼圖
+	};
+
+	std::vector<MaterialEntry> materialList_;
+	std::unordered_map<MaterialID, int> idToIndex_;
+	int materialCounter_{};
 
 
 	//////////////////////////////InstanceBuffer関係

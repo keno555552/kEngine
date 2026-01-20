@@ -6,12 +6,13 @@ char* config::clientTitle_ = nullptr;
 int config::clientWidth_ = 0;
 int config::clientHeight_ = 0;
 
-bool config::isConnetKeyboard_ = false;
-bool config::isConnetMouse_ = false;
-bool config::isConnetGamePad_ = false;
+bool config::isConnectKeyboard_ = false;
+bool config::isConnectMouse_ = false;
+bool config::isConnectGamePad_ = false;
 gamepadType config::gamePadType_ = NODEVICE;
 int config::XInputDriverIP_ = -1;
 
+int config::default_Plane_MeshBufferHandle_     = 0;
 int config::default_Triangle_MeshBufferHandle_	= 0;
 int config::default_Sprite2D_MeshBufferHandle_	= 0;
 int config::default_Cube_MeshBufferHandle_		= 0;

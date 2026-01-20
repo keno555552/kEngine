@@ -50,13 +50,13 @@ private:
 	static const uint32_t kMaxSRVCount;
 
 	/// SRV用のデスクリプタサイズ
-	uint32_t descriptorSize;
+	uint32_t descriptorSize{};
 
 	/// SRV用デスクリプタヒープ
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap{};
 
 	/// 廃棄SRV管理配列
-	std::vector<uint32_t> freeIndices;
+	std::vector<uint32_t> freeIndices{};
 
 	// 次に使用するSRVインデックス
 	uint32_t nextNewIndex = 0;

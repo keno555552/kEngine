@@ -12,6 +12,7 @@ void SimpleSprite::CreateDefaultData() {
 	InitMaterialConfig(newObjectPart.materialConfig.get());
 	newObjectPart.materialConfig->enableLighting = false;
 	newObjectPart.materialConfig->MakeUVMatrix();
+	newObjectPart.materialConfig->lightModelType = LightModelType::Sprite2D;
 
 	objectParts_.push_back(newObjectPart);
 }

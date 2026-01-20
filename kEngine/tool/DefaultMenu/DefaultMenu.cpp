@@ -12,26 +12,26 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 	/// =========== リソース読み込み ==========///
 
 	std::string menuPath = "resources/texture/menu/";
-	TH_menuBG_ = system_->LoadTextrue(menuPath + "menuBG.png");
+	TH_menuBG_ = system_->LoadTexture(menuPath + "menuBG.png");
 
-	TH_menuPause = system_->LoadTextrue(menuPath + "menuPause.png");
-	TH_menuBGM = system_->LoadTextrue(menuPath + "menuBGM.png");
-	TH_menuBGM_NL = system_->LoadTextrue(menuPath + "menuBGM_NL.png");
-	TH_menuMASTER = system_->LoadTextrue(menuPath + "menuMASTER.png");
-	TH_menuMASTER_NL = system_->LoadTextrue(menuPath + "menuMASTER_NL.png");
-	TH_menuSE = system_->LoadTextrue(menuPath + "menuSE.png");
-	TH_menuSE_NL = system_->LoadTextrue(menuPath + "menuSE_NL.png");
+	TH_menuPause = system_->LoadTexture(menuPath + "menuPause.png");
+	TH_menuBGM = system_->LoadTexture(menuPath + "menuBGM.png");
+	TH_menuBGM_NL = system_->LoadTexture(menuPath + "menuBGM_NL.png");
+	TH_menuMASTER = system_->LoadTexture(menuPath + "menuMASTER.png");
+	TH_menuMASTER_NL = system_->LoadTexture(menuPath + "menuMASTER_NL.png");
+	TH_menuSE = system_->LoadTexture(menuPath + "menuSE.png");
+	TH_menuSE_NL = system_->LoadTexture(menuPath + "menuSE_NL.png");
 
-	TH_menuClose = system_->LoadTextrue(menuPath + "menuClose.png");
-	TH_menuClose_NL = system_->LoadTextrue(menuPath + "menuClose_NL.png");
-	TH_menuBack = system_->LoadTextrue(menuPath + "menuBack.png");
-	TH_menuBack_NL = system_->LoadTextrue(menuPath + "menuBack_NL.png");
-	TH_menuRetry = system_->LoadTextrue(menuPath + "menuRetry.png");
-	TH_menuRetry_NL = system_->LoadTextrue(menuPath + "menuRetry_NL.png");
+	TH_menuClose = system_->LoadTexture(menuPath + "menuClose.png");
+	TH_menuClose_NL = system_->LoadTexture(menuPath + "menuClose_NL.png");
+	TH_menuBack = system_->LoadTexture(menuPath + "menuBack.png");
+	TH_menuBack_NL = system_->LoadTexture(menuPath + "menuBack_NL.png");
+	TH_menuRetry = system_->LoadTexture(menuPath + "menuRetry.png");
+	TH_menuRetry_NL = system_->LoadTexture(menuPath + "menuRetry_NL.png");
 
-	TH_menuButton = system_->LoadTextrue(menuPath + "menuButton.png");
-	TH_menuButton_NL = system_->LoadTextrue(menuPath + "menuButton_NL.png");
-	TH_menuVolumeBar = system_->LoadTextrue(menuPath + "menuVolumeBar.png");
+	TH_menuButton = system_->LoadTexture(menuPath + "menuButton.png");
+	TH_menuButton_NL = system_->LoadTexture(menuPath + "menuButton_NL.png");
+	TH_menuVolumeBar = system_->LoadTexture(menuPath + "menuVolumeBar.png");
 
 	float middlePointX = (float)config::GetClientWidth() / 2;
 	float middlePointY = (float)config::GetClientHeight() / 2;

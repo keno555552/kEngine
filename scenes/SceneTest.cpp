@@ -3,8 +3,8 @@
 SceneTest::SceneTest(kEngine* system) {
 	/// =========== システム初期化 ============///
 	system_ = system;
-	debugCamera_ = new DebugCamera(system);
-	camera_ = new Camera;
+	debugCamera_ = system_->CreateDebugCamera();
+	camera_ = system_->CreateCamera();
 	camera_->Move(Vector3(0.0f, 0.5f, -10.0f));
 	usingCamera_ = camera_;
 	system_->SetCamera(usingCamera_);
@@ -13,9 +13,9 @@ SceneTest::SceneTest(kEngine* system) {
 	skydomeModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/skydome/skydome.obj");
 	playerModelHandle_ = system_->SetModelObj("resources/object/ball/ball.obj");
 
-	boxTextureHandle_ = system_->LoadTextrue("resources/texture/testBox.png");
-	tryTextureHandle_ = system_->LoadTextrue("resources/texture/Tryer.png");
-	uvTextureHandle_ = system_->LoadTextrue("resources/TemplateResource/texture/uvChecker.png");
+	boxTextureHandle_ = system_->LoadTexture("resources/texture/testBox.png");
+	tryTextureHandle_ = system_->LoadTexture("resources/texture/Tryer.png");
+	uvTextureHandle_ = system_->LoadTexture("resources/TemplateResource/texture/uvChecker.png");
 
 	//skydome_->CreateDefaultData();
 	skydome_ = new Object;
@@ -57,8 +57,8 @@ SceneTest::SceneTest(kEngine* system) {
 }
 
 SceneTest::~SceneTest() {
-	delete camera_;
-	delete debugCamera_;
+	system_->DestroyCamera(camera_);
+	system_->DestroyCamera(debugCamera_);
 
 	delete player_;
 	delete skydome_;
@@ -68,7 +68,7 @@ SceneTest::~SceneTest() {
 }
 
 void SceneTest::Update() {
-	/// カメラ処理
+
 	CameraPart();
 
 	/// Skydome更新
@@ -130,15 +130,16 @@ void SceneTest::Draw() {
 void SceneTest::CameraPart() {
 	if (useDebugCamera) {
 		usingCamera_ = debugCamera_;
+		debugCamera_->MouseControlUpdate();
 	} else {
-		Transform cameraTransform = CreateDefaultTransform();
-		cameraTransform.translate.x = player_->mainPosition.transform.translate.x;
-		cameraTransform.translate.y = player_->mainPosition.transform.translate.y + 0.5f;
-		cameraTransform.translate.z = player_->mainPosition.transform.translate.z - 15.0f;
-		camera_->SetCamera(cameraTransform);
+		//Transform cameraTransform = CreateDefaultTransform();
+		//cameraTransform.translate.x = player_->mainPosition.transform.translate.x;
+		//cameraTransform.translate.y = player_->mainPosition.transform.translate.y + 0.5f;
+		//cameraTransform.translate.z = player_->mainPosition.transform.translate.z - 15.0f;
+		//camera_->SetCamera(cameraTransform);
 		usingCamera_ = camera_;
 	}
-	usingCamera_->Update();
+	//usingCamera_->Update();
 	system_->SetCamera(usingCamera_);
 }
 
