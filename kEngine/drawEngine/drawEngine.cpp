@@ -1033,6 +1033,58 @@ void DrawEngine::Draw2D() {
 }
 
 void DrawEngine::Draw2DTransparent() {
+
+	auto& transparent2D_ = drawDataCollector_->GetTransparentObjectParts3D();
+
+	/// TileSRV
+	commandList_->SetGraphicsRootDescriptorTable(1, Tile3DSrvHandleGPU_);
+
+	/// Lighting
+	commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
+
+	for (auto& object : transparent2D_) {
+
+		/// Set PSO
+		PSODecision((int)object.psoID);
+
+		SetMaterial(object.materialID);
+
+		SetTexture(object.materialID);
+
+		/// MeshIndex 數量
+		int meshIndexCount = object.mesh->GetIndexNum();
+
+		/// VBV/IBV 設定
+		D3D12_VERTEX_BUFFER_VIEW vbv = object.mesh->GetVertexBufferView();
+		D3D12_INDEX_BUFFER_VIEW ibv = object.mesh->GetIndexBufferView();
+		commandList_->IASetVertexBuffers(0, 1, &vbv);
+		commandList_->IASetIndexBuffer(&ibv);
+
+
+
+		/// WVP 設定
+		int instIdx = instance3DCounter_;
+		tile3DInstancingData_[instance3DCounter_].WVP = object.transformData.WVP;
+		tile3DInstancingData_[instance3DCounter_].world = object.transformData.world;
+		tile3DInstancingData_[instance3DCounter_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
+		++instance3DCounter_;
+
+		/// OffsetData 設定
+		OffsetData* inUse = instanceOffsetData_[offsetDataCounter_];
+		*inUse->instanceOffset = static_cast<UINT>(instIdx);
+		inUse->state = 1;
+		commandList_->SetGraphicsRootConstantBufferView(4, inUse->instanceOffsetResource->GetResource()->GetGPUVirtualAddress());
+
+		/// Draw
+		if (meshIndexCount != 0) {
+			commandList_->DrawIndexedInstanced(meshIndexCount, 1, 0, 0, 0);
+		} else {
+			int meshVertexCount = object.mesh->GetVertexNum();
+			commandList_->DrawInstanced(meshVertexCount, 1, 0, 0);
+		}
+
+		++offsetDataCounter_;
+	}
 }
 
 void DrawEngine::Draw2DOpaque() {
