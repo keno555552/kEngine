@@ -52,11 +52,6 @@ void SceneManager::SceneChanger() {
 	}
 
 
-	//if (system_->GetTriggerOn(DIK_R) || system_->GetGamepadTriggerOn(VK_PAD_START)) {
-	//	isReset_ = true;
-	//	delete sceneUsing_, sceneUsing_ = nullptr;
-	//}
-
 	if (sceneUsing_ != nullptr) {
 		if (defaultMenu_->IsBack()) {
 			sceneUsing_->SetNextStage(SceneNum::S_TITLE);
@@ -81,7 +76,6 @@ void SceneManager::SceneChanger() {
 				defaultMenu_->SetCanOpen(true);
 			}
 		}
-
 
 		switch (sceneUsingHandle_) {
 		case SceneNum::S_END:

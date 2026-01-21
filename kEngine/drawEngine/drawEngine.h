@@ -70,10 +70,6 @@ public:
 
 
 
-	/// 描くものテータを収集する関数
-	void Collect2D(SpriteData* spriteData);
-	void Collect3D(ObjectData* object);
-
 	/// 全部描く関数
 
 	/// 2D描画関数

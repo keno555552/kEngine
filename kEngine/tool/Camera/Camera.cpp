@@ -29,7 +29,6 @@ void Camera::Update() {
 	viewMatrix_ = Inverse(worldMatrix_);
 	/// 更新フラグオフ
 	dirty_ = false;
-	Logger::Log("[kInfo]Camera:Camera Updated.");
 }
 
 TransformationMatrix Camera::transformationMatrixTransform(Transform objTransform) {

@@ -84,7 +84,7 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE GetTextureCPUDescriptorHandle(int handle);
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureGPUDescriptorHandle(int handle);
 
-	void ResizeSpriteMesh(int spriteNumber);
+	void ResizeSimpleSpriteMeshList(int spriteNumber);
 	void DeleteExtraSpriteMesh(int spriteNumber);
 
 	int InputMaterialConfig(std::shared_ptr<MaterialConfig> material);
