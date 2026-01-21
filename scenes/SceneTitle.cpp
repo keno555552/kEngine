@@ -3,8 +3,8 @@
 
 SceneTitle::SceneTitle(kEngine* system) {
 	system_ = system;
-	debugCamera_ = new DebugCamera(system);
-	camera_ = new Camera;
+	debugCamera_ = system_->CreateDebugCamera();
+	camera_ = system_->CreateCamera();
 	camera_->Move(Vector3(0.0f, 0.5f, -15.0f));
 	camera_->Rotate(Vector3(0.182f, 0, 0));
 
@@ -92,8 +92,8 @@ SceneTitle::~SceneTitle() {
 
 	system_->SoundStop(SH_BGM_);
 
-	delete camera_;
-	delete debugCamera_;
+	system_->DestroyCamera(camera_);
+	system_->DestroyCamera(debugCamera_);
 	delete title_;
 }
 
@@ -134,23 +134,22 @@ void SceneTitle::Draw() {
 
 
 #ifdef USE_IMGUI
-	/// imgui����
-	ImguiPart();
+	/// ImGui����
+	ImGuiPart();
 #endif
 }
 
 #ifdef USE_IMGUI
-void SceneTitle::ImguiPart() {
+void SceneTitle::ImGuiPart() {
 
-	Vector3 debugCamPos = debugCamera_->GetTransform().translate;
-	Vector3 camPos = camera_->GetTransform().translate;
-	Vector3 camRotate = camera_->GetTransform().rotate;
+	Transform debugCamTran = debugCamera_->GetTransform();
+	Transform camTran = camera_->GetTransform();
 
 	ImGui::Begin("DebugCamera");
 	ImGui::Checkbox("isUse", &useDebugCamera);
-	ImGui::SliderFloat3("DebugCameraPos", &debugCamPos.x, -50.0f, 50.0f);
-	ImGui::SliderFloat3("CameraPos", &camPos.x, -50.0f, 50.0f);
-	ImGui::SliderFloat3("CameraRotato", &camRotate.x, -2.0f, 2.0f);
+	ImGui::SliderFloat3("DebugCameraPos", &debugCamTran.translate.x, -50.0f, 50.0f);
+	ImGui::SliderFloat3("CameraPos", &camTran.translate.x, -50.0f, 50.0f);
+	ImGui::SliderFloat3("CameraRotato", &camTran.rotate.x, -2.0f, 2.0f);
 	ImGui::End();
 
 	ImGui::Begin("TitleScene");
@@ -158,9 +157,8 @@ void SceneTitle::ImguiPart() {
 	ImGui::SliderFloat3("GroundUVScale", &ground_->objectParts_[0].materialConfig->uvScale.x, -1.0f, 1.0f);
 	ImGui::End();
 
-	debugCamera_->SetTranslate(debugCamPos);
-	camera_->SetTranslate(camPos);
-	camera_->SetRotate(camRotate);
+	debugCamera_->SetCamera(debugCamTran);
+	camera_->SetCamera(camTran);
 
 }
 #endif
@@ -168,10 +166,11 @@ void SceneTitle::ImguiPart() {
 void SceneTitle::CameraPart() {
 	if (useDebugCamera) {
 		usingCamera_ = debugCamera_;
+		debugCamera_->MouseControlUpdate();
 	} else {
 		usingCamera_ = camera_;
 	}
-	usingCamera_->Update();
+	system_->SetCamera(usingCamera_);
 }
 
 void SceneTitle::UpdateSelect() {

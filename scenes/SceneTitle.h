@@ -76,7 +76,7 @@ private:
 	void CameraPart();
 
 #ifdef USE_IMGUI
-	void ImguiPart();
+	void ImGuiPart();
 #endif
 
 	void UpdateSelect();

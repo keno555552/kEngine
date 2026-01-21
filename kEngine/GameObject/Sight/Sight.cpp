@@ -8,8 +8,7 @@
 #include <cmath>
 
 Sight::Sight(kEngine* system, Player* player) :
-	player_(player)
-{
+	player_(player) {
 	system_ = system;
 }
 
@@ -22,42 +21,30 @@ void Sight::Update(Camera* camera) {
 		mainPosition.transform.translate = player_->mainPosition.transform.translate;
 	}
 
-	if (camera && player_) {
-		// 1) 取得螢幕座標 -> NDC
-		float w = static_cast<float>(config::GetClientWidth());
-		float h = static_cast<float>(config::GetClientHeight());
-		float xNdc = (2.0f * static_cast<float>(system_->GetMousePosX()) / w) - 1.0f;
-		float yNdc = 1.0f - (2.0f * static_cast<float>(system_->GetMousePosY()) / h);
+	float mouseX = system_->GetMousePosX();
+	float mouseY = system_->GetMousePosY();
 
-		// 2) 反變換到世界座標（投射在玩家高度的平面上）
-		Matrix4x4 vp = camera->GetViewMatrix() * camera->GetProjectionMatrix();
-		Matrix4x4 invVP = Inverse(vp);
+	float w = config::GetClientWidth();
+	float h = config::GetClientHeight();
 
-		Vector4 nearClip{ xNdc, yNdc, 0.0f, 1.0f };
-		Vector4 farClip{ xNdc, yNdc, 1.0f, 1.0f };
+	float ndcX = (mouseX / w) * 2.0f - 1.0f;
+	float ndcY = 1.0f - (mouseY / h) * 2.0f;
 
-		Vector4 nearWorld = Multiply(nearClip, invVP);
-		Vector4 farWorld = Multiply(farClip, invVP);
-		if (nearWorld.w != 0.0f) nearWorld = nearWorld /= nearWorld.w;
-		if (farWorld.w != 0.0f) farWorld = farWorld /= farWorld.w;
+	Vector3 dir =
+		Vector3{ 1, 0, 0 } * ndcX +
+		Vector3{ 0, 1, 0 } * ndcY +
+		Vector3{ 0, 0, -1 } * 1.0f;   // 往前射
 
-		Vector3 dir{ farWorld.x - nearWorld.x, farWorld.y - nearWorld.y, farWorld.z - nearWorld.z };
-		// 交會到玩家所在的Z平面 (Z 為上軸)
-		float planeZ = player_->mainPosition.transform.translate.z;
-		if (std::abs(dir.z) > 1e-4f) {
-			float t = (planeZ - nearWorld.z) / dir.z;
-			Vector3 hit{
-				nearWorld.x + dir.x * t,
-				nearWorld.y + dir.y * t,
-				planeZ
-			};
-			mouseOnPlane_ = hit;
-			Vector3 toHit = hit - player_->mainPosition.transform.translate;
-			if (std::abs(toHit.x) > 1e-4f || std::abs(toHit.y) > 1e-4f) {
-				mainPosition.transform.rotate.z = std::atan2(toHit.y, toHit.x) - std::numbers::pi_v<float> / 2.0f;
-			}
-		}
-	}
+	dir = Normalize(dir);
 
-	Object::Update(camera);
+	mouseOnPlane_ = camera->GetTransform().translate + dir * 10.0f; 
+
+	Vector3 toHit = mouseOnPlane_ - mainPosition.transform.translate;
+	angleSightToTarget_ = mouseOnPlane_;
+
+	float angle = atan2(toHit.y, toHit.x);
+
+	angle -= std::numbers::pi_v<float> / 2.0f;
+
+	mainPosition.transform.rotate.z = angle;
 }

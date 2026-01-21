@@ -619,8 +619,8 @@ Vector3 ExtractTranslate(const Matrix4x4 matrix4x4) {
 #pragma endregion
 
 #pragma region カメラ改変陣列
-Matrix4x4 MakeAffineMatrix(Vector3 scole, Vector3 rotate, Vector3 translate) {
-	Matrix4x4 s = MakeScaleMatrix4x4(scole);
+Matrix4x4 MakeAffineMatrix(Vector3 scale, Vector3 rotate, Vector3 translate) {
+	Matrix4x4 s = MakeScaleMatrix4x4(scale);
 
 	Matrix4x4 r = MakeRotateMatrix4x4(rotate);
 

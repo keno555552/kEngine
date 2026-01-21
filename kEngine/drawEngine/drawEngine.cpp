@@ -86,6 +86,7 @@ void DrawEngine::Initialize
 	for (int index = 0; index < config::Get2DTileNumInstance(); ++index) {
 		tile2DInstancingData_[index].WVP = Identity();
 		tile2DInstancingData_[index].world = Identity();
+		tile2DInstancingData_[index].WorldInverseTranspose = Identity();
 	}
 	int srvHandleIndex = srvManager_->Allocate();
 	srvManager_->CreateSRVforStructuredBuffer(srvHandleIndex, tile2DWVPResource_->GetResource().Get(), config::Get2DTileNumInstance(), sizeof(TransformationMatrix));  // 修正：使用正確的 tile2DWVPResource_
@@ -97,6 +98,7 @@ void DrawEngine::Initialize
 	for (int index = 0; index < config::Get3DTileNumInstance(); ++index) {
 		tile3DInstancingData_[index].WVP = Identity();
 		tile3DInstancingData_[index].world = Identity();
+		tile3DInstancingData_[index].WorldInverseTranspose = Identity();
 	}
 	srvHandleIndex = srvManager_->Allocate();
 	srvManager_->CreateSRVforStructuredBuffer(srvHandleIndex, tile3DWVPResource_->GetResource().Get(), config::Get3DTileNumInstance(), sizeof(TransformationMatrix));
@@ -250,7 +252,7 @@ void DrawEngine::PSODecision(int psoID) {
 		commandList_->SetPipelineState(psoList_[psoID]);
 		currentPSO_ = newPSO;
 
-		rootSignature_ = pso_->getRootSignature(psoID);
+		rootSignature_ = pso_->getRootSignature((int)currentPSO_);
 		commandList_->SetGraphicsRootSignature(rootSignature_);
 	}
 }
@@ -914,13 +916,6 @@ void DrawEngine::Draw3DTile() {
 
 }
 
-void DrawEngine::Collect2D(SpriteData* spriteData) {
-	resourceManager_->Collet2D(spriteData);
-}
-
-void DrawEngine::Collect3D(ObjectData* object) {
-	resourceManager_->Collet3D(object);
-}
 
 void DrawEngine::Draw2D() {
 
@@ -936,7 +931,7 @@ void DrawEngine::Draw2DTransparent() {
 	auto& transparent2D_ = drawDataCollector_->GetTransparentObjectParts2D();
 
 	/// TileSRV
-	commandList_->SetGraphicsRootDescriptorTable(1, Tile3DSrvHandleGPU_);
+	commandList_->SetGraphicsRootDescriptorTable(1, Tile2DSrvHandleGPU_);
 
 	/// Lighting
 	commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
@@ -987,7 +982,7 @@ void DrawEngine::Draw2DTransparent() {
 }
 
 void DrawEngine::Draw2DOpaque() {
-	auto& transparentObjectParts2D_ = drawDataCollector_->GetOpaqueBuckets3D();
+	auto& transparentObjectParts2D_ = drawDataCollector_->GetOpaqueBuckets2D();
 
 	/// TileSRV
 	commandList_->SetGraphicsRootDescriptorTable(1, Tile2DSrvHandleGPU_);
@@ -1003,7 +998,6 @@ void DrawEngine::Draw2DOpaque() {
 		for (auto& [materialID, RenderDataGroup] : materialBuckets) {
 
 			if (RenderDataGroup.empty()) continue;
-
 
 			SetMaterial(materialID);
 
@@ -1039,9 +1033,9 @@ void DrawEngine::Draw2DOpaque() {
 					tile2DInstancingData_[instance2DCounter_].WVP = object.transformData.WVP;;
 					tile2DInstancingData_[instance2DCounter_].world = object.transformData.world;
 					tile2DInstancingData_[instance2DCounter_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
-
 					instancesCounter++;
 					instance2DCounter_++;
+
 				}
 
 				/// 設定 offset
@@ -1059,6 +1053,7 @@ void DrawEngine::Draw2DOpaque() {
 					int meshVertexCount = RenderData[0].mesh->GetVertexNum();
 					commandList_->DrawInstanced(meshVertexCount, instancesCounter, 0, 0);
 				}
+
 				//Logger::Log("Draw3D: pso=%d mat=%u meshID=%d instances=%d",(int)psoID, materialID, meshBuffer, instancesCounter);
 			}
 		}
@@ -1080,7 +1075,7 @@ void DrawEngine::Draw3D() {
 
 void DrawEngine::Draw3DTransparent() {
 
-	auto& transparent3D_ = drawDataCollector_->GetTransparentObjectParts3D();
+	auto& transparent3D_ = drawDataCollector_->GetTransparentObjectParts2D();
 
 	/// TileSRV
 	commandList_->SetGraphicsRootDescriptorTable(1, Tile3DSrvHandleGPU_);

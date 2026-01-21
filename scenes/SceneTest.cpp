@@ -227,8 +227,8 @@ void SceneTest::Draw() {
 	}
 
 #ifdef USE_IMGUI
-	/// imgui処理
-	ImguiPart();
+	/// ImGui処理
+	ImGuiPart();
 #endif
 }
 

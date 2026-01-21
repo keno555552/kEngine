@@ -568,7 +568,7 @@ bool ResourceManager::SetModelTexture(Model* model) {
 void ResourceManager::ResizeSimpleSpriteMesh(DirectX::TexMetadata Metadata, int counter, CornerData corner, Vector2 anchorPoint, Vector2 cropLT, Vector2 cropSize) {
 
 	/// 足りない分を作成
-	ResizeSpriteMesh(counter);
+	ResizeSimpleSpriteMeshList(counter);
 
 	/// スブライドサイズ
 	Vector2 texSize{ (float)Metadata.width, (float)Metadata.height };
@@ -623,8 +623,8 @@ D3D12_GPU_DESCRIPTOR_HANDLE ResourceManager::GetTextureGPUDescriptorHandle(int h
 //	}
 //}
 
-void ResourceManager::ResizeSpriteMesh(int spriteNumber) {
-	int notEnoughCounter = spriteNumber - (int)simpleSpriteMeshList_.size();
+void ResourceManager::ResizeSimpleSpriteMeshList(int spriteNumber) {
+	int notEnoughCounter = spriteNumber - (int)simpleSpriteMeshList_.size() + 1;
 	/// どれくらい足りないのか計算
 	if (notEnoughCounter <= 0)return;
 	for (int i = 0; i < notEnoughCounter; i++) {
@@ -633,7 +633,7 @@ void ResourceManager::ResizeSpriteMesh(int spriteNumber) {
 }
 
 void ResourceManager::DeleteExtraSpriteMesh(int spriteNumber) {
-	int counter = spriteNumber - (int)simpleSpriteMeshList_.size();
+	int counter = spriteNumber - (int)simpleSpriteMeshList_.size() + 1;
 	if (counter >= 0)return;
 	for (int i = 0; i < -counter; i++) {
 		delete simpleSpriteMeshList_.back();

@@ -3,8 +3,8 @@
 Scene1::Scene1(kEngine* system) {
 	/// =========== システム初期化 ============///
 	system_ = system;
-	debugCamera_ = new DebugCamera(system);
-	camera_ = new Camera;
+	debugCamera_ = system_->CreateDebugCamera();
+	camera_ = system_->CreateCamera();
 	camera_->Move(Vector3(0.0f, 0.5f, -10.0f));
 
 	/// =========== リソースロード ============///
@@ -117,8 +117,8 @@ Scene1::~Scene1() {
 
 	system_->SoundStop(SH_BGM_);
 
-	delete camera_;
-	delete debugCamera_;
+	system_->DestroyCamera(camera_);
+	system_->DestroyCamera(debugCamera_);
 
 	delete sight_;
 
@@ -168,7 +168,7 @@ void Scene1::Update() {
 
 	/// Bullet更新
 	if (system_->GetMouseIsPush(0)) {
-		player_->Shoot(sight_->GetMouseOnPlane());
+		player_->Shoot(sight_->GetAngleSightToTarget());
 	}
 
 	/// Enemy更新
@@ -319,6 +319,7 @@ void Scene1::Draw() {
 void Scene1::CameraPart() {
 	if (useDebugCamera) {
 		usingCamera_ = debugCamera_;
+		debugCamera_->MouseControlUpdate();
 	} else {
 		Transform cameraTransform = CreateDefaultTransform();
 		cameraTransform.translate.x = player_->mainPosition.transform.translate.x;
@@ -327,7 +328,7 @@ void Scene1::CameraPart() {
 		camera_->SetCamera(cameraTransform);
 		usingCamera_ = camera_;
 	}
-	usingCamera_->Update();
+	system_->SetCamera(usingCamera_);
 }
 
 #ifdef USE_IMGUI
