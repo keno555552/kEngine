@@ -8,9 +8,9 @@ SceneTitle::SceneTitle(kEngine* system) {
 	camera_->Move(Vector3(0.0f, 0.5f, -15.0f));
 	camera_->Rotate(Vector3(0.182f, 0, 0));
 
-	/// =========== リソースロード ============///
+	/// =========== ���\�[�X���[�h ============///
 
-	/// リソースハンドル
+	/// ���\�[�X�n���h��
 	std::string basePath = "resources/";
 	std::string templatePath = "TemplateResource/";
 	std::string objectPath = "object/";
@@ -36,7 +36,7 @@ SceneTitle::SceneTitle(kEngine* system) {
 	SH_BGM_ = system_->SoundLoadSE((basePath + soundPath + BGMPath + "Title.wav").c_str());
 	SH_Select_ = system_->SoundLoadSE((basePath + soundPath + SEPath + "menuSelect.wav").c_str());
 	SH_Decide_ = system_->SoundLoadSE((basePath + soundPath + SEPath + "menuChoose.wav").c_str());
-	/// =========== ゲームオブジェクト初期化 ==========///
+	/// =========== �Q�[���I�u�W�F�N�g������ ==========///
 
 	skydome_ = new Object;
 	skydome_->IntObject(system_);
@@ -82,7 +82,7 @@ SceneTitle::SceneTitle(kEngine* system) {
 	menuRun[1] = [=]() {SceneTitle::SelectSetting(); };
 	menuRun[2] = [=]() {SceneTitle::SelectQuit(); };
 
-	/// BGM再生
+	/// BGM�Đ�
 	if(!system_->SoundIsPlaying(SH_BGM_)){
 		system_->SoundPlayBGM(SH_BGM_, 0.4f);
 	}
@@ -98,7 +98,7 @@ SceneTitle::~SceneTitle() {
 }
 
 void SceneTitle::Update() {
-	/// カメラ処理
+	/// �J��������
 	CameraPart();
 
 
@@ -107,13 +107,13 @@ void SceneTitle::Update() {
 	//}
 	UpdateSelect();
 
-	/// Skydome更新
+	/// Skydome�X�V
 	skydome_->Update(usingCamera_);
 
-	/// Ground更新
+	/// Ground�X�V
 	ground_->Update(usingCamera_);
 
-	/// Sprite更新
+	/// Sprite�X�V
 	title_->Update(nullptr);
 	startButton_->Update(nullptr);
 	settingButton_->Update(nullptr);
@@ -123,7 +123,7 @@ void SceneTitle::Update() {
 
 void SceneTitle::Draw() {
 
-	/// 実体処理
+	/// ���̏���
 	skydome_->Draw();
 	ground_->Draw();
 
@@ -134,7 +134,7 @@ void SceneTitle::Draw() {
 
 
 #ifdef USE_IMGUI
-	/// imgui処理
+	/// imgui����
 	ImguiPart();
 #endif
 }
@@ -181,7 +181,7 @@ void SceneTitle::UpdateSelect() {
 
 	if (!isUp && !isDown && !isSelect)return;
 
-	/// ボタン選択処理
+	/// �{�^���I�����
 	if (isUp && selectedButtonhandle > START) {
 		selectedButtonhandle--;
 		system_->SoundPlaySE(SH_Select_);
@@ -190,15 +190,15 @@ void SceneTitle::UpdateSelect() {
 		system_->SoundPlaySE(SH_Select_);
 	}
 
-	/// ボタンハンドルに応じてテクスチャ変更
+	/// �{�^���n���h���ɉ����ăe�N�X�`���ύX
 	startButton_->objectParts_[0].materialConfig->textureHandle = (selectedButtonhandle == START) ? TH_buttonBack_Select_ : TH_buttonBack_notSelect_;
 	settingButton_->objectParts_[0].materialConfig->textureHandle = (selectedButtonhandle == SETTING) ? TH_buttonBack_Select_ : TH_buttonBack_notSelect_;
 	quitButton_->objectParts_[0].materialConfig->textureHandle = (selectedButtonhandle == QUIT) ? TH_buttonBack_Select_ : TH_buttonBack_notSelect_;
 
-	/// スタートボタン
+	/// �X�^�[�g�{�^��
 	if (isSelect) {
 		if (selectedButtonhandle != SETTING) {
-			/// BGM停止
+			/// BGM��~
 			system_->SoundStop(SH_BGM_);
 		}
 		system_->SoundPlaySE(SH_Decide_);

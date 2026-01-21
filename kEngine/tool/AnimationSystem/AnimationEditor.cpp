@@ -17,8 +17,6 @@ AnimationEditor::AnimationEditor(kEngine* system) {
 
 	/// ================= Test ================///
 
-
-
 	/// ================ システム最終設定 ================///
 	SetupAnimationEditorEnd();
 	animationUnit_->ReadAnimationData(&animationList_[0]);
@@ -26,6 +24,7 @@ AnimationEditor::AnimationEditor(kEngine* system) {
 }
 
 AnimationEditor::~AnimationEditor() {
+	system_->DestroyCamera(camera_);
 	delete mainTimer_;
 	delete skydome_;
 }
@@ -83,7 +82,7 @@ void AnimationEditor::SetupAnimationEditor() {
 	markerColor2_.ColorBy1();
 
 	/// ============ カメラ設定 ============///
-	camera_ = new DebugCamera(system_);
+	camera_ = system_->CreateCamera();
 	camera_->Move({ 0.0f,0.5f,-10.0f });
 	camera_->SetDefaultTransform(camera_->GetTransform());
 

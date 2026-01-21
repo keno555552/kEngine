@@ -17,7 +17,7 @@ bool CheakXInputDeviceConnected() {
 		if (XInputGetState(i, &state) == ERROR_SUCCESS) {
 			bool boool = true;
 			config::SetGamePadType(XINPUT);
-			config::SetConnetGamePad(&boool);
+			config::SetConnectGamePad(&boool);
 			config::SetXInputIp(i);
 			return true; // 見つけたtrue
 		}
@@ -108,7 +108,7 @@ bool DirectXCore::isDirectInputCreated() {
 void DirectXCore::SetDirectXInputKeyBoard() {
 	SetDirectXInput(Keyboard, keyBoardDevice);
 	bool boool = true;
-	config::SetConnetKeyboard(&boool);
+	config::SetConnectKeyboard(&boool);
 }
 
 void DirectXCore::ReleaseDirectXInputKeyBoard() {
@@ -117,14 +117,14 @@ void DirectXCore::ReleaseDirectXInputKeyBoard() {
 		keyBoardDevice->Release();
 		keyBoardDevice = nullptr;
 		bool boool = false;
-		config::SetConnetKeyboard(&boool);
+		config::SetConnectKeyboard(&boool);
 	}
 }
 
 void DirectXCore::SetDirectXInputMouse() {
 	SetDirectXInput(Mouse, mouseDevice);
 	bool boool = true;
-	config::SetConnetMouse(&boool);
+	config::SetConnectMouse(&boool);
 }
 
 void DirectXCore::ReleaseDirectXInputMouse() {
@@ -133,14 +133,14 @@ void DirectXCore::ReleaseDirectXInputMouse() {
 		mouseDevice->Release();
 		mouseDevice = nullptr;
 		bool boool = false;
-		config::SetConnetMouse(&boool);
+		config::SetConnectMouse(&boool);
 	}
 }
 
 void DirectXCore::SetDirectXInputGamepad() {
 	SetDirectXInput(GamePad, gamepadDevice);
 	bool boool = true;
-	config::SetConnetGamePad(&boool);
+	config::SetConnectGamePad(&boool);
 }
 
 void DirectXCore::ReleaseDirectXInputGamepad() {
@@ -149,7 +149,7 @@ void DirectXCore::ReleaseDirectXInputGamepad() {
 		gamepadDevice->Release();
 		gamepadDevice = nullptr;
 		bool boool = false;
-		config::SetConnetGamePad(&boool);
+		config::SetConnectGamePad(&boool);
 	}
 }
 
@@ -241,9 +241,9 @@ void DirectXCore::SetDirectXInput(InputType type, IDirectInputDevice8*& drive) {
 		result = directInput->CreateDevice(GUID_SysKeyboard, &drive, NULL);
 		if (SUCCEEDED(result)) {
 			boool = true;
-			config::SetConnetKeyboard(&boool);
+			config::SetConnectKeyboard(&boool);
 		} else {
-			config::SetConnetKeyboard(&boool);
+			config::SetConnectKeyboard(&boool);
 			skip = true;
 			break;
 		}
@@ -258,9 +258,9 @@ void DirectXCore::SetDirectXInput(InputType type, IDirectInputDevice8*& drive) {
 		result = directInput->CreateDevice(GUID_SysMouse, &drive, NULL);
 		if (SUCCEEDED(result)) {
 			boool = true;
-			config::SetConnetMouse(&boool);
+			config::SetConnectMouse(&boool);
 		} else {
-			config::SetConnetMouse(&boool);
+			config::SetConnectMouse(&boool);
 			skip = true;
 			break;
 		}
@@ -275,10 +275,10 @@ void DirectXCore::SetDirectXInput(InputType type, IDirectInputDevice8*& drive) {
 		result = directInput->CreateDevice(GUID_Joystick, &drive, NULL);
 		if (SUCCEEDED(result)) {
 			boool = true;
-			config::SetConnetGamePad(&boool);
+			config::SetConnectGamePad(&boool);
 			config::SetGamePadType(DIRECTINPUT);
 		} else {
-			config::SetConnetGamePad(&boool);
+			config::SetConnectGamePad(&boool);
 			config::SetGamePadType(NODEVICE);
 			skip = true;
 			break;

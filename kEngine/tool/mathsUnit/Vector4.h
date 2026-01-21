@@ -12,6 +12,7 @@ struct Vector4
 	Vector4 operator/= (const float& target);
 	Vector4 operator+(const Vector4& target);
 	Vector4 operator-(const Vector4& target);
+	Vector4 operator=(const Vector4& target);
 
 	bool operator==(const Vector4& target)const;
 	bool operator!=(const Vector4& target)const;

@@ -16,168 +16,108 @@ void Object::IntObject(kEngine* system) {
 	system_ = system;
 }
 
-//void Object::Update(Camera* camera) {
-//	Camera instanceCamera = *camera;
-//
-//	ObjectPart mainObjectPart = mainPosition;
-//
-//	if (isBillboard_) {
-//		Transform changedCameraTransform = instanceCamera.GetTransform();
-//		changedCameraTransform.rotate.x = 0.0f;
-//		changedCameraTransform.rotate.y = 0.0f;
-//		instanceCamera.SetCamera(changedCameraTransform);
-//
-//		mainObjectPart.transform.rotate.x = 0.0f;
-//		mainObjectPart.transform.rotate.y = 0.0f;
-//	}
-//
-//	Matrix4x4 parentMatrix = Identity();
-//	if (followObject_ != nullptr) {
-//		parentMatrix = MakeAffineMatrix(
-//			followObject_->transform.scale,
-//			followObject_->transform.rotate,
-//			followObject_->transform.translate
-//		);
-//	}
-//
-//	Matrix4x4 objectMainMatrix = MakeAffineMatrix(
-//		mainObjectPart.transform.scale,
-//		mainObjectPart.transform.rotate,
-//		mainObjectPart.transform.translate
-//	);
-//	Matrix4x4 objectWorldMatrix = objectMainMatrix * parentMatrix;
-//	mainPosition.transformationMatrix = camera->transformationMatrixTransform(objectWorldMatrix);
-//
-//
-//	ObjectPart parentPart;
-//	for (auto& part : objectParts_) {
-//		parentPart = part;
-//
-//		Matrix4x4 objectParentMatrix = Identity();
-//		if (parentPart.parentPart != nullptr) {
-//
-//			objectParentMatrix = MakeAffineMatrix(
-//				parentPart.parentPart->transform.scale,
-//				parentPart.parentPart->transform.rotate,
-//				parentPart.parentPart->transform.translate
-//			);
-//		}
-//
-//		Matrix4x4 localMatrix = MakeAffineMatrix(
-//			parentPart.transform.scale,
-//			parentPart.transform.rotate,
-//			parentPart.transform.translate
-//		);
-//
-//		Matrix4x4 worldMatrix = localMatrix * objectParentMatrix * objectWorldMatrix;
-//		part.transformationMatrix = camera->transformationMatrixTransform(worldMatrix);
-//		part.materialConfig->MakeUVMatrix();
-//	}
-//
-//}
-
 void Object::Update(Camera* camera) {
-	ObjectPart mainObjectPart = mainPosition;
-
-	// 父物件矩陣
-	Matrix4x4 parentMatrix = Identity();
-
-	if (followObject_ != nullptr) {
-		if (isBillboard_) {
-			// Billboard 只繼承平移，不繼承旋轉
-			parentMatrix = MakeTranslateMatrix(followObject_->transform.translate);
-			// 如果需要縮放，可以加上：
-			parentMatrix = parentMatrix * MakeScaleMatrix4x4(followObject_->transform.scale) ;
-		} else {
-			// 一般物件才繼承完整的 affine
-			parentMatrix = MakeAffineMatrix(
-				followObject_->transform.scale,
-				followObject_->transform.rotate,
-				followObject_->transform.translate
-			);
-		}
-	}
-
-
-	// 主物件矩陣
-	Matrix4x4 objectMainMatrix = MakeAffineMatrix(
-		mainObjectPart.transform.scale,
-		mainObjectPart.transform.rotate,
-		mainObjectPart.transform.translate
-	);
-
-	// Billboard處理
-	if (isBillboard_) {
-		Transform camTransform = camera->GetTransform();
-
-		//カメラのforward向量
-		float cosY = cosf(camTransform.rotate.y);
-		float sinY = sinf(camTransform.rotate.y);
-		float cosX = cosf(camTransform.rotate.x);
-		float sinX = sinf(camTransform.rotate.x);
-
-		// Forward (Z軸)
-		Vector3 camForward = {
-			sinY * cosX,
-			-sinX,
-			cosY * cosX
-		};
-
-		// Right (X軸)
-		Vector3 camRight = {
-			cosY,
-			0.0f,
-			-sinY
-		};
-
-		// Up (Y軸)
-		Vector3 camUp = {
-			sinY * sinX,
-			cosX,
-			cosY * sinX
-		};
-
-		Matrix4x4 billboardMatrix = {
-			camRight.x, camRight.y,camRight.z,0,
-			camUp.x,camUp.y, camUp.z, 0,
-			camForward.x,camForward.y, camForward.z, 0,
-			mainObjectPart.transform.translate.x,mainObjectPart.transform.translate.y,mainObjectPart.transform.translate.z,1
-		};
-
-		// 縮放計算
-		objectMainMatrix = billboardMatrix * MakeScaleMatrix4x4(mainObjectPart.transform.scale);
-	}
-
-	Matrix4x4 objectWorldMatrix = objectMainMatrix * parentMatrix;
-	mainPosition.transformationMatrix = camera->transformationMatrixTransform(objectWorldMatrix);
-
-	// 子物件處理
-	for (auto& part : objectParts_) {
-		Matrix4x4 objectParentMatrix = Identity();
-		if (part.parentPart != nullptr) {
-			objectParentMatrix = MakeAffineMatrix(
-				part.parentPart->transform.scale,
-				part.parentPart->transform.rotate,
-				part.parentPart->transform.translate
-			);
-		}
-
-		// Billboard 子物件：XY 旋轉を0にする
-		if (isBillboard_) {
-			part.transform.rotate.x = 0.0f;
-			part.transform.rotate.y = 0.0f;
-		}
-
-		Matrix4x4 localMatrix = MakeAffineMatrix(
-			part.transform.scale,
-			part.transform.rotate,
-			part.transform.translate
-		);
-
-		Matrix4x4 worldMatrix = localMatrix * objectParentMatrix * objectWorldMatrix;
-		part.transformationMatrix = camera->transformationMatrixTransform(worldMatrix);
-		part.materialConfig->MakeUVMatrix();
-	}
+	//ObjectPart mainObjectPart = mainPosition;
+	//
+	//// 父物件矩陣
+	//Matrix4x4 parentMatrix = Identity();
+	//
+	//if (followObject_ != nullptr) {
+	//	if (isBillboard_) {
+	//		// Billboard 只繼承平移，不繼承旋轉
+	//		parentMatrix = MakeTranslateMatrix(followObject_->transform.translate);
+	//		// 如果需要縮放，可以加上：
+	//		parentMatrix = parentMatrix * MakeScaleMatrix4x4(followObject_->transform.scale) ;
+	//	} else {
+	//		// 一般物件才繼承完整的 affine
+	//		parentMatrix = MakeAffineMatrix(
+	//			followObject_->transform.scale,
+	//			followObject_->transform.rotate,
+	//			followObject_->transform.translate
+	//		);
+	//	}
+	//}
+	//
+	//
+	//// 主物件矩陣
+	//Matrix4x4 objectMainMatrix = MakeAffineMatrix(
+	//	mainObjectPart.transform.scale,
+	//	mainObjectPart.transform.rotate,
+	//	mainObjectPart.transform.translate
+	//);
+	//
+	//// Billboard處理
+	//if (isBillboard_) {
+	//	Transform camTransform = camera->GetTransform();
+	//
+	//	//カメラのforward向量
+	//	float cosY = cosf(camTransform.rotate.y);
+	//	float sinY = sinf(camTransform.rotate.y);
+	//	float cosX = cosf(camTransform.rotate.x);
+	//	float sinX = sinf(camTransform.rotate.x);
+	//
+	//	// Forward (Z軸)
+	//	Vector3 camForward = {
+	//		sinY * cosX,
+	//		-sinX,
+	//		cosY * cosX
+	//	};
+	//
+	//	// Right (X軸)
+	//	Vector3 camRight = {
+	//		cosY,
+	//		0.0f,
+	//		-sinY
+	//	};
+	//
+	//	// Up (Y軸)
+	//	Vector3 camUp = {
+	//		sinY * sinX,
+	//		cosX,
+	//		cosY * sinX
+	//	};
+	//
+	//	Matrix4x4 billboardMatrix = {
+	//		camRight.x, camRight.y,camRight.z,0,
+	//		camUp.x,camUp.y, camUp.z, 0,
+	//		camForward.x,camForward.y, camForward.z, 0,
+	//		mainObjectPart.transform.translate.x,mainObjectPart.transform.translate.y,mainObjectPart.transform.translate.z,1
+	//	};
+	//
+	//	// 縮放計算
+	//	objectMainMatrix = billboardMatrix * MakeScaleMatrix4x4(mainObjectPart.transform.scale);
+	//}
+	//
+	//Matrix4x4 objectWorldMatrix = objectMainMatrix * parentMatrix;
+	//mainPosition.transformationMatrix = camera->transformationMatrixTransform(objectWorldMatrix);
+	//
+	//// 子物件處理
+	//for (auto& part : objectParts_) {
+	//	Matrix4x4 objectParentMatrix = Identity();
+	//	if (part.parentPart != nullptr) {
+	//		objectParentMatrix = MakeAffineMatrix(
+	//			part.parentPart->transform.scale,
+	//			part.parentPart->transform.rotate,
+	//			part.parentPart->transform.translate
+	//		);
+	//	}
+	//
+	//	// Billboard 子物件：XY 旋轉を0にする
+	//	if (isBillboard_) {
+	//		part.transform.rotate.x = 0.0f;
+	//		part.transform.rotate.y = 0.0f;
+	//	}
+	//
+	//	Matrix4x4 localMatrix = MakeAffineMatrix(
+	//		part.transform.scale,
+	//		part.transform.rotate,
+	//		part.transform.translate
+	//	);
+	//
+	//	Matrix4x4 worldMatrix = localMatrix * objectParentMatrix * objectWorldMatrix;
+	//	part.transformationMatrix = camera->transformationMatrixTransform(worldMatrix);
+	//	part.materialConfig->MakeUVMatrix();
+	//}
 }
 
 

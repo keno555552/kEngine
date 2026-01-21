@@ -24,9 +24,9 @@ private:
 	static int clientWidth_;
 	static int clientHeight_;
 
-	static bool isConnetKeyboard_;
-	static bool isConnetMouse_;
-	static bool isConnetGamePad_;
+	static bool isConnectKeyboard_;
+	static bool isConnectMouse_;
+	static bool isConnectGamePad_;
 	static gamepadType gamePadType_;
 	static int XInputDriverIP_;
 
@@ -37,12 +37,12 @@ public:
 	static int GetClientWidth() { return clientWidth_; }
 	static void SaveClientHeight(int clientHeight) { clientHeight_ = clientHeight; }
 	static int GetClientHeight() { return clientHeight_; }
-	static void SetConnetKeyboard(bool* state) { isConnetKeyboard_ = *state; }
-	static bool GetKeyboardState() { return isConnetKeyboard_; }
-	static void SetConnetMouse(bool* state) { isConnetMouse_ = *state; }
-	static bool GetMouseState() { return isConnetMouse_; }
-	static void SetConnetGamePad(bool* state) { isConnetGamePad_ = *state; }
-	static bool GetGamePadState() { return isConnetGamePad_; }
+	static void SetConnectKeyboard(bool* state) { isConnectKeyboard_ = *state; }
+	static bool GetKeyboardState() { return isConnectKeyboard_; }
+	static void SetConnectMouse(bool* state) { isConnectMouse_ = *state; }
+	static bool GetMouseState() { return isConnectMouse_; }
+	static void SetConnectGamePad(bool* state) { isConnectGamePad_ = *state; }
+	static bool GetGamePadState() { return isConnectGamePad_; }
 	static void SetGamePadType(gamepadType Type) { gamePadType_ = Type; }
 	static gamepadType GetGamePadType() { return gamePadType_; }
 	static void SetXInputIp(int IP) { XInputDriverIP_ = IP; }
@@ -54,6 +54,7 @@ public:
 
 public:
 	/// デフォルトメッシュバッファハンドル
+	static int default_Plane_MeshBufferHandle_;
 	static int default_Triangle_MeshBufferHandle_;
 	static int default_Sprite2D_MeshBufferHandle_;
 	static int default_Cube_MeshBufferHandle_;

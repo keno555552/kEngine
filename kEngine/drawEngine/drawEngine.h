@@ -24,13 +24,17 @@
 #include <format>
 
 #include "SrvManager.h"
+#include "DrawDataCollector.h"
 
 class DrawEngine
 {
 public:
 	~DrawEngine();
 
-	void Initialize(const char* kClientTitle, int kClientWidth, int kClientHeight, DirectXCore* directXDirver,SrvManager* srvManager, ResourceManager* resourceManager);
+	void Initialize(DirectXCore* directXDirver,
+					SrvManager* srvManager, 
+					ResourceManager* resourceManager,
+					DrawDataCollector* drawDataCollector);
 
 	void PreDraw();
 	void CommitDraw();
@@ -71,12 +75,18 @@ public:
 	void Collect3D(ObjectData* object);
 
 	/// 全部描く関数
-	void Draw2D();
-	void Draw3D();
-	void DrawCall();
 
-	/// Camera
-	void SetCamera(Camera* camera);
+	/// 2D描画関数
+	void Draw2D();
+	void Draw2DTransparent();
+	void Draw2DOpaque();
+
+	/// 3D描画関数
+	void Draw3D();
+	void Draw3DTransparent();
+	void Draw3DOpaque();
+
+	void DrawCall();
 
 	/// リソースローディング
 	int GetModelTextureHandle(int modelHandle, int part);
@@ -84,8 +94,6 @@ public:
 	int readModelTextureHandle(int Handle);
 	int readCommonTextureHandle(int Handle);
 
-	bool SetModelTexture(Model* model);
-	int SetModel(std::string Path);
 	int LoadModelTexture(const std::string& filePath);
 
 
@@ -93,9 +101,10 @@ private:
 	
 	PSO* pso_ = new PSO;
 	ResourceManager* resourceManager_{};
-	DirectXCore* directXDriver_{};					/*借り*/
-	ID3D12GraphicsCommandList* commandList_{};		/*借り*/
-	SrvManager* srvManager_{};						/*借り*/
+	DirectXCore* directXDriver_{};					/*依存*/
+	ID3D12GraphicsCommandList* commandList_{};		/*依存*/
+	SrvManager* srvManager_{};						/*依存*/
+	DrawDataCollector* drawDataCollector_{};			/*依存*/
 
 	int kClientWidth_ = 0;
 	int kClientHeight_ = 0;
@@ -150,9 +159,7 @@ private:
 	int instance2DCounter_ = 0;
 	int instance3DCounter_ = 0;
 
-	/// カメラ
-	Camera* instanceCamera_ = nullptr; // 実体は外でもつ
-	Camera* defaultCamera_ = nullptr; //　仮カメラ、カメラがない時使う 
+	/// カメラ関連
 	CameraForGPU* cameraPtr_ = nullptr;
 	BasicResource* cameraBuffer_ = new BasicResource;
 
@@ -175,12 +182,14 @@ private:
 	/// 内部関数
 	D3D12_VIEWPORT createViewport(int kClientWidth, int kClientHeight);
 	D3D12_RECT createScissorRect(int kClientWidth, int kClientHeight);
-	void SetMaterial(int MaterialHandle);
+	void SetMaterial(int materialID);
+	void SetTexture(int materialID);
 	void SetCameraForGPU();
 	void InitializeLighting();
 	void SetLighting(DirectionalLight* directionalLight);
 
 	void PSODecision(MaterialConfig& material);
+	void PSODecision(int psoID);
 	ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);
 	void MakeDepthStencilView();
 

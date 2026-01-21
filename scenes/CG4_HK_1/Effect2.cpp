@@ -3,8 +3,8 @@
 Effect2::Effect2(kEngine* system) {
 	/// =========== システム初期化 ============///
 	system_ = system;
-	debugCamera_ = new DebugCamera(system);
-	camera_ = new Camera;
+	debugCamera_ = system_->CreateDebugCamera();
+	camera_ = system_->CreateCamera();
 	camera_->Move(Vector3(0.0f, 0.5f, -10.0f));
 
 	/// =========== リソースロード ============///
@@ -26,8 +26,8 @@ Effect2::Effect2(kEngine* system) {
 }
 
 Effect2::~Effect2() {
-	delete camera_;
-	delete debugCamera_;
+	system_->DestroyCamera(camera_);
+	system_->DestroyCamera(debugCamera_);
 
 	delete skydome_;
 	delete ball_;
@@ -84,10 +84,11 @@ void Effect2::Draw() {
 void Effect2::CameraPart() {
 	if (useDebugCamera) {
 		usingCamera_ = debugCamera_;
+		debugCamera_->MouseControlUpdate();
 	} else {
 		usingCamera_ = camera_;
 	}
-	usingCamera_->Update();
+	system_->SetCamera(usingCamera_);
 }
 
 #ifdef USE_IMGUI

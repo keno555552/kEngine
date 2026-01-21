@@ -3,20 +3,14 @@
 #pragma region システム管理
 
 kEngine::kEngine() {
-	dxComm = new DirectXController;
-	srvManager = new SrvManager;
-	drawEngine = new DrawEngine;
-	inputManager = new InputManager;
-	soundManager = new SoundManager;
-	timeManager = new TimeManager;
 }
 
 
 kEngine::~kEngine() {
+
 #ifdef USE_IMGUI
 	ImGuiManager::Shutdown();
 #endif
-
 	delete timeManager;
 	delete soundManager;
 	delete inputManager;
@@ -24,6 +18,8 @@ kEngine::~kEngine() {
 	delete instanceManager;
 	delete resourceManager;
 	delete drawEngine;
+	delete drawDataCollector;
+	delete cameraManager;
 	delete srvManager;
 	delete dxComm;
 }
@@ -33,23 +29,30 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 	config::SaveClientWidth(kClientWidth);
 	config::SaveClientHeight(kClientHeight);
 
+	dxComm = new DirectXController;
 	dxComm->InitializeDrive(kClientTitle, kClientWidth, kClientHeight);
+
+	srvManager = new SrvManager;
 	srvManager->Initialize(dxComm);
 
 #ifdef USE_IMGUI
-	int srvIndex = srvManager->Allocate(); // ImGui用に1個確保
-	ImGuiManager::Initialize(dxComm->GetHWND(),
-		dxComm->GetDevice(),
-		dxComm->GetCommandQueue(),
-		srvManager->GetDescriptorHeap().Get(),
-		srvManager->GetCPUDescriptorHandle(srvIndex),
-		srvManager->GetGPUDescriptorHandle(srvIndex));
+	ImGuiManager::Initialize(dxComm, srvManager);
 #endif
 
 	TextureManager::GetInstance()->Initialize(dxComm, srvManager);
 	instanceManager = new InstanceManager();
 	resourceManager = new ResourceManager(dxComm, instanceManager);
-	drawEngine->Initialize(kClientTitle, kClientWidth, kClientHeight, dxComm, srvManager,resourceManager);
+
+	cameraManager = new CameraManager;
+
+	drawDataCollector = new DrawDataCollector(resourceManager, instanceManager, cameraManager);
+	drawEngine = new DrawEngine;
+	drawEngine->Initialize(dxComm, srvManager, resourceManager, drawDataCollector);
+
+	soundManager = new SoundManager;
+	timeManager = new TimeManager;
+
+	inputManager = new InputManager;
 	inputManager->Initialize(dxComm, timeManager);
 }
 
@@ -58,6 +61,7 @@ void kEngine::StartFrame() {
 	drawEngine->PreDraw();
 	inputManager->KeysUpdata();
 	timeManager->Update();
+	drawDataCollector->PreCollect();
 }
 
 void kEngine::EndFrame() {
@@ -79,11 +83,13 @@ bool kEngine::ProcessMessage() {
 #pragma region 描画システム
 
 void kEngine::Draw2D(SpriteData* spriteData) {
-	resourceManager->Collet2D(spriteData);
+	//resourceManager->Collet2D(spriteData);
+	drawDataCollector->Collect2D(spriteData);
 }
 
 void kEngine::Draw3D(ObjectData* object) {
-	resourceManager->Collet3D(object);
+	//resourceManager->Collet3D(object);
+	drawDataCollector->Collect3D(object);
 }
 
 int kEngine::GetModelTextureHandle(int modelHandle, int part) {
@@ -99,9 +105,26 @@ int kEngine::SetModelObj(std::string path) {
 	return resourceManager->LoadModel(path);
 }
 
-void kEngine::SetCamera(Camera* camera) {
-	drawEngine->SetCamera(camera);
+DebugCamera* kEngine::CreateDebugCamera() {
+	return cameraManager->CreateDebugCamera(this);
 }
+
+Camera* kEngine::CreateCamera() {
+	return cameraManager->CreateCamera();
+}
+
+void kEngine::DestroyCamera(Camera* camera) {
+	cameraManager->DestroyCamera(camera);
+}
+
+void kEngine::SetCamera(Camera* camera) {
+	cameraManager->SetActiveCamera(camera);
+}
+
+void kEngine::ResetToDefaultCamera() {
+	cameraManager->ResetActiveCamera();
+}
+
 
 int kEngine::commonTextureHandleReader(int handle) {
 	return resourceManager->GetTextureHandleFromCommonList(handle);
@@ -349,6 +372,5 @@ float kEngine::GetDeltaTime() {
 TimeManager* kEngine::GetTimeManager() const {
 	return timeManager;
 }
-
 
 #pragma endregion

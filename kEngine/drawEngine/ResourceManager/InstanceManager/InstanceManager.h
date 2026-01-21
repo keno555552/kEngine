@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <map>
 #include <unordered_map>
+#include <DrawData/ObjectData.h>
 
 struct ObjectPart;
 class InstanceManager
@@ -30,6 +31,7 @@ public:
 
 	void Add2DInstance(Transform wvpData, MaterialConfig material, CornerData cornerData = {}, Vector2 anchorPoint = {}, Vector2 cropLT = {}, Vector2 cropSize = {});
 	void Add3DInstance(TransformationMatrix wvpData, MaterialConfig material, int vertexNum, int modelHandle = 0, int modelGroupHandle = 0);
+	void Add3DInstance(ObjectData* object);
 	void SpriteLayerManagement();
 	//void RemoveModelInstance();
 	//void UpdateModelInstance();
@@ -49,8 +51,7 @@ public:
 	std::vector< ModelInstance*> modelList_;
 	std::vector< ModelInstance*> tile3DList_;
 
-	std::unordered_map<MaterialConfig, std::vector<ObjectPart*>, MaterialConfigHash> opaqueMaterialBuckets_;
-	std::vector<ObjectPart*> transparentObjectParts_;
+
 
 
 public:

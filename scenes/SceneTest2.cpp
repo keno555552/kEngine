@@ -3,8 +3,8 @@
 SceneTest2::SceneTest2(kEngine* system) {
 	/// =========== システム初期化 ============///
 	system_ = system;
-	debugCamera_ = new DebugCamera(system);
-	camera_ = new Camera;
+	debugCamera_ = system->CreateDebugCamera();
+	camera_ = system->CreateCamera();
 	camera_->Move(Vector3(0.0f, 0.5f, -10.0f));
 
 	/// =========== リソースロード ============///
@@ -36,8 +36,8 @@ SceneTest2::SceneTest2(kEngine* system) {
 }
 
 SceneTest2::~SceneTest2() {
-	delete camera_;
-	delete debugCamera_;
+	system_->DestroyCamera(camera_);
+	system_->DestroyCamera(debugCamera_);
 
 	delete skydome_;
 	delete sprite_;

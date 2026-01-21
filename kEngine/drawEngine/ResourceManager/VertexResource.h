@@ -26,6 +26,8 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12Resource> GetIndexResource_() { return indexResource_->GetResource(); };
 	D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView() { return vertexBufferView; }
 	D3D12_INDEX_BUFFER_VIEW GetIndexBufferView() { return indexBufferView; }
+	int GetVertexNum() { return vertexNum_; }
+	int GetIndexNum() { return indexNum_; }
 
 protected:
 
@@ -33,6 +35,8 @@ protected:
 	D3D12_INDEX_BUFFER_VIEW indexBufferView{};
 	BasicResource* vertexResource_ = new BasicResource;
 	BasicResource* indexResource_ = new BasicResource;
+	int vertexNum_ = 0;
+	int indexNum_ = 0;
 };
 
 

@@ -7,10 +7,14 @@
 
 Transform CameraDefaultTransform();
 
+class CameraManager;
+class DebugCamera;
 class Camera {
 public:
-	/// 初期化
-	Camera();
+
+	/// CameraManagerからのみ生成・破棄可能
+	friend class CameraManager;
+	friend class DebugCamera;
 
 	/// 更新
 	virtual void Update();
@@ -22,23 +26,24 @@ public:
 	/// 直接座標指定
 	void SetCamera(Transform cameraTransform);
 
+
 	/// 平行移動
 	void Move(Vector3 speed);
 	void Rotate(Vector3 Theta);
 
 
 	/// セットカメラ
-	void SetRotate(Vector3 rotate) { cameraTransform_.rotate = rotate; }
-	void SetTranslate(Vector3 translate) { cameraTransform_.translate = translate; }
-	void SetFovY(float fovY) { fovY_ = fovY; }
-	void SetAspect(float aspect) { aspect_ = aspect; }
-	void SetNearClip(float nearClip) { nearClip_ = nearClip; }
-	void SetFarClip(float farClip) { farClip_ = farClip; }
+	void SetRotation(Vector3 rotate);
+	void SetTranslate(Vector3 translate);
+	void SetFovY(float fovY);
+	void SetAspect(float aspect);
+	void SetNearClip(float nearClip);
+	void SetFarClip(float farClip);
 
-	Matrix4x4 GetWorldMatrix() const { return worldMatrix_; }
-	Matrix4x4 GetViewMatrix() const { return viewMatrix_; }
-	Matrix4x4 GetProjectionMatrix() const { return projectionMatrix_; }
-	Transform GetTransform() const { return cameraTransform_; }
+	Matrix4x4 GetWorldMatrix();
+	Matrix4x4 GetViewMatrix();
+	Matrix4x4 GetProjectionMatrix();
+	Transform GetTransform();
 
 	void SetDefaultTransform(Transform defaultTransform) { defaultTransform_ = defaultTransform; }
 	Transform GetDefaultTransform() const { return defaultTransform_; }
@@ -46,6 +51,12 @@ public:
 	void ResetCamera(); 
 
 private:
+	/// =============　将来カメラは必ずエンジン側で管理されるべき ============= ///
+	Camera();
+	virtual ~Camera() = default;
+
+
+protected:
 
 	/// 水平方向視野角
 	float fovY_;
@@ -73,6 +84,9 @@ private:
 
 	/// ビュー行列
 	Matrix4x4 viewMatrix_{};
+
+	/// 更新フラグ
+	bool dirty_{ true };
 
 };
 

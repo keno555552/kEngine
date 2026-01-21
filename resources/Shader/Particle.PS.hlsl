@@ -102,7 +102,7 @@ PixelShaderOutput main(VertexShaderOutput input)
     }
     else
     {
-        output.color.rgb = gMaterial.color.rgb * textureColor.rgb;
+        output.color.rgb = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.intensity;
         output.color.a = gMaterial.color.a * textureColor.a;
     }
     //output.color.rgb = normalize(input.normal) * 0.5f + 0.5f;

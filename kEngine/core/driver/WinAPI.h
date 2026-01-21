@@ -9,10 +9,6 @@
 #include "ConvertString.h"
 #include "Logger.h"
 
-#ifdef USE_IMGUI
-#include "ImGuiManager.h"
-#endif
-
 class WinAPI
 {
 public:

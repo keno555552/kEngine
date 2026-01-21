@@ -1,26 +1,26 @@
 #include "ImGuiManager.h"
+#include "DirectXController.h"
+#include "SrvManager.h"
 
 bool ImGuiManager::HandleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
     return ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam);
 }
 
-void ImGuiManager::Initialize(HWND hwnd, 
-                              ID3D12Device* device, 
-                              ID3D12CommandQueue* queue, 
-	                          ID3D12DescriptorHeap* srvHeap,
-                              D3D12_CPU_DESCRIPTOR_HANDLE CPUDescriptorHandle, 
-                              D3D12_GPU_DESCRIPTOR_HANDLE GPUDescriptorHandle) {
+void ImGuiManager::Initialize(DirectXController* dxComm, SrvManager* srvManager) {
+    uint32_t srvIndex = srvManager->Allocate();
+    dxComm->GetCommandQueue();
+
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
-    ImGui_ImplWin32_Init(hwnd);
+    ImGui_ImplWin32_Init(dxComm->GetHWND());
     ImGui_ImplDX12_Init(
-        device, 
+        dxComm->GetDevice(),
         2,
         DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
-        srvHeap,
-        CPUDescriptorHandle,
-        GPUDescriptorHandle);
+        srvManager->GetDescriptorHeap().Get(),
+        srvManager->GetCPUDescriptorHandle(srvIndex),
+        srvManager->GetGPUDescriptorHandle(srvIndex));
 }
 
 /// IMGUI_CHECKVERSION();
