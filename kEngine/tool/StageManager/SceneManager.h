@@ -11,6 +11,7 @@
 #include "AnimationSystem/AnimationEditor.h"
 #include "DefaultMenu/DefaultMenu.h"
 #include "CG4_HK_1/Effect2.h"
+#include "CG3_HK_2/SceneCGHK2.h"
 
 class SceneManager {
 public:

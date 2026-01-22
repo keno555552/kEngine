@@ -350,6 +350,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Data\RenderData\RenderData.cpp" />
     <ClCompile Include="kEngine\core\pso\PSOID.cpp" />
     <ClCompile Include="ResourceLoader.cpp" />
+    <ClCompile Include="scenes\CG3_HK_2\SceneCGHK2.cpp" />
     <ClCompile Include="scenes\CG4_HK_1\menu.cpp" />
     <ClCompile Include="scenes\CG4_HK_1\Effect1.cpp" />
     <ClCompile Include="scenes\CG4_HK_1\Effect2.cpp" />
@@ -450,6 +451,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Data\RenderData\RenderData.h" />
     <ClInclude Include="kEngine\core\pso\PSOID.h" />
     <ClInclude Include="ResourceLoader.h" />
+    <ClInclude Include="scenes\CG3_HK_2\SceneCGHK2.h" />
     <ClInclude Include="scenes\CG4_HK_1\menu.h" />
     <ClInclude Include="scenes\CG4_HK_1\Effect1.h" />
     <ClInclude Include="scenes\CG4_HK_1\Effect2.h" />

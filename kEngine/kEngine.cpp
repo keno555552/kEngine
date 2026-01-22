@@ -57,13 +57,14 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 
 void kEngine::StartFrame() {
 	dxComm->StartFrame();
-	drawEngine->PreDraw();
+	drawEngine->StartFrame();
 	inputManager->KeysUpdata();
 	timeManager->Update();
 	drawDataCollector->PreCollect();
 }
 
 void kEngine::EndFrame() {
+	drawEngine->PreDraw();
 	drawEngine->CommitDraw();
 	dxComm->EndFrame();
 	drawEngine->EndDraw();

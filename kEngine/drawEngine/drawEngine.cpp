@@ -135,49 +135,44 @@ void DrawEngine::Initialize
 
 }
 
-void DrawEngine::PreDraw() {
+void DrawEngine::StartFrame() {
 	// 描画用のDescriptorHeapの設定
 	ID3D12DescriptorHeap* descriptorHeaps[] = { srvManager_->GetDescriptorHeap().Get() };  // 現在使用正確的 getter 函式
 	commandList_->SetDescriptorHeaps(1, descriptorHeaps);
 
 	commandList_->RSSetViewports(1, &viewport);  // Viewportを設定
 	commandList_->RSSetScissorRects(1, &scissorRect);  // Scissorを設定
-	/// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-	commandList_->SetPipelineState(psoList_[(int)defaultLightModel_]);  // PSOを設定
-	rootSignature_ = pso_->getRootSignature((int)psoType::defaultPSO);
-	commandList_->SetGraphicsRootSignature(rootSignature_);
-	if (currentPSO_ != psoType::defaultPSO) {
-		currentPSO_ = psoType::defaultPSO;
-	}
-	/// 形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけば良い
-	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	/// 各種のリソースを設定
+	/// 各種のリソースを設定(今内容がない)
 	resourceManager_->CreateTurnResource();
+
 
 	/// InstanceCounterReset
 	instance2DCounter_ = 0;
 	instance3DCounter_ = 0;
 	offsetDataCounter_ = 0;
+}
+
+void DrawEngine::PreDraw() {
+
+	/// 形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけば良い
+	commandList_->SetGraphicsRootSignature(rootSignature_);
+	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	/// Lighting
 	SetLighting(directionalLightData);
+
+	/// Set Camera
+	SetCameraForGPU();
 
 }
 
 void DrawEngine::CommitDraw() {
 
-	/// Set Camera
-	SetCameraForGPU();
 
 	/// 集まったデータで描画
 	/// Sprite描画
 	DrawCall();
-	//DrawModel();
-	//DrawCube();
-	//Draw3DTile();
-	//DrawSprite();
-	//Draw2DTile();
 }
 
 void DrawEngine::EndDraw() {
@@ -1283,6 +1278,8 @@ void DrawEngine::SetTexture(int materialID) {
 void DrawEngine::SetCameraForGPU() {
 
 	cameraPtr_->worldPosition = drawDataCollector_->GetCameraPosition();
+
+	Logger::Log("Camera Position: x=%f y=%f z=%f", cameraPtr_->worldPosition.x, cameraPtr_->worldPosition.y, cameraPtr_->worldPosition.z);
 
 	commandList_->SetGraphicsRootConstantBufferView(5, cameraBuffer_->GetResource()->GetGPUVirtualAddress());
 }

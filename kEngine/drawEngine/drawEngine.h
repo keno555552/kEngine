@@ -36,6 +36,7 @@ public:
 					ResourceManager* resourceManager,
 					DrawDataCollector* drawDataCollector);
 
+	void StartFrame();
 	void PreDraw();
 	void CommitDraw();
 	void EndDraw();

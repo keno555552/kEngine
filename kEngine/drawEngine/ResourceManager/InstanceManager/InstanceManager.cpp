@@ -255,11 +255,11 @@ void InstanceManager::Add3DInstance(TransformationMatrix wvpData, MaterialConfig
 }
 
 void InstanceManager::Add3DInstance(ObjectData* object) {
-	//for(auto& objectpart : object->objectParts_){
-	//	if (objectpart.materialConfig->textureColor.w < 1.0f) {
-	//		transparentObjectParts_.push_back(&objectpart);
+	//for(auto& objectPart : object->objectParts_){
+	//	if (objectPart.materialConfig->textureColor.w < 1.0f) {
+	//		transparentObjectParts_.push_back(&objectPart);
 	//	} else {
-	//		opaqueMaterialBuckets_[objectpart.materialConfig].push_back(&objectpart);
+	//		opaqueMaterialBuckets_[objectPart.materialConfig].push_back(&objectPart);
 	//	}
 	//}
 }
