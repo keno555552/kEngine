@@ -2,7 +2,7 @@
 #include "Transform.h"			//Transform.h
 #include <cstdint>
 #include <windows.h>
-#include "DirectionalLight.h"
+#include "Data/DirectionalLightGPU.h"
 #include <string>
 #include <vector>
 #include "SceneManager.h"

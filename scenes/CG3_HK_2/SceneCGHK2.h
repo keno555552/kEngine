@@ -5,6 +5,7 @@
 #include "DebugCamera.h"
 #include "Player\Player.h"
 #include "tool\MapChip\MapChipField.h"
+#include "tool\DebugTool\DebugObject.h"
 
 
 class SceneCGHK2 : public Scene
@@ -40,6 +41,7 @@ private:
 	/// =========== ゲームオブジェクト ==========///
 	Object* skydome_ = nullptr;
 	Player* player_ = nullptr;
+	DebugObject* debugObject_ = nullptr;
 	SimpleSprite* sprite_ = nullptr;
 	SimpleSprite* sprite2_ = nullptr;
 

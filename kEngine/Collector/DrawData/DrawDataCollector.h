@@ -6,10 +6,10 @@
 #include "materialConfig.h"
 #include "DrawData/ObjectData.h"
 #include "DrawData/SpriteData.h"
-#include "PSOID.h"
+#include "PSOType.h"
 #include "Camera/Camera.h"
 #include "VertexResource.h"
-#include "RenderData.h"
+#include "Queue/RenderData.h"
 using ModelID = int;
 
 inline const float layerDepth_Sprite = 0.0001f;

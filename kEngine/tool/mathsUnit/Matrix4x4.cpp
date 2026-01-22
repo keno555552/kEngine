@@ -1,18 +1,18 @@
 #include "Matrix4x4.h"
 
 Matrix4x4 Matrix4x4::Identity() {
-	Matrix4x4 resuit = {};
+	Matrix4x4 result = {};
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
-			resuit.m[i][j] = 0;
+			result.m[i][j] = 0;
 			m[i][j] = 0;
 			if (i == j) {
-				resuit.m[i][j] = 1;
+				result.m[i][j] = 1;
 				m[i][j] = 1;
 			}
 		}
 	}
-	return resuit;
+	return result;
 }
 
 Matrix4x4 Matrix4x4::Inverse() {
@@ -220,17 +220,18 @@ Matrix4x4 Matrix4x4::operator*(const Matrix4x4& target) {
 }
 
 Matrix4x4 Matrix4x4::operator*(const float& target) {
-	Matrix4x4 resuit = {};
+	Matrix4x4 result = {};
 	for (int x = 0; x < 4; x++) {
 		for (int y = 0; y < 4; y++) {
-			resuit.m[x][y] = m[x][y] * target;
+			result.m[x][y] = m[x][y] * target;
 		}
 	}
-	return resuit;
+	return result;
 }
 
+
 Matrix4x4& Matrix4x4::operator=(const Matrix4x4& target) {
-	Matrix4x4 resuit = {};
+	Matrix4x4 result = {};
 	for (int x = 0; x < 4; x++) {
 		for (int y = 0; y < 4; y++) {
 			this->m[x][y] = target.m[x][y];
@@ -252,6 +253,13 @@ bool Matrix4x4::operator==(const Matrix4x4& target)const {
 bool Matrix4x4::operator!=(const Matrix4x4& target)const {
 	return !(*this == target);
 }
+
+Matrix4x4 operator*(float target, const Matrix4x4& vec) {
+	float f = target;
+	Matrix4x4 v = vec;
+	return v * f;
+}
+
 
 #pragma region 陣列転換
 Matrix4x4 MakeTranslateMatrix4x4(const Vector3 translate) {
@@ -578,8 +586,8 @@ Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float botto
 	};
 }
 
-//Vector3 viewFinilTransform(Vector3 obj, Matrix4x4 tranformMatrix) {
-//	Matrix4x4 objMatrix = MakeTranslateMatrix(obj) * tranformMatrix;
+//Vector3 viewFinalTransform(Vector3 obj, Matrix4x4 transformMatrix) {
+//	Matrix4x4 objMatrix = MakeTranslateMatrix(obj) * transformMatrix;
 //	if (objMatrix.m[3][3] != 0) {
 //		objMatrix.m[3][0] /= objMatrix.m[3][3];
 //		objMatrix.m[3][1] /= objMatrix.m[3][3];
@@ -591,7 +599,7 @@ Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float botto
 //	return MakeTranslateVector3(objMatrix);
 //}
 
-Vector3 viewFinilTransform(Vector3 obj, Matrix4x4 m) {
+Vector3 viewFinalTransform(Vector3 obj, Matrix4x4 m) {
 
 	float x = obj.x * m.m[0][0] + obj.y * m.m[1][0] + obj.z * m.m[2][0] + 1.0f * m.m[3][0];
 	float y = obj.x * m.m[0][1] + obj.y * m.m[1][1] + obj.z * m.m[2][1] + 1.0f * m.m[3][1];

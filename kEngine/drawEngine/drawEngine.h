@@ -8,7 +8,7 @@
 #include "ResourceManager.h"
 #include "VertexData.h"
 #include "Material.h"
-#include "DirectionalLight.h"
+#include "Data/DirectionalLightGPU.h"
 
 #include "MathsIncluder.h"
 #include "TransformationMatrix.h"
@@ -41,7 +41,7 @@ public:
 	void CommitDraw();
 	void EndDraw();
 
-	void SetDirectionalLight(DirectionalLight* light);
+	void SetDirectionalLight(DirectionalLightGPU* light);
 
 	/// 三角形関連
 	void DrawTriangle(TransformationMatrix* wvpData, MaterialConfig material);
@@ -145,8 +145,8 @@ private:
 
 
 	///Lighting関連
-	DirectionalLight* directionalLightData{};		// 外部から受ける
-	DirectionalLight* lightingData = nullptr;
+	DirectionalLightGPU* directionalLightData{};		// 外部から受ける
+	DirectionalLightGPU* lightingData = nullptr;
 
 	/// 交換用容器
 	BasicResource* tile2DWVPResource_ = new BasicResource;
@@ -183,7 +183,7 @@ private:
 	void SetTexture(int materialID);
 	void SetCameraForGPU();
 	void InitializeLighting();
-	void SetLighting(DirectionalLight* directionalLight);
+	void SetLighting(DirectionalLightGPU* directionalLight);
 
 	void PSODecision(MaterialConfig& material);
 	void PSODecision(int psoID);

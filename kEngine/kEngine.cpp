@@ -70,7 +70,7 @@ void kEngine::EndFrame() {
 	drawEngine->EndDraw();
 }
 
-void kEngine::SetDirectionalLight(DirectionalLight* light) {
+void kEngine::SetDirectionalLight(DirectionalLightGPU* light) {
 	drawEngine->SetDirectionalLight(light);
 }
 

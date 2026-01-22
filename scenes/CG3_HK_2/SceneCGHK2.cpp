@@ -31,6 +31,9 @@ SceneCGHK2::SceneCGHK2(kEngine* system) {
 
 	//player_->CreateDefaultData();
 	//player_->modelHandle_ = playerModelHandle_;
+	debugObject_ = new DebugObject(system_);
+	debugObject_->SetFollowObject(&player_->mainPosition);
+	debugObject_->SetShowCenterPoint(true);
 
 	sprite_ = new SimpleSprite;
 	sprite_->IntObject(system_);
@@ -49,6 +52,7 @@ SceneCGHK2::~SceneCGHK2() {
 	system_->DestroyCamera(camera_);
 	system_->DestroyCamera(debugCamera_);
 
+	delete debugObject_;
 	delete player_;
 	delete skydome_;
 	delete sprite_;
@@ -66,6 +70,8 @@ void SceneCGHK2::Update() {
 	player_->Update(usingCamera_);
 
 	sprite_->Update(usingCamera_);
+
+	debugObject_->Update(usingCamera_);
 
 
 	if (system_->GetTriggerOn(DIK_0)) {
@@ -85,6 +91,7 @@ void SceneCGHK2::Draw() {
 	//system_->DrawModel(&skydome_->objectParts[0].transformationMatrix, &(skydome_->objectParts[0].materialConfig.get()), skydomeModelHandle_);
 	skydome_->Draw();
 	player_->Draw();
+	debugObject_->Draw();
 	//sprite_->Draw();
 	//sprite2_->Draw();
 	//system_->Draw3D(skydome_);

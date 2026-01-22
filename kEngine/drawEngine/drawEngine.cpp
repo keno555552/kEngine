@@ -5,7 +5,7 @@
 #define M_PI 3.1415926f
 #include "Logger.h"
 
-#include "RenderData.h"
+#include "Queue/RenderData.h"
 
 
 DrawEngine::~DrawEngine() {
@@ -73,7 +73,7 @@ void DrawEngine::Initialize
 	///Lighting
 	InitializeLighting();
 
-	directionalLightData = new DirectionalLight{
+	directionalLightData = new DirectionalLightGPU{
 			.color{1.0f,1.0f,1.0f,1.0f},
 			.direction{-0.5f,-0.5f,0.4f},
 			.intensity{1.0f}
@@ -186,10 +186,10 @@ void DrawEngine::EndDraw() {
 	}
 }
 
-void DrawEngine::SetDirectionalLight(DirectionalLight* light) {
+void DrawEngine::SetDirectionalLight(DirectionalLightGPU* light) {
 	if (light) {
 		if (!directionalLightData) {
-			directionalLightData = new DirectionalLight;
+			directionalLightData = new DirectionalLightGPU;
 		}
 		*directionalLightData = *light;
 	}
@@ -1279,19 +1279,17 @@ void DrawEngine::SetCameraForGPU() {
 
 	cameraPtr_->worldPosition = drawDataCollector_->GetCameraPosition();
 
-	Logger::Log("Camera Position: x=%f y=%f z=%f", cameraPtr_->worldPosition.x, cameraPtr_->worldPosition.y, cameraPtr_->worldPosition.z);
-
 	commandList_->SetGraphicsRootConstantBufferView(5, cameraBuffer_->GetResource()->GetGPUVirtualAddress());
 }
 
 void DrawEngine::InitializeLighting() {
 
 	// マテリアルにデータを書き込む
-	resourceManager_->lightingResource_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(DirectionalLight));
+	resourceManager_->lightingResource_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(DirectionalLightGPU));
 	resourceManager_->lightingResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&lightingData));
 }
 
-void DrawEngine::SetLighting(DirectionalLight* directionalLight) {
+void DrawEngine::SetLighting(DirectionalLightGPU* directionalLight) {
 	// Lightingにデータを書き込む
 
 	*lightingData = *directionalLight;

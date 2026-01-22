@@ -20,7 +20,7 @@
 #include "InstanceManager.h"
 #include "ResourceManager/ResourceManager.h"
 #include "TextureManager/TextureManager.h"
-#include "Lighting/DirectionalLight.h"
+#include "Data/DirectionalLightGPU.h"
 #include "Camera.h"
 
 
@@ -41,7 +41,7 @@ public:
 
 	void EndFrame();
 
-	void SetDirectionalLight(DirectionalLight* light);
+	void SetDirectionalLight(DirectionalLightGPU* light);
 
 	bool ProcessMessage();
 
