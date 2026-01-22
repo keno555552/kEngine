@@ -9,7 +9,7 @@
 #include "PSOType.h"
 #include "Camera/Camera.h"
 #include "VertexResource.h"
-#include "Queue/RenderData.h"
+#include "Render/Queue/RenderData.h"
 using ModelID = int;
 
 inline const float layerDepth_Sprite = 0.0001f;
@@ -30,7 +30,7 @@ public:
 
 	Vector3 GetCameraPosition() const;
 
-	std::unordered_map <PSOID,
+	std::unordered_map <PSOType,
 		std::unordered_map <MaterialID,
 		std::unordered_map <ModelID,
 		std::vector<RenderData>>>
@@ -38,7 +38,7 @@ public:
 
 	std::vector<RenderData>& GetTransparentObjectParts2D() { return transparentObjectParts2D_; }
 
-	std::unordered_map <PSOID,
+	std::unordered_map <PSOType,
 		std::unordered_map <MaterialID,
 		std::unordered_map <ModelID,
 		std::vector<RenderData>>>
@@ -80,7 +80,7 @@ private:
 
 	/// ==================== 2Dデータ ====================///
 	/// 不透明オブジェクトバケット
-	std::unordered_map <PSOID,
+	std::unordered_map <PSOType,
 		std::unordered_map <MaterialID,
 		std::unordered_map <ModelID,
 		std::vector<RenderData>>>
@@ -96,7 +96,7 @@ private:
 
 	/// ==================== 3Dデータ ====================///
 	/// 不透明オブジェクトバケット
-	std::unordered_map <PSOID,
+	std::unordered_map <PSOType,
 		std::unordered_map <MaterialID,
 		std::unordered_map <ModelID,
 		std::vector<RenderData>>>

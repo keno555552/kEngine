@@ -1,6 +1,6 @@
 #pragma once
 
-enum class PSOID {
+enum class PSOType {
 	NONE = -1,
 
 	/// 2D系

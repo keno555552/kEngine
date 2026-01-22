@@ -133,7 +133,17 @@ float DrawDataCollector::SpriteLayerManagement(float zBuffer) {
 }
 
 Matrix4x4 DrawDataCollector::MakeFollowObjectMatrix(SpriteData* sprite) {
-	Matrix4x4 followMatrix = Identity();
+
+	float zBuffer = sprite->mainPosition.transform.translate.z;
+
+	Matrix4x4 objectMainMatrix = MakeAffineMatrix(
+		sprite->mainPosition.transform.scale,
+		sprite->mainPosition.transform.rotate,
+		sprite->mainPosition.transform.translate
+	);
+
+	Matrix4x4 parentMatrix = Identity();
+
 	SpriteData* parent = sprite->followObject_;
 	while (parent != nullptr) {
 		Matrix4x4 local = MakeAffineMatrix(
@@ -142,29 +152,41 @@ Matrix4x4 DrawDataCollector::MakeFollowObjectMatrix(SpriteData* sprite) {
 			parent->mainPosition.transform.translate
 		);
 
-		followMatrix = local * followMatrix ;
+		parentMatrix = parentMatrix * local;
 		parent = parent->followObject_;
 	}
-	return followMatrix;
+
+	Matrix4x4 resultMatrix = objectMainMatrix * parentMatrix;
+	resultMatrix.m[3][2] = zBuffer;
+
+	return resultMatrix;
 }
 
 TransformationMatrix DrawDataCollector::SpriteWVPAdjustment(SpriteData& sprite, SpritePart& part) {
-	Camera* cam = cameraManager_->GetActiveCamera();
-	Matrix4x4 viewMatrix = cam->GetViewMatrix();
-	Matrix4x4 projectionMatrix = cam->GetProjectionMatrix();
+
+	// 2D UI 用：View 取單位矩陣，Projection 用螢幕尺寸的正交矩陣（左上原點，Y 向下）
+	Matrix4x4 viewMatrix = Identity();
+	Matrix4x4 projectionMatrix = MakeOrthographicMatrix(
+		0.0f,                                     // left
+		0.0f,                                     // top
+		static_cast<float>(config::GetClientWidth()),   // right
+		static_cast<float>(config::GetClientHeight()),  // bottom
+		-1.0f,                                    // nearZ，留空間給負的 layer depth
+		1.0f                                      // farZ
+	);
 
 	Matrix4x4 followWorldMatrix = MakeFollowObjectMatrix(&sprite);
 
-	Transform spriteTransform = part.worldTransform;
-	spriteTransform.translate.z = SpriteLayerManagement(part.transform.translate.z);
-
 	Matrix4x4 localMatrix = MakeAffineMatrix(
-		spriteTransform.scale,
-		spriteTransform.rotate,
-		spriteTransform.translate
+		part.worldTransform.scale,
+		part.worldTransform.rotate,
+		part.worldTransform.translate
 	);
 
-	Matrix4x4 worldMatrix = localMatrix * followWorldMatrix;
+	Matrix4x4 worldMatrix = followWorldMatrix * localMatrix;
+
+	float spriteTransform = part.transform.translate.z;
+	worldMatrix.m[3][2] = SpriteLayerManagement(spriteTransform);
 
 	TransformationMatrix result{};
 	result.world = worldMatrix;
@@ -191,7 +213,7 @@ Matrix4x4 DrawDataCollector::MakeFollowObjectMatrix(ObjectData* object) {
 			parent->transform.translate
 		);
 
-		parentMatrix = parentMatrix * local;
+		parentMatrix = local * parentMatrix;
 		parent = parent->parentPart;
 	}
 
@@ -205,16 +227,6 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustment(ObjectData& object, 
 
 	Matrix4x4 followWorldMatrix = MakeFollowObjectMatrix(&object);
 
-	// 子物件 parent（如果有）
-	Matrix4x4 partParentMatrix = Identity();
-	if (part.parentPart != nullptr) {
-		partParentMatrix = MakeAffineMatrix(
-			part.parentPart->transform.scale,
-			part.parentPart->transform.rotate,
-			part.parentPart->transform.translate
-		);
-	}
-
 	// Billboard 子物件：XY 旋轉を0にする
 	if (object.isBillboard_) {
 		Vector3 camRot = cam->GetTransform().rotate;
@@ -223,7 +235,6 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustment(ObjectData& object, 
 		part.transform.rotate.z = 0.0f;
 	}
 
-
 	Matrix4x4 localMatrix = MakeAffineMatrix(
 		part.transform.scale,
 		part.transform.rotate,
@@ -231,7 +242,7 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustment(ObjectData& object, 
 	);
 
 	//Matrix4x4 worldMatrix = localMatrix * partParentMatrix * followWorldMatrix;
-	Matrix4x4 worldMatrix = followWorldMatrix * partParentMatrix * localMatrix;
+	Matrix4x4 worldMatrix = localMatrix * followWorldMatrix;
 	
 	TransformationMatrix result{};
 	result.WVP = worldMatrix * viewMatrix * projectionMatrix;
@@ -259,7 +270,7 @@ void DrawDataCollector::AddSpriteToBucket(RenderData& renderData,int meshID) {
 				transparentObjectParts2D_.end(),
 				[z](const RenderData& data) {
 					float dataZ = data.transformData.WVP.m[3][2];
-					return z < dataZ;
+					return z > dataZ;
 				}
 			);
 
@@ -271,7 +282,7 @@ void DrawDataCollector::AddSpriteToBucket(RenderData& renderData,int meshID) {
 			}
 		} else {
 			/// 不透明オブジェクトバケットへ追加
-			opaqueBuckets2D_[static_cast<PSOID>(renderData.psoID)][renderData.materialID][meshID].emplace_back(renderData);
+			opaqueBuckets2D_[static_cast<PSOType>(renderData.psoID)][renderData.materialID][meshID].emplace_back(renderData);
 		}
 	}
 }
@@ -307,7 +318,7 @@ void DrawDataCollector::AddObjectToBucket(RenderData& renderData,int meshID) {
 			}
 		} else {
 			/// 不透明オブジェクトバケットへ追加
-			opaqueBuckets3D_[static_cast<PSOID>(renderData.psoID)][renderData.materialID][meshID].emplace_back(renderData);
+			opaqueBuckets3D_[static_cast<PSOType>(renderData.psoID)][renderData.materialID][meshID].emplace_back(renderData);
 		}
 	}
 
@@ -320,15 +331,15 @@ uint32_t DrawDataCollector::PSODecision(MaterialConfig& material) {
 
 	switch (lightModelType) {
 	case LightModelType::Sprite2D:
-		return (uint32_t)PSOID::Sprite2D;
+		return (uint32_t)PSOType::Sprite2D;
 	case LightModelType::Lambert:
-		return (uint32_t)PSOID::Lambert;
+		return (uint32_t)PSOType::Lambert;
 	case LightModelType::HalfLambert:
-		return (uint32_t)PSOID::HalfLambert;
+		return (uint32_t)PSOType::HalfLambert;
 	case LightModelType::PhongReflection:
-		return (uint32_t)PSOID::PhongReflection;
+		return (uint32_t)PSOType::PhongReflection;
 	case LightModelType::BlinnPhongReflection:
-		return (uint32_t)PSOID::BlinnPhongReflection;
+		return (uint32_t)PSOType::BlinnPhongReflection;
 	}
-	return (uint32_t)PSOID::NONE;
+	return (uint32_t)PSOType::NONE;
 }
