@@ -1,6 +1,6 @@
 #pragma once
 #include "MaterialConfig.h"
-#include "Scene.h"
+#include "BaseScene.h"
 #include "SceneTitle.h"
 #include "Scene1.h"
 #include "SceneResult.h"
@@ -15,8 +15,15 @@
 
 class SceneManager {
 public:
-	SceneManager(kEngine* system);
-	~SceneManager();
+
+	static void Initialize(kEngine* system);
+	static SceneManager& GetInstance();
+
+	// 複製禁止
+	SceneManager(const SceneManager&) = delete;
+	SceneManager& operator=(const SceneManager&) = delete;
+	SceneManager(SceneManager&&) = delete;
+	SceneManager& operator=(SceneManager&&) = delete;
 
 	void Update();
 	void Render();
@@ -30,6 +37,11 @@ public:
 	void StageCheckBoxUpdate();
 
 
+private:
+	static SceneManager* sceneManager_;
+
+	SceneManager(kEngine* system);
+	~SceneManager();
 private:
 	Scene* sceneUsing_ = nullptr;
 	Scene* sceneOld_ = nullptr;

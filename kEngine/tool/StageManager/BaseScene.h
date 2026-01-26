@@ -2,12 +2,14 @@
 #include "kEngine.h"
 #include "SceneElement.h"
 
+
+
 class SceneManager;
-class Scene
+class BaseScene
 {
 public:
 
-	virtual ~Scene() = default;
+	virtual ~BaseScene() = default;
 
 	ScenePhase phase_ = ScenePhase::PREPARE;
 
@@ -40,4 +42,3 @@ protected:
 	IsWin isWin_ = IsWin::NONE;
 	bool isSceneEnd_ = false;
 };
-

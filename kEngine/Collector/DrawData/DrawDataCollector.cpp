@@ -1,13 +1,15 @@
-#include "DrawDataCollector.h"
-#include "CameraManager.h"
-#include "ResourceManager.h"
 #include "Logger.h"
+#include "DrawDataCollector.h"
+#include "CameraManager/CameraManager.h"
+#include "LightManager/LightManager.h"
+#include "ResourceManager.h"
 
-DrawDataCollector::DrawDataCollector(ResourceManager* rm, InstanceManager* im, CameraManager* cm) :
+DrawDataCollector::DrawDataCollector(ResourceManager* rm, InstanceManager* im, CameraManager* cm, LightManager* lm) :
 	resourceManager_(rm),
 	instanceManager_(im),
-	cameraManager_(cm){
-}
+	cameraManager_(cm),
+	lightManager_(lm)
+{}
 
 void DrawDataCollector::PreCollect() {
 
@@ -152,7 +154,7 @@ Matrix4x4 DrawDataCollector::MakeFollowObjectMatrix(SpriteData* sprite) {
 			parent->mainPosition.transform.translate
 		);
 
-		parentMatrix = parentMatrix * local;
+		parentMatrix = local * parentMatrix;
 		parent = parent->followObject_;
 	}
 
@@ -178,9 +180,9 @@ TransformationMatrix DrawDataCollector::SpriteWVPAdjustment(SpriteData& sprite, 
 	Matrix4x4 followWorldMatrix = MakeFollowObjectMatrix(&sprite);
 
 	Matrix4x4 localMatrix = MakeAffineMatrix(
-		part.worldTransform.scale,
-		part.worldTransform.rotate,
-		part.worldTransform.translate
+		part.transform.scale,
+		part.transform.rotate,
+		part.transform.translate
 	);
 
 	Matrix4x4 worldMatrix = followWorldMatrix * localMatrix;
@@ -342,4 +344,16 @@ uint32_t DrawDataCollector::PSODecision(MaterialConfig& material) {
 		return (uint32_t)PSOType::BlinnPhongReflection;
 	}
 	return (uint32_t)PSOType::NONE;
+}
+
+void DrawDataCollector::UpdateLightData() {
+	if(lightManager_)lightManager_->TurnDataToGPUData();
+}
+
+std::vector<LightGPU> DrawDataCollector::GetLightGPUBuffer() {
+	return lightManager_->GetGPUBuffer();
+}
+
+uint32_t DrawDataCollector::GetLightCount() {
+	return (uint32_t)lightManager_->GetLightCount();
 }

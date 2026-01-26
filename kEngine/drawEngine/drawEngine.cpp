@@ -89,7 +89,7 @@ void DrawEngine::Initialize
 		tile2DInstancingData_[index].WorldInverseTranspose = Identity();
 	}
 	int srvHandleIndex = srvManager_->Allocate();
-	srvManager_->CreateSRVforStructuredBuffer(srvHandleIndex, tile2DWVPResource_->GetResource().Get(), config::Get2DTileNumInstance(), sizeof(TransformationMatrix));  // 修正：使用正確的 tile2DWVPResource_
+	srvManager_->CreateSRVForStructuredBuffer(srvHandleIndex, tile2DWVPResource_->GetResource().Get(), config::Get2DTileNumInstance(), sizeof(TransformationMatrix));  // 修正：使用正確的 tile2DWVPResource_
 
 	Tile2DSrvHandleGPU_ = srvManager_->GetGPUDescriptorHandle(srvHandleIndex);
 
@@ -101,7 +101,7 @@ void DrawEngine::Initialize
 		tile3DInstancingData_[index].WorldInverseTranspose = Identity();
 	}
 	srvHandleIndex = srvManager_->Allocate();
-	srvManager_->CreateSRVforStructuredBuffer(srvHandleIndex, tile3DWVPResource_->GetResource().Get(), config::Get3DTileNumInstance(), sizeof(TransformationMatrix));
+	srvManager_->CreateSRVForStructuredBuffer(srvHandleIndex, tile3DWVPResource_->GetResource().Get(), config::Get3DTileNumInstance(), sizeof(TransformationMatrix));
 
 	Tile3DSrvHandleGPU_ = srvManager_->GetGPUDescriptorHandle(srvHandleIndex);
 
@@ -155,12 +155,13 @@ void DrawEngine::StartFrame() {
 
 void DrawEngine::PreDraw() {
 
-	/// 形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけば良い
+	/// 形状を設定。PSOに設定しているものとはまた別。同じものを設定するとUpdateLighting考えておけば良い
 	commandList_->SetGraphicsRootSignature(rootSignature_);
 	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	/// Lighting
-	SetLighting(directionalLightData);
+	drawDataCollector_->UpdateLightData();
+	UpdateLighting();
 
 	/// Set Camera
 	SetCameraForGPU();
@@ -918,7 +919,7 @@ void DrawEngine::Draw2D() {
 
 	Draw2DOpaque();
 	Draw2DTransparent();
-	
+
 }
 
 void DrawEngine::Draw2DTransparent() {
@@ -928,13 +929,13 @@ void DrawEngine::Draw2DTransparent() {
 	/// TileSRV
 	commandList_->SetGraphicsRootDescriptorTable(1, Tile2DSrvHandleGPU_);
 
-	/// Lighting
-	commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
 
 	for (auto& object : transparent2D_) {
 
 		/// Set PSO
 		PSODecision((int)object.psoID);
+
+		SetLightingGPU();
 
 		SetMaterial(object.materialID);
 
@@ -994,15 +995,11 @@ void DrawEngine::Draw2DOpaque() {
 
 			if (RenderDataGroup.empty()) continue;
 
+			SetLightingGPU();
+
 			SetMaterial(materialID);
 
 			SetTexture(materialID);
-
-			/// 透明度によってブレンドモードを変更
-			int materialIndex = resourceManager_->idToIndex_[materialID];
-			float alpha = resourceManager_->materialList_[materialIndex].cpuMaterial.get()->color.w;
-
-
 
 			/// 不透明ものの描画
 
@@ -1030,7 +1027,6 @@ void DrawEngine::Draw2DOpaque() {
 					tile2DInstancingData_[instance2DCounter_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
 					instancesCounter++;
 					instance2DCounter_++;
-
 				}
 
 				/// 設定 offset
@@ -1070,18 +1066,17 @@ void DrawEngine::Draw3D() {
 
 void DrawEngine::Draw3DTransparent() {
 
-	auto& transparent3D_ = drawDataCollector_->GetTransparentObjectParts2D();
+	auto& transparent3D_ = drawDataCollector_->GetTransparentObjectParts3D();
 
 	/// TileSRV
 	commandList_->SetGraphicsRootDescriptorTable(1, Tile3DSrvHandleGPU_);
-
-	/// Lighting
-	commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
 
 	for (auto& object : transparent3D_) {
 
 		/// Set PSO
 		PSODecision((int)object.psoID);
+
+		SetLightingGPU();
 
 		SetMaterial(object.materialID);
 
@@ -1095,8 +1090,6 @@ void DrawEngine::Draw3DTransparent() {
 		D3D12_INDEX_BUFFER_VIEW ibv = object.mesh->GetIndexBufferView();
 		commandList_->IASetVertexBuffers(0, 1, &vbv);
 		commandList_->IASetIndexBuffer(&ibv);
-
-
 
 		/// WVP 設定
 		int instIdx = instance3DCounter_;
@@ -1129,28 +1122,21 @@ void DrawEngine::Draw3DOpaque() {
 	/// TileSRV
 	commandList_->SetGraphicsRootDescriptorTable(1, Tile3DSrvHandleGPU_);
 
-	/// Lighting
-	commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
-
 	for (auto& [psoID, materialBuckets] : transparentObjectParts3D_) {
 
 		/// Set PSO
 		PSODecision((int)psoID);
 
+
 		for (auto& [materialID, RenderDataGroup] : materialBuckets) {
 
 			if (RenderDataGroup.empty()) continue;
 
+			SetLightingGPU();
 
 			SetMaterial(materialID);
 
 			SetTexture(materialID);
-
-			/// 透明度によってブレンドモードを変更
-			int materialIndex = resourceManager_->idToIndex_[materialID];
-			float alpha = resourceManager_->materialList_[materialIndex].cpuMaterial.get()->color.w;
-
-
 
 			/// 不透明ものの描画
 
@@ -1190,7 +1176,7 @@ void DrawEngine::Draw3DOpaque() {
 				++offsetDataCounter_;
 
 
-				if(meshIndexCount != 0){
+				if (meshIndexCount != 0) {
 					commandList_->DrawIndexedInstanced(meshIndexCount, instancesCounter, 0, 0, 0);
 				} else {
 					int meshVertexCount = RenderData[0].mesh->GetVertexNum();
@@ -1285,16 +1271,38 @@ void DrawEngine::SetCameraForGPU() {
 void DrawEngine::InitializeLighting() {
 
 	// マテリアルにデータを書き込む
-	resourceManager_->lightingResource_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(DirectionalLightGPU));
-	resourceManager_->lightingResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&lightingData));
+	//resourceManager_->lightingResource_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(DirectionalLightGPU));
+	//resourceManager_->lightingResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&lightingData));
+
+	/// LightListGPU 作成
+	lightBuffer_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(LightGPU) * config::GetMaxLightNum());
+	lightBuffer_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&lightListData_));
+	/// 時間あれば初期化をここでやる
+	int srvHandleIndex = srvManager_->Allocate();
+	srvManager_->CreateSRVForStructuredBuffer(srvHandleIndex, lightBuffer_->GetResource().Get(), config::GetMaxLightNum(), sizeof(LightGPU));
+
+	lightListSrvHandleGPU_ = srvManager_->GetGPUDescriptorHandle(srvHandleIndex);
 }
 
-void DrawEngine::SetLighting(DirectionalLightGPU* directionalLight) {
+void DrawEngine::UpdateLighting() {
+
 	// Lightingにデータを書き込む
+	lightCount_ = drawDataCollector_->GetLightCount();
 
-	*lightingData = *directionalLight;
-	lightingData->direction = Normalize(lightingData->direction);
+	for (int i = 0; i < lightCount_; ++i) {
+		lightListData_[i] = drawDataCollector_->GetLightGPUBuffer()[i];
+	}
+
 }
+
+void DrawEngine::SetLightingGPU() {
+
+	// LightListGPU Set
+	commandList_->SetGraphicsRootDescriptorTable(6, lightListSrvHandleGPU_);
+	// LightingCount Set
+	commandList_->SetGraphicsRoot32BitConstants(3, 1, &lightCount_, 0);
+}
+
 
 ID3D12Resource* DrawEngine::CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height) {
 

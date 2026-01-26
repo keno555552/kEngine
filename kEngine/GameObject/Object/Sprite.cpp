@@ -4,8 +4,10 @@
 void SimpleSprite::CreateDefaultData() {
 	modelHandle_ = 0;
 
-	mainPosition.materialConfig = std::make_shared<MaterialConfig>();
-	InitMaterialConfig(mainPosition.materialConfig.get());
+	if(mainPosition.materialConfig == nullptr){
+		mainPosition.materialConfig = std::make_shared<MaterialConfig>();
+		InitMaterialConfig(mainPosition.materialConfig.get());
+	}
 
 	SimpleSpritePart newObjectPart;
 	newObjectPart.materialConfig = std::make_shared<MaterialConfig>();

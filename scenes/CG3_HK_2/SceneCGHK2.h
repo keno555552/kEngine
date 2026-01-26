@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "Object\Object.h"
 #include "Object\Sprite.h"
+#include "Light.h"
 #include "DebugCamera.h"
 #include "Player\Player.h"
 #include "tool\MapChip\MapChipField.h"
@@ -20,6 +21,14 @@ public:
 private:
 	kEngine* system_ = nullptr;				// 借り
 
+	/// ============= ライト関連 ==============///
+	Light* light1_ = nullptr;
+	Light* light2_ = nullptr;
+	Light* light3_ = nullptr;
+	AreaLight* areaLight_ = nullptr;
+	AreaLight* areaLight2_ = nullptr;
+
+
 	/// ============== カメラ関連 ==============///
 	/// ステージカメラ(mainカメラ)
 	Camera* camera_ = nullptr;
@@ -37,9 +46,11 @@ private:
 	int boxTextureHandle_ = 0;
 	int tryTextureHandle_ = 0;
 	int uvTextureHandle_ = 0;
+	int whiteTextureHandle_ = 0;
 
 	/// =========== ゲームオブジェクト ==========///
 	Object* skydome_ = nullptr;
+	Object* ground_ = nullptr;
 	Player* player_ = nullptr;
 	DebugObject* debugObject_ = nullptr;
 	SimpleSprite* sprite_ = nullptr;
@@ -49,9 +60,24 @@ private:
 	/// =============== フラグ ================///
 	bool useDebugCamera = false;
 
+	int isBlinn_Phong = true;
+
+	int lightMode = 0;
+	bool isNormalLight = true;
+	bool isMultiPointLight = false;
+	bool isMultiSpotLight = false;
+	bool isMultiAreaLight = false;
+
+	void InitNormalLight();
+	void InitMultiPointLight();
+	void InitMultiSpotLight();
+	void InitMultiAreaLight();
 private:
 	/// ============= シーン内命令 =============///
 	void CameraPart();
+#ifdef USE_IMGUI
 	void ImGuiPart();
+	void SelectLightMode();
+#endif
 };
 

@@ -19,6 +19,7 @@ kEngine::~kEngine() {
 	delete drawEngine;
 	delete drawDataCollector;
 	delete cameraManager;
+	delete lightManager;
 	delete srvManager;
 	delete dxComm;
 }
@@ -42,9 +43,11 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 	textureManager->Initialize(dxComm, srvManager);
 	resourceManager = new ResourceManager(dxComm, instanceManager);
 
+	lightManager = new LightManager;
+
 	cameraManager = new CameraManager;
 
-	drawDataCollector = new DrawDataCollector(resourceManager, instanceManager, cameraManager);
+	drawDataCollector = new DrawDataCollector(resourceManager, instanceManager, cameraManager, lightManager);
 	drawEngine = new DrawEngine;
 	drawEngine->Initialize(dxComm, srvManager, resourceManager, drawDataCollector);
 
@@ -103,6 +106,14 @@ int kEngine::GetMutiModelNum(int modelHandle) {
 int kEngine::SetModelObj(std::string path) {
 	//return drawEngine->SetModel(path);
 	return resourceManager->LoadModel(path);
+}
+
+void kEngine::AddLight(Light* light) {
+	lightManager->AddLight(light);
+}
+
+void kEngine::RemoveLight(Light* light) {
+	lightManager->RemoveLight(light);
 }
 
 DebugCamera* kEngine::CreateDebugCamera() {

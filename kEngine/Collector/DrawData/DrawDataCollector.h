@@ -10,18 +10,24 @@
 #include "Camera/Camera.h"
 #include "VertexResource.h"
 #include "Render/Queue/RenderData.h"
+#include "Data/LightGPU.h"
+#include <cstdint>
 using ModelID = int;
 
 inline const float layerDepth_Sprite = 0.0001f;
 inline const float layeredSpriteDepth_ = 0.4f;
 
+class LightManager;
 class ResourceManager;
 class InstanceManager;
 class CameraManager;
 class DrawDataCollector
 {
 public:
-	DrawDataCollector(ResourceManager* rm, InstanceManager* im, CameraManager* cm);
+	DrawDataCollector(ResourceManager* rm,
+					InstanceManager* im,
+					CameraManager* cm,
+					LightManager* lm);
 
 	void PreCollect();
 
@@ -46,6 +52,11 @@ public:
 
 	std::vector<RenderData>& GetTransparentObjectParts3D() { return transparentObjectParts3D_; }
 
+	/// ============ Light関連 ==============///
+
+	void UpdateLightData();
+	std::vector<LightGPU> GetLightGPUBuffer();
+	uint32_t GetLightCount();
 
 private:
 
@@ -74,6 +85,9 @@ private:
 private:
 	ResourceManager* resourceManager_ = nullptr; /*借り*/
 	InstanceManager* instanceManager_ = nullptr; /*借り*/
+
+	/// ============ Light関連 ==============///
+	LightManager* lightManager_ = nullptr; /*借り*/
 
 	/// ============ カメラ関連 ==============///
 	CameraManager* cameraManager_ = nullptr; /*借り*/

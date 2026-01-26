@@ -18,6 +18,7 @@
 #include "VertexIndex.h"
 #include "Camera.h"
 #include "DrawData/CameraForGPU.h"
+#include "Data/LightGPU.h"
 
 #include "DrawData/ObjectData.h"
 #include "DrawData/SpriteData.h"
@@ -148,6 +149,12 @@ private:
 	DirectionalLightGPU* directionalLightData{};		// 外部から受ける
 	DirectionalLightGPU* lightingData = nullptr;
 
+	uint32_t lightCount_ = 0;
+
+	D3D12_GPU_DESCRIPTOR_HANDLE lightListSrvHandleGPU_{};
+	BasicResource* lightBuffer_ = new BasicResource;
+	LightGPU* lightListData_ = nullptr;
+
 	/// 交換用容器
 	BasicResource* tile2DWVPResource_ = new BasicResource;
 	TransformationMatrix* tile2DInstancingData_ = nullptr;
@@ -183,7 +190,8 @@ private:
 	void SetTexture(int materialID);
 	void SetCameraForGPU();
 	void InitializeLighting();
-	void SetLighting(DirectionalLightGPU* directionalLight);
+	void UpdateLighting();
+	void SetLightingGPU();
 
 	void PSODecision(MaterialConfig& material);
 	void PSODecision(int psoID);

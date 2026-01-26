@@ -1,7 +1,10 @@
 #include "SceneManager.h"
 
-SceneManager::SceneManager(kEngine* system) {
-	system_ = system;
+SceneManager* SceneManager::sceneManager_ = nullptr;
+
+SceneManager::SceneManager(kEngine* system) 
+	: system_(system) 
+{
 	//sceneUsingHandle_ = SceneNum::S_STAGE_01;
 	//sceneUsingHandle_ = SceneNum::S_BOSSTEST;
 	sceneUsingHandle_ = SceneNum::S_TESTER;
@@ -40,6 +43,18 @@ SceneManager::~SceneManager() {
 		delete sceneUsing_, sceneUsing_ = nullptr;
 	if (sceneOld_ != nullptr)
 		delete sceneOld_, sceneOld_ = nullptr;
+}
+
+void SceneManager::Initialize(kEngine* system) {
+
+	if (!sceneManager_) {
+		sceneManager_ = new SceneManager(system);
+	}
+
+}
+
+SceneManager& SceneManager::GetInstance() {
+	return *sceneManager_;
 }
 
 void SceneManager::SceneChanger() {

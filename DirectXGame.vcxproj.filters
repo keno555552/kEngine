@@ -216,7 +216,7 @@
     <ClCompile Include="kEngine\tool\mathsUnit\TransformationMatrix.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\StageManager\Scene.cpp">
+    <ClCompile Include="kEngine\tool\StageManager\BaseScene.cpp">
       <Filter>ソース ファイル\kEngine\tool\StageManager</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\tool\StageManager\SceneManager.cpp">
@@ -429,6 +429,36 @@
     <ClCompile Include="kEngine\tool\DebugTool\DebugObject.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="kEngine\Manager\LightManager\LightManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Lighting\DirectionalLight.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Lighting\Light.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Render\Data\LightGPU.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\LightingType.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Lighting\SpotLight.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Lighting\PointLight.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Lighting\AeraLight.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\tool\StageManager\BaseSceneFactory.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="scenes\SceneFactory.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kEngine\tool\mathsUnit\Vector2.h">
@@ -539,7 +569,7 @@
     <ClInclude Include="kEngine\tool\StageManager\SceneManager.h">
       <Filter>ヘッダー ファイル\kEngine\tool\StageManager</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\StageManager\Scene.h">
+    <ClInclude Include="kEngine\tool\StageManager\BaseScene.h">
       <Filter>ヘッダー ファイル\kEngine\tool\StageManager</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\tool\TimeManager\TimeManager.h">
@@ -732,6 +762,36 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\tool\DebugTool\DebugObject.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Manager\LightManager\LightManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Lighting\DirectionalLight.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Lighting\Light.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\Data\LightGPU.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\LightingType.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Lighting\SpotLight.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Lighting\PointLight.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Lighting\AeraLight.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\tool\StageManager\BaseSceneFactory.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="scenes\SceneFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
