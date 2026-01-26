@@ -19,9 +19,8 @@ SceneTitle::~SceneTitle() {
 void SceneTitle::Update() {
 
 	if (system_->GetTriggerOn(DIK_SPACE)) {
-		ChangeNextStage(SceneNum::S_STAGE_01);
+		outcome_ = SceneOutcome::NEXT;
 	}
-
 }
 
 void SceneTitle::Draw() {

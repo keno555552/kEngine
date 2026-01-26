@@ -46,6 +46,10 @@ public:
 
 	bool ProcessMessage();
 
+	static bool GameOn() { return isGameOn_; }
+
+	static void EndGame() { isGameOn_ = false; }
+
 #pragma endregion
 
 #pragma region 描画システム
@@ -195,4 +199,7 @@ private:
 
 	/// ============ 時間関連 ============///
 	TimeManager* timeManager = nullptr;
+
+	/// =========== ゲーム継続関連 ===========///
+	static bool isGameOn_;
 };

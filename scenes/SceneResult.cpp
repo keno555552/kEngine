@@ -17,7 +17,7 @@ SceneResult::~SceneResult() {
 
 void SceneResult::Update() {
 	if (system_->GetTriggerOn(DIK_SPACE)) {
-		ChangeNextStage(SceneNum::S_TITLE);
+		outcome_ = SceneOutcome::NEXT;
 	}
 }
 

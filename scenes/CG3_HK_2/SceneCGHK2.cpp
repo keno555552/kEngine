@@ -151,7 +151,7 @@ void SceneCGHK2::Update() {
 	}
 
 	if (system_->GetTriggerOn(DIK_SPACE)) {
-		ChangeNextStage(SceneNum::S_Result);
+		outcome_ = SceneOutcome::NEXT;
 	}
 }
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "Scene.h"
+#include "BaseScene.h"
 #include "TransformationMatrix.h"
 #include "Transform.h"			//Transform.h
 #include "Vector4.h"
@@ -11,7 +11,7 @@
 #include "DebugCamera.h"
 
 
-class SceneTester :public Scene
+class SceneTester :public BaseScene
 {
 public:
 	SceneTester(kEngine* system);

@@ -2,29 +2,14 @@
 
 SceneManager* SceneManager::sceneManager_ = nullptr;
 
-SceneManager::SceneManager(kEngine* system) 
-	: system_(system) 
-{
+SceneManager::SceneManager(kEngine* system)
+	: system_(system),
+	sceneFactory_(new SceneFactory(system)) {
 	//sceneUsingHandle_ = SceneNum::S_STAGE_01;
 	//sceneUsingHandle_ = SceneNum::S_BOSSTEST;
-	sceneUsingHandle_ = SceneNum::S_TESTER;
+	sceneUsingNameHandle_ = "CGHK2";
 	//sceneUsingHandle_ = SceneNum::S_TITLE;
 	//sceneUsingHandle_ = SceneNum::S_STAGE_01;
-	
-	
-
-	//InitMaterialConfig(&materialConfig_);
-	//materialConfig_.uvTransformMatrix =
-	//	MakeAffineMatrix(materialConfig_.uvScale, materialConfig_.uvRotate,
-	//		materialConfig_.uvTranslate);
-	//materialConfig_.textureHandle =
-	//	system_->LoadTexture("resources/TemplateResource/texture/uvChecker.png");
-	// materialConfig_.textureHandle =
-	// system_->LoadTexture("resources/nullScene.png");
-
-	//for (auto& ptr : stageIsClear_) {
-	//	ptr = false;
-	//}
 
 	helperTextureHandle_ = system_->LoadTexture("resources/texture/helper.png");
 	helperSprite_ = new SimpleSprite;
@@ -33,7 +18,6 @@ SceneManager::SceneManager(kEngine* system)
 	helperSprite_->mainPosition.transform.scale = { 0.5f,0.5f,1.0f };
 	helperSprite_->mainPosition.transform.translate = { 0.0f,550.0f,0.0f };
 	helperSprite_->objectParts_[0].materialConfig->textureHandle = helperTextureHandle_;
-
 
 	defaultMenu_ = new DefaultMenu(system_);
 }
@@ -59,83 +43,52 @@ SceneManager& SceneManager::GetInstance() {
 
 void SceneManager::SceneChanger() {
 
-	if (sceneUsing_ != nullptr) {
-		if (sceneUsing_->GetScenePhase() == ScenePhase::EXIT) {
-			sceneUsingHandle_ = sceneUsing_->GetNextStage();
-			delete sceneUsing_, sceneUsing_ = nullptr;
+	if (sceneUsing_) {
+		bool isSceneChange = false;
+
+		switch (sceneUsing_->GetOutcome()) {
+
+		case SceneOutcome::NEXT:
+		{
+			auto targetScene = sceneFlow_.find(sceneUsingNameHandle_);
+			if (targetScene != sceneFlow_.end()) {
+				sceneUsingNameHandle_ = targetScene->second;
+				isSceneChange = true;
+			} else {
+				Logger::Log("[kError] SM :: SceneChanger: Scene not found in sceneFlow_: " + sceneUsingNameHandle_);
+			}
 		}
-	}
+		break;
 
+		case SceneOutcome::RETRY:
+			isSceneChange = true;
+			break;
 
-	if (sceneUsing_ != nullptr) {
+		case SceneOutcome::RETURN:
+			isSceneChange = true;
+			sceneUsingNameHandle_ = "TITLE";
+			break;
+		case SceneOutcome::EXIT:
+			kEngine::EndGame();
+			break;
+
+		}
+
 		if (defaultMenu_->IsBack()) {
-			sceneUsing_->SetNextStage(SceneNum::S_TITLE);
-			sceneUsing_->SetScenePhase(ScenePhase::EXIT);
+			isSceneChange = true;
+			sceneUsingNameHandle_ = "TITLE";
 		}
+
 		if (defaultMenu_->IsRetry()) {
-			delete sceneUsing_, sceneUsing_ = nullptr;
+			isSceneChange = true;
 		}
+
+		if (!isSceneChange)return;
+
+		delete sceneUsing_, sceneUsing_ = nullptr;
 	}
 
-
-	//StageCheckBoxUpdate();
-
-	if (sceneUsing_ == nullptr) {
-
-		if (sceneUsingHandle_ == SceneNum::S_TITLE || sceneUsingHandle_ == SceneNum::S_SELECT) {
-			if (defaultMenu_->GetCanOpen()) {
-				defaultMenu_->SetCanOpen(false);
-			}
-		} else {
-			if (!defaultMenu_->GetCanOpen()) {
-				defaultMenu_->SetCanOpen(true);
-			}
-		}
-
-		switch (sceneUsingHandle_) {
-		case SceneNum::S_END:
-			/// GetIsEndによって外で終わる
-			break;
-
-		case SceneNum::S_NONE:
-			/// 何もしない, 空番号
-			break;
-
-		case SceneNum::S_TESTER:
-			//sceneUsing_ = new SceneTester(system_);
-			//sceneUsing_ = new SceneTest(system_);
-			//sceneUsing_ = new SceneTest2(system_);
-			//sceneUsing_ = new StageTestForGE(system_);
-			//sceneUsing_ = new Effect2(system_);
-			sceneUsing_ = new SceneCGHK2(system_);
-			break;
-
-		case SceneNum::S_TITLE:
-			sceneUsing_ = new SceneTitle(system_);
-			break;
-
-		case SceneNum::S_SELECT:
-			break;
-
-		case SceneNum::S_STAGE_01:
-			//sceneUsing_ = new SceneTest(system_);
-			//sceneUsing_ = new Scene1(system_);
-			break;
-		case SceneNum::S_STAGE_02:
-			break;
-
-		case SceneNum::S_Result:
-			sceneUsing_ = new SceneResult(system_);
-			break;
-
-		case SceneNum::S_BOSSTEST:
-			break;
-
-		case SceneNum::S_ANIMATIONEDITOR:
-			sceneUsing_ = new AnimationEditor(system_);
-			break;
-		}
-	}
+	sceneUsing_ = sceneFactory_->CreateScene(sceneUsingNameHandle_);
 }
 
 
@@ -143,6 +96,8 @@ void SceneManager::Update() {
 
 
 	SceneChanger();
+
+	//defaultMenu_->Update();
 
 	if (!defaultMenu_->GetIsPause()) {
 		if (sceneUsing_ != nullptr) {
@@ -152,7 +107,6 @@ void SceneManager::Update() {
 
 	//helperSprite_->Update(nullptr);
 
-	//defaultMenu_->Update();
 }
 
 void SceneManager::Render() {
@@ -171,36 +125,31 @@ void SceneManager::Render() {
 #endif
 }
 
-bool SceneManager::GetIsEnd() {
-	if (sceneUsingHandle_ == SceneNum::S_END)return true;
-	return false;
-}
-
-void SceneManager::StageCheckBoxUpdate() {
-	int checker = 0;
-	int newStageNum = -1;
-
-	for (int i = 0; i < 10; ++i) {
-		if (stage[i]) {
-			checker++;
-			if (i != static_cast<int>(sceneUsingHandle_)) {
-				newStageNum = i;
-			}
-		}
-	}
-
-	if (checker > 1 && newStageNum != -1) {
-		ClearStage();
-		stage[newStageNum] = true;
-		sceneUsingHandle_ = static_cast<SceneNum>(newStageNum);
-	}
-
-	if (checker == 0) {
-		ClearStage();
-		stage[0] = true;
-		sceneUsingHandle_ = SceneNum::S_SELECT;
-	}
-}
+//void SceneManager::StageCheckBoxUpdate() {
+//	int checker = 0;
+//	int newStageNum = -1;
+//
+//	for (int i = 0; i < 10; ++i) {
+//		if (stage[i]) {
+//			checker++;
+//			if (i != static_cast<int>(sceneUsingHandle_)) {
+//				newStageNum = i;
+//			}
+//		}
+//	}
+//
+//	if (checker > 1 && newStageNum != -1) {
+//		ClearStage();
+//		stage[newStageNum] = true;
+//		sceneUsingHandle_ = static_cast<SceneNum>(newStageNum);
+//	}
+//
+//	if (checker == 0) {
+//		ClearStage();
+//		stage[0] = true;
+//		sceneUsingHandle_ = SceneNum::S_SELECT;
+//	}
+//}
 
 
 void SceneManager::ClearStage() {

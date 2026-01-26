@@ -1,5 +1,6 @@
 #pragma once
 #include "MaterialConfig.h"
+#include "SceneFactory.h"
 #include "BaseScene.h"
 #include "SceneTitle.h"
 #include "Scene1.h"
@@ -27,14 +28,18 @@ public:
 
 	void Update();
 	void Render();
-
-	bool GetIsEnd();
+;
 
 public:
-	SceneNum sceneUsingHandle_ = SceneNum::S_NONE;
-	void SceneChanger();
+	std::string sceneUsingNameHandle_ = "NONE";
 
-	void StageCheckBoxUpdate();
+	void SceneChanger();
+	//void StageCheckBoxUpdate();
+
+private:
+	std::map<std::string,std::string> sceneFlow_ = {
+		{"TITLE","STAGE_01"},
+	};
 
 
 private:
@@ -43,11 +48,13 @@ private:
 	SceneManager(kEngine* system);
 	~SceneManager();
 private:
-	Scene* sceneUsing_ = nullptr;
-	Scene* sceneOld_ = nullptr;
+	BaseScene* sceneUsing_ = nullptr;
+	BaseScene* sceneOld_ = nullptr;
 
 private:
 	kEngine* system_ = nullptr; // 借り
+
+	SceneFactory* sceneFactory_ = nullptr;
 
 	DefaultMenu* defaultMenu_ = nullptr;
 

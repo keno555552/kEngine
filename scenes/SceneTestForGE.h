@@ -1,9 +1,9 @@
 #pragma once
-#include "Scene.h"
+#include "BaseScene.h"
 #include "MathsIncluder.h"
 #include "config.h"
 
-class SceneTestForGE :public Scene
+class SceneTestForGE :public BaseScene
 {
 public:
 	SceneTestForGE(kEngine* system);

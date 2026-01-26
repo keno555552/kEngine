@@ -1,7 +1,7 @@
 #pragma once
-#include "Scene.h"
+#include "BaseScene.h"
 
-class Menu :public Scene
+class Menu :public BaseScene
 {
 	public:
 	Menu(kEngine* system);

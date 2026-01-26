@@ -1,11 +1,11 @@
 #pragma once
-#include "Scene.h"
+#include "BaseScene.h"
 #include "Object\Object.h"
 #include "Object\Sprite.h"
 #include "DebugCamera.h"
 #include "Player\Player.h"
 
-class Effect1 :public Scene
+class Effect1 :public BaseScene
 {
 public:
 	Effect1(kEngine* system);

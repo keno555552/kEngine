@@ -1,10 +1,10 @@
 #pragma once
 #include "./kEngine.h"
-#include "../StageManager/Scene.h"
+#include "../StageManager/BaseScene.h"
 #include <memory>
 #include <vector>
 
-class Scene1 : public Scene {
+class Scene1 : public BaseScene {
 public:
 	Scene1(kEngine* system);
 	~Scene1();

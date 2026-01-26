@@ -4,7 +4,7 @@
 #include <functional>
 #include "Vector3.h"
 #include "kEngine.h"
-#include "Scene.h"
+#include "BaseScene.h"
 #include "GameObject/Object/Corner.h"
 
 

@@ -1,9 +1,9 @@
 #pragma once
-#include "Scene.h"
+#include "BaseScene.h"
 #include "Object\Sprite.h"
 #include "DebugCamera.h"
 
-class SceneTitle :public Scene
+class SceneTitle :public BaseScene
 {
 public:
 	SceneTitle(kEngine* system);

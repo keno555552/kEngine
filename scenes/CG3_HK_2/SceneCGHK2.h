@@ -1,5 +1,5 @@
 #pragma once
-#include "Scene.h"
+#include "BaseScene.h"
 #include "Object\Object.h"
 #include "Object\Sprite.h"
 #include "Light.h"
@@ -9,7 +9,7 @@
 #include "tool\DebugTool\DebugObject.h"
 
 
-class SceneCGHK2 : public Scene
+class SceneCGHK2 : public BaseScene
 {
 public:
 	SceneCGHK2(kEngine* system);

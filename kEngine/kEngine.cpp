@@ -2,6 +2,8 @@
 
 #pragma region システム管理
 
+bool kEngine::isGameOn_ = true;
+
 kEngine::kEngine() {
 }
 

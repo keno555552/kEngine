@@ -1,12 +1,12 @@
 #pragma once
-#include "Scene.h"
+#include "BaseScene.h"
 #include "Object\Object.h"
 #include "Object\Sprite.h"
 #include "DebugCamera.h"
 #include "Player\Player.h"
 #include "Particle\P_Fire\P_Fire.h"
 
-class SceneTest2 :public Scene
+class SceneTest2 :public BaseScene
 {
 public:
 	SceneTest2(kEngine* system);

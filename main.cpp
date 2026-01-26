@@ -21,7 +21,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	SceneManager::Initialize(system);
 
 	///========================Main処理=====================///
-	while (!system->ProcessMessage()) {
+	while (system->ProcessMessage() && kEngine::GameOn()) {
 
 
 		///====================ゲーム処理====================///
