@@ -88,8 +88,9 @@ SceneCGHK2::SceneCGHK2(kEngine* system) {
 	debugObject_ = new DebugObject(system_);
 	debugObject_->SetFollowObject(&player_->mainPosition);
 	//debugObject_->SetShowCenterPoint(true);
-	//debugObject_->SetShowNumber(true);
-	//debugObject_->UpdateShowNumber(1234567890);
+	debugObject_->SetShowNumber(true);
+	//debugObject_->UpdateShowNumber(92);
+	debugObject_->UpdateShowNumber(1234567890);
 
 	ground_ = new Object;
 	ground_->IntObject(system_);
@@ -140,6 +141,9 @@ void SceneCGHK2::Update() {
 
 	sprite_->Update(usingCamera_);
 
+	debugObject_->SetShowCenterPoint(isShowCenterPoint);
+	debugObject_->SetShowNumber(isShowCenterNumber);
+	debugObject_->UpdateShowNumber(textNumber);
 	debugObject_->Update(usingCamera_);
 
 	ground_->Update(usingCamera_);
@@ -153,6 +157,7 @@ void SceneCGHK2::Update() {
 	if (system_->GetTriggerOn(DIK_SPACE)) {
 		outcome_ = SceneOutcome::NEXT;
 	}
+
 }
 
 
@@ -338,7 +343,20 @@ void SceneCGHK2::ImGuiPart() {
 		ImGui::SliderFloat3("Scale", &player_->mainPosition.transform.scale.x, -1.0f, 1.0f);
 		ImGui::SliderFloat("ScaleOnce", &scale, -1.0f, 1.0f);
 		ImGui::SliderFloat("shininess", &shininess, 0.0f, 256.0f);
+
+		ImGui::ColorEdit4("Color", &player_->objectParts_[0].materialConfig->textureColor.x);
+		ImGui::ColorEdit4("Color2", &player_->objectParts_[0].materialConfig->textureColor2.x);
+		ImGui::ColorEdit4("Color3", &player_->objectParts_[0].materialConfig->textureColor3.x);
+
+		ImGui::SliderFloat("intensity", &player_->objectParts_[0].materialConfig->intensity, 0.0f, 5.0f);
+		ImGui::SliderFloat("heightScale", &player_->objectParts_[0].materialConfig->heightScale, 0.0f, 5.0f);
+
 		ImGui::Checkbox("isBlinn_Phong", (bool*)&isBlinn_Phong);
+
+		ImGui::SliderInt("textNumber", &textNumber, 0, 1000);
+		ImGui::Checkbox("isShowCenterPoint", &isShowCenterPoint);
+		ImGui::Checkbox("isShowCenterNumber", &isShowCenterNumber);
+
 		ImGui::End();
 
 		if(isBlinn_Phong) {
@@ -348,7 +366,7 @@ void SceneCGHK2::ImGuiPart() {
 		}
 		else {
 			for (auto& parts : player_->objectParts_) {
-				parts.materialConfig->lightModelType = LightModelType::PhongReflection;
+				parts.materialConfig->lightModelType = LightModelType::FlameNeonGlow;
 			}
 		}
 

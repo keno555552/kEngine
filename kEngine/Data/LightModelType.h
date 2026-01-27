@@ -8,6 +8,7 @@ enum class LightModelType {
     HalfLambert,
     PhongReflection,
     BlinnPhongReflection,
+	FlameNeonGlow,
     NumLightModels
 };
 

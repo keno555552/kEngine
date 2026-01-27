@@ -62,6 +62,10 @@ private:
 
 	int isBlinn_Phong = true;
 
+	int textNumber = 0;
+	bool isShowCenterPoint = false;
+	bool isShowCenterNumber = false;
+
 	int lightMode = 0;
 	bool isNormalLight = true;
 	bool isMultiPointLight = false;

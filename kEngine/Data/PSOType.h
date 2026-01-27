@@ -11,6 +11,7 @@ enum class PSOType {
 	HalfLambert,
 	PhongReflection,
 	BlinnPhongReflection,
+	FlameNeonGlow,
 	NUMBER_OF_PSO,
 
 	/// デフォルトPSO

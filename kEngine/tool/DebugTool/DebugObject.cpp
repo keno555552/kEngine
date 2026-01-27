@@ -40,6 +40,11 @@ void DebugObject::SetShowCenterPoint(bool isShow) {
 			centerPoint_->objectParts_[0].anchorPoint = { 15.0f,15.0f };
 			centerPoint_->objectParts_[0].materialConfig->textureHandle = TH_centerPoint;
 		}
+	} else {
+		if (centerPoint_) {
+			delete centerPoint_;
+			centerPoint_ = nullptr;
+		}
 	}
 }
 
@@ -53,6 +58,11 @@ void DebugObject::SetShowNumber(bool isShow) {
 			centerNumberSprite_->mainPosition.materialConfig->lightModelType = LightModelType::Sprite2D;
 			centerNumberSprite_->mainPosition.materialConfig->textureHandle = TH_number;
 			centerNumberSprite_->mainPosition.materialConfig->textureColor = { 1,1,1,1 };
+		}
+	} else {
+		if (centerNumberSprite_) {
+			delete centerNumberSprite_;
+			centerNumberSprite_ = nullptr;
 		}
 	}
 }
@@ -104,7 +114,7 @@ void DebugObject::updateCenterNumber() {
 			}
 			int numDigits = (int)centerNumberArray.size();
 
-			/// 位置調整 ///
+			/// スプライト数調整 ///
 			int diff = (int)centerNumberSprite_->objectParts_.size() - (int)centerNumberArray.size();
 			if (diff < 0) {
 				for (int i = 0; i < -diff; i++) {
@@ -117,20 +127,33 @@ void DebugObject::updateCenterNumber() {
 				}
 			}
 
-			float spriteW = 160.0f;
-			float spriteH = 1140.0f;
+			/// A---------- 多分大丈夫 ----------A ///
 
-			float cropW = 160.0f;
-			float cropH = 114.0f;
+			/// スプライト配置 ///
+
+			float scale = 0.025f;
+
+			float spriteW = 1140.0f;
+			float spriteH = 160.0f;
+
+			float cropW = 114.0f;
+			float cropH = 160.0f;
 
 			float spacing = 2.0f;
 
-			// 整排寬度
-			float totalWidth = spriteW * numDigits + spacing * (numDigits - 1);
+			// スケール適用後のサイズ
+			float pxScale = scale * 10; // ピクセルをスクリーン座標に変換するためのスケール
+			float scaledCropW = cropW * pxScale;
+			float scaledCropH = cropH * pxScale;
+			float scaledSpacing = spacing * pxScale;
 
-			// 左上角基準
-			float baseX = targetPosition_.x - totalWidth * 0.5f;
-			float baseY = targetPosition_.y - spriteH * 0.5f;
+			// 整排寬度
+			float totalWidth = scaledCropW * numDigits + scaledSpacing * (numDigits - 1);
+
+			// 初めの数字の位置
+			Vector2 pos = camera_->GetObjectScreenPos(followObject_->transform.translate);
+			float baseX = pos.x - (totalWidth * 0.5f);
+			float baseY = pos.y - (scaledCropH * 0.5f);
 
 			for (int i = 0; i < numDigits; i++) {
 
@@ -141,15 +164,16 @@ void DebugObject::updateCenterNumber() {
 				part.cropLT = Vector2(digit * cropW, 0.0f);
 				part.cropSize = Vector2(cropW, cropH);
 
-				// 設定位置（中心點）
-				float x = baseX + i * (spriteW + spacing) + spriteW * 0.5f;
-				float y = baseY + spriteH * 0.5f;
+				// 設定位置
+				float x = baseX + i * (scaledCropW + scaledSpacing);
 
-				part.transform.translate = targetPosition_;
-
-				// 設定縮放
-				part.transform.scale = Vector3(0.1f, 0.8f, 1.0f);
+				part.transform.translate = { x,baseY,0 };
 			}
+
+			// 設定縮放
+			float scaleX = scale;
+			float scaleY = scale * 10.0f;
+			centerNumberSprite_->mainPosition.transform.scale = Vector3(scaleX, scaleY, 1.0f);
 		}
 	}
 }

@@ -18,9 +18,15 @@
 struct Material
 {
     float4 color;
+    float4 color2;
+    float4 color3;
+    
     int enableLighting;
+
     float4x4 uvTransform;
     float shininess;
+    float intensity;
+    float heightScale;
 };
 
 struct LightGPU

@@ -119,6 +119,5 @@ private:
 	/// 透明オブジェクトバケット
 	std::vector<RenderData> transparentObjectParts3D_;
 
-
 };
 

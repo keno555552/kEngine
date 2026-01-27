@@ -158,6 +158,7 @@ void DrawEngine::PreDraw() {
 	/// 形状を設定。PSOに設定しているものとはまた別。同じものを設定するとUpdateLighting考えておけば良い
 	commandList_->SetGraphicsRootSignature(rootSignature_);
 	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	currentPSO_ = psoType::NONE;
 
 	/// Lighting
 	drawDataCollector_->UpdateLightData();
@@ -982,9 +983,6 @@ void DrawEngine::Draw2DOpaque() {
 
 	/// TileSRV
 	commandList_->SetGraphicsRootDescriptorTable(1, Tile2DSrvHandleGPU_);
-
-	/// Lighting
-	commandList_->SetGraphicsRootConstantBufferView(3, resourceManager_->lightingResource_->GetResource()->GetGPUVirtualAddress());
 
 	for (auto& [psoID, materialBuckets] : transparentObjectParts2D_) {
 

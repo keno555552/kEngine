@@ -812,6 +812,10 @@
     <FxCompile Include="resources\Shader\Tile2D.VS.hlsl" />
     <FxCompile Include="resources\Shader\LightingLambert\PhongReflection.hlsl" />
     <FxCompile Include="resources\Shader\LightingLambert\BlinnPhongReflection.hlsl" />
+    <FxCompile Include="resources\Shader\FlameNeonGlow.PS.hlsl" />
+    <FxCompile Include="resources\Shader\FlameNeonGlow.VS.hlsl" />
+    <FxCompile Include="resources\Shader\GlowSphere.PS.hlsl" />
+    <FxCompile Include="resources\Shader\GlowSphere.VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

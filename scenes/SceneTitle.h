@@ -24,4 +24,8 @@ public:
 	/// ============ オブジェクト ============///
 	SimpleSprite* sprite_ = new SimpleSprite;
 
+
+private:
+	void ImGuiPart();
+
 };

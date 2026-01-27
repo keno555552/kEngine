@@ -185,7 +185,7 @@ TransformationMatrix DrawDataCollector::SpriteWVPAdjustment(SpriteData& sprite, 
 		part.transform.translate
 	);
 
-	Matrix4x4 worldMatrix = followWorldMatrix * localMatrix;
+	Matrix4x4 worldMatrix =  followWorldMatrix * localMatrix;
 
 	float spriteTransform = part.transform.translate.z;
 	worldMatrix.m[3][2] = SpriteLayerManagement(spriteTransform);
@@ -342,6 +342,8 @@ uint32_t DrawDataCollector::PSODecision(MaterialConfig& material) {
 		return (uint32_t)PSOType::PhongReflection;
 	case LightModelType::BlinnPhongReflection:
 		return (uint32_t)PSOType::BlinnPhongReflection;
+	case LightModelType::FlameNeonGlow:
+		return (uint32_t)PSOType::FlameNeonGlow;
 	}
 	return (uint32_t)PSOType::NONE;
 }

@@ -46,7 +46,7 @@ const std::vector<LightGPU>& LightManager::GetGPUBuffer() const {
 	if (!lightGPUList_.empty()) {
 		return lightGPUList_;
 	}
-	Logger::Log("[kError] LM:: There is no lighting!");
+	//Logger::Log("[kError] LM:: There is no lighting!");
 	return defaultLightGPUList_;
 }
 

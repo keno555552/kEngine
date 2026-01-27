@@ -8,6 +8,7 @@ SceneManager::SceneManager(kEngine* system)
 	//sceneUsingHandle_ = SceneNum::S_STAGE_01;
 	//sceneUsingHandle_ = SceneNum::S_BOSSTEST;
 	sceneUsingNameHandle_ = "CGHK2";
+	//sceneUsingNameHandle_ = "TITLE";
 	//sceneUsingHandle_ = SceneNum::S_TITLE;
 	//sceneUsingHandle_ = SceneNum::S_STAGE_01;
 

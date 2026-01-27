@@ -205,6 +205,10 @@ void PSO::ShaderCompile(LightModelType lightModelType) {
 		vertexShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Particle.VS.hlsl", L"vs_6_0");
 		pixelShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Particle.PS.hlsl", L"ps_6_0", lightModelType);
 		break;
+	case LightModelType::FlameNeonGlow:
+		vertexShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/FlameNeonGlow.VS.hlsl", L"vs_6_0");
+		pixelShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/FlameNeonGlow.PS.hlsl", L"ps_6_0");
+		break;
 	}
 	assert(vertexShaderBlob_ != nullptr);
 	assert(pixelShaderBlob_ != nullptr);
