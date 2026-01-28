@@ -8,7 +8,7 @@
 
 #pragma region Input
 
-bool CheakXInputDeviceConnected() {
+bool CheckXInputDeviceConnected() {
 	XINPUT_STATE state;
 	ZeroMemory(&state, sizeof(XINPUT_STATE));
 
@@ -78,11 +78,11 @@ DirectXCore::~DirectXCore() {
 	//CloseHandle(fenceEvent);
 }
 
-uint32_t DirectXCore::GetDesriptorSizeRTV() {
+uint32_t DirectXCore::GetDescriptorSizeRTV() {
 	return device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 }
 
-uint32_t DirectXCore::GetDesriptorSizeDSV() {
+uint32_t DirectXCore::GetDescriptorSizeDSV() {
 	return device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 }
 
@@ -298,7 +298,7 @@ void DirectXCore::SetDirectXInput(InputType type, IDirectInputDevice8*& drive) {
 }
 
 void DirectXCore::SetXInput() {
-	CheakXInputDeviceConnected();
+	CheckXInputDeviceConnected();
 }
 
 

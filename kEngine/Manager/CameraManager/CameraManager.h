@@ -17,7 +17,7 @@ public:
     void DestroyCamera(Camera* cam);
 
 	/// アクティブカメラの設定
-    void SetActiveCamera(Camera* cam);
+    void SetActiveCamera(Camera* cam = nullptr);
 
 	/// リセットアクティブカメラ
 	void ResetActiveCamera();

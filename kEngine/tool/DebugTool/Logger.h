@@ -41,7 +41,4 @@ public:
 		OutputDebugStringA(buf.data());
 		OutputDebugStringA("\n");
 	}
-
-
-
 };

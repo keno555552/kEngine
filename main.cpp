@@ -2,7 +2,7 @@
 #include "Transform.h"			//Transform.h
 #include <cstdint>
 #include <windows.h>
-#include "DirectionalLight.h"
+#include "Data/DirectionalLightGPU.h"
 #include <string>
 #include <vector>
 #include "SceneManager.h"
@@ -17,29 +17,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	kEngine* system(new kEngine);
 	system->Initialize(kWindowTitle, kWindowWidth, kWindowHeight);
 
-	SceneManager* sceneManager = new SceneManager(system);
+	//SceneManager* sceneManager = new SceneManager(system);
+	SceneManager::Initialize(system);
 
 	///========================Main処理=====================///
-	while (true) {
+	while (system->ProcessMessage() && kEngine::GameOn()) {
 
 
 		///====================ゲーム処理====================///
-		sceneManager->Update();
+		SceneManager::GetInstance().Update();
 
 		///=====================描画処理=====================///
 		system->StartFrame();
 
-		sceneManager->Render();
+		SceneManager::GetInstance().Render();
 
 		system->EndFrame();
 
-		///// 終了条件
-		if (/*system->GetTriggerOn(DIK_ESCAPE) ||
-			system->GetGamepadTriggerOn(VK_PAD_START) ||*/
-			sceneManager->GetIsEnd() ||
-			system->ProcessMessage()) {
-			break;
-		}
 	}
 	delete system;
 	return 0;

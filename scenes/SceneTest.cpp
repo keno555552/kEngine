@@ -180,9 +180,9 @@ void SceneTest::Update() {
 		else useDebugCamera = true;
 	}
 
-	//if (system_->GetTriggerOn(DIK_SPACE)) {
-	//	ChangeNextStage(SceneNum::S_Result);
-	//}
+	if (system_->GetTriggerOn(DIK_SPACE)) {
+		outcome_ = SceneOutcome::NEXT;
+	}
 }
 
 

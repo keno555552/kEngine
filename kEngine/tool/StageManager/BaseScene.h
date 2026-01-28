@@ -2,11 +2,14 @@
 #include "kEngine.h"
 #include "SceneElement.h"
 
+
+
 class SceneManager;
-class Scene
+class BaseScene
 {
 public:
-	virtual ~Scene() = default;
+
+	virtual ~BaseScene() = default;
 
 	ScenePhase phase_ = ScenePhase::PREPARE;
 
@@ -16,11 +19,8 @@ public:
 
 	ScenePhase GetScenePhase() const { return phase_; }
 	void SetScenePhase(ScenePhase phase) { phase_ = phase; }
-
-	SceneNum GetNextStage() const { return nextStage; }
-	void SetNextStage(SceneNum stageNum) {nextStage = stageNum; }
 	
-	IsWin GetIsWin() const { return isWin_; }
+	SceneOutcome GetOutcome() const { return outcome_; }
 
 public:
 
@@ -29,14 +29,11 @@ public:
 
 protected:
 
-	void ChangeNextStage(SceneNum sceneNum);
 	void EndGame();
 
 protected:
 	kEngine* system_ = nullptr;
-	SceneNum nextStage = SceneNum::S_NONE;
 
-	IsWin isWin_ = IsWin::NONE;
+	SceneOutcome outcome_ = SceneOutcome::NONE;
 	bool isSceneEnd_ = false;
 };
-

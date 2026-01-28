@@ -7,6 +7,7 @@
 class MaterialConfig
 {
 public:
+
 	/// Texture関連
 	bool useModelTexture = true;
 	int textureHandle = 0;
@@ -26,8 +27,12 @@ public:
 	int materialResourceHandle = -1;
 	int drawState = 0;
 
-	/// Phong反射モデル用
+	/// ===================== 追加パラメータ ===================== ///
+	Vector4 textureColor2{ 1.0f,1.0f,1.0f,1.0f };
+	Vector4 textureColor3{ 1.0f,1.0f,1.0f,1.0f };
 	float shininess = 32.0f;
+    float intensity = 1.0f;
+    float heightScale = 2.0f;
 
 	bool operator==(const MaterialConfig& target)const;
 	bool operator!=(const MaterialConfig& target)const;
@@ -76,8 +81,6 @@ struct MaterialConfigHash {
         return h;
     }
 };
-
-
 
 /// MaterialConfig初期化
 void InitMaterialConfig(MaterialConfig* materialConfig);

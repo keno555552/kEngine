@@ -62,7 +62,7 @@ ID3D12RootSignature* PSO::createRootSignature() {
 	descriptionRootSignature.NumStaticSamplers = _countof(staticSampler);
 
 	/// RootParameter作成。PixelShaderのMaterialとVertexShaderのTransform
-	D3D12_ROOT_PARAMETER rootParameters[6] = {};                                                    
+	D3D12_ROOT_PARAMETER rootParameters[7] = {};                                                    
 
 	// Material用
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;                                // CBV を使う
@@ -89,20 +89,32 @@ ID3D12RootSignature* PSO::createRootSignature() {
 	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);					/// Tableで利用する数
 
 	// Lighting用
-	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;									/// CBV を使う
-	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;									/// PixelShaderで使う
-	rootParameters[3].Descriptor.ShaderRegister = 1;
+	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	rootParameters[3].Constants.Num32BitValues = 1;
+	rootParameters[3].Constants.RegisterSpace = 0;
+	rootParameters[3].Constants.ShaderRegister = 2; // b2
 
 	// slot 4: InstanceOffset (b1, VertexShader)
 	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 	rootParameters[4].Descriptor.ShaderRegister = 1;
 
-	// Camera 用 (b2)
+	// Camera 用 (b1)
 	rootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;									/// 或 ALL
-	rootParameters[5].Descriptor.ShaderRegister = 2;													/// b2
+	rootParameters[5].Descriptor.ShaderRegister = 1;													/// b1
 
+	// LightList 用 (StructuredBuffer<LightGPU> gLights : t1)
+	static D3D12_DESCRIPTOR_RANGE lightListRange[1]{};
+	lightListRange[0].BaseShaderRegister = 1; // t1
+	lightListRange[0].NumDescriptors = 1;
+	lightListRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	lightListRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	rootParameters[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[6].DescriptorTable.pDescriptorRanges = lightListRange;
+	rootParameters[6].DescriptorTable.NumDescriptorRanges = _countof(lightListRange);
 
 
 	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ
@@ -192,6 +204,10 @@ void PSO::ShaderCompile(LightModelType lightModelType) {
 	case LightModelType::BlinnPhongReflection:
 		vertexShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Particle.VS.hlsl", L"vs_6_0");
 		pixelShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Particle.PS.hlsl", L"ps_6_0", lightModelType);
+		break;
+	case LightModelType::FlameNeonGlow:
+		vertexShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/FlameNeonGlow.VS.hlsl", L"vs_6_0");
+		pixelShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/FlameNeonGlow.PS.hlsl", L"ps_6_0");
 		break;
 	}
 	assert(vertexShaderBlob_ != nullptr);

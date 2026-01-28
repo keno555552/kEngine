@@ -4,9 +4,7 @@
 #include <d3d12.h>
 #include <vector>
 
-// 前向宣告，避免循環引用
 class DirectXCore;
-
 class SrvManager
 {
 public:
@@ -20,11 +18,14 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(uint32_t index);
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(uint32_t index);
 
+
+	/// =========== SRV生成・解放 ===========///
+	/// /// SRV生成 (バッファ用)
 	/// SRV生成 (テクスチャ用)
-	void CreateSRVforTexture2D(uint32_t srvIndex, ID3D12Resource* pResource, DXGI_FORMAT Format, UINT MipLevels);
+	void CreateSRVForTexture2D(uint32_t srvIndex, ID3D12Resource* pResource, DXGI_FORMAT Format, UINT MipLevels);
 
 	/// SRV生成 (Structured Buffer用)
-	void CreateSRVforStructuredBuffer(uint32_t srvIndex, ID3D12Resource* pResource, UINT numElements, UINT structureByteStride);
+	void CreateSRVForStructuredBuffer(uint32_t srvIndex, ID3D12Resource* pResource, UINT numElements, UINT structureByteStride);
 
 	/// SRV解放
 	void Free(uint32_t srvIndex);
@@ -33,7 +34,7 @@ public:
 	bool CheckSRVHeapFull();
 	
 	/// 取得 descriptor size
-	uint32_t GetDesriptorSizeSRV();
+	uint32_t GetDescriptorSizeSRV();
 	
 	/// 取得 descriptor heap
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetDescriptorHeap() { return descriptorHeap; }

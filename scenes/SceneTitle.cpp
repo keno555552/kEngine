@@ -218,4 +218,19 @@ void SceneTitle::SelectSetting() {
 
 void SceneTitle::SelectQuit() {
 	ChangeNextStage(SceneNum::S_END);
+void SceneTitle::Draw() {
+	sprite_->Draw();
+	ImGuiPart();
+}
+
+void SceneTitle::ImGuiPart() {
+
+	ImGui::Begin("Sprite");
+	ImGui::SliderFloat3("position", &sprite_->mainPosition.transform.translate.x, -960.0f, 960.0f);
+	ImGui::SliderFloat3("rotation", &sprite_->mainPosition.transform.rotate.x, -3.14f, 3.14f);
+	ImGui::SliderFloat3("scale", &sprite_->mainPosition.transform.scale.x, 0.0f, 10.0f);
+	ImGui::SliderFloat2("LTpos", &sprite_->objectParts_[0].cropLT.x, 1.0f, 400.0f);
+	ImGui::SliderFloat2("Size", &sprite_->objectParts_[0].cropSize.x, 1.0f, 400.0f);
+	ImGui::End();
+
 }

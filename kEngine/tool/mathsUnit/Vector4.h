@@ -13,6 +13,8 @@ struct Vector4
 	Vector4 operator+(const Vector4& target);
 	Vector4 operator-(const Vector4& target);
 	Vector4 operator=(const Vector4& target);
+	Vector4 operator*(const Matrix4x4& target);
+	friend Vector4 operator*(const Vector4& v, const Matrix4x4& m);
 
 	bool operator==(const Vector4& target)const;
 	bool operator!=(const Vector4& target)const;

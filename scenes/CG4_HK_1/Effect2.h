@@ -1,5 +1,5 @@
 #pragma once
-#include "Scene.h"
+#include "BaseScene.h"
 #include "Object\Object.h"
 #include "Object\Sprite.h"
 #include "Particle\P_Fire\P_Fire.h"
@@ -8,7 +8,7 @@
 #include "Particle\P_Ball\P_Ball.h"
 #include <random>
 
-class Effect2 :public Scene
+class Effect2 :public BaseScene
 {
 public:
 	Effect2(kEngine* system);

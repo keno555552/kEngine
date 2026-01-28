@@ -44,9 +44,9 @@ bool WinAPI::ProcessMessage() {
 		DispatchMessage(&msg);
 	}
 	if (msg.message == WM_QUIT) {
-		return true;
+		return false;
 	}
-	return false;
+	return true;
 }
 
 bool WinAPI::RegisterWindowClass() {

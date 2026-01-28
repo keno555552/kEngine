@@ -1,17 +1,17 @@
 #pragma once
-#include "Scene.h"
+#include "BaseScene.h"
 #include "TransformationMatrix.h"
 #include "Transform.h"			//Transform.h
 #include "Vector4.h"
 #include "Vector2.h"
 #include <vector>
 #include "MaterialConfig.h"
-#include "DirectionalLight.h"
+#include "Data/DirectionalLightGPU.h"
 #include "config.h"
 #include "DebugCamera.h"
 
 
-class SceneTester :public Scene
+class SceneTester :public BaseScene
 {
 public:
 	SceneTester(kEngine* system);
@@ -80,7 +80,7 @@ private:
 	kEngine* system_ = nullptr;
 
 	///Lighting
-	DirectionalLight directionalLight{
+	DirectionalLightGPU directionalLight{
 		.color{1.0f,1.0f,1.0f,1.0f},
 		.direction{-0.5f,-0.5f,0.4f},
 		.intensity{1.0f}
@@ -96,7 +96,7 @@ private:
 	int suzanneModelHandle_ = 0;
 	int multiMeshModelHandle_ = 0;
 	int multiMaterialModelHandle_ = 0;
-	int charaterModelHandle_ = 0;
+	int characterModelHandle_ = 0;
 	int needleModelHandle_ = 0;
 	int skydomeModelHandle_ = 0;
 

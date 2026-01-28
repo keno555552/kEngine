@@ -19,6 +19,9 @@ private:
 	/// 最大SRV数(最大テキスチャ枚数)
 	static const int kMaxSRVNum_ = 512;              /// 最大SRV数(最大テキスチャ枚数)
 
+	/// 最大ライト数設定
+	static const int kMaxLightNum_ = 50;              /// 最大ライト数
+
 private:
 	static char* clientTitle_;
 	static int clientWidth_;
@@ -31,12 +34,20 @@ private:
 	static int XInputDriverIP_;
 
 public:
+	static int Get2DTileNumInstance() { return k2DTileNumInstance_; }
+	static int Get3DTileNumInstance() { return k3DTileNumInstance_; }
+	static int GetMaxMaterialNum() { return kMaxMaterialNum_; }
+	static int GetMaxSRVNum() { return kMaxSRVNum_; }
+	static int GetMaxLightNum() { return kMaxLightNum_; }
+
 	static void SaveClientTitle(const char* clientTitle);
 	static const char* GetClientTitle() { return clientTitle_; }
 	static void SaveClientWidth(int clientWidth) { clientWidth_ = clientWidth; }
 	static int GetClientWidth() { return clientWidth_; }
 	static void SaveClientHeight(int clientHeight) { clientHeight_ = clientHeight; }
 	static int GetClientHeight() { return clientHeight_; }
+
+
 	static void SetConnectKeyboard(bool* state) { isConnectKeyboard_ = *state; }
 	static bool GetKeyboardState() { return isConnectKeyboard_; }
 	static void SetConnectMouse(bool* state) { isConnectMouse_ = *state; }
@@ -47,10 +58,6 @@ public:
 	static gamepadType GetGamePadType() { return gamePadType_; }
 	static void SetXInputIp(int IP) { XInputDriverIP_ = IP; }
 	static int GetXInputIp() { return XInputDriverIP_; }
-	static int Get2DTileNumInstance() { return k2DTileNumInstance_; }
-	static int Get3DTileNumInstance() { return k3DTileNumInstance_; }
-	static int GetMaxMaterialNum() { return kMaxMaterialNum_; }
-	static int GetMaxSRVNum() { return kMaxSRVNum_; }
 
 public:
 	/// デフォルトメッシュバッファハンドル

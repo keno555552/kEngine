@@ -1,5 +1,5 @@
 #pragma once
-#include "Scene.h"
+#include "BaseScene.h"
 #include "Object\Object.h"
 #include "Object\Sprite.h"
 #include "Sight\Sight.h"
@@ -10,7 +10,7 @@
 #include "tool\MapChip\MapChipField.h"
 #include "tool\CollisionManager\CollisionManager.h"
 
-class SceneTest :public Scene
+class SceneTest :public BaseScene
 {
 public:
 	SceneTest(kEngine* system);

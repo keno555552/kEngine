@@ -1,6 +1,6 @@
 #pragma once
 
-enum class PSOID {
+enum class PSOType {
 	NONE = -1,
 
 	/// 2D系
@@ -11,6 +11,7 @@ enum class PSOID {
 	HalfLambert,
 	PhongReflection,
 	BlinnPhongReflection,
+	FlameNeonGlow,
 	NUMBER_OF_PSO,
 
 	/// デフォルトPSO

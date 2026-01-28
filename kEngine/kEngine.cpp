@@ -2,6 +2,8 @@
 
 #pragma region システム管理
 
+bool kEngine::isGameOn_ = true;
+
 kEngine::kEngine() {
 }
 
@@ -20,6 +22,7 @@ kEngine::~kEngine() {
 	delete drawEngine;
 	delete drawDataCollector;
 	delete cameraManager;
+	delete lightManager;
 	delete srvManager;
 	delete dxComm;
 }
@@ -43,9 +46,11 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 	instanceManager = new InstanceManager();
 	resourceManager = new ResourceManager(dxComm, instanceManager);
 
+	lightManager = new LightManager;
+
 	cameraManager = new CameraManager;
 
-	drawDataCollector = new DrawDataCollector(resourceManager, instanceManager, cameraManager);
+	drawDataCollector = new DrawDataCollector(resourceManager, instanceManager, cameraManager, lightManager);
 	drawEngine = new DrawEngine;
 	drawEngine->Initialize(dxComm, srvManager, resourceManager, drawDataCollector);
 
@@ -58,19 +63,20 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 
 void kEngine::StartFrame() {
 	dxComm->StartFrame();
-	drawEngine->PreDraw();
+	drawEngine->StartFrame();
 	inputManager->KeysUpdata();
 	timeManager->Update();
 	drawDataCollector->PreCollect();
 }
 
 void kEngine::EndFrame() {
+	drawEngine->PreDraw();
 	drawEngine->CommitDraw();
 	dxComm->EndFrame();
 	drawEngine->EndDraw();
 }
 
-void kEngine::SetDirectionalLight(DirectionalLight* light) {
+void kEngine::SetDirectionalLight(DirectionalLightGPU* light) {
 	drawEngine->SetDirectionalLight(light);
 }
 
@@ -103,6 +109,14 @@ int kEngine::GetMutiModelNum(int modelHandle) {
 int kEngine::SetModelObj(std::string path) {
 	//return drawEngine->SetModel(path);
 	return resourceManager->LoadModel(path);
+}
+
+void kEngine::AddLight(Light* light) {
+	lightManager->AddLight(light);
+}
+
+void kEngine::RemoveLight(Light* light) {
+	lightManager->RemoveLight(light);
 }
 
 DebugCamera* kEngine::CreateDebugCamera() {

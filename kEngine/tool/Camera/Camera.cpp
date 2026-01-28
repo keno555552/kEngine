@@ -118,6 +118,23 @@ Transform Camera::GetTransform() {
 	return cameraTransform_;
 }
 
+Vector2 Camera::GetObjectScreenPos(Vector3 objPos) {
+
+	Vector4 clip = Vector4(objPos.x, objPos.y, objPos.z, 1.0f) * viewMatrix_ * projectionMatrix_;
+
+	if (clip.w <= 0.0f)
+		return Vector2(-9999, -9999);
+
+	float ndcX = clip.x / clip.w;
+	float ndcY = clip.y / clip.w;
+
+	float screenX = (ndcX * 0.5f + 0.5f) * config::GetClientWidth();
+	float screenY = (1.0f - (ndcY * 0.5f + 0.5f)) * config::GetClientHeight();
+
+	return Vector2(screenX, screenY);
+
+}
+
 void Camera::ResetCamera() {
 	cameraTransform_ = defaultTransform_;
 	dirty_ = true;

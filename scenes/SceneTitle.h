@@ -1,11 +1,11 @@
 #pragma once
-#include "Scene.h"
 #include "Object\Object.h"
+#include "BaseScene.h"
 #include "Object\Sprite.h"
 #include "DebugCamera.h"
 #include "DefaultMenu/DefaultMenu.h"
 
-class SceneTitle :public Scene
+class SceneTitle :public BaseScene
 {
 public:
 	SceneTitle(kEngine* system);
@@ -83,4 +83,8 @@ private:
 	void SelectStart();
 	void SelectSetting();
 	void SelectQuit();
+
+private:
+	void ImGuiPart();
+
 };

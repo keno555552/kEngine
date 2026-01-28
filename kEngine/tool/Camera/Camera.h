@@ -44,6 +44,7 @@ public:
 	Matrix4x4 GetViewMatrix();
 	Matrix4x4 GetProjectionMatrix();
 	Transform GetTransform();
+	Vector2 GetObjectScreenPos(Vector3 objPos);
 
 	void SetDefaultTransform(Transform defaultTransform) { defaultTransform_ = defaultTransform; }
 	Transform GetDefaultTransform() const { return defaultTransform_; }

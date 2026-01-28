@@ -22,18 +22,18 @@ public:
 
 
 private:
-	kEngine* system_ = nullptr;				// 借り
+	kEngine* system_ = nullptr;				// �؂�
 
-	/// ============== カメラ関連 ==============///
-	/// ステージカメラ(mainカメラ)
+	/// ============== �J�����֘A ==============///
+	/// �X�e�[�W�J����(main�J����)
 	Camera* camera_ = nullptr;
-	/// デバックカメラ
+	/// �f�o�b�N�J����
 	DebugCamera* debugCamera_ = nullptr;
-	/// 今使っているカメラ
-	Camera* usingCamera_ = nullptr;			// 借り用
+	/// ���g���Ă���J����
+	Camera* usingCamera_ = nullptr;			// �؂�p
 
-	/// =========== リソースハンドル ============///
-	/// モデルハンドル
+	/// =========== ���\�[�X�n���h�� ============///
+	/// ���f���n���h��
 	int MH_skydome_ = 0;
 	int MH_player_ = 0;
 	int MH_sight_ = 0;
@@ -43,7 +43,7 @@ private:
 	int MH_enemy_ = 0;
 	int MH_backPoint_ = 0;
 
-	/// テキスチャーハンドル
+	/// �e�L�X�`���[�n���h��
 	int TH_box_ = 0;
 	int TH_try_ = 0;
 	int TH_uv_ = 0;
@@ -59,7 +59,7 @@ private:
 	int SH_BGM_ = 0;
 	int SE_killEnemy_ = 0;
 
-	/// =========== ゲームオブジェクト ==========///
+	/// =========== �Q�[���I�u�W�F�N�g ==========///
 	Object* skydome_ = nullptr;
 	//Object* object_ = nullptr;
 
@@ -80,14 +80,14 @@ private:
 	std::vector<Bullet*> bulletList_;
 	std::vector<Enemy*> enemyList_;
 
-	/// ========== コリジョンマネージャー =========///
+	/// ========== �R���W�����}�l�[�W���[ =========///
 	CollisionManager collisionManager_;
 
-	/// =============== フラグ ================///
+	/// =============== �t���O ================///
 	bool useDebugCamera = false;
 
 private:
-	/// ============= シーン内命令 =============///
+	/// ============= �V�[������� =============///
 	void CameraPart();
 	void ImGuiPart();
 

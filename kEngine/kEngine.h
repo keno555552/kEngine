@@ -12,7 +12,7 @@
 #include "materialconfig.h"
 #include "tool/TimeManager/TimeManager.h"
 #include "DrawDataCollector.h"
-#include "CameraManager.h"
+#include "CameraManager/CameraManager.h"
 
 #ifdef USE_IMGUI
 #include "ImGuiManager.h"
@@ -23,7 +23,8 @@
 #include "InstanceManager.h"
 #include "ResourceManager/ResourceManager.h"
 #include "TextureManager/TextureManager.h"
-#include "Lighting/DirectionalLight.h"
+#include "LightManager/LightManager.h"
+#include "Data/DirectionalLightGPU.h"
 #include "Camera.h"
 
 
@@ -44,9 +45,13 @@ public:
 
 	void EndFrame();
 
-	void SetDirectionalLight(DirectionalLight* light);
+	void SetDirectionalLight(DirectionalLightGPU* light);
 
 	bool ProcessMessage();
+
+	static bool GameOn() { return isGameOn_; }
+
+	static void EndGame() { isGameOn_ = false; }
 
 #pragma endregion
 
@@ -60,6 +65,10 @@ public:
 
 	int GetMutiModelNum(int modelHandle);
 	int SetModelObj(std::string path);
+
+	void AddLight(Light* light);
+	void RemoveLight(Light* light);
+
 
 	DebugCamera* CreateDebugCamera();
 	Camera* CreateCamera();
@@ -176,6 +185,9 @@ private:
 	TextureManager* textureManager = nullptr;
 	DrawDataCollector* drawDataCollector = nullptr;
 
+	/// ライティング管理
+	LightManager* lightManager = nullptr;
+
 	/// カメラ管理
 	CameraManager* cameraManager = nullptr;
 
@@ -190,4 +202,7 @@ private:
 
 	/// ============ 時間関連 ============///
 	TimeManager* timeManager = nullptr;
+
+	/// =========== ゲーム継続関連 ===========///
+	static bool isGameOn_;
 };

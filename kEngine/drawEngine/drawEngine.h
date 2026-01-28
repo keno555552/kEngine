@@ -8,7 +8,7 @@
 #include "ResourceManager.h"
 #include "VertexData.h"
 #include "Material.h"
-#include "DirectionalLight.h"
+#include "Data/DirectionalLightGPU.h"
 
 #include "MathsIncluder.h"
 #include "TransformationMatrix.h"
@@ -18,6 +18,7 @@
 #include "VertexIndex.h"
 #include "Camera.h"
 #include "DrawData/CameraForGPU.h"
+#include "Data/LightGPU.h"
 
 #include "DrawData/ObjectData.h"
 #include "DrawData/SpriteData.h"
@@ -36,11 +37,12 @@ public:
 					ResourceManager* resourceManager,
 					DrawDataCollector* drawDataCollector);
 
+	void StartFrame();
 	void PreDraw();
 	void CommitDraw();
 	void EndDraw();
 
-	void SetDirectionalLight(DirectionalLight* light);
+	void SetDirectionalLight(DirectionalLightGPU* light);
 
 	/// 三角形関連
 	void DrawTriangle(TransformationMatrix* wvpData, MaterialConfig material);
@@ -144,8 +146,14 @@ private:
 
 
 	///Lighting関連
-	DirectionalLight* directionalLightData{};		// 外部から受ける
-	DirectionalLight* lightingData = nullptr;
+	DirectionalLightGPU* directionalLightData{};		// 外部から受ける
+	DirectionalLightGPU* lightingData = nullptr;
+
+	uint32_t lightCount_ = 0;
+
+	D3D12_GPU_DESCRIPTOR_HANDLE lightListSrvHandleGPU_{};
+	BasicResource* lightBuffer_ = new BasicResource;
+	LightGPU* lightListData_ = nullptr;
 
 	/// 交換用容器
 	BasicResource* tile2DWVPResource_ = new BasicResource;
@@ -182,7 +190,8 @@ private:
 	void SetTexture(int materialID);
 	void SetCameraForGPU();
 	void InitializeLighting();
-	void SetLighting(DirectionalLight* directionalLight);
+	void UpdateLighting();
+	void SetLightingGPU();
 
 	void PSODecision(MaterialConfig& material);
 	void PSODecision(int psoID);
