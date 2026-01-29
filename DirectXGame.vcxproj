@@ -246,6 +246,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="kEngine\GameObject\CountdownTimer\CountdownTimer.cpp" />
     <ClCompile Include="kEngine\Lighting\AeraLight.cpp" />
     <ClCompile Include="kEngine\Lighting\DirectionalLight.cpp" />
     <ClCompile Include="kEngine\Data\BlendModeType.cpp" />
@@ -375,8 +376,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="scenes\SceneTitle.cpp" />
     <ClCompile Include="kEngine\core\driver\SrvManager.cpp" />
     <ClCompile Include="kEngine\Lighting\SpotLight.cpp" />
+    <ClCompile Include="kEngine\GameObject\StartTimer\StartTimer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="kEngine\GameObject\CountdownTimer\CountdownTimer.h" />
     <ClInclude Include="kEngine\Lighting\AeraLight.h" />
     <ClInclude Include="kEngine\Lighting\DirectionalLight.h" />
     <ClInclude Include="kEngine\Data\BlendModeType.h" />
@@ -488,6 +491,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="scenes\SceneTitle.h" />
     <ClInclude Include="kEngine\core\driver\SrvManager.h" />
     <ClInclude Include="kEngine\Lighting\SpotLight.h" />
+    <ClInclude Include="kEngine\GameObject\StartTimer\StartTimer.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\FlameNeonGlow.PS.hlsl">

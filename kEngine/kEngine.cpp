@@ -386,4 +386,28 @@ TimeManager* kEngine::GetTimeManager() const {
 	return timeManager;
 }
 
+void kEngine::SetTimeScale(float timeScale) {
+	timeManager->setTimeScale(timeScale);
+}
+
+float kEngine::GetTimeScale() const {
+	return timeManager->getTimeScale();
+}
+
+float kEngine::GetScaledDeltaTime() const {
+	return timeManager->getScaledDeltaTime();
+}
+
+void kEngine::SetTimerTimeScale(float timerTimeScale) {
+	timeManager->setTimerTimeScale(timerTimeScale);
+}
+
+float kEngine::GetTimerTimeScale_() const {
+	return timeManager->getTimerTimeScale();
+}
+
+float kEngine::GetTimerScaledDeltaTime_() const {
+	return timeManager->getTimerScaledDeltaTime();
+}
+
 #pragma endregion

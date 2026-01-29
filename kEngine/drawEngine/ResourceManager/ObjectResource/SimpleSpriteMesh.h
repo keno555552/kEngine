@@ -13,12 +13,14 @@ public:
 	void SetSize(CornerData corner);
 	void SetAnchor(Vector2 RBpos, Vector2 anchorPoint);
 	void SetTexcoord(Vector2 textureSize,Vector2 cropLT, Vector2 cropSize);
+	void ResetTexcoord();
 	ID3D12Resource* CreateVertexResource_(ID3D12Device* device)override;
 	void Mapping();
 	ID3D12Resource* CreateIndexResource_(ID3D12Device* device)override;
 
 	int GetVertexNum() { return 6; }
 	bool CheckSize(Vector2 RBpos);
+	bool CheckIsDefaultSize();
 	void SetKeep(bool keep) { keep_ = keep; }
 	bool GetKeep() { return keep_; }
 

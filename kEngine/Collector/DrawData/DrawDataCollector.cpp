@@ -34,8 +34,8 @@ void DrawDataCollector::Collect2D(SpriteData* sprite) {
 
 		/// ========================================  RenderData作成  ========================================///
 
-		/// metaData取得
-		DirectX::TexMetadata metaData = resourceManager_->GetTextureMetadata(object.materialConfig->textureHandle);
+		/// metaData
+		DirectX::TexMetadata metaData = resourceManager_->GetTextureMetaData(object.materialConfig->textureHandle);
 
 		/// スプライトメッシュのリサイズ
 		resourceManager_->ResizeSimpleSpriteMesh(

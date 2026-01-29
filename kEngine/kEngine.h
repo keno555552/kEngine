@@ -167,6 +167,17 @@ public:
 	float GetDeltaTime();
 	TimeManager* GetTimeManager()const;
 
+	/// 倍率付きの時間関数
+	void SetTimeScale(float timeScale);
+	float GetTimeScale() const;
+	float GetScaledDeltaTime() const;
+
+	/// Timer用の倍率付きの時間関数
+	void SetTimerTimeScale(float timerTimeScale);
+	float GetTimerTimeScale_() const;
+	float GetTimerScaledDeltaTime_() const;
+
+
 #pragma endregion
 
 private:

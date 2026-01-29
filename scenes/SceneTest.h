@@ -5,6 +5,7 @@
 #include "DebugCamera.h"
 #include "Player\Player.h"
 #include "tool\MapChip\MapChipField.h"
+#include "StartTimer\StartTimer.h"
 
 class SceneTest :public BaseScene
 {
@@ -42,11 +43,13 @@ private:
 	SimpleSprite* sprite_ = nullptr;
 	SimpleSprite* sprite2_ = nullptr;
 	MapChipField* mapChipField_ = nullptr;
+	StartTimer* startTimer_ = nullptr;
 	std::vector<std::vector<Object*>> blockObjectList_;
 
 
-	/// =============== フラグ ================///
+	/// =============== フラグ / 変数 ================///
 	bool useDebugCamera = false;
+	float timerScale = 1.0f;
 
 private:
 	/// ============= シーン内命令 =============///

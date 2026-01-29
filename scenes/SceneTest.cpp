@@ -5,7 +5,7 @@ SceneTest::SceneTest(kEngine* system) {
 	system_ = system;
 	debugCamera_ = system_->CreateDebugCamera();
 	camera_ = system_->CreateCamera();
-	camera_->Move(Vector3(0.0f, 0.5f, -10.0f));
+	camera_->Move(Vector3(0.0f, 1.5f, -10.0f));
 	usingCamera_ = camera_;
 	system_->SetCamera(usingCamera_);
 
@@ -52,6 +52,8 @@ SceneTest::SceneTest(kEngine* system) {
 	mapChipField_->SetBlockWidth(1.0f);
 	mapChipField_->SetBlockHeight(1.0f);
 
+	startTimer_ = new StartTimer(system_);
+
 	/// マップチップの初期化
 	GenerateBlocks();
 }
@@ -80,6 +82,8 @@ void SceneTest::Update() {
 	sprite_->Update(usingCamera_);
 	//sprite2_->Update(usingCamera_);
 
+	system_->SetTimerTimeScale(timerScale);
+
 	/// ブロック更新
 	for (auto& row : blockObjectList_) {
 		for (auto& block : row) {
@@ -88,6 +92,9 @@ void SceneTest::Update() {
 			}
 		}
 	}
+
+	/// スタートタイマー更新
+	startTimer_->Update(nullptr);
 
 	if (system_->GetTriggerOn(DIK_0)) {
 		if (useDebugCamera)useDebugCamera = false;
@@ -121,6 +128,8 @@ void SceneTest::Draw() {
 		}
 	}
 
+	startTimer_->Draw();
+
 #ifdef USE_IMGUI
 	/// ImGui処理
 	ImGuiPart();
@@ -143,8 +152,8 @@ void SceneTest::CameraPart() {
 	system_->SetCamera(usingCamera_);
 }
 
-#ifdef USE_IMGUI
 void SceneTest::ImGuiPart() {
+#ifdef USE_IMGUI
 	ImGui::Begin("DebugCamera");
 	ImGui::Checkbox("isUse", &useDebugCamera);
 	ImGui::End();
@@ -169,8 +178,26 @@ void SceneTest::ImGuiPart() {
 		}
 	}
 
-}
+	ImGui::Begin("StartTimer");
+	ImVec2 size(50, 20);
+	Timer& timer = startTimer_->GetTime();
+	ImGui::Text("Time: %.2f / %.2f", timer.parameter_, timer.maxTime_);
+	ImGui::Text("Count: %d", startTimer_->GetCount());
+	if (ImGui::Button("Start", size)) {
+		startTimer_->Start();
+	}
+	if (ImGui::Button("Stop", size)) {
+		startTimer_->Stop();
+	}
+	if (ImGui::Button("Reset", size)) {
+		startTimer_->Reset();
+	}
+	ImGui::SliderFloat("TimeScale", &timerScale, 0.0f, 5.0f);
+	ImGui::End();
+	
+
 #endif
+}
 
 
 void SceneTest::GenerateBlocks() {
