@@ -21,8 +21,8 @@ void Sight::Update(Camera* camera) {
 		mainPosition.transform.translate = player_->mainPosition.transform.translate;
 	}
 
-	float mouseX = system_->GetMousePosX();
-	float mouseY = system_->GetMousePosY();
+	float mouseX = (float)system_->GetMousePosX();
+	float mouseY = (float)system_->GetMousePosY();
 
 	float w = config::GetClientWidth();
 	float h = config::GetClientHeight();
@@ -38,6 +38,7 @@ void Sight::Update(Camera* camera) {
 	dir = Normalize(dir);
 
 	mouseOnPlane_ = camera->GetTransform().translate + dir * 10.0f; 
+	mouseOnPlane_.z = 0.0f; // プレイヤーと同じ平面に投影
 
 	Vector3 toHit = mouseOnPlane_ - mainPosition.transform.translate;
 	angleSightToTarget_ = mouseOnPlane_;

@@ -193,7 +193,6 @@ private:
 	void UpdateLighting();
 	void SetLightingGPU();
 
-	void PSODecision(MaterialConfig& material);
 	void PSODecision(int psoID);
 	ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);
 	void MakeDepthStencilView();

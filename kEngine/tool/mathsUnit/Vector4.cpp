@@ -74,6 +74,14 @@ Vector4 Multiply(const Vector4& v, const Matrix4x4& m) {
 		v.x * m.m[0][3] + v.y * m.m[1][3] + v.z * m.m[2][3] + v.w * m.m[3][3]
 	};
 }
+
+Vector4 ColorTo1(Vector4 colorBy255) {
+	return { colorBy255.x / 255.0f, colorBy255.y / 255.0f, colorBy255.z / 255.0f, colorBy255.w / 255.0f };
+}
+
+Vector4 ColorTo255(Vector4 colorBy1) {
+	return { colorBy1.x * 255.0f, colorBy1.y * 255.0f, colorBy1.z * 255.0f, colorBy1.w * 255.0f };
+}
  
 //Vector4 Vector4::ColorBy144() {
 //	return { z * 144.0f, y * 144.0f, x * 144.0f, w * 144.0f };

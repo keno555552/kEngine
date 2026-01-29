@@ -16,7 +16,12 @@ Bullet::Bullet(kEngine* system, const Vector3& position, const Vector3& directio
 	CreateModelData(MH_bullet_);
 	mainPosition.transform.translate = position;
 	mainPosition.transform.scale = { 0.4f,0.4f,0.4f };
-	objectParts_[0].materialConfig->textureColor = { 1.0f,1.0f,0.5f,1.0f };
+	objectParts_[0].materialConfig->lightModelType = LightModelType::FlameNeonGlow;
+	objectParts_[0].materialConfig->textureColor = ColorTo1({ 224,238,8,255 });
+	objectParts_[0].materialConfig->textureColor2 = ColorTo1({ 225,0,0,255 });
+	objectParts_[0].materialConfig->textureColor3 = ColorTo1({ 225,248,248,255 });
+	objectParts_[0].materialConfig->intensity = 1.587f;
+	objectParts_[0].materialConfig->heightScale = 1.783f;
 	direction_ = Normalize(direction);
 
 	// orient bullet in 2D: forward (+Y) rotates only around Z to face move direction
@@ -34,6 +39,4 @@ Bullet::~Bullet() {
 void Bullet::Update(Camera* camera) {
 	float dt = system_->GetDeltaTime();
 	mainPosition.transform.translate += direction_ * speed_ * dt;
-
-	Object::Update(camera);
 }

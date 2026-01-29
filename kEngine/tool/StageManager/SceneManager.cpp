@@ -7,7 +7,7 @@ SceneManager::SceneManager(kEngine* system)
 	sceneFactory_(new SceneFactory(system)) {
 	//sceneUsingHandle_ = SceneNum::S_STAGE_01;
 	//sceneUsingHandle_ = SceneNum::S_BOSSTEST;
-	sceneUsingNameHandle_ = "CGHK2";
+	sceneUsingNameHandle_ = "TITLE";
 	//sceneUsingNameHandle_ = "TITLE";
 	//sceneUsingHandle_ = SceneNum::S_TITLE;
 	//sceneUsingHandle_ = SceneNum::S_STAGE_01;
@@ -73,6 +73,15 @@ void SceneManager::SceneChanger() {
 			kEngine::EndGame();
 			break;
 
+		case SceneOutcome::WIN:
+			sceneUsingNameHandle_ = "WIN";
+			isSceneChange = true;
+			break;
+			
+		case SceneOutcome::LOSE:
+			sceneUsingNameHandle_ = "LOSE";
+			isSceneChange = true;
+			break;
 		}
 
 		if (defaultMenu_->IsBack()) {

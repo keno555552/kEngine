@@ -73,13 +73,6 @@ void DrawEngine::Initialize
 	///Lighting
 	InitializeLighting();
 
-	directionalLightData = new DirectionalLightGPU{
-			.color{1.0f,1.0f,1.0f,1.0f},
-			.direction{-0.5f,-0.5f,0.4f},
-			.intensity{1.0f}
-	};
-
-
 	/// Tile用wvpBufferを作成
 	tile2DWVPResource_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(TransformationMatrix) * config::Get2DTileNumInstance());
 	tile2DWVPResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&tile2DInstancingData_));
@@ -194,52 +187,6 @@ void DrawEngine::SetDirectionalLight(DirectionalLightGPU* light) {
 			directionalLightData = new DirectionalLightGPU;
 		}
 		*directionalLightData = *light;
-	}
-}
-
-void DrawEngine::PSODecision(MaterialConfig& material) {
-	bool psoChanged = false;
-
-	LightModelType lightModelType = (LightModelType)(int)material.lightModelType;
-
-	switch (lightModelType) {
-	case LightModelType::Sprite2D:
-		if (currentPSO_ != psoType::Sprite2D) {
-			commandList_->SetPipelineState(psoList_[(int)LightModelType::Sprite2D]);
-			currentPSO_ = psoType::Sprite2D;
-			psoChanged = true;
-		}
-		break;
-	case LightModelType::Lambert:
-		if (currentPSO_ != psoType::Lambert) {
-			commandList_->SetPipelineState(psoList_[(int)LightModelType::Lambert]);
-			currentPSO_ = psoType::Lambert;
-			psoChanged = true;
-		}
-		break;
-	case LightModelType::HalfLambert:
-		if (currentPSO_ != psoType::HalfLambert) {
-			commandList_->SetPipelineState(psoList_[(int)LightModelType::HalfLambert]);
-			currentPSO_ = psoType::HalfLambert;
-			psoChanged = true;
-		}
-		break;
-	case LightModelType::PhongReflection:
-		if (currentPSO_ != psoType::PhongReflection) {
-			commandList_->SetPipelineState(psoList_[(int)LightModelType::PhongReflection]);
-			currentPSO_ = psoType::PhongReflection;
-			psoChanged = true;
-		}
-	case LightModelType::BlinnPhongReflection:
-		if (currentPSO_ != psoType::BlinnPhongReflection) {
-			commandList_->SetPipelineState(psoList_[(int)LightModelType::BlinnPhongReflection]);
-			currentPSO_ = psoType::BlinnPhongReflection;
-			psoChanged = true;
-		}
-	}
-	if (psoChanged) {
-		rootSignature_ = pso_->getRootSignature((int)currentPSO_);
-		commandList_->SetGraphicsRootSignature(rootSignature_);
 	}
 }
 
@@ -1044,7 +991,7 @@ void DrawEngine::Draw2DOpaque() {
 					commandList_->DrawInstanced(meshVertexCount, instancesCounter, 0, 0);
 				}
 
-				//Logger::Log("Draw3D: pso=%d mat=%u meshID=%d instances=%d",(int)psoID, materialID, meshBuffer, instancesCounter);
+				//Logger::Log("Collect2D tex=%d\n",materialID);
 			}
 		}
 	}

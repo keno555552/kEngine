@@ -3,9 +3,9 @@
 void SimpleSpriteMesh::SetSize(Vector2 RBpos) {
 
 	conerData.coner[(int)CornerName::TOP_LEFT] = { 0,		  0 };
-	conerData.coner[(int)CornerName::BOTTOM_LEFT]	= { 0,	RBpos.y };
+	conerData.coner[(int)CornerName::BOTTOM_LEFT] = { 0,	RBpos.y };
 	conerData.coner[(int)CornerName::BOTTOM_RIGHT] = RBpos;
-	conerData.coner[(int)CornerName::TOP_RIGHT]	= { RBpos.x,  0 };
+	conerData.coner[(int)CornerName::TOP_RIGHT] = { RBpos.x,  0 };
 
 	Mapping();
 }
@@ -29,27 +29,38 @@ void SimpleSpriteMesh::SetAnchor(Vector2 RBpos, Vector2 anchorPoint) {
 	float top = 0.0f - anchorPoint.y;
 	float bottom = RBpos.y - anchorPoint.y;
 
-	conerData.coner[(int)CornerName::TOP_LEFT] =		{ left,		top };
-	conerData.coner[(int)CornerName::BOTTOM_LEFT] =		{ left,		bottom };
-	conerData.coner[(int)CornerName::BOTTOM_RIGHT] =	{ right,	bottom };
-	conerData.coner[(int)CornerName::TOP_RIGHT] =		{ right,	top };
+	conerData.coner[(int)CornerName::TOP_LEFT] = { left,		top };
+	conerData.coner[(int)CornerName::BOTTOM_LEFT] = { left,		bottom };
+	conerData.coner[(int)CornerName::BOTTOM_RIGHT] = { right,	bottom };
+	conerData.coner[(int)CornerName::TOP_RIGHT] = { right,	top };
 
 	Mapping();
 }
 
-void SimpleSpriteMesh::SetTexcoord(Vector2 textureSize,Vector2 cropLT, Vector2 cropSize) {
+void SimpleSpriteMesh::SetTexcoord(Vector2 textureSize, Vector2 cropLT, Vector2 cropSize) {
 	float leftX = cropLT.x / textureSize.x;
 	float rightX = (cropLT.x + cropSize.x) / textureSize.x;
 	float topY = cropLT.y / textureSize.y;
 	float bottomY = (cropLT.y + cropSize.y) / textureSize.y;
 
-	Texcoord[(int)CornerName::TOP_LEFT] =		{ leftX,	topY };
-	Texcoord[(int)CornerName::BOTTOM_LEFT] =	{ leftX,	bottomY };
-	Texcoord[(int)CornerName::BOTTOM_RIGHT] =	{ rightX,	bottomY };
-	Texcoord[(int)CornerName::TOP_RIGHT] =		{ rightX,	topY };
-	
+	Texcoord[(int)CornerName::TOP_LEFT] = { leftX,	topY };
+	Texcoord[(int)CornerName::BOTTOM_LEFT] = { leftX,	bottomY };
+	Texcoord[(int)CornerName::BOTTOM_RIGHT] = { rightX,	bottomY };
+	Texcoord[(int)CornerName::TOP_RIGHT] = { rightX,	topY };
+
 	Mapping();
 }
+
+void SimpleSpriteMesh::ResetTexcoord() {
+
+	Texcoord[0] = { 0,0 };
+	Texcoord[1] = { 0,1 };
+	Texcoord[2] = { 1,1 };
+	Texcoord[3] = { 1,0 };
+	Mapping();
+
+}
+
 
 ID3D12Resource* SimpleSpriteMesh::CreateVertexResource_(ID3D12Device* device) {
 
@@ -108,6 +119,14 @@ ID3D12Resource* SimpleSpriteMesh::CreateIndexResource_(ID3D12Device* device) {
 bool SimpleSpriteMesh::CheckSize(Vector2 RBpos) {
 	if (conerData.coner[(int)CornerName::BOTTOM_RIGHT].x == RBpos.x)return false;
 	if (conerData.coner[(int)CornerName::BOTTOM_RIGHT].y == RBpos.y)return false;
+	return true;
+}
+
+bool SimpleSpriteMesh::CheckIsDefaultSize() {
+	if (Texcoord[0] != Vector2{ 0,0 })return false;
+	if (Texcoord[0] != Vector2{ 0,1 })return false;
+	if (Texcoord[0] != Vector2{ 1,1 })return false;
+	if (Texcoord[0] != Vector2{ 1,0 })return false;
 	return true;
 }
 

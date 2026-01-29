@@ -1,5 +1,5 @@
 #pragma once
-#include "Scene.h"
+#include "BaseScene.h"
 #include "Object\Object.h"
 #include "Object\Sprite.h"
 #include "Sight\Sight.h"
@@ -12,7 +12,7 @@
 #include "tool\CollisionManager\CollisionManager.h"
 
 
-class Scene1 :public Scene
+class Scene1 :public BaseScene
 {
 public:
 	Scene1(kEngine* system);
@@ -24,16 +24,16 @@ public:
 private:
 	kEngine* system_ = nullptr;				// �؂�
 
-	/// ============== �J�����֘A ==============///
-	/// �X�e�[�W�J����(main�J����)
+	/// ============== カメラ関連 ==============///
+	/// メーンカメラ
 	Camera* camera_ = nullptr;
-	/// �f�o�b�N�J����
+	/// デバックカメラ
 	DebugCamera* debugCamera_ = nullptr;
-	/// ���g���Ă���J����
+	/// 今使っているカメラ
 	Camera* usingCamera_ = nullptr;			// �؂�p
 
-	/// =========== ���\�[�X�n���h�� ============///
-	/// ���f���n���h��
+	/// =========== テキスチャハンドル ============///
+	/// モデルハンドル
 	int MH_skydome_ = 0;
 	int MH_player_ = 0;
 	int MH_sight_ = 0;
@@ -43,7 +43,7 @@ private:
 	int MH_enemy_ = 0;
 	int MH_backPoint_ = 0;
 
-	/// �e�L�X�`���[�n���h��
+	/// テキスチャハンドル
 	int TH_box_ = 0;
 	int TH_try_ = 0;
 	int TH_uv_ = 0;
@@ -59,7 +59,7 @@ private:
 	int SH_BGM_ = 0;
 	int SE_killEnemy_ = 0;
 
-	/// =========== �Q�[���I�u�W�F�N�g ==========///
+	/// =========== 実体 ==========///
 	Object* skydome_ = nullptr;
 	//Object* object_ = nullptr;
 
@@ -80,7 +80,7 @@ private:
 	std::vector<Bullet*> bulletList_;
 	std::vector<Enemy*> enemyList_;
 
-	/// ========== �R���W�����}�l�[�W���[ =========///
+	/// ========== 当たり判定マネージャー =========///
 	CollisionManager collisionManager_;
 
 	/// =============== �t���O ================///

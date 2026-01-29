@@ -246,9 +246,15 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="kEngine\GameObject\BackPoint\BackPoint.cpp" />
+    <ClCompile Include="kEngine\GameObject\Bullet\Bullet.cpp" />
+    <ClCompile Include="kEngine\GameObject\Enemy\Enemy.cpp" />
+    <ClCompile Include="kEngine\GameObject\HPBar\HPBar.cpp" />
+    <ClCompile Include="kEngine\GameObject\Sight\Sight.cpp" />
     <ClCompile Include="kEngine\Lighting\AeraLight.cpp" />
     <ClCompile Include="kEngine\Lighting\DirectionalLight.cpp" />
     <ClCompile Include="kEngine\Data\BlendModeType.cpp" />
+    <ClCompile Include="kEngine\tool\CollisionManager\CollisionManager.cpp" />
     <ClCompile Include="kEngine\tool\DebugTool\DebugObject.cpp" />
     <ClCompile Include="kEngine\Manager\CameraManager\CameraManager.cpp" />
     <ClCompile Include="kEngine\Collector\DrawData\DrawDataCollector.cpp" />
@@ -321,7 +327,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\core\driver\DirectXCore.cpp" />
     <ClCompile Include="kEngine\core\driver\DirectXController.cpp" />
     <ClCompile Include="kEngine\Data\Render\Data\DirectionalLightGPU.cpp" />
-    <ClCompile Include="kEngine\drawEngine\drawEngine.cpp" />
+    <ClCompile Include="kEngine\drawEngine\drawEngine.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="kEngine\kEngine.cpp" />
     <ClCompile Include="kEngine\tool\DebugTool\Logger.cpp" />
     <ClCompile Include="kEngine\Manager\LightManager\LightManager.cpp" />
@@ -366,6 +376,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="scenes\CG4_HK_1\Effect1.cpp" />
     <ClCompile Include="scenes\CG4_HK_1\Effect2.cpp" />
     <ClCompile Include="scenes\Scene1.cpp" />
+    <ClCompile Include="scenes\sceneLose.cpp" />
     <ClCompile Include="scenes\SceneResult.cpp" />
     <ClCompile Include="scenes\SceneTest.cpp" />
     <ClCompile Include="kEngine\GameObject\Object\Sprite.cpp" />
@@ -375,11 +386,18 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="scenes\SceneTitle.cpp" />
     <ClCompile Include="kEngine\core\driver\SrvManager.cpp" />
     <ClCompile Include="kEngine\Lighting\SpotLight.cpp" />
+    <ClCompile Include="scenes\SceneWin.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="kEngine\GameObject\BackPoint\BackPoint.h" />
+    <ClInclude Include="kEngine\GameObject\Bullet\Bullet.h" />
+    <ClInclude Include="kEngine\GameObject\Enemy\Enemy.h" />
+    <ClInclude Include="kEngine\GameObject\HPBar\HPBar.h" />
+    <ClInclude Include="kEngine\GameObject\Sight\Sight.h" />
     <ClInclude Include="kEngine\Lighting\AeraLight.h" />
     <ClInclude Include="kEngine\Lighting\DirectionalLight.h" />
     <ClInclude Include="kEngine\Data\BlendModeType.h" />
+    <ClInclude Include="kEngine\tool\CollisionManager\CollisionManager.h" />
     <ClInclude Include="kEngine\tool\DebugTool\DebugObject.h" />
     <ClInclude Include="kEngine\Manager\CameraManager\CameraManager.h" />
     <ClInclude Include="kEngine\Collector\DrawData\DrawDataCollector.h" />
@@ -479,6 +497,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="scenes\CG4_HK_1\Effect1.h" />
     <ClInclude Include="scenes\CG4_HK_1\Effect2.h" />
     <ClInclude Include="scenes\Scene1.h" />
+    <ClInclude Include="scenes\sceneLose.h" />
     <ClInclude Include="scenes\SceneResult.h" />
     <ClInclude Include="scenes\SceneTest.h" />
     <ClInclude Include="kEngine\GameObject\Object\Sprite.h" />
@@ -488,13 +507,18 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="scenes\SceneTitle.h" />
     <ClInclude Include="kEngine\core\driver\SrvManager.h" />
     <ClInclude Include="kEngine\Lighting\SpotLight.h" />
+    <ClInclude Include="scenes\SceneWin.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\FlameNeonGlow.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="resources\Shader\FlameNeonGlow.VS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="resources\Shader\GlowSphere.PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
@@ -510,6 +534,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Development|x64'">4.0</ShaderModel>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="resources\Shader\LightingLambert\BlinnPhongReflection.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
@@ -530,6 +556,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
     <FxCompile Include="resources\Shader\GlowSphere.VS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="resources\Shader\LightingLambert\HalfLambert.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
@@ -587,9 +615,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
     <FxCompile Include="resources\Shader\Particle.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="resources\Shader\Particle.VS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="resources\Shader\Tile2D.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>

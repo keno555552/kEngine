@@ -61,7 +61,7 @@ void SceneLose::Update() {
 
 	if (system_->GetTriggerOn(DIK_SPACE)) {
 		system_->SoundStop(SH_BGM_);
-		ChangeNextStage(SceneNum::S_TITLE);
+		outcome_ = SceneOutcome::NEXT;
 	}
 
 }

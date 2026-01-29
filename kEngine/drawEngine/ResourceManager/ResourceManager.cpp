@@ -544,7 +544,7 @@ int ResourceManager::GetTextureHandleFromModelGroup(int modelHandle, int part) {
 	return modelGroupList_[modelHandle]->GetModel(part)->GetTextureHandle();
 }
 
-DirectX::TexMetadata ResourceManager::GetTextureMetadata(int textureHandle) {
+DirectX::TexMetadata ResourceManager::GetTextureMetaData(int textureHandle) {
 	return TextureManager::GetInstance()->GetTextureMetadata(textureHandle);
 }
 
@@ -584,6 +584,10 @@ void ResourceManager::ResizeSimpleSpriteMesh(DirectX::TexMetadata Metadata, int 
 
 	if (cropLT != Vector2{} || cropSize != Vector2{}) {
 		simpleSpriteMeshList_[counter]->SetTexcoord(texSize, cropLT, cropSize);
+	} else {
+		if (!simpleSpriteMeshList_[counter]->CheckIsDefaultSize()) {
+			simpleSpriteMeshList_[counter]->ResetTexcoord();
+		}
 	}
 }
 
@@ -648,6 +652,11 @@ int ResourceManager::InputMaterialConfig(std::shared_ptr<MaterialConfig> materia
 		[&](MaterialEntry& entry) {
 			auto locked = entry.config.lock();
 			return locked && (*locked == *material);
+
+
+			//auto locked = entry.config.lock().get();
+			//Logger::Log("Comparing material config pointers: %p and %p", locked, material.get());
+			//return locked == material.get();
 		}
 	);
 

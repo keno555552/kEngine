@@ -67,7 +67,7 @@ public:
 	int GetTextureHandleFromCommonList(int index);
 	int GetTextureHandleFromModelGroup(int modelHandle, int part);
 
-	DirectX::TexMetadata GetTextureMetadata(int textureHandle);
+	DirectX::TexMetadata GetTextureMetaData(int textureHandle);
 
 	int ReadModelTextureHandle(int index);
 	int ReadCommonTextureHandle(int index);

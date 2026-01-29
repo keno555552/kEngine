@@ -41,6 +41,8 @@ public:
 private:
 	std::map<std::string,std::string> sceneFlow_ = {
 		{"TITLE","STAGE_01"},
+		{"WIN","TITLE"},
+		{"LOSE","TITLE"},
 	};
 
 

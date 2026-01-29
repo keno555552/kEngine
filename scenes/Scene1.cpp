@@ -84,13 +84,16 @@ Scene1::Scene1(kEngine* system) {
 	sight_ = new Sight(system, player_);
 	sight_->IntObject(system_);
 	sight_->CreateModelData(MH_sight_);
-	sight_->mainPosition.transform.scale = { 0.5f, 0.5f, 0.5f };
-	sight_->objectParts_[0].materialConfig->textureColor = { 0.8f,0.2f,0.2f,1.0f };
+	//sight_->mainPosition.transform.scale = { 0.5f, 0.5f, 0.5f };
+	sight_->mainPosition.transform.scale = { 1.5f, 1.5f, 1.5f };
+	sight_->objectParts_[0].materialConfig->textureColor = { 0.8f,0.2f,0.2f,0.999f };
 
 	backSign_ = new Object;
 	backSign_->IntObject(system_);
 	backSign_->CreateModelData(MH_backPoint_);
 	backSign_->mainPosition.transform.scale = { 0.5f,0.5f,0.5f };
+	backSign_->objectParts_[0].materialConfig->textureColor = { 1.0f,1.0f,1.0f,0.999f };
+
 
 
 	/// マップチップの生成
@@ -212,7 +215,7 @@ void Scene1::Update() {
 
 			if (system_->GetTriggerOn(DIK_SPACE)) {
 				system_->SoundStop(SH_BGM_);
-				ChangeNextStage(SceneNum::S_WIN);
+				outcome_ = SceneOutcome::WIN;
 			}
 		}
 	}
@@ -226,7 +229,7 @@ void Scene1::Update() {
 		if (hp <= 0) {
 			hpUI_[0]->objectParts_[0].materialConfig->textureHandle = TH_hpUI_empty_;
 			system_->SoundStop(SH_BGM_);
-			ChangeNextStage(SceneNum::S_LOSE);
+			outcome_ = SceneOutcome::LOSE;
 		}
 	}
 

@@ -17,6 +17,7 @@ void SimpleSprite::CreateDefaultData() {
 	newObjectPart.materialConfig->lightModelType = LightModelType::Sprite2D;
 
 	objectParts_.push_back(newObjectPart);
+
 }
 
 void SimpleSprite::IntObject(kEngine* system) {

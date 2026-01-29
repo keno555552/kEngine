@@ -14,7 +14,7 @@ public:
 	void Update() override;
 	void Draw() override;
 
-	void GetMenu(DefaultMenu* defaultMenu) { defaultMenu_ = defaultMenu; }
+	void SetMenu(DefaultMenu* defaultMenu) { defaultMenu_ = defaultMenu; }
 
 private:
 	enum TitleButton {
@@ -83,8 +83,5 @@ private:
 	void SelectStart();
 	void SelectSetting();
 	void SelectQuit();
-
-private:
-	void ImGuiPart();
 
 };

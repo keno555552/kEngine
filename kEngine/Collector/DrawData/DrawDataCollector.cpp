@@ -35,7 +35,7 @@ void DrawDataCollector::Collect2D(SpriteData* sprite) {
 		/// ========================================  RenderData作成  ========================================///
 
 		/// metaData取得
-		DirectX::TexMetadata metaData = resourceManager_->GetTextureMetadata(object.materialConfig->textureHandle);
+		DirectX::TexMetadata metaData = resourceManager_->GetTextureMetaData(object.materialConfig->textureHandle);
 
 		/// スプライトメッシュのリサイズ
 		resourceManager_->ResizeSimpleSpriteMesh(
@@ -165,9 +165,6 @@ Matrix4x4 DrawDataCollector::MakeFollowObjectMatrix(SpriteData* sprite) {
 }
 
 TransformationMatrix DrawDataCollector::SpriteWVPAdjustment(SpriteData& sprite, SpritePart& part) {
-	Camera* cam = cameraManager_->GetActiveCamera();
-	Matrix4x4 viewMatrix = cam->GetViewMatrix();
-	Matrix4x4 projectionMatrix = cam->GetProjectionMatrix();
 
 	// 2D UI 用：View 取單位矩陣，Projection 用螢幕尺寸的正交矩陣（左上原點，Y 向下）
 	Matrix4x4 viewMatrix = Identity();
@@ -183,9 +180,9 @@ TransformationMatrix DrawDataCollector::SpriteWVPAdjustment(SpriteData& sprite, 
 	Matrix4x4 followWorldMatrix = MakeFollowObjectMatrix(&sprite);
 
 	Matrix4x4 localMatrix = MakeAffineMatrix(
-		spriteTransform.scale,
-		spriteTransform.rotate,
-		spriteTransform.translate
+		part.transform.scale,
+		part.transform.rotate,
+		part.transform.translate
 	);
 
 	Matrix4x4 worldMatrix = localMatrix * followWorldMatrix;
@@ -265,13 +262,13 @@ void DrawDataCollector::AddSpriteToBucket(RenderData& renderData,int meshID) {
 
 		if (material->color.w < 1.0f) {
 
-			float z = renderData.transformData.WVP.m[3][2];
+			float z = renderData.transformData.world.m[3][2];
 
 			auto checker2 = std::find_if(
 				transparentObjectParts2D_.begin(),
 				transparentObjectParts2D_.end(),
 				[z](const RenderData& data) {
-					float dataZ = data.transformData.WVP.m[3][2];
+					float dataZ = data.transformData.world.m[3][2];
 					return z > dataZ;
 				}
 			);
@@ -308,7 +305,7 @@ void DrawDataCollector::AddObjectToBucket(RenderData& renderData,int meshID) {
 				transparentObjectParts3D_.end(),
 				[z](const RenderData& data) {
 					float dataZ = data.transformData.world.m[3][2];
-					return z > dataZ;
+					return z < dataZ;
 				}
 			);
 
@@ -323,8 +320,6 @@ void DrawDataCollector::AddObjectToBucket(RenderData& renderData,int meshID) {
 			opaqueBuckets3D_[static_cast<PSOType>(renderData.psoID)][renderData.materialID][meshID].emplace_back(renderData);
 		}
 	}
-
-	auto& t = renderData.transformData;
 }
 
 uint32_t DrawDataCollector::PSODecision(MaterialConfig& material) {

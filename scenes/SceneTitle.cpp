@@ -62,6 +62,7 @@ SceneTitle::SceneTitle(kEngine* system) {
 	startButton_->CreateDefaultData();
 	startButton_->mainPosition.transform.translate = Vector3(112.0f, 402.0f, 0.0f);
 	startButton_->objectParts_[1].materialConfig->textureHandle = TH_startButton_;
+	startButton_->objectParts_[1].transform.translate.z = -1;
 	startButton_->objectParts_[0].materialConfig->textureHandle = TH_buttonBack_Select_;
 
 	settingButton_->IntObject(system_);
@@ -69,6 +70,7 @@ SceneTitle::SceneTitle(kEngine* system) {
 	settingButton_->CreateDefaultData();
 	settingButton_->mainPosition.transform.translate = Vector3(112.0f, 495.0f, 0.0f);
 	settingButton_->objectParts_[1].materialConfig->textureHandle = TH_settingButton_;
+	settingButton_->objectParts_[1].transform.translate.z = -1;
 	settingButton_->objectParts_[0].materialConfig->textureHandle = TH_buttonBack_notSelect_;
 
 	quitButton_->IntObject(system_);
@@ -76,14 +78,15 @@ SceneTitle::SceneTitle(kEngine* system) {
 	quitButton_->CreateDefaultData();
 	quitButton_->mainPosition.transform.translate = Vector3(112.0f, 597.0f, 0.0f);
 	quitButton_->objectParts_[1].materialConfig->textureHandle = TH_quitButton_;
+	quitButton_->objectParts_[1].transform.translate.z = -1;
 	quitButton_->objectParts_[0].materialConfig->textureHandle = TH_buttonBack_notSelect_;
 
-	menuRun[0] = [=]() {SceneTitle::SelectStart(); };
-	menuRun[1] = [=]() {SceneTitle::SelectSetting(); };
-	menuRun[2] = [=]() {SceneTitle::SelectQuit(); };
+	menuRun[0] = [this]() {this->SelectStart(); };
+	menuRun[1] = [this]() {this->SelectSetting(); };
+	menuRun[2] = [this]() {this->SelectQuit(); };
 
 	/// BGM�Đ�
-	if(!system_->SoundIsPlaying(SH_BGM_)){
+	if (!system_->SoundIsPlaying(SH_BGM_)) {
 		system_->SoundPlayBGM(SH_BGM_, 0.4f);
 	}
 }
@@ -95,35 +98,27 @@ SceneTitle::~SceneTitle() {
 	system_->DestroyCamera(camera_);
 	system_->DestroyCamera(debugCamera_);
 	delete title_;
+	delete skydome_;
+	delete ground_;
+
+	SimpleSprite* title_ = new SimpleSprite;
+
+	delete startButton_;
+	delete settingButton_;
+	delete quitButton_;
+
 }
 
 void SceneTitle::Update() {
-	/// �J��������
+
 	CameraPart();
 
-
-	//if (system_->GetTriggerOn(DIK_SPACE)) {
-	//	ChangeNextStage(SceneNum::S_STAGE_01);
-	//}
 	UpdateSelect();
-
-	/// Skydome�X�V
-	skydome_->Update(usingCamera_);
-
-	/// Ground�X�V
-	ground_->Update(usingCamera_);
-
-	/// Sprite�X�V
-	title_->Update(nullptr);
-	startButton_->Update(nullptr);
-	settingButton_->Update(nullptr);
-	quitButton_->Update(nullptr);
 
 }
 
 void SceneTitle::Draw() {
 
-	/// ���̏���
 	skydome_->Draw();
 	ground_->Draw();
 
@@ -159,7 +154,6 @@ void SceneTitle::ImGuiPart() {
 
 	debugCamera_->SetCamera(debugCamTran);
 	camera_->SetCamera(camTran);
-
 }
 #endif
 
@@ -180,7 +174,6 @@ void SceneTitle::UpdateSelect() {
 
 	if (!isUp && !isDown && !isSelect)return;
 
-	/// �{�^���I�����
 	if (isUp && selectedButtonhandle > START) {
 		selectedButtonhandle--;
 		system_->SoundPlaySE(SH_Select_);
@@ -189,15 +182,18 @@ void SceneTitle::UpdateSelect() {
 		system_->SoundPlaySE(SH_Select_);
 	}
 
-	/// �{�^���n���h���ɉ����ăe�N�X�`���ύX
 	startButton_->objectParts_[0].materialConfig->textureHandle = (selectedButtonhandle == START) ? TH_buttonBack_Select_ : TH_buttonBack_notSelect_;
 	settingButton_->objectParts_[0].materialConfig->textureHandle = (selectedButtonhandle == SETTING) ? TH_buttonBack_Select_ : TH_buttonBack_notSelect_;
 	quitButton_->objectParts_[0].materialConfig->textureHandle = (selectedButtonhandle == QUIT) ? TH_buttonBack_Select_ : TH_buttonBack_notSelect_;
-
-	/// �X�^�[�g�{�^��
+	//startButton_->objectParts_[1].materialConfig->textureHandle = (selectedButtonhandle == START) ? TH_buttonBack_notSelect_ : TH_buttonBack_Select_;
+	//settingButton_->objectParts_[1].materialConfig->textureHandle = (selectedButtonhandle == SETTING) ? TH_buttonBack_notSelect_ : TH_buttonBack_Select_;
+	//quitButton_->objectParts_[1].materialConfig->textureHandle = (selectedButtonhandle == QUIT) ? TH_buttonBack_notSelect_ : TH_buttonBack_Select_;
+	//if(selectedButtonhandle == START )startButton_->objectParts_[0].materialConfig->textureHandle = TH_title;
+	//if(selectedButtonhandle == SETTING)startButton_->objectParts_[0].materialConfig->textureHandle = TH_buttonBack_Select_;
+	//if(selectedButtonhandle == QUIT)startButton_->objectParts_[0].materialConfig->textureHandle = TH_buttonBack_notSelect_;
+	
 	if (isSelect) {
 		if (selectedButtonhandle != SETTING) {
-			/// BGM��~
 			system_->SoundStop(SH_BGM_);
 		}
 		system_->SoundPlaySE(SH_Decide_);
@@ -207,7 +203,7 @@ void SceneTitle::UpdateSelect() {
 }
 
 void SceneTitle::SelectStart() {
-	ChangeNextStage(SceneNum::S_STAGE_01);
+	outcome_ = SceneOutcome::NEXT;
 }
 
 void SceneTitle::SelectSetting() {
@@ -217,20 +213,5 @@ void SceneTitle::SelectSetting() {
 }
 
 void SceneTitle::SelectQuit() {
-	ChangeNextStage(SceneNum::S_END);
-void SceneTitle::Draw() {
-	sprite_->Draw();
-	ImGuiPart();
-}
-
-void SceneTitle::ImGuiPart() {
-
-	ImGui::Begin("Sprite");
-	ImGui::SliderFloat3("position", &sprite_->mainPosition.transform.translate.x, -960.0f, 960.0f);
-	ImGui::SliderFloat3("rotation", &sprite_->mainPosition.transform.rotate.x, -3.14f, 3.14f);
-	ImGui::SliderFloat3("scale", &sprite_->mainPosition.transform.scale.x, 0.0f, 10.0f);
-	ImGui::SliderFloat2("LTpos", &sprite_->objectParts_[0].cropLT.x, 1.0f, 400.0f);
-	ImGui::SliderFloat2("Size", &sprite_->objectParts_[0].cropSize.x, 1.0f, 400.0f);
-	ImGui::End();
-
+	outcome_ = SceneOutcome::EXIT;
 }

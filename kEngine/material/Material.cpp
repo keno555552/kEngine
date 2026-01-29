@@ -1,4 +1,5 @@
 #include "Material.h"
+#include "Logger.h"
 
 bool Material::operator==(const Material target) {
 	if (color != target.color)return false;
@@ -25,4 +26,5 @@ void Material::inputMaterialConfig(MaterialConfig target) {
 	shininess = target.shininess;
 	intensity = target.intensity;
 	heightScale = target.heightScale;
+	//Logger::Log("Material inputMaterialConfig called.");
 }
