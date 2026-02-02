@@ -115,7 +115,7 @@ void DebugObject::updateCenterNumber() {
 			int numDigits = (int)centerNumberArray.size();
 
 			/// スプライト数調整 ///
-			int diff = (int)centerNumberSprite_->objectParts_.size() - (int)centerNumberArray.size();
+			int diff = (int)centerNumberSprite_->objectParts_.size() - numDigits;
 			if (diff < 0) {
 				for (int i = 0; i < -diff; i++) {
 					centerNumberSprite_->CreateDefaultData();
@@ -126,8 +126,6 @@ void DebugObject::updateCenterNumber() {
 					centerNumberSprite_->objectParts_.pop_back();
 				}
 			}
-
-			/// A---------- 多分大丈夫 ----------A ///
 
 			/// スプライト配置 ///
 

@@ -6,18 +6,21 @@ class CountdownTimer : public SimpleSprite
 {
 public:
 	CountdownTimer(kEngine* kEngine);
+	~CountdownTimer();
 
-	//void Update(Camera* camera) override;
-	//void Draw() override;
-	//
-	//void Start();
-	//void Stop();
-	//bool IsTimeUp();
-	//bool IsLessTime();
-	//
-	//Timer& GetTime();
-	//
-	//void Reset();
+	void Update(Camera* camera) override;
+	void Draw() override;
+	
+	void Start();
+	void Stop();
+	void Reset();
+	bool IsTimeUp();
+	bool IsLessTime();
+	
+	float SetScale(float scale = -99999);
+	void SetLessTimeColor(Vector4 color);
+	Timer& GetTime();
+	
 
 private:
 
@@ -36,14 +39,26 @@ private:
 	SimpleSprite* leftTimeSprite_{};
 
 	/// =========== フラク、内部変数 ===========///
-	Vector4 usingColor = { 1.0f,1.0f,1.0f,0.0f };
-	float startScale_ = 0.5f;
+	Vector4 lessTimeColor = { 1.0f,0.0f,0.0f,1.0f };
 	Timer* timer_ = nullptr;
-	int numberCount_ = 3;
+	float maxTime_ = 15.0f;
+	float lessTime_ = 10.0f;
 	bool isStart_ = false;
+	
+	/// 文字関連
+	Vector2 leftTimeSpriteSize = { 571.0f,160.0f };
+	Vector2 pointSpriteSize = { 54.0f,160.0f };
+	Vector2 numberSpriteSize = { 1140.0f,160.0f };
+	float numberSpacing = 0.2f;
+	float scale_ = 0.4f;
+
+	/// ============= フラグ ============= ///
+
+	std::vector<int> timeArray;
 
 private:
+	/// ============= シーン内命令 =============///
 
-	void ImGuiPart();
-
+	void NumberSpritesInit();
+	void PositionSetting();
 };

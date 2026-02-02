@@ -65,7 +65,9 @@ void StartTimer::Update(Camera* camera) {
 		startSprite_->mainPosition.transform.scale = { scaleValue,scaleValue,1.0f };
 	}
 
+	/// ========== スプライト配置 ========== ///
 
+	
 
 }
 
@@ -92,16 +94,6 @@ void StartTimer::Stop() {
 	isStart_ = false;
 }
 
-bool StartTimer::IsTimeUp() {
-	if (numberCount_ > -1)return false;
-	if (timer_->parameter_ != timer_->maxTime_)return false;
-	return true;
-}
-
-Timer& StartTimer::GetTime() {
-	return *timer_;
-}
-
 void StartTimer::Reset() {
 	for (int i = 0; i < 3; i++) {
 		numberSprites_[i]->mainPosition.transform.scale = { startScale_, startScale_, 1.0f };
@@ -116,6 +108,16 @@ void StartTimer::Reset() {
 	isStart_ = false;
 
 
+}
+
+bool StartTimer::IsTimeUp() {
+	if (numberCount_ > -1)return false;
+	if (timer_->parameter_ != timer_->maxTime_)return false;
+	return true;
+}
+
+Timer& StartTimer::GetTime() {
+	return *timer_;
 }
 
 void StartTimer::ImGuiPart() {

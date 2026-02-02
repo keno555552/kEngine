@@ -53,6 +53,7 @@ SceneTest::SceneTest(kEngine* system) {
 	mapChipField_->SetBlockHeight(1.0f);
 
 	startTimer_ = new StartTimer(system_);
+	countdownTimer_ = new CountdownTimer(system_);
 
 	/// マップチップの初期化
 	GenerateBlocks();
@@ -96,6 +97,8 @@ void SceneTest::Update() {
 	/// スタートタイマー更新
 	startTimer_->Update(nullptr);
 
+	countdownTimer_->Update(nullptr);
+
 	if (system_->GetTriggerOn(DIK_0)) {
 		if (useDebugCamera)useDebugCamera = false;
 		else useDebugCamera = true;
@@ -129,6 +132,7 @@ void SceneTest::Draw() {
 	}
 
 	startTimer_->Draw();
+	countdownTimer_->Draw();
 
 #ifdef USE_IMGUI
 	/// ImGui処理
@@ -193,6 +197,23 @@ void SceneTest::ImGuiPart() {
 		startTimer_->Reset();
 	}
 	ImGui::SliderFloat("TimeScale", &timerScale, 0.0f, 5.0f);
+	ImGui::End();
+
+
+	ImGui::Begin("CountdownTimer_");
+	Timer& timer2 = countdownTimer_->GetTime();
+	ImGui::Text("Time: %.2f / %.2f", timer2.parameter_, timer2.maxTime_);
+	if (ImGui::Button("Start2", size)) {
+		countdownTimer_->Start();
+	}
+	if (ImGui::Button("Stop2", size)) {
+		countdownTimer_->Stop();
+	}
+	if (ImGui::Button("Reset2", size)) {
+		countdownTimer_->Reset();
+	}
+	ImGui::ColorEdit4("Color", &countdownColor.x);
+	countdownTimer_->SetLessTimeColor(countdownColor);
 	ImGui::End();
 	
 
