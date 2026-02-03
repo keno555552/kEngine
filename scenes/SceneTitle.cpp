@@ -23,6 +23,7 @@ SceneTitle::SceneTitle(kEngine* system) {
 
 	MH_skydome_ = system_->SetModelObj((basePath + templatePath + objectPath + "skydome/skydome.obj").c_str());
 	MH_ground_ = system_->SetModelObj((basePath + objectPath + "ground/ground.obj").c_str());
+	MH_player_ = system_->SetModelObj((basePath + objectPath + "player/player.obj").c_str());
 
 	TH_buleSkySkydome_ = system_->LoadTexture((basePath + texturePath + "sky/bluesky.png").c_str());
 	TH_title = system_->LoadTexture((basePath + texturePath + "title.png").c_str());
@@ -50,6 +51,14 @@ SceneTitle::SceneTitle(kEngine* system) {
 	ground_->CreateModelData(MH_ground_);
 	ground_->objectParts_[0].materialConfig->uvScale = { 100.0f,100.0f,0 };
 
+	player_ = new Object;
+	player_->IntObject(system_);
+	player_->CreateModelData(MH_player_);
+	player_->mainPosition.transform.translate = { 0.15f,0.3f,-19.2f };
+	player_->mainPosition.transform.scale = { 0.1f,0.1f,0.1f };
+	player_->mainPosition.transform.rotate = { 0.25f,0.75f,0.0f };
+
+	/// =========== スブライド ==========///
 
 	title_->IntObject(system_);
 	title_->CreateDefaultData();
@@ -100,6 +109,7 @@ SceneTitle::~SceneTitle() {
 	delete title_;
 	delete skydome_;
 	delete ground_;
+	delete player_;
 
 	SimpleSprite* title_ = new SimpleSprite;
 
@@ -121,6 +131,7 @@ void SceneTitle::Draw() {
 
 	skydome_->Draw();
 	ground_->Draw();
+	player_->Draw();
 
 	title_->Draw();
 	startButton_->Draw();
@@ -150,6 +161,12 @@ void SceneTitle::ImGuiPart() {
 	ImGui::Begin("TitleScene");
 	ImGui::SliderFloat3("GroundPos", &ground_->mainPosition.transform.translate.x, -10.0f, 10.0f);
 	ImGui::SliderFloat3("GroundUVScale", &ground_->objectParts_[0].materialConfig->uvScale.x, -1.0f, 1.0f);
+	ImGui::End();
+
+	ImGui::Begin("Player");
+	ImGui::SliderFloat3("PlayerPos", &player_->mainPosition.transform.translate.x, -10.0f, 10.0f);
+	ImGui::SliderFloat3("PlayerScale", &player_->mainPosition.transform.scale.x, -1.0f, 1.0f);
+	ImGui::SliderFloat3("PlayerRotate", &player_->mainPosition.transform.rotate.x, -1.0f, 1.0f);
 	ImGui::End();
 
 	debugCamera_->SetCamera(debugCamTran);

@@ -39,6 +39,7 @@ private:
 	/// モデルハンドル
 	int MH_skydome_{};
 	int MH_ground_{};
+	int MH_player_{};
 
 	/// テキスチャーハンドル
 	int TH_buleSkySkydome_{};
@@ -57,6 +58,7 @@ private:
 	/// =========== ゲームオブジェクト ==========///
 	Object* skydome_ = nullptr;
 	Object* ground_ = nullptr;
+	Object* player_ = nullptr;
 
 	SimpleSprite* title_ = new SimpleSprite;
 
