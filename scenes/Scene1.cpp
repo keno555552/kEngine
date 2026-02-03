@@ -85,8 +85,8 @@ Scene1::Scene1(kEngine* system) {
 	sight_->IntObject(system_);
 	sight_->CreateModelData(MH_sight_);
 	//sight_->mainPosition.transform.scale = { 0.5f, 0.5f, 0.5f };
-	sight_->mainPosition.transform.scale = { 1.5f, 1.5f, 1.5f };
-	sight_->objectParts_[0].materialConfig->textureColor = { 0.8f,0.2f,0.2f,0.999f };
+	sight_->mainPosition.transform.scale = { 0.5f, 0.5f, 0.5f };
+	sight_->objectParts_[0].materialConfig->textureColor = { 0.8f,0.2f,0.2f,1.0f };
 
 	backSign_ = new Object;
 	backSign_->IntObject(system_);
@@ -353,6 +353,7 @@ void Scene1::ImGuiPart() {
 	{
 		ImGui::Begin("MaterialConfig");
 		ImGui::SliderFloat3("uvScale", &underGround_BG_->objectParts_[0].materialConfig->uvScale.x, -50.0f, 50.0f);
+		ImGui::ColorEdit4("textureColor", &backSign_->objectParts_[0].materialConfig->textureColor.x);
 		ImGui::End();
 	}
 }

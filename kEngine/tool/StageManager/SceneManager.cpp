@@ -7,8 +7,9 @@ SceneManager::SceneManager(kEngine* system)
 	sceneFactory_(new SceneFactory(system)) {
 	//sceneUsingHandle_ = SceneNum::S_STAGE_01;
 	//sceneUsingHandle_ = SceneNum::S_BOSSTEST;
-	sceneUsingNameHandle_ = "TITLE";
 	//sceneUsingNameHandle_ = "TITLE";
+	//sceneUsingNameHandle_ = "STAGE_01";
+	sceneUsingNameHandle_ = "TITLE";
 	//sceneUsingHandle_ = SceneNum::S_TITLE;
 	//sceneUsingHandle_ = SceneNum::S_STAGE_01;
 
@@ -77,7 +78,7 @@ void SceneManager::SceneChanger() {
 			sceneUsingNameHandle_ = "WIN";
 			isSceneChange = true;
 			break;
-			
+
 		case SceneOutcome::LOSE:
 			sceneUsingNameHandle_ = "LOSE";
 			isSceneChange = true;
@@ -98,16 +99,30 @@ void SceneManager::SceneChanger() {
 		delete sceneUsing_, sceneUsing_ = nullptr;
 	}
 
+	bool isNullScene = (sceneUsing_ == nullptr);
 	sceneUsing_ = sceneFactory_->CreateScene(sceneUsingNameHandle_);
+	if (sceneUsingNameHandle_ == "TITLE" && isNullScene) {
+		if (auto* title = dynamic_cast<SceneTitle*>(sceneUsing_)) {
+			title->SetMenu(defaultMenu_);
+		}
+	}
+
 }
 
 
 void SceneManager::Update() {
 
-
 	SceneChanger();
 
-	//defaultMenu_->Update();
+	if (sceneUsingNameHandle_ == "TITLE" ||
+		sceneUsingNameHandle_ == "WIN" ||
+		sceneUsingNameHandle_ == "LOSE") {
+		defaultMenu_->SetCanOpen(false);
+	} else {
+		defaultMenu_->SetCanOpen(true);
+	}
+
+	defaultMenu_->Update();
 
 	if (!defaultMenu_->GetIsPause()) {
 		if (sceneUsing_ != nullptr) {

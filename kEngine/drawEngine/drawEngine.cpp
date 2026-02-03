@@ -866,11 +866,13 @@ void DrawEngine::Draw2D() {
 	if (drawDataCollector_->GetOpaqueBuckets2D().empty() &&
 		drawDataCollector_->GetTransparentObjectParts2D().empty())return;
 
+	/// 不透明->透明(zBuffer順)で描画
 	Draw2DOpaque();
 	Draw2DTransparent();
 
 }
 
+/// 透明(zBuffer順)の描画
 void DrawEngine::Draw2DTransparent() {
 
 	auto& transparent2D_ = drawDataCollector_->GetTransparentObjectParts2D();
@@ -888,7 +890,7 @@ void DrawEngine::Draw2DTransparent() {
 
 		SetMaterial(object.materialID);
 
-		SetTexture(object.materialID);
+ 		SetTexture(object.materialID);
 
 		/// MeshIndex 數量
 		int meshIndexCount = object.mesh->GetIndexNum();
@@ -926,6 +928,7 @@ void DrawEngine::Draw2DTransparent() {
 	}
 }
 
+/// 不透明(pso>>Material>>mesh順)の描画
 void DrawEngine::Draw2DOpaque() {
 	auto& transparentObjectParts2D_ = drawDataCollector_->GetOpaqueBuckets2D();
 
@@ -1007,6 +1010,7 @@ void DrawEngine::Draw3D() {
 	if (drawDataCollector_->GetOpaqueBuckets3D().empty() &&
 		drawDataCollector_->GetTransparentObjectParts3D().empty())return;
 
+	/// 不透明->透明(zBuffer順)で描画
 	Draw3DOpaque();
 	Draw3DTransparent();
 
@@ -1014,7 +1018,7 @@ void DrawEngine::Draw3D() {
 
 void DrawEngine::Draw3DTransparent() {
 
-	auto& transparent3D_ = drawDataCollector_->GetTransparentObjectParts2D();
+	auto& transparent3D_ = drawDataCollector_->GetTransparentObjectParts3D();
 
 	/// TileSRV
 	commandList_->SetGraphicsRootDescriptorTable(1, Tile3DSrvHandleGPU_);
@@ -1065,6 +1069,8 @@ void DrawEngine::Draw3DTransparent() {
 }
 
 void DrawEngine::Draw3DOpaque() {
+
+	if (drawDataCollector_->GetOpaqueBuckets3D().empty())return;
 	auto& transparentObjectParts3D_ = drawDataCollector_->GetOpaqueBuckets3D();
 
 	/// TileSRV

@@ -663,10 +663,12 @@ int ResourceManager::InputMaterialConfig(std::shared_ptr<MaterialConfig> materia
 
 	if (checker != materialList_.end()) {
 
+		// 既存のMaterialConfigを更新
 		if (auto locked = checker->config.lock()) {
 			*locked = *material;
 		}
 
+		// 更新 CPU 材質
 		checker->cpuMaterial->inputMaterialConfig(*material);
 
 		// 更新 GPU 材質
@@ -674,6 +676,9 @@ int ResourceManager::InputMaterialConfig(std::shared_ptr<MaterialConfig> materia
 		checker->gpuMaterial->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&gpuPtr));
 		*gpuPtr = *checker->cpuMaterial;
 		checker->gpuMaterial->GetResource()->Unmap(0, nullptr);
+
+		// テクスチャハンドルも更新
+		checker->textureHandle = material->textureHandle;
 
 		return checker->materialID;
 	}
@@ -707,5 +712,5 @@ int ResourceManager::InputMaterialConfig(std::shared_ptr<MaterialConfig> materia
 	materialList_.push_back(std::move(entry));
 	idToIndex_.emplace(materialList_.back().materialID, (int)materialList_.size() - 1);
 
-	return materialList_.back().materialID;
+	return entry.materialID;
 }

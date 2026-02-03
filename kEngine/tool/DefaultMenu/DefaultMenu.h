@@ -24,7 +24,7 @@ class DefaultMenu
 public:
 	DefaultMenu(kEngine* system);
 
-	void Updata();
+	void Update();
 	void Draw();
 
 	bool GetIsPause() const { return isPause_; }

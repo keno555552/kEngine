@@ -56,6 +56,10 @@ void DrawDataCollector::Collect2D(SpriteData* sprite) {
 		/// マテリアル設定
 		object.materialConfig->MakeUVMatrix();
 		renderData.materialID = resourceManager_->InputMaterialConfig(object.materialConfig);
+		if (renderData.materialID == 25) {
+			Sleep(0);
+		}
+
 
 		/// 変換行列設定
 		renderData.transformData = SpriteWVPAdjustment(*sprite, object);
@@ -139,7 +143,7 @@ float DrawDataCollector::SpriteLayerManagement(float zBuffer) {
 
 Matrix4x4 DrawDataCollector::MakeFollowObjectMatrix(SpriteData* sprite) {
 
-	float zBuffer = sprite->mainPosition.transform.translate.z;
+	float zBuffer = SpriteLayerManagement(sprite->mainPosition.transform.translate.z);
 
 	Matrix4x4 objectMainMatrix = MakeAffineMatrix(
 		sprite->mainPosition.transform.scale,
@@ -272,7 +276,7 @@ void DrawDataCollector::AddSpriteToBucket(RenderData& renderData,int meshID) {
 				transparentObjectParts2D_.end(),
 				[z](const RenderData& data) {
 					float dataZ = data.transformData.world.m[3][2];
-					return z > dataZ;
+					return z < dataZ;
 				}
 			);
 
@@ -308,7 +312,7 @@ void DrawDataCollector::AddObjectToBucket(RenderData& renderData,int meshID) {
 				transparentObjectParts3D_.end(),
 				[z](const RenderData& data) {
 					float dataZ = data.transformData.world.m[3][2];
-					return z < dataZ;
+					return z > dataZ;
 				}
 			);
 

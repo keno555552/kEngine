@@ -162,7 +162,7 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 	sMenuButtonM_NL->IntObject(system_);
 	sMenuButtonM_NL->CreateDefaultData();
 	sMenuButtonM_NL->objectParts_[0].materialConfig->textureHandle = TH_menuButton_NL;
-	sMenuButtonM_NL->mainPosition.transform.translate = { 0, 0, -1.0f };
+	sMenuButtonM_NL->mainPosition.transform.translate = { 0, 0, 116.0f };
 	sMenuButtonM_NL->followObject_ = sMenuButtonM;
 	sMenuButtonM_NL->Update(nullptr);
 
@@ -178,7 +178,7 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 	sMenuButtonB_NL->IntObject(system_);
 	sMenuButtonB_NL->CreateDefaultData();
 	sMenuButtonB_NL->objectParts_[0].materialConfig->textureHandle = TH_menuButton_NL;
-	sMenuButtonB_NL->mainPosition.transform.translate = { 0, 0, -1.0f };
+	sMenuButtonB_NL->mainPosition.transform.translate = { 0, 0, 118.0f };
 	sMenuButtonB_NL->followObject_ = sMenuButtonB;
 	sMenuButtonB_NL->Update(nullptr);
 
@@ -194,28 +194,28 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 	sMenuButtonS_NL->IntObject(system_);
 	sMenuButtonS_NL->CreateDefaultData();
 	sMenuButtonS_NL->objectParts_[0].materialConfig->textureHandle = TH_menuButton_NL;
-	sMenuButtonS_NL->mainPosition.transform.translate = { 0, 0, -1.0f };
+	sMenuButtonS_NL->mainPosition.transform.translate = { 0, 0, 120.0f };
 	sMenuButtonS_NL->followObject_ = sMenuButtonS;
 	sMenuButtonS_NL->Update(nullptr);
 
 	sMenuVolumeBarM->IntObject(system_);
 	sMenuVolumeBarM->CreateDefaultData();
 	sMenuVolumeBarM->objectParts_[0].materialConfig->textureHandle = TH_menuVolumeBar;
-	sMenuVolumeBarM->mainPosition.transform.translate = { 204.0f, 136.0f, 120.0f };
+	sMenuVolumeBarM->mainPosition.transform.translate = { 204.0f, 136.0f, 114.0f };
 	sMenuVolumeBarM->followObject_ = sMenuBG_;
 	sMenuVolumeBarM->Update(nullptr);
 
 	sMenuVolumeBarB->IntObject(system_);
 	sMenuVolumeBarB->CreateDefaultData();
 	sMenuVolumeBarB->objectParts_[0].materialConfig->textureHandle = TH_menuVolumeBar;
-	sMenuVolumeBarB->mainPosition.transform.translate = { 204.0f, 203.0f, 121.0f };
+	sMenuVolumeBarB->mainPosition.transform.translate = { 204.0f, 203.0f, 114.0f };
 	sMenuVolumeBarB->followObject_ = sMenuBG_;
 	sMenuVolumeBarB->Update(nullptr);
 
 	sMenuVolumeBarS->IntObject(system_);
 	sMenuVolumeBarS->CreateDefaultData();
 	sMenuVolumeBarS->objectParts_[0].materialConfig->textureHandle = TH_menuVolumeBar;
-	sMenuVolumeBarS->mainPosition.transform.translate = { 204.0f, 270.0f, 122.0f };
+	sMenuVolumeBarS->mainPosition.transform.translate = { 204.0f, 270.0f, 114.0f };
 	sMenuVolumeBarS->followObject_ = sMenuBG_;
 	sMenuVolumeBarS->Update(nullptr);
 
@@ -229,7 +229,7 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 
 }
 
-void DefaultMenu::Updata() {
+void DefaultMenu::Update() {
 
 	/// ============ メニュー開閉 ============///
 	if (canOpen_ || clickOpenMenu_) {

@@ -62,7 +62,7 @@ SceneTitle::SceneTitle(kEngine* system) {
 	startButton_->CreateDefaultData();
 	startButton_->mainPosition.transform.translate = Vector3(112.0f, 402.0f, 0.0f);
 	startButton_->objectParts_[1].materialConfig->textureHandle = TH_startButton_;
-	startButton_->objectParts_[1].transform.translate.z = -1;
+	//startButton_->objectParts_[1].transform.translate.z = -1;
 	startButton_->objectParts_[0].materialConfig->textureHandle = TH_buttonBack_Select_;
 
 	settingButton_->IntObject(system_);
@@ -70,7 +70,7 @@ SceneTitle::SceneTitle(kEngine* system) {
 	settingButton_->CreateDefaultData();
 	settingButton_->mainPosition.transform.translate = Vector3(112.0f, 495.0f, 0.0f);
 	settingButton_->objectParts_[1].materialConfig->textureHandle = TH_settingButton_;
-	settingButton_->objectParts_[1].transform.translate.z = -1;
+	//settingButton_->objectParts_[1].transform.translate.z = -1;
 	settingButton_->objectParts_[0].materialConfig->textureHandle = TH_buttonBack_notSelect_;
 
 	quitButton_->IntObject(system_);
@@ -78,7 +78,7 @@ SceneTitle::SceneTitle(kEngine* system) {
 	quitButton_->CreateDefaultData();
 	quitButton_->mainPosition.transform.translate = Vector3(112.0f, 597.0f, 0.0f);
 	quitButton_->objectParts_[1].materialConfig->textureHandle = TH_quitButton_;
-	quitButton_->objectParts_[1].transform.translate.z = -1;
+	//quitButton_->objectParts_[1].transform.translate.z = -1;
 	quitButton_->objectParts_[0].materialConfig->textureHandle = TH_buttonBack_notSelect_;
 
 	menuRun[0] = [this]() {this->SelectStart(); };
