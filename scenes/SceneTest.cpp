@@ -233,10 +233,6 @@ void SceneTest::Draw() {
 			}
 		}
 	}
-
-			}
-		}
-	}
 }
 
 void SceneTest::CameraPart() {
@@ -277,21 +273,21 @@ void SceneTest::ImGuiPart() {
 	ImGui::End();
 
 
-	ImGui::Begin("CountdownTimer_");
-	Timer& timer2 = countdownTimer_->GetTime();
-	ImGui::Text("Time: %.2f / %.2f", timer2.parameter_, timer2.maxTime_);
-	if (ImGui::Button("Start2", size)) {
-		countdownTimer_->Start();
-	}
-	if (ImGui::Button("Stop2", size)) {
-		countdownTimer_->Stop();
-	}
-	if (ImGui::Button("Reset2", size)) {
-		countdownTimer_->Reset();
-	}
-	ImGui::ColorEdit4("Color", &countdownColor.x);
-	countdownTimer_->SetLessTimeColor(countdownColor);
-	ImGui::End();
+	//ImGui::Begin("CountdownTimer_");
+	//Timer& timer2 = countdownTimer_->GetTime();
+	//ImGui::Text("Time: %.2f / %.2f", timer2.parameter_, timer2.maxTime_);
+	//if (ImGui::Button("Start2", size)) {
+	//	countdownTimer_->Start();
+	//}
+	//if (ImGui::Button("Stop2", size)) {
+	//	countdownTimer_->Stop();
+	//}
+	//if (ImGui::Button("Reset2", size)) {
+	//	countdownTimer_->Reset();
+	//}
+	//ImGui::ColorEdit4("Color", &countdownColor.x);
+	//countdownTimer_->SetLessTimeColor(countdownColor);
+	//ImGui::End();
 
 
 #endif

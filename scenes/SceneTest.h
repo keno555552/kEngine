@@ -9,6 +9,8 @@
 #include "Enemy\Enemy.h"
 #include "tool\MapChip\MapChipField.h"
 #include "tool\CollisionManager\CollisionManager.h"
+#include "StartTimer\StartTimer.h"
+#include "CountdownTimer\CountdownTimer.h"
 
 class SceneTest :public BaseScene
 {
@@ -17,8 +19,6 @@ public:
 	~SceneTest();
 	void Update() override;
 	void Draw() override;
-
-	void DrawBlock();
 
 
 private:

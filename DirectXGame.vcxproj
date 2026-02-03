@@ -248,9 +248,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClCompile Include="kEngine\GameObject\BackPoint\BackPoint.cpp" />
     <ClCompile Include="kEngine\GameObject\Bullet\Bullet.cpp" />
+    <ClCompile Include="kEngine\GameObject\CountdownTimer\CountdownTimer.cpp" />
     <ClCompile Include="kEngine\GameObject\Enemy\Enemy.cpp" />
     <ClCompile Include="kEngine\GameObject\HPBar\HPBar.cpp" />
     <ClCompile Include="kEngine\GameObject\Sight\Sight.cpp" />
+    <ClCompile Include="kEngine\GameObject\StartTimer\StartTimer.cpp" />
     <ClCompile Include="kEngine\Lighting\AeraLight.cpp" />
     <ClCompile Include="kEngine\Lighting\DirectionalLight.cpp" />
     <ClCompile Include="kEngine\Data\BlendModeType.cpp" />
@@ -391,9 +393,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClInclude Include="kEngine\GameObject\BackPoint\BackPoint.h" />
     <ClInclude Include="kEngine\GameObject\Bullet\Bullet.h" />
+    <ClInclude Include="kEngine\GameObject\CountdownTimer\CountdownTimer.h" />
     <ClInclude Include="kEngine\GameObject\Enemy\Enemy.h" />
     <ClInclude Include="kEngine\GameObject\HPBar\HPBar.h" />
     <ClInclude Include="kEngine\GameObject\Sight\Sight.h" />
+    <ClInclude Include="kEngine\GameObject\StartTimer\StartTimer.h" />
     <ClInclude Include="kEngine\Lighting\AeraLight.h" />
     <ClInclude Include="kEngine\Lighting\DirectionalLight.h" />
     <ClInclude Include="kEngine\Data\BlendModeType.h" />
