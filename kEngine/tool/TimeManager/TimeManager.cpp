@@ -2,13 +2,24 @@
 #include "TimeManager.h"
 
 void TimeManager::Update() {
+	/// フレーム時間計測
 	auto now = std::chrono::steady_clock::now();
 	std::chrono::duration<float> elapsed = now - lastUpdateTime;
+
+	/// deltaTime_に経過時間をセット
 	deltaTime_ = elapsed.count();
+
+	/// scaleがある時間の計算
+	scaledDeltaTime_ = deltaTime_ * timeScale_;
+	timerScaledDeltaTime_ = deltaTime_ * timerTimeScale_;
+
+	/// 更新時間を保存
 	lastUpdateTime = now;
 
+	/// FPS計算
 	oneScondCounter_ += deltaTime_;
 
+	/// 1秒ごとFPSの計算
 	if (oneScondCounter_ > 1.0f) {
 		float sum = 0.0f;
 		for (auto& ptr : fpsHistory_) {
@@ -23,6 +34,8 @@ void TimeManager::Update() {
 	}
 
 }
+
+
 
 #pragma region Timer
 Timer::Timer() {
@@ -51,7 +64,7 @@ void Timer::ResetM() {
 }
 
 void Timer::ToMix() {
-	float t = timeManager_->getDeltaTime();
+	float t = TimerSpeed();
 	if (parameter_ < maxTime_) {
 		parameter_ += t;
 	} else {
@@ -60,7 +73,7 @@ void Timer::ToMix() {
 }
 
 void Timer::ToMixZero() {
-	float t = timeManager_->getDeltaTime();
+	float t = TimerSpeed();
 	if (parameter_ < maxTime_ - 1 && parameter_ > 0) {
 		parameter_ += t;
 	} else {
@@ -69,7 +82,7 @@ void Timer::ToMixZero() {
 }
 
 void Timer::ToZero() {
-	float t = timeManager_->getDeltaTime();
+	float t = TimerSpeed();
 	if (parameter_ > 0) {
 		parameter_ -= t;
 	} else {
@@ -78,7 +91,7 @@ void Timer::ToZero() {
 }
 
 void Timer::ToZeroMix() {
-	float t = timeManager_->getDeltaTime();
+	float t = TimerSpeed();
 	if (parameter_ > 0 && parameter_ < maxTime_) {
 		parameter_ -= t;
 	} else {
@@ -87,7 +100,7 @@ void Timer::ToZeroMix() {
 }
 
 void Timer::foreverUp() {
-	float t = timeManager_->getDeltaTime();
+	float t = TimerSpeed();
 	if (parameter_ < maxTime_) {
 		parameter_ += t;
 	} else {
@@ -96,7 +109,7 @@ void Timer::foreverUp() {
 }
 
 void Timer::foreverDown() {
-	float t = timeManager_->getDeltaTime();
+	float t = TimerSpeed();
 	if (parameter_ > 0) {
 		parameter_ -= t;
 	} else {
@@ -105,7 +118,7 @@ void Timer::foreverDown() {
 }
 
 void Timer::AnimationF() {
-	float t = timeManager_->getDeltaTime();
+	float t = TimerSpeed();
 	if (parameter_ < maxTime_ - 1) {
 		parameter_ += t;
 	} else {
@@ -211,6 +224,23 @@ float Timer::easyOutBack(float r) {
 	return 1 + c3 * powf(T - 1, 3) + c1 * powf(T - 1, 2);
 }
 
+bool Timer::GetIsMax() const {
+	if (parameter_ == maxTime_)return true;
+	return false;
+}
+
+bool Timer::GetIsZero() const {
+	if (parameter_ == 0.0f)return true;
+	return false;
+}
+
+float Timer::TimerSpeed() {
+	if(isInfluenceByTimeScale_)
+		return timeManager_->getTimerScaledDeltaTime();
+	else
+		return timeManager_->getDeltaTime();
+}
+
 #pragma endregion 
 
 #pragma region Easing
@@ -228,7 +258,7 @@ float easyOut(float a, float b, float t, float r) {
 	return (1.0f - easedT) * a + (easedT)*b;
 }
 
-float easyInOut(int a, int b, int c, int t, float r) {
+float easyInOut(float a, float b, float c, float t, float r) {
 	float time = float(c) / t;
 	float easedT = {};
 	if (time <= 0.5) {

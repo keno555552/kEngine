@@ -8,7 +8,7 @@
 #include "ResourceManager.h"
 #include "VertexData.h"
 #include "Material.h"
-#include "DirectionalLight.h"
+#include "Data/DirectionalLightGPU.h"
 
 #include "MathsIncluder.h"
 #include "TransformationMatrix.h"
@@ -17,23 +17,32 @@
 #include "MaterialConfig.h"
 #include "VertexIndex.h"
 #include "Camera.h"
+#include "DrawData/CameraForGPU.h"
+#include "Data/LightGPU.h"
 
 #include "DrawData/ObjectData.h"
 #include "DrawData/SpriteData.h"
 #include <format>
+
+#include "SrvManager.h"
+#include "DrawDataCollector.h"
 
 class DrawEngine
 {
 public:
 	~DrawEngine();
 
-	void Initialize(const char* kClientTitle, int kClientWidth, int kClientHeight, DirectXCore* directXDirver);
+	void Initialize(DirectXCore* directXDirver,
+					SrvManager* srvManager, 
+					ResourceManager* resourceManager,
+					DrawDataCollector* drawDataCollector);
 
+	void StartFrame();
 	void PreDraw();
 	void CommitDraw();
 	void EndDraw();
 
-	void SetDirectionalLight(DirectionalLight* light);
+	void SetDirectionalLight(DirectionalLightGPU* light);
 
 	/// 三角形関連
 	void DrawTriangle(TransformationMatrix* wvpData, MaterialConfig material);
@@ -63,28 +72,26 @@ public:
 
 
 
-	/// 描くものテータを収集する関数
-	void Collect2D(SpriteData* spriteData);
-	void Collect3D(ObjectData* object);
-
 	/// 全部描く関数
-	void Draw2D();
-	void Draw3D();
-	void DrawCall();
 
-	/// Camera
-	void SetCamera(Camera* camera);
+	/// 2D描画関数
+	void Draw2D();
+	void Draw2DTransparent();
+	void Draw2DOpaque();
+
+	/// 3D描画関数
+	void Draw3D();
+	void Draw3DTransparent();
+	void Draw3DOpaque();
+
+	void DrawCall();
 
 	/// リソースローディング
 	int GetModelTextureHandle(int modelHandle, int part);
 
 	int readModelTextureHandle(int Handle);
-	int readCommenTextureHandle(int Handle);
+	int readCommonTextureHandle(int Handle);
 
-	bool SetModelTexture(Model* model);
-	int SetModel(std::string Path);
-	int GetMuitModelNum(int modelHandle);
-	int LoadTexture(const std::string& filePath);
 	int LoadModelTexture(const std::string& filePath);
 
 
@@ -92,14 +99,16 @@ private:
 	
 	PSO* pso_ = new PSO;
 	ResourceManager* resourceManager_{};
-	DirectXCore* directXDriver_{};					/*借り*/
-	ID3D12GraphicsCommandList* commandList_{};		/*借り*/
+	DirectXCore* directXDriver_{};					/*依存*/
+	ID3D12GraphicsCommandList* commandList_{};		/*依存*/
+	SrvManager* srvManager_{};						/*依存*/
+	DrawDataCollector* drawDataCollector_{};			/*依存*/
 
 	int kClientWidth_ = 0;
 	int kClientHeight_ = 0;
 
-	int kMaxSudivision_ = 18;
-	int kSudivision_ = 0;
+	int kMaxSubdivision_ = 18;
+	int kSubdivision_ = 0;
 
 private:
 	enum class psoType {
@@ -107,7 +116,9 @@ private:
 		defaultPSO = 1,
 		Sprite2D = 0,
 		Lambert,
-		HalfLambert
+		HalfLambert,
+		PhongReflection,
+		BlinnPhongReflection,
 	};
 
 private:
@@ -122,11 +133,11 @@ private:
 	D3D12_VIEWPORT viewport{};
 	D3D12_RECT scissorRect{};
 
-	/// Textrue関連
+	/// Texture関連
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE Tile2DSrvHandleGPU_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE Tile3DSrvHandleGPU_{};
-	uint32_t descriptorIndex_ = 1;						// 0はImgui用に予約
+	uint32_t descriptorIndex_ = 1;						// 0はImGui用に予約
 	std::vector<int> commonTextureSRVMap_;
 	std::vector<int> modelTextureSRVMap_;
 	int defaultTextureHandle_ = 0;						// white5x5
@@ -135,8 +146,14 @@ private:
 
 
 	///Lighting関連
-	DirectionalLight* directionalLightData{};		// 外部から受ける
-	DirectionalLight* lightingData = nullptr;
+	DirectionalLightGPU* directionalLightData{};		// 外部から受ける
+	DirectionalLightGPU* lightingData = nullptr;
+
+	uint32_t lightCount_ = 0;
+
+	D3D12_GPU_DESCRIPTOR_HANDLE lightListSrvHandleGPU_{};
+	BasicResource* lightBuffer_ = new BasicResource;
+	LightGPU* lightListData_ = nullptr;
 
 	/// 交換用容器
 	BasicResource* tile2DWVPResource_ = new BasicResource;
@@ -146,9 +163,9 @@ private:
 	int instance2DCounter_ = 0;
 	int instance3DCounter_ = 0;
 
-	/// カメラ
-	Camera* instanceCamera_ = nullptr; // 実体は外でもつ
-	Camera* saveCamera_ = nullptr; //　仮カメラ、カメラがない時使う 
+	/// カメラ関連
+	CameraForGPU* cameraPtr_ = nullptr;
+	BasicResource* cameraBuffer_ = new BasicResource;
 
 	//Material関連
 	Material* materialData = nullptr;
@@ -169,22 +186,16 @@ private:
 	/// 内部関数
 	D3D12_VIEWPORT createViewport(int kClientWidth, int kClientHeight);
 	D3D12_RECT createScissorRect(int kClientWidth, int kClientHeight);
-	void SetMaterial(int MaterialHandle);
+	void SetMaterial(int materialID);
+	void SetTexture(int materialID);
+	void SetCameraForGPU();
 	void InitializeLighting();
-	void SetLighting(DirectionalLight* directionalLight);
+	void UpdateLighting();
+	void SetLightingGPU();
 
-
-	void PSODecition(MaterialConfig& material);
-	//DirectX::ScratchImage LoadTextrueLow(const std::string& filePath);
-	//ID3D12Resource* CreateTextureResource(ID3D12Device* device, const DirectX::TexMetadata& metadata, ResourceManager::TextureInfo* saveData = nullptr);
-	//ID3D12Resource* UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages, ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
-	//int MakeTextureShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResource);
-	//int MakeModelShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResource);
-	D3D12_GPU_DESCRIPTOR_HANDLE CreateTileWVPBuffer(ID3D12Resource* insstancingResource);
+	void PSODecision(int psoID);
 	ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);
 	void MakeDepthStencilView();
-
-	//Vector2 calTextruePos(Vector2 pos);
 
 private:
 	bool isFinish = false;

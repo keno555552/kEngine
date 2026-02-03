@@ -11,6 +11,8 @@
 #include "config.h"
 #include "DrawData/ObjectData.h"
 #include "DrawData/SpriteData.h"
+#include "SrvManager.h"
+using MaterialID = int;
 
 class ResourceManager
 {
@@ -29,7 +31,7 @@ public:
 
 public:
 	/// 一回だけ作成するResource
-	ResourceManager(DirectXCore* device);
+	ResourceManager(DirectXCore* device, InstanceManager* instanceManager);
 	/// 最後で解放するResource
 	~ResourceManager();
 
@@ -43,7 +45,7 @@ public:
 	//////////////////////////////命令
 
 	/// Resource Collect
-	void ColletSprite(Vector2 pos, MaterialConfig material);
+	//void ColletSprite(Vector2 pos, MaterialConfig material);
 	void ColletModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = 0, bool useDefaultModel = false);
 	void Collet2DTile(Vector2 pos, MaterialConfig material);
 	void Collet3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = 0, bool useDefaultModel = false);
@@ -65,10 +67,10 @@ public:
 	int GetTextureHandleFromCommonList(int index);
 	int GetTextureHandleFromModelGroup(int modelHandle, int part);
 
-	DirectX::TexMetadata GetTextureMetadata(int textureHandle);
+	DirectX::TexMetadata GetTextureMetaData(int textureHandle);
 
 	int ReadModelTextureHandle(int index);
-	int ReadCommenTextureHandle(int index);
+	int ReadCommonTextureHandle(int index);
 
 	bool SetModelTexture(Model* model);
 
@@ -77,22 +79,24 @@ public:
 	/// 暫くのCounter管理
 	int GetTextureCounter();
 	void TextureCounterPlus(int index = 1);
-	void TextuerCounterAdjust(int index);
+	void TextureCounterAdjust(int index);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE GetTextureCPUDescriptorHandle(int handle);
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureGPUDescriptorHandle(int handle);
 
-	void CreateSpriteMesh();
+	void ResizeSimpleSpriteMeshList(int spriteNumber);
+	void DeleteExtraSpriteMesh(int spriteNumber);
+
+	int InputMaterialConfig(std::shared_ptr<MaterialConfig> material);
+
 
 public:
 
 	/// 借りのDevice
 	DirectXCore* core_ = nullptr;
-	ID3D12Device* Bdevice_ = nullptr;
+	ID3D12Device* BDevice_ = nullptr;
 
 	//////////////////////////////Texture関係
-	/// テクスチャ関係
-	BasicResource* textureResource_ = new BasicResource; ///テキスチャーの収納のどころ
 
 	/// Lighting関係
 	BasicResource* lightingResource_ = new BasicResource;
@@ -100,20 +104,31 @@ public:
 	/// Material関係
 	std::vector<BasicResource*> materialResourceList_;
 
-	//WVPResource* wvpResource_ = nullptr;
+	struct MaterialEntry {
+		MaterialID materialID{};
+		std::weak_ptr<MaterialConfig> config{}; // 外部設定
+		std::unique_ptr <Material> cpuMaterial{};                // CPU 資料
+		BasicResource* gpuMaterial{};           // GPU buffer
+		int textureHandle{};                    // 使用的貼圖
+	};
+
+	std::vector<MaterialEntry> materialList_;
+	std::unordered_map<MaterialID, int> idToIndex_;
+	int materialCounter_{};
+
 
 	//////////////////////////////InstanceBuffer関係
 
 	/// Instance管理
-	InstanceManager* instanceManager_ = new InstanceManager;
+	InstanceManager* instanceManager_{}; /*借り*/
 
 	//////////////////////////////Vertex\Index関係
 
 	/// 図形関係
-	std::vector<MeshBuffer*> meshBufferList_;		/// すべでのモデルを収納するどころ		これを使って解放する
-	std::vector<Sprite2DMesh*> spriteMeshHandles_;	/// スブライドのハンドルを収納する		解放に使えない
-	std::vector<ModelGroup*> modelGroupList_;		/// モデルグループを	収納する			解放に使えない
-	std::vector < SimpleSpriteMesh*> simpleSpriteMeshList_;	/// デフォルトのスプライトメッシュ
+	std::vector	<MeshBuffer*> meshBufferList_;		/// すべでのモデルを収納するどころ		これを使って解放する
+	std::vector	<Sprite2DMesh*> spriteMeshHandles_;	/// スブライドのハンドルを収納する		解放に使えない
+	std::vector	<ModelGroup*> modelGroupList_;		/// モデルグループを	収納する			解放に使えない
+	std::vector <SimpleSpriteMesh*> simpleSpriteMeshList_;	/// デフォルトのスプライトメッシュ
 
 	/// ModelHandle
 	int modelHandleCounter_ = 0;
@@ -123,11 +138,6 @@ private:
 	/// リソース作り
 
 	int CreateSimpleSpriteMeshResource();
-	//int CreateSprite2DResource(Vector2 LTpos, Vector2 LBpos,
-	//	Vector2 RTpos, Vector2 RBpos,
-	//	float TsizeX, float TsizeY,
-	//	Vector2 TCLTPos, Vector2 TCRBPos);
-	//int CreateSprite2DResource(const DirectX::TexMetadata mipData);
 	int CreateTriangleResource();
 	int CreateCubeResource();
 	int CreateSphereResource(int sudivision);

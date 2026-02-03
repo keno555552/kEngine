@@ -3,19 +3,23 @@
 struct Material
 {
     float4 color;
-    uint enableLighting;
+    float4 color2;
+    float4 color3;
+    
+    int enableLighting;
+
     float4x4 uvTransform;
+    float shininess;
+    float intensity;
+    float heightScale;
 };
 
-struct DirectionalLight
+struct Camera
 {
-    float4 color;
-    float3 direction;
-    float intensity;
+    float3 position;
 };
 
 ConstantBuffer<Material> gMaterial : register(b0);
-ConstantBuffer<DirectionalLight> gDirectionalLight : register(b1);
 Texture2D<float4> gTexture : register(t0);
 SamplerState gSampler : register(s0);
 

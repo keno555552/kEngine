@@ -1,6 +1,6 @@
 #pragma once
 #include "externals/nlohmann/json.hpp"
-#include "../StageManager/Scene.h"
+#include "../StageManager/BaseScene.h"
 #include "config.h"
 #include "Object/Sprite.h"
 #include "Object/Object.h"
@@ -9,7 +9,7 @@
 #include "AnimationSystem.h"
 #include "AnimationUnit.h"
 
-class AnimationEditor : public Scene
+class AnimationEditor : public BaseScene
 {
 public:
 	AnimationEditor(kEngine* system);

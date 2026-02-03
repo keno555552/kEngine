@@ -1,14 +1,19 @@
 #include "WinAPI.h"
+#ifdef USE_IMGUI
+#include "ImGuiManager.h"
+#endif
 
 WinAPI::~WinAPI() {
 }
 
 LRESULT CALLBACK WinAPI::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+
 #ifdef USE_IMGUI
-	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam)) {
+	if (ImGuiManager::HandleMessage(hwnd, msg, wparam, lparam)) {
 		return true;
 	}
 #endif
+
 	switch (msg) {
 	case WM_DESTROY:
 		PostQuitMessage(0);
@@ -39,9 +44,9 @@ bool WinAPI::ProcessMessage() {
 		DispatchMessage(&msg);
 	}
 	if (msg.message == WM_QUIT) {
-		return true;
+		return false;
 	}
-	return false;
+	return true;
 }
 
 bool WinAPI::RegisterWindowClass() {

@@ -11,7 +11,7 @@
 
 class Logger
 {
-	public:
+public:
 	/// <summary>
 	/// 出力ウィンドウに文字出力
 	/// </summary>
@@ -23,5 +23,22 @@ class Logger
 	/// </summary>
 	/// <param name="message"></param>
 	static void Log(const std::wstring& message);
-};
 
+	/// <summary>
+	/// 出力ウィンドウに文字出力
+	/// </summary>
+	/// <typeparam name="...Args"></typeparam>
+	/// <param name="fmt"></param>
+	/// <param name="...args"></param>
+	template<typename... Args>
+	static void Log(const char* fmt, Args... args) {
+		int size = std::snprintf(nullptr, 0, fmt, args...) + 1;
+		if (size <= 0) return;
+
+		std::vector<char> buf(size);
+		std::snprintf(buf.data(), size, fmt, args...);
+
+		OutputDebugStringA(buf.data());
+		OutputDebugStringA("\n");
+	}
+};

@@ -13,6 +13,16 @@ public:
 	float getInstantFPS() const { return instantFps_; }
 	float getFPSPerSecond() const { return fpsPerSecond_; }
 
+	/// 倍率付きの時間関数
+	void setTimeScale(float timeScale) { timeScale_ = timeScale; }
+	float getTimeScale() const { return timeScale_; }
+	float getScaledDeltaTime() const { return scaledDeltaTime_; }
+	/// Timer用の倍率付きの時間関数
+	void setTimerTimeScale(float timerTimeScale) { timerTimeScale_ = timerTimeScale; }
+	float getTimerTimeScale() const { return timerTimeScale_; }
+	float getTimerScaledDeltaTime() const { return timerScaledDeltaTime_; }
+
+
 private:
 	std::chrono::steady_clock::time_point lastUpdateTime;
 	float deltaTime_ = 0.0f;
@@ -20,6 +30,12 @@ private:
 	std::vector<float>fpsHistory_;
 	float instantFps_ = 0.0f;
 	float fpsPerSecond_ = 0.0f;
+
+private:
+	float timeScale_ = 1.0f;
+	float scaledDeltaTime_ = 0.0f;
+	float timerTimeScale_ = 1.0f;
+	float timerScaledDeltaTime_ = 0.0f;
 };
 
 class Timer {
@@ -196,17 +212,28 @@ public:
 	/// <returns>0から1までの変化値</returns>
 	float easyOutBack(float r);
 
+	bool GetIsMax() const;
+
+	bool GetIsZero() const;
+
+	bool GetInfluenceByTimeScale() const { return isInfluenceByTimeScale_; }
+
+	void SetInfluenceByTimeScale(bool isInfluence) { isInfluenceByTimeScale_ = isInfluence; }
 
 public:
-
+	/// 経過時間
 	float parameter_;
-	/// 秒
+	/// 最大時間
 	float maxTime_;
+	/// scaleに影響されるか
+	bool isInfluenceByTimeScale_ = false;
 
 private:
 
 	TimeManager* timeManager_ = nullptr;
 
+private:
+	float TimerSpeed();
 };
 #pragma endregion 
 
@@ -253,7 +280,7 @@ float easyOut(float a, float b, float t, float r);
 /// <param name="t">clockの最大時間</param>
 /// <param name="r">変動率[1.0f以上]</param>
 /// <returns>aからbまで今どれくらい進んでる値</returns>
-float easyInOut(int a, int b, int c, int t, float r);
+float easyInOut(float a, float b, float c, float t, float r);
 
 /// <summary>
 /// Timerに連れてAからBまで変動、一回後ろに行って、早く最後のどころに行く

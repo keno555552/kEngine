@@ -1,5 +1,6 @@
 #pragma once
 #include "Vector3.h"
+#include "Vector4.h"
 
 typedef struct Matrix4x4 {
 
@@ -17,12 +18,12 @@ typedef struct Matrix4x4 {
 	Matrix4x4 operator+(const Matrix4x4& target);
 	Matrix4x4 operator-(const Matrix4x4& target);
 	Matrix4x4 operator*(const Matrix4x4& target);
-	Matrix4x4 operator*(const float& target);
 	Matrix4x4& operator=(const Matrix4x4& target);
-	friend Matrix4x4 operator*(float scalar, const Matrix4x4& vec);
+	Matrix4x4 operator*(const float& target);
+	friend Matrix4x4 operator*(float target, const Matrix4x4& vec);
 
-	bool operator==(const Matrix4x4& target);
-	bool operator!=(const Matrix4x4& target);
+	bool operator==(const Matrix4x4& target)const;
+	bool operator!=(const Matrix4x4& target)const;
 
 }Matrix4x4;
 
@@ -180,8 +181,16 @@ Matrix4x4 MakeOrthographicMatrix(float   left, float   top,
 /// <param name="obj">もの自身のワルド座標</param>
 /// <param name="tranformMatrix">変換Matrix</param>
 /// <returns></returns>
-Vector3 viewFinilTransform(Vector3 obj, Matrix4x4 tranformMatrix);
+Vector3 viewFinalTransform(Vector3 obj, Matrix4x4 tranformMatrix);
 
+
+/// <summary>
+/// Matrix4x4で方向ベクトルを変換する
+/// </summary>
+/// <param name="dir"> 方向ベクトル</param>
+/// <param name="m"> 変換Matrix4x4</param>
+/// <returns>結果Vector3</returns>
+Vector3 TransformDirection(Vector3 dir, const Matrix4x4& m);
 #pragma endregion
 
 

@@ -24,6 +24,7 @@ public:
 					  const wchar_t* profile,
 					  LightModelType modelType = LightModelType::NONE);
 
+
 	IDxcUtils* getDxcUtils() { return dxcUtils; }
 	IDxcCompiler3* getDxcCompiler() { return dxcCompiler; }
 	IDxcIncludeHandler* getIncludeHandler() { return includeHandler; }
@@ -33,4 +34,6 @@ private:
 	IDxcCompiler3* dxcCompiler = nullptr;
 	IDxcIncludeHandler* includeHandler = nullptr;
 private:
+	/// シェーダーをビルドしてコンパイルする
+	IDxcResult* BuildAndCompileShader(const std::wstring& filePath, const wchar_t* profile, LightModelType modelType, HRESULT& hr, DxcBuffer& shaderSourceBuffer);
 };

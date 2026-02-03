@@ -1,4 +1,5 @@
 #include "InstanceManager.h"
+#include "Object/Object.h"
 
 InstanceManager::~InstanceManager() {
 	ClearInstance(materialConfigList_);
@@ -25,39 +26,39 @@ void InstanceManager::Update() {
 	}
 }
 
-void InstanceManager::AddSpriteInstance(Vector2 pos, MaterialConfig material) {
-	SpriteInstance instance;
-	instance.position = { pos.x,pos.y,(float)tileLayerCount * -0.0001f };
-	instance.scale = { 1.0f,1.0f };		/// まだ使ってない
-	instance.rotate = { 0.0f,0.0f,0.0f };  /// まだ使ってない
-	instance.layer = 0;					/// まだ使ってない
-	instance.drawState = STANDBY;
-
-	auto checker = std::find_if(materialConfigList_.begin(),
-		materialConfigList_.end(),
-		[&](MaterialConfig* ptr) {return *ptr == material; });
-
-	if (checker == materialConfigList_.end()) {
-		MaterialConfig* newMaterial = new MaterialConfig(material);
-		materialConfigList_.push_back(newMaterial);
-		instance.materialConfigIndex = int(materialConfigList_.size() - 1);
-	} else {
-		instance.materialConfigIndex = (int)std::distance(materialConfigList_.begin(), checker);
-	}
-
-	auto checker2 = std::find_if(spriteList_.begin(),
-		spriteList_.end(),
-		[&](SpriteInstance* ptr) {return ptr->CheckSame(instance); });
-
-	if (checker2 != spriteList_.end()) {
-		(*checker2)->drawState = STANDBY;
-		(*checker2)->materialConfigIndex = instance.materialConfigIndex;
-	} else {
-		SpriteInstance* newInstance = new SpriteInstance(instance);
-		spriteList_.push_back(newInstance);
-	}
-	spriteLayerCount++;
-}
+//void InstanceManager::AddSpriteInstance(Vector2 pos, MaterialConfig material) {
+//	SpriteInstance instance;
+//	instance.position = { pos.x,pos.y,(float)tileLayerCount * -0.0001f };
+//	instance.scale = { 1.0f,1.0f };		/// まだ使ってない
+//	instance.rotate = { 0.0f,0.0f,0.0f };  /// まだ使ってない
+//	instance.layer = 0;					/// まだ使ってない
+//	instance.drawState = STANDBY;
+//
+//	auto checker = std::find_if(materialConfigList_.begin(),
+//		materialConfigList_.end(),
+//		[&](MaterialConfig* ptr) {return *ptr == material; });
+//
+//	if (checker == materialConfigList_.end()) {
+//		MaterialConfig* newMaterial = new MaterialConfig(material);
+//		materialConfigList_.push_back(newMaterial);
+//		instance.materialConfigIndex = int(materialConfigList_.size() - 1);
+//	} else {
+//		instance.materialConfigIndex = (int)std::distance(materialConfigList_.begin(), checker);
+//	}
+//
+//	auto checker2 = std::find_if(spriteList_.begin(),
+//		spriteList_.end(),
+//		[&](SpriteInstance* ptr) {return ptr->CheckSame(instance); });
+//
+//	if (checker2 != spriteList_.end()) {
+//		(*checker2)->drawState = STANDBY;
+//		(*checker2)->materialConfigIndex = instance.materialConfigIndex;
+//	} else {
+//		SpriteInstance* newInstance = new SpriteInstance(instance);
+//		spriteList_.push_back(newInstance);
+//	}
+//	spriteLayerCount++;
+//}
 
 void InstanceManager::AddModelInstance(TransformationMatrix* wvpData, MaterialConfig material, int vertexNum, int modelHandle, bool useDefaultModel) {
 	//	ModelInstance instance;
@@ -186,7 +187,7 @@ void InstanceManager::Add2DInstance(Transform wvpData, MaterialConfig material, 
 		tileLayerCount++;
 	} else {
 		/// レイヤー指定がある場合はその値を使用し、深度調整のみ行う
-		instance.position.z = layerdSpriteDepth_ + wvpData.translate.z;
+		instance.position.z = layeredSpriteDepth_ + wvpData.translate.z;
 	}
 
 	/// マテリアル設定
@@ -244,13 +245,23 @@ void InstanceManager::Add3DInstance(TransformationMatrix wvpData, MaterialConfig
 		tile3DList_.end(),
 		[&](ModelInstance* ptr) {return ptr->CheckSame(instance); });
 
-	if (checker2 == tile3DList_.end()) {
+	if (checker2 == tile3DList_.end()) { 
 		ModelInstance* newInstance = new ModelInstance(instance);
 		tile3DList_.push_back(newInstance);
 	} else {
 		(*checker2)->drawState = STANDBY;
 		(*checker2)->materialConfigIndex = instance.materialConfigIndex;
 	}
+}
+
+void InstanceManager::Add3DInstance(ObjectData* object) {
+	//for(auto& objectPart : object->objectParts_){
+	//	if (objectPart.materialConfig->textureColor.w < 1.0f) {
+	//		transparentObjectParts_.push_back(&objectPart);
+	//	} else {
+	//		opaqueMaterialBuckets_[objectPart.materialConfig].push_back(&objectPart);
+	//	}
+	//}
 }
 
 void InstanceManager::SpriteLayerManagement() {

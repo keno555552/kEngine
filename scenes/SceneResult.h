@@ -1,8 +1,8 @@
 #pragma once
-#include "Scene.h"
+#include "BaseScene.h"
 #include "Object\Sprite.h"
 
-class SceneResult :public Scene
+class SceneResult :public BaseScene
 {
 public:
 	SceneResult(kEngine* system);

@@ -2,42 +2,81 @@
 
 #pragma region システム管理
 
+bool kEngine::isGameOn_ = true;
+
 kEngine::kEngine() {
-	dxComm = new DirectXController;
-	drawEngine = new DrawEngine;
-	inputManager = new InputManager;
-	soundManager = new SoundManager;
-	timeManager = new TimeManager;
 }
 
+
 kEngine::~kEngine() {
-	delete drawEngine;
-	delete inputManager;
-	delete soundManager;
+
+#ifdef USE_IMGUI
+	ImGuiManager::Shutdown();
+#endif
 	delete timeManager;
+	delete soundManager;
+	delete inputManager;
+	TextureManager::GetInstance()->Finalize();
+	delete instanceManager;
+	delete resourceManager;
+	delete drawEngine;
+	delete drawDataCollector;
+	delete cameraManager;
+	delete lightManager;
+	delete srvManager;
 	delete dxComm;
 }
 
 void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClientHeight) {
+	config::SaveClientTitle(kClientTitle);
+	config::SaveClientWidth(kClientWidth);
+	config::SaveClientHeight(kClientHeight);
+
+	dxComm = new DirectXController;
 	dxComm->InitializeDrive(kClientTitle, kClientWidth, kClientHeight);
-	drawEngine->Initialize(kClientTitle, kClientWidth, kClientHeight, dxComm);
+
+	srvManager = new SrvManager;
+	srvManager->Initialize(dxComm);
+
+#ifdef USE_IMGUI
+	ImGuiManager::Initialize(dxComm, srvManager);
+#endif
+
+	TextureManager::GetInstance()->Initialize(dxComm, srvManager);
+	instanceManager = new InstanceManager();
+	resourceManager = new ResourceManager(dxComm, instanceManager);
+
+	lightManager = new LightManager;
+
+	cameraManager = new CameraManager;
+
+	drawDataCollector = new DrawDataCollector(resourceManager, instanceManager, cameraManager, lightManager);
+	drawEngine = new DrawEngine;
+	drawEngine->Initialize(dxComm, srvManager, resourceManager, drawDataCollector);
+
+	soundManager = new SoundManager;
+	timeManager = new TimeManager;
+
+	inputManager = new InputManager;
 	inputManager->Initialize(dxComm, timeManager);
 }
 
 void kEngine::StartFrame() {
 	dxComm->StartFrame();
-	drawEngine->PreDraw();
+	drawEngine->StartFrame();
 	inputManager->KeysUpdata();
 	timeManager->Update();
+	drawDataCollector->PreCollect();
 }
 
 void kEngine::EndFrame() {
+	drawEngine->PreDraw();
 	drawEngine->CommitDraw();
 	dxComm->EndFrame();
 	drawEngine->EndDraw();
 }
 
-void kEngine::SetDirectionalLight(DirectionalLight* light) {
+void kEngine::SetDirectionalLight(DirectionalLightGPU* light) {
 	drawEngine->SetDirectionalLight(light);
 }
 
@@ -49,74 +88,67 @@ bool kEngine::ProcessMessage() {
 
 #pragma region 描画システム
 
-void kEngine::DrawTriangle(TransformationMatrix* wvpData, MaterialConfig material) {
-	drawEngine->DrawTriangle(wvpData, material);
-}
-
-void kEngine::DrawSprite(Vector2 pos, MaterialConfig material) {
-	//drawEngine->DrawSpriteDirect(pos, material);
-	drawEngine->CollectSprite(pos, material);
-}
-
-void kEngine::DrawSprite(Vector2 pos, MaterialConfig material, Vector2 LTpos, Vector2 LBpos, Vector2 RTpos, Vector2 RBpos, float TsizeX, float TsizeY, Vector2 TCLTPos, Vector2 TCRBPos) {
-	drawEngine->DrawSpriteDirect(pos, material, LTpos, LBpos, RTpos, RBpos, TsizeX, TsizeY, TCLTPos, TCRBPos);
-}
-
-void kEngine::DrawTile(Vector2 pos, MaterialConfig material) {
-	drawEngine->Collect2DTile(pos, material);
-}
-
-void kEngine::DrawCube(TransformationMatrix* wvpData, MaterialConfig material) {
-	drawEngine->CollectCube(wvpData, material);
-}
-
-void kEngine::DrawSprete(TransformationMatrix* wvpData, MaterialConfig material) {
-	drawEngine->DrawSphere(wvpData, material, 1);
-}
-
-void kEngine::DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle) {
-	//drawEngine->DrawModel(wvpData, material, modelHandle);
-	drawEngine->CollectModel(wvpData, material, modelHandle);
-}
-
-void kEngine::DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material) {
-	drawEngine->CollectModel(wvpData, material);
-}
-
-void kEngine::Draw3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material) {
-	drawEngine->Collect3DTile(wvpData, material);
-}
-
 void kEngine::Draw2D(SpriteData* spriteData) {
-	drawEngine->Collect2D(spriteData);
+	//resourceManager->Collet2D(spriteData);
+	drawDataCollector->Collect2D(spriteData);
 }
 
 void kEngine::Draw3D(ObjectData* object) {
-	drawEngine->Collect3D(object);
+	//resourceManager->Collet3D(object);
+	drawDataCollector->Collect3D(object);
 }
 
 int kEngine::GetModelTextureHandle(int modelHandle, int part) {
-	return drawEngine->GetModelTextureHandle(modelHandle, part);
+	return resourceManager->GetTextureHandleFromModelGroup(modelHandle, part);
 }
 
-int kEngine::GetMuitModelNum(int modelHandle) {
-	return drawEngine->GetMuitModelNum(modelHandle);
+int kEngine::GetMutiModelNum(int modelHandle) {
+	return resourceManager->modelGroupList_[modelHandle]->GetModelNum();
 }
 
 int kEngine::SetModelObj(std::string path) {
-	return drawEngine->SetModel(path);
+	//return drawEngine->SetModel(path);
+	return resourceManager->LoadModel(path);
 }
 
+void kEngine::AddLight(Light* light) {
+	lightManager->AddLight(light);
+}
+
+void kEngine::RemoveLight(Light* light) {
+	lightManager->RemoveLight(light);
+}
+
+DebugCamera* kEngine::CreateDebugCamera() {
+	return cameraManager->CreateDebugCamera(this);
+}
+
+Camera* kEngine::CreateCamera() {
+	return cameraManager->CreateCamera();
+}
+
+void kEngine::DestroyCamera(Camera* camera) {
+	cameraManager->DestroyCamera(camera);
+}
+
+void kEngine::SetCamera(Camera* camera) {
+	cameraManager->SetActiveCamera(camera);
+}
+
+void kEngine::ResetToDefaultCamera() {
+	cameraManager->ResetActiveCamera();
+}
+
+
 int kEngine::commonTextureHandleReader(int handle) {
-	return drawEngine->readCommenTextureHandle(handle);
+	return resourceManager->GetTextureHandleFromCommonList(handle);
 };
 int kEngine::commonModelHandleReader(int handle) {
-	return drawEngine->readModelTextureHandle(handle);
+	return resourceManager->ReadModelTextureHandle(handle);
 };
 
-int kEngine::LoadTextrue(const std::string& filePath) {
-	int handle = drawEngine->LoadTexture(filePath);
-	return handle;
+int kEngine::LoadTexture(const std::string& filePath) {
+	return resourceManager->LoadCommonTexture(filePath);
 }
 
 #pragma endregion
@@ -189,7 +221,7 @@ bool kEngine::SoundGetSEMute()const { return soundManager->SoundGetSEMute(); }
 #pragma region 入力関連
 
 Vector2 kEngine::GetMousePosVector2() {
-	return Vector2 { (float)inputManager->mousePosX(), (float)inputManager->mousePosY() };
+	return Vector2{ (float)inputManager->mousePosX(), (float)inputManager->mousePosY() };
 }
 
 int kEngine::GetMousePosX() {
@@ -355,5 +387,28 @@ TimeManager* kEngine::GetTimeManager() const {
 	return timeManager;
 }
 
+void kEngine::SetTimeScale(float timeScale) {
+	timeManager->setTimeScale(timeScale);
+}
+
+float kEngine::GetTimeScale() const {
+	return timeManager->getTimeScale();
+}
+
+float kEngine::GetScaledDeltaTime() const {
+	return timeManager->getScaledDeltaTime();
+}
+
+void kEngine::SetTimerTimeScale(float timerTimeScale) {
+	timeManager->setTimerTimeScale(timerTimeScale);
+}
+
+float kEngine::GetTimerTimeScale_() const {
+	return timeManager->getTimerTimeScale();
+}
+
+float kEngine::GetTimerScaledDeltaTime_() const {
+	return timeManager->getTimerScaledDeltaTime();
+}
 
 #pragma endregion

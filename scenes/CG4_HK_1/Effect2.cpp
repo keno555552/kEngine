@@ -3,15 +3,15 @@
 Effect2::Effect2(kEngine* system) {
 	/// =========== システム初期化 ============///
 	system_ = system;
-	debugCamera_ = new DebugCamera(system);
-	camera_ = new Camera;
+	debugCamera_ = system_->CreateDebugCamera();
+	camera_ = system_->CreateCamera();
 	camera_->Move(Vector3(0.0f, 0.5f, -10.0f));
 
 	/// =========== リソースロード ============///
 	skydomeModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/skydome/skydome.obj");
 	planeModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/plane/plane.obj");
 
-	boxTextureHandle_ = system_->LoadTextrue("resources/texture/testBox.png");
+	boxTextureHandle_ = system_->LoadTexture("resources/texture/testBox.png");
 
 	skydome_ = new Object;
 	skydome_->IntObject(system_);
@@ -26,10 +26,12 @@ Effect2::Effect2(kEngine* system) {
 }
 
 Effect2::~Effect2() {
-	delete camera_;
-	delete debugCamera_;
+	system_->DestroyCamera(camera_);
+	system_->DestroyCamera(debugCamera_);
 
 	delete skydome_;
+	delete ball_;
+	delete plane_;
 	//delete fire_;
 }
 
@@ -82,10 +84,11 @@ void Effect2::Draw() {
 void Effect2::CameraPart() {
 	if (useDebugCamera) {
 		usingCamera_ = debugCamera_;
+		debugCamera_->MouseControlUpdate();
 	} else {
 		usingCamera_ = camera_;
 	}
-	usingCamera_->Update();
+	system_->SetCamera(usingCamera_);
 }
 
 #ifdef USE_IMGUI

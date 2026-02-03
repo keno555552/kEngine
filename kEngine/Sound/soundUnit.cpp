@@ -85,6 +85,23 @@ SoundData SoundUnit::SoundLoad(const char* filename) {
 
 void SoundUnit::SoundUnload() {
 	/// バッファのメモリを解放
+	if (pSourceVoice_) {
+		pSourceVoice_->Stop();
+		pSourceVoice_->FlushSourceBuffers();
+		pSourceVoice_->DestroyVoice();
+		pSourceVoice_ = nullptr;
+	}
+	if (!pSourceVoiceGroup.empty()) {
+		for (auto ptr : pSourceVoiceGroup) {
+			if (ptr) {
+				ptr->Stop();
+				ptr->FlushSourceBuffers();
+				ptr->DestroyVoice();
+			}
+		}
+		pSourceVoiceGroup.clear();
+	}
+
 	delete[] soundData->pBuffer;
 
 	soundData->pBuffer = 0;
@@ -97,10 +114,12 @@ void SoundUnit::SoundUnload() {
 void SoundUnit::SoundPlaySE(IXAudio2* xAudio2, float cVolume, float volume) {
 	HRESULT result;
 
-	/// 波形フォーマットを元にSourceVoiceの生成
+	/// 波形フォーマットを元にSourceVoiceの生成（SE は再生中フラグ不要なので callback なし）
+// >>6
 	IXAudio2SourceVoice* pSourceVoice = nullptr;
-	result = xAudio2->CreateSourceVoice(&pSourceVoice, &soundData->wfex, 0, XAUDIO2_DEFAULT_FREQ_RATIO, voiceCallBack_);
+	result = xAudio2->CreateSourceVoice(&pSourceVoice, &soundData->wfex, 0, XAUDIO2_DEFAULT_FREQ_RATIO, nullptr);
 	pSourceVoiceGroup.push_back(pSourceVoice);
+// <<6
 	assert(SUCCEEDED(result));
 
 	soundType = Type::SE;
@@ -204,10 +223,11 @@ void SoundUnit::SoundPause() {
 	if (pSourceVoice_) {
 		pSourceVoice_->Stop();
 		isPause_ = true;
+		if (voiceCallBack_) { voiceCallBack_->isBGMPlaying = false; }
 	}
 	if (!pSourceVoiceGroup.empty()) {
 		for (auto ptr : pSourceVoiceGroup) {
-			pSourceVoice_->Stop();
+			if (ptr) { ptr->Stop(); }
 			isPause_ = true;
 		}
 	}
@@ -217,10 +237,11 @@ void SoundUnit::SoundContinue() {
 	if (pSourceVoice_) {
 		pSourceVoice_->Start();
 		isPause_ = false;
+		if (voiceCallBack_) { voiceCallBack_->isBGMPlaying = true; }
 	}
 	if (!pSourceVoiceGroup.empty()) {
 		for (auto ptr : pSourceVoiceGroup) {
-			pSourceVoice_->Stop();
+			if (ptr) { ptr->Start(); }
 			isPause_ = false;
 		}
 	}
@@ -231,18 +252,19 @@ void SoundUnit::SoundStop() {
 		pSourceVoice_->Stop();
 		pSourceVoice_->FlushSourceBuffers();
 		isPause_ = false;
+		if (voiceCallBack_) { voiceCallBack_->isBGMPlaying = false; }
 	}
 	if (!pSourceVoiceGroup.empty()) {
 		for (auto ptr : pSourceVoiceGroup) {
-			pSourceVoice_->Stop();
+			if (ptr) { ptr->Stop(); }
 			isPause_ = false;
 		}
 	}
 }
 
 bool SoundUnit::isPlaying() {
-	if (voiceCallBack_->isBGMPlaying) {
-		if (!isPause_) {
+	if (soundType == Type::BGM && voiceCallBack_ != nullptr) {
+		if (voiceCallBack_->isBGMPlaying && !isPause_) {
 			return true;
 		}
 	}
@@ -261,7 +283,7 @@ void SoundUnit::SoundSetMute(bool isMute) {
 	}
 	if (!pSourceVoiceGroup.empty()) {
 		for (auto ptr : pSourceVoiceGroup) {
-			pSourceVoice_->SetVolume(fVolume);
+			if (ptr) { ptr->SetVolume(fVolume); }
 		}
 	}
 }

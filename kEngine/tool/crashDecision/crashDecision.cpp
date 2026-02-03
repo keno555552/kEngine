@@ -29,8 +29,8 @@ void DrawAABB(const AABB& aabb, const Matrix4x4& viewProjectionMatrix, const Mat
 	p[7] = { aabb.max.x,aabb.max.y,aabb.min.z };
 
 	for (int i = 0; i < 8; i++) {
-		p2[i] = viewFinilTransform(p[i], viewProjectionMatrix);
-		p3[i] = viewFinilTransform(p2[i], viewportMatrix);
+		p2[i] = viewFinalTransform(p[i], viewProjectionMatrix);
+		p3[i] = viewFinalTransform(p2[i], viewportMatrix);
 	}
 
 	for (int i = 0; i < 4; i++) {

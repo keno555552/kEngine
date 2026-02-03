@@ -2,11 +2,31 @@
 #include "DirectXController.h"
 #include "inputManager.h"
 #include "soundManager.h"
+#include "SrvManager.h"
 #include "drawEngine.h"
+#include "ResourceManager/ResourceManager.h"
+#include "ResourceManager/InstanceManager/InstanceManager.h"
+#include "ResourceManager/TextureManager/TextureManager.h"
 #include "TransformationMatrix.h"
 #include "Vector2.h"
 #include "materialconfig.h"
 #include "tool/TimeManager/TimeManager.h"
+#include "DrawDataCollector.h"
+#include "CameraManager/CameraManager.h"
+
+#ifdef USE_IMGUI
+#include "ImGuiManager.h"
+#endif // USE_IMGUI
+#include <string>
+#include "DrawData/ObjectData.h"
+#include "DrawData/SpriteData.h"
+#include "InstanceManager.h"
+#include "ResourceManager/ResourceManager.h"
+#include "TextureManager/TextureManager.h"
+#include "LightManager/LightManager.h"
+#include "Data/DirectionalLightGPU.h"
+#include "Camera.h"
+
 
 class kEngine
 {
@@ -25,91 +45,41 @@ public:
 
 	void EndFrame();
 
-	void SetDirectionalLight(DirectionalLight* light);
+	void SetDirectionalLight(DirectionalLightGPU* light);
 
 	bool ProcessMessage();
+
+	static bool GameOn() { return isGameOn_; }
+
+	static void EndGame() { isGameOn_ = false; }
 
 #pragma endregion
 
 #pragma region 描画システム
 
-	/// <summary>
-	/// 3D 三角形を描く
-	/// </summary>
-	/// <param name="wvpData">: 計算終わったTransformMatrix</param>
-	/// <param name="material">: MaterialConfig </param>
-	void DrawTriangle(TransformationMatrix* wvpData, MaterialConfig material);
-
-	/// <summary>
-	/// 2D 四角形を描く, 左上が0,0, 右下プラス, 座標はピクセル計算
-	/// </summary>
-	/// <param name="pos"> Vector2座標</param>
-	/// <param name="material"> MaterialConfig </param>
-	void DrawSprite(Vector2 pos, MaterialConfig material);
-
-	void DrawTile(Vector2 pos, MaterialConfig material);
-
-	/// <summary>
-	/// 2D 四角形を描く, 左上が0,0, 右下プラス, 座標はピクセル計算, 
-	/// </summary>
-	/// <param name="pos"> Vector2座標</param>
-	/// <param name="material"> MaterialConfig </param>
-	/// <param name="LTpos">描くどころの左上座標</param>
-	/// <param name="LBpos">描くどころの左下座標</param>
-	/// <param name="RTpos">描くどころの右上座標</param>
-	/// <param name="RBpos">描くどころの右下座標</param>
-	/// <param name="TsizeX">textrueのサイズx</param>
-	/// <param name="TsizeY">textrueのサイズy</param>
-	/// <param name="TCLTPos">textrueに対するカットする左上</param>
-	/// <param name="TCRBPos">textrueに対するカットする右下</param>
-	void DrawSprite(Vector2 pos, MaterialConfig material, Vector2 LTpos, Vector2 LBpos, Vector2 RTpos, Vector2 RBpos, float TsizeX, float TsizeY, Vector2 TCLTPos, Vector2 TCRBPos);
-
-	/// <summary>
-	/// 3D 立方体を描く
-	/// </summary>
-	/// <param name="wvpData">: 計算終わったTransformMatrix</param>
-	/// <param name="material">: MaterialConfig </param>
-	void DrawCube(TransformationMatrix* wvpData, MaterialConfig material);
-
-	/// <summary>
-	/// 
-	/// </summary>
-	/// <param name="wvpData">: 計算終わったTransformMatrix</param>
-	/// <param name="material">: MaterialConfig </param>
-	void DrawSprete(TransformationMatrix* wvpData, MaterialConfig material);
-
-	/// <summary>
-	/// 
-	/// </summary>
-	/// <param name="wvpData"></param>
-	/// <param name="material"></param>
-	/// <param name="modelHandle"></param>
-	void DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle);
-	void DrawModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material);
-
-
-	/// <summary>
-	/// 
-	/// </summary>
-	/// <param name="wvpData"></param>
-	/// <param name="material"></param>
-	void Draw3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material);
-
-
-
 	/// VVVV====== SpriteData/ObjectData描画,今上使えない ======VVVV///
 	void Draw2D(SpriteData* spriteData);
 	void Draw3D(ObjectData* objectData);
 
-	int GetModelTextureHandle(int modelHandle,int part);
+	int GetModelTextureHandle(int modelHandle, int part);
 
-	int GetMuitModelNum(int modelHandle);
+	int GetMutiModelNum(int modelHandle);
 	int SetModelObj(std::string path);
+
+	void AddLight(Light* light);
+	void RemoveLight(Light* light);
+
+
+	DebugCamera* CreateDebugCamera();
+	Camera* CreateCamera();
+	void DestroyCamera(Camera* camera);
+	void SetCamera(Camera* camera);
+	void ResetToDefaultCamera();
 
 	int commonTextureHandleReader(int handle);
 	int commonModelHandleReader(int handle);
 
-	int LoadTextrue(const std::string& filePath);
+	int LoadTexture(const std::string& filePath);
 
 #pragma endregion
 
@@ -200,13 +170,50 @@ public:
 	float GetDeltaTime();
 	TimeManager* GetTimeManager()const;
 
+	/// 倍率付きの時間関数
+	void SetTimeScale(float timeScale);
+	float GetTimeScale() const;
+	float GetScaledDeltaTime() const;
+
+	/// Timer用の倍率付きの時間関数
+	void SetTimerTimeScale(float timerTimeScale);
+	float GetTimerTimeScale_() const;
+	float GetTimerScaledDeltaTime_() const;
+
+
 #pragma endregion
 
 private:
+	/// ============ コアシステム ============///
 	DirectXController* dxComm = nullptr;
+
+	/// ============ 描画関連 ============///
+
+	/// 資源管理
+	SrvManager* srvManager = nullptr;
+	ResourceManager* resourceManager = nullptr;
+	InstanceManager* instanceManager = nullptr;
+	TextureManager* textureManager = nullptr;
+	DrawDataCollector* drawDataCollector = nullptr;
+
+	/// ライティング管理
+	LightManager* lightManager = nullptr;
+
+	/// カメラ管理
+	CameraManager* cameraManager = nullptr;
+
+	/// 描画ロジック
 	DrawEngine* drawEngine = nullptr;
+
+	/// ============ 入力関連 ============///
 	InputManager* inputManager = nullptr;
+
+	/// ============ 音関連 ============///
 	SoundManager* soundManager = nullptr;
+
+	/// ============ 時間関連 ============///
 	TimeManager* timeManager = nullptr;
 
+	/// =========== ゲーム継続関連 ===========///
+	static bool isGameOn_;
 };

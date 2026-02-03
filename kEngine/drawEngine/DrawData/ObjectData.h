@@ -6,14 +6,40 @@
 #include "TransformationMatrix.h"
 #include "MaterialConfig.h"
 
-struct ObjectPart {
-	Transform transform = CreateDefaultTransform();
+class drawEngine;
+class DrawDataCollector;
+class ResourceManager;
+class AnimationUnit;
+class ObjectPart {
+public:
 
-	TransformationMatrix transformationMatrix{};
+	friend class drawEngine;
+	friend class DrawDataCollector;
+	friend class ResourceManager;
+	friend class AnimationUnit;
+
+	/// ============= 基本変換情報 ============= ///
+
+	Transform transform = CreateDefaultTransform();
 
 	std::shared_ptr<MaterialConfig>materialConfig;
 
 	ObjectPart* parentPart = nullptr;
+
+	Vector3 forward = { 0.0f,0.0f,0.0f };
+
+	bool operator==(const ObjectPart& target);
+
+	/// =============== 更新関数 =============== ///
+
+	Matrix4x4 UpdateWorldMatrix();
+
+	/// ========== エンジン側用データ =========== ///
+
+private:
+	TransformationMatrix transformationMatrix{};
+	Matrix4x4 worldAnchorPointMatrix{};
+
 };
 
 

@@ -17,8 +17,6 @@ AnimationEditor::AnimationEditor(kEngine* system) {
 
 	/// ================= Test ================///
 
-
-
 	/// ================ システム最終設定 ================///
 	SetupAnimationEditorEnd();
 	animationUnit_->ReadAnimationData(&animationList_[0]);
@@ -26,6 +24,7 @@ AnimationEditor::AnimationEditor(kEngine* system) {
 }
 
 AnimationEditor::~AnimationEditor() {
+	system_->DestroyCamera(camera_);
 	delete mainTimer_;
 	delete skydome_;
 }
@@ -83,7 +82,7 @@ void AnimationEditor::SetupAnimationEditor() {
 	markerColor2_.ColorBy1();
 
 	/// ============ カメラ設定 ============///
-	camera_ = new DebugCamera(system_);
+	camera_ = system_->CreateCamera();
 	camera_->Move({ 0.0f,0.5f,-10.0f });
 	camera_->SetDefaultTransform(camera_->GetTransform());
 
@@ -95,12 +94,12 @@ void AnimationEditor::SetupAnimationEditor() {
 	/// ===== テキスチャローディング ===///
 	std::string mainPath = "resources/TemplateResource/texture/animationEditor/";
 
-	mainTimeBarTH_ = system_->LoadTextrue(mainPath + "mainTimeBar.png");
-	mainNeedleTH_ = system_->LoadTextrue(mainPath + "mainNeedle.png");
-	markerTH_ = system_->LoadTextrue(mainPath + "marker.png");
-	pingTH_ = system_->LoadTextrue(mainPath + "ping.png");
-	pingFirstTH_ = system_->LoadTextrue(mainPath + "pingFirst.png");
-	pingLastTH_ = system_->LoadTextrue(mainPath + "pingLast.png");
+	mainTimeBarTH_ = system_->LoadTexture(mainPath + "mainTimeBar.png");
+	mainNeedleTH_ = system_->LoadTexture(mainPath + "mainNeedle.png");
+	markerTH_ = system_->LoadTexture(mainPath + "marker.png");
+	pingTH_ = system_->LoadTexture(mainPath + "ping.png");
+	pingFirstTH_ = system_->LoadTexture(mainPath + "pingFirst.png");
+	pingLastTH_ = system_->LoadTexture(mainPath + "pingLast.png");
 
 	std::string modelPath = "resources/TemplateResource/object/";
 	Skydome_modelHandle_ = system_->SetModelObj(modelPath + "animationEditor/studioBG/studioBG.obj");

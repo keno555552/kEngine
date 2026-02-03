@@ -3,8 +3,8 @@
 Effect1::Effect1(kEngine* system) {
 	/// =========== システム初期化 ============///
 	system_ = system;
-	debugCamera_ = new DebugCamera(system);
-	camera_ = new Camera;
+	debugCamera_ = system_->CreateDebugCamera();
+	camera_ = system_->CreateCamera();
 	camera_->Move(Vector3(-2.736f, -4.474f, -27.334f));
 	camera_->Rotate(Vector3(-0.324f, 0.228f, 0.0f));
 
@@ -12,7 +12,7 @@ Effect1::Effect1(kEngine* system) {
 	skydomeModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/skydome/skydome.obj");
 	sphereModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/plane/plane.obj");
 
-	boxTextureHandle_ = system_->LoadTextrue("resources/texture/testBox.png");
+	boxTextureHandle_ = system_->LoadTexture("resources/texture/testBox.png");
 
 	skydome_ = new Object;
 	skydome_->IntObject(system_);
@@ -30,8 +30,8 @@ Effect1::Effect1(kEngine* system) {
 }
 
 Effect1::~Effect1() {
-	delete camera_;
-	delete debugCamera_;
+	system_->DestroyCamera(camera_);
+	system_->DestroyCamera(debugCamera_);
 
 	delete skydome_;
 	for (auto& ptr : plane_) {

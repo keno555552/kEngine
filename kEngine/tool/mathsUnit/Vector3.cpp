@@ -46,14 +46,14 @@ Vector3 Vector3::operator*=(const Vector3& target) {
 	return *this;
 }
 
-bool Vector3::operator==(const Vector3& target) {
+bool Vector3::operator==(const Vector3& target) const{
 	if (x != target.x)return false;
 	if (y != target.y)return false;
 	if (z != target.z)return false;
 	return true;
 }
 
-bool Vector3::operator!=(const Vector3& target) {
+bool Vector3::operator!=(const Vector3& target) const {
 	return !(*this == target);
 }
 

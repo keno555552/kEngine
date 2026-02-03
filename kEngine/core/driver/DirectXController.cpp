@@ -1,5 +1,6 @@
 #include "DirectXController.h"
 #include <pplwin.h>
+#include <cassert>
 
 DirectXController::DirectXController() {
 	static FixFPS fixFPS;
@@ -9,16 +10,15 @@ DirectXController::DirectXController() {
 }
 
 DirectXController::~DirectXController() {
-	Finalize();
+
 	timeEndPeriod(1);
+	Finalize();
 }
 
 void DirectXController::StartFrame() {
 
 #ifdef USE_IMGUI
-	ImGui_ImplDX12_NewFrame();
-	ImGui_ImplWin32_NewFrame();
-	ImGui::NewFrame();
+	ImGuiManager::BeginFrame();
 #endif
 
 	// これから書き込むバックバッファのインデックスを取得
@@ -45,22 +45,16 @@ void DirectXController::StartFrame() {
 	commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);
 	// 指定した色で画面全体をクリアする
 	float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f }; // 青っぽい色。RGBAの順
-	//float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f }; // 黒色。RGBAの順
+	//float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f }; // 黑色。RGBAの順
 	commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 	commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
-
-	// 描画用のDescriptorHeapの設定
-	ID3D12DescriptorHeap* descriptorHeaps[] = { srvDescriptorHeap };
-	commandList->SetDescriptorHeaps(1, descriptorHeaps);
 }
 
 void DirectXController::EndFrame() {
 
 #ifdef _DEBUG
 #ifdef USE_IMGUI
-	// 実際のcommandListのImGuiの描画コマンドを積む
-	ImGui::Render();
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
+	ImGuiManager::EndFrame(commandList);
 #endif
 #endif
 

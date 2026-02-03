@@ -889,7 +889,7 @@ int InputManager::gamepadDIR2() {
 
 bool InputManager::CheckIsGamepadConnet() {
 	bool hasState = config::GetGamePadState();
-	bool isXInput = CheakXInputDeviceConnected();
+	bool isXInput = CheckXInputDeviceConnected();
 	bool isDInput = SUCCEEDED(driver_->GetDirectInput()->GetDeviceStatus(GUID_Joystick));
 
 	if (hasState && !isDInput) {
@@ -908,7 +908,7 @@ bool InputManager::CheckIsGamepadConnet() {
 
 	if (!isXInput && !isDInput) {
 		bool boool = false;
-		config::SetConnetGamePad(&boool);
+		config::SetConnectGamePad(&boool);
 		return false;
 	}
 	return true;

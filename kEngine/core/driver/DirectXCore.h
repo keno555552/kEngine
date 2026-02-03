@@ -30,10 +30,8 @@
 #include <dxgidebug.h>
 
 #pragma region Input
-bool CheakXInputDeviceConnected();
+bool CheckXInputDeviceConnected();
 #pragma endregion
-
-
 
 #pragma region DirectXCommon
 
@@ -43,19 +41,18 @@ public:
 	~DirectXCore();
 
 	/// Getter
-	ID3D12Device* GetDriver() { return device; };
+	ID3D12Device* GetDevice() { return device; };
 	HWND GetHWND() { return winAPI_->GetHWND(); };
-	ID3D12DescriptorHeap* GetSrvDescriptorHeap() { return srvDescriptorHeap; };
 	ID3D12DescriptorHeap* GetDsvDescriptorHeap() { return dsvDescriptorHeap; };
 	ID3D12DescriptorHeap* GetRtvDescriptorHeap() { return rtvDescriptorHeap; };
-	uint32_t GetDesriptorSizeSRV();
-	uint32_t GetDesriptorSizeRTV();
-	uint32_t GetDesriptorSizeDSV();
+	uint32_t GetDescriptorSizeRTV();
+	uint32_t GetDescriptorSizeDSV();
 
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index);
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index);
 
 	ID3D12GraphicsCommandList* GetCommandList() { return commandList; }
+	ID3D12CommandQueue* GetCommandQueue() { return commandQueue; }
 
 	bool isDirectInputCreated();
 	IDirectInput8* GetDirectInput() { return directInput; }
@@ -99,7 +96,6 @@ protected:
 	ID3D12Resource* swapChainResources[2];
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 	ID3D12DescriptorHeap* rtvDescriptorHeap;
-	ID3D12DescriptorHeap* srvDescriptorHeap;
 	ID3D12DescriptorHeap* dsvDescriptorHeap;
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
 	ID3D12Fence* fence;
@@ -113,9 +109,8 @@ protected:
 	IDirectInputDevice8* mouseDevice;
 	IDirectInputDevice8* gamepadDevice;
 
-
-
-protected:
+//protected:
+public:
 
 	/// 創建設備
 	ID3D12Device* CreateDevice(IDXGIAdapter4* adapter);
@@ -128,21 +123,22 @@ protected:
 	void SetDirectXInput(InputType type, IDirectInputDevice8*& drive);
 	void SetXInput();
 	///創建命令隊列
-	ID3D12CommandQueue* CreateCommandQueue(ID3D12Device* device);
+	ID3D12CommandQueue* CreateCommandQueue();
 	///創建命令分配器
-	ID3D12CommandAllocator* CreateCommandAllocator(ID3D12Device* device);
+	ID3D12CommandAllocator* CreateCommandAllocator();
 	///創建命令隊列
-	ID3D12GraphicsCommandList* CreateCommandList(ID3D12Device* device, ID3D12CommandAllocator* commandAllocator);
+	ID3D12GraphicsCommandList* CreateCommandList(ID3D12CommandAllocator* commandAllocator);
 	///創建命令列表
 	IDXGISwapChain4* CreateSwapChain(IDXGIFactory7* factory, ID3D12CommandQueue* commandQueue, HWND hwnd, UINT width, UINT height);
 	///創建描述符堆
-	ID3D12DescriptorHeap* CreateDescriptorHeap(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible);
+	ID3D12DescriptorHeap* CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible);
 	///創建渲染目標視圖
-	void CreateRenderTargetViews(ID3D12Device* device, IDXGISwapChain4* swapChain, ID3D12DescriptorHeap* rtvDescriptorHeap);
+	void CreateRenderTargetViews(IDXGISwapChain4* swapChain, ID3D12DescriptorHeap* rtvDescriptorHeap);
 	///
-	ID3D12Fence* CreateFence(ID3D12Device* device);
+	ID3D12Fence* CreateFence();
 
 };
 
 #pragma endregion
+
 

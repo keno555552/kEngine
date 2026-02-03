@@ -8,7 +8,7 @@
 
 #pragma region Input
 
-bool CheakXInputDeviceConnected() {
+bool CheckXInputDeviceConnected() {
 	XINPUT_STATE state;
 	ZeroMemory(&state, sizeof(XINPUT_STATE));
 
@@ -17,7 +17,7 @@ bool CheakXInputDeviceConnected() {
 		if (XInputGetState(i, &state) == ERROR_SUCCESS) {
 			bool boool = true;
 			config::SetGamePadType(XINPUT);
-			config::SetConnetGamePad(&boool);
+			config::SetConnectGamePad(&boool);
 			config::SetXInputIp(i);
 			return true; // 見つけたtrue
 		}
@@ -49,7 +49,6 @@ DirectXCore::DirectXCore() {
 	swapChainResources[1] = {};
 	//DescriptorHeap = {};
 	rtvDescriptorHeap = {};
-	srvDescriptorHeap = {};
 	dsvDescriptorHeap = {};
 	rtvHandles[0] = {};
 	rtvHandles[1] = {};
@@ -79,15 +78,11 @@ DirectXCore::~DirectXCore() {
 	//CloseHandle(fenceEvent);
 }
 
-uint32_t DirectXCore::GetDesriptorSizeSRV() {
-	return device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-}
-
-uint32_t DirectXCore::GetDesriptorSizeRTV() {
+uint32_t DirectXCore::GetDescriptorSizeRTV() {
 	return device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 }
 
-uint32_t DirectXCore::GetDesriptorSizeDSV() {
+uint32_t DirectXCore::GetDescriptorSizeDSV() {
 	return device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 }
 
@@ -113,7 +108,7 @@ bool DirectXCore::isDirectInputCreated() {
 void DirectXCore::SetDirectXInputKeyBoard() {
 	SetDirectXInput(Keyboard, keyBoardDevice);
 	bool boool = true;
-	config::SetConnetKeyboard(&boool);
+	config::SetConnectKeyboard(&boool);
 }
 
 void DirectXCore::ReleaseDirectXInputKeyBoard() {
@@ -122,14 +117,14 @@ void DirectXCore::ReleaseDirectXInputKeyBoard() {
 		keyBoardDevice->Release();
 		keyBoardDevice = nullptr;
 		bool boool = false;
-		config::SetConnetKeyboard(&boool);
+		config::SetConnectKeyboard(&boool);
 	}
 }
 
 void DirectXCore::SetDirectXInputMouse() {
 	SetDirectXInput(Mouse, mouseDevice);
 	bool boool = true;
-	config::SetConnetMouse(&boool);
+	config::SetConnectMouse(&boool);
 }
 
 void DirectXCore::ReleaseDirectXInputMouse() {
@@ -138,14 +133,14 @@ void DirectXCore::ReleaseDirectXInputMouse() {
 		mouseDevice->Release();
 		mouseDevice = nullptr;
 		bool boool = false;
-		config::SetConnetMouse(&boool);
+		config::SetConnectMouse(&boool);
 	}
 }
 
 void DirectXCore::SetDirectXInputGamepad() {
 	SetDirectXInput(GamePad, gamepadDevice);
 	bool boool = true;
-	config::SetConnetGamePad(&boool);
+	config::SetConnectGamePad(&boool);
 }
 
 void DirectXCore::ReleaseDirectXInputGamepad() {
@@ -154,7 +149,7 @@ void DirectXCore::ReleaseDirectXInputGamepad() {
 		gamepadDevice->Release();
 		gamepadDevice = nullptr;
 		bool boool = false;
-		config::SetConnetGamePad(&boool);
+		config::SetConnectGamePad(&boool);
 	}
 }
 
@@ -246,9 +241,9 @@ void DirectXCore::SetDirectXInput(InputType type, IDirectInputDevice8*& drive) {
 		result = directInput->CreateDevice(GUID_SysKeyboard, &drive, NULL);
 		if (SUCCEEDED(result)) {
 			boool = true;
-			config::SetConnetKeyboard(&boool);
+			config::SetConnectKeyboard(&boool);
 		} else {
-			config::SetConnetKeyboard(&boool);
+			config::SetConnectKeyboard(&boool);
 			skip = true;
 			break;
 		}
@@ -263,9 +258,9 @@ void DirectXCore::SetDirectXInput(InputType type, IDirectInputDevice8*& drive) {
 		result = directInput->CreateDevice(GUID_SysMouse, &drive, NULL);
 		if (SUCCEEDED(result)) {
 			boool = true;
-			config::SetConnetMouse(&boool);
+			config::SetConnectMouse(&boool);
 		} else {
-			config::SetConnetMouse(&boool);
+			config::SetConnectMouse(&boool);
 			skip = true;
 			break;
 		}
@@ -280,10 +275,10 @@ void DirectXCore::SetDirectXInput(InputType type, IDirectInputDevice8*& drive) {
 		result = directInput->CreateDevice(GUID_Joystick, &drive, NULL);
 		if (SUCCEEDED(result)) {
 			boool = true;
-			config::SetConnetGamePad(&boool);
+			config::SetConnectGamePad(&boool);
 			config::SetGamePadType(DIRECTINPUT);
 		} else {
-			config::SetConnetGamePad(&boool);
+			config::SetConnectGamePad(&boool);
 			config::SetGamePadType(NODEVICE);
 			skip = true;
 			break;
@@ -303,11 +298,11 @@ void DirectXCore::SetDirectXInput(InputType type, IDirectInputDevice8*& drive) {
 }
 
 void DirectXCore::SetXInput() {
-	CheakXInputDeviceConnected();
+	CheckXInputDeviceConnected();
 }
 
 
-ID3D12CommandQueue* DirectXCore::CreateCommandQueue(ID3D12Device* device) {
+ID3D12CommandQueue* DirectXCore::CreateCommandQueue() {
 	// コマンドキューを生成する
 	ID3D12CommandQueue* commandQueue = nullptr;
 	D3D12_COMMAND_QUEUE_DESC commandQueueDesc{};
@@ -319,7 +314,7 @@ ID3D12CommandQueue* DirectXCore::CreateCommandQueue(ID3D12Device* device) {
 	return commandQueue;
 }
 
-ID3D12CommandAllocator* DirectXCore::CreateCommandAllocator(ID3D12Device* device) {
+ID3D12CommandAllocator* DirectXCore::CreateCommandAllocator() {
 	// コマンドアロケータを生成する
 	ID3D12CommandAllocator* commandAllocator = nullptr;
 	HRESULT hr = device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator));
@@ -329,7 +324,7 @@ ID3D12CommandAllocator* DirectXCore::CreateCommandAllocator(ID3D12Device* device
 	return commandAllocator;
 }
 
-ID3D12GraphicsCommandList* DirectXCore::CreateCommandList(ID3D12Device* device, ID3D12CommandAllocator* commandAllocator) {
+ID3D12GraphicsCommandList* DirectXCore::CreateCommandList(ID3D12CommandAllocator* commandAllocator) {
 	// コマンドリストを生成する
 	ID3D12GraphicsCommandList* commandList = nullptr;
 	HRESULT hr = device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator, nullptr, IID_PPV_ARGS(&commandList));
@@ -357,7 +352,7 @@ IDXGISwapChain4* DirectXCore::CreateSwapChain(IDXGIFactory7* dxgiFactory, ID3D12
 	return swapChain;
 }
 
-ID3D12DescriptorHeap* DirectXCore::CreateDescriptorHeap(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible) {
+ID3D12DescriptorHeap* DirectXCore::CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible) {
 	ID3D12DescriptorHeap* descriptorHeap = nullptr;
 	D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc{};
 	descriptorHeapDesc.Type = heapType;
@@ -369,7 +364,7 @@ ID3D12DescriptorHeap* DirectXCore::CreateDescriptorHeap(ID3D12Device* device, D3
 	return descriptorHeap;
 }
 
-void DirectXCore::CreateRenderTargetViews(ID3D12Device* device, IDXGISwapChain4* swapChain, ID3D12DescriptorHeap* rtvDescriptorHeap) {
+void DirectXCore::CreateRenderTargetViews(IDXGISwapChain4* swapChain, ID3D12DescriptorHeap* rtvDescriptorHeap) {
 	// SwapChainからResourceを引っ張ってくる
 	HRESULT hr = swapChain->GetBuffer(0, IID_PPV_ARGS(&swapChainResources[0]));
 	// うまく取得できなければ起動できない
@@ -399,7 +394,7 @@ void DirectXCore::CreateRenderTargetViews(ID3D12Device* device, IDXGISwapChain4*
 	device->CreateRenderTargetView(swapChainResources[1], &rtvDesc, rtvHandles[1]);
 }
 
-ID3D12Fence* DirectXCore::CreateFence(ID3D12Device* device) {
+ID3D12Fence* DirectXCore::CreateFence() {
 	///初期値0でFenceを作る
 	//ID3D12Fence* fence = nullptr;
 	//uint64_t fenceValue = 0;
@@ -427,9 +422,6 @@ void DirectXCore::InitializeDrive(const char* kClientTitle, int kClientWidth, in
 	/// WindowAPI、windowを作る
 	winAPI_ = new WinAPI();
 	winAPI_->Initialize(kClientTitle, kClientWidth, kClientHeight);
-
-	config::SaveClientWidth(kClientWidth);
-	config::SaveClientHeight(kClientHeight);
 
 	/// DXGIファクトリーの生成
 	dxgiFactory = nullptr;
@@ -463,43 +455,24 @@ void DirectXCore::InitializeDrive(const char* kClientTitle, int kClientWidth, in
 	assert(useAdapter != nullptr);
 
 	device = CreateDevice(useAdapter);
-	commandQueue = CreateCommandQueue(device);
-	commandAllocator = CreateCommandAllocator(device);
-	commandList = CreateCommandList(device, commandAllocator);
+	commandQueue = CreateCommandQueue();
+	commandAllocator = CreateCommandAllocator();
+	commandList = CreateCommandList(commandAllocator);
 
 	SwapChain = CreateSwapChain(dxgiFactory, commandQueue, winAPI_->GetHWND(), kClientWidth, kClientHeight);
 	//DescriptorHeap = CreateDescriptorHeap(device);
-	rtvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
-	srvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, config::GetMaxSRVNum(), true);
-	dsvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
+	rtvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
+	dsvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
 
-	CreateRenderTargetViews(device, SwapChain, rtvDescriptorHeap);
+	CreateRenderTargetViews(SwapChain, rtvDescriptorHeap);
 
-	fence = CreateFence(device);
+	fence = CreateFence();
 
-
-#ifdef USE_IMGUI
-		///Imgui
-		// ImGuiの初期化。詳細はさして重要ではないので解説は省略する。
-		// こういうもんである
-		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
-		ImGui::StyleColorsDark();
-		ImGui_ImplWin32_Init(winAPI_->GetHWND());
-		ImGui_ImplDX12_Init(device,
-			swapChainDesc.BufferCount,
-			rtvDesc.Format,
-			srvDescriptorHeap,
-			srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-			srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-#endif
-
-		// DirectX入力装置の初期化
-		InitializeDirectXInput();
-		SetDirectXInput(Keyboard, keyBoardDevice);
-		SetDirectXInput(Mouse, mouseDevice);
-		// SetDirectXInput(GamePad, gamepadDevice); //XInput優先
-
+	// DirectX入力装置の初期化
+	InitializeDirectXInput();
+	SetDirectXInput(Keyboard, keyBoardDevice);
+	SetDirectXInput(Mouse, mouseDevice);
+	// SetDirectXInput(GamePad, gamepadDevice); //XInput優先
 
 }
 
@@ -509,18 +482,8 @@ bool DirectXCore::ProcessMessage() {
 
 void DirectXCore::Finalize() {
 
-#ifdef USE_IMGUI
-	/// ImGuiの終了処理。詳細はさして重要ではないので解説は省略する。
-	// こういうもんである。初期化と逆順に行う
-	ImGui_ImplDX12_Shutdown();
-	ImGui_ImplWin32_Shutdown();
-	ImGui::DestroyContext();
-#endif
 
 	/// すべでのものの解放
-	if (dxgiFactory)			dxgiFactory->Release();
-	if (useAdapter)				useAdapter->Release();
-	if (device)					device->Release();
 	if (commandQueue)			commandQueue->Release();
 	if (commandAllocator)		commandAllocator->Release();
 	if (commandList)			commandList->Release();
@@ -528,19 +491,24 @@ void DirectXCore::Finalize() {
 	if (swapChainResources[0])	swapChainResources[0]->Release();
 	if (swapChainResources[1])	swapChainResources[1]->Release();
 	if (rtvDescriptorHeap)		rtvDescriptorHeap->Release();
-	if (srvDescriptorHeap)		srvDescriptorHeap->Release();
 	if (dsvDescriptorHeap)		dsvDescriptorHeap->Release();
-	if (fence)					fence->Release();
 	if (directInput)			directInput->Release();
 	if (keyBoardDevice) { keyBoardDevice->Unacquire();  keyBoardDevice->Release(); }
 	if (mouseDevice) { mouseDevice->Unacquire();  mouseDevice->Release(); }
 	if (gamepadDevice) { gamepadDevice->Unacquire();  gamepadDevice->Release(); }
+
+	if (fence)					fence->Release();
+
+	if (device)					device->Release();
+	if (useAdapter)				useAdapter->Release();
+	if (dxgiFactory)			dxgiFactory->Release();
 	CloseHandle(fenceEvent);
 
 #ifdef _DEBUG
 	/// リソースリークチェック
 	IDXGIDebug1* debug;
-	if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))) {
+	//if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))) {
+	if (SUCCEEDED(DXGIGetDebugInterface1(1, IID_PPV_ARGS(&debug)))) {
 		//debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);///また未解放要素がある
 		debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_DETAIL);
 		debug->ReportLiveObjects(DXGI_DEBUG_APP, DXGI_DEBUG_RLO_ALL);

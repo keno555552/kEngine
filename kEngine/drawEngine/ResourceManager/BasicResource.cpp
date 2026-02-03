@@ -1,4 +1,5 @@
 #include "BasicResource.h"
+#include <cassert>
 
 ID3D12Resource* CreateResource(ID3D12Device* device, size_t sizeInBytes) {
 	// 頂点リソース用のヒープの設定

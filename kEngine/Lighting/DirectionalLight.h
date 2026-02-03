@@ -1,11 +1,11 @@
 #pragma once
-#include "Vector4.h"
-#include "Vector3.h"
+#include "Light.h"
 
-struct DirectionalLight
+class DirectionalLight : public Light
 {
-	Vector4 color;
-	Vector3 direction;
-	float intensity;
+public:
+	DirectionalLight() = default;
+	~DirectionalLight() = default;
+private:
 };
 

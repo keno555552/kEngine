@@ -3,6 +3,10 @@
 #include "FrameRateLimiter.h"
 #pragma comment(lib,"winmm.lib")
 
+#ifdef USE_IMGUI
+#include "ImGuiManager.h"
+#endif
+
 class DirectXController :public DirectXCore
 {
 public:

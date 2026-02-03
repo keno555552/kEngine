@@ -3,16 +3,16 @@
 SceneTest2::SceneTest2(kEngine* system) {
 	/// =========== システム初期化 ============///
 	system_ = system;
-	debugCamera_ = new DebugCamera(system);
-	camera_ = new Camera;
+	debugCamera_ = system->CreateDebugCamera();
+	camera_ = system->CreateCamera();
 	camera_->Move(Vector3(0.0f, 0.5f, -10.0f));
 
 	/// =========== リソースロード ============///
 	skydomeModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/skydome/skydome.obj");
 	sphereModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/plane/plane.obj");
 
-	boxTextureHandle_ = system_->LoadTextrue("resources/texture/testBox.png");
-	tryTextureHandle_ = system_->LoadTextrue("resources/texture/Tryer.png");
+	boxTextureHandle_ = system_->LoadTexture("resources/texture/testBox.png");
+	tryTextureHandle_ = system_->LoadTexture("resources/texture/Tryer.png");
 
 	skydome_ = new Object;
 	skydome_->IntObject(system_);
@@ -36,8 +36,8 @@ SceneTest2::SceneTest2(kEngine* system) {
 }
 
 SceneTest2::~SceneTest2() {
-	delete camera_;
-	delete debugCamera_;
+	system_->DestroyCamera(camera_);
+	system_->DestroyCamera(debugCamera_);
 
 	delete skydome_;
 	delete sprite_;

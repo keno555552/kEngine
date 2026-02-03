@@ -50,34 +50,7 @@ IDxcBlob* Shader_compile::CompileShader(// CompilerするShaderファイルへ�
 
 	/// 2.Compileする
 	// 実際にShaderをコンパイルする
-	IDxcResult* shaderResult = nullptr;
-	std::vector<LPCWSTR> arguments = {
-	filePath.c_str(),			// コンパイル対象のhlslファイル名
-	L"-E", L"main",				// エントリーポイントの指定。基本的にmain以外にはしない
-	L"-T", profile,				// ShaderProfileの設定
-	L"-Zi", L"-Qembed_debug",	// デバッグ用の情報を埋め込む
-	L"-Od",						// 最適化を外しておく
-	L"-Zpr"						// メモリレイアウトは行優先
-	};
-	// 光照モデル設定
-	if (modelType == LightModelType::Lambert) {
-		arguments.push_back(L"-D");
-		arguments.push_back(L"LIGHT_MODEL_LAMBERT=1");
-	} else if (modelType == LightModelType::HalfLambert) {
-		arguments.push_back(L"-D");
-		arguments.push_back(L"LIGHT_MODEL_HALF=1");
-	}
-	hr = dxcCompiler->Compile(
-		&shaderSourceBuffer, // 読み込んだファイル
-		arguments.data(), // コンパイルオプション
-		static_cast<uint32_t>(arguments.size()), // コンパイルオプションの数
-		includeHandler, // includeが含まれた諸々
-		IID_PPV_ARGS(&shaderResult) // コンパイル結果
-	);
-
-
-	// コンパイルエラーではなくdxcが起動できないなど致命的な状況
-	assert(SUCCEEDED(hr));
+	IDxcResult* shaderResult = BuildAndCompileShader(filePath, profile, modelType, hr, shaderSourceBuffer);
 
 	/// 3.警告・エラーがでていないか確認する
 	// 警告・エラーが出てたらログに出して止める
@@ -89,6 +62,7 @@ IDxcBlob* Shader_compile::CompileShader(// CompilerするShaderファイルへ�
 		// 警告・エラーダメゼッタイ
 		assert(false);
 	}
+
 
 	/// 4.Compile結果を受け取って返す
 	// コンパイル結果から実行用のバイナリ部分を取得
@@ -102,6 +76,49 @@ IDxcBlob* Shader_compile::CompileShader(// CompilerするShaderファイルへ�
 	shaderResult->Release();
 	// 実行用のバイナリを返却
 	return shaderBlob;
+}
+
+
+IDxcResult* Shader_compile::BuildAndCompileShader(const std::wstring& filePath, const wchar_t* profile, LightModelType modelType, HRESULT& hr, DxcBuffer& shaderSourceBuffer) {
+
+	IDxcResult* shaderResult = nullptr;
+
+	std::vector<LPCWSTR> arguments = {
+		filePath.c_str(),			// コンパイル対象のhlslファイル名
+		L"-E", L"main",				// エントリーポイントの指定。基本的にmain以外にはしない
+		L"-T", profile,				// ShaderProfileの設定
+		L"-Zi", L"-Qembed_debug",	// デバッグ用の情報を埋め込む
+		L"-Od",						// 最適化を外しておく
+		L"-Zpr"						// メモリレイアウトは行優先
+	};
+
+	// 光照モデル設定
+	if (modelType == LightModelType::Lambert) {
+		arguments.push_back(L"-D");
+		arguments.push_back(L"LIGHT_MODEL_LAMBERT=1");
+	} else if (modelType == LightModelType::HalfLambert) {
+		arguments.push_back(L"-D");
+		arguments.push_back(L"LIGHT_MODEL_HALF=1");
+	} else if (modelType == LightModelType::PhongReflection) {
+		arguments.push_back(L"-D");
+		arguments.push_back(L"LIGHT_MODEL_PHONG=1");
+	} else if (modelType == LightModelType::BlinnPhongReflection) {
+		arguments.push_back(L"-D");
+		arguments.push_back(L"LIGHT_MODEL_BLINN_PHONG=1");
+	}
+
+	hr = dxcCompiler->Compile(
+		&shaderSourceBuffer, // 読み込んだファイル
+		arguments.data(), // コンパイルオプション
+		static_cast<uint32_t>(arguments.size()), // コンパイルオプションの数
+		includeHandler, // includeが含まれた諸々
+		IID_PPV_ARGS(&shaderResult) // コンパイル結果
+	);
+
+	// コンパイルエラーではなくdxcが起動できないなど致命的な状況
+	assert(SUCCEEDED(hr));
+
+	return shaderResult;
 }
 
 

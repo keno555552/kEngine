@@ -1,6 +1,7 @@
 #pragma once
 #include "MaterialConfig.h"
-#include "Scene.h"
+#include "SceneFactory.h"
+#include "BaseScene.h"
 #include "SceneTitle.h"
 #include "Scene1.h"
 #include "SceneResult.h"
@@ -8,33 +9,56 @@
 #include "SceneTester.h"
 #include "SceneTest.h"
 #include "SceneTest2.h"
+#include "SceneWin.h"
+#include "SceneLose.h"
 #include "AnimationSystem/AnimationEditor.h"
 #include "DefaultMenu/DefaultMenu.h"
 #include "CG4_HK_1/Effect2.h"
+#include "CG3_HK_2/SceneCGHK2.h"
 
 class SceneManager {
 public:
-	SceneManager(kEngine* system);
-	~SceneManager();
+
+	static void Initialize(kEngine* system);
+	static SceneManager& GetInstance();
+
+	// 複製禁止
+	SceneManager(const SceneManager&) = delete;
+	SceneManager& operator=(const SceneManager&) = delete;
+	SceneManager(SceneManager&&) = delete;
+	SceneManager& operator=(SceneManager&&) = delete;
 
 	void Update();
 	void Render();
-
-	bool GetIsEnd();
+;
 
 public:
-	SceneNum sceneUsingHandle_ = SceneNum::S_NONE;
-	void SceneChanger();
+	std::string sceneUsingNameHandle_ = "NONE";
 
-	void StageCheckBoxUpdate();
+	void SceneChanger();
+	//void StageCheckBoxUpdate();
+
+private:
+	std::map<std::string,std::string> sceneFlow_ = {
+		{"TITLE","STAGE_01"},
+		{"WIN","TITLE"},
+		{"LOSE","TITLE"},
+	};
 
 
 private:
-	Scene* sceneUsing_ = nullptr;
-	Scene* sceneOld_ = nullptr;
+	static SceneManager* sceneManager_;
+
+	SceneManager(kEngine* system);
+	~SceneManager();
+private:
+	BaseScene* sceneUsing_ = nullptr;
+	BaseScene* sceneOld_ = nullptr;
 
 private:
 	kEngine* system_ = nullptr; // 借り
+
+	SceneFactory* sceneFactory_ = nullptr;
 
 	DefaultMenu* defaultMenu_ = nullptr;
 
@@ -65,6 +89,6 @@ private:
 	void ClearStage();
 
 #ifdef USE_IMGUI
-	void ImguiPart();
+	void ImGuiPart();
 #endif
 };

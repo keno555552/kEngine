@@ -3,7 +3,7 @@
 SceneResult::SceneResult(kEngine* system) {
 	system_ = system;
 
-	testTextResult = system_->LoadTextrue("resources/texture/sceneTest/result.png");
+	testTextResult = system_->LoadTexture("resources/texture/sceneTest/result.png");
 
 	sprite_->IntObject(system_);
 	sprite_->CreateDefaultData();
@@ -17,7 +17,7 @@ SceneResult::~SceneResult() {
 
 void SceneResult::Update() {
 	if (system_->GetTriggerOn(DIK_SPACE)) {
-		ChangeNextStage(SceneNum::S_TITLE);
+		outcome_ = SceneOutcome::NEXT;
 	}
 }
 
