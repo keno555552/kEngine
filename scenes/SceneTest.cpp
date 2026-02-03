@@ -5,7 +5,7 @@ SceneTest::SceneTest(kEngine* system) {
 	system_ = system;
 	debugCamera_ = system_->CreateDebugCamera();
 	camera_ = system_->CreateCamera();
-	camera_->Move(Vector3(0.0f, 0.5f, -10.0f));
+	camera_->Move(Vector3(0.0f, 1.5f, -10.0f));
 	usingCamera_ = camera_;
 	system_->SetCamera(usingCamera_);
 
@@ -79,6 +79,9 @@ SceneTest::SceneTest(kEngine* system) {
 	mapChipField_->LoadMapChipCsv("resources/stage/blocks1.csv");
 	mapChipField_->SetBlockWidth(1.0f);
 	mapChipField_->SetBlockHeight(1.0f);
+
+	startTimer_ = new StartTimer(system_);
+	countdownTimer_ = new CountdownTimer(system_);
 
 	/// マップチップの初期化
 	GenerateMap();
@@ -175,6 +178,11 @@ void SceneTest::Update() {
 		}
 	}
 
+	/// スタートタイマー更新
+	startTimer_->Update(nullptr);
+
+	countdownTimer_->Update(nullptr);
+
 	if (system_->GetTriggerOn(DIK_0)) {
 		if (useDebugCamera)useDebugCamera = false;
 		else useDebugCamera = true;
@@ -226,10 +234,9 @@ void SceneTest::Draw() {
 		}
 	}
 
-#ifdef USE_IMGUI
-	/// ImGui処理
-	ImGuiPart();
-#endif
+			}
+		}
+	}
 }
 
 void SceneTest::CameraPart() {
@@ -248,8 +255,8 @@ void SceneTest::CameraPart() {
 	system_->SetCamera(usingCamera_);
 }
 
-#ifdef USE_IMGUI
 void SceneTest::ImGuiPart() {
+#ifdef USE_IMGUI
 	ImGui::Begin("DebugCamera");
 	ImGui::Checkbox("isUse", &useDebugCamera);
 	ImGui::End();
@@ -266,9 +273,29 @@ void SceneTest::ImGuiPart() {
 		ImGui::SliderFloat3("uvScale", &underGround_BG_->objectParts_[0].materialConfig->uvScale.x, -50.0f, 50.0f);
 		ImGui::End();
 	}
+	ImGui::SliderFloat("TimeScale", &timerScale, 0.0f, 5.0f);
+	ImGui::End();
 
-}
+
+	ImGui::Begin("CountdownTimer_");
+	Timer& timer2 = countdownTimer_->GetTime();
+	ImGui::Text("Time: %.2f / %.2f", timer2.parameter_, timer2.maxTime_);
+	if (ImGui::Button("Start2", size)) {
+		countdownTimer_->Start();
+	}
+	if (ImGui::Button("Stop2", size)) {
+		countdownTimer_->Stop();
+	}
+	if (ImGui::Button("Reset2", size)) {
+		countdownTimer_->Reset();
+	}
+	ImGui::ColorEdit4("Color", &countdownColor.x);
+	countdownTimer_->SetLessTimeColor(countdownColor);
+	ImGui::End();
+
+
 #endif
+}
 
 
 void SceneTest::GenerateMap() {

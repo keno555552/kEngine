@@ -34,7 +34,7 @@ void DrawDataCollector::Collect2D(SpriteData* sprite) {
 
 		/// ========================================  RenderData作成  ========================================///
 
-		/// metaData取得
+		/// metaData
 		DirectX::TexMetadata metaData = resourceManager_->GetTextureMetaData(object.materialConfig->textureHandle);
 
 		/// スプライトメッシュのリサイズ
@@ -80,6 +80,7 @@ void DrawDataCollector::Collect3D(ObjectData* object) {
 	/// nullチェック
 	if (!object)return;
 
+	int moderCounter = 0;
 	for (auto& objectPart : object->objectParts_) {
 
 		/// ========================================  RenderData作成  ========================================///
@@ -88,7 +89,7 @@ void DrawDataCollector::Collect3D(ObjectData* object) {
 		RenderData renderData;
 
 		/// メッシュ設定
-		renderData.mesh = resourceManager_->meshBufferList_[object->modelHandle_];
+		renderData.mesh = resourceManager_->modelGroupList_[object->modelHandle_]->GetModel(moderCounter);
 
 		/// マテリアル設定
 		objectPart.materialConfig->MakeUVMatrix();
@@ -105,6 +106,8 @@ void DrawDataCollector::Collect3D(ObjectData* object) {
 
 		/// ========================================  バケット振り分け  ========================================///
 		AddObjectToBucket(renderData, object->modelHandle_);
+
+		moderCounter++;
 	}
 }
 
@@ -185,7 +188,7 @@ TransformationMatrix DrawDataCollector::SpriteWVPAdjustment(SpriteData& sprite, 
 		part.transform.translate
 	);
 
-	Matrix4x4 worldMatrix = localMatrix * followWorldMatrix;
+	Matrix4x4 worldMatrix =  localMatrix * followWorldMatrix;
 
 	TransformationMatrix result{};
 	result.world = worldMatrix;

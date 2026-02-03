@@ -40,14 +40,20 @@ public:
 	void SetNearClip(float nearClip);
 	void SetFarClip(float farClip);
 
+	/// ゲットカメラ
 	Matrix4x4 GetWorldMatrix();
 	Matrix4x4 GetViewMatrix();
 	Matrix4x4 GetProjectionMatrix();
 	Transform GetTransform();
 	Vector2 GetObjectScreenPos(Vector3 objPos);
 
+	/// デフォルト変換設定・取得
 	void SetDefaultTransform(Transform defaultTransform) { defaultTransform_ = defaultTransform; }
 	Transform GetDefaultTransform() const { return defaultTransform_; }
+
+	/// カメラツール
+	bool isObjectFaceCamera(const Vector3& objectForward,const Vector3& objectPos, const float& thresholdDegree = 90.0f);
+
 
 	void ResetCamera(); 
 

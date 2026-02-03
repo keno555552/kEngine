@@ -18,6 +18,8 @@ public:
 	void Update() override;
 	void Draw() override;
 
+	void DrawBlock();
+
 
 private:
 	kEngine* system_ = nullptr;				// 借り
@@ -60,6 +62,8 @@ private:
 
 	Player* player_ = nullptr;
 	MapChipField* mapChipField_ = nullptr;
+	StartTimer* startTimer_ = nullptr;
+	CountdownTimer* countdownTimer_ = nullptr;
 	std::vector<std::vector<Object*>> blockObjectList_;
 	std::vector<Bullet*> bulletList_;
 	std::vector<Enemy*> enemyList_;
@@ -67,8 +71,10 @@ private:
 	/// ========== コリジョンマネージャー =========///
 	CollisionManager collisionManager_;
 
-	/// =============== フラグ ================///
+	/// =============== フラグ / 変数 ================///
 	bool useDebugCamera = false;
+	float timerScale = 1.0f;
+	Vector4 countdownColor = { 1.0f,0.0f,0.0f,1.0f };
 
 private:
 	/// ============= シーン内命令 =============///

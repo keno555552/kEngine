@@ -863,7 +863,8 @@ void DrawEngine::Draw3DTile() {
 
 void DrawEngine::Draw2D() {
 
-	if (drawDataCollector_->GetOpaqueBuckets2D().empty())return;
+	if (drawDataCollector_->GetOpaqueBuckets2D().empty() &&
+		drawDataCollector_->GetTransparentObjectParts2D().empty())return;
 
 	Draw2DOpaque();
 	Draw2DTransparent();
@@ -1003,7 +1004,8 @@ void DrawEngine::Draw2DOpaque() {
 
 void DrawEngine::Draw3D() {
 
-	if (drawDataCollector_->GetOpaqueBuckets3D().empty())return;
+	if (drawDataCollector_->GetOpaqueBuckets3D().empty() &&
+		drawDataCollector_->GetTransparentObjectParts3D().empty())return;
 
 	Draw3DOpaque();
 	Draw3DTransparent();
@@ -1235,7 +1237,7 @@ void DrawEngine::UpdateLighting() {
 	// Lightingにデータを書き込む
 	lightCount_ = drawDataCollector_->GetLightCount();
 
-	for (int i = 0; i < lightCount_; ++i) {
+	for (int i = 0; i < (int)lightCount_; ++i) {
 		lightListData_[i] = drawDataCollector_->GetLightGPUBuffer()[i];
 	}
 

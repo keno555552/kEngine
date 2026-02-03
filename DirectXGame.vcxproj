@@ -431,6 +431,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\tool\crashDecision\crashDecision.h" />
     <ClInclude Include="kEngine\tool\DefaultMenu\DefaultMenu.h" />
     <ClInclude Include="kEngine\tool\MapChip\MapChipField.h" />
+    <ClInclude Include="kEngine\tool\mathsUnit\Vector4.h" />
     <ClInclude Include="kEngine\tool\PerlinNoise\PerlinNoise.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\VertexIndex.h" />
     <ClInclude Include="kEngine\tool\mathsUnit\randomMaker.h" />
@@ -463,7 +464,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\tool\mathsUnit\Transform.h" />
     <ClInclude Include="kEngine\tool\mathsUnit\Vector2.h" />
     <ClInclude Include="kEngine\tool\mathsUnit\Vector3.h" />
-    <ClInclude Include="kEngine\tool\mathsUnit\Vector4.h" />
     <ClInclude Include="kEngine\kEngine.h" />
     <ClInclude Include="kEngine\core\pso\PSO.h" />
     <ClInclude Include="kEngine\core\pso\shader_compile.h" />

@@ -183,6 +183,14 @@ Matrix4x4 MakeOrthographicMatrix(float   left, float   top,
 /// <returns></returns>
 Vector3 viewFinalTransform(Vector3 obj, Matrix4x4 tranformMatrix);
 
+
+/// <summary>
+/// Matrix4x4で方向ベクトルを変換する
+/// </summary>
+/// <param name="dir"> 方向ベクトル</param>
+/// <param name="m"> 変換Matrix4x4</param>
+/// <returns>結果Vector3</returns>
+Vector3 TransformDirection(Vector3 dir, const Matrix4x4& m);
 #pragma endregion
 
 

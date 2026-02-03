@@ -14,7 +14,7 @@
 #include <unordered_map>
 #include <DrawData/ObjectData.h>
 
-struct ObjectPart;
+class ObjectPart;
 class InstanceManager
 {
 public:
