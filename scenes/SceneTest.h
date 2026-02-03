@@ -16,6 +16,8 @@ public:
 	void Update() override;
 	void Draw() override;
 
+	void DrawBlock();
+
 
 private:
 	kEngine* system_ = nullptr;				// 借り

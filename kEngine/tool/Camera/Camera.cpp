@@ -135,6 +135,17 @@ Vector2 Camera::GetObjectScreenPos(Vector3 objPos) {
 
 }
 
+bool Camera::isObjectFaceCamera(const Vector3& objectForward, const Vector3& objectPos, const float& thresholdDegree) {
+	Vector3 toCamera = Normalize(cameraTransform_.translate - objectPos);
+
+	float dot = Dot(objectForward, toCamera);
+
+	float thresholdDot = cosf(thresholdDegree * (3.14159265f / 180.0f));
+
+	return dot < thresholdDot;
+}
+
+
 void Camera::ResetCamera() {
 	cameraTransform_ = defaultTransform_;
 	dirty_ = true;

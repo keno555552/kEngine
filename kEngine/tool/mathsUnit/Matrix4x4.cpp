@@ -615,5 +615,13 @@ Vector3 viewFinalTransform(Vector3 obj, Matrix4x4 m) {
 	return { x, y, z };
 }
 
+Vector3 TransformDirection(Vector3 dir, const Matrix4x4& m) {
+
+	float x = dir.x * m.m[0][0] + dir.y * m.m[1][0] + dir.z * m.m[2][0];
+	float y = dir.x * m.m[0][1] + dir.y * m.m[1][1] + dir.z * m.m[2][1];
+	float z = dir.x * m.m[0][2] + dir.y * m.m[1][2] + dir.z * m.m[2][2];
+
+	return { x, y, z };
+}
 
 #pragma endregion

@@ -84,7 +84,7 @@ int LightManager::GetLightCount() {
 	if (lightGPUList_.empty()) {
 		return 1;
 	}
-	return lightGPUList_.size();
+	return (int)lightGPUList_.size();
 }
 
 void LightManager::ConvertDirectionalLight(DirectionalLight* light) {

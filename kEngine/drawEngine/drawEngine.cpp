@@ -1289,7 +1289,7 @@ void DrawEngine::UpdateLighting() {
 	// Lightingにデータを書き込む
 	lightCount_ = drawDataCollector_->GetLightCount();
 
-	for (int i = 0; i < lightCount_; ++i) {
+	for (int i = 0; i < (int)lightCount_; ++i) {
 		lightListData_[i] = drawDataCollector_->GetLightGPUBuffer()[i];
 	}
 
