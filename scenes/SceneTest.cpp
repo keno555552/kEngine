@@ -30,7 +30,10 @@ SceneTest::SceneTest(kEngine* system) {
 		parts.materialConfig->lightModelType = LightModelType::PhongReflection;
 	}
 
-
+	debugObject_ = new DebugObject(system_);
+	debugObject_->SetFollowObject(&player_->mainPosition);
+	debugObject_->SetShowNumber(true);
+	debugObject_->UpdateShowNumber(1234567890);
 
 	//player_->CreateDefaultData();
 	//player_->modelHandle_ = playerModelHandle_;
@@ -80,6 +83,12 @@ void SceneTest::Update() {
 	/// player更新
 	player_->Update(usingCamera_);
 
+	debugObject_->SetShowCenterPoint(true);
+	debugObject_->SetShowNumber(true);
+	debugObject_->UpdateShowNumber(10);
+	debugObject_->Update(usingCamera_);
+
+
 	sprite_->Update(usingCamera_);
 	//sprite2_->Update(usingCamera_);
 
@@ -121,6 +130,7 @@ void SceneTest::Draw() {
 	//system_->Draw3D(skydome_);
 	//system_->Draw3D(player_);
 	//system_->Draw3D(model_);
+	debugObject_->Draw();
 
 	/// ブロック描画
 	DrawBlock();
@@ -189,7 +199,10 @@ void SceneTest::ImGuiPart() {
 		ImGui::SliderFloat3("Scale", &player_->mainPosition.transform.scale.x, -1.0f, 1.0f);
 		ImGui::SliderFloat("ScaleOnce", &scale, -1.0f, 1.0f);
 		ImGui::SliderFloat("shininess", &shininess, 0.0f, 256.0f);
+		ImGui::SliderFloat("number", (float*)&number, 0, 100);
 		ImGui::End();
+
+		debugObject_->UpdateShowNumber(number);
 
 		//player_->mainPosition.transform.scale.x = scale;
 		//player_->mainPosition.transform.scale.y = scale;

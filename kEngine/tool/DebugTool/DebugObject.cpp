@@ -146,12 +146,13 @@ void DebugObject::updateCenterNumber() {
 			float scaledSpacing = spacing * pxScale;
 
 			// 整排寬度
-			float totalWidth = scaledCropW * numDigits + scaledSpacing * (numDigits - 1);
+			float totalWidth = spriteW * numDigits + spacing * (numDigits - 1);
 
-			// 初めの数字の位置
-			Vector2 pos = camera_->GetObjectScreenPos(followObject_->transform.translate);
-			float baseX = pos.x - (totalWidth * 0.5f);
-			float baseY = pos.y - (scaledCropH * 0.5f);
+
+			// 左上角基準
+			Vector2 pos = camera_->GetObjectScreenPos(targetPosition_);
+			float baseX = - totalWidth * 0.5f;
+			float baseY = - spriteH * 0.5f;
 
 			for (int i = 0; i < numDigits; i++) {
 
@@ -162,16 +163,17 @@ void DebugObject::updateCenterNumber() {
 				part.cropLT = Vector2(digit * cropW, 0.0f);
 				part.cropSize = Vector2(cropW, cropH);
 
-				// 設定位置
-				float x = baseX + i * (scaledCropW + scaledSpacing);
-
+				// 設定位置（中心點）
+				float x = baseX + i * (spriteW + spacing);
 				part.transform.translate = { x,baseY,0 };
 			}
+
 
 			// 設定縮放
 			float scaleX = scale;
 			float scaleY = scale * 10.0f;
 			centerNumberSprite_->mainPosition.transform.scale = Vector3(scaleX, scaleY, 1.0f);
+			centerNumberSprite_->mainPosition.transform.translate = Vector3(pos.x, pos.y, 0.0f);
 		}
 	}
 }

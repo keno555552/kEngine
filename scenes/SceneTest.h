@@ -7,6 +7,7 @@
 #include "tool\MapChip\MapChipField.h"
 #include "StartTimer\StartTimer.h"
 #include "CountdownTimer\CountdownTimer.h"
+#include "DebugTool\DebugObject.h"
 
 class SceneTest :public BaseScene
 {
@@ -48,6 +49,7 @@ private:
 	MapChipField* mapChipField_ = nullptr;
 	StartTimer* startTimer_ = nullptr;
 	CountdownTimer* countdownTimer_ = nullptr;
+	DebugObject* debugObject_ = nullptr;
 	std::vector<std::vector<Object*>> blockObjectList_;
 
 
@@ -55,6 +57,8 @@ private:
 	bool useDebugCamera = false;
 	float timerScale = 1.0f;
 	Vector4 countdownColor = { 1.0f,0.0f,0.0f,1.0f };
+
+	int number = 3;
 
 private:
 	/// ============= シーン内命令 =============///
