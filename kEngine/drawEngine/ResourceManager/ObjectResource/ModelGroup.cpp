@@ -1,5 +1,32 @@
 #include "ModelGroup.h"
 #include "filesystem"
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
+std::vector<ModelData> LoadFileTop(const std::string& filepath) {
+
+	std::string ext = std::filesystem::path(filepath).extension().string();
+
+	if (ext == ".obj") {
+		return LoadMuitObjFile(
+			std::filesystem::path(filepath).parent_path().string(),
+			std::filesystem::path(filepath).filename().string()
+		);
+	}
+	else if (ext == ".fbx") {
+	
+	
+	
+	}
+	else if(ext == ".gltf" || ext == ".glb" ) {
+		return LoadAssimpFile(
+			std::filesystem::path(filepath).parent_path().string(),
+			std::filesystem::path(filepath).filename().string()
+		);
+	}
+	return std::vector<ModelData>();
+}
 
 std::vector<ModelData> LoadMuitObjFile(const std::string& directoryPath, const std::string& filename) {
 
@@ -12,7 +39,7 @@ std::vector<ModelData> LoadMuitObjFile(const std::string& directoryPath, const s
 	std::vector<Vector2> texcoords;												//　テクスチャ座標
 	std::string line;															//　ファイルから読んだ１行を格納する変数
 	std::string materialFilename;
-	
+
 	bool startCopy = false;
 
 	///2. ファイルを開く
@@ -73,7 +100,7 @@ std::vector<ModelData> LoadMuitObjFile(const std::string& directoryPath, const s
 				} else { normal = normals[elementIndices[2] - 1]; }
 
 				Vector2 texcoord;
-				if (!elementIndices[1]) { texcoord = Vector2{ normal.x, normal.y } *0.5f + Vector2{ 0.5f,0.5f }; }
+				if (!elementIndices[1]) { texcoord = Vector2{ normal.x, normal.y } * 0.5f + Vector2{ 0.5f,0.5f }; }
 				//if (!(elementIndices[1])) { texcoord = { 0,0 }; }
 				else { texcoord = texcoords[elementIndices[1] - 1]; }
 
@@ -118,6 +145,62 @@ std::vector<ModelData> LoadMuitObjFile(const std::string& directoryPath, const s
 	}
 
 	///4. ModelDataを返す
+	return modelGroup;														// 構築したModelDataを返す
+}
+
+std::vector<ModelData> LoadAssimpFile(const std::string& directoryPath, const std::string& filename) {
+
+	///1. 中で必要となる変数の宣言
+	Assimp::Importer importer;
+	std::string filePath = directoryPath + "/" + filename;
+	const aiScene* scene = importer.ReadFile(filePath,
+		aiProcess_FlipWindingOrder |		// 頂点の順番を反転
+		aiProcess_FlipUVs 					// UV反転
+	);
+	assert(scene->HasMeshes());
+
+	///2. 実際にファイルを読む、ModelDataを構築していく
+	std::vector<ModelData>modelGroup;
+	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; meshIndex++) {
+		aiMesh* mesh = scene->mMeshes[meshIndex];
+		ModelData modelData{};
+		assert(mesh->HasNormals()); // 法線情報がないMeshは今回は非対応
+		assert(mesh->HasTextureCoords(0)); // テクスチャ座標がないMeshは今回は非対応
+
+		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; faceIndex++) {
+			aiFace face = mesh->mFaces[faceIndex];
+			assert(face.mNumIndices == 3); // 三角形以外は非対応
+			// 面の頂点インデックスを逆順に格納して、左右手座標系変換を行う
+			for (uint32_t element = 0; element < face.mNumIndices; element++) {
+				uint32_t vertexIndex = face.mIndices[(face.mNumIndices - 1) - element];
+				aiVector3D aiPosition = mesh->mVertices[vertexIndex];
+				aiVector3D aiNormal = mesh->mNormals[vertexIndex];
+				aiVector3D aiTexCoord = mesh->mTextureCoords[0][vertexIndex];
+				VertexData vertex{};
+				// 位置
+				vertex.position = { aiPosition.x, aiPosition.y, aiPosition.z, 1.0f };
+				// 法線
+				vertex.normal = { aiNormal.x, aiNormal.y, aiNormal.z };
+				// テクスチャ座標
+				vertex.texcoord = { aiTexCoord.x, aiTexCoord.y };
+				// aiProcess_MakeLeftHandedはz*=-1をしてくれるので、右手系から左手系への変換は頂点の順番を反転するだけで良い
+				//vertex.position.z *= -1.0f;
+				//vertex.normal.z *= -1.0f;
+				vertex.texcoord.x *= -1.0f;
+				modelData.vertices.push_back(vertex);
+			}
+		}
+		// --- 材質（每個 mesh 只讀一次） ---
+		uint32_t materialIndex = mesh->mMaterialIndex;
+		aiMaterial* material = scene->mMaterials[materialIndex];
+
+		if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
+			aiString textureFilePath;
+			material->GetTexture(aiTextureType_DIFFUSE, 0, &textureFilePath);
+			modelData.material.textureFilePath = directoryPath + "/" + textureFilePath.C_Str();
+		}
+		modelGroup.push_back(modelData);
+	}
 	return modelGroup;														// 構築したModelDataを返す
 }
 

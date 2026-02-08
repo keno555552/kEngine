@@ -15,8 +15,6 @@ struct MaterialData
 	std::string textureFilePath;
 	std::string mtlName_;
 };
-MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
-MaterialData LoadTargetMaterialTemplateFile(const std::string& directoryPath, const std::string& filename, const std::string& target);
 
 struct ModelData
 {
@@ -25,6 +23,9 @@ struct ModelData
 };
 ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename);
 
+std::vector<ModelData> LoadFileTop(const std::string& filepath);
+MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
+MaterialData LoadTargetMaterialTemplateFile(const std::string& directoryPath, const std::string& filename, const std::string& target);
 
 class Model :public MeshBuffer
 {

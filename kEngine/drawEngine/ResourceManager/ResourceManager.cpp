@@ -476,7 +476,8 @@ int ResourceManager::CreateModelResource(std::string Path) {
 	}
 
 	/// Model読み込み
-	std::vector<ModelData> modelList = LoadMuitObjFile(modelGroup->GetDirectoryPath(), modelGroup->GetObjName_());
+	std::vector<ModelData> modelList = LoadAssimpFile(modelGroup->GetDirectoryPath(), modelGroup->GetObjName_());
+	//std::vector<ModelData> modelList = LoadMuitObjFile(modelGroup->GetDirectoryPath(), modelGroup->GetObjName_());
 	for (auto& ptr : modelList) {
 		Model* newModel = new Model;
 		newModel->GetModelData(ptr);

@@ -3,6 +3,7 @@
 #include <vector>
 
 std::vector<ModelData> LoadMuitObjFile(const std::string& directoryPath, const std::string& filename);
+std::vector<ModelData> LoadAssimpFile(const std::string& directoryPath, const std::string& filename);
 
 class ModelGroup
 {
