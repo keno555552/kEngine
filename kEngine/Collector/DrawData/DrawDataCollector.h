@@ -12,6 +12,7 @@
 #include "Render/Queue/RenderData.h"
 #include "Data/LightGPU.h"
 #include <cstdint>
+#include "Model.h"
 using ModelID = int;
 
 inline const float layerDepth_Sprite = 0.0001f;
@@ -74,7 +75,7 @@ private:
 	/// フォローマトリックス作成 
 	Matrix4x4 MakeFollowObjectMatrix(ObjectData* object);
 	/// WVP調整
-	TransformationMatrix ObjectWVPAdjustment(ObjectData& object, ObjectPart& part);
+	TransformationMatrix ObjectWVPAdjustment(ObjectData& object, ObjectPart& part, ModelData modelData);
 	/// バケット追加
 	void AddObjectToBucket(RenderData& renderData,int meshID);
 

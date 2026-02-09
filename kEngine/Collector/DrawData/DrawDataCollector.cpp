@@ -23,8 +23,9 @@ void DrawDataCollector::PreCollect() {
 	simpleSpriteCounter_ = 0;
 	unlayeredSpriteCounter_ = 0;
 
-
 }
+
+#pragma region /// ===================================== 2D関連 ===================================== ///
 
 void DrawDataCollector::Collect2D(SpriteData* sprite) {
 	/// nullチェック
@@ -72,47 +73,6 @@ void DrawDataCollector::Collect2D(SpriteData* sprite) {
 		/// スプライトカウンターインクリメント
 		simpleSpriteCounter_++;
 	}
-}
-
-
-
-void DrawDataCollector::Collect3D(ObjectData* object) {
-	/// nullチェック
-	if (!object)return;
-
-	int moderCounter = 0;
-	for (auto& objectPart : object->objectParts_) {
-
-		/// ========================================  RenderData作成  ========================================///
-
-		/// RenderData作成
-		RenderData renderData;
-
-		/// メッシュ設定
-		renderData.mesh = resourceManager_->modelGroupList_[object->modelHandle_]->GetModel(moderCounter);
-
-		/// マテリアル設定
-		objectPart.materialConfig->MakeUVMatrix();
-		renderData.materialID = resourceManager_->InputMaterialConfig(objectPart.materialConfig);
-
-		/// 変換行列設定
-		renderData.transformData = ObjectWVPAdjustment(*object, objectPart);
-
-		/// PSO設定
-		renderData.psoID = PSODecision(*objectPart.materialConfig);
-
-		/// サブメッシュインデックス設定
-		renderData.subMeshIndex = 0;
-
-		/// ========================================  バケット振り分け  ========================================///
-		AddObjectToBucket(renderData, object->modelHandle_);
-
-		moderCounter++;
-	}
-}
-
-Vector3 DrawDataCollector::GetCameraPosition() const {
-	return cameraManager_->GetActiveCamera()->GetTransform().translate;
 }
 
 float DrawDataCollector::SpriteLayerManagement(float zBuffer) {
@@ -188,7 +148,7 @@ TransformationMatrix DrawDataCollector::SpriteWVPAdjustment(SpriteData& sprite, 
 		part.transform.translate
 	);
 
-	Matrix4x4 worldMatrix =  localMatrix * followWorldMatrix;
+	Matrix4x4 worldMatrix = localMatrix * followWorldMatrix;
 
 	float spriteTransform = part.transform.translate.z;
 	worldMatrix.m[3][2] = SpriteLayerManagement(spriteTransform);
@@ -200,63 +160,7 @@ TransformationMatrix DrawDataCollector::SpriteWVPAdjustment(SpriteData& sprite, 
 	return result;
 }
 
-Matrix4x4 DrawDataCollector::MakeFollowObjectMatrix(ObjectData* object) {
-
-	Matrix4x4 objectMainMatrix = MakeAffineMatrix(
-		object->mainPosition.transform.scale,
-		object->mainPosition.transform.rotate,
-		object->mainPosition.transform.translate
-	);
-
-	Matrix4x4 parentMatrix = Identity();
-
-	ObjectPart* parent = object->followObject_;
-	while (parent != nullptr) {
-		Matrix4x4 local = MakeAffineMatrix(
-			parent->transform.scale,
-			parent->transform.rotate,
-			parent->transform.translate
-		);
-
-		parentMatrix = local * parentMatrix;
-		parent = parent->parentPart;
-	}
-
-	return objectMainMatrix * parentMatrix;
-}
-
-TransformationMatrix DrawDataCollector::ObjectWVPAdjustment(ObjectData& object, ObjectPart& part) {
-	Camera* cam = cameraManager_->GetActiveCamera();
-	Matrix4x4 viewMatrix = cam->GetViewMatrix();
-	Matrix4x4 projectionMatrix = cam->GetProjectionMatrix();
-
-	Matrix4x4 followWorldMatrix = MakeFollowObjectMatrix(&object);
-
-	// Billboard 子物件：XY 旋轉を0にする
-	if (object.isBillboard_) {
-		Vector3 camRot = cam->GetTransform().rotate;
-		part.transform.rotate.x = camRot.x;
-		part.transform.rotate.y = camRot.y;
-		part.transform.rotate.z = 0.0f;
-	}
-
-	Matrix4x4 localMatrix = MakeAffineMatrix(
-		part.transform.scale,
-		part.transform.rotate,
-		part.transform.translate
-	);
-
-	//Matrix4x4 worldMatrix = localMatrix * partParentMatrix * followWorldMatrix;
-	Matrix4x4 worldMatrix = localMatrix * followWorldMatrix;
-	
-	TransformationMatrix result{};
-	result.WVP = worldMatrix * viewMatrix * projectionMatrix;
-	result.world = worldMatrix;
-	result.WorldInverseTranspose = worldMatrix.Inverse().Transpose();
-	return result;
-}
-
-void DrawDataCollector::AddSpriteToBucket(RenderData& renderData,int meshID) {
+void DrawDataCollector::AddSpriteToBucket(RenderData& renderData, int meshID) {
 
 	auto checker = resourceManager_->idToIndex_.find(renderData.materialID);
 
@@ -290,6 +194,102 @@ void DrawDataCollector::AddSpriteToBucket(RenderData& renderData,int meshID) {
 			opaqueBuckets2D_[static_cast<PSOType>(renderData.psoID)][renderData.materialID][meshID].emplace_back(renderData);
 		}
 	}
+}
+
+#pragma endregion
+
+#pragma region /// ===================================== 3D関連 ===================================== ///
+
+void DrawDataCollector::Collect3D(ObjectData* object) {
+	/// nullチェック
+	if (!object)return;
+
+	int moderCounter = 0;
+	for (auto& objectPart : object->objectParts_) {
+
+		/// ========================================  RenderData作成  ========================================///
+
+		/// RenderData作成
+		RenderData renderData;
+
+		/// メッシュ設定
+		Model* modelData = resourceManager_->modelGroupList_[object->modelHandle_]->GetModel(moderCounter);
+		renderData.mesh = modelData;
+
+		/// マテリアル設定
+		objectPart.materialConfig->MakeUVMatrix();
+		renderData.materialID = resourceManager_->InputMaterialConfig(objectPart.materialConfig);
+
+		/// 変換行列設定
+		renderData.transformData = ObjectWVPAdjustment(*object, objectPart, modelData->GetModelData());
+
+		/// PSO設定
+		renderData.psoID = PSODecision(*objectPart.materialConfig);
+
+		/// サブメッシュインデックス設定
+		renderData.subMeshIndex = 0;
+
+		/// ========================================  バケット振り分け  ========================================///
+		AddObjectToBucket(renderData, object->modelHandle_);
+
+		moderCounter++;
+	}
+}
+
+Matrix4x4 DrawDataCollector::MakeFollowObjectMatrix(ObjectData* object) {
+
+	Matrix4x4 objectMainMatrix = MakeAffineMatrix(
+		object->mainPosition.transform.scale,
+		object->mainPosition.transform.rotate,
+		object->mainPosition.transform.translate
+	);
+
+	Matrix4x4 parentMatrix = Identity();
+
+	ObjectPart* parent = object->followObject_;
+	while (parent != nullptr) {
+		Matrix4x4 local = MakeAffineMatrix(
+			parent->transform.scale,
+			parent->transform.rotate,
+			parent->transform.translate
+		);
+
+		parentMatrix = local * parentMatrix;
+		parent = parent->parentPart;
+	}
+
+	return objectMainMatrix * parentMatrix;
+}
+
+TransformationMatrix DrawDataCollector::ObjectWVPAdjustment(ObjectData& object, ObjectPart& part, ModelData modelData) {
+	Camera* cam = cameraManager_->GetActiveCamera();
+	Matrix4x4 viewMatrix = cam->GetViewMatrix();
+	Matrix4x4 projectionMatrix = cam->GetProjectionMatrix();
+
+	Matrix4x4 followWorldMatrix = MakeFollowObjectMatrix(&object);
+
+	// Billboard 子物件：XY 旋轉を0にする
+	if (object.isBillboard_) {
+		Vector3 camRot = cam->GetTransform().rotate;
+		part.transform.rotate.x = camRot.x;
+		part.transform.rotate.y = camRot.y;
+		part.transform.rotate.z = 0.0f;
+	}
+
+	Matrix4x4 localMatrix = MakeAffineMatrix(
+		part.transform.scale,
+		part.transform.rotate,
+		part.transform.translate
+	);
+
+	//Matrix4x4 worldMatrix = localMatrix * partParentMatrix * followWorldMatrix;
+	Matrix4x4 worldMatrix = localMatrix * followWorldMatrix;
+	
+	TransformationMatrix result{};
+	result.WVP = modelData.rootNode.localMatrix * worldMatrix * viewMatrix * projectionMatrix;
+	result.world = modelData.rootNode.localMatrix * worldMatrix;
+	result.WorldInverseTranspose = worldMatrix.Inverse().Transpose();
+	return result;
 }
 
 void DrawDataCollector::AddObjectToBucket(RenderData& renderData,int meshID) {
@@ -330,6 +330,16 @@ void DrawDataCollector::AddObjectToBucket(RenderData& renderData,int meshID) {
 	auto& t = renderData.transformData;
 }
 
+#pragma endregion
+
+
+
+#pragma region /// ========================== カメラ/マテリアル/ライティング関連 ========================= ///
+
+Vector3 DrawDataCollector::GetCameraPosition() const {
+	return cameraManager_->GetActiveCamera()->GetTransform().translate;
+}
+
 uint32_t DrawDataCollector::PSODecision(MaterialConfig& material) {
 
 	LightModelType lightModelType = (LightModelType)(int)material.lightModelType;
@@ -362,3 +372,5 @@ std::vector<LightGPU> DrawDataCollector::GetLightGPUBuffer() {
 uint32_t DrawDataCollector::GetLightCount() {
 	return (uint32_t)lightManager_->GetLightCount();
 }
+
+#pragma endregion

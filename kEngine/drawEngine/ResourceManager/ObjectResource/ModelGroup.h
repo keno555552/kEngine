@@ -2,8 +2,14 @@
 #include "Model.h"
 #include <vector>
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 std::vector<ModelData> LoadMuitObjFile(const std::string& directoryPath, const std::string& filename);
 std::vector<ModelData> LoadAssimpFile(const std::string& directoryPath, const std::string& filename);
+
+NodeData ReadNode(aiNode* node);
 
 class ModelGroup
 {

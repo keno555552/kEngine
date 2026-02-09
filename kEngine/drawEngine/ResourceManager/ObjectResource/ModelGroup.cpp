@@ -1,8 +1,5 @@
 #include "ModelGroup.h"
 #include "filesystem"
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 
 std::vector<ModelData> LoadFileTop(const std::string& filepath) {
 
@@ -13,19 +10,40 @@ std::vector<ModelData> LoadFileTop(const std::string& filepath) {
 			std::filesystem::path(filepath).parent_path().string(),
 			std::filesystem::path(filepath).filename().string()
 		);
-	}
-	else if (ext == ".fbx") {
-	
-	
-	
-	}
-	else if(ext == ".gltf" || ext == ".glb" ) {
+	} else if (ext == ".fbx") {
+
+
+
+	} else if (ext == ".gltf" || ext == ".glb") {
 		return LoadAssimpFile(
 			std::filesystem::path(filepath).parent_path().string(),
 			std::filesystem::path(filepath).filename().string()
 		);
 	}
 	return std::vector<ModelData>();
+}
+
+
+NodeData ReadNode(aiNode* node) {
+
+	NodeData result{};
+	aiMatrix4x4 aiLocalMatrix = node->mTransformation; // nodeのlocalMatrixを取得
+	aiLocalMatrix.Transpose(); // 行列を転置
+
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			result.localMatrix.m[i][j] = aiLocalMatrix[i][j];
+		}
+	}
+
+	result.name = node->mName.C_Str(); // nodeの名前を取得
+	result.children.resize(node->mNumChildren); // 子ノードの数だけchildrenを確保
+
+	for (uint32_t childIndex = 0; childIndex < node->mNumChildren; ++childIndex) {
+		result.children[childIndex] = ReadNode(node->mChildren[childIndex]); // 再帰的に子ノードを読み込む
+	}
+
+	return result;
 }
 
 std::vector<ModelData> LoadMuitObjFile(const std::string& directoryPath, const std::string& filename) {
@@ -190,7 +208,7 @@ std::vector<ModelData> LoadAssimpFile(const std::string& directoryPath, const st
 				modelData.vertices.push_back(vertex);
 			}
 		}
-		// --- 材質（每個 mesh 只讀一次） ---
+		// --- マテリアル関連 ---
 		uint32_t materialIndex = mesh->mMaterialIndex;
 		aiMaterial* material = scene->mMaterials[materialIndex];
 
@@ -199,7 +217,11 @@ std::vector<ModelData> LoadAssimpFile(const std::string& directoryPath, const st
 			material->GetTexture(aiTextureType_DIFFUSE, 0, &textureFilePath);
 			modelData.material.textureFilePath = directoryPath + "/" + textureFilePath.C_Str();
 		}
+
+		modelData.rootNode = ReadNode(scene->mRootNode);
+
 		modelGroup.push_back(modelData);
+
 	}
 	return modelGroup;														// 構築したModelDataを返す
 }

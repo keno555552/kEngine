@@ -480,7 +480,7 @@ int ResourceManager::CreateModelResource(std::string Path) {
 	//std::vector<ModelData> modelList = LoadMuitObjFile(modelGroup->GetDirectoryPath(), modelGroup->GetObjName_());
 	for (auto& ptr : modelList) {
 		Model* newModel = new Model;
-		newModel->GetModelData(ptr);
+		newModel->SetModelData(ptr);
 		newModel->SetModelObj(Path);
 		newModel->CreateVertexResourceG_(BDevice_);
 		modelGroup->PushModel(newModel);

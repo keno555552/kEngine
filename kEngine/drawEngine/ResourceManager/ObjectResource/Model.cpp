@@ -61,6 +61,7 @@ MaterialData LoadTargetMaterialTemplateFile(const std::string& directoryPath, co
 	return materialData;
 }
 
+
 ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename) {
 
 	///1. 中で必要となる変数の宣言
@@ -151,7 +152,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 }
 
 
-void Model::GetModelData(ModelData modelData) {
+void Model::SetModelData(ModelData modelData) {
 	modelData_ = modelData;
 }
 

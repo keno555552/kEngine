@@ -16,21 +16,32 @@ struct MaterialData
 	std::string mtlName_;
 };
 
+struct NodeData
+{
+	Matrix4x4 localMatrix = Identity();
+	std::string name;
+	std::vector<NodeData> children;
+};
+
 struct ModelData
 {
 	std::vector<VertexData> vertices;
 	MaterialData material;
+	NodeData rootNode;
 };
+
 ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename);
 
 std::vector<ModelData> LoadFileTop(const std::string& filepath);
 MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
 MaterialData LoadTargetMaterialTemplateFile(const std::string& directoryPath, const std::string& filename, const std::string& target);
 
+
 class Model :public MeshBuffer
 {
 public:
-	void GetModelData(ModelData modeldata);
+	ModelData GetModelData() { return modelData_; }
+	void SetModelData(ModelData modeldata);
 	ID3D12Resource* CreateVertexResource_(ID3D12Device* device)override;
 	ID3D12Resource* CreateVertexResourceG_(ID3D12Device* device);
 	std::string GetTexturePatch() { return texturePath_; }

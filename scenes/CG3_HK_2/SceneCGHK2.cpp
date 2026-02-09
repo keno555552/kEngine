@@ -64,7 +64,8 @@ SceneCGHK2::SceneCGHK2(kEngine* system) {
 
 	/// =========== リソースロード ============///
 	skydomeModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/skydome/skydome.obj");
-	playerModelHandle_ = system_->SetModelObj("resources/object/ball/ball.obj");
+	//playerModelHandle_ = system_->SetModelObj("resources/object/ball/ball.obj");
+	playerModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/plane/plane.gltf");
 
 	boxTextureHandle_ = system_->LoadTexture("resources/texture/testBox.png");
 	tryTextureHandle_ = system_->LoadTexture("resources/texture/Tryer.png");
@@ -79,6 +80,7 @@ SceneCGHK2::SceneCGHK2(kEngine* system) {
 	player_ = new Player(system, Vector3(0.0f, 0.0f, 0));
 	player_->CreateModelData(playerModelHandle_);
 	player_->mainPosition.transform.scale = Vector3(0.5f, 0.5f, 0.5f);
+	player_->mainPosition.transform.rotate.y = 3.14f;
 	for (auto parts : player_->objectParts_) {
 		parts.materialConfig->lightModelType = LightModelType::BlinnPhongReflection;
 	}
