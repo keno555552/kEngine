@@ -44,33 +44,6 @@ public:
 
 	void SetDirectionalLight(DirectionalLightGPU* light);
 
-	/// 三角形関連
-	void DrawTriangle(TransformationMatrix* wvpData, MaterialConfig material);
-
-	/// 2D図形関連
-	void CollectSprite(Vector2 pos, MaterialConfig material);
-	void DrawSprite();
-	void DrawSpriteDirect(Vector2 pos, MaterialConfig material);
-	void DrawSpriteDirect(Vector2 pos, MaterialConfig material, Vector2 LTpos, Vector2 LBpos, Vector2 RTpos, Vector2 RBpos, float TsizeX, float TsizeY, Vector2 TCLTPos, Vector2 TCRBPos);
-
-	/// Tile関連
-	void Collect2DTile(Vector2 pos, MaterialConfig material);
-	void Draw2DTile();
-
-	/// 立方体関連
-	void CollectCube(TransformationMatrix* wvpData, MaterialConfig material);
-	void DrawCube();
-	/// 球体関連
-	void DrawSphere(TransformationMatrix* wvpData, MaterialConfig material, int sudivision);
-	/// モデル関連
-	void CollectModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = -1);
-	void DrawModel();
-
-	/// Tile関連
-	void Collect3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = -1);
-	void Draw3DTile();
-
-
 
 	/// 全部描く関数
 

@@ -370,22 +370,17 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Lighting\PointLight.cpp" />
     <ClCompile Include="ResourceLoader.cpp" />
     <ClCompile Include="kEngine\tool\StageManager\BaseSceneFactory.cpp" />
-    <ClCompile Include="scenes\SceneFactory.cpp" />
     <ClCompile Include="scenes\CG3_HK_2\SceneCGHK2.cpp" />
     <ClCompile Include="scenes\CG4_HK_1\menu.cpp" />
     <ClCompile Include="scenes\CG4_HK_1\Effect1.cpp" />
     <ClCompile Include="scenes\CG4_HK_1\Effect2.cpp" />
-    <ClCompile Include="scenes\Scene1.cpp" />
-    <ClCompile Include="scenes\SceneResult.cpp" />
-    <ClCompile Include="scenes\SceneTest.cpp" />
     <ClCompile Include="kEngine\GameObject\Object\Sprite.cpp" />
     <ClCompile Include="kEngine\drawEngine\DrawData\SpriteData.cpp" />
     <ClCompile Include="kEngine\drawEngine\ResourceManager\TextureManager\TextureManager.cpp" />
-    <ClCompile Include="scenes\SceneTest2.cpp" />
-    <ClCompile Include="scenes\SceneTitle.cpp" />
     <ClCompile Include="kEngine\core\driver\SrvManager.cpp" />
     <ClCompile Include="kEngine\Lighting\SpotLight.cpp" />
     <ClCompile Include="kEngine\GameObject\StartTimer\StartTimer.cpp" />
+    <ClCompile Include="kEngine\tool\StageManager\SceneFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\assimp\include\assimp\aabb.h" />
@@ -576,22 +571,17 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Lighting\PointLight.h" />
     <ClInclude Include="ResourceLoader.h" />
     <ClInclude Include="kEngine\tool\StageManager\BaseSceneFactory.h" />
-    <ClInclude Include="scenes\SceneFactory.h" />
     <ClInclude Include="scenes\CG3_HK_2\SceneCGHK2.h" />
     <ClInclude Include="scenes\CG4_HK_1\menu.h" />
     <ClInclude Include="scenes\CG4_HK_1\Effect1.h" />
     <ClInclude Include="scenes\CG4_HK_1\Effect2.h" />
-    <ClInclude Include="scenes\Scene1.h" />
-    <ClInclude Include="scenes\SceneResult.h" />
-    <ClInclude Include="scenes\SceneTest.h" />
     <ClInclude Include="kEngine\GameObject\Object\Sprite.h" />
     <ClInclude Include="kEngine\drawEngine\DrawData\SpriteData.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\TextureManager\TextureManager.h" />
-    <ClInclude Include="scenes\SceneTest2.h" />
-    <ClInclude Include="scenes\SceneTitle.h" />
     <ClInclude Include="kEngine\core\driver\SrvManager.h" />
     <ClInclude Include="kEngine\Lighting\SpotLight.h" />
     <ClInclude Include="kEngine\GameObject\StartTimer\StartTimer.h" />
+    <ClInclude Include="kEngine\tool\StageManager\SceneFactory.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl">
