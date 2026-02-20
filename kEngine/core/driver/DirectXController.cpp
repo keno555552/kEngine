@@ -3,16 +3,28 @@
 #include <cassert>
 
 DirectXController::DirectXController() {
-	static FixFPS fixFPS;
-	fixFPS.Initialize();
-	
-	timeBeginPeriod(1);
+	//static FixFPS fixFPS;
+	//fixFPS.Initialize();
+	//
+	//timeBeginPeriod(1);
 }
 
 DirectXController::~DirectXController() {
 
+	//timeEndPeriod(1);
+	//Finalize();
+}
+
+void DirectXController::InitializeDrive(const char* kClientTitle, int kClientWidth, int kClientHeight) {
+	DirectXCore::InitializeDrive(kClientTitle, kClientWidth, kClientHeight);
+	static FixFPS fixFPS;
+	fixFPS.Initialize();
+	timeBeginPeriod(1);
+}
+
+void DirectXController::Finalize() {
 	timeEndPeriod(1);
-	Finalize();
+	DirectXCore::Finalize();
 }
 
 void DirectXController::StartFrame() {

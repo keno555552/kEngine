@@ -8,8 +8,8 @@
 class SoundManager
 {
 public:
-	SoundManager();
-	~SoundManager();
+	void Initialize();
+	void Finalize();
 
 	int SoundLoadSE(const char* filename);
 	void SoundPlaySE(int Handle, float volume);

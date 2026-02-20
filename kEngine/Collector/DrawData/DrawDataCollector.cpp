@@ -4,12 +4,18 @@
 #include "LightManager/LightManager.h"
 #include "ResourceManager.h"
 
-DrawDataCollector::DrawDataCollector(ResourceManager* rm, InstanceManager* im, CameraManager* cm, LightManager* lm) :
-	resourceManager_(rm),
-	instanceManager_(im),
-	cameraManager_(cm),
-	lightManager_(lm)
-{}
+
+void DrawDataCollector::Initialize(CameraManager * cm, LightManager * lm) {
+	cameraManager_ = cm, lightManager_ = lm;
+}
+
+void DrawDataCollector::Finalize() {
+	/// bucketクリア
+	opaqueBuckets2D_.clear();
+	transparentObjectParts2D_.clear();
+	opaqueBuckets3D_.clear();
+	transparentObjectParts3D_.clear();
+}
 
 void DrawDataCollector::PreCollect() {
 
@@ -36,10 +42,10 @@ void DrawDataCollector::Collect2D(SpriteData* sprite) {
 		/// ========================================  RenderData作成  ========================================///
 
 		/// metaData
-		DirectX::TexMetadata metaData = resourceManager_->GetTextureMetaData(object.materialConfig->textureHandle);
+		DirectX::TexMetadata metaData = ResourceManager::GetInstance()->GetTextureMetaData(object.materialConfig->textureHandle);
 
 		/// スプライトメッシュのリサイズ
-		resourceManager_->ResizeSimpleSpriteMesh(
+		ResourceManager::GetInstance()->ResizeSimpleSpriteMesh(
 			metaData,
 			simpleSpriteCounter_,
 			object.conerData,
@@ -52,11 +58,11 @@ void DrawDataCollector::Collect2D(SpriteData* sprite) {
 		RenderData renderData;
 
 		/// メッシュ設定
-		renderData.mesh = resourceManager_->simpleSpriteMeshList_[simpleSpriteCounter_];
+		renderData.mesh = ResourceManager::GetInstance()->simpleSpriteMeshList_[simpleSpriteCounter_];
 
 		/// マテリアル設定
 		object.materialConfig->MakeUVMatrix();
-		renderData.materialID = resourceManager_->InputMaterialConfig(object.materialConfig);
+		renderData.materialID = ResourceManager::GetInstance()->InputMaterialConfig(object.materialConfig);
 
 		/// 変換行列設定
 		renderData.transformData = SpriteWVPAdjustment(*sprite, object);
@@ -162,13 +168,13 @@ TransformationMatrix DrawDataCollector::SpriteWVPAdjustment(SpriteData& sprite, 
 
 void DrawDataCollector::AddSpriteToBucket(RenderData& renderData, int meshID) {
 
-	auto checker = resourceManager_->idToIndex_.find(renderData.materialID);
+	auto checker = ResourceManager::GetInstance()->idToIndex_.find(renderData.materialID);
 
-	if (checker == resourceManager_->idToIndex_.end()) {
+	if (checker == ResourceManager::GetInstance()->idToIndex_.end()) {
 		Logger::Log("[kError]DDC:MaterialID not found in ResourceManager!");
 		return;
 	} else {
-		Material* material = resourceManager_->materialList_[checker->second].cpuMaterial.get();
+		Material* material = ResourceManager::GetInstance()->materialList_[checker->second].cpuMaterial.get();
 
 		if (material->color.w < 1.0f) {
 
@@ -213,12 +219,12 @@ void DrawDataCollector::Collect3D(ObjectData* object) {
 		RenderData renderData;
 
 		/// メッシュ設定
-		Model* modelData = resourceManager_->modelGroupList_[object->modelHandle_]->GetModel(moderCounter);
+		Model* modelData = ResourceManager::GetInstance()->modelGroupList_[object->modelHandle_]->GetModel(moderCounter);
 		renderData.mesh = modelData;
 
 		/// マテリアル設定
 		objectPart.materialConfig->MakeUVMatrix();
-		renderData.materialID = resourceManager_->InputMaterialConfig(objectPart.materialConfig);
+		renderData.materialID = ResourceManager::GetInstance()->InputMaterialConfig(objectPart.materialConfig);
 
 		/// 変換行列設定
 		renderData.transformData = ObjectWVPAdjustment(*object, objectPart, modelData->GetModelData());
@@ -294,13 +300,13 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustment(ObjectData& object, 
 
 void DrawDataCollector::AddObjectToBucket(RenderData& renderData,int meshID) {
 
-	auto checker = resourceManager_->idToIndex_.find(renderData.materialID);
+	auto checker = ResourceManager::GetInstance()->idToIndex_.find(renderData.materialID);
 
-	if (checker == resourceManager_->idToIndex_.end()) {
+	if (checker == ResourceManager::GetInstance()->idToIndex_.end()) {
 		Logger::Log("[kError]DDC:MaterialID not found in ResourceManager!");
 		return;
 	} else {
-		Material* material = resourceManager_->materialList_[checker->second].cpuMaterial.get();
+		Material* material = ResourceManager::GetInstance()->materialList_[checker->second].cpuMaterial.get();
 
 		if (material->color.w < 1.0f) {
 

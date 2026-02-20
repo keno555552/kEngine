@@ -5,6 +5,9 @@ void InputManager::Initialize(DirectXCore* directXDirver, TimeManager* timeManag
 	timer->Init0(3, timeManager);
 }
 
+void InputManager::Finalize() {
+}
+
 void InputManager::KeysUpdata()   {
 	/// keyboard
 	if (config::GetKeyboardState()) {

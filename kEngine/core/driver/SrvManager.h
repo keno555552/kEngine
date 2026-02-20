@@ -12,6 +12,8 @@ public:
 	
 	void Initialize(DirectXCore* core);
 
+	void Finalize();
+
 	uint32_t Allocate();
 
 	/// CPU,GPUハンドルの取得

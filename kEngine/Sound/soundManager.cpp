@@ -1,14 +1,14 @@
 #include "soundManager.h"
 #include <algorithm>
 
-SoundManager::SoundManager() {
+void SoundManager::Initialize() {
 	HRESULT result = XAudio2Create(&xAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
 	assert(SUCCEEDED(result));
 	result = xAudio2->CreateMasteringVoice(&masterVoice);
 	assert(SUCCEEDED(result));
 }
 
-SoundManager::~SoundManager() {
+void SoundManager::Finalize() {
 	for(auto& ptr:sounds_){
 		delete ptr;
 	}

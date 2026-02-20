@@ -25,8 +25,14 @@ void SrvManager::Initialize(DirectXCore* core) {
 }
 
 SrvManager::~SrvManager() {
-	descriptorHeap.Reset(); // ComPtr 自動釋放
 }
+
+void SrvManager::Finalize() {
+	descriptorHeap.Reset();
+	freeIndices.clear();
+	nextNewIndex = 0;
+}
+
 
 uint32_t SrvManager::Allocate() {
 

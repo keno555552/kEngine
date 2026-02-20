@@ -1,6 +1,6 @@
 #include "LightManager.h"
 
-LightManager::LightManager() {
+void LightManager::Initialize() {
 	// デフォルトライト設定
 	LightGPU defaultLight{};
 	defaultLight.type = (int)LightingType::DirectionalLight;
@@ -12,7 +12,7 @@ LightManager::LightManager() {
 	}
 }
 
-LightManager::~LightManager() {
+void LightManager::Finalize() {
 	lightList_.clear();
 	lightGPUList_.clear();
 	defaultLightGPUList_.clear();

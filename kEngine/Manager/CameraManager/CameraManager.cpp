@@ -1,12 +1,13 @@
 #include "CameraManager.h"
 
-CameraManager::CameraManager() {
+void CameraManager::Initialize() {
     defaultCamera_ = new Camera();
     activeCamera_ = defaultCamera_;
 }
 
-CameraManager::~CameraManager() {
+void CameraManager::Finalize() {
     delete defaultCamera_;
+    defaultCamera_ = nullptr;
 }
 
 Camera* CameraManager::CreateCamera() {

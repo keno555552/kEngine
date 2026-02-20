@@ -12,18 +12,20 @@ kEngine::~kEngine() {
 #ifdef USE_IMGUI
 	ImGuiManager::Shutdown();
 #endif
-	delete timeManager;
-	delete soundManager;
-	delete inputManager;
+	inputManager->Finalize();
+	// delete timeManager;
+	soundManager->Finalize();
 	TextureManager::GetInstance()->Finalize();
-	delete instanceManager;
-	delete resourceManager;
-	delete drawEngine;
-	delete drawDataCollector;
-	delete cameraManager;
-	delete lightManager;
-	delete srvManager;
-	delete dxComm;
+	TextureManager::Destroy();
+	ResourceManager::GetInstance()->Finalize();
+	ResourceManager::Destroy();
+
+	drawEngine->Finalize();
+	drawDataCollector->Finalize();
+	cameraManager->Finalize();
+	lightManager->Finalize();
+	srvManager->Finalize();
+	dxComm->Finalize();
 }
 
 void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClientHeight) {
@@ -31,33 +33,37 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 	config::SaveClientWidth(kClientWidth);
 	config::SaveClientHeight(kClientHeight);
 
-	dxComm = new DirectXController;
+	dxComm = std::make_unique<DirectXController>();
 	dxComm->InitializeDrive(kClientTitle, kClientWidth, kClientHeight);
 
-	srvManager = new SrvManager;
-	srvManager->Initialize(dxComm);
+	srvManager = std::make_unique<SrvManager>();
+	srvManager->Initialize(dxComm.get());
 
 #ifdef USE_IMGUI
-	ImGuiManager::Initialize(dxComm, srvManager);
+	ImGuiManager::Initialize(dxComm.get(), srvManager.get());
 #endif
 
-	instanceManager = new InstanceManager;
-	textureManager->Initialize(dxComm, srvManager);
-	resourceManager = new ResourceManager(dxComm, instanceManager);
+	//instanceManager = std::make_unique < InstanceManager>();
+	TextureManager::GetInstance()->Initialize(dxComm.get(), srvManager.get());
+	ResourceManager::GetInstance()->Initialize(dxComm.get());
 
-	lightManager = new LightManager;
+	lightManager = std::make_unique<LightManager>();
+	cameraManager = std::make_unique<CameraManager>();
 
-	cameraManager = new CameraManager;
+	drawDataCollector = std::make_unique<DrawDataCollector>();
+	drawDataCollector->Initialize(cameraManager.get(), lightManager.get());
 
-	drawDataCollector = new DrawDataCollector(resourceManager, instanceManager, cameraManager, lightManager);
-	drawEngine = new DrawEngine;
-	drawEngine->Initialize(dxComm, srvManager, resourceManager, drawDataCollector);
 
-	soundManager = new SoundManager;
-	timeManager = new TimeManager;
+	drawEngine = std::make_unique<DrawEngine>();
+	drawEngine->Initialize(dxComm.get(), srvManager.get(), ResourceManager::GetInstance(), drawDataCollector.get());
 
-	inputManager = new InputManager;
-	inputManager->Initialize(dxComm, timeManager);
+	soundManager = std::make_unique<SoundManager>();
+	soundManager->Initialize();
+
+	timeManager = std::make_unique<TimeManager>();
+
+	inputManager = std::make_unique<InputManager>();
+	inputManager->Initialize(dxComm.get(), timeManager.get());
 }
 
 void kEngine::StartFrame() {
@@ -98,16 +104,16 @@ void kEngine::Draw3D(ObjectData* object) {
 }
 
 int kEngine::GetModelTextureHandle(int modelHandle, int part) {
-	return resourceManager->GetTextureHandleFromModelGroup(modelHandle, part);
+	return ResourceManager::GetInstance()->GetTextureHandleFromModelGroup(modelHandle, part);
 }
 
 int kEngine::GetMutiModelNum(int modelHandle) {
-	return resourceManager->modelGroupList_[modelHandle]->GetModelNum();
+	return ResourceManager::GetInstance()->modelGroupList_[modelHandle]->GetModelNum();
 }
 
 int kEngine::SetModelObj(std::string path) {
 	//return drawEngine->SetModel(path);
-	return resourceManager->LoadModel(path);
+	return ResourceManager::GetInstance()->LoadModel(path);
 }
 
 void kEngine::AddLight(Light* light) {
@@ -140,14 +146,14 @@ void kEngine::ResetToDefaultCamera() {
 
 
 int kEngine::commonTextureHandleReader(int handle) {
-	return resourceManager->GetTextureHandleFromCommonList(handle);
+	return ResourceManager::GetInstance()->GetTextureHandleFromCommonList(handle);
 };
 int kEngine::commonModelHandleReader(int handle) {
-	return resourceManager->ReadModelTextureHandle(handle);
+	return ResourceManager::GetInstance()->ReadModelTextureHandle(handle);
 };
 
 int kEngine::LoadTexture(const std::string& filePath) {
-	return resourceManager->LoadCommonTexture(filePath);
+	return ResourceManager::GetInstance()->LoadCommonTexture(filePath);
 }
 
 #pragma endregion
@@ -383,7 +389,7 @@ float kEngine::GetDeltaTime() {
 }
 
 TimeManager* kEngine::GetTimeManager() const {
-	return timeManager;
+	return timeManager.get();
 }
 
 void kEngine::SetTimeScale(float timeScale) {

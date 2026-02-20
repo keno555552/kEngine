@@ -76,7 +76,7 @@ public:
 	/// </summary>
 	bool ProcessMessage();
 
-	void Finalize();
+	virtual void Finalize();
 protected:
 	enum InputType {
 		Keyboard,

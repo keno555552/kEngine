@@ -1,11 +1,18 @@
 #include "ResourceManager.h"
 #include <Object/Object.h>
 
-ResourceManager::ResourceManager(DirectXCore* device, InstanceManager* instanceManager) {
+ResourceManager* ResourceManager::instance_ = nullptr;
+ResourceManager* ResourceManager::GetInstance() {
+	if (instance_ == nullptr) {
+		instance_ = new ResourceManager;
+	}
+	return instance_;
+}
+
+void ResourceManager::Initialize(DirectXCore* device) {
 
 	core_ = device;
 	BDevice_ = core_->GetDevice();
-	instanceManager_ = instanceManager;
 
 	config::default_Sprite2D_MeshBufferHandle_ = CreateSimpleSpriteMeshResource();
 	config::default_Triangle_MeshBufferHandle_ = CreateTriangleResource();
@@ -13,7 +20,7 @@ ResourceManager::ResourceManager(DirectXCore* device, InstanceManager* instanceM
 	config::default_Sphere_MeshBufferHandle_ = CreateSphereResource(1);
 }
 
-ResourceManager::~ResourceManager() {
+void ResourceManager::Finalize() {
 
 	ClearPointer(materialResourceList_);
 	ClearPointer(meshBufferList_);
@@ -21,8 +28,10 @@ ResourceManager::~ResourceManager() {
 	modelGroupList_.clear();
 	ClearPointer(simpleSpriteMeshList_);
 
-	/// comptr自動解放
-	delete lightingResource_;
+}
+
+void ResourceManager::Destroy() {
+	delete instance_, instance_ = nullptr;
 }
 
 void ResourceManager::CreateTurnResource() {
@@ -31,367 +40,7 @@ void ResourceManager::CreateTurnResource() {
 
 void ResourceManager::ClearTurnResource() {
 	TextureManager::GetInstance()->EndUploadingTexture();
-	instanceManager_->Update();
 }
-
-
-
-//void ResourceManager::ColletSprite(Vector2 pos, MaterialConfig material) {
-//	int materialNum = (int)instanceManager_->materialConfigList_.size();
-//	instanceManager_->AddSpriteInstance(pos, material);
-//	if (materialNum < (int)instanceManager_->materialConfigList_.size()) {
-//		/// 新しいResourceを追加
-//		BasicResource* newResource = new BasicResource;
-//		newResource->CreateResourceClass_(Bdevice_, sizeof(Material));
-//		materialResourceList_.push_back(newResource);
-//
-//		/// MaterialとMapする
-//		Material* newData = nullptr;
-//		newResource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&newData));
-//		newData->inputMaterialConfig(material);
-//		newResource->GetResource()->Unmap(0, nullptr);
-//
-//		/// instanceにResourceのHandleを設定
-//		instanceManager_->materialConfigList_.back()->materialResourceHandle = materialNum;
-//	}
-//}
-
-void ResourceManager::Collet2DTile(Vector2 pos, MaterialConfig material) {
-	int materialNum = (int)instanceManager_->materialConfigList_.size();
-	instanceManager_->Add2DTileInstance(pos, material);
-	if (materialNum < (int)instanceManager_->materialConfigList_.size()) {
-		/// 新しいResourceを追加
-		BasicResource* newResource = new BasicResource;
-		newResource->CreateResourceClass_(BDevice_, sizeof(Material));
-		materialResourceList_.push_back(newResource);
-
-		/// MaterialとMapする
-		Material* newData = nullptr;
-		newResource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&newData));
-		newData->inputMaterialConfig(material);
-		newResource->GetResource()->Unmap(0, nullptr);
-
-		/// instanceにResourceのHandleを設定
-		instanceManager_->materialConfigList_.back()->materialResourceHandle = materialNum;
-	}
-}
-
-void ResourceManager::ColletModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle, bool useDefaultModel) {
-
-	int modelNum = 1;
-	if (!useDefaultModel) modelNum = modelGroupList_[modelHandle]->GetModelNum();
-
-	for (int i = 0; i < modelNum; i++) {
-
-		int before = (int)instanceManager_->materialConfigList_.size();
-
-		/// 処理してるマテリアルをまとめる
-		MaterialConfig usingMaterial;
-		if (i < (int)material.size())usingMaterial = material[i];
-		else usingMaterial = material.back();
-
-
-		/// Instance追加
-		if (!useDefaultModel) {
-
-			if (usingMaterial.useModelTexture == true) {
-				usingMaterial.textureHandle = (modelGroupList_[modelHandle])->GetModel(i)->GetTextureHandle();
-			}
-
-			instanceManager_->AddModelInstance(wvpData, usingMaterial,
-				modelGroupList_[modelHandle]->GetModel(i)->GetVertexNum(),
-				modelGroupList_[modelHandle]->GetModelHandle(i),
-				useDefaultModel);
-
-		} else {
-
-			if (usingMaterial.useModelTexture == true) {
-				usingMaterial.textureHandle = 0;
-			}
-
-			if (modelHandle == config::default_Cube_MeshBufferHandle_) {
-				instanceManager_->AddModelInstance(wvpData, usingMaterial,
-					36,
-					config::default_Cube_MeshBufferHandle_,
-					useDefaultModel);
-			}
-		}
-
-		int after = (int)instanceManager_->materialConfigList_.size();
-
-		/// マテリアルが足すがによってリソース追加
-		if (after > before) {
-			/// 新しいResourceを追加
-			BasicResource* newResource = new BasicResource;
-			newResource->CreateResourceClass_(BDevice_, sizeof(Material));
-			materialResourceList_.push_back(newResource);
-
-			/// MaterialとMapする
-			Material* newData = nullptr;
-			newResource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&newData));
-			newData->inputMaterialConfig(usingMaterial);
-			newResource->GetResource()->Unmap(0, nullptr);
-
-			/// instanceにResourceのHandleを設定
-			instanceManager_->materialConfigList_.back()->materialResourceHandle = (int)materialResourceList_.size() - 1;
-		}
-	}
-}
-
-void ResourceManager::Collet3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle, bool useDefaultModel) {
-
-	int modelNum = 1;
-	if (!useDefaultModel) modelNum = modelGroupList_[modelHandle]->GetModelNum();
-
-	for (int i = 0; i < modelNum; i++) {
-
-		int before = (int)instanceManager_->materialConfigList_.size();
-
-		/// 処理してるマテリアルをまとめる
-		MaterialConfig usingMaterial;
-		if (i < (int)material.size())usingMaterial = material[i];
-		else usingMaterial = material.back();
-
-		if (usingMaterial.useModelTexture == true) {
-			usingMaterial.textureHandle = (modelGroupList_[modelHandle])->GetModel(i)->GetTextureHandle();
-		}
-
-		/// Instance追加
-		if (!useDefaultModel) {
-
-			if (usingMaterial.useModelTexture == true) {
-				usingMaterial.textureHandle = (modelGroupList_[modelHandle])->GetModel(i)->GetTextureHandle();
-			}
-
-			instanceManager_->Add3DTileInstance(wvpData, usingMaterial,
-				modelGroupList_[modelHandle]->GetModel(i)->GetVertexNum(),
-				modelGroupList_[modelHandle]->GetModelHandle(i),
-				useDefaultModel);
-
-		} else {
-
-			if (usingMaterial.useModelTexture == true) {
-				usingMaterial.textureHandle = 0;
-			}
-
-			if (modelHandle == config::default_Cube_MeshBufferHandle_) {
-				instanceManager_->Add3DTileInstance(wvpData, usingMaterial,
-					36,
-					config::default_Cube_MeshBufferHandle_,
-					useDefaultModel);
-			}
-		}
-
-
-		int after = (int)instanceManager_->materialConfigList_.size();
-
-		/// マテリアルが足すがによってリソース追加
-		if (after > before) {
-			/// 新しいResourceを追加
-			BasicResource* newResource = new BasicResource;
-			newResource->CreateResourceClass_(BDevice_, sizeof(Material));
-			materialResourceList_.push_back(newResource);
-
-			/// MaterialとMapする
-			Material* newData = nullptr;
-			newResource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&newData));
-			newData->inputMaterialConfig(usingMaterial);
-			newResource->GetResource()->Unmap(0, nullptr);
-
-			/// instanceにResourceのHandleを設定
-			instanceManager_->materialConfigList_.back()->materialResourceHandle = (int)materialResourceList_.size() - 1;
-		}
-	}
-}
-
-
-
-
-
-
-void ResourceManager::Collet2D(SpriteData* sprite) {
-	int materialNum = (int)instanceManager_->materialConfigList_.size();
-
-	int modelNum = (int)sprite->objectParts_.size();
-
-	for (int i = 0; i < modelNum; i++) {
-
-		int before = (int)instanceManager_->materialConfigList_.size();
-
-		/// 処理してるマテリアルをまとめる
-		MaterialConfig usingMaterial{};
-		usingMaterial = *sprite->objectParts_[i].materialConfig;
-
-		/// Instance追加
-		instanceManager_->Add2DInstance(sprite->objectParts_[i].worldTransform, usingMaterial, sprite->objectParts_[i].conerData, sprite->objectParts_[i].worldAnchorPoint, sprite->objectParts_[i].cropLT, sprite->objectParts_[i].cropSize);
-
-
-		int after = (int)instanceManager_->materialConfigList_.size();
-
-		/// マテリアルが足すがによってリソース追加
-		if (after > before) {
-			/// 新しいResourceを追加
-			BasicResource* newResource = new BasicResource;
-			newResource->CreateResourceClass_(BDevice_, sizeof(Material));
-			materialResourceList_.push_back(newResource);
-
-			/// MaterialとMapする
-			Material* newData = nullptr;
-			newResource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&newData));
-			newData->inputMaterialConfig(usingMaterial);
-			newResource->GetResource()->Unmap(0, nullptr);
-
-			/// instanceにResourceのHandleを設定
-			instanceManager_->materialConfigList_.back()->materialResourceHandle = (int)materialResourceList_.size() - 1;
-		}
-	}
-}
-
-//void ResourceManager::Collet3D(ObjectData* object) {
-//	int modelNum = modelGroupList_[object->modelHandle_]->GetModelNum();
-//
-//	for (int i = 0; i < modelNum; i++) {
-//
-//		int before = (int)instanceManager_->materialConfigList_.size();
-//
-//		/// 処理してるマテリアルをまとめる
-//		TransformationMatrix wvpData{};
-//		MaterialConfig usingMaterial{};
-//		if (i < (int)object->objectParts_.size()) {
-//			wvpData = object->objectParts_[i].transformationMatrix;
-//			usingMaterial = *object->objectParts_[i].materialConfig;
-//		} else {
-//			wvpData = object->objectParts_.back().transformationMatrix;
-//			usingMaterial = *object->objectParts_.back().materialConfig;
-//		}
-//
-//		/// Instance追加
-//
-//		instanceManager_->Add3DInstance(wvpData, usingMaterial,
-//			modelGroupList_[object->modelHandle_]->GetModel(i)->GetVertexNum(),
-//			modelGroupList_[object->modelHandle_]->GetModelHandle(i),
-//			object->modelHandle_);
-//
-//
-//		int after = (int)instanceManager_->materialConfigList_.size();
-//
-//		/// マテリアルが足すがによってリソース追加
-//		if (after > before) {
-//			/// 新しいResourceを追加
-//			BasicResource* newResource = new BasicResource;
-//			newResource->CreateResourceClass_(Bdevice_, sizeof(Material));
-//			materialResourceList_.push_back(newResource);
-//
-//			/// MaterialとMapする
-//			Material* newData = nullptr;
-//			newResource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&newData));
-//			newData->inputMaterialConfig(usingMaterial);
-//			newResource->GetResource()->Unmap(0, nullptr);
-//
-//			/// instanceにResourceのHandleを設定
-//			instanceManager_->materialConfigList_.back()->materialResourceHandle = (int)materialResourceList_.size() - 1;
-//		}
-//	}
-//
-//}
-
-//void ResourceManager::Collet3D(ObjectData* object) {
-//	int modelNum = modelGroupList_[object->modelHandle_]->GetModelNum();
-//
-//	for (int i = 0; i < modelNum; i++) {
-//
-//		int before = (int)instanceManager_->materialConfigList_.size();
-//
-//		/// 処理してるマテリアルをまとめる
-//		TransformationMatrix wvpData{};
-//		MaterialConfig usingMaterial{};
-//		if (i < (int)object->objectParts_.size()) {
-//			wvpData = object->objectParts_[i].transformationMatrix;
-//			usingMaterial = *object->objectParts_[i].materialConfig;
-//		} else {
-//			wvpData = object->objectParts_.back().transformationMatrix;
-//			usingMaterial = *object->objectParts_.back().materialConfig;
-//		}
-//
-//		/// Instance追加
-//
-//		instanceManager_->Add3DInstance(wvpData, usingMaterial,
-//			modelGroupList_[object->modelHandle_]->GetModel(i)->GetVertexNum(),
-//			modelGroupList_[object->modelHandle_]->GetModelHandle(i),
-//			object->modelHandle_);
-//
-//
-//		int after = (int)instanceManager_->materialConfigList_.size();
-//
-//		/// マテリアルが足すがによってリソース追加
-//		if (after > before) {
-//			/// 新しいResourceを追加
-//			BasicResource* newResource = new BasicResource;
-//			newResource->CreateResourceClass_(Bdevice_, sizeof(Material));
-//			materialResourceList_.push_back(newResource);
-//
-//			/// MaterialとMapする
-//			Material* newData = nullptr;
-//			newResource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&newData));
-//			newData->inputMaterialConfig(usingMaterial);
-//			newResource->GetResource()->Unmap(0, nullptr);
-//
-//			/// instanceにResourceのHandleを設定
-//			instanceManager_->materialConfigList_.back()->materialResourceHandle = (int)materialResourceList_.size() - 1;
-//		}
-//	}
-//
-//}
-
-void ResourceManager::Collet3D(ObjectData* object) {
-	int modelNum = modelGroupList_[object->modelHandle_]->GetModelNum();
-
-	for (int i = 0; i < modelNum; i++) {
-
-		int before = (int)instanceManager_->materialConfigList_.size();
-
-		/// 処理してるマテリアルをまとめる
-		TransformationMatrix wvpData{};
-		MaterialConfig usingMaterial{};
-		if (i < (int)object->objectParts_.size()) {
-			wvpData = object->objectParts_[i].transformationMatrix;
-			usingMaterial = *object->objectParts_[i].materialConfig;
-		} else {
-			wvpData = object->objectParts_.back().transformationMatrix;
-			usingMaterial = *object->objectParts_.back().materialConfig;
-		}
-
-		/// Instance追加
-
-		instanceManager_->Add3DInstance(wvpData, usingMaterial,
-			modelGroupList_[object->modelHandle_]->GetModel(i)->GetVertexNum(),
-			modelGroupList_[object->modelHandle_]->GetModelHandle(i),
-			object->modelHandle_);
-
-
-		int after = (int)instanceManager_->materialConfigList_.size();
-
-		/// マテリアルが足すがによってリソース追加
-		if (after > before) {
-			/// 新しいResourceを追加
-			BasicResource* newResource = new BasicResource;
-			newResource->CreateResourceClass_(BDevice_, sizeof(Material));
-			materialResourceList_.push_back(newResource);
-
-			/// MaterialとMapする
-			Material* newData = nullptr;
-			newResource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&newData));
-			newData->inputMaterialConfig(usingMaterial);
-			newResource->GetResource()->Unmap(0, nullptr);
-
-			/// instanceにResourceのHandleを設定
-			instanceManager_->materialConfigList_.back()->materialResourceHandle = (int)materialResourceList_.size() - 1;
-		}
-	}
-
-}
-
-
 
 int ResourceManager::CreateSimpleSpriteMeshResource() {
 
@@ -612,22 +261,6 @@ D3D12_GPU_DESCRIPTOR_HANDLE ResourceManager::GetTextureGPUDescriptorHandle(int h
 	return TextureManager::GetInstance()->GetTextureGPUDescriptorHandle(handle);
 }
 
-//void ResourceManager::CreateSpriteMesh() {
-//	int counter = (int)instanceManager_->tile2DList_.size() - (int)simpleSpriteMeshList_.size();
-//	if (counter == 0)return;
-//	if (counter > 0) {
-//		for (int i = 0; i < counter; i++) {
-//			CreateSimpleSpriteMeshResource();
-//		}
-//	} else {
-//		for (int i = 0; i < -counter; i++) {
-//			auto& it = simpleSpriteMeshList_.back();
-//			simpleSpriteMeshList_.pop_back();
-//			delete it;
-//		}
-//	}
-//}
-
 void ResourceManager::ResizeSimpleSpriteMeshList(int spriteNumber) {
 	int notEnoughCounter = spriteNumber - (int)simpleSpriteMeshList_.size() + 1;
 	/// どれくらい足りないのか計算
@@ -647,12 +280,14 @@ void ResourceManager::DeleteExtraSpriteMesh(int spriteNumber) {
 }
 
 int ResourceManager::InputMaterialConfig(std::shared_ptr<MaterialConfig> material) {
+
+	/// ================================= 既にあるか確認 =================================== ///
 	auto checker = std::find_if(
 		materialList_.begin(),
 		materialList_.end(),
 		[&](MaterialEntry& entry) {
 			auto locked = entry.config.lock();
-			return locked && (*locked == *material);
+			return locked && (locked.get() == material.get());
 
 
 			//auto locked = entry.config.lock().get();
@@ -661,16 +296,16 @@ int ResourceManager::InputMaterialConfig(std::shared_ptr<MaterialConfig> materia
 		}
 	);
 
-
+	/// =========================== 既にある場合、更新してIDを返す =========================== ///
 	if (checker != materialList_.end()) {
 
-		if (auto locked = checker->config.lock()) {
-			*locked = *material;
-		}
+		/// pointerが一緒だから更新なくてok
+		//checker->config = material;
 
-		checker->cpuMaterial->inputMaterialConfig(*material);
+		/// 更新 CPU 材質
+		checker->cpuMaterial->inputMaterialConfig(*material.get());
 
-		// 更新 GPU 材質
+		/// 更新 GPU 材質
 		Material* gpuPtr = nullptr;
 		checker->gpuMaterial->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&gpuPtr));
 		*gpuPtr = *checker->cpuMaterial;
@@ -679,7 +314,7 @@ int ResourceManager::InputMaterialConfig(std::shared_ptr<MaterialConfig> materia
 		return checker->materialID;
 	}
 
-	/// 新しいMaterialEntryを作成
+	/// ======================== ない場合、新しいMaterialEntryを作成 ======================== ///
 	MaterialEntry entry;
 
 	/// MaterialIDを設定

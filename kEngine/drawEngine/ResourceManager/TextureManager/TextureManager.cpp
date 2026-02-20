@@ -33,11 +33,15 @@ void TextureManager::Initialize(DirectXCore* core, SrvManager* srvManager)
 }
 
 void TextureManager::Finalize() {
+	if (intermediateResource_) {
+		intermediateResource_->ClearResource();
+		delete intermediateResource_;
+		intermediateResource_ = nullptr;
+	}
+}
 
-	intermediateResource_->ClearResource();
-	delete intermediateResource_;
+void TextureManager::Destroy() {
 	delete instance_, instance_ = nullptr;
-
 }
 
 DirectX::TexMetadata TextureManager::GetTextureMetadata(int textureHandle) {
@@ -204,7 +208,6 @@ uint32_t TextureManager::MakeModelTextureShaderResourceView(TextureData* texture
 }
 
 #pragma endregion
-
 
 ID3D12Resource* TextureManager::CreateTextureResource(const DirectX::TexMetadata& metadata) {
 

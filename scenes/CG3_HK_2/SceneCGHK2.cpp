@@ -64,8 +64,8 @@ SceneCGHK2::SceneCGHK2(kEngine* system) {
 
 	/// =========== リソースロード ============///
 	skydomeModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/skydome/skydome.obj");
-	//playerModelHandle_ = system_->SetModelObj("resources/object/ball/ball.obj");
-	playerModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/plane/plane.gltf");
+	playerModelHandle_ = system_->SetModelObj("resources/object/ball/ball.obj");
+	//playerModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/plane/plane.gltf");
 
 	boxTextureHandle_ = system_->LoadTexture("resources/texture/testBox.png");
 	tryTextureHandle_ = system_->LoadTexture("resources/texture/Tryer.png");

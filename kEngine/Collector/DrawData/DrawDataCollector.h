@@ -25,17 +25,22 @@ class CameraManager;
 class DrawDataCollector
 {
 public:
-	DrawDataCollector(ResourceManager* rm,
-					InstanceManager* im,
-					CameraManager* cm,
+
+	void Initialize(CameraManager* cm,
 					LightManager* lm);
 
+	void Finalize();
+
+	/// ============ カメラ関連 ==============///
+	Vector3 GetCameraPosition() const;
+
+	/// ============ 収集関連 ==============///
 	void PreCollect();
 
-	void Collect2D(SpriteData* sprite);
-	void Collect3D(ObjectData* object);
 
-	Vector3 GetCameraPosition() const;
+	/// ============== 2D関連 ===============///
+
+	void Collect2D(SpriteData* sprite);
 
 	std::unordered_map <PSOType,
 		std::unordered_map <MaterialID,
@@ -44,6 +49,10 @@ public:
 		>&GetOpaqueBuckets2D() { return opaqueBuckets2D_; }
 
 	std::vector<RenderData>& GetTransparentObjectParts2D() { return transparentObjectParts2D_; }
+
+	/// ============== 3D関連 ===============///
+
+	void Collect3D(ObjectData* object);
 
 	std::unordered_map <PSOType,
 		std::unordered_map <MaterialID,
@@ -84,7 +93,6 @@ private:
 	uint32_t PSODecision(MaterialConfig& material);
 
 private:
-	ResourceManager* resourceManager_ = nullptr; /*借り*/
 	InstanceManager* instanceManager_ = nullptr; /*借り*/
 
 	/// ============ Light関連 ==============///

@@ -1,7 +1,7 @@
 #include "InstanceManager.h"
 #include "Object/Object.h"
 
-InstanceManager::~InstanceManager() {
+void InstanceManager::Finalize() {
 	ClearInstance(materialConfigList_);
 	ClearInstance(spriteList_);
 	ClearInstance(tile2DList_);

@@ -185,8 +185,6 @@ ID3D12Device* DirectXCore::CreateDevice(IDXGIAdapter4* adapter) {
 		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
 		// 警告時に止まる
 		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
-		// 解除
-		infoQueue->Release();
 
 		// 抑制するメッセージのID
 		D3D12_MESSAGE_ID denyIds[] = {
@@ -205,6 +203,8 @@ ID3D12Device* DirectXCore::CreateDevice(IDXGIAdapter4* adapter) {
 		// 指定したメッセージの表示を抑制する
 		infoQueue->PushStorageFilter(&filter);
 
+		// 解除
+		infoQueue->Release();
 	}
 #endif
 	return device;
@@ -482,34 +482,65 @@ bool DirectXCore::ProcessMessage() {
 
 void DirectXCore::Finalize() {
 
+	// --- GPU objects (must release before device) ---
+	if (commandList) { commandList->Release();          commandList = nullptr; }
+	if (commandAllocator) { commandAllocator->Release();     commandAllocator = nullptr; }
+	if (commandQueue) { commandQueue->Release();         commandQueue = nullptr; }
 
-	/// すべでのものの解放
-	if (commandQueue)			commandQueue->Release();
-	if (commandAllocator)		commandAllocator->Release();
-	if (commandList)			commandList->Release();
-	if (SwapChain)				SwapChain->Release();
-	if (swapChainResources[0])	swapChainResources[0]->Release();
-	if (swapChainResources[1])	swapChainResources[1]->Release();
-	if (rtvDescriptorHeap)		rtvDescriptorHeap->Release();
-	if (dsvDescriptorHeap)		dsvDescriptorHeap->Release();
-	if (directInput)			directInput->Release();
-	if (keyBoardDevice) { keyBoardDevice->Unacquire();  keyBoardDevice->Release(); }
-	if (mouseDevice) { mouseDevice->Unacquire();  mouseDevice->Release(); }
-	if (gamepadDevice) { gamepadDevice->Unacquire();  gamepadDevice->Release(); }
+	if (SwapChain) { SwapChain->Release();            SwapChain = nullptr; }
+	if (swapChainResources[0]) { swapChainResources[0]->Release(); swapChainResources[0] = nullptr; }
+	if (swapChainResources[1]) { swapChainResources[1]->Release(); swapChainResources[1] = nullptr; }
 
-	if (fence)					fence->Release();
+	if (rtvDescriptorHeap) { rtvDescriptorHeap->Release();    rtvDescriptorHeap = nullptr; }
+	if (dsvDescriptorHeap) { dsvDescriptorHeap->Release();    dsvDescriptorHeap = nullptr; }
 
-	if (device)					device->Release();
-	if (useAdapter)				useAdapter->Release();
-	if (dxgiFactory)			dxgiFactory->Release();
-	CloseHandle(fenceEvent);
+	// --- DirectInput devices ---
+	if (keyBoardDevice) {
+		keyBoardDevice->Unacquire();
+		keyBoardDevice->Release();
+		keyBoardDevice = nullptr;
+	}
+
+	if (mouseDevice) {
+		mouseDevice->Unacquire();
+		mouseDevice->Release();
+		mouseDevice = nullptr;
+	}
+
+	if (gamepadDevice) {
+		gamepadDevice->Unacquire();
+		gamepadDevice->Release();
+		gamepadDevice = nullptr;
+	}
+
+	if (directInput) {
+		directInput->Release();
+		directInput = nullptr;
+	}
+
+	// --- Fence & event ---
+	if (fence) {
+		fence->Release();
+		fence = nullptr;
+	}
+
+	if (fenceEvent) {
+		CloseHandle(fenceEvent);
+		fenceEvent = nullptr;
+	}
+
+	// --- Device & DXGI objects (must be last) ---
+	if (device) { device->Release();      device = nullptr; }
+	if (useAdapter) { useAdapter->Release();  useAdapter = nullptr; }
+	if (dxgiFactory) { dxgiFactory->Release(); dxgiFactory = nullptr; }
+
 
 #ifdef _DEBUG
 	/// リソースリークチェック
 	IDXGIDebug1* debug;
 	//if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))) {
 	if (SUCCEEDED(DXGIGetDebugInterface1(1, IID_PPV_ARGS(&debug)))) {
-		//debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);///また未解放要素がある
+		debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);///また未解放要素がある
 		debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_DETAIL);
 		debug->ReportLiveObjects(DXGI_DEBUG_APP, DXGI_DEBUG_RLO_ALL);
 		debug->ReportLiveObjects(DXGI_DEBUG_D3D12, DXGI_DEBUG_RLO_ALL);
@@ -517,7 +548,7 @@ void DirectXCore::Finalize() {
 		debug->Release();
 	}
 	/// デバッグレイヤーの解放
-	if (debugController)		debugController->Release();
+	if (debugController)		debugController->Release(), debugController = nullptr;
 #endif
 
 	/// WindowAPIを消す

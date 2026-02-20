@@ -30,10 +30,15 @@ public:
 #pragma endregion
 
 public:
-	/// 一回だけ作成するResource
-	ResourceManager(DirectXCore* device, InstanceManager* instanceManager);
-	/// 最後で解放するResource
-	~ResourceManager();
+
+	/// シングルトン取得
+	static ResourceManager* GetInstance();
+
+	void Initialize(DirectXCore* device);
+	void Finalize();
+
+	static void Destroy();
+
 
 	/// ランクこと作成するResource
 	void CreateTurnResource();
@@ -43,16 +48,6 @@ public:
 
 public:
 	//////////////////////////////命令
-
-	/// Resource Collect
-	//void ColletSprite(Vector2 pos, MaterialConfig material);
-	void ColletModel(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = 0, bool useDefaultModel = false);
-	void Collet2DTile(Vector2 pos, MaterialConfig material);
-	void Collet3DTile(TransformationMatrix* wvpData, std::vector<MaterialConfig> material, int modelHandle = 0, bool useDefaultModel = false);
-
-	void Collet2D(SpriteData* sprite);
-	void Collet3D(ObjectData* object);
-
 
 	/// モデル読み込み
 	int LoadModel(std::string Path);
@@ -92,35 +87,29 @@ public:
 
 public:
 
+	/// singletonドライブ
+	static ResourceManager* instance_;
+
 	/// 借りのDevice
 	DirectXCore* core_ = nullptr;
 	ID3D12Device* BDevice_ = nullptr;
 
 	//////////////////////////////Texture関係
 
-	/// Lighting関係
-	BasicResource* lightingResource_ = new BasicResource;
-
 	/// Material関係
 	std::vector<BasicResource*> materialResourceList_;
 
 	struct MaterialEntry {
 		MaterialID materialID{};
-		std::weak_ptr<MaterialConfig> config{}; // 外部設定
-		std::unique_ptr <Material> cpuMaterial{};                // CPU 資料
-		BasicResource* gpuMaterial{};           // GPU buffer
-		int textureHandle{};                    // 使用的貼圖
+		std::weak_ptr<MaterialConfig> config{}; 
+		std::unique_ptr<Material> cpuMaterial;  
+		BasicResource* gpuMaterial{};           
+		int textureHandle{};                    
 	};
 
 	std::vector<MaterialEntry> materialList_;
 	std::unordered_map<MaterialID, int> idToIndex_;
 	int materialCounter_{};
-
-
-	//////////////////////////////InstanceBuffer関係
-
-	/// Instance管理
-	InstanceManager* instanceManager_{}; /*借り*/
 
 	//////////////////////////////Vertex\Index関係
 
@@ -135,8 +124,13 @@ public:
 
 
 private:
-	/// リソース作り
 
+	/// インストラクター・デストラクター封印
+	ResourceManager() = default;
+	~ResourceManager() = default;
+
+
+	/// リソース作り
 	int CreateSimpleSpriteMeshResource();
 	int CreateTriangleResource();
 	int CreateCubeResource();

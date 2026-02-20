@@ -8,6 +8,7 @@ class InputManager
 {
 public:
 	void Initialize(DirectXCore* directXDirver, TimeManager* timeManager);
+	void Finalize();
 
 	void KeysUpdata();
 	void Keys3sUpdata();

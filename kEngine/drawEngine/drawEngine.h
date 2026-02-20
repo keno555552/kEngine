@@ -30,12 +30,12 @@
 class DrawEngine
 {
 public:
-	~DrawEngine();
-
 	void Initialize(DirectXCore* directXDirver,
 					SrvManager* srvManager, 
 					ResourceManager* resourceManager,
 					DrawDataCollector* drawDataCollector);
+	
+	void Finalize();
 
 	void StartFrame();
 	void PreDraw();
@@ -102,7 +102,7 @@ private:
 	DirectXCore* directXDriver_{};					/*依存*/
 	ID3D12GraphicsCommandList* commandList_{};		/*依存*/
 	SrvManager* srvManager_{};						/*依存*/
-	DrawDataCollector* drawDataCollector_{};			/*依存*/
+	DrawDataCollector* drawDataCollector_{};		/*依存*/
 
 	int kClientWidth_ = 0;
 	int kClientHeight_ = 0;

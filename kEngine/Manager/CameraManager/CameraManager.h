@@ -4,8 +4,8 @@
 class CameraManager {
 public:
 
-    CameraManager();
-    ~CameraManager();
+	void Initialize();
+	void Finalize();
 
 	/// カメラの生成
     Camera* CreateCamera();

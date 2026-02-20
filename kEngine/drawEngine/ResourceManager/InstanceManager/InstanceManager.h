@@ -18,7 +18,8 @@ class ObjectPart;
 class InstanceManager
 {
 public:
-	~InstanceManager();
+
+	void Finalize();
 
 	void Update();
 

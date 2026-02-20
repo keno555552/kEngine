@@ -7,37 +7,6 @@
 
 #include "Queue/RenderData.h"
 
-
-DrawEngine::~DrawEngine() {
-	for (auto& ptr : psoList_) {
-		ptr->Release();
-		ptr = nullptr;
-	}
-	psoList_.clear();
-
-	delete pso_;
-
-	delete tile2DWVPResource_;
-	delete tile3DWVPResource_;
-
-	delete cameraBuffer_;
-
-	for (auto& ptr : instanceOffsetData_) {
-		delete ptr->instanceOffsetResource;
-		ptr->instanceOffsetResource = nullptr;
-		ptr->instanceOffset = nullptr;
-		delete ptr;
-		ptr = nullptr;
-	}
-
-	if (depthStencilResource) {
-		depthStencilResource->Release();
-		depthStencilResource = nullptr;
-	}
-
-
-}
-
 void DrawEngine::Initialize
 (DirectXCore* directXDriver, SrvManager* srvManager, ResourceManager* resourceManager, DrawDataCollector* drawDataCollector) {
 	directXDriver_ = directXDriver;
@@ -133,6 +102,34 @@ void DrawEngine::Initialize
 	config::default_Plane_MeshBufferHandle_ = resourceManager_->LoadModel("resources/TemplateResource/object/plane/plane.obj");
 	defaultTextureHandle_ = resourceManager_->LoadModelTexture("resources/TemplateResource/texture/white5x5.png");
 
+}
+
+void DrawEngine::Finalize() {
+	for (auto& ptr : psoList_) {
+		ptr->Release();
+		ptr = nullptr;
+	}
+	psoList_.clear();
+
+	delete pso_;
+
+	delete tile2DWVPResource_;
+	delete tile3DWVPResource_;
+
+	delete cameraBuffer_;
+
+	for (auto& ptr : instanceOffsetData_) {
+		delete ptr->instanceOffsetResource;
+		ptr->instanceOffsetResource = nullptr;
+		ptr->instanceOffset = nullptr;
+		delete ptr;
+		ptr = nullptr;
+	}
+
+	if (depthStencilResource) {
+		depthStencilResource->Release();
+		depthStencilResource = nullptr;
+	}
 }
 
 void DrawEngine::StartFrame() {

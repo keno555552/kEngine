@@ -20,6 +20,8 @@ public:
 	void Initialize(DirectXCore* core, SrvManager* srvManager);
 	/// シングルトン解放
 	void Finalize();
+	/// 
+	static void Destroy();
 
 	/// <summary>
 	/// 一般のテクスチャファイルの読み込み
@@ -94,8 +96,6 @@ private:
 
 	TextureManager() = default;
 	~TextureManager() = default;
-	TextureManager(TextureManager&) = delete;
-	TextureManager& operator= (TextureManager&) = delete;
 
 	static uint32_t descriptorIndex_;
 

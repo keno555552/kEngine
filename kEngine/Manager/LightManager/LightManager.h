@@ -16,8 +16,8 @@ class LightManager {
 public:
     static constexpr int MaxLights = 8;
 
-    LightManager();
-	~LightManager();
+	void Initialize();
+	void Finalize();
 
     void AddLight(Light* light);
 

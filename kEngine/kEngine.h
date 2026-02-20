@@ -182,34 +182,36 @@ public:
 
 private:
 	/// ============ コアシステム ============///
-	DirectXController* dxComm = nullptr;
+	std::unique_ptr <DirectXController> dxComm = nullptr;
 
 	/// ============ 描画関連 ============///
 
 	/// 資源管理
-	SrvManager* srvManager = nullptr;
-	ResourceManager* resourceManager = nullptr;
-	InstanceManager* instanceManager = nullptr;
-	TextureManager* textureManager = nullptr;
-	DrawDataCollector* drawDataCollector = nullptr;
+	std::unique_ptr <SrvManager> srvManager{};
+	///ResourceManager* resourceManager{};					/// シングルトン
+	///TextureManager* textureManager{};					/// シングルトン
+
+	/// インスタンス管理
+	//std::unique_ptr <InstanceManager> instanceManager{};	/// まだ使えない!
+	std::unique_ptr <DrawDataCollector> drawDataCollector{};
 
 	/// ライティング管理
-	LightManager* lightManager = nullptr;
+	std::unique_ptr <LightManager> lightManager{};
 
 	/// カメラ管理
-	CameraManager* cameraManager = nullptr;
+	std::unique_ptr <CameraManager> cameraManager{};
 
 	/// 描画ロジック
-	DrawEngine* drawEngine = nullptr;
+	std::unique_ptr <DrawEngine> drawEngine{};
 
 	/// ============ 入力関連 ============///
-	InputManager* inputManager = nullptr;
+	std::unique_ptr <InputManager> inputManager{};
 
 	/// ============ 音関連 ============///
-	SoundManager* soundManager = nullptr;
+	std::unique_ptr <SoundManager> soundManager{};
 
 	/// ============ 時間関連 ============///
-	TimeManager* timeManager = nullptr;
+	std::unique_ptr <TimeManager> timeManager{};
 
 	/// =========== ゲーム継続関連 ===========///
 	static bool isGameOn_;

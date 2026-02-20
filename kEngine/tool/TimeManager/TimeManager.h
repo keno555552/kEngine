@@ -6,6 +6,8 @@ class TimeManager
 {
 public:
 
+	//void Initialize();
+	//void Finalize();
 	void Update();
 
 public:

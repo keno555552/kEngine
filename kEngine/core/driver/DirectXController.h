@@ -12,6 +12,10 @@ class DirectXController :public DirectXCore
 public:
 	DirectXController();
 	~DirectXController();
+
+	void InitializeDrive(const char* kClientTitle, int kClientWidth, int kClientHeight) override;
+	void Finalize() override;
+
 	void StartFrame();
 	void EndFrame();
 private:
