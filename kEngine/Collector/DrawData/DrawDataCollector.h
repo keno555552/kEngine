@@ -27,7 +27,7 @@ class DrawDataCollector
 public:
 
 	void Initialize(CameraManager* cm,
-					LightManager* lm);
+		LightManager* lm);
 
 	void Finalize();
 
@@ -46,7 +46,7 @@ public:
 		std::unordered_map <MaterialID,
 		std::unordered_map <ModelID,
 		std::vector<RenderData>>>
-		>&GetOpaqueBuckets2D() { return opaqueBuckets2D_; }
+		>& GetOpaqueBuckets2D() { return opaqueBuckets2D_; }
 
 	std::vector<RenderData>& GetTransparentObjectParts2D() { return transparentObjectParts2D_; }
 
@@ -58,7 +58,7 @@ public:
 		std::unordered_map <MaterialID,
 		std::unordered_map <ModelID,
 		std::vector<RenderData>>>
-		>&GetOpaqueBuckets3D() { return opaqueBuckets3D_; }
+		>& GetOpaqueBuckets3D() { return opaqueBuckets3D_; }
 
 	std::vector<RenderData>& GetTransparentObjectParts3D() { return transparentObjectParts3D_; }
 
@@ -78,7 +78,7 @@ private:
 	/// WVP調整
 	TransformationMatrix SpriteWVPAdjustment(SpriteData& sprite, SpritePart& part);
 	/// バケット追加
-	void AddSpriteToBucket(RenderData& renderData,int meshID);
+	void AddSpriteToBucket(RenderData& renderData, int meshID);
 
 	/// ============= PSO関連 ====================///
 	/// フォローマトリックス作成 
@@ -86,7 +86,7 @@ private:
 	/// WVP調整
 	TransformationMatrix ObjectWVPAdjustment(ObjectData& object, ObjectPart& part, ModelData modelData);
 	/// バケット追加
-	void AddObjectToBucket(RenderData& renderData,int meshID);
+	void AddObjectToBucket(RenderData& renderData, int meshID);
 
 	/// ============ マテリアル関連 ==============///
 
@@ -128,5 +128,12 @@ private:
 	/// 透明オブジェクトバケット
 	std::vector<RenderData> transparentObjectParts3D_;
 
-};
+	/// ================ インスタンスデータ =================///
 
+	TransformationMatrix* tile2DInstancingData_ = nullptr;
+	TransformationMatrix* tile3DInstancingData_ = nullptr;
+
+	int instance2DCounter_ = 0;
+	int instance3DCounter_ = 0;
+
+};

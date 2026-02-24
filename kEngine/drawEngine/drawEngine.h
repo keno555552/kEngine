@@ -42,8 +42,6 @@ public:
 	void CommitDraw();
 	void EndDraw();
 
-	void SetDirectionalLight(DirectionalLightGPU* light);
-
 
 	/// 全部描く関数
 
@@ -119,14 +117,12 @@ private:
 
 
 	///Lighting関連
-	DirectionalLightGPU* directionalLightData{};		// 外部から受ける
-	DirectionalLightGPU* lightingData = nullptr;
-
-	uint32_t lightCount_ = 0;
-
 	D3D12_GPU_DESCRIPTOR_HANDLE lightListSrvHandleGPU_{};
 	BasicResource* lightBuffer_ = new BasicResource;
 	LightGPU* lightListData_ = nullptr;
+
+	uint32_t lightCount_ = 0;
+
 
 	/// 交換用容器
 	BasicResource* tile2DWVPResource_ = new BasicResource;

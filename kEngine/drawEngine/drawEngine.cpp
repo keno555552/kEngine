@@ -42,12 +42,6 @@ void DrawEngine::Initialize
 	///Lighting
 	InitializeLighting();
 
-	directionalLightData = new DirectionalLightGPU{
-			.color{1.0f,1.0f,1.0f,1.0f},
-			.direction{-0.5f,-0.5f,0.4f},
-			.intensity{1.0f}
-	};
-
 
 	/// Tile用wvpBufferを作成
 	tile2DWVPResource_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(TransformationMatrix) * config::Get2DTileNumInstance());
@@ -185,14 +179,6 @@ void DrawEngine::EndDraw() {
 	}
 }
 
-void DrawEngine::SetDirectionalLight(DirectionalLightGPU* light) {
-	if (light) {
-		if (!directionalLightData) {
-			directionalLightData = new DirectionalLightGPU;
-		}
-		*directionalLightData = *light;
-	}
-}
 
 void DrawEngine::PSODecision(MaterialConfig& material) {
 	bool psoChanged = false;
@@ -533,7 +519,6 @@ void DrawEngine::DrawCall() {
 
 int DrawEngine::readCommonTextureHandle(int handle) {
 	return resourceManager_->GetTextureHandleFromCommonList(handle);
-	//return commonTextureSRVMap_[handle];
 }
 
 int DrawEngine::GetModelTextureHandle(int modelHandle, int part) {
@@ -542,7 +527,6 @@ int DrawEngine::GetModelTextureHandle(int modelHandle, int part) {
 
 int DrawEngine::readModelTextureHandle(int handle) {
 	return resourceManager_->ReadModelTextureHandle(handle);
-	//return modelTextureSRVMap_[handle];
 }
 
 int DrawEngine::LoadModelTexture(const std::string& filePath) {

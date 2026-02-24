@@ -81,10 +81,6 @@ void kEngine::EndFrame() {
 	drawEngine->EndDraw();
 }
 
-void kEngine::SetDirectionalLight(DirectionalLightGPU* light) {
-	drawEngine->SetDirectionalLight(light);
-}
-
 bool kEngine::ProcessMessage() {
 	return dxComm->ProcessMessage();
 }
@@ -388,10 +384,6 @@ float kEngine::GetDeltaTime() {
 	return timeManager->getDeltaTime();
 }
 
-TimeManager* kEngine::GetTimeManager() const {
-	return timeManager.get();
-}
-
 void kEngine::SetTimeScale(float timeScale) {
 	timeManager->setTimeScale(timeScale);
 }
@@ -417,3 +409,52 @@ float kEngine::GetTimerScaledDeltaTime_() const {
 }
 
 #pragma endregion
+
+#pragma region システムインターフェース
+
+DirectXController* kEngine::GetDirectXController() {
+	return dxComm.get();
+}
+
+SrvManager* kEngine::GetSrvManager() {
+	return srvManager.get();
+}
+
+ResourceManager* kEngine::GetResourceManager() const {
+	return ResourceManager::GetInstance();
+}
+
+TextureManager* kEngine::GetTextureManager() const {
+	return TextureManager::GetInstance();
+}
+
+LightManager* kEngine::GetLightManager() const {
+	return lightManager.get();
+}
+
+CameraManager* kEngine::GetCameraManager() const {
+	return cameraManager.get();
+}
+
+DrawDataCollector* kEngine::GetDrawDataCollector() const {
+	return drawDataCollector.get();
+}
+
+DrawEngine* kEngine::GetDrawEngine() const {
+	return drawEngine.get();
+}
+
+SoundManager* kEngine::GetSoundManager() const {
+	return soundManager.get();
+}
+
+InputManager* kEngine::GetInputManager() const {
+	return inputManager.get();
+}
+
+TimeManager* kEngine::GetTimeManager() const {
+	return timeManager.get();
+}
+
+#pragma endregion
+

@@ -42,8 +42,6 @@ public:
 
 	void EndFrame();
 
-	void SetDirectionalLight(DirectionalLightGPU* light);
-
 	bool ProcessMessage();
 
 	static bool GameOn() { return isGameOn_; }
@@ -159,13 +157,12 @@ public:
 
 #pragma endregion
 
-#pragma region TimeManager
+#pragma region タイム関連
 
 	/// Timer
 	float GetFPS();
 	float GetFPSPerSecond();
 	float GetDeltaTime();
-	TimeManager* GetTimeManager()const;
 
 	/// 倍率付きの時間関数
 	void SetTimeScale(float timeScale);
@@ -177,6 +174,22 @@ public:
 	float GetTimerTimeScale_() const;
 	float GetTimerScaledDeltaTime_() const;
 
+
+#pragma endregion
+
+#pragma region システムインターフェース
+
+	DirectXController* GetDirectXController();
+	SrvManager* GetSrvManager();
+	ResourceManager* GetResourceManager() const;
+	TextureManager* GetTextureManager() const;
+	LightManager* GetLightManager() const;
+	CameraManager* GetCameraManager() const;
+	DrawDataCollector* GetDrawDataCollector() const;
+	DrawEngine* GetDrawEngine() const;
+	SoundManager* GetSoundManager() const;
+	InputManager* GetInputManager() const;
+	TimeManager* GetTimeManager()const;
 
 #pragma endregion
 
