@@ -39,7 +39,6 @@ public:
 	void PreCollect();
 	void EndCollect();
 
-
 	/// ============== 2D関連 ===============///
 
 	void Collect2D(SpriteData* sprite);
@@ -63,6 +62,11 @@ public:
 		>& GetOpaqueBuckets3D() { return opaqueBuckets3D_; }
 
 	std::vector<RenderData>& GetTransparentObjectParts3D() { return transparentObjectParts3D_; }
+
+	/// =========== Instance関連 ============///
+
+	void BuildInstanceList2D();
+	void BuildInstanceList3D();
 
 	/// ============ Light関連 ==============///
 

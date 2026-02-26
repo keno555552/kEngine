@@ -33,6 +33,15 @@ void DrawDataCollector::PreCollect() {
 
 void DrawDataCollector::EndCollect() {
 
+	/// ネールスキップ
+	if (opaqueBuckets2D_.empty() && transparentObjectParts2D_.empty()&&
+		opaqueBuckets3D_.empty() && transparentObjectParts3D_.empty())
+	return;
+
+	/// 実際のインスタンスリスト作成
+	BuildInstanceList2D();
+	BuildInstanceList3D();
+	
 }
 
 #pragma region /// ===================================== 2D関連 ===================================== ///
@@ -342,7 +351,66 @@ void DrawDataCollector::AddObjectToBucket(RenderData& renderData,int meshID) {
 
 #pragma endregion
 
+#pragma region /// ========================== カメラ/マテリアル/ライティング関連 ========================= ///
 
+void DrawDataCollector::BuildInstanceList2D() {
+
+	if (opaqueBuckets2D_.empty() && transparentObjectParts2D_.empty())return;
+
+	/// 不透明物件
+	for (auto& [psoID, materialBuckets] : opaqueBuckets2D_) {
+		for (auto& [materialID, RenderDataGroup] : materialBuckets) {
+			if (RenderDataGroup.empty()) continue;
+			for (auto& [meshBuffer, RenderData] : RenderDataGroup) {
+				/// WVP計算
+				for (auto& object : RenderData) {
+					tile2DInstancingData_[instance2DCounter_].WVP = object.transformData.WVP;;
+					tile2DInstancingData_[instance2DCounter_].world = object.transformData.world;
+					tile2DInstancingData_[instance2DCounter_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
+					instance2DCounter_++;
+				}
+			}
+		}
+	}
+
+	/// 透明物件
+	for (auto& object : transparentObjectParts2D_) {
+		tile2DInstancingData_[instance2DCounter_].WVP = object.transformData.WVP;;
+		tile2DInstancingData_[instance2DCounter_].world = object.transformData.world;
+		tile2DInstancingData_[instance2DCounter_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
+		instance2DCounter_++;
+	}
+}
+
+void DrawDataCollector::BuildInstanceList3D() {
+	if (opaqueBuckets3D_.empty() && transparentObjectParts3D_.empty())return;
+
+	/// 不透明物件
+	for (auto& [psoID, materialBuckets] : opaqueBuckets3D_) {
+		for (auto& [materialID, RenderDataGroup] : materialBuckets) {
+			if (RenderDataGroup.empty()) continue;
+			for (auto& [meshBuffer, RenderData] : RenderDataGroup) {
+				/// WVP計算
+				for (auto& object : RenderData) {
+					tile3DInstancingData_[instance3DCounter_].WVP = object.transformData.WVP;;
+					tile3DInstancingData_[instance3DCounter_].world = object.transformData.world;
+					tile3DInstancingData_[instance3DCounter_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
+					instance3DCounter_++;
+				}
+			}
+		}
+	}
+
+	/// 透明物件
+	for (auto& object : transparentObjectParts3D_) {
+		tile3DInstancingData_[instance3DCounter_].WVP = object.transformData.WVP;;
+		tile3DInstancingData_[instance3DCounter_].world = object.transformData.world;
+		tile3DInstancingData_[instance3DCounter_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
+		instance3DCounter_++;
+	}
+}
+
+#pragma endregion
 
 #pragma region /// ========================== カメラ/マテリアル/ライティング関連 ========================= ///
 
@@ -370,6 +438,7 @@ uint32_t DrawDataCollector::PSODecision(MaterialConfig& material) {
 	}
 	return (uint32_t)PSOType::NONE;
 }
+
 
 void DrawDataCollector::UpdateLightData() {
 	if(lightManager_)lightManager_->TurnDataToGPUData();
