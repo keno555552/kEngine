@@ -35,7 +35,9 @@ public:
 	Vector3 GetCameraPosition() const;
 
 	/// ============ 収集関連 ==============///
+
 	void PreCollect();
+	void EndCollect();
 
 
 	/// ============== 2D関連 ===============///

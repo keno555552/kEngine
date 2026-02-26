@@ -31,6 +31,10 @@ void DrawDataCollector::PreCollect() {
 
 }
 
+void DrawDataCollector::EndCollect() {
+
+}
+
 #pragma region /// ===================================== 2D関連 ===================================== ///
 
 void DrawDataCollector::Collect2D(SpriteData* sprite) {
