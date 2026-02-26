@@ -33,7 +33,6 @@ void DrawDataCollector::PreCollect() {
 
 void DrawDataCollector::EndCollect() {
 
-
 }
 
 #pragma region /// ===================================== 2D関連 ===================================== ///
