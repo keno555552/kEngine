@@ -29,6 +29,9 @@ void DrawDataCollector::PreCollect() {
 	simpleSpriteCounter_ = 0;
 	unlayeredSpriteCounter_ = 0;
 
+	/// インスタンスリストクリア
+	instance2DCounter_ = 0;
+	instance3DCounter_ = 0;
 }
 
 void DrawDataCollector::EndCollect() {
@@ -364,9 +367,9 @@ void DrawDataCollector::BuildInstanceList2D() {
 			for (auto& [meshBuffer, RenderData] : RenderDataGroup) {
 				/// WVP計算
 				for (auto& object : RenderData) {
-					tile2DInstancingData_[instance2DCounter_].WVP = object.transformData.WVP;;
-					tile2DInstancingData_[instance2DCounter_].world = object.transformData.world;
-					tile2DInstancingData_[instance2DCounter_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
+					instancingList2D_[instance2DCounter_].WVP = object.transformData.WVP;;
+					instancingList2D_[instance2DCounter_].world = object.transformData.world;
+					instancingList2D_[instance2DCounter_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
 					instance2DCounter_++;
 				}
 			}
@@ -375,9 +378,9 @@ void DrawDataCollector::BuildInstanceList2D() {
 
 	/// 透明物件
 	for (auto& object : transparentObjectParts2D_) {
-		tile2DInstancingData_[instance2DCounter_].WVP = object.transformData.WVP;;
-		tile2DInstancingData_[instance2DCounter_].world = object.transformData.world;
-		tile2DInstancingData_[instance2DCounter_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
+		instancingList2D_[instance2DCounter_].WVP = object.transformData.WVP;;
+		instancingList2D_[instance2DCounter_].world = object.transformData.world;
+		instancingList2D_[instance2DCounter_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
 		instance2DCounter_++;
 	}
 }
@@ -392,9 +395,9 @@ void DrawDataCollector::BuildInstanceList3D() {
 			for (auto& [meshBuffer, RenderData] : RenderDataGroup) {
 				/// WVP計算
 				for (auto& object : RenderData) {
-					tile3DInstancingData_[instance3DCounter_].WVP = object.transformData.WVP;;
-					tile3DInstancingData_[instance3DCounter_].world = object.transformData.world;
-					tile3DInstancingData_[instance3DCounter_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
+					instancingList3D_[instance3DCounter_].WVP = object.transformData.WVP;;
+					instancingList3D_[instance3DCounter_].world = object.transformData.world;
+					instancingList3D_[instance3DCounter_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
 					instance3DCounter_++;
 				}
 			}
@@ -403,9 +406,9 @@ void DrawDataCollector::BuildInstanceList3D() {
 
 	/// 透明物件
 	for (auto& object : transparentObjectParts3D_) {
-		tile3DInstancingData_[instance3DCounter_].WVP = object.transformData.WVP;;
-		tile3DInstancingData_[instance3DCounter_].world = object.transformData.world;
-		tile3DInstancingData_[instance3DCounter_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
+		instancingList3D_[instance3DCounter_].WVP = object.transformData.WVP;;
+		instancingList3D_[instance3DCounter_].world = object.transformData.world;
+		instancingList3D_[instance3DCounter_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
 		instance3DCounter_++;
 	}
 }

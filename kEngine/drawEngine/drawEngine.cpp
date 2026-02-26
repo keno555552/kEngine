@@ -42,33 +42,38 @@ void DrawEngine::Initialize
 	///Lighting
 	InitializeLighting();
 
-
-	/// Tile用wvpBufferを作成
+	/// =========================== Tile用wvpBufferを作成 =========================== ///
+	///2Dタイル用WVPバッファ
+	TransformationMatrix* instanceListPtr2D = nullptr;
 	tile2DWVPResource_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(TransformationMatrix) * config::Get2DTileNumInstance());
-	tile2DWVPResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&tile2DInstancingData_));
+	tile2DWVPResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&instanceListPtr2D));
+	drawDataCollector_->SetInstanceList2D(instanceListPtr2D);
+	
 	for (int index = 0; index < config::Get2DTileNumInstance(); ++index) {
-		tile2DInstancingData_[index].WVP = Identity();
-		tile2DInstancingData_[index].world = Identity();
-		tile2DInstancingData_[index].WorldInverseTranspose = Identity();
+		instanceListPtr2D[index].WVP = Identity();
+		instanceListPtr2D[index].world = Identity();
+		instanceListPtr2D[index].WorldInverseTranspose = Identity();
 	}
 	int srvHandleIndex = srvManager_->Allocate();
-	srvManager_->CreateSRVForStructuredBuffer(srvHandleIndex, tile2DWVPResource_->GetResource().Get(), config::Get2DTileNumInstance(), sizeof(TransformationMatrix));  // 修正：使用正確的 tile2DWVPResource_
-
+	srvManager_->CreateSRVForStructuredBuffer(srvHandleIndex, tile2DWVPResource_->GetResource().Get(), config::Get2DTileNumInstance(), sizeof(TransformationMatrix));
 	Tile2DSrvHandleGPU_ = srvManager_->GetGPUDescriptorHandle(srvHandleIndex);
 
+	///3Dタイル用WVPバッファ
+	TransformationMatrix* instanceListPtr3D = nullptr;
 	tile3DWVPResource_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(TransformationMatrix) * config::Get3DTileNumInstance());
-	tile3DWVPResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&tile3DInstancingData_));
+	tile3DWVPResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&instanceListPtr3D));
+	drawDataCollector_->SetInstanceList3D(instanceListPtr3D);
+
 	for (int index = 0; index < config::Get3DTileNumInstance(); ++index) {
-		tile3DInstancingData_[index].WVP = Identity();
-		tile3DInstancingData_[index].world = Identity();
-		tile3DInstancingData_[index].WorldInverseTranspose = Identity();
+		instanceListPtr3D[index].WVP = Identity();
+		instanceListPtr3D[index].world = Identity();
+		instanceListPtr3D[index].WorldInverseTranspose = Identity();
 	}
 	srvHandleIndex = srvManager_->Allocate();
 	srvManager_->CreateSRVForStructuredBuffer(srvHandleIndex, tile3DWVPResource_->GetResource().Get(), config::Get3DTileNumInstance(), sizeof(TransformationMatrix));
-
 	Tile3DSrvHandleGPU_ = srvManager_->GetGPUDescriptorHandle(srvHandleIndex);
 
-	/// InstanceOffset用バッファを作成
+	/// ====================== InstanceOffset用バッファを作成 ======================= ///
 	for (int i = 0; i < config::GetMaxMaterialNum(); i++) {
 		OffsetData* offsetData = new OffsetData;
 		UINT* offset = nullptr;
@@ -79,20 +84,12 @@ void DrawEngine::Initialize
 		instanceOffsetData_.push_back(offsetData);
 	}
 
-	//Microsoft::WRL::ComPtr<ID3D12Debug> debugController;
-	//D3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
-	//debugController->EnableDebugLayer();
-
-	//Microsoft::WRL::ComPtr<ID3D12Debug1> debugController1;
-	//debugController.As(&debugController1);
-	//debugController1->SetEnableGPUBasedValidation(TRUE);
-
-	/// カメラバッファの初期化
+	/// =========================== カメラバッファの初期化 =========================== ///
 	cameraBuffer_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(CameraForGPU));
 	cameraBuffer_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&cameraPtr_));
 
 
-	/// デフォルトのモデルを設定
+	/// ========================== デフォルトのモデルを設定 ========================== ///
 	config::default_Plane_MeshBufferHandle_ = resourceManager_->LoadModel("resources/TemplateResource/object/plane/plane.obj");
 	defaultTextureHandle_ = resourceManager_->LoadModelTexture("resources/TemplateResource/texture/white5x5.png");
 
@@ -279,9 +276,6 @@ void DrawEngine::Draw2DTransparent() {
 
 		/// WVP 設定
 		int instIdx = instance2DCounter_;
-		tile2DInstancingData_[instance2DCounter_].WVP = object.transformData.WVP;
-		tile2DInstancingData_[instance2DCounter_].world = object.transformData.world;
-		tile2DInstancingData_[instance2DCounter_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
 		++instance2DCounter_;
 
 		/// OffsetData 設定
@@ -344,9 +338,6 @@ void DrawEngine::Draw2DOpaque() {
 
 				/// WVP計算
 				for (auto& object : RenderData) {
-					tile2DInstancingData_[instance2DCounter_].WVP = object.transformData.WVP;;
-					tile2DInstancingData_[instance2DCounter_].world = object.transformData.world;
-					tile2DInstancingData_[instance2DCounter_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
 					instancesCounter++;
 					instance2DCounter_++;
 				}
@@ -416,9 +407,6 @@ void DrawEngine::Draw3DTransparent() {
 
 		/// WVP 設定
 		int instIdx = instance3DCounter_;
-		tile3DInstancingData_[instance3DCounter_].WVP = object.transformData.WVP;
-		tile3DInstancingData_[instance3DCounter_].world = object.transformData.world;
-		tile3DInstancingData_[instance3DCounter_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
 		++instance3DCounter_;
 
 		/// OffsetData 設定
@@ -482,10 +470,6 @@ void DrawEngine::Draw3DOpaque() {
 
 				/// WVP計算
 				for (auto& object : RenderData) {
-					tile3DInstancingData_[instance3DCounter_].WVP = object.transformData.WVP;;
-					tile3DInstancingData_[instance3DCounter_].world = object.transformData.world;
-					tile3DInstancingData_[instance3DCounter_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
-
 					instancesCounter++;
 					instance3DCounter_++;
 				}

@@ -65,6 +65,10 @@ public:
 
 	/// =========== Instance関連 ============///
 
+	void SetInstanceList2D(TransformationMatrix* instancingList2D) { instancingList2D_ = instancingList2D; }
+	void SetInstanceList3D(TransformationMatrix* instancingList3D) { instancingList3D_ = instancingList3D; }
+	TransformationMatrix* GetInstancingList2D() { return instancingList2D_; }
+	TransformationMatrix* GetInstancingList3D() { return instancingList3D_; }
 	void BuildInstanceList2D();
 	void BuildInstanceList3D();
 
@@ -136,8 +140,8 @@ private:
 
 	/// ================ インスタンスデータ =================///
 
-	TransformationMatrix* tile2DInstancingData_ = nullptr;
-	TransformationMatrix* tile3DInstancingData_ = nullptr;
+	TransformationMatrix* instancingList2D_ = nullptr;
+	TransformationMatrix* instancingList3D_ = nullptr;
 
 	int instance2DCounter_ = 0;
 	int instance3DCounter_ = 0;

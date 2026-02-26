@@ -43,8 +43,7 @@ public:
 	void EndDraw();
 
 
-	/// 全部描く関数
-
+	/// ======== 全部描く関数 ======== ///
 	/// 2D描画関数
 	void Draw2D();
 	void Draw2DTransparent();
@@ -124,11 +123,9 @@ private:
 	uint32_t lightCount_ = 0;
 
 
-	/// 交換用容器
+	/// Instance-GPU交換用容器
 	BasicResource* tile2DWVPResource_ = new BasicResource;
-	TransformationMatrix* tile2DInstancingData_ = nullptr;
 	BasicResource* tile3DWVPResource_ = new BasicResource;
-	TransformationMatrix* tile3DInstancingData_ = nullptr;
 	int instance2DCounter_ = 0;
 	int instance3DCounter_ = 0;
 
