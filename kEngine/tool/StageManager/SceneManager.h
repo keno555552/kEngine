@@ -13,7 +13,7 @@ public:
 	static void Initialize(kEngine* system);
 	static SceneManager& GetInstance();
 
-	// 複製禁止
+	/// 複製禁止
 	SceneManager(const SceneManager&) = delete;
 	SceneManager& operator=(const SceneManager&) = delete;
 	SceneManager(SceneManager&&) = delete;
@@ -27,7 +27,6 @@ public:
 	std::string sceneUsingNameHandle_ = "NONE";
 
 	void SceneChanger();
-	//void StageCheckBoxUpdate();
 
 private:
 	std::map<std::string,std::string> sceneFlow_ = {

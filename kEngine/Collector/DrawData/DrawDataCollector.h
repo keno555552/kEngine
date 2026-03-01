@@ -18,6 +18,10 @@ using ModelID = int;
 inline const float layerDepth_Sprite = 0.0001f;
 inline const float layeredSpriteDepth_ = 0.4f;
 
+/// 2D = sprite
+/// 3D = model
+/// PC = CPUパーティクル
+
 class LightManager;
 class ResourceManager;
 class InstanceManager;
@@ -47,9 +51,9 @@ public:
 		std::unordered_map <MaterialID,
 		std::unordered_map <ModelID,
 		std::vector<RenderData>>>
-		>& GetOpaqueBuckets2D() { return opaqueBuckets2D_; }
+		>& GetOpaqueBuckets2D() { return opaqueBucket2D_; }
 
-	std::vector<RenderData>& GetTransparentObjectParts2D() { return transparentObjectParts2D_; }
+	std::vector<RenderData>& GetTransparentObjectParts2D() { return transparentBucket2D_; }
 
 	/// ============== 3D関連 ===============///
 
@@ -61,7 +65,13 @@ public:
 		std::vector<RenderData>>>
 		>& GetOpaqueBuckets3D() { return opaqueBuckets3D_; }
 
-	std::vector<RenderData>& GetTransparentObjectParts3D() { return transparentObjectParts3D_; }
+	std::vector<RenderData>& GetTransparentObjectParts3D() { return transparentBucket3D_; }
+
+	/// ========== パーティクル関連 ===========///
+
+	void CollectParticleC(ObjectData* object);
+	
+	std::vector<RenderData>& GetBucketsParticleC() { return bucketParticleC_; }
 
 	/// =========== Instance関連 ============///
 
@@ -84,19 +94,27 @@ private:
 	/// ｚバッファ調整
 	float SpriteLayerManagement(float zBuffer);
 	/// フォローマトリックス作成
-	Matrix4x4 MakeFollowObjectMatrix(SpriteData* sprite);
+	Matrix4x4 MakeFollowObjectMatrix2D(SpriteData* sprite);
 	/// WVP調整
-	TransformationMatrix SpriteWVPAdjustment(SpriteData& sprite, SpritePart& part);
+	TransformationMatrix SpriteWVPAdjustment2D(SpriteData& sprite, SpritePart& part);
 	/// バケット追加
-	void AddSpriteToBucket(RenderData& renderData, int meshID);
+	void AddSpriteToBucket2D(RenderData& renderData, int meshID);
 
-	/// ============= PSO関連 ====================///
+	/// =============== 3D関連 ================///
 	/// フォローマトリックス作成 
-	Matrix4x4 MakeFollowObjectMatrix(ObjectData* object);
+	Matrix4x4 MakeFollowObjectMatrix3D(ObjectData* object);
 	/// WVP調整
-	TransformationMatrix ObjectWVPAdjustment(ObjectData& object, ObjectPart& part, ModelData modelData);
+	TransformationMatrix ObjectWVPAdjustment3D(ObjectData& object, ObjectPart& part, ModelData modelData);
 	/// バケット追加
-	void AddObjectToBucket(RenderData& renderData, int meshID);
+	void AddObjectToBucket3D(RenderData& renderData, int meshID);
+
+	/// ============ パーティクル関連 ============///
+	/// フォローマトリックス作成 
+	// 3Dのフォローマトリックスを流用
+	/// WVP調整
+	TransformationMatrix ObjectWVPAdjustmentPC(ObjectData& object, ObjectPart& part, ModelData modelData);
+	/// バケット追加
+	void AddObjectToBucketPC(RenderData& renderData);
 
 	/// ============ マテリアル関連 ==============///
 
@@ -117,11 +135,11 @@ private:
 		std::unordered_map <MaterialID,
 		std::unordered_map <ModelID,
 		std::vector<RenderData>>>
-		> opaqueBuckets2D_;
+		> opaqueBucket2D_;
 
 
 	/// 透明オブジェクトリスト
-	std::vector<RenderData> transparentObjectParts2D_;
+	std::vector<RenderData> transparentBucket2D_;
 
 	/// 2Dスブライドカンター
 	int simpleSpriteCounter_{};
@@ -136,14 +154,21 @@ private:
 		> opaqueBuckets3D_;
 
 	/// 透明オブジェクトバケット
-	std::vector<RenderData> transparentObjectParts3D_;
+	std::vector<RenderData> transparentBucket3D_;
+
+	/// ========== パーティクル関連 ===========///
+
+	/// パーティクルバケット
+	std::vector<RenderData> bucketParticleC_;
 
 	/// ================ インスタンスデータ =================///
 
 	TransformationMatrix* instancingList2D_ = nullptr;
 	TransformationMatrix* instancingList3D_ = nullptr;
+	TransformationMatrix* instancingListParticleC_ = nullptr;
 
-	int instance2DCounter_ = 0;
-	int instance3DCounter_ = 0;
+	int instanceCounter2D_ = 0;
+	int instanceCounter3D_ = 0;
+	int instanceCounterParticleC_ = 0;
 
 };
