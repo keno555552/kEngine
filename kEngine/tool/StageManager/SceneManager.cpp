@@ -5,13 +5,7 @@ SceneManager* SceneManager::sceneManager_ = nullptr;
 SceneManager::SceneManager(kEngine* system)
 	: system_(system),
 	sceneFactory_(new SceneFactory(system)) {
-	//sceneUsingHandle_ = SceneNum::S_STAGE_01;
-	//sceneUsingHandle_ = SceneNum::S_BOSSTEST;
 	sceneUsingNameHandle_ = "CGHK2";
-	//sceneUsingNameHandle_ = "TEST";
-	//sceneUsingNameHandle_ = "TITLE";
-	//sceneUsingHandle_ = SceneNum::S_TITLE;
-	//sceneUsingHandle_ = SceneNum::S_STAGE_01;
 
 	helperTextureHandle_ = system_->LoadTexture("resources/texture/helper.png");
 	helperSprite_ = new SimpleSprite;
@@ -107,8 +101,6 @@ void SceneManager::Update() {
 		}
 	}
 
-	//helperSprite_->Update(nullptr);
-
 }
 
 void SceneManager::Render() {
@@ -118,41 +110,12 @@ void SceneManager::Render() {
 	} else {
 	}
 
-	//helperSprite_->Draw();
-
 	//defaultMenu_->Draw();
 
 #ifdef USE_IMGUI
 	ImGuiPart();
 #endif
 }
-
-//void SceneManager::StageCheckBoxUpdate() {
-//	int checker = 0;
-//	int newStageNum = -1;
-//
-//	for (int i = 0; i < 10; ++i) {
-//		if (stage[i]) {
-//			checker++;
-//			if (i != static_cast<int>(sceneUsingHandle_)) {
-//				newStageNum = i;
-//			}
-//		}
-//	}
-//
-//	if (checker > 1 && newStageNum != -1) {
-//		ClearStage();
-//		stage[newStageNum] = true;
-//		sceneUsingHandle_ = static_cast<SceneNum>(newStageNum);
-//	}
-//
-//	if (checker == 0) {
-//		ClearStage();
-//		stage[0] = true;
-//		sceneUsingHandle_ = SceneNum::S_SELECT;
-//	}
-//}
-
 
 void SceneManager::ClearStage() {
 	for (auto& ptr : stage) {

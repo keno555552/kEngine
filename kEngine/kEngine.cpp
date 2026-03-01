@@ -75,6 +75,7 @@ void kEngine::StartFrame() {
 }
 
 void kEngine::EndFrame() {
+	drawDataCollector->EndCollect();
 	drawEngine->PreDraw();
 	drawEngine->CommitDraw();
 	dxComm->EndFrame();
