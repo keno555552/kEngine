@@ -23,7 +23,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	///========================Main処理=====================///
 	while (system->ProcessMessage() && kEngine::GameOn()) {
 
-
 		///====================ゲーム処理====================///
 		SceneManager::GetInstance().Update();
 
