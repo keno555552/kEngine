@@ -17,6 +17,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::unique_ptr<kEngine> system(new kEngine);
 	system->Initialize(kWindowTitle, kWindowWidth, kWindowHeight);
 
+
 	//SceneManager* sceneManager = new SceneManager(system);
 	SceneManager::Initialize(system.get());
 
