@@ -33,6 +33,20 @@ void TextureManager::Initialize(DirectXCore* core, SrvManager* srvManager)
 }
 
 void TextureManager::Finalize() {
+
+	for (auto& [handle, tex] : textureDatas) {
+		if (srvManager_ && tex.srvIndex != 0) {
+			srvManager_->Free(tex.srvIndex);
+		}
+		tex.resource.Reset();
+	}
+	textureDatas.clear();
+
+	filePathToHandle_.clear();
+	commonTextureSRVMap_.clear();
+	modelTextureSRVMap_.clear();
+	descriptorIndex_ = 0;
+
 	if (intermediateResource_) {
 		intermediateResource_->ClearResource();
 		delete intermediateResource_;

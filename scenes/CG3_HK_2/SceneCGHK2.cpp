@@ -72,6 +72,8 @@ SceneCGHK2::SceneCGHK2(kEngine* system) {
 	uvTextureHandle_ = system_->LoadTexture("resources/TemplateResource/texture/uvChecker.png");
 	whiteTextureHandle_ = system_->LoadTexture("resources/TemplateResource/texture/white5x5.png");
 
+	soundHandle_ = system_->SoundLoadSE("resources/sound/take.mp3");
+
 	skydome_ = new Object;
 	skydome_->IntObject(system_);
 	skydome_->CreateModelData(skydomeModelHandle_);
@@ -158,6 +160,10 @@ void SceneCGHK2::Update() {
 
 	if (system_->GetTriggerOn(DIK_SPACE)) {
 		outcome_ = SceneOutcome::NEXT;
+	}
+
+	if (system_->GetTriggerOn(DIK_Q)) {
+		system_->SoundPlaySE(soundHandle_, 0.5f);
 	}
 
 }

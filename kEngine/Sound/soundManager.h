@@ -11,7 +11,7 @@ public:
 	void Initialize();
 	void Finalize();
 
-	int SoundLoadSE(const char* filename);
+	int SoundLoadFile(const std::string& filename);
 	void SoundPlaySE(int Handle, float volume);
 	void SoundPlayBGM(int Handle, float volume);
 

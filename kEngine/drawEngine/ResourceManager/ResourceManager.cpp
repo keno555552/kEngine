@@ -28,7 +28,11 @@ void ResourceManager::Finalize() {
 	modelGroupList_.clear();
 	ClearPointer(simpleSpriteMeshList_);
 
+	materialList_.clear();
+	idToIndex_.clear();
+	materialCounter_ = 0;
 }
+
 
 void ResourceManager::Destroy() {
 	delete instance_, instance_ = nullptr;

@@ -6,6 +6,8 @@ void SoundManager::Initialize() {
 	assert(SUCCEEDED(result));
 	result = xAudio2->CreateMasteringVoice(&masterVoice);
 	assert(SUCCEEDED(result));
+	result = MFStartup(MF_VERSION,MFSTARTUP_NOSOCKET);
+	assert(SUCCEEDED(result));
 }
 
 void SoundManager::Finalize() {
@@ -17,9 +19,12 @@ void SoundManager::Finalize() {
 
 	if (masterVoice) { masterVoice->DestroyVoice(); masterVoice = nullptr; }
 	xAudio2.Reset();
+	
+	HRESULT result = MFShutdown();
+	assert(SUCCEEDED(result));
 }
 
-int SoundManager::SoundLoadSE(const char* filename) {
+int SoundManager::SoundLoadFile(const std::string& filename) {
 	// reuse existing sound if already loaded
 	for (int i = 0; i < static_cast<int>(sounds_.size()); ++i) {
 		if (sounds_[i]->GetFileName() == std::string(filename)) {

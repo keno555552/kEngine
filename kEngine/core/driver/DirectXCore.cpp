@@ -63,21 +63,6 @@ DirectXCore::DirectXCore() {
 	gamepadDevice = {};
 }
 
-DirectXCore::~DirectXCore() {
-	//if (dxgiFactory)			dxgiFactory->Release();
-	//if (useAdapter)				useAdapter->Release();
-	//if (device)					device->Release();
-	//if (commandQueue)			commandQueue->Release();
-	//if (commandAllocator)		commandAllocator->Release();
-	//if (commandList)			commandList->Release();
-	//if (SwapChain)				SwapChain->Release();
-	//if (swapChainResources[0])	swapChainResources[0]->Release();
-	//if (swapChainResources[1])	swapChainResources[1]->Release();
-	//if (DescriptorHeap)			DescriptorHeap->Release();
-	//if (fence)					fence->Release();
-	//CloseHandle(fenceEvent);
-}
-
 uint32_t DirectXCore::GetDescriptorSizeRTV() {
 	return device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 }
@@ -530,23 +515,29 @@ void DirectXCore::Finalize() {
 	}
 
 	// --- Device & DXGI objects (must be last) ---
+	/// リソースリークチェック
+	//ID3D12DebugDevice* debugDevice;
+	//if (SUCCEEDED(device->QueryInterface(IID_PPV_ARGS(&debugDevice)))) {
+	//	debugDevice->ReportLiveDeviceObjects(D3D12_RLDO_DETAIL);
+	//}
+
 	if (device) { device->Release();      device = nullptr; }
 	if (useAdapter) { useAdapter->Release();  useAdapter = nullptr; }
 	if (dxgiFactory) { dxgiFactory->Release(); dxgiFactory = nullptr; }
 
 
 #ifdef _DEBUG
-	/// リソースリークチェック
-	IDXGIDebug1* debug;
-	//if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))) {
-	if (SUCCEEDED(DXGIGetDebugInterface1(1, IID_PPV_ARGS(&debug)))) {
-		debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);///また未解放要素がある
-		debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_DETAIL);
-		debug->ReportLiveObjects(DXGI_DEBUG_APP, DXGI_DEBUG_RLO_ALL);
-		debug->ReportLiveObjects(DXGI_DEBUG_D3D12, DXGI_DEBUG_RLO_ALL);
 
-		debug->Release();
-	}
+	//IDXGIDebug1* debug;
+	////if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))) {
+	//if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))) {
+	//	//debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);///また未解放要素がある
+	//	debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_DETAIL);
+	//	debug->ReportLiveObjects(DXGI_DEBUG_APP, DXGI_DEBUG_RLO_ALL);
+	//	debug->ReportLiveObjects(DXGI_DEBUG_D3D12, DXGI_DEBUG_RLO_ALL);
+	//
+	//	debug->Release();
+	//}
 	/// デバッグレイヤーの解放
 	if (debugController)		debugController->Release(), debugController = nullptr;
 #endif

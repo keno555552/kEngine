@@ -18,7 +18,7 @@ void ImGuiManager::Initialize(DirectXController* dxComm, SrvManager* srvManager)
         dxComm->GetDevice(),
         2,
         DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
-        srvManager->GetDescriptorHeap().Get(),
+        srvManager->GetDescriptorHeap(),
         srvManager->GetCPUDescriptorHandle(srvIndex),
         srvManager->GetGPUDescriptorHandle(srvIndex));
 }

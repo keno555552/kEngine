@@ -93,6 +93,9 @@ Microsoft::WRL::ComPtr<ID3D12Resource> BasicResource::GetResource(int Index) {
 }
 
 void BasicResource::ClearResource() {
+	for (auto& r : resource_) {
+		r.Reset();
+	}
 	resource_.clear();
 	resourceCounter = 0;
 }
