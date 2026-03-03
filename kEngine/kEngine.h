@@ -28,8 +28,6 @@
 class kEngine
 {
 public:
-	kEngine();
-	~kEngine();
 
 #pragma region システム管理
 
@@ -37,6 +35,8 @@ public:
 	/// System関連
 
 	void Initialize(const char* kClientTitle, int kClientWidth, int kClientHeight);
+
+	void Finalize();
 
 	void StartFrame();
 
@@ -82,7 +82,7 @@ public:
 
 	/// 音関連
 
-	int SoundLoadSE(const char* filename);
+	int SoundLoadSE(const std::string filename);
 	void SoundPlaySE(int Handle, float volume = 1.0f);
 	void SoundPlayBGM(int Handle, float volume = 1.0f);
 

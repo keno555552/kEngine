@@ -4,30 +4,6 @@
 
 bool kEngine::isGameOn_ = true;
 
-kEngine::kEngine() {
-}
-
-kEngine::~kEngine() {
-
-#ifdef USE_IMGUI
-	ImGuiManager::Shutdown();
-#endif
-	inputManager->Finalize();
-	// delete timeManager;
-	soundManager->Finalize();
-	TextureManager::GetInstance()->Finalize();
-	TextureManager::Destroy();
-	ResourceManager::GetInstance()->Finalize();
-	ResourceManager::Destroy();
-
-	drawEngine->Finalize();
-	drawDataCollector->Finalize();
-	cameraManager->Finalize();
-	lightManager->Finalize();
-	srvManager->Finalize();
-	dxComm->Finalize();
-}
-
 void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClientHeight) {
 	config::SaveClientTitle(kClientTitle);
 	config::SaveClientWidth(kClientWidth);
@@ -64,6 +40,27 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 
 	inputManager = std::make_unique<InputManager>();
 	inputManager->Initialize(dxComm.get(), timeManager.get());
+}
+
+void kEngine::Finalize() {
+
+#ifdef USE_IMGUI
+	ImGuiManager::Shutdown();
+#endif
+	inputManager->Finalize();
+	// delete timeManager;
+	soundManager->Finalize();
+	TextureManager::GetInstance()->Finalize();
+	TextureManager::Destroy();
+	ResourceManager::GetInstance()->Finalize();
+	ResourceManager::Destroy();
+
+	drawEngine->Finalize();
+	drawDataCollector->Finalize();
+	cameraManager->Finalize();
+	lightManager->Finalize();
+	srvManager->Finalize();
+	dxComm->Finalize();
 }
 
 void kEngine::StartFrame() {
@@ -157,8 +154,8 @@ int kEngine::LoadTexture(const std::string& filePath) {
 
 #pragma region 音関連
 
-int kEngine::SoundLoadSE(const char* filename) {
-	return soundManager->SoundLoadSE(filename);
+int kEngine::SoundLoadSE(const std::string filename) {
+	return soundManager->SoundLoadFile(filename);
 }
 
 void kEngine::SoundPlaySE(int Handle, float volume) {

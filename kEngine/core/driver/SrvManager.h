@@ -39,7 +39,7 @@ public:
 	uint32_t GetDescriptorSizeSRV();
 	
 	/// 取得 descriptor heap
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetDescriptorHeap() { return descriptorHeap; }
+	ID3D12DescriptorHeap* GetDescriptorHeap() { return descriptorHeap.Get(); }
 
 	/// =========== 描画用コマンドリスト設定 ===========///
 

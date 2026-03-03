@@ -38,7 +38,6 @@ bool CheckXInputDeviceConnected();
 class DirectXCore {
 public:
 	DirectXCore();
-	~DirectXCore();
 
 	/// Getter
 	ID3D12Device* GetDevice() { return device; };

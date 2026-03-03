@@ -1,6 +1,16 @@
 #pragma once
 #include <xaudio2.h>
 #pragma comment(lib,"xaudio2.lib")
+
+#include <mfapi.h>
+#include <mfidl.h>
+#include <mfreadwrite.h>
+#pragma comment(lib,"mfplat.lib")
+#pragma comment(lib,"mf.lib")
+#pragma comment(lib, "mfreadwrite.lib")
+#pragma comment(lib, "mfuuid.lib")
+
+
 #include <fstream>
 #include <wrl.h>
 
@@ -33,11 +43,9 @@ struct FormatChunk {
 /// 音声データ
 struct SoundData {
 	// 波形フォーマット
-	WAVEFORMATEX wfex;
-	// バッファの先頭アドレス
-	BYTE* pBuffer;
-	// バッファのサイズ
-	unsigned int bufferSize;
+	WAVEFORMATEXTENSIBLE wfex{};
+	// バッファ
+	std::vector<BYTE> buffer;
 };
 
 class VoiceCallback : public IXAudio2VoiceCallback {
@@ -74,7 +82,7 @@ public:
 	SoundUnit();
 	~SoundUnit();
 
-	SoundData SoundLoad(const char* filename);
+	SoundData SoundLoad(const std::string& filename);
 
 	void SoundPlaySE(IXAudio2* xAudio2, float cVolume, float volume);
 	void SoundPlayBGM(IXAudio2* xAudio2, float cVolume, float volume);
@@ -93,14 +101,14 @@ public:
 	void SoundSetMute(bool isMute);
 	bool SoundGetMute()const { return isMute_; }
 
-	char* GetFileName() { return filename_; }
+	const std::string& GetFileName() const{ return filename_; }
 
 	void SoundUnload();
 
 private:
 	SoundData* soundData = new SoundData;
 	VoiceCallback* voiceCallBack_ = new VoiceCallback;
-	char* filename_{};
+	std::string filename_{};
 
 	/// やむ操作
 	std::vector<IXAudio2SourceVoice*> pSourceVoiceGroup;
@@ -117,6 +125,6 @@ private:
 	Type soundType = Type::NONE;
 
 private:
-	SoundData SoundLoadWave(const char* filename);
+	SoundData SoundLoadWave(const std::string& filename);
 };
 
