@@ -197,6 +197,7 @@ private:
 	/// ============ コアシステム ============///
 	std::unique_ptr <DirectXController> dxComm = nullptr;
 
+
 	/// ============ 描画関連 ============///
 
 	/// 資源管理
