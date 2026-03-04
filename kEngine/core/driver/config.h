@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 enum gamepadType {
 	NODEVICE,
@@ -24,7 +25,7 @@ private:
 	static const int kMaxLightNum_ = 50;              /// 最大ライト数
 
 private:
-	static char* clientTitle_;
+	static std::string clientTitle_;
 	static int clientWidth_;
 	static int clientHeight_;
 
@@ -41,8 +42,8 @@ public:
 	static int GetMaxSRVNum() { return kMaxSRVNum_; }
 	static int GetMaxLightNum() { return kMaxLightNum_; }
 
-	static void SaveClientTitle(const char* clientTitle);
-	static const char* GetClientTitle() { return clientTitle_; }
+	static void SaveClientTitle(const std::string& clientTitle);
+	static const std::string GetClientTitle() { return clientTitle_; }
 	static void SaveClientWidth(int clientWidth) { clientWidth_ = clientWidth; }
 	static int GetClientWidth() { return clientWidth_; }
 	static void SaveClientHeight(int clientHeight) { clientHeight_ = clientHeight; }

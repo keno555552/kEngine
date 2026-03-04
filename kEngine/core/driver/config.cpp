@@ -1,8 +1,7 @@
 #include "config.h"
-#include "string.h"
 
 /// インスタンス設定
-char* config::clientTitle_ = nullptr;
+std::string config::clientTitle_{};
 int config::clientWidth_ = 0;
 int config::clientHeight_ = 0;
 
@@ -18,22 +17,14 @@ int config::default_Sprite2D_MeshBufferHandle_	= 0;
 int config::default_Cube_MeshBufferHandle_		= 0;
 int config::default_Sphere_MeshBufferHandle_	= 0;
 
-void config::SaveClientTitle(const char* clientTitle) {
-    /// nullCheck
-    if (!clientTitle) {
-        delete[] clientTitle_;
-        clientTitle_ = nullptr;
-        return;
-    }
+void config::SaveClientTitle(const std::string& clientTitle) {
 
-    /// 旧資料を消す
-    delete[] clientTitle_;
-
-	/// 文字列長取得＋1(終端文字分)
-    size_t length = strlen(clientTitle) + 1;
-    clientTitle_ = new char[length];
+    ////// 旧資料を消す
+    ///if (!clientTitle_.empty()) {
+    ///    clientTitle_.clear();
+    ///}
 
 	/// 文字列コピー
-    strcpy_s(clientTitle_, length, clientTitle);
+	clientTitle_ = clientTitle;
 }
 
