@@ -48,9 +48,6 @@ private:
 	int uvTextureHandle_ = 0;
 	int whiteTextureHandle_ = 0;
 
-	/// サントラハンドル
-	int soundHandle_ = 0;
-
 	/// =========== ゲームオブジェクト ==========///
 	Object* skydome_ = nullptr;
 	Object* ground_ = nullptr;
