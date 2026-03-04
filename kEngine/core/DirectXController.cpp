@@ -44,7 +44,7 @@ void DirectXController::StartFrame() {
 	// Noneにしておく
 	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 	// バリアを張る対象のリソース。現在のバックバッファに対して行う
-	barrier.Transition.pResource = swapChainResources[backBufferIndex];
+	barrier.Transition.pResource = swapChainResources[backBufferIndex].Get();
 	// 遷移前（現在）のResourceState
 	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
 	// 遷移後のResourceState
@@ -66,7 +66,7 @@ void DirectXController::EndFrame() {
 
 #ifdef _DEBUG
 #ifdef USE_IMGUI
-	ImGuiManager::EndFrame(commandList);
+	ImGuiManager::EndFrame(commandList.Get());
 #endif
 #endif
 
@@ -74,7 +74,7 @@ void DirectXController::EndFrame() {
 
 	// 画面に描く処理はすべて終わり、画面に映すので、状態を遷移
 	// 今回はRenderTargetからPresentにする
-	barrier.Transition.pResource = swapChainResources[backBufferIndex];
+	barrier.Transition.pResource = swapChainResources[backBufferIndex].Get();
 
 
 	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
@@ -89,7 +89,7 @@ void DirectXController::EndFrame() {
 	assert(SUCCEEDED(hr));
 
 	// GPUにコマンドリストの実行を行わせる
-	ID3D12CommandList* commandLists[] = { commandList };
+	ID3D12CommandList* commandLists[] = { commandList.Get()};
 	commandQueue->ExecuteCommandLists(1, commandLists);
 
 	// GPUとOSに画面の交換を行うよう通知する
@@ -102,7 +102,7 @@ void DirectXController::EndFrame() {
 	// Fenceの値を更新
 	fenceValue++;
 	// GPUがここまでたどり着いたときに、Fenceの値を指定した値に代入するようにSignalを送る
-	commandQueue->Signal(fence, fenceValue);
+	commandQueue->Signal(fence.Get(), fenceValue);
 
 	// Fenceの値が指定したSignal値にたどり着いているか確認する
 	// GetCompletedValueの初期値はFence作成時に渡した初期値
@@ -117,7 +117,7 @@ void DirectXController::EndFrame() {
 	// 次のフレーム用のコマンドリストを準備
 	hr = commandAllocator->Reset(); // 重置命令分配器，為下一幀準備
 	assert(SUCCEEDED(hr)); // チェック
-	hr = commandList->Reset(commandAllocator, nullptr); // コマンドリストをリセット
+	hr = commandList->Reset(commandAllocator.Get(), nullptr); // コマンドリストをリセット
 	assert(SUCCEEDED(hr)); // チェック
 
 }

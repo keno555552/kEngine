@@ -40,24 +40,24 @@ public:
 	DirectXCore();
 
 	/// Getter
-	ID3D12Device* GetDevice() { return device; };
+	ID3D12Device* GetDevice() { return device.Get(); };
 	HWND GetHWND() { return winAPI_->GetHWND(); };
-	ID3D12DescriptorHeap* GetDsvDescriptorHeap() { return dsvDescriptorHeap; };
-	ID3D12DescriptorHeap* GetRtvDescriptorHeap() { return rtvDescriptorHeap; };
+	ID3D12DescriptorHeap* GetDsvDescriptorHeap() { return dsvDescriptorHeap.Get(); };
+	ID3D12DescriptorHeap* GetRtvDescriptorHeap() { return rtvDescriptorHeap.Get(); };
 	uint32_t GetDescriptorSizeRTV();
 	uint32_t GetDescriptorSizeDSV();
 
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index);
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index);
 
-	ID3D12GraphicsCommandList* GetCommandList() { return commandList; }
-	ID3D12CommandQueue* GetCommandQueue() { return commandQueue; }
+	ID3D12GraphicsCommandList* GetCommandList() { return commandList.Get(); }
+	ID3D12CommandQueue* GetCommandQueue() { return commandQueue.Get(); }
 
 	bool isDirectInputCreated();
-	IDirectInput8* GetDirectInput() { return directInput; }
-	IDirectInputDevice8* GetDirectInputKeyboard() { return keyBoardDevice; }
-	IDirectInputDevice8* GetDirectInputMouse() { return mouseDevice; }
-	IDirectInputDevice8* GetDirectInputGamepad() { return gamepadDevice; }
+	IDirectInput8* GetDirectInput() { return directInput.Get(); }
+	IDirectInputDevice8* GetDirectInputKeyboard() { return keyBoardDevice.Get(); }
+	IDirectInputDevice8* GetDirectInputMouse() { return mouseDevice.Get(); }
+	IDirectInputDevice8* GetDirectInputGamepad() { return gamepadDevice.Get(); }
 	void SetDirectXInputKeyBoard();
 	void SetDirectXInputMouse();
 	void SetDirectXInputGamepad();
@@ -83,30 +83,30 @@ protected:
 		GamePad
 	};
 
-	ID3D12Debug1* debugController;
-	IDXGIFactory7* dxgiFactory;
-	IDXGIAdapter4* useAdapter;
-	ID3D12Device* device;
-	ID3D12CommandQueue* commandQueue;
-	ID3D12CommandAllocator* commandAllocator;
-	ID3D12GraphicsCommandList* commandList;
-	IDXGISwapChain4* SwapChain;
+	Microsoft::WRL::ComPtr<ID3D12Debug1> debugController{};
+	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory{};
+	Microsoft::WRL::ComPtr<IDXGIAdapter4> useAdapter{};
+	Microsoft::WRL::ComPtr<ID3D12Device> device{};
+	Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue{};
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator{};
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList{};
+	Microsoft::WRL::ComPtr<IDXGISwapChain4> SwapChain{};
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
-	ID3D12Resource* swapChainResources[2];
+	Microsoft::WRL::ComPtr<ID3D12Resource> swapChainResources[2]{};
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
-	ID3D12DescriptorHeap* rtvDescriptorHeap;
-	ID3D12DescriptorHeap* dsvDescriptorHeap;
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
-	ID3D12Fence* fence;
-	uint64_t fenceValue;
-	HANDLE fenceEvent;
-	WinAPI* winAPI_;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap{};
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap{};
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2]{};
+	Microsoft::WRL::ComPtr<ID3D12Fence> fence{};
+	uint64_t fenceValue = 0;
+	HANDLE fenceEvent = nullptr;
+	std::unique_ptr<WinAPI> winAPI_{};
 
 	/// DirectInput
-	IDirectInput8* directInput;
-	IDirectInputDevice8* keyBoardDevice;
-	IDirectInputDevice8* mouseDevice;
-	IDirectInputDevice8* gamepadDevice;
+	Microsoft::WRL::ComPtr<IDirectInput8> directInput{};
+	Microsoft::WRL::ComPtr<IDirectInputDevice8> keyBoardDevice{};
+	Microsoft::WRL::ComPtr<IDirectInputDevice8> mouseDevice{};
+	Microsoft::WRL::ComPtr<IDirectInputDevice8> gamepadDevice{};
 
 //protected:
 public:
@@ -119,7 +119,7 @@ public:
 	/// DirectXInput初期化
 	void InitializeDirectXInput();
 	/// InputDrive作り
-	void SetDirectXInput(InputType type, IDirectInputDevice8*& drive);
+	void SetDirectXInput(InputType type, Microsoft::WRL::ComPtr<IDirectInputDevice8>& drive);
 	void SetXInput();
 	///創建命令隊列
 	ID3D12CommandQueue* CreateCommandQueue();
@@ -134,7 +134,7 @@ public:
 	///創建渲染目標視圖
 	void CreateRenderTargetViews(IDXGISwapChain4* swapChain, ID3D12DescriptorHeap* rtvDescriptorHeap);
 	///
-	ID3D12Fence* CreateFence();
+	void CreateFence();
 
 };
 

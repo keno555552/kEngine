@@ -165,10 +165,10 @@
     <ClCompile Include="kEngine\core\driver\config.cpp">
       <Filter>ソース ファイル\kEngine\core\driver</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\driver\DirectXCore.cpp">
+    <ClCompile Include="kEngine\core\DirectXCore.cpp">
       <Filter>ソース ファイル\kEngine\core\driver</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\driver\DirectXController.cpp">
+    <ClCompile Include="kEngine\core\DirectXController.cpp">
       <Filter>ソース ファイル\kEngine\core\driver</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\core\Input\inputManager.cpp">
@@ -225,7 +225,7 @@
     <ClCompile Include="kEngine\tool\TimeManager\TimeManager.cpp">
       <Filter>ソース ファイル\kEngine\tool</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\kEngine.cpp">
+    <ClCompile Include="kEngine\core\kEngine.cpp">
       <Filter>ソース ファイル\kEngine</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\tool\PerlinNoise\PerlinNoise.cpp">
@@ -560,10 +560,10 @@
     <ClInclude Include="kEngine\core\Input\inputManager.h">
       <Filter>ヘッダー ファイル\kEngine\core\Input</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\driver\DirectXCore.h">
+    <ClInclude Include="kEngine\core\DirectXCore.h">
       <Filter>ヘッダー ファイル\kEngine\core\driver</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\driver\DirectXController.h">
+    <ClInclude Include="kEngine\core\DirectXController.h">
       <Filter>ヘッダー ファイル\kEngine\core\driver</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\core\driver\config.h">
@@ -602,7 +602,7 @@
     <ClInclude Include="kEngine\tool\TimeManager\TimeManager.h">
       <Filter>ヘッダー ファイル\kEngine\tool</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\kEngine.h">
+    <ClInclude Include="kEngine\core\kEngine.h">
       <Filter>ヘッダー ファイル\kEngine</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\tool\PerlinNoise\PerlinNoise.h">

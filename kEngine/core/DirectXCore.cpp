@@ -36,31 +36,6 @@ bool CheckXInputDeviceConnected() {
 #pragma region DirectXCommon
 
 DirectXCore::DirectXCore() {
-	debugController = {};
-	HRESULT hr = {};
-	dxgiFactory = {};
-	useAdapter = {};
-	device = {};
-	commandQueue = {};
-	commandAllocator = {};
-	commandList = {};
-	SwapChain = {};
-	swapChainResources[0] = {};
-	swapChainResources[1] = {};
-	//DescriptorHeap = {};
-	rtvDescriptorHeap = {};
-	dsvDescriptorHeap = {};
-	rtvHandles[0] = {};
-	rtvHandles[1] = {};
-	fence = {};
-	fenceValue = {};
-	fenceEvent = {};
-	winAPI_ = {};
-
-	directInput = {};
-	keyBoardDevice = {};
-	mouseDevice = {};
-	gamepadDevice = {};
 }
 
 uint32_t DirectXCore::GetDescriptorSizeRTV() {
@@ -216,7 +191,7 @@ void DirectXCore::InitializeDirectXInput() {
 	assert(SUCCEEDED(result));
 }
 
-void DirectXCore::SetDirectXInput(InputType type, IDirectInputDevice8*& drive) {
+void DirectXCore::SetDirectXInput(InputType type, Microsoft::WRL::ComPtr<IDirectInputDevice8>& drive) {
 	HRESULT result;
 	bool boool = false;
 	bool skip = false;
@@ -370,16 +345,16 @@ void DirectXCore::CreateRenderTargetViews(IDXGISwapChain4* swapChain, ID3D12Desc
 
 	// まず1つ目を作る。2つ目は最初のとこから作る。作る場所をこちらで指定してあげる必要がある
 	rtvHandles[0] = rtvStartHandle;
-	device->CreateRenderTargetView(swapChainResources[0], &rtvDesc, rtvHandles[0]);
+	device->CreateRenderTargetView(swapChainResources[0].Get(), &rtvDesc, rtvHandles[0]);
 
 	// 2つ目のディスクリプタハンドルを得る（自力で）
 	rtvHandles[1].ptr = rtvHandles[0].ptr + device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
 	// 2つ目を作る
-	device->CreateRenderTargetView(swapChainResources[1], &rtvDesc, rtvHandles[1]);
+	device->CreateRenderTargetView(swapChainResources[1].Get(), &rtvDesc, rtvHandles[1]);
 }
 
-ID3D12Fence* DirectXCore::CreateFence() {
+void DirectXCore::CreateFence() {
 	///初期値0でFenceを作る
 	//ID3D12Fence* fence = nullptr;
 	//uint64_t fenceValue = 0;
@@ -389,13 +364,10 @@ ID3D12Fence* DirectXCore::CreateFence() {
 	///FenceのSignalを待つためのイベントを作成する
 	fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	assert(fenceEvent != nullptr);
-
-	return fence;
 }
 
 void DirectXCore::InitializeDrive(const char* kClientTitle, int kClientWidth, int kClientHeight) {
 #ifdef _DEBUG
-	debugController = nullptr;
 	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
 		// デバッグレイヤーを有効化する
 		debugController->EnableDebugLayer();
@@ -405,11 +377,10 @@ void DirectXCore::InitializeDrive(const char* kClientTitle, int kClientWidth, in
 #endif
 
 	/// WindowAPI、windowを作る
-	winAPI_ = new WinAPI();
+	winAPI_ = std::make_unique<WinAPI>();
 	winAPI_->Initialize(kClientTitle, kClientWidth, kClientHeight);
 
 	/// DXGIファクトリーの生成
-	dxgiFactory = nullptr;
 	// HRESULTはWindows系のエラーコードであり、
 	// 関数が成功したかどうかをSUCCEEDEDマクロで判定できる
 	HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));
@@ -439,19 +410,19 @@ void DirectXCore::InitializeDrive(const char* kClientTitle, int kClientWidth, in
 	// 適切なアダプタが見つからなかったので起動できない
 	assert(useAdapter != nullptr);
 
-	device = CreateDevice(useAdapter);
+	device = CreateDevice(useAdapter.Get());
 	commandQueue = CreateCommandQueue();
 	commandAllocator = CreateCommandAllocator();
-	commandList = CreateCommandList(commandAllocator);
+	commandList = CreateCommandList(commandAllocator.Get());
 
-	SwapChain = CreateSwapChain(dxgiFactory, commandQueue, winAPI_->GetHWND(), kClientWidth, kClientHeight);
+	SwapChain = CreateSwapChain(dxgiFactory.Get(), commandQueue.Get(), winAPI_->GetHWND(), kClientWidth, kClientHeight);
 	//DescriptorHeap = CreateDescriptorHeap(device);
 	rtvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
 	dsvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
 
-	CreateRenderTargetViews(SwapChain, rtvDescriptorHeap);
+	CreateRenderTargetViews(SwapChain.Get(), rtvDescriptorHeap.Get());
 
-	fence = CreateFence();
+	CreateFence();
 
 	// DirectX入力装置の初期化
 	InitializeDirectXInput();
@@ -468,45 +439,40 @@ bool DirectXCore::ProcessMessage() {
 void DirectXCore::Finalize() {
 
 	// --- GPU objects (must release before device) ---
-	if (commandList) { commandList->Release();          commandList = nullptr; }
-	if (commandAllocator) { commandAllocator->Release();     commandAllocator = nullptr; }
-	if (commandQueue) { commandQueue->Release();         commandQueue = nullptr; }
+	if (commandList) { commandList.Reset(); }
+	if (commandAllocator) { commandAllocator.Reset(); }
+	if (commandQueue) { commandQueue.Reset(); }
 
-	if (SwapChain) { SwapChain->Release();            SwapChain = nullptr; }
-	if (swapChainResources[0]) { swapChainResources[0]->Release(); swapChainResources[0] = nullptr; }
-	if (swapChainResources[1]) { swapChainResources[1]->Release(); swapChainResources[1] = nullptr; }
+	if (SwapChain) { SwapChain.Reset(); }
+	if (swapChainResources[0]) { swapChainResources[0].Reset(); }
+	if (swapChainResources[1]) { swapChainResources[1].Reset(); }
 
-	if (rtvDescriptorHeap) { rtvDescriptorHeap->Release();    rtvDescriptorHeap = nullptr; }
-	if (dsvDescriptorHeap) { dsvDescriptorHeap->Release();    dsvDescriptorHeap = nullptr; }
+	if (rtvDescriptorHeap) { rtvDescriptorHeap.Reset(); }
+	if (dsvDescriptorHeap) { dsvDescriptorHeap.Reset(); }
 
 	// --- DirectInput devices ---
 	if (keyBoardDevice) {
 		keyBoardDevice->Unacquire();
-		keyBoardDevice->Release();
-		keyBoardDevice = nullptr;
+		keyBoardDevice.Reset();
 	}
 
 	if (mouseDevice) {
 		mouseDevice->Unacquire();
-		mouseDevice->Release();
-		mouseDevice = nullptr;
+		mouseDevice.Reset();
 	}
 
 	if (gamepadDevice) {
 		gamepadDevice->Unacquire();
-		gamepadDevice->Release();
-		gamepadDevice = nullptr;
+		gamepadDevice.Reset();
 	}
 
 	if (directInput) {
-		directInput->Release();
-		directInput = nullptr;
+		directInput.Reset();
 	}
 
 	// --- Fence & event ---
 	if (fence) {
-		fence->Release();
-		fence = nullptr;
+		fence.Reset();
 	}
 
 	if (fenceEvent) {
@@ -521,9 +487,9 @@ void DirectXCore::Finalize() {
 	//	debugDevice->ReportLiveDeviceObjects(D3D12_RLDO_DETAIL);
 	//}
 
-	if (device) { device->Release();      device = nullptr; }
-	if (useAdapter) { useAdapter->Release();  useAdapter = nullptr; }
-	if (dxgiFactory) { dxgiFactory->Release(); dxgiFactory = nullptr; }
+	if (device) { device.Reset(); }
+	if (useAdapter) { useAdapter.Reset(); }
+	if (dxgiFactory) { dxgiFactory.Reset(); }
 
 
 #ifdef _DEBUG
@@ -539,12 +505,12 @@ void DirectXCore::Finalize() {
 	//	debug->Release();
 	//}
 	/// デバッグレイヤーの解放
-	if (debugController)		debugController->Release(), debugController = nullptr;
+	if (debugController)		debugController.Reset();
 #endif
 
 	/// WindowAPIを消す
 	winAPI_->Finalize();
-	delete winAPI_;
+	winAPI_.reset();
 }
 #pragma endregion
 
