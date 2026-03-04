@@ -14,10 +14,11 @@ const int32_t kWindowHeight = 720;
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	CoInitializeEx(0, COINIT_MULTITHREADED);
-	std::unique_ptr<kEngine> system(new kEngine);
+	std::unique_ptr<kEngine> system;
+	system = std::make_unique<kEngine>();
 	system->Initialize(kWindowTitle, kWindowWidth, kWindowHeight);
 
-	//SceneManager* sceneManager = new SceneManager(system);
+
 	SceneManager::Initialize(system.get());
 
 	///========================Main処理=====================///
