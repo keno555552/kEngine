@@ -4,7 +4,7 @@
 #include "externals/DirectXTex/d3dx12.h"
 #include <vector>
 #include "Config.h"
-#include "PSO.h"
+#include "PSOManager/PSOFactory.h"
 #include "ResourceManager.h"
 #include "VertexData.h"
 #include "Material.h"
@@ -67,7 +67,7 @@ public:
 
 private:
 	
-	PSO* pso_ = new PSO;
+	PSOFactory* pso_ = new PSOFactory;
 	ResourceManager* resourceManager_{};
 	DirectXCore* directXDriver_{};					/*依存*/
 	ID3D12GraphicsCommandList* commandList_{};		/*依存*/
@@ -98,7 +98,7 @@ private:
 	psoType currentPSO_ = psoType::NONE;
 
 private:
-	std::vector<ID3D12PipelineState*> psoList_;
+	std::vector <Microsoft::WRL::ComPtr<ID3D12PipelineState>> psoList_;
 	ID3D12RootSignature* rootSignature_ = nullptr; 			// Listからもセーブしたから解放しなくていい	
 	D3D12_VIEWPORT viewport{};
 	D3D12_RECT scissorRect{};

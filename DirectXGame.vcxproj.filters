@@ -174,7 +174,7 @@
     <ClCompile Include="kEngine\core\inputCore.cpp">
       <Filter>ソース ファイル\kEngine\core\Input</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\pso\PSO.cpp">
+    <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory.cpp">
       <Filter>ソース ファイル\kEngine\core\pso</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Data\LightModelType.cpp">
@@ -240,7 +240,7 @@
     <ClCompile Include="kEngine\Tool\StringManage\ConvertString.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\pso\shader_compile.cpp">
+    <ClCompile Include="kEngine\Renderer\ShaderManager\shader_compile.cpp">
       <Filter>ソース ファイル\Shader</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\GameObject\Button\button.cpp">
@@ -572,7 +572,7 @@
     <ClInclude Include="kEngine\core\config.h">
       <Filter>ヘッダー ファイル\kEngine\core\driver</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\pso\PSO.h">
+    <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory.h">
       <Filter>ヘッダー ファイル\kEngine\core\pso</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Data\Render\Data\DirectionalLightGPU.h">
@@ -623,7 +623,7 @@
     <ClInclude Include="kEngine\Tool\StringManage\ConvertString.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\pso\shader_compile.h">
+    <ClInclude Include="kEngine\Renderer\ShaderManager\shader_compile.h">
       <Filter>ヘッダー ファイル\Shader</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\GameObject\Button\button.h">

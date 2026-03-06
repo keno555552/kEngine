@@ -1,31 +1,13 @@
-#include "PSO.h"
+#include "PSOFactory.h"
 #include "Vector4.h"
 
-PSO::~PSO() {
-	//directXDriver_->GetDriver()->Release(); /*借り*/
-	signatureBlob_->Release();
-	if (errorBlob_) {
-		errorBlob_->Release();
-	}
-
-	for (auto& ptr : rootSignatureList_) {
-		ptr->Release();
-		ptr = nullptr;
-	}
-	rootSignatureList_.clear();
-	vertexShaderBlob_->Release();
-	pixelShaderBlob_->Release();
-	delete shader_compile_;
-	//graphicsPipelineState_->Release();
-}
-
-void PSO::Initialize(DirectXCore* directXDriver) {
+void PSOFactory::Initialize(DirectXCore* directXDriver) {
 	directXDriver_ = directXDriver;
-	shader_compile_ = new Shader_compile;
+	shader_compile_ = std::make_unique<Shader_compile>();
 	shader_compile_->Initialize();
 }
 
-ID3D12PipelineState* PSO::createPSO(LightModelType lightModelType) {
+Microsoft::WRL::ComPtr <ID3D12PipelineState> PSOFactory::createPSO(LightModelType lightModelType) {
 	createRootSignature();
 	createInputLayout();
 	SetBlendState();
@@ -37,7 +19,7 @@ ID3D12PipelineState* PSO::createPSO(LightModelType lightModelType) {
 	return graphicsPipelineState_;
 }
 
-ID3D12RootSignature* PSO::createRootSignature() {
+ID3D12RootSignature* PSOFactory::createRootSignature() {
 	///RootSignature作成
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
 	descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
@@ -122,23 +104,31 @@ ID3D12RootSignature* PSO::createRootSignature() {
 
 
 	// シリアライズしてバイナリにする
-	signatureBlob_ = nullptr;
-	errorBlob_ = nullptr;
-	HRESULT hr = D3D12SerializeRootSignature(&descriptionRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob_, &errorBlob_);
+	signatureBlob_.Reset();
+	errorBlob_.Reset();
+	HRESULT hr = D3D12SerializeRootSignature(&descriptionRootSignature,
+												D3D_ROOT_SIGNATURE_VERSION_1, 
+												signatureBlob_.GetAddressOf(),
+												errorBlob_.GetAddressOf());
 	if (FAILED(hr)) {
-		Logger::Log(reinterpret_cast<char*>(errorBlob_->GetBufferPointer()));
+		if(errorBlob_){
+			Logger::Log(reinterpret_cast<char*>(errorBlob_->GetBufferPointer()));
+		}
 		assert(false);
 	}
 	// バイナリを元に生成
-	rootSignature_ = nullptr;
-	hr = directXDriver_->GetDevice()->CreateRootSignature(0, signatureBlob_->GetBufferPointer(), signatureBlob_->GetBufferSize(), IID_PPV_ARGS(&rootSignature_));
+	rootSignature_.Reset();
+	hr = directXDriver_->GetDevice()->CreateRootSignature(0, 
+														  signatureBlob_->GetBufferPointer(), 
+														  signatureBlob_->GetBufferSize(), 
+														  IID_PPV_ARGS(rootSignature_.GetAddressOf()));
 	assert(SUCCEEDED(hr));
 
 	rootSignatureList_.push_back(rootSignature_);
-	return rootSignature_;
+	return rootSignature_.Get();
 }
 
-void PSO::createInputLayout() {
+void PSOFactory::createInputLayout() {
 	///InputLayout
 	//D3D12_INPUT_ELEMENT_DESC inputElementDESCs[2] = {};
 	inputElementDESCs_[0] = {};
@@ -162,7 +152,7 @@ void PSO::createInputLayout() {
 	inputLayoutDESC_.NumElements = _countof(inputElementDESCs_);
 }
 
-void PSO::SetBlendState() {
+void PSOFactory::SetBlendState() {
 	// BlendStateの設定
 	//D3D12_BLEND_DESC blendDesc{};
 	blendDesc_ = {};
@@ -177,7 +167,7 @@ void PSO::SetBlendState() {
 	blendDesc_.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
 }
 
-void PSO::SetRasterizerState() {
+void PSOFactory::SetRasterizerState() {
 	// RasterizerStateの設定
 	//D3D12_RASTERIZER_DESC rasterizerDesc{};
 	rasterizerDesc_ = {};
@@ -188,10 +178,10 @@ void PSO::SetRasterizerState() {
 
 }
 
-void PSO::ShaderCompile(LightModelType lightModelType) {
+void PSOFactory::ShaderCompile(LightModelType lightModelType) {
 	/// Shaderをコンパイルする
-	vertexShaderBlob_ = {};
-	pixelShaderBlob_ = {};
+	vertexShaderBlob_.Reset();
+	pixelShaderBlob_.Reset();
 
 	switch (lightModelType) {
 	case LightModelType::Sprite2D:
@@ -210,11 +200,11 @@ void PSO::ShaderCompile(LightModelType lightModelType) {
 		pixelShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/FlameNeonGlow.PS.hlsl", L"ps_6_0");
 		break;
 	}
-	assert(vertexShaderBlob_ != nullptr);
-	assert(pixelShaderBlob_ != nullptr);
+	assert(vertexShaderBlob_.Get());
+	assert(pixelShaderBlob_.Get());
 }
 
-void PSO::SetDepthStencilState() {
+void PSOFactory::SetDepthStencilState() {
 	// DepthStencilStateの設定
 	depthStencilDesc = {};
 	// Depthの機能を有効化する
@@ -225,10 +215,10 @@ void PSO::SetDepthStencilState() {
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 }
 
-void PSO::SetGraphicsPipelineState() {
+void PSOFactory::SetGraphicsPipelineState() {
 	// graphicsPipelineStateに設定する情報をまとめる
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
-	graphicsPipelineStateDesc.pRootSignature = rootSignature_; // RootSignature
+	graphicsPipelineStateDesc.pRootSignature = rootSignature_.Get(); // RootSignature
 	graphicsPipelineStateDesc.InputLayout = inputLayoutDESC_; // InputLayout
 	graphicsPipelineStateDesc.VS = { vertexShaderBlob_->GetBufferPointer(), vertexShaderBlob_->GetBufferSize() }; // VertexShader
 	graphicsPipelineStateDesc.PS = { pixelShaderBlob_->GetBufferPointer(), pixelShaderBlob_->GetBufferSize() }; // PixelShader
@@ -247,8 +237,8 @@ void PSO::SetGraphicsPipelineState() {
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 	// 実際に生成
-	graphicsPipelineState_ = nullptr;
-	HRESULT hr = directXDriver_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState_));
+	graphicsPipelineState_.Reset();
+	HRESULT hr = directXDriver_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(graphicsPipelineState_.GetAddressOf()));
 	assert(SUCCEEDED(hr));
 }
 

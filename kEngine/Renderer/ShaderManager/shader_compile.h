@@ -14,26 +14,20 @@
 
 class Shader_compile{
 public:
-	~Shader_compile();
 
 	void Initialize();
 
-	IDxcBlob* CompileShader(// CompilerするShaderファイルへのパス
+	Microsoft::WRL::ComPtr <IDxcBlob> CompileShader(// CompilerするShaderファイルへのパス
 					  const std::wstring& filePath,
 					  // Compilerに使用するProfile
 					  const wchar_t* profile,
 					  LightModelType modelType = LightModelType::NONE);
 
-
-	IDxcUtils* getDxcUtils() { return dxcUtils; }
-	IDxcCompiler3* getDxcCompiler() { return dxcCompiler; }
-	IDxcIncludeHandler* getIncludeHandler() { return includeHandler; }
-
 private:
-	IDxcUtils* dxcUtils = nullptr;
-	IDxcCompiler3* dxcCompiler = nullptr;
-	IDxcIncludeHandler* includeHandler = nullptr;
+	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
+	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler = nullptr;
+	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler = nullptr;
 private:
 	/// シェーダーをビルドしてコンパイルする
-	IDxcResult* BuildAndCompileShader(const std::wstring& filePath, const wchar_t* profile, LightModelType modelType, HRESULT& hr, DxcBuffer& shaderSourceBuffer);
+	Microsoft::WRL::ComPtr<IDxcResult> BuildAndCompileShader(const std::wstring& filePath, const wchar_t* profile, LightModelType modelType, HRESULT& hr, DxcBuffer& shaderSourceBuffer);
 };

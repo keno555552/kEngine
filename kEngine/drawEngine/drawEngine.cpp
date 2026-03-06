@@ -24,8 +24,11 @@ void DrawEngine::Initialize
 	///================== PSO関連 ==================
 	/// PSOつくり
 	for (int i = 0; i < (int)LightModelType::NumLightModels; i++) {
-		ID3D12PipelineState* graphicsPipelineState_ = pso_->createPSO((LightModelType)i);
-		psoList_.push_back(graphicsPipelineState_);
+
+		//auto pso = std::make_unique<PSO>();
+		//pso->Initialize(directXDriver_);
+		
+		psoList_.push_back(pso_->createPSO((LightModelType)i));
 	}
 
 	rootSignature_ = pso_->getRootSignature((int)psoType::defaultPSO);
@@ -96,10 +99,7 @@ void DrawEngine::Initialize
 }
 
 void DrawEngine::Finalize() {
-	for (auto& ptr : psoList_) {
-		ptr->Release();
-		ptr = nullptr;
-	}
+
 	psoList_.clear();
 
 	delete pso_;
@@ -185,34 +185,34 @@ void DrawEngine::PSODecision(MaterialConfig& material) {
 	switch (lightModelType) {
 	case LightModelType::Sprite2D:
 		if (currentPSO_ != psoType::Sprite2D) {
-			commandList_->SetPipelineState(psoList_[(int)LightModelType::Sprite2D]);
+			commandList_->SetPipelineState(psoList_[(int)LightModelType::Sprite2D].Get());
 			currentPSO_ = psoType::Sprite2D;
 			psoChanged = true;
 		}
 		break;
 	case LightModelType::Lambert:
 		if (currentPSO_ != psoType::Lambert) {
-			commandList_->SetPipelineState(psoList_[(int)LightModelType::Lambert]);
+			commandList_->SetPipelineState(psoList_[(int)LightModelType::Lambert].Get());
 			currentPSO_ = psoType::Lambert;
 			psoChanged = true;
 		}
 		break;
 	case LightModelType::HalfLambert:
 		if (currentPSO_ != psoType::HalfLambert) {
-			commandList_->SetPipelineState(psoList_[(int)LightModelType::HalfLambert]);
+			commandList_->SetPipelineState(psoList_[(int)LightModelType::HalfLambert].Get());
 			currentPSO_ = psoType::HalfLambert;
 			psoChanged = true;
 		}
 		break;
 	case LightModelType::PhongReflection:
 		if (currentPSO_ != psoType::PhongReflection) {
-			commandList_->SetPipelineState(psoList_[(int)LightModelType::PhongReflection]);
+			commandList_->SetPipelineState(psoList_[(int)LightModelType::PhongReflection].Get());
 			currentPSO_ = psoType::PhongReflection;
 			psoChanged = true;
 		}
 	case LightModelType::BlinnPhongReflection:
 		if (currentPSO_ != psoType::BlinnPhongReflection) {
-			commandList_->SetPipelineState(psoList_[(int)LightModelType::BlinnPhongReflection]);
+			commandList_->SetPipelineState(psoList_[(int)LightModelType::BlinnPhongReflection].Get());
 			currentPSO_ = psoType::BlinnPhongReflection;
 			psoChanged = true;
 		}
@@ -226,7 +226,7 @@ void DrawEngine::PSODecision(MaterialConfig& material) {
 void DrawEngine::PSODecision(int psoID) {
 	auto newPSO = static_cast<psoType>(psoID);
 	if (currentPSO_ != newPSO) {
-		commandList_->SetPipelineState(psoList_[psoID]);
+		commandList_->SetPipelineState(psoList_[psoID].Get());
 		currentPSO_ = newPSO;
 
 		rootSignature_ = pso_->getRootSignature((int)currentPSO_);
