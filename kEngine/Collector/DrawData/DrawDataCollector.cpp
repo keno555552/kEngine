@@ -6,7 +6,8 @@
 
 
 void DrawDataCollector::Initialize(CameraManager * cm, LightManager * lm) {
-	cameraManager_ = cm, lightManager_ = lm;
+	cameraManager_ = cm;
+	lightManager_ = lm;
 }
 
 void DrawDataCollector::Finalize() {
@@ -15,6 +16,15 @@ void DrawDataCollector::Finalize() {
 	transparentBucket2D_.clear();
 	opaqueBuckets3D_.clear();
 	transparentBucket3D_.clear();
+	bucketParticleC_.clear();
+
+	instanceCounter2D_ = 0;
+	instanceCounter3D_ = 0;
+	instanceCounterParticleC_ = 0;
+
+	instancingList2D_ = nullptr;
+	instancingList3D_ = nullptr;
+	instancingListParticleC_ = nullptr;
 }
 
 void DrawDataCollector::PreCollect() {
@@ -348,8 +358,6 @@ void DrawDataCollector::AddObjectToBucket3D(RenderData& renderData,int meshID) {
 			opaqueBuckets3D_[static_cast<PSOType>(renderData.psoID)][renderData.materialID][meshID].emplace_back(renderData);
 		}
 	}
-
-	auto& t = renderData.transformData;
 }
 
 #pragma endregion

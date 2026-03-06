@@ -177,10 +177,10 @@
     <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory.cpp">
       <Filter>ソース ファイル\kEngine\core\pso</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Data\LightModelType.cpp">
+    <ClCompile Include="kEngine\Data\Render\Types\LightModelType.cpp">
       <Filter>ソース ファイル\kEngine\Lighting</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Data\Render\Data\DirectionalLightGPU.cpp">
+    <ClCompile Include="kEngine\Data\Render\GPUData\DirectionalLightGPU.cpp">
       <Filter>ソース ファイル\kEngine\Lighting</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\material\MaterialConfig.cpp">
@@ -372,13 +372,13 @@
     <ClCompile Include="kEngine\Data\Render\Queue\RenderData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Data\PSOType.cpp">
+    <ClCompile Include="kEngine\Data\Render\Types\PSOType.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Manager\CameraManager\CameraManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Data\BlendModeType.cpp">
+    <ClCompile Include="kEngine\Data\Render\Types\BlendModeType.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Tool\DebugTool\DebugObject.cpp">
@@ -393,10 +393,10 @@
     <ClCompile Include="kEngine\Lighting\Light.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Data\Render\Data\LightGPU.cpp">
+    <ClCompile Include="kEngine\Data\Render\GPUData\LightGPU.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Data\LightingType.cpp">
+    <ClCompile Include="kEngine\Data\Render\Types\LightingType.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Lighting\SpotLight.cpp">
@@ -575,10 +575,10 @@
     <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory.h">
       <Filter>ヘッダー ファイル\kEngine\core\pso</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Data\Render\Data\DirectionalLightGPU.h">
+    <ClInclude Include="kEngine\Data\Render\GPUData\DirectionalLightGPU.h">
       <Filter>ヘッダー ファイル\kEngine\Lighting</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Data\LightModelType.h">
+    <ClInclude Include="kEngine\Data\Render\Types\LightModelType.h">
       <Filter>ヘッダー ファイル\kEngine\Lighting</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\material\Material.h">
@@ -755,13 +755,13 @@
     <ClInclude Include="kEngine\Data\Render\Queue\RenderData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Data\PSOType.h">
+    <ClInclude Include="kEngine\Data\Render\Types\PSOType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Manager\CameraManager\CameraManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Data\BlendModeType.h">
+    <ClInclude Include="kEngine\Data\Render\Types\BlendModeType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Tool\DebugTool\DebugObject.h">
@@ -776,10 +776,10 @@
     <ClInclude Include="kEngine\Lighting\Light.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Data\Render\Data\LightGPU.h">
+    <ClInclude Include="kEngine\Data\Render\GPUData\LightGPU.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Data\LightingType.h">
+    <ClInclude Include="kEngine\Data\Render\Types\LightingType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Lighting\SpotLight.h">

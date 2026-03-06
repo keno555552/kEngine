@@ -8,7 +8,7 @@
 #include "ResourceManager.h"
 #include "VertexData.h"
 #include "Material.h"
-#include "Data/DirectionalLightGPU.h"
+#include "GPUData/DirectionalLightGPU.h"
 
 #include "MathsIncluder.h"
 #include "TransformationMatrix.h"
@@ -18,7 +18,7 @@
 #include "VertexIndex.h"
 #include "Camera.h"
 #include "DrawData/CameraForGPU.h"
-#include "Data/LightGPU.h"
+#include "GPUData/LightGPU.h"
 
 #include "DrawData/ObjectData.h"
 #include "DrawData/SpriteData.h"

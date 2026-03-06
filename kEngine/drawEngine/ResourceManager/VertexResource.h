@@ -1,6 +1,6 @@
 #pragma once
 #include "BasicResource.h"
-#include "Data/DirectionalLightGPU.h"
+#include "GPUData/DirectionalLightGPU.h"
 
 D3D12_VERTEX_BUFFER_VIEW CreateVertexBufferView(ID3D12Resource* vertexResource, uint32_t NumOfVertex);
 D3D12_INDEX_BUFFER_VIEW CreateIndexBufferView(ID3D12Resource* vertexResource, uint32_t NumOfVertex);

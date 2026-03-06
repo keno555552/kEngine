@@ -4,7 +4,7 @@
 #include "config.h"
 #include "Logger.h"
 #include "Light.h"
-#include "Data/LightGPU.h"
+#include "GPUData/LightGPU.h"
 #include "LightingType.h"
 #include "DirectionalLight.h"
 #include "PointLight.h"

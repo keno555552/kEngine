@@ -10,7 +10,7 @@
 #include "Camera/Camera.h"
 #include "VertexResource.h"
 #include "Render/Queue/RenderData.h"
-#include "Data/LightGPU.h"
+#include "GPUData/LightGPU.h"
 #include <cstdint>
 #include "Model.h"
 using ModelID = int;

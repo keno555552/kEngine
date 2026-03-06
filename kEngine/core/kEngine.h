@@ -21,7 +21,7 @@
 #include "ResourceManager/ResourceManager.h"
 #include "TextureManager/TextureManager.h"
 #include "LightManager/LightManager.h"
-#include "Data/DirectionalLightGPU.h"
+#include "GPUData/DirectionalLightGPU.h"
 #include "Camera.h"
 
 
