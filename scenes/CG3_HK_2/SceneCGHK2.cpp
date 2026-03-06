@@ -63,16 +63,16 @@ SceneCGHK2::SceneCGHK2(kEngine* system) {
 	system_->SetCamera(usingCamera_);
 
 	/// =========== リソースロード ============///
-	skydomeModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/skydome/skydome.obj");
-	playerModelHandle_ = system_->SetModelObj("resources/object/ball/ball.obj");
-	//playerModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/plane/plane.gltf");
+	skydomeModelHandle_ = system_->SetModelObj("./kEngine/EngineAssets/TemplateResource/object/skydome/skydome.obj");
+	playerModelHandle_ = system_->SetModelObj("./kEngine/EngineAssets/object/ball/ball.obj");
+	//playerModelHandle_ = system_->SetModelObj("./kEngine/EngineAssets/TemplateResource/object/plane/plane.gltf");
 
-	boxTextureHandle_ = system_->LoadTexture("resources/texture/testBox.png");
-	tryTextureHandle_ = system_->LoadTexture("resources/texture/Tryer.png");
-	uvTextureHandle_ = system_->LoadTexture("resources/TemplateResource/texture/uvChecker.png");
-	whiteTextureHandle_ = system_->LoadTexture("resources/TemplateResource/texture/white5x5.png");
+	boxTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/texture/testBox.png");
+	tryTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/texture/Tryer.png");
+	uvTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/uvChecker.png");
+	whiteTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/white5x5.png");
 
-	soundHandle_ = system_->SoundLoadSE("resources/sound/take.mp3");
+	soundHandle_ = system_->SoundLoadSE("./kEngine/EngineAssets/sound/take.mp3");
 
 	skydome_ = new Object;
 	skydome_->IntObject(system_);

@@ -17,11 +17,11 @@
 #include "MaterialConfig.h"
 #include "VertexIndex.h"
 #include "Camera.h"
-#include "DrawData/CameraForGPU.h"
+#include "CameraForGPU.h"
 #include "GPUData/LightGPU.h"
 
-#include "DrawData/ObjectData.h"
-#include "DrawData/SpriteData.h"
+#include "Data/Render/CPUData/ObjectData.h"
+#include "Data/Render/CPUData/SpriteData.h"
 #include <format>
 
 #include "SrvManager/SrvManager.h"

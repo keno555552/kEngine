@@ -6,11 +6,11 @@
 #include "Material.h"
 #include "MaterialConfig.h"
 #include "VertexIndex.h"
-#include "InstanceManager.h"
+//#include "InstanceManager.h"
 #include "TextureManager.h"
 #include "config.h"
-#include "DrawData/ObjectData.h"
-#include "DrawData/SpriteData.h"
+#include "Data/Render/CPUData/ObjectData.h"
+#include "Data/Render/CPUData/SpriteData.h"
 #include "SrvManager/SrvManager.h"
 using MaterialID = int;
 

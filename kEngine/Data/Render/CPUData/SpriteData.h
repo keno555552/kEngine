@@ -5,8 +5,8 @@
 #include "Transform.h"
 #include "TransformationMatrix.h"
 #include "MaterialConfig.h"
-#include "DrawData/ObjectData.h"
-#include "DrawData/CornerData.h"
+#include "Data/Render/CPUData/ObjectData.h"
+#include "Data/Render/CPUData/CornerData.h"
 
 struct SpritePart
 {

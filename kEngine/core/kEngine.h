@@ -15,9 +15,9 @@
 #include "ImGuiManager.h"
 #endif // USE_IMGUI
 #include <string>
-#include "DrawData/ObjectData.h"
-#include "DrawData/SpriteData.h"
-#include "InstanceManager.h"
+#include "Data/Render/CPUData/ObjectData.h"
+#include "Data/Render/CPUData/SpriteData.h"
+//#include "InstanceManager.h"
 #include "ResourceManager/ResourceManager.h"
 #include "TextureManager/TextureManager.h"
 #include "LightManager/LightManager.h"

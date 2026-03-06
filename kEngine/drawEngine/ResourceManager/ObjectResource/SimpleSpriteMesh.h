@@ -4,7 +4,7 @@
 #include "TransformationMatrix.h"
 #include "VertexResource.h"
 #include "Config.h"
-#include "DrawData/CornerData.h"
+#include "Data/Render/CPUData/CornerData.h"
 
 class SimpleSpriteMesh :public MeshBuffer
 {

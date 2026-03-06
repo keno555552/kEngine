@@ -7,7 +7,7 @@
 #include "MathsIncluder.h"
 #include "kEngine.h"
 #include "Camera.h"
-#include "DrawData/ObjectData.h"
+#include "Data/Render/CPUData/ObjectData.h"
 #include <crashdecision/crashDecision.h>
 
 class Object : public ObjectData {

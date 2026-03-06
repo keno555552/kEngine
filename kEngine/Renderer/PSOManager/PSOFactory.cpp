@@ -1,5 +1,6 @@
 #include "PSOFactory.h"
 #include "Vector4.h"
+#include "ConvertString.h"
 
 void PSOFactory::Initialize(DirectXCore* directXDriver) {
 	directXDriver_ = directXDriver;
@@ -193,21 +194,24 @@ void PSOFactory::ShaderCompile(LightModelType lightModelType) {
 	vertexShaderBlob_.Reset();
 	pixelShaderBlob_.Reset();
 
+	/// Shaderの置場
+	std::string shaderFolder = "./kEngine/EngineAssets/Shader/";
+
 	switch (lightModelType) {
 	case LightModelType::Sprite2D:
-		vertexShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Tile2D.VS.hlsl", L"vs_6_0");
-		pixelShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Tile2D.PS.hlsl", L"ps_6_0");
+		vertexShaderBlob_ = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder + "Tile2D.VS.hlsl"), L"vs_6_0");
+		pixelShaderBlob_ = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder + "Tile2D.PS.hlsl"), L"ps_6_0");
 		return;
 	case LightModelType::Lambert:
 	case LightModelType::HalfLambert:
 	case LightModelType::PhongReflection:
 	case LightModelType::BlinnPhongReflection:
-		vertexShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Particle.VS.hlsl", L"vs_6_0");
-		pixelShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/Particle.PS.hlsl", L"ps_6_0", lightModelType);
+		vertexShaderBlob_ = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder + "Particle.VS.hlsl"), L"vs_6_0");
+		pixelShaderBlob_ = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder + "Particle.PS.hlsl"), L"ps_6_0", lightModelType);
 		break;
 	case LightModelType::FlameNeonGlow:
-		vertexShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/FlameNeonGlow.VS.hlsl", L"vs_6_0");
-		pixelShaderBlob_ = shader_compile_->CompileShader(L"./resources/Shader/FlameNeonGlow.PS.hlsl", L"ps_6_0");
+		vertexShaderBlob_ = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder + "FlameNeonGlow.VS.hlsl"), L"vs_6_0");
+		pixelShaderBlob_ = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder + "FlameNeonGlow.PS.hlsl"), L"ps_6_0");
 		break;
 	}
 	assert(vertexShaderBlob_.Get());

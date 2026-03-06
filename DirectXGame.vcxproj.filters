@@ -246,13 +246,7 @@
     <ClCompile Include="kEngine\GameObject\Button\button.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\InstanceManager\InstanceManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\InstanceManager\SpriteInstance.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\InstanceManager\ModelInstance.cpp">
+    <ClCompile Include="kEngine\SceneCollector\InstanceManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\drawEngine\ResourceManager\WVPResource.cpp">
@@ -279,13 +273,13 @@
     <ClCompile Include="kEngine\Tool\MapChip\MapChipField.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\DrawData\ObjectData.cpp">
+    <ClCompile Include="kEngine\Data\Render\CPUData\ObjectData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\GameObject\Object\Sprite.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\DrawData\SpriteData.cpp">
+    <ClCompile Include="kEngine\Data\Render\CPUData\SpriteData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\SimpleSpriteMesh.cpp">
@@ -294,7 +288,7 @@
     <ClCompile Include="kEngine\drawEngine\ResourceManager\TextureManager\TextureManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\DrawData\CornerData.cpp">
+    <ClCompile Include="kEngine\Data\Render\CPUData\CornerData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="scenes\CG4_HK_1\Effect1.cpp">
@@ -360,10 +354,10 @@
     <ClCompile Include="kEngine\Manager\IDManager\IDManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\DrawData\CameraForGPU.cpp">
+    <ClCompile Include="kEngine\Data\Render\GPUData\CameraForGPU.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\DrawData\CameraData.cpp">
+    <ClCompile Include="kEngine\Data\Render\CPUData\CameraData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Collector\DrawData\DrawDataCollector.cpp">
@@ -629,13 +623,7 @@
     <ClInclude Include="kEngine\GameObject\Button\button.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\InstanceManager\InstanceManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\InstanceManager\SpriteInstance.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\InstanceManager\ModelInstance.h">
+    <ClInclude Include="kEngine\SceneCollector\InstanceManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\drawEngine\ResourceManager\WVPResource.h">
@@ -662,13 +650,13 @@
     <ClInclude Include="kEngine\Tool\MapChip\MapChipField.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\DrawData\ObjectData.h">
+    <ClInclude Include="kEngine\Data\Render\CPUData\ObjectData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\GameObject\Object\Sprite.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\DrawData\SpriteData.h">
+    <ClInclude Include="kEngine\Data\Render\CPUData\SpriteData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\SimpleSpriteMesh.h">
@@ -677,7 +665,7 @@
     <ClInclude Include="kEngine\drawEngine\ResourceManager\TextureManager\TextureManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\DrawData\CornerData.h">
+    <ClInclude Include="kEngine\Data\Render\CPUData\CornerData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="scenes\CG4_HK_1\Effect1.h">
@@ -743,10 +731,10 @@
     <ClInclude Include="kEngine\Manager\IDManager\IDManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\DrawData\CameraForGPU.h">
+    <ClInclude Include="kEngine\Data\Render\GPUData\CameraForGPU.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\DrawData\CameraData.h">
+    <ClInclude Include="kEngine\Data\Render\CPUData\CameraData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Collector\DrawData\DrawDataCollector.h">

@@ -93,8 +93,8 @@ void DrawEngine::Initialize
 
 
 	/// ========================== デフォルトのモデルを設定 ========================== ///
-	config::default_Plane_MeshBufferHandle_ = resourceManager_->LoadModel("resources/TemplateResource/object/plane/plane.obj");
-	defaultTextureHandle_ = resourceManager_->LoadModelTexture("resources/TemplateResource/texture/white5x5.png");
+	config::default_Plane_MeshBufferHandle_ = resourceManager_->LoadModel("./kEngine/EngineAssets/TemplateResource/object/plane/plane.obj");
+	defaultTextureHandle_ = resourceManager_->LoadModelTexture("./kEngine/EngineAssets/TemplateResource/texture/white5x5.png");
 
 }
 

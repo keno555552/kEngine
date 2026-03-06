@@ -2,8 +2,8 @@
 
 DebugObject::DebugObject(kEngine* kEngine) {
 	system_ = kEngine;
-	TH_centerPoint = system_->LoadTexture("./resources/TemplateResource/texture/centerPoint.png");
-	TH_number = system_->LoadTexture("./resources/TemplateResource/texture/number/unicode_japaness_number.png");
+	TH_centerPoint = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/centerPoint.png");
+	TH_number = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/number/unicode_japaness_number.png");
 }
 
 DebugObject::~DebugObject() {

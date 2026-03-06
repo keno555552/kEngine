@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <map>
 #include <unordered_map>
-#include <DrawData/ObjectData.h>
+#include <Data/Render/CPUData/ObjectData.h>
 
 class ObjectPart;
 class InstanceManager

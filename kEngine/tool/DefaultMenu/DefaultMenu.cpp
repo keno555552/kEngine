@@ -11,7 +11,7 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 
 	/// =========== リソース読み込み ==========///
 
-	std::string menuPath = "resources/texture/menu/";
+	std::string menuPath = "./kEngine/EngineAssets/texture/menu/";
 	TH_menuBG_ = system_->LoadTexture(menuPath + "menuBG.png");
 
 	TH_menuPause = system_->LoadTexture(menuPath + "menuPause.png");

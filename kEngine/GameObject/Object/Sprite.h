@@ -7,7 +7,7 @@
 #include "MathsIncluder.h"
 #include "kEngine.h"
 #include "Camera.h"
-#include "DrawData/SpriteData.h"
+#include "Data/Render/CPUData/SpriteData.h"
 
 class SimpleSprite : public SimpleSpriteData {
 public:

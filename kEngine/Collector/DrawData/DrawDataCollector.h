@@ -4,12 +4,12 @@
 #include <map>
 #include <unordered_map>
 #include "materialConfig.h"
-#include "DrawData/ObjectData.h"
-#include "DrawData/SpriteData.h"
+#include "Data/Render/CPUData/ObjectData.h"
+#include "Data/Render/CPUData/SpriteData.h"
 #include "PSOType.h"
 #include "Camera/Camera.h"
 #include "VertexResource.h"
-#include "Render/Queue/RenderData.h"
+#include "Data/Render/Queue/RenderData.h"
 #include "GPUData/LightGPU.h"
 #include <cstdint>
 #include "Model.h"
