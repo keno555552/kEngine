@@ -6,6 +6,7 @@
 #include <codecvt>
 
 #include <vector>
+#include <string>
 #include "ConvertString.h"
 #include "Logger.h"
 
@@ -16,7 +17,7 @@ public:
 
 	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
-	bool Initialize(const char* title, int width, int height, HINSTANCE hInstance = GetModuleHandle(nullptr));
+	bool Initialize(const std::string& title, int width, int height, HINSTANCE hInstance = GetModuleHandle(nullptr));
 	void Finalize() const;
 	HWND GetHWND() const { return hwnd_; }
 	HINSTANCE GetHINSTANCE() const { return hInstance_; }

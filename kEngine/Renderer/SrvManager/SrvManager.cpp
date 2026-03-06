@@ -36,9 +36,6 @@ void SrvManager::Finalize() {
 
 uint32_t SrvManager::Allocate() {
 
-	assert(nextNewIndex < kMaxSRVCount);
-	/// 上限に達していないかチェックしてassert
-
 	/// freeIndicesに廃棄された番号があればそれを返す
 	if (!freeIndices.empty()) {
 		uint32_t index = freeIndices.back();
@@ -51,6 +48,9 @@ uint32_t SrvManager::Allocate() {
 
 	/// 次回のために番号を1進める
 	nextNewIndex++;
+
+	/// 上限に達していないかチェックしてassert
+	assert(nextNewIndex < kMaxSRVCount);
 
 	/// 上で記録した番号をreturn
 	return index;

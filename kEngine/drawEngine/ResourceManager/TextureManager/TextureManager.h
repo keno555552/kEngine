@@ -1,6 +1,6 @@
 #pragma once
 #include "DirectXCore.h"
-#include "SrvManager.h"
+#include "SrvManager/SrvManager.h"
 #include "BasicResource.h"
 #include "externals/DirectXTex/DirectXTex.h"
 //#include "WinAPI.h"

@@ -162,7 +162,7 @@
     <ClCompile Include="kEngine\drawEngine\drawEngine.cpp">
       <Filter>ソース ファイル\kEngine\DrawEngine</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\driver\config.cpp">
+    <ClCompile Include="kEngine\core\config.cpp">
       <Filter>ソース ファイル\kEngine\core\driver</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\core\DirectXCore.cpp">
@@ -171,7 +171,7 @@
     <ClCompile Include="kEngine\core\DirectXController.cpp">
       <Filter>ソース ファイル\kEngine\core\driver</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\Input\inputManager.cpp">
+    <ClCompile Include="kEngine\core\inputCore.cpp">
       <Filter>ソース ファイル\kEngine\core\Input</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\core\pso\PSO.cpp">
@@ -195,49 +195,49 @@
     <ClCompile Include="kEngine\Sound\soundManager.cpp">
       <Filter>ソース ファイル\kEngine\Sound</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\Camera\DebugCamera.cpp">
+    <ClCompile Include="kEngine\Tool\Camera\DebugCamera.cpp">
       <Filter>ソース ファイル\kEngine\tool</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\mathsUnit\Matrix3x3.cpp">
+    <ClCompile Include="kEngine\Tool\mathsUnit\Matrix3x3.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\mathsUnit\Matrix4x4.cpp">
+    <ClCompile Include="kEngine\Tool\mathsUnit\Matrix4x4.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\mathsUnit\Transform.cpp">
+    <ClCompile Include="kEngine\Tool\mathsUnit\Transform.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\mathsUnit\Vector2.cpp">
+    <ClCompile Include="kEngine\Tool\mathsUnit\Vector2.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\mathsUnit\Vector3.cpp">
+    <ClCompile Include="kEngine\Tool\mathsUnit\Vector3.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\mathsUnit\TransformationMatrix.cpp">
+    <ClCompile Include="kEngine\Tool\mathsUnit\TransformationMatrix.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\StageManager\BaseScene.cpp">
+    <ClCompile Include="kEngine\Tool\StageManager\BaseScene.cpp">
       <Filter>ソース ファイル\kEngine\tool\StageManager</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\StageManager\SceneManager.cpp">
+    <ClCompile Include="kEngine\Tool\StageManager\SceneManager.cpp">
       <Filter>ソース ファイル\kEngine\tool\StageManager</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\TimeManager\TimeManager.cpp">
+    <ClCompile Include="kEngine\Tool\TimeManager\TimeManager.cpp">
       <Filter>ソース ファイル\kEngine\tool</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\core\kEngine.cpp">
       <Filter>ソース ファイル\kEngine</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\PerlinNoise\PerlinNoise.cpp">
+    <ClCompile Include="kEngine\Tool\PerlinNoise\PerlinNoise.cpp">
       <Filter>ソース ファイル\Effect</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\mathsUnit\MathsIncluder.cpp">
+    <ClCompile Include="kEngine\Tool\mathsUnit\MathsIncluder.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\mathsUnit\randomMaker.cpp">
+    <ClCompile Include="kEngine\Tool\mathsUnit\randomMaker.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\StringManage\ConvertString.cpp">
+    <ClCompile Include="kEngine\Tool\StringManage\ConvertString.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\core\pso\shader_compile.cpp">
@@ -258,25 +258,25 @@
     <ClCompile Include="kEngine\drawEngine\ResourceManager\WVPResource.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\Camera\Camera.cpp">
+    <ClCompile Include="kEngine\Tool\Camera\Camera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\GameObject\Object\Object.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\DebugTool\Logger.cpp">
+    <ClCompile Include="kEngine\Tool\DebugTool\Logger.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\driver\WinAPI.cpp">
+    <ClCompile Include="kEngine\core\WinAPI.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\driver\FrameRateLimiter.cpp">
+    <ClCompile Include="kEngine\Utility\FrameRateLimiter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\GameObject\Player\Player.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\MapChip\MapChipField.cpp">
+    <ClCompile Include="kEngine\Tool\MapChip\MapChipField.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\drawEngine\DrawData\ObjectData.cpp">
@@ -312,16 +312,16 @@
     <ClCompile Include="kEngine\GameObject\Object\Corner.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\MapChip\MapChipData.cpp">
+    <ClCompile Include="kEngine\Tool\MapChip\MapChipData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\AnimationSystem\AnimationSystem.cpp">
+    <ClCompile Include="kEngine\Tool\AnimationSystem\AnimationSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\AnimationSystem\AnimationUnit.cpp">
+    <ClCompile Include="kEngine\Tool\AnimationSystem\AnimationUnit.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\AnimationSystem\AnimationEditor.cpp">
+    <ClCompile Include="kEngine\Tool\AnimationSystem\AnimationEditor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\SphereMesh.cpp">
@@ -336,28 +336,28 @@
     <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\CubeMesh.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\crashDecision\crashData.cpp">
+    <ClCompile Include="kEngine\Tool\crashDecision\crashData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\crashDecision\crashDecision.cpp">
+    <ClCompile Include="kEngine\Tool\crashDecision\crashDecision.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\DefaultMenu\DefaultMenu.cpp">
+    <ClCompile Include="kEngine\Tool\DefaultMenu\DefaultMenu.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\StageManager\SceneElement.cpp">
+    <ClCompile Include="kEngine\Tool\StageManager\SceneElement.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\GameObject\Particle\P_Ball\P_Ball.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\driver\SrvManager.cpp">
+    <ClCompile Include="kEngine\Renderer\SrvManager\SrvManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\driver\ImGuiManager.cpp">
+    <ClCompile Include="kEngine\Tool\ImGuiManager\ImGuiManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\driver\IDManager.cpp">
+    <ClCompile Include="kEngine\Manager\IDManager\IDManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\drawEngine\DrawData\CameraForGPU.cpp">
@@ -381,7 +381,7 @@
     <ClCompile Include="kEngine\Data\BlendModeType.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\DebugTool\DebugObject.cpp">
+    <ClCompile Include="kEngine\Tool\DebugTool\DebugObject.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Manager\LightManager\LightManager.cpp">
@@ -408,7 +408,7 @@
     <ClCompile Include="kEngine\Lighting\AeraLight.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\StageManager\BaseSceneFactory.cpp">
+    <ClCompile Include="kEngine\Tool\StageManager\BaseSceneFactory.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\GameObject\CountdownTimer\CountdownTimer.cpp">
@@ -417,7 +417,7 @@
     <ClCompile Include="kEngine\GameObject\StartTimer\StartTimer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\mathsUnit\Vector4.cpp">
+    <ClCompile Include="kEngine\Tool\mathsUnit\Vector4.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="externals\DirectXTex\BC.cpp">
@@ -507,27 +507,30 @@
     <ClCompile Include="externals\imgui\imgui_widgets.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\StageManager\SceneFactory.cpp">
+    <ClCompile Include="kEngine\Tool\StageManager\SceneFactory.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="scenes\CG3_HK_2\SceneCGHK2.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="GAME\scenes\scene1.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="kEngine\tool\mathsUnit\Vector2.h">
+    <ClInclude Include="kEngine\Tool\mathsUnit\Vector2.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\mathsUnit\Vector3.h">
+    <ClInclude Include="kEngine\Tool\mathsUnit\Vector3.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\mathsUnit\Matrix3x3.h">
+    <ClInclude Include="kEngine\Tool\mathsUnit\Matrix3x3.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\mathsUnit\Matrix4x4.h">
+    <ClInclude Include="kEngine\Tool\mathsUnit\Matrix4x4.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\mathsUnit\Transform.h">
+    <ClInclude Include="kEngine\Tool\mathsUnit\Transform.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\Model.h">
@@ -557,7 +560,7 @@
     <ClInclude Include="kEngine\drawEngine\drawEngine.h">
       <Filter>ヘッダー ファイル\kEngine\DrawEngine</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\Input\inputManager.h">
+    <ClInclude Include="kEngine\core\inputCore.h">
       <Filter>ヘッダー ファイル\kEngine\core\Input</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\core\DirectXCore.h">
@@ -566,7 +569,7 @@
     <ClInclude Include="kEngine\core\DirectXController.h">
       <Filter>ヘッダー ファイル\kEngine\core\driver</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\driver\config.h">
+    <ClInclude Include="kEngine\core\config.h">
       <Filter>ヘッダー ファイル\kEngine\core\driver</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\core\pso\PSO.h">
@@ -590,34 +593,34 @@
     <ClInclude Include="kEngine\Sound\soundUnit.h">
       <Filter>ヘッダー ファイル\kEngine\Sound</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\Camera\DebugCamera.h">
+    <ClInclude Include="kEngine\Tool\Camera\DebugCamera.h">
       <Filter>ヘッダー ファイル\kEngine\tool</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\StageManager\SceneManager.h">
+    <ClInclude Include="kEngine\Tool\StageManager\SceneManager.h">
       <Filter>ヘッダー ファイル\kEngine\tool\StageManager</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\StageManager\BaseScene.h">
+    <ClInclude Include="kEngine\Tool\StageManager\BaseScene.h">
       <Filter>ヘッダー ファイル\kEngine\tool\StageManager</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\TimeManager\TimeManager.h">
+    <ClInclude Include="kEngine\Tool\TimeManager\TimeManager.h">
       <Filter>ヘッダー ファイル\kEngine\tool</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\core\kEngine.h">
       <Filter>ヘッダー ファイル\kEngine</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\PerlinNoise\PerlinNoise.h">
+    <ClInclude Include="kEngine\Tool\PerlinNoise\PerlinNoise.h">
       <Filter>ヘッダー ファイル\Effect</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\mathsUnit\MathsIncluder.h">
+    <ClInclude Include="kEngine\Tool\mathsUnit\MathsIncluder.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\mathsUnit\randomMaker.h">
+    <ClInclude Include="kEngine\Tool\mathsUnit\randomMaker.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\mathsUnit\TransformationMatrix.h">
+    <ClInclude Include="kEngine\Tool\mathsUnit\TransformationMatrix.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\StringManage\ConvertString.h">
+    <ClInclude Include="kEngine\Tool\StringManage\ConvertString.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\core\pso\shader_compile.h">
@@ -638,25 +641,25 @@
     <ClInclude Include="kEngine\drawEngine\ResourceManager\WVPResource.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\Camera\Camera.h">
+    <ClInclude Include="kEngine\Tool\Camera\Camera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\GameObject\Object\Object.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\DebugTool\Logger.h">
+    <ClInclude Include="kEngine\Tool\DebugTool\Logger.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\driver\WinAPI.h">
+    <ClInclude Include="kEngine\core\WinAPI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\driver\FrameRateLimiter.h">
+    <ClInclude Include="kEngine\Utility\FrameRateLimiter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\GameObject\Player\Player.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\MapChip\MapChipField.h">
+    <ClInclude Include="kEngine\Tool\MapChip\MapChipField.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\drawEngine\DrawData\ObjectData.h">
@@ -692,16 +695,16 @@
     <ClInclude Include="kEngine\GameObject\Object\Corner.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\MapChip\MapChipData.h">
+    <ClInclude Include="kEngine\Tool\MapChip\MapChipData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\AnimationSystem\AnimationEditor.h">
+    <ClInclude Include="kEngine\Tool\AnimationSystem\AnimationEditor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\AnimationSystem\AnimationSystem.h">
+    <ClInclude Include="kEngine\Tool\AnimationSystem\AnimationSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\AnimationSystem\AnimationUnit.h">
+    <ClInclude Include="kEngine\Tool\AnimationSystem\AnimationUnit.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\SphereMesh.h">
@@ -716,28 +719,28 @@
     <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\CubeMesh.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\crashDecision\crashData.h">
+    <ClInclude Include="kEngine\Tool\crashDecision\crashData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\crashDecision\crashDecision.h">
+    <ClInclude Include="kEngine\Tool\crashDecision\crashDecision.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\DefaultMenu\DefaultMenu.h">
+    <ClInclude Include="kEngine\Tool\DefaultMenu\DefaultMenu.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\StageManager\SceneElement.h">
+    <ClInclude Include="kEngine\Tool\StageManager\SceneElement.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\GameObject\Particle\P_Ball\P_Ball.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\driver\SrvManager.h">
+    <ClInclude Include="kEngine\Renderer\SrvManager\SrvManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\driver\ImGuiManager.h">
+    <ClInclude Include="kEngine\Tool\ImGuiManager\ImGuiManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\driver\IDManager.h">
+    <ClInclude Include="kEngine\Manager\IDManager\IDManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\drawEngine\DrawData\CameraForGPU.h">
@@ -761,7 +764,7 @@
     <ClInclude Include="kEngine\Data\BlendModeType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\DebugTool\DebugObject.h">
+    <ClInclude Include="kEngine\Tool\DebugTool\DebugObject.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Manager\LightManager\LightManager.h">
@@ -788,7 +791,7 @@
     <ClInclude Include="kEngine\Lighting\AeraLight.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\StageManager\BaseSceneFactory.h">
+    <ClInclude Include="kEngine\Tool\StageManager\BaseSceneFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\GameObject\CountdownTimer\CountdownTimer.h">
@@ -797,7 +800,7 @@
     <ClInclude Include="kEngine\GameObject\StartTimer\StartTimer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\mathsUnit\Vector4.h">
+    <ClInclude Include="kEngine\Tool\mathsUnit\Vector4.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="externals\DirectXTex\BC.h">
@@ -1106,10 +1109,13 @@
     <ClInclude Include="externals\assimp\include\assimp\ZipArchiveIOSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\StageManager\SceneFactory.h">
+    <ClInclude Include="kEngine\Tool\StageManager\SceneFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="scenes\CG3_HK_2\SceneCGHK2.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="GAME\scenes\scene1.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

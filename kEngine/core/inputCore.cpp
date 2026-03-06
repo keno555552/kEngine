@@ -1,14 +1,16 @@
-#include "inputManager.h"
+#include "inputCore.h"
 
-void InputManager::Initialize(DirectXCore* directXDirver, TimeManager* timeManager) {
+void InputCore::Initialize(DirectXCore* directXDirver, TimeManager* timeManager) {
 	driver_ = directXDirver;
+	timer = std::make_unique<Timer>();
 	timer->Init0(3, timeManager);
 }
 
-void InputManager::Finalize() {
+void InputCore::Finalize() {
+	timer.reset();
 }
 
-void InputManager::KeysUpdata()   {
+void InputCore::KeysUpdata()   {
 	/// keyboard
 	if (config::GetKeyboardState()) {
 		memcpy(preKeys_, keys_, sizeof keys_);
@@ -46,7 +48,7 @@ void InputManager::KeysUpdata()   {
 	Keys3sUpdata();
 }
 
-void InputManager::Keys3sUpdata() {
+void InputCore::Keys3sUpdata() {
 	///今はいいが,後で3秒更新するにした方がいい
 	if (timer->parameter_ == 0) {
 		CheckIsKeyboardConnet();
@@ -58,22 +60,22 @@ void InputManager::Keys3sUpdata() {
 
 #pragma region keyboard関連
 
-bool InputManager::keyTriggerOn(int key) {
+bool InputCore::keyTriggerOn(int key) {
 	if (!preKeys_[key] && keys_[key]) { return true; }
 	return false;
 }
 
-bool InputManager::keyTriggerOff(int key) {
+bool InputCore::keyTriggerOff(int key) {
 	if (preKeys_[key] && !keys_[key]) { return true; }
 	return false;
 }
 
-bool InputManager::keyIsPush(int key) {
+bool InputCore::keyIsPush(int key) {
 	if (keys_[key]) { return true; }
 	return false;
 }
 
-void InputManager::CheckIsKeyboardConnet() {
+void InputCore::CheckIsKeyboardConnet() {
 	bool flag1 = config::GetKeyboardState();
 	bool flag2 = SUCCEEDED(driver_->GetDirectInput()->GetDeviceStatus(GUID_SysKeyboard));
 
@@ -89,48 +91,48 @@ void InputManager::CheckIsKeyboardConnet() {
 #pragma endregion
 
 #pragma region mouse関連
-int InputManager::mousePosX() {
+int InputCore::mousePosX() {
 	return mousePos_.x;
 }
 
-int InputManager::mousePosY() {
+int InputCore::mousePosY() {
 	return mousePos_.y;
 }
 
-int InputManager::mousePosXIns() {
+int InputCore::mousePosXIns() {
 	return mouse_.lX;;
 }
 
-int InputManager::mousePosYIns() {
+int InputCore::mousePosYIns() {
 	return mouse_.lY;;
 }
 
-bool InputManager::mouseTriggerOn(int key) {
+bool InputCore::mouseTriggerOn(int key) {
 	if (!(preMouse_.rgbButtons[key] & 0x80) && (mouse_.rgbButtons[key] & 0x80)) { return true; }
 	return false;
 }
 
-bool InputManager::mouseTriggerOff(int key) {
+bool InputCore::mouseTriggerOff(int key) {
 	if ((preMouse_.rgbButtons[key] & 0x80) && !(mouse_.rgbButtons[key] & 0x80)) { return true; }
 	return false;
 }
 
-bool InputManager::mouseIsPush(int key) {
+bool InputCore::mouseIsPush(int key) {
 	if (mouse_.rgbButtons[key] & 0x80) { return true; }
 	return false;
 }
 
-int InputManager::mouseScrollSpeed() {
+int InputCore::mouseScrollSpeed() {
 	if (mouse_.lZ > 0) { return  1; }
 	if (mouse_.lZ < 0) { return -1; }
 	return 0;
 }
 
-int InputManager::mouseScrollSpeedOrigin() {
+int InputCore::mouseScrollSpeedOrigin() {
 	return mouse_.lZ;
 }
 
-void InputManager::CheckIsMouseConnet() {
+void InputCore::CheckIsMouseConnet() {
 	bool flag1 = config::GetMouseState();
 	bool flag2 = SUCCEEDED(driver_->GetDirectInput()->GetDeviceStatus(GUID_SysMouse));
 
@@ -148,134 +150,134 @@ void InputManager::CheckIsMouseConnet() {
 
 #pragma region GamePad関連
 
-bool InputManager::gamepadTriggerOn(int key) {
+bool InputCore::gamepadTriggerOn(int key) {
 	if (config::GetGamePadType() == XINPUT) { return gamepadXITriggerOn(XIKeyChange(key)); }
 	if (config::GetGamePadType() == DIRECTINPUT) { return gamepadDITriggerOn(DIKeyChange(key)); }
 	return 0;
 }
 
-bool InputManager::gamepadTriggerOff(int key) {
+bool InputCore::gamepadTriggerOff(int key) {
 	if (config::GetGamePadType() == XINPUT) { return gamepadXITriggerOff(XIKeyChange(key)); }
 	if (config::GetGamePadType() == DIRECTINPUT) { return gamepadDITriggerOff(DIKeyChange(key)); }
 	return 0;
 }
 
-bool InputManager::gamepadIsPush(int key) {
+bool InputCore::gamepadIsPush(int key) {
 	if (config::GetGamePadType() == XINPUT) { return gamepadXIIsPush(XIKeyChange(key)); }
 	if (config::GetGamePadType() == DIRECTINPUT) { return gamepadDIIsPush(DIKeyChange(key)); }
 	return 0;
 }
 
-int InputManager::gamepad4Direction() {
+int InputCore::gamepad4Direction() {
 	if (config::GetGamePadType() == XINPUT) { return gamepadXI4Direction(); }
 	if (config::GetGamePadType() == DIRECTINPUT) { return gamepadDI4Direction(); }
 	return 0;
 }
 
-int InputManager::gamepad4DirectionTriggerOn() {
+int InputCore::gamepad4DirectionTriggerOn() {
 	if (config::GetGamePadType() == XINPUT) { return gamepadXI4DirectionTriggerOn(); }
 	if (config::GetGamePadType() == DIRECTINPUT) { return gamepadDI4DirectionTriggerOn(); }
 	return 0;
 }
 
-int InputManager::gamepad4DirectionTriggerOff() {
+int InputCore::gamepad4DirectionTriggerOff() {
 	if (config::GetGamePadType() == XINPUT) { return gamepadXI4DirectionTriggerOff(); }
 	if (config::GetGamePadType() == DIRECTINPUT) { return gamepadDI4DirectionTriggerOff(); }
 	return 0;
 }
 
-int InputManager::gamepad8Direction() {
+int InputCore::gamepad8Direction() {
 	if (config::GetGamePadType() == XINPUT) { return gamepadXI8Direction(); }
 	if (config::GetGamePadType() == DIRECTINPUT) { return gamepadDI8Direction(); }
 	return 0;
 };
 
 
-int InputManager::gamepad8DirectionTriggerOn() {
+int InputCore::gamepad8DirectionTriggerOn() {
 	if (config::GetGamePadType() == XINPUT) { return gamepadXI8DirectionTriggerOn(); }
 	if (config::GetGamePadType() == DIRECTINPUT) { return gamepadDI8DirectionTriggerOn(); }
 	return 0;
 }
 
-int InputManager::gamepad8DirectionTriggerOff() {
+int InputCore::gamepad8DirectionTriggerOff() {
 	if (config::GetGamePadType() == XINPUT) { return gamepadXI8DirectionTriggerOff(); }
 	if (config::GetGamePadType() == DIRECTINPUT) { return gamepadDI8DirectionTriggerOff(); }
 	return 0;
 }
 
-int InputManager::gamepadDirectionFloat() {
+int InputCore::gamepadDirectionFloat() {
 	if (config::GetGamePadType() == XINPUT) { return gamepadXIDirectionFloat(); }
 	if (config::GetGamePadType() == DIRECTINPUT) { return gamepadDIDirectionFloat(); }
 	return 0;
 }
 
-float InputManager::gamepadLStick01X() {
+float InputCore::gamepadLStick01X() {
 	if (config::GetGamePadType() == XINPUT) { return gamepadXILStick01X(); }
 	if (config::GetGamePadType() == DIRECTINPUT) { return gamepadDILStick01X(); }
 	return 0;
 }
 
-float InputManager::gamepadLStick01Y() {
+float InputCore::gamepadLStick01Y() {
 	if (config::GetGamePadType() == XINPUT) { return gamepadXILStick01Y(); }
 	if (config::GetGamePadType() == DIRECTINPUT) { return gamepadDILStick01Y(); }
 	return 0;
 }
 
-int InputManager::gamepadLStickX() {
+int InputCore::gamepadLStickX() {
 	if (config::GetGamePadType() == XINPUT) { return gamepadXILStickX(); }
 	if (config::GetGamePadType() == DIRECTINPUT) { return gamepadDILStickX(); }
 	return 0;
 }
 
-int InputManager::gamepadLStickY() {
+int InputCore::gamepadLStickY() {
 	if (config::GetGamePadType() == XINPUT) { return gamepadXILStickY(); }
 	if (config::GetGamePadType() == DIRECTINPUT) { return gamepadDILStickY(); }
 	return 0;
 }
 
-float InputManager::gamepadRStick01X() {
+float InputCore::gamepadRStick01X() {
 	if (config::GetGamePadType() == XINPUT) { return gamepadXIRStick01X(); }
 	if (config::GetGamePadType() == DIRECTINPUT) { return gamepadDIRStick01X(); }
 	return 0;
 }
 
-float InputManager::gamepadRStick01Y() {
+float InputCore::gamepadRStick01Y() {
 	if (config::GetGamePadType() == XINPUT) { return gamepadXIRStick01Y(); }
 	if (config::GetGamePadType() == DIRECTINPUT) { return gamepadDIRStick01Y(); }
 	return 0;
 }
 
-int InputManager::gamepadRStickX() {
+int InputCore::gamepadRStickX() {
 	if (config::GetGamePadType() == XINPUT) { return gamepadXIRStickX(); }
 	if (config::GetGamePadType() == DIRECTINPUT) { return gamepadDIRStickX(); }
 	return 0;
 }
 
-int InputManager::gamepadRStickY() {
+int InputCore::gamepadRStickY() {
 	if (config::GetGamePadType() == XINPUT) { return gamepadXIRStickY(); }
 	if (config::GetGamePadType() == DIRECTINPUT) { return gamepadDIRStickY(); }
 	return 0;
 }
 
-float InputManager::gamepadL201() {
+float InputCore::gamepadL201() {
 	if (config::GetGamePadType() == XINPUT) { return gamepadXIL201(); }
 	if (config::GetGamePadType() == DIRECTINPUT) { return gamepadDIL201(); }
 	return 0;
 }
 
-float InputManager::gamepadR201() {
+float InputCore::gamepadR201() {
 	if (config::GetGamePadType() == XINPUT) { return gamepadXIR201(); }
 	if (config::GetGamePadType() == DIRECTINPUT) { return gamepadDIR201(); }
 	return 0;
 }
 
-int InputManager::gamepadL2() {
+int InputCore::gamepadL2() {
 	if (config::GetGamePadType() == XINPUT) { return gamepadXIL2(); }
 	if (config::GetGamePadType() == DIRECTINPUT) { return gamepadDIL2(); }
 	return 0;
 }
 
-int InputManager::gamepadR2() {
+int InputCore::gamepadR2() {
 	if (config::GetGamePadType() == XINPUT) { return gamepadXIR2(); }
 	if (config::GetGamePadType() == DIRECTINPUT) { return gamepadDIR2(); }
 	return 0;
@@ -283,7 +285,7 @@ int InputManager::gamepadR2() {
 
 #pragma region XInput関連
 
-bool InputManager::gamepadXITriggerOn(int key) {
+bool InputCore::gamepadXITriggerOn(int key) {
 	if (key == VK_PAD_LTRIGGER) { 				/// Button[06] = Direct(PS4): L2
 		if (!(XprePadData_.Gamepad.bLeftTrigger > 10) && (XpadData_.Gamepad.bLeftTrigger > 10)) { return true; } else { return false; }
 	}
@@ -293,7 +295,7 @@ bool InputManager::gamepadXITriggerOn(int key) {
 	return (!(XprePadData_.Gamepad.wButtons & key) && (XpadData_.Gamepad.wButtons & key));
 }
 
-bool InputManager::gamepadXITriggerOff(int key) {
+bool InputCore::gamepadXITriggerOff(int key) {
 	if (key == VK_PAD_LTRIGGER) { 				/// Button[06] = Direct(PS4): L2
 		if ((XprePadData_.Gamepad.bLeftTrigger > 10) && !(XpadData_.Gamepad.bLeftTrigger > 10)) { return true; }
 		else { return false; }
@@ -305,7 +307,7 @@ bool InputManager::gamepadXITriggerOff(int key) {
 	return ((XprePadData_.Gamepad.wButtons & key) && !(XpadData_.Gamepad.wButtons & key));
 }
 
-bool InputManager::gamepadXIIsPush(int key) {
+bool InputCore::gamepadXIIsPush(int key) {
 	if (key == VK_PAD_LTRIGGER) { 				/// Button[06] = Direct(PS4): L2
 		if (XpadData_.Gamepad.bLeftTrigger > 10) { return true; }
 		else { return false; }
@@ -317,7 +319,7 @@ bool InputManager::gamepadXIIsPush(int key) {
 	return (XpadData_.Gamepad.wButtons & key);
 }
 
-int InputManager::gamepadXI4Direction() {
+int InputCore::gamepadXI4Direction() {
 	if (XpadData_.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) { return 1; }
 	if (XpadData_.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) { return 2; };
 	if (XpadData_.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) { return 3; };
@@ -325,7 +327,7 @@ int InputManager::gamepadXI4Direction() {
 	return 0;
 }
 
-int InputManager::gamepadXI4DirectionTriggerOn() {
+int InputCore::gamepadXI4DirectionTriggerOn() {
 	int preFlag = -1;
 	int flag = -1;
 
@@ -346,7 +348,7 @@ int InputManager::gamepadXI4DirectionTriggerOn() {
 	return 0;
 }
 
-int InputManager::gamepadXI4DirectionTriggerOff() {
+int InputCore::gamepadXI4DirectionTriggerOff() {
 	int preFlag = -1;
 	int flag = -1;
 
@@ -367,7 +369,7 @@ int InputManager::gamepadXI4DirectionTriggerOff() {
 	return 0;
 }
 
-int InputManager::gamepadXI8Direction() {
+int InputCore::gamepadXI8Direction() {
 	if ((XpadData_.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) &&
 		(XpadData_.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT)) {
 		return 2;
@@ -391,7 +393,7 @@ int InputManager::gamepadXI8Direction() {
 	return 0;
 }
 
-int InputManager::gamepadXI8DirectionTriggerOn() {
+int InputCore::gamepadXI8DirectionTriggerOn() {
 	int preFlag = -1;
 	int flag = -1;
 
@@ -449,7 +451,7 @@ int InputManager::gamepadXI8DirectionTriggerOn() {
 	return 0;
 }
 
-int InputManager::gamepadXI8DirectionTriggerOff() {
+int InputCore::gamepadXI8DirectionTriggerOff() {
 	int preFlag = -1;
 	int flag = -1;
 
@@ -507,11 +509,11 @@ int InputManager::gamepadXI8DirectionTriggerOff() {
 	return 0;
 }
 
-int InputManager::gamepadXIDirectionFloat() {
+int InputCore::gamepadXIDirectionFloat() {
 	return 0;
 }
 
-float InputManager::gamepadXILStick01X() {
+float InputCore::gamepadXILStick01X() {
 	float result = ((float)XpadData_.Gamepad.sThumbLX);
 	if (result > -7000.0f && result < 7000.0f) {
 		return 0.0f;
@@ -522,7 +524,7 @@ float InputManager::gamepadXILStick01X() {
 	return -1.0f;
 }
 
-float InputManager::gamepadXILStick01Y() {
+float InputCore::gamepadXILStick01Y() {
 	float result = ((float)XpadData_.Gamepad.sThumbLY);
 	if (result > -7000.0f && result < 7000.0f) {
 		return 0.0f;
@@ -533,15 +535,15 @@ float InputManager::gamepadXILStick01Y() {
 	return -1.0f;
 }
 
-int InputManager::gamepadXILStickX() {
+int InputCore::gamepadXILStickX() {
 	return XpadData_.Gamepad.sThumbLX;
 }
 
-int InputManager::gamepadXILStickY() {
+int InputCore::gamepadXILStickY() {
 	return XpadData_.Gamepad.sThumbLY;
 }
 
-float InputManager::gamepadXIRStick01X() {
+float InputCore::gamepadXIRStick01X() {
 	float result = ((float)XpadData_.Gamepad.sThumbRX);
 	if (result > -7000.0f && result < 7000.0f) {
 		return 0.0f;
@@ -552,7 +554,7 @@ float InputManager::gamepadXIRStick01X() {
 	return -1.0f;
 }
 
-float InputManager::gamepadXIRStick01Y() {
+float InputCore::gamepadXIRStick01Y() {
 	float result = ((float)XpadData_.Gamepad.sThumbRY);
 	if (result > -7000.0f && result < 7000.0f) {
 		return 0.0f;
@@ -563,33 +565,33 @@ float InputManager::gamepadXIRStick01Y() {
 	return -1.0f;
 }
 
-int InputManager::gamepadXIRStickX() {
+int InputCore::gamepadXIRStickX() {
 	return XpadData_.Gamepad.sThumbRX;
 }
 
-int InputManager::gamepadXIRStickY() {
+int InputCore::gamepadXIRStickY() {
 	return XpadData_.Gamepad.sThumbRY;
 }
 
-float InputManager::gamepadXIL201() {
+float InputCore::gamepadXIL201() {
 	float result = ((float)XpadData_.Gamepad.bLeftTrigger);
 	result /= 255.0f;
 	return result;
 }
 
-float InputManager::gamepadXIR201() {
+float InputCore::gamepadXIR201() {
 	float result = ((float)XpadData_.Gamepad.bRightTrigger);
 	result /= 255.0f;
 	return result;
 }
 
-int InputManager::gamepadXIL2() {
+int InputCore::gamepadXIL2() {
 	float result = ((float)XpadData_.Gamepad.bLeftTrigger);
 	result = result / 255.0f * 65535.0f;
 	return (int)result;
 }
 
-int InputManager::gamepadXIR2() {
+int InputCore::gamepadXIR2() {
 	float result = ((float)XpadData_.Gamepad.bRightTrigger);
 	result = result / 255.0f * 65535.0f;
 	return (int)result;
@@ -616,22 +618,22 @@ int InputManager::gamepadXIR2() {
 /// Button[13] = Direct(PS4): 中央パッド
 
 
-bool InputManager::gamepadDITriggerOn(int key) {
+bool InputCore::gamepadDITriggerOn(int key) {
 	if (!(prePadData_.rgbButtons[key] & 0x80) && (padData_.rgbButtons[key] & 0x80)) { return true; }
 	return false;
 }
 
-bool InputManager::gamepadDITriggerOff(int key) {
+bool InputCore::gamepadDITriggerOff(int key) {
 	if ((prePadData_.rgbButtons[key] & 0x80) && !(padData_.rgbButtons[key] & 0x80)) { return true; }
 	return false;
 }
 
-bool InputManager::gamepadDIIsPush(int key) {
+bool InputCore::gamepadDIIsPush(int key) {
 	if (padData_.rgbButtons[key] & 0x80) { return true; }
 	return false;
 }
 
-int InputManager::gamepadDI4Direction() {
+int InputCore::gamepadDI4Direction() {
 	if (padData_.rgdwPOV[0] == -1) { return 0; }
 	if (padData_.rgdwPOV[0] > 31500 || padData_.rgdwPOV[0] <= 4500) { return 1; }// 0
 	if (padData_.rgdwPOV[0] > 4500 && padData_.rgdwPOV[0] <= 13500) { return 2; }// 9000
@@ -640,7 +642,7 @@ int InputManager::gamepadDI4Direction() {
 	return -1;
 }
 
-int InputManager::gamepadDI4DirectionTriggerOn() {
+int InputCore::gamepadDI4DirectionTriggerOn() {
 	int preFlag = -1;
 	int flag = -1;
 
@@ -669,7 +671,7 @@ int InputManager::gamepadDI4DirectionTriggerOn() {
 	return 0;
 }
 
-int InputManager::gamepadDI4DirectionTriggerOff() {
+int InputCore::gamepadDI4DirectionTriggerOff() {
 	int preFlag = -1;
 	int flag = -1;
 
@@ -697,7 +699,7 @@ int InputManager::gamepadDI4DirectionTriggerOff() {
 	return 0;
 }
 
-int InputManager::gamepadDI8Direction() {
+int InputCore::gamepadDI8Direction() {
 	if (padData_.rgdwPOV[0] == -1) { return 0; }
 	if (padData_.rgdwPOV[0] > 33750 || padData_.rgdwPOV[0] <= 2250) { return 1; }// 0
 	if (padData_.rgdwPOV[0] > 2250 && padData_.rgdwPOV[0] <= 6750) { return 2; }// 4500
@@ -711,7 +713,7 @@ int InputManager::gamepadDI8Direction() {
 }
 
 
-int InputManager::gamepadDI8DirectionTriggerOn() {
+int InputCore::gamepadDI8DirectionTriggerOn() {
 	int preFlag = -1;
 	int flag = -1;
 
@@ -752,7 +754,7 @@ int InputManager::gamepadDI8DirectionTriggerOn() {
 	return 0;
 }
 
-int InputManager::gamepadDI8DirectionTriggerOff() {
+int InputCore::gamepadDI8DirectionTriggerOff() {
 	int preFlag = -1;
 	int flag = -1;
 
@@ -793,11 +795,11 @@ int InputManager::gamepadDI8DirectionTriggerOff() {
 	return 0;
 }
 
-int InputManager::gamepadDIDirectionFloat() {
+int InputCore::gamepadDIDirectionFloat() {
 	return padData_.rgdwPOV[0];
 }
 
-float InputManager::gamepadDILStick01X() {
+float InputCore::gamepadDILStick01X() {
 	float result = ((float)padData_.lX - 32767.0f);
 	if (result > -7000.0f && result < 7000.0f) {
 		return 0.0f;
@@ -808,7 +810,7 @@ float InputManager::gamepadDILStick01X() {
 	return -1.0f;
 }
 
-float InputManager::gamepadDILStick01Y() {
+float InputCore::gamepadDILStick01Y() {
 	float result = -((float)padData_.lY - 32767.0f);
 	if (result > -7000.0f && result < 7000.0f) {
 		return 0.0f;
@@ -819,15 +821,15 @@ float InputManager::gamepadDILStick01Y() {
 	return -1.0f;
 }
 
-int InputManager::gamepadDILStickX() {
+int InputCore::gamepadDILStickX() {
 	return int(padData_.lX - 32767.0f);
 }
 
-int InputManager::gamepadDILStickY() {
+int InputCore::gamepadDILStickY() {
 	return int(padData_.lY - 32767.0f);
 }
 
-float InputManager::gamepadDIRStick01X() {
+float InputCore::gamepadDIRStick01X() {
 	float result = ((float)padData_.lZ - 32767.0f);
 	if (result > -7000.0f && result < 7000.0f) {
 		return 0.0f;
@@ -838,7 +840,7 @@ float InputManager::gamepadDIRStick01X() {
 	return -1.0f;
 }
 
-float InputManager::gamepadDIRStick01Y() {
+float InputCore::gamepadDIRStick01Y() {
 	float result = -((float)padData_.lRz - 32767.0f);
 	if (result > -7000.0f && result < 7000.0f) {
 		return 0.0f;
@@ -849,16 +851,16 @@ float InputManager::gamepadDIRStick01Y() {
 	return -1.0f;
 }
 
-int InputManager::gamepadDIRStickX() {
+int InputCore::gamepadDIRStickX() {
 	return int(padData_.lRz - 32767.0f);
 }
 
-int InputManager::gamepadDIRStickY() {
+int InputCore::gamepadDIRStickY() {
 	return int(padData_.lZ - 32767.0f);
 }
 
 
-float InputManager::gamepadDIL201() {
+float InputCore::gamepadDIL201() {
 	float result = ((float)padData_.lRx);
 	if (result > -7000.0f && result < 7000.0f) {
 		return 0.0f;
@@ -869,7 +871,7 @@ float InputManager::gamepadDIL201() {
 	return -1.0f;
 }
 
-float InputManager::gamepadDIR201() {
+float InputCore::gamepadDIR201() {
 	float result = ((float)padData_.lRy);
 	if (result > -7000.0f && result < 7000.0f) {
 		return 0.0f;
@@ -880,17 +882,17 @@ float InputManager::gamepadDIR201() {
 	return -1.0f;
 }
 
-int InputManager::gamepadDIL2() {
+int InputCore::gamepadDIL2() {
 	return padData_.lRx;
 }
 
-int InputManager::gamepadDIR2() {
+int InputCore::gamepadDIR2() {
 	return padData_.lRy;
 }
 
 #pragma endregion
 
-bool InputManager::CheckIsGamepadConnet() {
+bool InputCore::CheckIsGamepadConnet() {
 	bool hasState = config::GetGamePadState();
 	bool isXInput = CheckXInputDeviceConnected();
 	bool isDInput = SUCCEEDED(driver_->GetDirectInput()->GetDeviceStatus(GUID_Joystick));
@@ -917,7 +919,7 @@ bool InputManager::CheckIsGamepadConnet() {
 	return true;
 }
 
-int InputManager::DIKeyChange(int input) {
+int InputCore::DIKeyChange(int input) {
 	if (input == VK_PAD_A) { return 1; }	/// Button[00] = Direct(PS4): []
 	if (input == VK_PAD_B) { return 2; }	/// Button[01] = Direct(PS4): X
 	if (input == VK_PAD_X) { return 0; }	/// Button[02] = Direct(PS4): 0
@@ -939,7 +941,7 @@ int InputManager::DIKeyChange(int input) {
 }
 
 
-int InputManager::XIKeyChange(int input) {
+int InputCore::XIKeyChange(int input) {
 	if (input == VK_PAD_A) { return XINPUT_GAMEPAD_A; }							/// Button[00] = Direct(PS4): []
 	if (input == VK_PAD_B) { return XINPUT_GAMEPAD_B; }							/// Button[01] = Direct(PS4): X
 	if (input == VK_PAD_X) { return XINPUT_GAMEPAD_X; }							/// Button[02] = Direct(PS4): 0

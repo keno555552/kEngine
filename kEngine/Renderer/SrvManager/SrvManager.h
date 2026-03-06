@@ -47,7 +47,7 @@ public:
 	void SetGraphicsRootDescriptorTable(UINT RootParameterIndex, uint32_t srvIndex);
 
 private:
-	DirectXCore* directXCore_ = nullptr;
+	DirectXCore* directXCore_ = nullptr; //借り
 
 	/// 最大SRV数（最大テクスチャ枚数）
 	static const uint32_t kMaxSRVCount;
@@ -65,4 +65,9 @@ private:
 	uint32_t nextNewIndex = 0;
 
 };
+
+// TODO: Freeはあるが、それを再利用する機能がない。時間があればやる。
+// TODO: SRVヒープのサイズ検査がない。SRVヒープがいっぱいになったらエラーを出すようにする。
+
+
 

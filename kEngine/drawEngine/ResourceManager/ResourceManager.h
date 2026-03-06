@@ -11,7 +11,7 @@
 #include "config.h"
 #include "DrawData/ObjectData.h"
 #include "DrawData/SpriteData.h"
-#include "SrvManager.h"
+#include "SrvManager/SrvManager.h"
 using MaterialID = int;
 
 class ResourceManager

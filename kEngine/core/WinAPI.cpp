@@ -22,7 +22,7 @@ LRESULT CALLBACK WinAPI::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-bool WinAPI::Initialize(const char* kClientTitle, int kClientWidth, int kClientHeight, HINSTANCE hInstance) {
+bool WinAPI::Initialize(const std::string& kClientTitle, int kClientWidth, int kClientHeight, HINSTANCE hInstance) {
 	className_ = ConvertString::SwitchStdStringWstring(kClientTitle);
 	hInstance_ = hInstance;
 	if (!RegisterWindowClass())										return false;
@@ -32,19 +32,19 @@ bool WinAPI::Initialize(const char* kClientTitle, int kClientWidth, int kClientH
 }
 
 void WinAPI::Finalize() const {
-	DestroyWindow(hwnd_);
+	//DestroyWindow(hwnd_);
 	CoUninitialize();
 }
 
 bool WinAPI::ProcessMessage() {
 	MSG msg{};
 
-	if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+	while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
-	}
-	if (msg.message == WM_QUIT) {
-		return false;
+		if (msg.message == WM_QUIT) {
+			return false;
+		}
 	}
 	return true;
 }
@@ -53,7 +53,7 @@ bool WinAPI::RegisterWindowClass() {
 	///windowを登録する
 	WNDCLASS wc{};
 	wc.lpfnWndProc = WindowProc;
-	wc.lpszClassName = L"Window1";
+	wc.lpszClassName = className_.c_str();
 	wc.hInstance = GetModuleHandle(nullptr);
 	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
 
@@ -66,7 +66,7 @@ bool WinAPI::CreateMainWindow(int kClientWidth, int kClientHeight, HINSTANCE hIn
 	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, FALSE);
 
 	hwnd_ = CreateWindow(
-		L"Window1",
+		className_.c_str(),
 		className_.c_str(),
 		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
 		CW_USEDEFAULT,

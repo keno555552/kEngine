@@ -1,13 +1,13 @@
 #pragma once
 #include "DirectXController.h"
-#include "inputManager.h"
+#include "inputCore.h"
 #include "soundManager.h"
-#include "SrvManager.h"
+#include "SrvManager/SrvManager.h"
 #include "drawEngine.h"
 #include "TransformationMatrix.h"
 #include "Vector2.h"
 #include "materialconfig.h"
-#include "tool/TimeManager/TimeManager.h"
+#include "TimeManager/TimeManager.h"
 #include "DrawDataCollector.h"
 #include "CameraManager/CameraManager.h"
 
@@ -188,7 +188,7 @@ public:
 	DrawDataCollector* GetDrawDataCollector() const;
 	DrawEngine* GetDrawEngine() const;
 	SoundManager* GetSoundManager() const;
-	InputManager* GetInputManager() const;
+	InputCore* GetInputManager() const;
 	TimeManager* GetTimeManager()const;
 
 #pragma endregion
@@ -219,7 +219,7 @@ private:
 	std::unique_ptr <DrawEngine> drawEngine{};
 
 	/// ============ 入力関連 ============///
-	std::unique_ptr <InputManager> inputManager{};
+	std::unique_ptr <InputCore> inputManager{};
 
 	/// ============ 音関連 ============///
 	std::unique_ptr <SoundManager> soundManager{};

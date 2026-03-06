@@ -4,7 +4,7 @@
 #include "config.h"
 #include <cassert>
 
-class InputManager
+class InputCore
 {
 public:
 	void Initialize(DirectXCore* directXDirver, TimeManager* timeManager);
@@ -74,7 +74,7 @@ private:
 	XINPUT_STATE XpadData_ = { 0 };
 	XINPUT_STATE XprePadData_ = { 0 };
 
-	Timer* timer = new Timer;
+	std::unique_ptr<Timer> timer{};
 
 private:
 
