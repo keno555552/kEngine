@@ -295,15 +295,15 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Tool\ImGuiManager\ImGuiManager.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\CubeMesh.cpp" />
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\SphereMesh.cpp" />
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\Sprite2DMesh.cpp" />
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\TriangleMesh.cpp" />
+    <ClCompile Include="kEngine\Renderer\Mesh\CubeMesh.cpp" />
+    <ClCompile Include="kEngine\Renderer\Mesh\SphereMesh.cpp" />
+    <ClCompile Include="kEngine\Renderer\Mesh\Sprite2DMesh.cpp" />
+    <ClCompile Include="kEngine\Renderer\Mesh\TriangleMesh.cpp" />
     <ClCompile Include="kEngine\GameObject\Object\Corner.cpp" />
     <ClCompile Include="kEngine\Data\Render\CPUData\CornerData.cpp" />
     <ClCompile Include="kEngine\Utility\FrameRateLimiter.cpp" />
     <ClCompile Include="kEngine\core\WinAPI.cpp" />
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\SimpleSpriteMesh.cpp" />
+    <ClCompile Include="kEngine\Renderer\Mesh\SimpleSpriteMesh.cpp" />
     <ClCompile Include="kEngine\Tool\AnimationSystem\AnimationEditor.cpp" />
     <ClCompile Include="kEngine\Tool\AnimationSystem\AnimationSystem.cpp" />
     <ClCompile Include="kEngine\Tool\AnimationSystem\AnimationUnit.cpp" />
@@ -325,10 +325,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Tool\mathsUnit\Vector4.cpp" />
     <ClCompile Include="kEngine\Tool\PerlinNoise\PerlinNoise.cpp" />
     <ClCompile Include="kEngine\Tool\mathsUnit\randomMaker.cpp" />
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\Model.cpp" />
+    <ClCompile Include="kEngine\Renderer\Mesh\Model.cpp" />
     <ClCompile Include="kEngine\Data\Render\Types\LightModelType.cpp" />
     <ClCompile Include="kEngine\material\MaterialConfig.cpp" />
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\ModelGroup.cpp" />
+    <ClCompile Include="kEngine\Renderer\Mesh\ModelGroup.cpp" />
     <ClCompile Include="kEngine\Tool\mathsUnit\MathsIncluder.cpp" />
     <ClCompile Include="kEngine\Sound\soundUnit.cpp" />
     <ClCompile Include="kEngine\Sound\soundManager.cpp" />
@@ -502,15 +502,15 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Data\Render\GPUData\CameraForGPU.h" />
     <ClInclude Include="kEngine\Manager\IDManager\IDManager.h" />
     <ClInclude Include="kEngine\Tool\ImGuiManager\ImGuiManager.h" />
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\CubeMesh.h" />
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\SphereMesh.h" />
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\Sprite2DMesh.h" />
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\TriangleMesh.h" />
+    <ClInclude Include="kEngine\Renderer\Mesh\CubeMesh.h" />
+    <ClInclude Include="kEngine\Renderer\Mesh\SphereMesh.h" />
+    <ClInclude Include="kEngine\Renderer\Mesh\Sprite2DMesh.h" />
+    <ClInclude Include="kEngine\Renderer\Mesh\TriangleMesh.h" />
     <ClInclude Include="kEngine\GameObject\Object\Corner.h" />
     <ClInclude Include="kEngine\Data\Render\CPUData\CornerData.h" />
     <ClInclude Include="kEngine\Utility\FrameRateLimiter.h" />
     <ClInclude Include="kEngine\core\WinAPI.h" />
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\SimpleSpriteMesh.h" />
+    <ClInclude Include="kEngine\Renderer\Mesh\SimpleSpriteMesh.h" />
     <ClInclude Include="kEngine\Tool\AnimationSystem\AnimationEditor.h" />
     <ClInclude Include="kEngine\Tool\AnimationSystem\AnimationSystem.h" />
     <ClInclude Include="kEngine\Tool\AnimationSystem\AnimationUnit.h" />
@@ -533,10 +533,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Tool\PerlinNoise\PerlinNoise.h" />
     <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\VertexIndex.h" />
     <ClInclude Include="kEngine\Tool\mathsUnit\randomMaker.h" />
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\Model.h" />
+    <ClInclude Include="kEngine\Renderer\Mesh\Model.h" />
     <ClInclude Include="kEngine\Data\Render\Types\LightModelType.h" />
     <ClInclude Include="kEngine\material\MaterialConfig.h" />
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\ModelGroup.h" />
+    <ClInclude Include="kEngine\Renderer\Mesh\ModelGroup.h" />
     <ClInclude Include="kEngine\Tool\mathsUnit\MathsIncluder.h" />
     <ClInclude Include="kEngine\Sound\soundUnit.h" />
     <ClInclude Include="kEngine\Sound\soundManager.h" />

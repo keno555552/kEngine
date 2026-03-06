@@ -226,18 +226,17 @@ std::vector<ModelData> LoadAssimpFile(const std::string& directoryPath, const st
 	return modelGroup;														// 構築したModelDataを返す
 }
 
-//ModelGroup::~ModelGroup() {
-//	if (!modelGroup_.empty()) 		{
-//		for (Model* model : modelGroup_) {
-//			model->ClearAllResource();
-//			delete model;      
-//		}
-//		modelGroup_.clear();   
-//
-//	}
-//}
+ModelGroup::~ModelGroup() {
+	if (!modelGroup_.empty()) 		{
+		for (auto& model : modelGroup_) {
+			if(model){
+				model->ClearAllResource();
+			}
+		}
+	}
+}
 
-void ModelGroup::PushModel(Model* model) {
+void ModelGroup::PushModel(std::shared_ptr<Model> model) {
 	modelGroup_.push_back(model);
 }
 

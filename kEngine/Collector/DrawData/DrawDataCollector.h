@@ -12,7 +12,7 @@
 #include "Data/Render/Queue/RenderData.h"
 #include "GPUData/LightGPU.h"
 #include <cstdint>
-#include "Model.h"
+#include "Mesh/Model.h"
 using ModelID = int;
 
 inline const float layerDepth_Sprite = 0.0001f;

@@ -16,8 +16,8 @@ class ModelGroup
 public:
 	//~ModelGroup();
 
-	Model* GetModel(int handle){return modelGroup_[handle];}
-	void PushModel(Model* model);
+	Model* GetModel(int handle){return modelGroup_[handle].get();}
+	void PushModel(std::shared_ptr<Model> model);
 	void SetModelObj(std::string Path);
 	std::string GetDirectoryPath() { return directoryPath_; }
 	std::string GetObjName_() { return objName_; }
@@ -30,7 +30,7 @@ public:
 private:
 	std::string directoryPath_ = "resources/object/plane";
 	std::string objName_ = "plane.obj";
-	std::vector<Model*> modelGroup_;
+	std::vector<std::shared_ptr<Model>> modelGroup_;
 	std::vector<int> modelHandle_;
 };
 

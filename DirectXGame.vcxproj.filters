@@ -138,10 +138,10 @@
     <ClCompile Include="main.cpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\Model.cpp">
+    <ClCompile Include="kEngine\Renderer\Mesh\Model.cpp">
       <Filter>ソース ファイル\kEngine\DrawEngine\ResourceManager\ObjectResource</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\ModelGroup.cpp">
+    <ClCompile Include="kEngine\Renderer\Mesh\ModelGroup.cpp">
       <Filter>ソース ファイル\kEngine\DrawEngine\ResourceManager\ObjectResource</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\GameObject\Particle\Particle.cpp">
@@ -282,7 +282,7 @@
     <ClCompile Include="kEngine\Data\Render\CPUData\SpriteData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\SimpleSpriteMesh.cpp">
+    <ClCompile Include="kEngine\Renderer\Mesh\SimpleSpriteMesh.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\drawEngine\ResourceManager\TextureManager\TextureManager.cpp">
@@ -318,16 +318,16 @@
     <ClCompile Include="kEngine\Tool\AnimationSystem\AnimationEditor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\SphereMesh.cpp">
+    <ClCompile Include="kEngine\Renderer\Mesh\SphereMesh.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\Sprite2DMesh.cpp">
+    <ClCompile Include="kEngine\Renderer\Mesh\Sprite2DMesh.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\TriangleMesh.cpp">
+    <ClCompile Include="kEngine\Renderer\Mesh\TriangleMesh.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\CubeMesh.cpp">
+    <ClCompile Include="kEngine\Renderer\Mesh\CubeMesh.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Tool\crashDecision\crashData.cpp">
@@ -527,10 +527,10 @@
     <ClInclude Include="kEngine\Tool\mathsUnit\Transform.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\Model.h">
+    <ClInclude Include="kEngine\Renderer\Mesh\Model.h">
       <Filter>ヘッダー ファイル\kEngine\DrawEngine\ResourceManager\ObjectResource</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\ModelGroup.h">
+    <ClInclude Include="kEngine\Renderer\Mesh\ModelGroup.h">
       <Filter>ヘッダー ファイル\kEngine\DrawEngine\ResourceManager\ObjectResource</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\GameObject\Particle\Particle.h">
@@ -659,7 +659,7 @@
     <ClInclude Include="kEngine\Data\Render\CPUData\SpriteData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\SimpleSpriteMesh.h">
+    <ClInclude Include="kEngine\Renderer\Mesh\SimpleSpriteMesh.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\drawEngine\ResourceManager\TextureManager\TextureManager.h">
@@ -695,16 +695,16 @@
     <ClInclude Include="kEngine\Tool\AnimationSystem\AnimationUnit.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\SphereMesh.h">
+    <ClInclude Include="kEngine\Renderer\Mesh\SphereMesh.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\Sprite2DMesh.h">
+    <ClInclude Include="kEngine\Renderer\Mesh\Sprite2DMesh.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\TriangleMesh.h">
+    <ClInclude Include="kEngine\Renderer\Mesh\TriangleMesh.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\CubeMesh.h">
+    <ClInclude Include="kEngine\Renderer\Mesh\CubeMesh.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Tool\crashDecision\crashData.h">
