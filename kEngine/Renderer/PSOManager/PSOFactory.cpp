@@ -7,6 +7,16 @@ void PSOFactory::Initialize(DirectXCore* directXDriver) {
 	shader_compile_->Initialize();
 }
 
+void PSOFactory::Finalize() {
+	rootSignatureList_.clear();
+	rootSignature_.Reset();
+	vertexShaderBlob_.Reset();
+	pixelShaderBlob_.Reset();
+	graphicsPipelineState_.Reset();
+	shader_compile_->Finalize();
+	shader_compile_.reset();
+}
+
 Microsoft::WRL::ComPtr <ID3D12PipelineState> PSOFactory::createPSO(LightModelType lightModelType) {
 	createRootSignature();
 	createInputLayout();

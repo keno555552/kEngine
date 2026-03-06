@@ -24,6 +24,7 @@ class PSOFactory {
 public:
 
 	void Initialize(DirectXCore* directXDriver);
+	void Finalize();
 
 	ID3D12RootSignature* getRootSignature(int handle) { return rootSignatureList_[handle].Get(); }
 

@@ -32,7 +32,7 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 
 	drawEngine = std::make_unique<DrawEngine>();
 	drawEngine->Initialize(dxComm.get(), srvManager.get(), ResourceManager::GetInstance(), drawDataCollector.get());
-	
+
 	soundManager = std::make_unique<SoundManager>();
 	soundManager->Initialize();
 

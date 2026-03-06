@@ -16,6 +16,7 @@ class Shader_compile{
 public:
 
 	void Initialize();
+	void Finalize();
 
 	Microsoft::WRL::ComPtr <IDxcBlob> CompileShader(// CompilerするShaderファイルへのパス
 					  const std::wstring& filePath,

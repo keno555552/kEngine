@@ -20,6 +20,12 @@ void Shader_compile::Initialize() {
 
 }
 
+void Shader_compile::Finalize() {
+	dxcUtils.Reset();
+	dxcCompiler.Reset();
+	includeHandler.Reset();
+}
+
 
 Microsoft::WRL::ComPtr <IDxcBlob> Shader_compile::CompileShader(// CompilerするShaderファイルへのパス
 	const std::wstring& filePath,
