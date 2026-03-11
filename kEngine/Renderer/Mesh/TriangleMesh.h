@@ -1,5 +1,5 @@
 #pragma once
-#include "VertexData.h"
+#include "Data/Render/CPUData/VertexData.h"
 #include "Transform.h"
 #include "TransformationMatrix.h"
 #include "VertexResource.h"

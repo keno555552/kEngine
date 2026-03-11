@@ -7,7 +7,7 @@
 
 #include <vector>
 #include <string>
-#include "ConvertString.h"
+#include "StringManage\ConvertString.h"
 #include "Logger.h"
 
 class WinAPI

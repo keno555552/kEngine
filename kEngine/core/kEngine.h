@@ -3,12 +3,12 @@
 #include "inputCore.h"
 #include "soundManager.h"
 #include "SrvManager/SrvManager.h"
-#include "drawEngine.h"
+#include "drawEngine/drawEngine.h"
 #include "TransformationMatrix.h"
 #include "Vector2.h"
-#include "materialconfig.h"
+#include "Data/Render/CPUData/materialconfig.h"
 #include "TimeManager/TimeManager.h"
-#include "DrawDataCollector.h"
+#include "DrawData/DrawDataCollector.h"
 #include "CameraManager/CameraManager.h"
 
 #ifdef USE_IMGUI
@@ -18,11 +18,11 @@
 #include "Data/Render/CPUData/ObjectData.h"
 #include "Data/Render/CPUData/SpriteData.h"
 //#include "InstanceManager.h"
-#include "ResourceManager/ResourceManager.h"
-#include "TextureManager/TextureManager.h"
+#include "Resource/ResourceManager.h"
+#include "Resource/TextureManager.h"
 #include "LightManager/LightManager.h"
 #include "GPUData/DirectionalLightGPU.h"
-#include "Camera.h"
+#include "Camera/Camera.h"
 
 
 class kEngine

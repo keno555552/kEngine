@@ -2,7 +2,7 @@
 #include "DrawDataCollector.h"
 #include "CameraManager/CameraManager.h"
 #include "LightManager/LightManager.h"
-#include "ResourceManager.h"
+#include "Resource/ResourceManager.h"
 
 
 void DrawDataCollector::Initialize(CameraManager * cm, LightManager * lm) {
@@ -84,7 +84,7 @@ void DrawDataCollector::Collect2D(SpriteData* sprite) {
 		RenderData renderData;
 
 		/// メッシュ設定
-		renderData.mesh = ResourceManager::GetInstance()->simpleSpriteMeshList_[simpleSpriteCounter_];
+		renderData.mesh = ResourceManager::GetInstance()->simpleSpriteMeshList_[simpleSpriteCounter_].get();
 
 		/// マテリアル設定
 		object.materialConfig->MakeUVMatrix();
@@ -200,7 +200,7 @@ void DrawDataCollector::AddSpriteToBucket2D(RenderData& renderData, int meshID) 
 		Logger::Log("[kError]DDC:MaterialID not found in ResourceManager!");
 		return;
 	} else {
-		Material* material = ResourceManager::GetInstance()->materialList_[checker->second].cpuMaterial.get();
+		MaterialForGPU* material = ResourceManager::GetInstance()->materialList_[checker->second].cpuMaterial.get();
 
 		if (material->color.w < 1.0f) {
 
@@ -332,7 +332,7 @@ void DrawDataCollector::AddObjectToBucket3D(RenderData& renderData,int meshID) {
 		Logger::Log("[kError]DDC:MaterialID not found in ResourceManager!");
 		return;
 	} else {
-		Material* material = ResourceManager::GetInstance()->materialList_[checker->second].cpuMaterial.get();
+		MaterialForGPU* material = ResourceManager::GetInstance()->materialList_[checker->second].cpuMaterial.get();
 
 		if (material->color.w < 1.0f) {
 

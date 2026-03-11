@@ -14,7 +14,7 @@ NodeData ReadNode(aiNode* node);
 class ModelGroup
 {
 public:
-	//~ModelGroup();
+	~ModelGroup();
 
 	Model* GetModel(int handle){return modelGroup_[handle].get();}
 	void PushModel(std::shared_ptr<Model> model);

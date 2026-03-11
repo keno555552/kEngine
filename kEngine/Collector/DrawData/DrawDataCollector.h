@@ -3,12 +3,12 @@
 #include <memory>
 #include <map>
 #include <unordered_map>
-#include "materialConfig.h"
+#include "Data/Render/CPUData/materialConfig.h"
 #include "Data/Render/CPUData/ObjectData.h"
 #include "Data/Render/CPUData/SpriteData.h"
-#include "PSOType.h"
+#include "Data/Render/Types/PSOType.h"
 #include "Camera/Camera.h"
-#include "VertexResource.h"
+#include "Mesh/VertexResource.h"
 #include "Data/Render/Queue/RenderData.h"
 #include "GPUData/LightGPU.h"
 #include <cstdint>

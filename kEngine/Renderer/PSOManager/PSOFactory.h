@@ -16,7 +16,7 @@
 #include "config.h"
 #include <vector>
 
-#include "ConvertString.h"
+#include "StringManage/ConvertString.h"
 
 #include "ShaderManager/shader_compile.h"
 

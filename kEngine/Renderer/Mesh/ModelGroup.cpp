@@ -92,7 +92,7 @@ std::vector<ModelData> LoadMuitObjFile(const std::string& directoryPath, const s
 			normal.z *= -1.0f;
 			normals.push_back(normal);
 		} else if (identifier == "f") {	/// 面は三角形限定。その他は未対応
-			VertexData triangle[3];												// 左右手座標形転換用(->左)
+			VertexData triangle[3]{};												// 左右手座標形転換用(->左)
 			for (int faceVertex = 0; faceVertex < 3; faceVertex++) {
 				std::string vertexDeinition;
 				s >> vertexDeinition;
@@ -228,12 +228,13 @@ std::vector<ModelData> LoadAssimpFile(const std::string& directoryPath, const st
 
 ModelGroup::~ModelGroup() {
 	if (!modelGroup_.empty()) 		{
-		for (auto& model : modelGroup_) {
+		for (auto model : modelGroup_) {
 			if(model){
 				model->ClearAllResource();
 			}
 		}
 	}
+	modelGroup_.clear();
 }
 
 void ModelGroup::PushModel(std::shared_ptr<Model> model) {
