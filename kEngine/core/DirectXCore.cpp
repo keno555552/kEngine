@@ -4,7 +4,7 @@
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 
-#include "ConvertString.h"
+#include "StringManage/ConvertString.h"
 
 #pragma region Input
 
@@ -481,29 +481,23 @@ void DirectXCore::Finalize() {
 	}
 
 	// --- Device & DXGI objects (must be last) ---
-	/// リソースリークチェック
-	//ID3D12DebugDevice* debugDevice;
-	//if (SUCCEEDED(device->QueryInterface(IID_PPV_ARGS(&debugDevice)))) {
-	//	debugDevice->ReportLiveDeviceObjects(D3D12_RLDO_DETAIL);
-	//}
 
 	if (device) { device.Reset(); }
 	if (useAdapter) { useAdapter.Reset(); }
 	if (dxgiFactory) { dxgiFactory.Reset(); }
 
-
 #ifdef _DEBUG
 
-	//IDXGIDebug1* debug;
-	////if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))) {
+	IDXGIDebug1* debug;
 	//if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))) {
-	//	//debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);///また未解放要素がある
-	//	debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_DETAIL);
-	//	debug->ReportLiveObjects(DXGI_DEBUG_APP, DXGI_DEBUG_RLO_ALL);
-	//	debug->ReportLiveObjects(DXGI_DEBUG_D3D12, DXGI_DEBUG_RLO_ALL);
-	//
-	//	debug->Release();
-	//}
+	if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))) {
+		//debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);///また未解放要素がある
+		//debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_DETAIL);
+		debug->ReportLiveObjects(DXGI_DEBUG_APP, DXGI_DEBUG_RLO_ALL);
+		//debug->ReportLiveObjects(DXGI_DEBUG_D3D12, DXGI_DEBUG_RLO_ALL);
+	
+		debug->Release();
+	}
 	/// デバッグレイヤーの解放
 	if (debugController)		debugController.Reset();
 #endif
