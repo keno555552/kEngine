@@ -40,6 +40,7 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 
 	inputManager = std::make_unique<InputCore>();
 	inputManager->Initialize(dxComm.get(), timeManager.get());
+
 }
 
 void kEngine::Finalize() {
