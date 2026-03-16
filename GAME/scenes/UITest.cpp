@@ -76,6 +76,11 @@ UITest::UITest(kEngine* system) {
 	ground_->mainPosition.transform.scale = Vector3(50.0f, 0.1f, 50.0f);
 	ground_->mainPosition.transform.translate = Vector3(0.0f, -1.0f, 0.0f);
 
+	box_ = std::make_unique<Object>();
+	box_->IntObject(system_);
+	box_->CreateDefaultData();
+	box_->modelHandle_ = config::default_Cube_MeshBufferHandle_;
+	box_->objectParts_[0].materialConfig->textureHandle = whiteTextureHandle_;
 }
 
 UITest::~UITest() {
@@ -102,6 +107,15 @@ void UITest::Update() {
 
 	ground_->Update(usingCamera_);
 
+	;
+
+	Ray mouseRay = usingCamera_->ScreenPointToRay(system_->GetMousePosVector2());
+
+	AABB box;
+	box.min = { -0.5f, -0.5f, -0.5f };
+	box.max = { 0.5f,  0.5f,  0.5f };
+
+	crashDecision(box, mouseRay) == true ? isHit = true : isHit = false;
 
 	if (system_->GetTriggerOn(DIK_0)) {
 		if (useDebugCamera)useDebugCamera = false;
@@ -123,48 +137,12 @@ void UITest::Draw() {
 	/// 実体処理
 	skydome_->Draw();
 	ground_->Draw();
+	box_->Draw();
 
 #ifdef USE_IMGUI
 	/// ImGui処理
 	ImGuiPart();
 #endif
-}
-
-
-void UITest::InitNormalLight() {
-	light1_->ableLight = true;
-	light1_->direction = { -0.5f, -1.0f, -0.3f };
-	light1_->color = { 1.0f, 1.0f, 1.0f };
-	light1_->intensity = 1.0f;
-
-	light2_->ableLight = true;
-	light2_->lightingType = LightingType::PointLight;
-	light2_->position = { 3.0f, 1.0f, 0.0f };
-	light2_->range = 10.0f;
-	light2_->color = { 1.0f, 0.2f, 0.2f };
-	light2_->intensity = 2.0f;
-
-	light3_->ableLight = true;
-	light3_->lightingType = LightingType::SpotLight;
-	light3_->position = { 0.0f, 4.0f, 0.0f };   // 在物體正上方
-	light3_->direction = { 0.0f, -1.0f, 0.0f };  // 往下照
-	light3_->angle = 0.34906585f;
-	light3_->range = 12.0f;
-	light3_->color = { 0.3f, 0.3f, 1.0f };   // 藍光
-	light3_->intensity = 3.0f;
-
-	areaLight_->ableLight = true;
-	areaLight_->lightingType = LightingType::AreaLight;
-	areaLight_->position = { 0.0f, 2.0f, 0.0f };
-	areaLight_->right = { 1.0f, 0.0f, 0.0f };
-	areaLight_->up = { 0.0f,  0.0f, 1.0f };
-	areaLight_->width = 1.0f;
-	areaLight_->height = 1.0f;
-	areaLight_->color = { 1.0f, 0.9f, 0.7f }; // 暖色光
-	areaLight_->intensity = 5.0f;
-	areaLight_->range = 10.0f;
-
-	areaLight2_->ableLight = false;
 }
 
 void UITest::CameraPart() {
@@ -187,6 +165,10 @@ void UITest::CameraPart() {
 void UITest::ImGuiPart() {
 	ImGui::Begin("DebugCamera");
 	ImGui::Checkbox("isUse", &useDebugCamera);
+	ImGui::End();
+
+	ImGui::Begin("HitCheck");
+	ImGui::Checkbox("isMouseHitAABB", &isHit);
 	ImGui::End();
 }
 #endif 

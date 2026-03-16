@@ -2,6 +2,9 @@
 #include <Math.h>
 #include <algorithm>
 #include "MathsIncluder.h"
+#define M_PI 3.14159265358979323846f
+
+#include "Camera/camera.h"
 #include "crashData.h"
 
 
@@ -160,13 +163,22 @@ bool crashDecision(const Sphere& s1, const Sphere& s2);
 ///// <returns>isHit</returns>
 //bool crashDecision(const AABB& aabb1, const Sphere& sphere);
 //
-///// <summary>
-///// AABB & Segment Hit Decision
-///// </summary>
-///// <param name="s1">AABB</param>
-///// <param name="s2">Sphere</param>
-///// <returns>isHit</returns>
-//bool crashDecision(const AABB& aabb1, const Segment& segment);
+/// <summary>
+/// AABB & Segment Hit Decision
+/// </summary>
+/// <param name="s1">AABB</param>
+/// <param name="s2">Sphere</param>
+/// <returns>isHit</returns>
+bool crashDecision(const AABB& aabb1, const Segment& lineBase);
+
+
+/// <summary>
+/// Ray & AABB Hit Decision
+/// </summary>
+/// <param name="ray">Ray</param>
+/// <param name="aabb">AABB</param>
+/// <returns>isHit</returns>
+bool crashDecision(const AABB& aabb, const Ray& ray);
 
 #pragma endregion
 

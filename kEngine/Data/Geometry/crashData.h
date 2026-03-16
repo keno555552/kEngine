@@ -7,6 +7,12 @@ struct Ray {
 	Vector3 direction;
 };
 
+/// 線分
+struct Segment{
+	Vector3 origin; //<<< 始点
+	Vector3 diff;   //<<< 終点への差分ベクトル
+};
+
 /// 球体
 typedef struct Sphere {
 	Vector3 center;

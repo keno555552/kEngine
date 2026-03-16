@@ -46,24 +46,13 @@ private:
 	/// =========== ゲームオブジェクト ==========///
 	std::unique_ptr<Object> skydome_ = nullptr;
 	std::unique_ptr<Object> ground_ = nullptr;
-
+	std::unique_ptr<Object> box_ = nullptr;
 
 	/// =============== フラグ ================///
 	bool useDebugCamera = false;
 
-	int isBlinn_Phong = true;
+	bool isHit = false;
 
-	int textNumber = 0;
-	bool isShowCenterPoint = false;
-	bool isShowCenterNumber = false;
-
-	int lightMode = 0;
-	bool isNormalLight = true;
-	bool isMultiPointLight = false;
-	bool isMultiSpotLight = false;
-	bool isMultiAreaLight = false;
-
-	void InitNormalLight();
 private:
 	/// ============= シーン内命令 =============///
 	void CameraPart();
