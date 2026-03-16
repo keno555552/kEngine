@@ -10,8 +10,11 @@
 class SceneManager {
 public:
 
-	static void Initialize(kEngine* system);
 	static SceneManager& GetInstance();
+	~SceneManager() = default;
+
+	void Initialize(kEngine* system);
+	void Finalize();
 
 	/// 複製禁止
 	SceneManager(const SceneManager&) = delete;
@@ -35,10 +38,9 @@ private:
 
 
 private:
-	static SceneManager* sceneManager_;
+	static std::unique_ptr <SceneManager> sceneManager_;
 
-	SceneManager(kEngine* system);
-	~SceneManager();
+	SceneManager() = default;
 private:
 	std::unique_ptr <BaseScene> sceneUsing_ = nullptr;
 	std::unique_ptr <BaseScene> sceneOld_ = nullptr;
