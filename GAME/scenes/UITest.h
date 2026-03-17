@@ -2,22 +2,28 @@
 #include "BaseScene.h"
 #include "Object\Object.h"
 #include "Object\Sprite.h"
+#include "Lighting\Light.h"
 #include "Camera\DebugCamera.h"
-#include "Player\Player.h"
 
-class Effect1 :public BaseScene
+class UITest : public BaseScene
 {
 public:
-	Effect1(kEngine* system);
-	~Effect1();
+	UITest(kEngine* system);
+	~UITest();
+
 	void Update() override;
 	void Draw() override;
 
-	void CameraPart();
-	void ImguiPart();
-
 private:
 	kEngine* system_ = nullptr;				// 借り
+
+	/// ============= ライト関連 ==============///
+	std::unique_ptr<Light> light1_ = nullptr;
+	std::unique_ptr<Light> light2_ = nullptr;
+	std::unique_ptr<Light> light3_ = nullptr;
+	std::unique_ptr<AreaLight> areaLight_ = nullptr;
+	std::unique_ptr<AreaLight> areaLight2_ = nullptr;
+
 
 	/// ============== カメラ関連 ==============///
 	/// ステージカメラ(mainカメラ)
@@ -30,17 +36,32 @@ private:
 	/// =========== リソースハンドル ============///
 	/// モデルハンドル
 	int skydomeModelHandle_ = 0;
-	int sphereModelHandle_ = 0;
 
 	/// テキスチャーハンドル
-	int boxTextureHandle_ = 0;
+	int whiteTextureHandle_ = 0;
+
+	/// サントラハンドル
+	int soundHandle_ = 0;
 
 	/// =========== ゲームオブジェクト ==========///
 	std::unique_ptr<Object> skydome_ = nullptr;
-	std::unique_ptr<Object> plane_[200];
+	std::unique_ptr<Object> ground_ = nullptr;
+	std::unique_ptr<Object> box_ = nullptr;
 
-
-	/// =============== フラグ ===============///
+	/// =============== フラグ ================///
 	bool useDebugCamera = false;
+
+	bool isHit = false;
+
+private:
+	/// ============= シーン内命令 =============///
+	void CameraPart();
+#ifdef USE_IMGUI
+	void ImGuiPart();
+	void SelectLightMode();
+#endif
+
+
+
 };
 

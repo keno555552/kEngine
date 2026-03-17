@@ -1,12 +1,12 @@
 #include "SceneManager.h"
 
-SceneManager* SceneManager::sceneManager_ = nullptr;
+std::unique_ptr <SceneManager> SceneManager::sceneManager_ = nullptr;
 
-SceneManager::SceneManager(kEngine* system)
-	: system_(system) 
-{
+void SceneManager::Initialize(kEngine* system) {
+	system_ = system;
 	sceneFactory_ = std::make_unique<SceneFactory>(system);
-	sceneUsingNameHandle_ = "CGHK2";
+	//sceneUsingNameHandle_ = "CGHK2";
+	sceneUsingNameHandle_ = "UITest";
 
 	helperTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/texture/helper.png");
 	helperSprite_ = std::make_unique <SimpleSprite>();
@@ -19,7 +19,7 @@ SceneManager::SceneManager(kEngine* system)
 	defaultMenu_ = std::make_unique <DefaultMenu>(system_);
 }
 
-SceneManager::~SceneManager() {
+void SceneManager::Finalize() {
 	sceneUsing_.reset();
 	sceneOld_.reset();
 	sceneFactory_.reset();
@@ -27,15 +27,10 @@ SceneManager::~SceneManager() {
 	helperSprite_.reset();
 }
 
-void SceneManager::Initialize(kEngine* system) {
-
-	if (!sceneManager_) {
-		sceneManager_ = new SceneManager(system);
-	}
-
-}
-
 SceneManager& SceneManager::GetInstance() {
+	if (!sceneManager_) {
+		sceneManager_.reset(new SceneManager);
+	}
 	return *sceneManager_;
 }
 
@@ -129,35 +124,35 @@ void SceneManager::ClearStage() {
 #ifdef USE_IMGUI
 void SceneManager::ImGuiPart() {
 	{
-		float fps = system_->GetFPS();
-		float fps1s = system_->GetFPSPerSecond();
-		float deltaTime = system_->GetDeltaTime();
-		ImGui::Begin("FPS");
-		ImGui::InputFloat("FPS", &fps);
-		ImGui::InputFloat("FPS_1s", &fps1s);
-		ImGui::InputFloat("deltaTime", &deltaTime);
-		ImGui::End();
+		//float fps = system_->GetFPS();
+		//float fps1s = system_->GetFPSPerSecond();
+		//float deltaTime = system_->GetDeltaTime();
+		//ImGui::Begin("FPS");
+		//ImGui::InputFloat("FPS", &fps);
+		//ImGui::InputFloat("FPS_1s", &fps1s);
+		//ImGui::InputFloat("deltaTime", &deltaTime);
+		//ImGui::End();
 	}
 	{
-		ImGui::Begin("MenuTest");
-		if (defaultMenu_->isClicked()) {
-			ImGui::Text("IsClicked: True");
-		} else {
-			ImGui::Text("IsClicked: False");
-		}
-
-		if (defaultMenu_->IsRetry()) {
-			ImGui::Text("IsRetry: True");
-		} else {
-			ImGui::Text("IsRetry: False");
-		}
-
-		if (defaultMenu_->IsBack()) {
-			ImGui::Text("IsBack: True");
-		} else {
-			ImGui::Text("IsBack: False");
-		}
-		ImGui::End();
+		//ImGui::Begin("MenuTest");
+		//if (defaultMenu_->isClicked()) {
+		//	ImGui::Text("IsClicked: True");
+		//} else {
+		//	ImGui::Text("IsClicked: False");
+		//}
+		//
+		//if (defaultMenu_->IsRetry()) {
+		//	ImGui::Text("IsRetry: True");
+		//} else {
+		//	ImGui::Text("IsRetry: False");
+		//}
+		//
+		//if (defaultMenu_->IsBack()) {
+		//	ImGui::Text("IsBack: True");
+		//} else {
+		//	ImGui::Text("IsBack: False");
+		//}
+		//ImGui::End();
 	}
 }
 #endif

@@ -18,7 +18,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	system = std::make_unique<kEngine>();
 	system->Initialize(kWindowTitle, kWindowWidth, kWindowHeight);
 
-	SceneManager::Initialize(system.get());
+	SceneManager::GetInstance().Initialize(system.get());
 
 	///========================Main処理=====================///
 	while (system->ProcessMessage() && kEngine::GameOn()) {
@@ -34,6 +34,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		system->EndFrame();
 
 	}
+	SceneManager::GetInstance().Finalize();
 	system->Finalize();
 	return 0;
 }
