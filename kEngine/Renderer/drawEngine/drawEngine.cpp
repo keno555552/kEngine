@@ -108,7 +108,7 @@ void DrawEngine::Finalize() {
 	psoList_.clear();
 
 	pso_->Finalize();
-	delete pso_;
+	pso_.reset();
 
 	tile2DWVPResource_->ClearResource();
 	tile3DWVPResource_->ClearResource();

@@ -3,6 +3,7 @@
 #include "externals/DirectXTex/DirectXTex.h"
 #include "externals/DirectXTex/d3dx12.h"
 #include <vector>
+#include <memory>
 #include "Config.h"
 #include "PSOManager/PSOFactory.h"
 #include "Resource/ResourceManager.h"
@@ -67,7 +68,7 @@ public:
 
 private:
 	
-	PSOFactory* pso_ = new PSOFactory;
+	std::unique_ptr<PSOFactory> pso_ = std::make_unique<PSOFactory>();
 	ResourceManager* resourceManager_{};
 	DirectXCore* directXDriver_{};					/*依存*/
 	ID3D12GraphicsCommandList* commandList_{};		/*依存*/
