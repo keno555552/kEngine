@@ -23,12 +23,6 @@ void ResourceManager::Initialize(DirectXCore* device) {
 
 void ResourceManager::Finalize() {
 
-	if (!materialResourceList_.empty()) {
-		for (auto& ptr : materialResourceList_) {
-			ptr->ClearResource();
-			ptr.reset();
-		}
-	}
 	materialResourceList_.clear();
 
 	meshBufferList_.clear();

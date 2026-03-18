@@ -69,7 +69,7 @@ public:
 private:
 	
 	std::unique_ptr<PSOFactory> pso_ = std::make_unique<PSOFactory>();
-	ResourceManager* resourceManager_{};
+	ResourceManager* resourceManager_{};			/*依存*/
 	DirectXCore* directXDriver_{};					/*依存*/
 	ID3D12GraphicsCommandList* commandList_{};		/*依存*/
 	SrvManager* srvManager_{};						/*依存*/
@@ -112,14 +112,14 @@ private:
 	std::vector<int> commonTextureSRVMap_;
 	std::vector<int> modelTextureSRVMap_;
 	int defaultTextureHandle_ = 0;						// white5x5
-	//Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilResource = nullptr;
-	ID3D12Resource* depthStencilResource = nullptr;			// ResourceManagerで作るから、ここではポインタだけもらう
+	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilResource = nullptr;
+	//ID3D12Resource* depthStencilResource = nullptr;			// ResourceManagerで作るから、ここではポインタだけもらう
 
 
 	///Lighting関連
 	D3D12_GPU_DESCRIPTOR_HANDLE lightListSrvHandleGPU_{};
 	std::unique_ptr <BasicResource> lightBuffer_;
-	LightGPU* lightListData_ = nullptr;
+	LightGPU* lightListData_ = nullptr;                  // 受け皿
 
 	uint32_t lightCount_ = 0;
 
@@ -131,7 +131,7 @@ private:
 	int instance3DCounter_ = 0;
 
 	/// カメラ関連
-	CameraForGPU* cameraPtr_ = nullptr;                  // CameraForGPU構造体へのポインタ
+	CameraForGPU* cameraPtr_ = nullptr;                  // 受け皿
 	std::unique_ptr <BasicResource> cameraBuffer_;
 
 private:
