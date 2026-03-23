@@ -370,5 +370,35 @@ bool crashDecision(const AABB& aabb, const Ray& ray) {
 	return true;
 }
 
+bool crashDecision(const Sphere& sphere, const Ray& ray, float* tOut) {
+	Sphere sphereCopy = sphere;
+	Ray rayCopy = ray;
+
+	Vector3 oc = rayCopy.origin - sphereCopy.center;
+
+	float a = Dot(ray.direction, ray.direction);
+	float b = 2.0f * Dot(oc, ray.direction);
+	float c = Dot(oc, oc) - sphere.radius * sphere.radius;
+
+	float discriminant = b * b - 4.0f * a * c;
+	if (discriminant < 0.0f)
+		return false;
+
+	float sqrtD = std::sqrt(discriminant);
+
+	float t1 = (-b - sqrtD) / (2.0f * a);
+	float t2 = (-b + sqrtD) / (2.0f * a);
+
+	float t = -1.0f;
+	if (t1 >= 0.0f) t = t1;
+	else if (t2 >= 0.0f) t = t2;
+	else return false;
+
+	if (tOut) *tOut = t;
+
+	return true;
+
+}
+
 
 

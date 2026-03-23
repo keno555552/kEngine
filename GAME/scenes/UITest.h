@@ -4,6 +4,8 @@
 #include "Object\Sprite.h"
 #include "Lighting\Light.h"
 #include "Camera\DebugCamera.h"
+#include "GAME\Object\DetailButton\DetailButton.h"
+#include "GAME\Object\Panel\Panel.h"
 
 class UITest : public BaseScene
 {
@@ -48,17 +50,21 @@ private:
 	std::unique_ptr<Object> ground_ = nullptr;
 	std::unique_ptr<Object> box_ = nullptr;
 
+	std::unique_ptr<DetailButton> detailButton_ = nullptr;
+	std::unique_ptr<Panel> panel_ = nullptr;
+
 	/// =============== フラグ ================///
 	bool useDebugCamera = false;
 
 	bool isHit = false;
+
+	bool isPress_ = false;
 
 private:
 	/// ============= シーン内命令 =============///
 	void CameraPart();
 #ifdef USE_IMGUI
 	void ImGuiPart();
-	void SelectLightMode();
 #endif
 
 

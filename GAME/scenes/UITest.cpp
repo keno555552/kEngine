@@ -61,7 +61,7 @@ UITest::UITest(kEngine* system) {
 
 	/// =========== リソースロード ============///
 	skydomeModelHandle_ = system_->SetModelObj("./kEngine/EngineAssets/TemplateResource/object/skydome/skydome.obj");
-	
+
 	whiteTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/white5x5.png");
 
 	skydome_ = std::make_unique<Object>();
@@ -79,8 +79,17 @@ UITest::UITest(kEngine* system) {
 	box_ = std::make_unique<Object>();
 	box_->IntObject(system_);
 	box_->CreateDefaultData();
-	box_->modelHandle_ = config::default_Cube_MeshBufferHandle_;
+	box_->modelHandle_ = config::default_Sphere_MeshBufferHandle_;
 	box_->objectParts_[0].materialConfig->textureHandle = whiteTextureHandle_;
+	box_->mainPosition.transform.scale = Vector3(0.5f, 0.5f, 0.5f);
+	box_->mainPosition.transform.translate = Vector3(0.0f, 0.0f, 0.0f);
+
+
+	detailButton_ = std::make_unique<DetailButton>(system_);
+	detailButton_->SetButton({ 100.0f,100.0f }, 200.0f, 80.0f);
+
+	panel_ = std::make_unique<Panel>(system_);
+	panel_->SetPanel({ 720.0f,300.0f }, 500.0f, 500.0f);
 }
 
 UITest::~UITest() {
@@ -95,6 +104,8 @@ UITest::~UITest() {
 
 	ground_.reset();
 	skydome_.reset();
+	box_.reset();
+	detailButton_.reset();
 }
 
 
@@ -107,15 +118,17 @@ void UITest::Update() {
 
 	ground_->Update(usingCamera_);
 
-	;
+	detailButton_->Update();
+
+	panel_->Update();
 
 	Ray mouseRay = usingCamera_->ScreenPointToRay(system_->GetMousePosVector2());
 
-	AABB box;
-	box.min = { -0.5f, -0.5f, -0.5f };
-	box.max = { 0.5f,  0.5f,  0.5f };
+	Sphere target;
+	target.center = box_->mainPosition.transform.translate;
+	target.radius = 0.5f;
 
-	crashDecision(box, mouseRay) == true ? isHit = true : isHit = false;
+	crashDecision(target, mouseRay) == true ? isHit = true : isHit = false;
 
 	if (system_->GetTriggerOn(DIK_0)) {
 		if (useDebugCamera)useDebugCamera = false;
@@ -130,6 +143,28 @@ void UITest::Update() {
 		system_->SoundPlaySE(soundHandle_, 0.5f);
 	}
 
+	/// Panelのロジック処理
+	if (isPress_) {
+		if (panel_->GetIsEnd()) {
+			panel_->SetOpen();
+		}
+	} else {
+		if (panel_->GetIsNormal()) {
+			panel_->SetClose();
+		}
+	}
+	///// Panelのロジック処理
+	//if (isHit) {
+	//	if (panel_->GetIsEnd()) {
+	//		panel_->SetOpen();
+	//	}
+	//} else {
+	//	if (panel_->GetIsNormal()) {
+	//		panel_->SetClose();
+	//	}
+	//}
+
+
 }
 
 void UITest::Draw() {
@@ -138,6 +173,8 @@ void UITest::Draw() {
 	skydome_->Draw();
 	ground_->Draw();
 	box_->Draw();
+	detailButton_->Render();
+	panel_->Render();
 
 #ifdef USE_IMGUI
 	/// ImGui処理
@@ -169,6 +206,18 @@ void UITest::ImGuiPart() {
 
 	ImGui::Begin("HitCheck");
 	ImGui::Checkbox("isMouseHitAABB", &isHit);
+	ImGui::End();
+
+	bool isPress = detailButton_->GetIsPress();
+
+	ImGui::Begin("DetailButton");
+	ImGui::SliderFloat3("Position", &detailButton_->mainPosition.transform.translate.x, 0.0f, 500.0f);
+	ImGui::Checkbox("isClicked", &isPress);
+	ImGui::End();
+	isPress_ = isPress;
+
+	ImGui::Begin("Panel");
+	ImGui::SliderFloat3("Position", &panel_->mainPosition.transform.translate.x, 0.0f, 500.0f);
 	ImGui::End();
 }
 #endif 

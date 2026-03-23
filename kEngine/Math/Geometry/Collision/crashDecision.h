@@ -5,7 +5,7 @@
 #define M_PI 3.14159265358979323846f
 
 #include "Camera/camera.h"
-#include "crashData.h"
+#include "CrashData/crashIncluder.h"
 
 
 /// <summary>
@@ -179,6 +179,15 @@ bool crashDecision(const AABB& aabb1, const Segment& lineBase);
 /// <param name="aabb">AABB</param>
 /// <returns>isHit</returns>
 bool crashDecision(const AABB& aabb, const Ray& ray);
+
+
+/// <summary>
+/// Ray & AABB Hit Decision
+/// </summary>
+/// <param name="ray">Ray</param>
+/// <param name="aabb">AABB</param>
+/// <returns>isHit</returns>
+bool crashDecision(const Sphere& sphere, const Ray& ray, float* tOut = nullptr);
 
 #pragma endregion
 
