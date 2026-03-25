@@ -533,7 +533,13 @@ Matrix4x4 MakeAffineMatrix(Vector3 scale, Vector3 rotate, Vector3 translate) {
 }
 
 Matrix4x4 MatrixMix(Matrix4x4* matrix1, Matrix4x4* matrix2, Matrix4x4* matrix3, Matrix4x4* matrix4) {
-	if (matrix4 == nullptr) { return Matrix4x4{ *matrix1 * *matrix2 * *matrix3 }; } else if (matrix3 == nullptr) { return Matrix4x4{ *matrix1 * *matrix2 }; } else { return Matrix4x4{ *matrix1 * *matrix2 * *matrix3 * *matrix4 }; }
+	if (matrix4 == nullptr) { 
+		return Matrix4x4{ *matrix1 * *matrix2 * *matrix3 }; 
+	} else if (matrix3 == nullptr) {
+		return Matrix4x4{ *matrix1 * *matrix2 }; 
+	} else {
+		return Matrix4x4{ *matrix1 * *matrix2 * *matrix3 * *matrix4 }; 
+	}
 }
 
 /////////////////////////////////////////////////////////////////

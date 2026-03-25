@@ -252,6 +252,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="kEngine\Data\Kinematics\Types\CircleMotionPlane.cpp" />
+    <ClCompile Include="kEngine\Math\Kinematics\CircularMation.cpp" />
+    <ClCompile Include="kEngine\Utility\Bit.cpp" />
+    <ClCompile Include="kEngine\Math\Geometry\Interpolation.cpp" />
+    <ClCompile Include="kEngine\Math\Geometry\Curve.cpp" />
     <ClCompile Include="GAME\Object\Panel\Panel.cpp" />
     <ClCompile Include="kEngine\Data\Render\CPUData\DebugLine.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -260,8 +265,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Tool\DebugTool\DebugDraw.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="kEngine\Data\Geometry\CrashData\Capsule.cpp" />
-    <ClCompile Include="kEngine\Data\Geometry\CrashData\AABB.cpp" />
+    <ClCompile Include="kEngine\Data\Geometry\Shape\Line\Capsule.cpp" />
+    <ClCompile Include="kEngine\Data\Geometry\Shape\Quad\AABB.cpp" />
     <ClCompile Include="externals\DirectXTex\BC.cpp" />
     <ClCompile Include="externals\DirectXTex\BC4BC5.cpp" />
     <ClCompile Include="externals\DirectXTex\BC6HBC7.cpp" />
@@ -324,7 +329,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\core\inputCore.cpp" />
     <ClCompile Include="kEngine\core\config.cpp" />
     <ClCompile Include="kEngine\Renderer\Resource\BasicResource.cpp" />
-    <ClCompile Include="kEngine\Data\Geometry\CrashData\crashIncluder.cpp" />
+    <ClCompile Include="kEngine\Data\Geometry\Shape\crashIncluder.cpp" />
     <ClCompile Include="kEngine\Math\Geometry\Collision\crashDecision.cpp" />
     <ClCompile Include="kEngine\Tool\DefaultMenu\DefaultMenu.cpp" />
     <ClCompile Include="kEngine\Data\Game\MapChip\MapChipField.cpp" />
@@ -351,6 +356,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Renderer\Lighting\Light.cpp" />
     <ClCompile Include="kEngine\Data\Render\GPUData\LightGPU.cpp" />
     <ClCompile Include="kEngine\Data\Render\Types\LightingType.cpp" />
+    <ClCompile Include="kEngine\Data\Geometry\Shape\Line\Line.cpp" />
     <ClCompile Include="main.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -379,9 +385,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Data\Render\Types\PSOType.cpp" />
     <ClCompile Include="kEngine\Renderer\Lighting\PointLight.cpp" />
     <ClCompile Include="kEngine\Math\Matrix3x3Math.cpp" />
-    <ClCompile Include="kEngine\Data\Geometry\CrashData\Ray.cpp" />
-    <ClCompile Include="kEngine\Data\Geometry\CrashData\OldHitBox.cpp" />
-    <ClCompile Include="kEngine\Data\Geometry\CrashData\OBB.cpp" />
+    <ClCompile Include="kEngine\Data\Geometry\Shape\Line\Ray.cpp" />
+    <ClCompile Include="kEngine\Data\Geometry\Shape\Quad\OldHitBox.cpp" />
+    <ClCompile Include="kEngine\Data\Geometry\Shape\Quad\OBB.cpp" />
+    <ClCompile Include="kEngine\Data\Geometry\Shape\Plane\Plane.cpp" />
     <ClCompile Include="ResourceLoader.cpp" />
     <ClCompile Include="kEngine\Scenes\BaseSceneFactory.cpp" />
     <ClCompile Include="kEngine\Scenes\CG3_HK_2\SceneCGHK2.cpp" />
@@ -396,10 +403,18 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\GameObject\StartTimer\StartTimer.cpp" />
     <ClCompile Include="kEngine\Scenes\SceneFactory.cpp" />
     <ClCompile Include="GAME\scenes\UITest.cpp" />
-    <ClCompile Include="kEngine\Data\Geometry\CrashData\Segment.cpp" />
-    <ClCompile Include="kEngine\Data\Geometry\CrashData\Sphere.cpp" />
+    <ClCompile Include="kEngine\Data\Geometry\Shape\Line\Segment.cpp" />
+    <ClCompile Include="kEngine\Data\Geometry\Shape\Circle\Sphere.cpp" />
+    <ClCompile Include="kEngine\Data\Geometry\Shape\Triangle\Triangle.cpp" />
+    <ClCompile Include="kEngine\Math\Geometry\SegmentUtility.cpp" />
+    <ClCompile Include="kEngine\Math\Geometry\VectorUtility.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="kEngine\Data\Kinematics\Types\CircleMotionPlane.h" />
+    <ClInclude Include="kEngine\Math\Kinematics\CircularMation.h" />
+    <ClInclude Include="kEngine\Utility\Bit.h" />
+    <ClInclude Include="kEngine\Math\Geometry\Interpolation.h" />
+    <ClInclude Include="kEngine\Math\Geometry\Curve.h" />
     <ClInclude Include="GAME\Object\Panel\Panel.h" />
     <ClInclude Include="kEngine\Data\Render\CPUData\DebugLine.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -408,8 +423,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Tool\DebugTool\DebugDraw.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="kEngine\Data\Geometry\CrashData\Capsule.h" />
-    <ClInclude Include="kEngine\Data\Geometry\CrashData\AABB.h" />
+    <ClInclude Include="kEngine\Data\Geometry\Shape\Line\Capsule.h" />
+    <ClInclude Include="kEngine\Data\Geometry\Shape\Quad\AABB.h" />
     <ClInclude Include="externals\assimp\include\assimp\aabb.h" />
     <ClInclude Include="externals\assimp\include\assimp\ai_assert.h" />
     <ClInclude Include="externals\assimp\include\assimp\anim.h" />
@@ -543,7 +558,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\core\inputCore.h" />
     <ClInclude Include="kEngine\core\config.h" />
     <ClInclude Include="kEngine\Renderer\Resource\BasicResource.h" />
-    <ClInclude Include="kEngine\Data\Geometry\CrashData\crashIncluder.h" />
+    <ClInclude Include="kEngine\Data\Geometry\Shape\crashIncluder.h" />
     <ClInclude Include="kEngine\Math\Geometry\Collision\crashDecision.h" />
     <ClInclude Include="kEngine\Tool\DefaultMenu\DefaultMenu.h" />
     <ClInclude Include="kEngine\Data\Game\MapChip\MapChipField.h" />
@@ -595,9 +610,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Data\Render\Types\LightingType.h" />
     <ClInclude Include="kEngine\Renderer\Lighting\PointLight.h" />
     <ClInclude Include="kEngine\Math\Matrix3x3Math.h" />
-    <ClInclude Include="kEngine\Data\Geometry\CrashData\Ray.h" />
-    <ClInclude Include="kEngine\Data\Geometry\CrashData\OldHitBox.h" />
-    <ClInclude Include="kEngine\Data\Geometry\CrashData\OBB.h" />
+    <ClInclude Include="kEngine\Data\Geometry\Shape\Line\Ray.h" />
+    <ClInclude Include="kEngine\Data\Geometry\Shape\Quad\OldHitBox.h" />
+    <ClInclude Include="kEngine\Data\Geometry\Shape\Quad\OBB.h" />
+    <ClInclude Include="kEngine\Data\Geometry\Shape\Plane\Plane.h" />
+    <ClInclude Include="kEngine\Data\Geometry\Shape\Line\Line.h" />
     <ClInclude Include="ResourceLoader.h" />
     <ClInclude Include="kEngine\Scenes\BaseSceneFactory.h" />
     <ClInclude Include="kEngine\Scenes\CG3_HK_2\SceneCGHK2.h" />
@@ -612,8 +629,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\GameObject\StartTimer\StartTimer.h" />
     <ClInclude Include="kEngine\Scenes\SceneFactory.h" />
     <ClInclude Include="GAME\scenes\UITest.h" />
-    <ClInclude Include="kEngine\Data\Geometry\CrashData\Segment.h" />
-    <ClInclude Include="kEngine\Data\Geometry\CrashData\Sphere.h" />
+    <ClInclude Include="kEngine\Data\Geometry\Shape\Line\Segment.h" />
+    <ClInclude Include="kEngine\Data\Geometry\Shape\Circle\Sphere.h" />
+    <ClInclude Include="kEngine\Data\Geometry\Shape\Triangle\Triangle.h" />
+    <ClInclude Include="kEngine\Math\Geometry\SegmentUtility.h" />
+    <ClInclude Include="kEngine\Math\Geometry\VectorUtility.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl">

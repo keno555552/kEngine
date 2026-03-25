@@ -227,7 +227,6 @@ void Panel::Render() {
 
 #ifdef _DEBUG
 		ImGuiPart();
-	}
 #endif
 }
 
