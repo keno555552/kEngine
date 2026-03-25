@@ -73,6 +73,15 @@ void kEngine::StartFrame() {
 }
 
 void kEngine::EndFrame() {
+
+#ifdef _DEBUG
+
+	///デバッグドロー描画
+	DebugDraw::DrawAll(this);
+	DebugDraw::Clear();
+
+#endif
+
 	drawDataCollector->EndCollect();
 	drawEngine->PreDraw();
 	drawEngine->CommitDraw();
@@ -88,13 +97,37 @@ bool kEngine::ProcessMessage() {
 
 #pragma region 描画システム
 
+void kEngine::DrawDebugLine(DebugLine* debugLine) {
+
+	/// nullptrチェック
+	if (!debugLine) {
+		Logger::Log("kEngine::DrawDebugLine()にnullptrが渡されました。");
+		return;
+	}
+
+	drawDataCollector->CollectDebugLine(debugLine);
+
+}
+
 void kEngine::Draw2D(SpriteData* spriteData) {
-	//resourceManager->Collet2D(spriteData);
+
+	/// nullptrチェック
+	if (!spriteData) {
+		Logger::Log("kEngine::Draw2D()にnullptrが渡されました。");
+		return;
+	}
+
 	drawDataCollector->Collect2D(spriteData);
 }
 
 void kEngine::Draw3D(ObjectData* object) {
-	//resourceManager->Collet3D(object);
+
+	/// nullptrチェック
+	if (!object) {
+		Logger::Log("kEngine::Draw3D()にnullptrが渡されました。");
+		return;
+	} 
+
 	drawDataCollector->Collect3D(object);
 }
 

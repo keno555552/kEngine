@@ -52,9 +52,11 @@ private:
 
 private:
 	void createInputLayout();
+	void createInputLayoutForDebugLine();
 	void SetBlendState();
 	void SetRasterizerState();
 	void ShaderCompile(LightModelType lightModelType);
 	void SetDepthStencilState();
 	void SetGraphicsPipelineState();
+	void SetGraphicsPipelineStateForDebugLine();
 };

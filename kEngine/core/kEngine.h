@@ -24,6 +24,10 @@
 #include "GPUData/DirectionalLightGPU.h"
 #include "Camera/Camera.h"
 
+#ifdef _DEBUG
+#include "DebugDraw.h"
+#endif
+#include <CPUData/DebugLine.h>
 
 class kEngine
 {
@@ -53,6 +57,7 @@ public:
 #pragma region 描画システム
 
 	/// VVVV====== SpriteData/ObjectData描画,今上使えない ======VVVV///
+	void DrawDebugLine(DebugLine* debugLine);
 	void Draw2D(SpriteData* spriteData);
 	void Draw3D(ObjectData* objectData);
 

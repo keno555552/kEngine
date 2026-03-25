@@ -12,6 +12,7 @@ enum class PSOType {
 	PhongReflection,
 	BlinnPhongReflection,
 	FlameNeonGlow,
+	DebugLine,
 	NUMBER_OF_PSO,
 
 	/// デフォルトPSO

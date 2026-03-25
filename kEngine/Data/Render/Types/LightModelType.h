@@ -9,7 +9,8 @@ enum class LightModelType {
     PhongReflection,
     BlinnPhongReflection,
 	FlameNeonGlow,
-    NumLightModels
+    DebugLine,
+    NumLightModels,
 };
 
 std::string GetLightModelMacro(LightModelType model);

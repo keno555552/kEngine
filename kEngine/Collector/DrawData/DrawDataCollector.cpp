@@ -5,7 +5,7 @@
 #include "Resource/ResourceManager.h"
 
 
-void DrawDataCollector::Initialize(CameraManager * cm, LightManager * lm) {
+void DrawDataCollector::Initialize(CameraManager* cm, LightManager* lm) {
 	cameraManager_ = cm;
 	lightManager_ = lm;
 }
@@ -34,29 +34,71 @@ void DrawDataCollector::PreCollect() {
 	transparentBucket2D_.clear();
 	opaqueBuckets3D_.clear();
 	transparentBucket3D_.clear();
+	debugLinesVertexBucket_.clear();
 
 	/// レイヤードスプライト用リストクリア
 	simpleSpriteCounter_ = 0;
 	unlayeredSpriteCounter_ = 0;
 
 	/// インスタンスリストクリア
+	instanceCounterDL_ = 0;
 	instanceCounter2D_ = 0;
 	instanceCounter3D_ = 0;
+	instanceCounterParticleC_ = 0;
 }
 
 void DrawDataCollector::EndCollect() {
 
 
 	/// ネールスキップ
-	if (opaqueBucket2D_.empty() && transparentBucket2D_.empty()&&
+	if (opaqueBucket2D_.empty() && transparentBucket2D_.empty() &&
 		opaqueBuckets3D_.empty() && transparentBucket3D_.empty())
-	return;
+		return;
 
 	/// 実際のインスタンスリスト作成
 	BuildInstanceList2D();
 	BuildInstanceList3D();
-	
+
 }
+
+
+#pragma region /// ================================== DebugLine関連 ================================= ///
+
+
+TransformationMatrix DrawDataCollector::DLWVPAdjustment(DebugLine* debugLine) {
+	Camera* cam = cameraManager_->GetActiveCamera();
+	Matrix4x4 viewMatrix = cam->GetViewMatrix();
+	Matrix4x4 projectionMatrix = cam->GetProjectionMatrix();
+
+	Matrix4x4 worldMatrix = Identity(); // 因為點已經是世界座標
+
+	TransformationMatrix result;
+	result.WVP = worldMatrix * viewMatrix * projectionMatrix;
+	result.world = worldMatrix;
+	result.WorldInverseTranspose = worldMatrix.Inverse().Transpose();
+	return result;
+}
+
+void DrawDataCollector::CollectDebugLine(DebugLine* debugLine) {
+
+	/// lineDataをGPU用の構造体に変換
+	DebugLineVertexGPU newData[2];
+	newData[0].startPoint = debugLine->startPoint;
+	newData[0].color = debugLine->color;
+	newData[1].startPoint = debugLine->endPoint;
+	newData[1].color = debugLine->color;
+	for (auto& point : newData) {
+		debugLinesVertexBucket_.push_back(point);
+	}
+
+	/// TransformMatrixを作るためのデータ収集
+	TransformationMatrix DLTM = DLWVPAdjustment(debugLine);
+	instancingListDL_[instanceCounterDL_].world = DLTM.world;
+	instancingListDL_[instanceCounterDL_].WVP = DLTM.WVP;
+	instancingListDL_[instanceCounterDL_].WorldInverseTranspose = DLTM.WorldInverseTranspose;
+	instanceCounterDL_++;
+}
+
 
 #pragma region /// ===================================== 2D関連 ===================================== ///
 
@@ -317,7 +359,7 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustment3D(ObjectData& object
 
 	//Matrix4x4 worldMatrix = localMatrix * partParentMatrix * followWorldMatrix;
 	Matrix4x4 worldMatrix = localMatrix * followWorldMatrix;
-	
+
 	TransformationMatrix result{};
 	result.WVP = modelData.rootNode.localMatrix * worldMatrix * viewMatrix * projectionMatrix;
 	result.world = modelData.rootNode.localMatrix * worldMatrix;
@@ -325,7 +367,7 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustment3D(ObjectData& object
 	return result;
 }
 
-void DrawDataCollector::AddObjectToBucket3D(RenderData& renderData,int meshID) {
+void DrawDataCollector::AddObjectToBucket3D(RenderData& renderData, int meshID) {
 
 	auto checker = ResourceManager::GetInstance()->idToIndex_.find(renderData.materialID);
 
@@ -532,13 +574,15 @@ uint32_t DrawDataCollector::PSODecision(MaterialConfig& material) {
 		return (uint32_t)PSOType::BlinnPhongReflection;
 	case LightModelType::FlameNeonGlow:
 		return (uint32_t)PSOType::FlameNeonGlow;
+	case LightModelType::DebugLine:
+		return (uint32_t)PSOType::DebugLine;
 	}
 	return (uint32_t)PSOType::NONE;
 }
 
 
 void DrawDataCollector::UpdateLightData() {
-	if(lightManager_)lightManager_->TurnDataToGPUData();
+	if (lightManager_)lightManager_->TurnDataToGPUData();
 }
 
 std::vector<LightGPU> DrawDataCollector::GetLightGPUBuffer() {

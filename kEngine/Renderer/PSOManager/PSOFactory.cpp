@@ -19,14 +19,15 @@ void PSOFactory::Finalize() {
 }
 
 Microsoft::WRL::ComPtr <ID3D12PipelineState> PSOFactory::createPSO(LightModelType lightModelType) {
+	bool isDebugLine = (lightModelType == LightModelType::DebugLine);
 	createRootSignature();
-	createInputLayout();
+	isDebugLine ? createInputLayoutForDebugLine() : createInputLayout();
 	SetBlendState();
 	SetRasterizerState();
 	ShaderCompile(lightModelType);
 	SetDepthStencilState();
 
-	SetGraphicsPipelineState();
+	isDebugLine ? SetGraphicsPipelineStateForDebugLine() : SetGraphicsPipelineState();
 	return graphicsPipelineState_;
 }
 
@@ -163,6 +164,32 @@ void PSOFactory::createInputLayout() {
 	inputLayoutDESC_.NumElements = _countof(inputElementDESCs_);
 }
 
+void PSOFactory::createInputLayoutForDebugLine() {
+	///InputLayout
+
+	inputElementDESCs_[0] = {};
+	inputElementDESCs_[0].SemanticName = "POSITION";
+	inputElementDESCs_[0].SemanticIndex = 0;
+	inputElementDESCs_[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	inputElementDESCs_[0].InputSlot = 0;
+	inputElementDESCs_[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDESCs_[0].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+	inputElementDESCs_[0].InstanceDataStepRate = 0;
+
+	inputElementDESCs_[1] = {};
+	inputElementDESCs_[1].SemanticName = "COLOR";
+	inputElementDESCs_[1].SemanticIndex = 0;
+	inputElementDESCs_[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	inputElementDESCs_[1].InputSlot = 0;
+	inputElementDESCs_[1].AlignedByteOffset = 12; // float3 = 12 bytes
+	inputElementDESCs_[1].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+	inputElementDESCs_[1].InstanceDataStepRate = 0;
+
+	inputLayoutDESC_ = {};
+	inputLayoutDESC_.pInputElementDescs = inputElementDESCs_;
+	inputLayoutDESC_.NumElements = 2;
+}
+
 void PSOFactory::SetBlendState() {
 	// BlendStateの設定
 	//D3D12_BLEND_DESC blendDesc{};
@@ -213,6 +240,10 @@ void PSOFactory::ShaderCompile(LightModelType lightModelType) {
 		vertexShaderBlob_ = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder + "FlameNeonGlow.VS.hlsl"), L"vs_6_0");
 		pixelShaderBlob_ = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder + "FlameNeonGlow.PS.hlsl"), L"ps_6_0");
 		break;
+	case LightModelType::DebugLine:
+		vertexShaderBlob_ = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder + "DebugLine.VS.hlsl"), L"vs_6_0");
+		pixelShaderBlob_ = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder + "DebugLine.PS.hlsl"), L"ps_6_0");
+		break;
 	}
 	assert(vertexShaderBlob_.Get());
 	assert(pixelShaderBlob_.Get());
@@ -248,6 +279,34 @@ void PSOFactory::SetGraphicsPipelineState() {
 	graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
 	// DepthStencilの設定
 	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
+	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+
+	// 実際に生成
+	graphicsPipelineState_.Reset();
+	HRESULT hr = directXDriver_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(graphicsPipelineState_.GetAddressOf()));
+	assert(SUCCEEDED(hr));
+}
+
+void PSOFactory::SetGraphicsPipelineStateForDebugLine() {
+	// graphicsPipelineStateに設定する情報をまとめる
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
+	graphicsPipelineStateDesc.pRootSignature = rootSignature_.Get(); // RootSignature
+	graphicsPipelineStateDesc.InputLayout = inputLayoutDESC_; // InputLayout
+	graphicsPipelineStateDesc.VS = { vertexShaderBlob_->GetBufferPointer(), vertexShaderBlob_->GetBufferSize() }; // VertexShader
+	graphicsPipelineStateDesc.PS = { pixelShaderBlob_->GetBufferPointer(), pixelShaderBlob_->GetBufferSize() }; // PixelShader
+	graphicsPipelineStateDesc.BlendState = blendDesc_; // BlendState
+	graphicsPipelineStateDesc.RasterizerState = rasterizerDesc_; // RasterizerState
+	// 書き込むRTVの情報
+	graphicsPipelineStateDesc.NumRenderTargets = 1;
+	graphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	// 利用するトポロジ（形状）のタイプ。線
+	graphicsPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+	// どのように画面に色を打ち込むかの設定（気にしなくて良い）
+	graphicsPipelineStateDesc.SampleDesc.Count = 1;
+	graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
+	// DepthStencilの設定
+	graphicsPipelineStateDesc.DepthStencilState.DepthEnable = FALSE;
+	graphicsPipelineStateDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 	// 実際に生成

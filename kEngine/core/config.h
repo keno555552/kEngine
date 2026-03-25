@@ -11,6 +11,7 @@ class config
 {
 private:
 	/// 描画設定
+	static const int kDebugLineNumInstance_ = 5000;   /// DebugLineの最大インスタンス数
 	static const int k2DTileNumInstance_ = 50000;     /// Tileの最大インスタンス数
 	static const int k3DTileNumInstance_ = 10000;     /// Tileの最大インスタンス数
 	static const int kParticleNumInstance_ = 100000;  /// Particleの最大インスタンス数
@@ -36,6 +37,7 @@ private:
 	static int XInputDriverIP_;
 
 public:
+	static int GetDebugLineNumInstance() { return kDebugLineNumInstance_; }
 	static int Get2DTileNumInstance() { return k2DTileNumInstance_; }
 	static int Get3DTileNumInstance() { return k3DTileNumInstance_; }
 	static int GetMaxMaterialNum() { return kMaxMaterialNum_; }

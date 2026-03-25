@@ -534,7 +534,7 @@
     <ClCompile Include="kEngine\Data\Geometry\CrashData\Capsule.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Tool\DebugTool\DebugLineTool.cpp">
+    <ClCompile Include="kEngine\Tool\DebugTool\DebugDraw.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Data\Render\GPUData\DebugLineGPU.cpp">
@@ -1166,7 +1166,7 @@
     <ClInclude Include="kEngine\Data\Geometry\CrashData\Capsule.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Tool\DebugTool\DebugLineTool.h">
+    <ClInclude Include="kEngine\Tool\DebugTool\DebugDraw.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Data\Render\GPUData\DebugLineGPU.h">

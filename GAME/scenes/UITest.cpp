@@ -1,5 +1,5 @@
 #include "UITest.h"
-
+#include "DebugDraw.h"
 
 UITest::UITest(kEngine* system) {
 	/// =========== システム初期化 ============///
@@ -122,13 +122,7 @@ void UITest::Update() {
 
 	panel_->Update();
 
-	Ray mouseRay = usingCamera_->ScreenPointToRay(system_->GetMousePosVector2());
-
-	Sphere target;
-	target.center = box_->mainPosition.transform.translate;
-	target.radius = 0.5f;
-
-	crashDecision(target, mouseRay) == true ? isHit = true : isHit = false;
+	MouseLogic();
 
 	if (system_->GetTriggerOn(DIK_0)) {
 		if (useDebugCamera)useDebugCamera = false;
@@ -165,6 +159,27 @@ void UITest::Update() {
 	//}
 
 
+}
+
+void UITest::MouseLogic() {
+	Ray mouseRay = usingCamera_->ScreenPointToRay(system_->GetMousePosVector2());
+
+	Sphere target;
+	target.center = box_->mainPosition.transform.translate;
+	target.radius = 0.5f;
+
+	AABB aabb;
+	aabb.min = box_->mainPosition.transform.translate - Vector3(0.5f, 0.5f, 0.5f);
+	aabb.max = box_->mainPosition.transform.translate + Vector3(0.5f, 0.5f, 0.5f);
+
+	crashDecision(target, mouseRay) == true ? isHit = true : isHit = false;
+
+	if (isHit) {
+		DebugDraw::AddSphere(target, { 1.0f,0.0f,0.0f,1.0f }, usingCamera_);
+	} else {	
+		DebugDraw::AddSphere(target, { 1.0f,1.0f,0.0f,1.0f }, usingCamera_);
+	}
+	DebugDraw::AddAABB(aabb, { 0.0f,1.0f,0.0f,1.0f });
 }
 
 void UITest::Draw() {

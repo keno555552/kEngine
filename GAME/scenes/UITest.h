@@ -63,6 +63,7 @@ private:
 private:
 	/// ============= シーン内命令 =============///
 	void CameraPart();
+	void MouseLogic();
 #ifdef USE_IMGUI
 	void ImGuiPart();
 #endif

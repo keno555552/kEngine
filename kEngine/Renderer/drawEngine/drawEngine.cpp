@@ -6,6 +6,7 @@
 #include "Logger.h"
 
 #include "Queue/RenderData.h"
+#include <vector>
 
 void DrawEngine::Initialize
 (DirectXCore* directXDriver, SrvManager* srvManager, ResourceManager* resourceManager, DrawDataCollector* drawDataCollector) {
@@ -31,7 +32,7 @@ void DrawEngine::Initialize
 		psoList_.push_back(pso_->createPSO((LightModelType)i));
 	}
 
-	rootSignature_ = pso_->getRootSignature((int)psoType::defaultPSO);
+	rootSignature_ = pso_->getRootSignature((int)PSOType::defaultPSO);
 
 	depthStencilResource = CreateDepthStencilTextureResource(directXDriver_->GetDevice(), kClientWidth_, kClientHeight_);
 	MakeDepthStencilView();
@@ -40,41 +41,39 @@ void DrawEngine::Initialize
 	viewport = createViewport(kClientWidth_, kClientHeight_);
 	scissorRect = createScissorRect(kClientWidth_, kClientHeight_);
 
-
-
-	///Lighting
+	/// Lighting
 	lightBuffer_ = std::make_unique<BasicResource>();
 	InitializeLighting();
 
 	/// =========================== Tile用wvpBufferを作成 =========================== ///
-	///2Dタイル用WVPバッファ
-	TransformationMatrix* instanceListPtr2D = nullptr;
-	tile2DWVPResource_ = std::make_unique<BasicResource>();
-	tile2DWVPResource_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(TransformationMatrix) * config::Get2DTileNumInstance());
-	tile2DWVPResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&instanceListPtr2D));
+
+	/// DebugLine
+	TransformationMatrix* instanceListPtrDL = CreateInstanceBuffer<TransformationMatrix>(debugLineResource_, config::GetDebugLineNumInstance());
+	drawDataCollector_->SetInstanceListDL(instanceListPtrDL);
+
+	intializeInstanceTMBuffer(instanceListPtrDL, config::GetDebugLineNumInstance());
+
+	int srvHandleIndex = srvManager_->Allocate();
+	srvManager_->CreateSRVForStructuredBuffer(srvHandleIndex, debugLineResource_->GetResource().Get(), config::GetDebugLineNumInstance(), sizeof(TransformationMatrix));
+	TileDLSrvHandleGPU_ = srvManager_->GetGPUDescriptorHandle(srvHandleIndex);
+
+
+	/// 2Dタイル用WVPバッファ
+	TransformationMatrix* instanceListPtr2D = CreateInstanceBuffer<TransformationMatrix>(tile2DWVPResource_, config::Get2DTileNumInstance());
 	drawDataCollector_->SetInstanceList2D(instanceListPtr2D);
 
-	for (int index = 0; index < config::Get2DTileNumInstance(); ++index) {
-		instanceListPtr2D[index].WVP = Identity();
-		instanceListPtr2D[index].world = Identity();
-		instanceListPtr2D[index].WorldInverseTranspose = Identity();
-	}
-	int srvHandleIndex = srvManager_->Allocate();
+	intializeInstanceTMBuffer(instanceListPtr2D, config::Get2DTileNumInstance());
+
+	srvHandleIndex = srvManager_->Allocate();
 	srvManager_->CreateSRVForStructuredBuffer(srvHandleIndex, tile2DWVPResource_->GetResource().Get(), config::Get2DTileNumInstance(), sizeof(TransformationMatrix));
 	Tile2DSrvHandleGPU_ = srvManager_->GetGPUDescriptorHandle(srvHandleIndex);
 
-	///3Dタイル用WVPバッファ
-	TransformationMatrix* instanceListPtr3D = nullptr;
-	tile3DWVPResource_ = std::make_unique<BasicResource>();
-	tile3DWVPResource_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(TransformationMatrix) * config::Get3DTileNumInstance());
-	tile3DWVPResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&instanceListPtr3D));
+	/// 3Dタイル用WVPバッファ
+	TransformationMatrix* instanceListPtr3D = CreateInstanceBuffer<TransformationMatrix>(tile3DWVPResource_, config::Get3DTileNumInstance());
 	drawDataCollector_->SetInstanceList3D(instanceListPtr3D);
 
-	for (int index = 0; index < config::Get3DTileNumInstance(); ++index) {
-		instanceListPtr3D[index].WVP = Identity();
-		instanceListPtr3D[index].world = Identity();
-		instanceListPtr3D[index].WorldInverseTranspose = Identity();
-	}
+	intializeInstanceTMBuffer(instanceListPtr3D, config::Get3DTileNumInstance());
+
 	srvHandleIndex = srvManager_->Allocate();
 	srvManager_->CreateSRVForStructuredBuffer(srvHandleIndex, tile3DWVPResource_->GetResource().Get(), config::Get3DTileNumInstance(), sizeof(TransformationMatrix));
 	Tile3DSrvHandleGPU_ = srvManager_->GetGPUDescriptorHandle(srvHandleIndex);
@@ -156,7 +155,7 @@ void DrawEngine::PreDraw() {
 	/// 形状を設定。PSOに設定しているものとはまた別。同じものを設定するとUpdateLighting考えておけば良い
 	commandList_->SetGraphicsRootSignature(rootSignature_);
 	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	currentPSO_ = psoType::NONE;
+	currentPSO_ = PSOType::NONE;
 
 	/// Lighting
 	drawDataCollector_->UpdateLightData();
@@ -169,10 +168,10 @@ void DrawEngine::PreDraw() {
 
 void DrawEngine::CommitDraw() {
 
-
 	/// 集まったデータで描画
 	/// Sprite描画
 	DrawCall();
+
 }
 
 void DrawEngine::EndDraw() {
@@ -186,57 +185,8 @@ void DrawEngine::EndDraw() {
 	}
 }
 
-
-void DrawEngine::PSODecision(MaterialConfig& material) {
-	bool psoChanged = false;
-
-	LightModelType lightModelType = (LightModelType)(int)material.lightModelType;
-
-	switch (lightModelType) {
-	case LightModelType::Sprite2D:
-		if (currentPSO_ != psoType::Sprite2D) {
-			commandList_->SetPipelineState(psoList_[(int)LightModelType::Sprite2D].Get());
-			currentPSO_ = psoType::Sprite2D;
-			psoChanged = true;
-		}
-		break;
-	case LightModelType::Lambert:
-		if (currentPSO_ != psoType::Lambert) {
-			commandList_->SetPipelineState(psoList_[(int)LightModelType::Lambert].Get());
-			currentPSO_ = psoType::Lambert;
-			psoChanged = true;
-		}
-		break;
-	case LightModelType::HalfLambert:
-		if (currentPSO_ != psoType::HalfLambert) {
-			commandList_->SetPipelineState(psoList_[(int)LightModelType::HalfLambert].Get());
-			currentPSO_ = psoType::HalfLambert;
-			psoChanged = true;
-		}
-		break;
-	case LightModelType::PhongReflection:
-		if (currentPSO_ != psoType::PhongReflection) {
-			commandList_->SetPipelineState(psoList_[(int)LightModelType::PhongReflection].Get());
-			currentPSO_ = psoType::PhongReflection;
-			psoChanged = true;
-		}
-		break;
-	case LightModelType::BlinnPhongReflection:
-		if (currentPSO_ != psoType::BlinnPhongReflection) {
-			commandList_->SetPipelineState(psoList_[(int)LightModelType::BlinnPhongReflection].Get());
-			currentPSO_ = psoType::BlinnPhongReflection;
-			psoChanged = true;
-		}
-		break;
-	}
-	if (psoChanged) {
-		rootSignature_ = pso_->getRootSignature((int)currentPSO_);
-		commandList_->SetGraphicsRootSignature(rootSignature_);
-	}
-}
-
 void DrawEngine::PSODecision(int psoID) {
-	auto newPSO = static_cast<psoType>(psoID);
+	auto newPSO = static_cast<PSOType>(psoID);
 	if (currentPSO_ != newPSO) {
 		commandList_->SetPipelineState(psoList_[psoID].Get());
 		currentPSO_ = newPSO;
@@ -244,6 +194,33 @@ void DrawEngine::PSODecision(int psoID) {
 		rootSignature_ = pso_->getRootSignature((int)currentPSO_);
 		commandList_->SetGraphicsRootSignature(rootSignature_);
 	}
+}
+
+void DrawEngine::DrawDebugLine() {
+
+	auto& vertices = drawDataCollector_->GetDebugLineVertexBucket();
+	UINT lineCount = (UINT)vertices.size();
+
+	if (vertices.empty()) return;
+
+	/// TileSRV
+	commandList_->SetGraphicsRootDescriptorTable(1, TileDLSrvHandleGPU_);
+
+	/// ========== PSO ==========
+	PSODecision((int)PSOType::DebugLine);
+
+	/// ========== Camera CBV (b1) ==========
+	SetCameraForGPU();
+
+	/// ========== Topology ==========
+	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+
+	/// ========== VertexBuffer ==========
+	UpdateDebugLineVertexBuffer(vertices);
+	commandList_->IASetVertexBuffers(0, 1, &debugLineVBView_);
+
+	/// ========== Draw ==========
+	commandList_->DrawInstanced((UINT)vertices.size(), 1, 0, 0);
 }
 
 void DrawEngine::Draw2D() {
@@ -278,13 +255,11 @@ void DrawEngine::Draw2DTransparent() {
 		/// MeshIndex 數量
 		int meshIndexCount = object.mesh->GetIndexNum();
 
-		/// VBV/IBV 設定
+		/// VBV/IBV 設定 
 		D3D12_VERTEX_BUFFER_VIEW vbv = object.mesh->GetVertexBufferView();
 		D3D12_INDEX_BUFFER_VIEW ibv = object.mesh->GetIndexBufferView();
 		commandList_->IASetVertexBuffers(0, 1, &vbv);
 		commandList_->IASetIndexBuffer(&ibv);
-
-
 
 		/// WVP 設定
 		int instIdx = instance2DCounter_;
@@ -511,6 +486,7 @@ void DrawEngine::Draw3DOpaque() {
 void DrawEngine::DrawCall() {
 	Draw3D();
 	Draw2D();
+	DrawDebugLine();
 }
 
 int DrawEngine::readCommonTextureHandle(int handle) {
@@ -550,6 +526,14 @@ D3D12_RECT DrawEngine::createScissorRect(int kClientWidth, int kClientHeight) {
 	scissorRect.bottom = kClientHeight;
 
 	return scissorRect;
+}
+
+void DrawEngine::intializeInstanceTMBuffer(TransformationMatrix* bufferPointer, size_t count) {
+	for (size_t index = 0; index < count; ++index) {
+		bufferPointer[index].WVP = Identity();
+		bufferPointer[index].world = Identity();
+		bufferPointer[index].WorldInverseTranspose = Identity();
+	}
 }
 
 void DrawEngine::SetMaterial(int materialID) {
@@ -673,5 +657,30 @@ void DrawEngine::MakeDepthStencilView() {
 	);
 }
 
+void DrawEngine::UpdateDebugLineVertexBuffer(const std::vector<DebugLineVertexGPU>& vertices) {
 
+	if (vertices.empty()) return;
 
+	size_t bufferSize = sizeof(DebugLineVertexGPU) * vertices.size();
+
+	// 如果 buffer 不夠大 → 重建
+	if (!debugLineVB_ || debugLineVertexBufferSize_ < bufferSize) {
+		debugLineVertexBufferSize_ = bufferSize;
+
+		debugLineVB_.Reset();
+
+		// 用你現有的 BasicResource 工具建立 Upload Buffer
+		debugLineVB_ = debugLineResource_->CreateResourceClass_(directXDriver_->GetDevice(), bufferSize);
+	}
+
+	// Map + Copy
+	DebugLineVertexGPU* mapped = nullptr;
+	debugLineVB_->Map(0, nullptr, (void**)&mapped);
+	memcpy(mapped, vertices.data(), bufferSize);
+	debugLineVB_->Unmap(0, nullptr);
+
+	// VBView
+	debugLineVBView_.BufferLocation = debugLineVB_->GetGPUVirtualAddress();
+	debugLineVBView_.SizeInBytes = (UINT)bufferSize;
+	debugLineVBView_.StrideInBytes = sizeof(DebugLineVertexGPU);
+}

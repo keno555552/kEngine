@@ -13,6 +13,8 @@
 #include "GPUData/LightGPU.h"
 #include <cstdint>
 #include "Mesh/Model.h"
+#include "Data/Render/CPUData/DebugLine.h"
+#include "Data/Render/GPUData/DebugLineGPU.h"
 using ModelID = int;
 
 inline const float layerDepth_Sprite = 0.0001f;
@@ -42,6 +44,12 @@ public:
 
 	void PreCollect();
 	void EndCollect();
+
+	/// =========== DebugLine 関連 ============///
+
+	void CollectDebugLine(DebugLine* debugLine);
+
+	std::vector<DebugLineVertexGPU>& GetDebugLineVertexBucket() { return debugLinesVertexBucket_; }
 
 	/// ============== 2D関連 ===============///
 
@@ -75,8 +83,10 @@ public:
 
 	/// =========== Instance関連 ============///
 
+	void SetInstanceListDL(TransformationMatrix* instancingListDL) { instancingListDL_ = instancingListDL; }
 	void SetInstanceList2D(TransformationMatrix* instancingList2D) { instancingList2D_ = instancingList2D; }
 	void SetInstanceList3D(TransformationMatrix* instancingList3D) { instancingList3D_ = instancingList3D; }
+	TransformationMatrix* GetInstanceListDL() { return instancingListDL_; }
 	TransformationMatrix* GetInstancingList2D() { return instancingList2D_; }
 	TransformationMatrix* GetInstancingList3D() { return instancingList3D_; }
 	void BuildInstanceList2D();
@@ -90,6 +100,10 @@ public:
 
 private:
 
+	/// =========== DebugLine 関連 ============///
+	
+	TransformationMatrix DLWVPAdjustment(DebugLine* debugLine);
+	
 	/// ============ スプライト関連 ==============///
 	/// ｚバッファ調整
 	float SpriteLayerManagement(float zBuffer);
@@ -129,6 +143,10 @@ private:
 	/// ============ カメラ関連 ==============///
 	CameraManager* cameraManager_ = nullptr; /*借り*/
 
+	/// ================ デバッグドロー関連 =================///
+
+	std::vector<DebugLineVertexGPU> debugLinesVertexBucket_;
+
 	/// ==================== 2Dデータ ====================///
 	/// 不透明オブジェクトバケット
 	std::unordered_map <PSOType,
@@ -163,10 +181,12 @@ private:
 
 	/// ================ インスタンスデータ =================///
 
+	TransformationMatrix* instancingListDL_ = nullptr;
 	TransformationMatrix* instancingList2D_ = nullptr;
 	TransformationMatrix* instancingList3D_ = nullptr;
 	TransformationMatrix* instancingListParticleC_ = nullptr;
 
+	int instanceCounterDL_ = 0;
 	int instanceCounter2D_ = 0;
 	int instanceCounter3D_ = 0;
 	int instanceCounterParticleC_ = 0;

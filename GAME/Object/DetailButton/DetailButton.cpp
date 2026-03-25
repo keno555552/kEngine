@@ -1,5 +1,4 @@
 #include "DetailButton.h"
-#
 
 DetailButton::DetailButton(kEngine* system) {
 	system_ = system;
