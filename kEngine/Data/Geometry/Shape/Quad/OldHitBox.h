@@ -1,5 +1,5 @@
 #pragma once
-#include "Vector2.h"
+#include "LinearAlgebra/Vector2.h"
 
 ///　ヒットボックス
 struct HitBox final {

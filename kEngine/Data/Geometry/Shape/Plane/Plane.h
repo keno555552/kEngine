@@ -1,5 +1,5 @@
 #pragma once
-#include "Vector3.h"
+#include "LinearAlgebra/Vector3.h"
 
 struct Plane {
 	Vector3 normal; //<<< 法線ベクトル

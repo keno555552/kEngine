@@ -187,7 +187,7 @@ std::vector<ModelData> LoadAssimpFile(const std::string& directoryPath, const st
 
 		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; faceIndex++) {
 			aiFace face = mesh->mFaces[faceIndex];
-			assert(face.mNumIndices == 3); // 三角形以外は非対応
+			//assert(face.mNumIndices == 3); // 三角形以外は非対応
 			// 面の頂点インデックスを逆順に格納して、左右手座標系変換を行う
 			for (uint32_t element = 0; element < face.mNumIndices; element++) {
 				uint32_t vertexIndex = face.mIndices[(face.mNumIndices - 1) - element];

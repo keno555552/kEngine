@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
-#include "Vector4.h"
-#include "Matrix4x4.h"
+#include "LinearAlgebra/Vector4.h"
+#include "LinearAlgebra/Matrix4x4.h"
 #include "Data/Render/Types/LightModelType.h"
 
 class MaterialConfig

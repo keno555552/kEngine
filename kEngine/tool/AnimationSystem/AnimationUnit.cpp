@@ -44,6 +44,7 @@ void AnimationUnit::TakeControlObject(Object* object) {
 
 void AnimationUnit::RelistControlObject() {
 	controlledObject_ = nullptr;
+	instanceObject_.reset();
 }
 
 void AnimationUnit::Update(Camera* camera) {
@@ -103,16 +104,16 @@ void AnimationUnit::UpdateInstanceObject() {
 	if (index + 1 >= animationData_->keyList.size())index -= 1;
 	KeyFrame usingKeyFrame = animationData_->keyList[index + 1];
 	KeyFrame frontKeyFrame = animationData_->keyList[index];
-
+	
 	if (instanceObject_ != nullptr) {
 		T = ChangeEasing(usingKeyFrame.animationType_, (float)usingKeyFrame.easeRate_);
-
+	
 		instanceObject_->mainPosition.transform = {
 			frontKeyFrame.transformData.mainPosition.transform.scale * (1 - T) + usingKeyFrame.transformData.mainPosition.transform.scale * T,
 			frontKeyFrame.transformData.mainPosition.transform.rotate * (1 - T) + usingKeyFrame.transformData.mainPosition.transform.rotate * T,
 			frontKeyFrame.transformData.mainPosition.transform.translate * (1 - T) + usingKeyFrame.transformData.mainPosition.transform.translate * T
 		};
-
+	
 		int partNum = 0;
 		for (auto& part : instanceObject_->objectParts_) {
 			instanceObject_->objectParts_[partNum].transform = {
@@ -146,52 +147,60 @@ float AnimationUnit::ChangeEasing(AnimationType type, float R) {
 }
 
 void AnimationUnit::ControlleObject(Camera* camera) {
+	camera;
 
-	Matrix4x4 parentMatrix = Identity();
-	if (controlledObject_->followObject_ != nullptr) {
-		parentMatrix = MakeAffineMatrix(
-			controlledObject_->followObject_->transform.scale,
-			controlledObject_->followObject_->transform.rotate,
-			controlledObject_->followObject_->transform.translate
-		);
+	controlledObject_->mainPosition = instanceObject_->mainPosition;
+
+	for (int i = 0; i < controlledObject_->objectParts_.size(); i++) {
+		controlledObject_->objectParts_[i].transform = instanceObject_->objectParts_[i].transform;
 	}
 
-	Matrix4x4 objectMainMatrix = MakeAffineMatrix(
-		controlledObject_->mainPosition.transform.scale,
-		controlledObject_->mainPosition.transform.rotate,
-		controlledObject_->mainPosition.transform.translate
-	);
 
-	Matrix4x4 objectAnimateMainMatrix = MakeAffineMatrix(
-		instanceObject_->mainPosition.transform.scale,
-		instanceObject_->mainPosition.transform.rotate,
-		instanceObject_->mainPosition.transform.translate
-	);
-	Matrix4x4 objectWorldMatrix = objectMainMatrix * objectAnimateMainMatrix * parentMatrix;
-	controlledObject_->mainPosition.transformationMatrix = camera->transformationMatrixTransform(objectWorldMatrix);
-
-	int partNum = 0;
-	for (auto& part : controlledObject_->objectParts_) {
-		Matrix4x4 objectParentMatrix = Identity();
-		if (part.parentPart != nullptr) {
-			objectParentMatrix = MakeAffineMatrix(
-				part.parentPart->transform.scale,
-				part.parentPart->transform.rotate,
-				part.parentPart->transform.translate
-			);
-		}
-
-		Matrix4x4 localMatrix = MakeAffineMatrix(
-			instanceObject_->objectParts_[partNum].transform.scale,
-			instanceObject_->objectParts_[partNum].transform.rotate,
-			instanceObject_->objectParts_[partNum].transform.translate
-		);
-
-		Matrix4x4 worldMatrix = localMatrix * objectParentMatrix * objectWorldMatrix;
-		part.transformationMatrix = camera->transformationMatrixTransform(worldMatrix);
-		part.materialConfig->MakeUVMatrix();
-		partNum++;
-	}
+	//Matrix4x4 parentMatrix = Identity();
+	//if (controlledObject_->followObject_ != nullptr) {
+	//	parentMatrix = MakeAffineMatrix(
+	//		controlledObject_->followObject_->transform.scale,
+	//		controlledObject_->followObject_->transform.rotate,
+	//		controlledObject_->followObject_->transform.translate
+	//	);
+	//}
+	//
+	//Matrix4x4 objectMainMatrix = MakeAffineMatrix(
+	//	controlledObject_->mainPosition.transform.scale,
+	//	controlledObject_->mainPosition.transform.rotate,
+	//	controlledObject_->mainPosition.transform.translate
+	//);
+	//
+	//Matrix4x4 objectAnimateMainMatrix = MakeAffineMatrix(
+	//	instanceObject_->mainPosition.transform.scale,
+	//	instanceObject_->mainPosition.transform.rotate,
+	//	instanceObject_->mainPosition.transform.translate
+	//);
+	//Matrix4x4 objectWorldMatrix = objectMainMatrix * objectAnimateMainMatrix * parentMatrix;
+	//controlledObject_->mainPosition.transformationMatrix = camera->transformationMatrixTransform(objectWorldMatrix);
+	//
+	//int partNum = 0;
+	//for (auto& part : controlledObject_->objectParts_) {
+	//	Matrix4x4 objectParentMatrix = Identity();
+	//	if (part.parentPart != nullptr) {
+	//		objectParentMatrix = MakeAffineMatrix(
+	//			part.parentPart->transform.scale,
+	//			part.parentPart->transform.rotate,
+	//			part.parentPart->transform.translate
+	//		);
+	//	}
+	//
+	//	Matrix4x4 localMatrix = MakeAffineMatrix(
+	//		instanceObject_->objectParts_[partNum].transform.scale,
+	//		instanceObject_->objectParts_[partNum].transform.rotate,
+	//		instanceObject_->objectParts_[partNum].transform.translate
+	//	);
+	//
+	//	Matrix4x4 worldMatrix = localMatrix * objectParentMatrix * objectWorldMatrix;
+	//	part.transformationMatrix = camera->transformationMatrixTransform(worldMatrix);
+	//	part.materialConfig->MakeUVMatrix();
+	//	partNum++;
+	//}
 }
 
 void AnimationObjectData::SetSimpleObject(const Object& obj) {

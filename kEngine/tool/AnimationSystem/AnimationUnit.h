@@ -4,30 +4,14 @@
 #include "Transform.h"
 #include "Geometry/Collision/crashDecision.h"
 #include "Object/Object.h"
-
-
-enum class AnimationType {
-	LINEARITY,
-	EASY_IN,
-	EASY_OUT,
-	EASY_IN_OUT,
-	EASY_IN_BACK,
-	EASY_OUT_BACK,
-};
-
-struct KeyFrame {
-	int index_{};
-	float time_{};
-	AnimationType animationType_{};
-	float easeRate_{};
-	Object transformData{};
-	HitBox hitBox_{};
-};
+#include "Keyframe.h"
 
 struct AnimationObjectData {
 	int animationID{};
 	std::vector <KeyFrame> keyList{};
 	AnimationObjectData* parent_ = nullptr;
+
+	float duration = 0;
 
 	Object SimpleObject{};
 	void SetSimpleObject(const Object& obj);

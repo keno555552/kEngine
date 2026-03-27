@@ -2,11 +2,19 @@
 
 AnimationEditor::AnimationEditor(kEngine* system) {
 	system_ = system;
+
+	/// ============ カメラ設定 ============///
+	camera_ = system_->CreateCamera();
+	camera_->Move({ 0.0f,0.5f,-10.0f });
+	camera_->SetDefaultTransform(camera_->GetTransform());
+	system_->SetCamera(camera_);
+
+	/// ============ アニメーションエディター設定 ============///
 	SetupAnimationEditor();
 
 	/// =============== モデル設定 ===============///
-	std::string modelPath = "resources/TemplateResource/object/";
-	targetModelHandle_ = system_->SetModelObj(modelPath + "player/player.obj");
+	std::string modelPath = "kEngine/EngineAssets/Object/";
+	targetModelHandle_ = system_->SetModelObj(modelPath + "charater/charater.obj");
 
 	targetModel_ = std::make_unique<Object>();
 	targetModel_->IntObject(system_);
@@ -91,10 +99,6 @@ void AnimationEditor::SetupAnimationEditor() {
 	markerColor2_ = { 42.0f,42.0f,42.0f,255.0f };
 	markerColor2_.ColorBy1();
 
-	/// ============ カメラ設定 ============///
-	camera_ = system_->CreateCamera();
-	camera_->Move({ 0.0f,0.5f,-10.0f });
-	camera_->SetDefaultTransform(camera_->GetTransform());
 
 	/// ======= タイマー設定 =======///
 	mainTimer_ = std::make_unique<Timer>();
@@ -102,7 +106,7 @@ void AnimationEditor::SetupAnimationEditor() {
 	mainTimer_->parameter_ = startMinTime_;
 
 	/// ===== テキスチャローディング ===///
-	std::string mainPath = "resources/TemplateResource/texture/animationEditor/";
+	std::string mainPath = "kEngine/EngineAssets/texture/animationEditor/";
 
 	mainTimeBarTH_ = system_->LoadTexture(mainPath + "mainTimeBar.png");
 	mainNeedleTH_ = system_->LoadTexture(mainPath + "mainNeedle.png");
@@ -111,8 +115,8 @@ void AnimationEditor::SetupAnimationEditor() {
 	pingFirstTH_ = system_->LoadTexture(mainPath + "pingFirst.png");
 	pingLastTH_ = system_->LoadTexture(mainPath + "pingLast.png");
 
-	std::string modelPath = "resources/TemplateResource/object/";
-	Skydome_modelHandle_ = system_->SetModelObj(modelPath + "animationEditor/studioBG/studioBG.obj");
+	std::string modelPath = "kEngine/EngineAssets/Object/animationEditor/studioBG/";
+	Skydome_modelHandle_ = system_->SetModelObj(modelPath + "studioBG.obj");
 
 	/// ========= skydome設定 ========///
 	skydome_ = std::make_unique<Object>();
@@ -189,7 +193,7 @@ void AnimationEditor::UIUpdate() {
 
 	/// ============= 3D基本とカメラ更新 =============///
 	skydome_->Update(camera_);
-	camera_->Update();
+	//camera_->Update();
 }
 
 void AnimationEditor::UIDraw() {
@@ -210,7 +214,7 @@ void AnimationEditor::UIDraw() {
 
 void AnimationEditor::mouseMovement() {
 	if (system_->GetMouseTriggerOn(0)) {
-		Vector2 mousePos =  system_->GetMousePosVector2();
+		Vector2 mousePos = system_->GetMousePosVector2();
 		for (int i = 0; i < keyFrameList_.size(); i++) {
 			if (CrashDecisionHitBoxPointBool(&keyFrameList_[i].hitBox_, mousePos)) {
 				pickedKeyFrame_ = keyFrameList_[i].index_;
@@ -615,7 +619,58 @@ void AnimationEditor::SaveAnimationData(const AnimationObjectData& animationList
 	output << file.dump(4);
 }
 
+/// ======================= アニメーションデータ読み込関連 ========================///
+
 void AnimationEditor::LoadAnimationData(AnimationObjectData* animationList, const std::string& filePath) {
+	size_t dotPos = filePath.rfind('.');
+
+	/// ファイルが変
+	if (dotPos == std::string::npos) {
+		Logger::Log("[kError] AE :: File path does not contain an extension.");
+		return;
+	}
+
+	/// ファイル拡張子による処理分岐
+	std::string fileExt = filePath.substr(dotPos);
+
+
+	if (fileExt == ".json") {
+		LoadAnimationDataFromJson(animationList, filePath);
+		return;
+	}
+	if (fileExt == ".gltf") {
+		LoadAnimationDataFromJson(animationList, filePath);
+		return;
+	}
+
+	Logger::Log("[kError] AE :: File not support.");
+}
+
+void AnimationEditor::LoadAnimationDataFromGltf(AnimationObjectData* animationList, const std::string& filePath) {
+
+	std::ifstream input(filePath);
+	if (!input.is_open()) {
+		throw std::runtime_error("Failed to open file: " + filePath);
+	}
+
+	/// ファイルを読み込む
+	Assimp::Importer importer;
+	std::string filePathInst = filePath;
+	const aiScene* scene = importer.ReadFile(filePath.c_str(), 0);
+
+	/// アニメーションデータがない
+	if (scene->mNumAnimations != 0) {
+		Logger::Log("[kError] AE :: This file does not contain animation data.");
+		return;
+	}
+
+	aiAnimation* animationAssimp = scene->mAnimations[0];
+	
+	animationList->duration = float(animationAssimp->mDuration / animationAssimp->mTicksPerSecond);
+
+}
+
+void AnimationEditor::LoadAnimationDataFromJson(AnimationObjectData* animationList, const std::string& filePath) {
 	std::ifstream input(filePath);
 	if (!input.is_open()) {
 		throw std::runtime_error("Failed to open file: " + filePath);
@@ -790,9 +845,9 @@ void AnimationEditor::ImguiPart() {
 				ImGui::SliderFloat3("Scale", &keyFrameModel_->mainPosition.transform.scale.x, -10.0f, 10.0f);
 				ImGui::InputFloat3("Scale_Input", &keyFrameModel_->mainPosition.transform.scale.x);
 
-			
 
-			
+
+
 
 			}
 			ImGui::Indent();
@@ -803,21 +858,21 @@ void AnimationEditor::ImguiPart() {
 					ImGui::InputFloat3((std::string("Position_Input_") + index).c_str(),
 						&keyFrameModel_->objectParts_[i].transform.translate.x);
 
-					
+
 					ImGui::SliderFloat3((std::string("Rotate_") + index).c_str(), &keyFrameModel_->objectParts_[i].transform.rotate.x, -10.0f, 10.0f);
 					ImGui::InputFloat3((std::string("Rotate_Input_") + index).c_str(),
 						&keyFrameModel_->objectParts_[i].transform.rotate.x);
 
-					
-					
+
+
 					ImGui::SliderFloat3((std::string("Scale_") + index).c_str(), &keyFrameModel_->objectParts_[i].transform.scale.x, -10.0f, 10.0f);
 					ImGui::InputFloat3((std::string("Scale_Input_") + index).c_str(),
 						&keyFrameModel_->objectParts_[i].transform.scale.x);
 
 
-			
 
-				
+
+
 				}
 			}
 			ImGui::Unindent();

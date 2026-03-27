@@ -1,5 +1,5 @@
 #pragma once
-#include "Vector3.h"
+#include "LinearAlgebra/Vector3.h"
 
 /// 線分
 struct Segment {

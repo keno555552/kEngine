@@ -198,22 +198,22 @@
     <ClCompile Include="kEngine\GameObject\Camera\DebugCamera.cpp">
       <Filter>ソース ファイル\kEngine\tool</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Math\Matrix3x3.cpp">
+    <ClCompile Include="kEngine\Math\LinearAlgebra\Matrix3x3.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Math\Matrix4x4.cpp">
+    <ClCompile Include="kEngine\Math\LinearAlgebra\Matrix4x4.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Math\Transform.cpp">
+    <ClCompile Include="kEngine\Math\LinearAlgebra\Transform.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Math\Vector2.cpp">
+    <ClCompile Include="kEngine\Math\LinearAlgebra\Vector2.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Math\Vector3.cpp">
+    <ClCompile Include="kEngine\Math\LinearAlgebra\Vector3.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Math\TransformationMatrix.cpp">
+    <ClCompile Include="kEngine\Math\LinearAlgebra\TransformationMatrix.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Scenes\BaseScene.cpp">
@@ -405,7 +405,7 @@
     <ClCompile Include="kEngine\GameObject\StartTimer\StartTimer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Math\Vector4.cpp">
+    <ClCompile Include="kEngine\Math\LinearAlgebra\Vector4.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="externals\DirectXTex\BC.cpp">
@@ -504,7 +504,7 @@
     <ClCompile Include="GAME\scenes\scene1.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Math\Matrix3x3Math.cpp">
+    <ClCompile Include="kEngine\Math\LinearAlgebra\Matrix3x3Math.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="GAME\scenes\UITest.cpp">
@@ -576,21 +576,39 @@
     <ClCompile Include="kEngine\Data\Kinematics\Types\CircleMotionPlane.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="kEngine\Math\LinearAlgebra\Quaternion.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Physics\PhysicalObject.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Physics\Spring.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Physics\PhysicalBall.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Physics\SpringUtility.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\AnimationSystem\Keyframe.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="kEngine\Math\Vector2.h">
+    <ClInclude Include="kEngine\Math\LinearAlgebra\Vector2.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Math\Vector3.h">
+    <ClInclude Include="kEngine\Math\LinearAlgebra\Vector3.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Math\Matrix3x3.h">
+    <ClInclude Include="kEngine\Math\LinearAlgebra\Matrix3x3.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Math\Matrix4x4.h">
+    <ClInclude Include="kEngine\Math\LinearAlgebra\Matrix4x4.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Math\Transform.h">
+    <ClInclude Include="kEngine\Math\LinearAlgebra\Transform.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Renderer\Mesh\Model.h">
@@ -677,7 +695,7 @@
     <ClInclude Include="kEngine\Utility\randomMaker.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Math\TransformationMatrix.h">
+    <ClInclude Include="kEngine\Math\LinearAlgebra\TransformationMatrix.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Utility\StringManage\ConvertString.h">
@@ -848,7 +866,7 @@
     <ClInclude Include="kEngine\GameObject\StartTimer\StartTimer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Math\Vector4.h">
+    <ClInclude Include="kEngine\Math\LinearAlgebra\Vector4.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="externals\DirectXTex\BC.h">
@@ -1166,7 +1184,7 @@
     <ClInclude Include="GAME\scenes\scene1.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Math\Matrix3x3Math.h">
+    <ClInclude Include="kEngine\Math\LinearAlgebra\Matrix3x3Math.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="GAME\scenes\UITest.h">
@@ -1236,6 +1254,24 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Data\Kinematics\Types\CircleMotionPlane.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Math\LinearAlgebra\Quaternion.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Physics\PhysicalObject.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Physics\Spring.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Physics\PhysicalBall.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Physics\SpringUtility.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\AnimationSystem\Keyframe.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

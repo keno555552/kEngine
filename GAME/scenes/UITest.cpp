@@ -162,24 +162,31 @@ void UITest::Update() {
 }
 
 void UITest::MouseLogic() {
+
 	Ray mouseRay = usingCamera_->ScreenPointToRay(system_->GetMousePosVector2());
 
 	Sphere target;
 	target.center = box_->mainPosition.transform.translate;
 	target.radius = 0.5f;
+	isHit = crashDecision(target, mouseRay);
 
 	AABB aabb;
 	aabb.min = box_->mainPosition.transform.translate - Vector3(0.5f, 0.5f, 0.5f);
 	aabb.max = box_->mainPosition.transform.translate + Vector3(0.5f, 0.5f, 0.5f);
-
-	crashDecision(target, mouseRay) == true ? isHit = true : isHit = false;
+	bool aabbHit = crashDecision(aabb, mouseRay);
 
 	if (isHit) {
 		DebugDraw::AddSphere(target, { 1.0f,0.0f,0.0f,1.0f }, usingCamera_);
 	} else {	
 		DebugDraw::AddSphere(target, { 1.0f,1.0f,0.0f,1.0f }, usingCamera_);
 	}
-	DebugDraw::AddAABB(aabb, { 0.0f,1.0f,0.0f,1.0f });
+
+	if (aabbHit) {
+		DebugDraw::AddAABB(aabb, { 1.0f,0.0f,0.0f,1.0f });
+	} else {	
+		DebugDraw::AddAABB(aabb, { 0.0f,1.0f,0.0f,1.0f });
+	}
+
 }
 
 void UITest::Draw() {

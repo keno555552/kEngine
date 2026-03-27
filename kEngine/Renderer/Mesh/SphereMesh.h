@@ -1,7 +1,7 @@
 #pragma once
 #include "Data/Render/CPUData/VertexData.h"
-#include "Transform.h"
-#include "TransformationMatrix.h"
+#include "LinearAlgebra/Transform.h"
+#include "LinearAlgebra/TransformationMatrix.h"
 #include "VertexResource.h"
 #include "Model.h"
 #include "Config.h"

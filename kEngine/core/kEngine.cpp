@@ -24,6 +24,7 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 	ResourceManager::GetInstance()->Initialize(dxComm.get());
 
 	lightManager = std::make_unique<LightManager>();
+	lightManager->Initialize();
 	cameraManager = std::make_unique<CameraManager>();
 
 	drawDataCollector = std::make_unique<DrawDataCollector>();

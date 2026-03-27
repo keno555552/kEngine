@@ -2,6 +2,7 @@
 #include "externals/nlohmann/json.hpp"
 #include "BaseScene.h"
 #include "config.h"
+#include "Keyframe.h"
 #include "Object/Sprite.h"
 #include "Object/Object.h"
 #include "Geometry/Collision/crashDecision.h"
@@ -155,6 +156,9 @@ private:
 	/// セーブ/ロード関連関数
 	void SaveAnimationData(const AnimationObjectData& animationList, const std::string& filePath);
 	void LoadAnimationData(AnimationObjectData* animationList, const std::string& filePath);
+
+	void LoadAnimationDataFromGltf(AnimationObjectData* animationList, const std::string& filePath);
+	void LoadAnimationDataFromJson(AnimationObjectData* animationList, const std::string& filePath);
 
 #ifdef USE_IMGUI
 	void ImguiPart();

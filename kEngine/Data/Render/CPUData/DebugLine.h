@@ -1,6 +1,6 @@
 #pragma once
-#include "Vector3.h"
-#include "Vector4.h"
+#include "LinearAlgebra/Vector3.h"
+#include "LinearAlgebra/Vector4.h"
 
 struct DebugLine
 {

@@ -2,8 +2,8 @@
 #include <vector>
 #include "MathsIncluder.h"
 #include <memory>
-#include "Transform.h"
-#include "TransformationMatrix.h"
+#include "LinearAlgebra/Transform.h"
+#include "LinearAlgebra/TransformationMatrix.h"
 #include "MaterialConfig.h"
 #include "Data/Render/CPUData/ObjectData.h"
 #include "Data/Render/CPUData/CornerData.h"
