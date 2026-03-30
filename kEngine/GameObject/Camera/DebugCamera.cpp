@@ -31,7 +31,6 @@ void DebugCamera::MouseControlUpdate() {
 
 	///マウスホイール移動
 	float before = cameraTransform.translate.z;
-	cameraTransform.translate.z += system_->GetMouseScroll();
 	if (before != cameraTransform.translate.z) {
 		isMoved = true;
 	}
@@ -41,6 +40,7 @@ void DebugCamera::MouseControlUpdate() {
 	if (system_->GetMouseIsPush(2) && isMouseM_) {
 		cameraTransform.translate.x += (float)system_->GetMousePosXIns() * -0.005f;
 		cameraTransform.translate.y += (float)system_->GetMousePosYIns() * 0.005f;
+		cameraTransform.translate.z += system_->GetMouseScroll();
 		isMoved = true;
 	}
 	//右鍵視覚移動
@@ -54,21 +54,21 @@ void DebugCamera::MouseControlUpdate() {
 
 	/// GamePad操作
 	if (config::GetKeyboardState() && isGamePad_) {
-		if (system_->GetGamepadLStick01X() != 0)				{cameraTransform.translate.x += system_->GetGamepadLStick01X() / 50.0f; isMoved = true;}
-		if (system_->GetGamepadLStick01Y() != 0)				{cameraTransform.translate.z += system_->GetGamepadLStick01Y() / 50.0f; isMoved = true;}
-		if (system_->GetGamepadIsPush(VK_PAD_LSHOULDER) != 0)	{cameraTransform.translate.y += 0.01f; isMoved = true;								   }
-		if (system_->GetGamepadIsPush(VK_PAD_RSHOULDER) != 0)	{cameraTransform.translate.y -= 0.01f; isMoved = true;								   }
-		if (system_->GetGamepadRStick01Y() != 0)				{cameraTransform.rotate.x -= system_->GetGamepadRStick01Y() / 100.0f; isMoved = true;  }
-		if (system_->GetGamepadRStick01X() != 0)				{cameraTransform.rotate.y += system_->GetGamepadRStick01X() / 100.0f; isMoved = true;  }
+		if (system_->GetGamepadLStick01X() != 0) { cameraTransform.translate.x += system_->GetGamepadLStick01X() / 50.0f; isMoved = true; }
+		if (system_->GetGamepadLStick01Y() != 0) { cameraTransform.translate.z += system_->GetGamepadLStick01Y() / 50.0f; isMoved = true; }
+		if (system_->GetGamepadIsPush(VK_PAD_LSHOULDER) != 0) { cameraTransform.translate.y += 0.01f; isMoved = true; }
+		if (system_->GetGamepadIsPush(VK_PAD_RSHOULDER) != 0) { cameraTransform.translate.y -= 0.01f; isMoved = true; }
+		if (system_->GetGamepadRStick01Y() != 0) { cameraTransform.rotate.x -= system_->GetGamepadRStick01Y() / 100.0f; isMoved = true; }
+		if (system_->GetGamepadRStick01X() != 0) { cameraTransform.rotate.y += system_->GetGamepadRStick01X() / 100.0f; isMoved = true; }
 	}
 
 	///元の位置に戻る
 	if (system_->GetIsPush(DIK_R) && isR_) {
-		ResetCamera(); 
+		ResetCamera();
 		isMoved = true;
 	}
 	if (system_->GetGamepadIsPush(VK_PAD_BACK) && isGamePad_) {
-		ResetCamera(); 
+		ResetCamera();
 		isMoved = true;
 	}
 

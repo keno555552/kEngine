@@ -166,7 +166,7 @@ void AnimationEditor::SetupAnimationEditor() {
 void AnimationEditor::SetupAnimationEditorEnd() {
 
 	/// ======= デイタ設定 =======///
-	AnimationObjectData testData{};
+	AnimationNodeData testData{};
 	testData.SetSimpleObject(*targetModel_);
 	animationList_.push_back({ testData });
 	animationUnit_ = std::make_unique<AnimationUnit>(system_);
@@ -215,15 +215,15 @@ void AnimationEditor::UIDraw() {
 void AnimationEditor::mouseMovement() {
 	if (system_->GetMouseTriggerOn(0)) {
 		Vector2 mousePos = system_->GetMousePosVector2();
-		for (int i = 0; i < keyFrameList_.size(); i++) {
-			if (CrashDecisionHitBoxPointBool(&keyFrameList_[i].hitBox_, mousePos)) {
-				pickedKeyFrame_ = keyFrameList_[i].index_;
-				selectedKeyFrame_ = keyFrameList_[i].index_;
-				isPickKeyFrame_ = true;
-				isChooseKeyFrame_ = true;
-				return;
-			}
-		}
+		//for (int i = 0; i < keyFrameList_.size(); i++) {
+		//	if (CrashDecisionHitBoxPointBool(&keyFrameList_[i].hitBox_, mousePos)) {
+		//		pickedKeyFrame_ = keyFrameList_[i].index_;
+		//		selectedKeyFrame_ = keyFrameList_[i].index_;
+		//		isPickKeyFrame_ = true;
+		//		isChooseKeyFrame_ = true;
+		//		return;
+		//	}
+		//}
 	}
 	if (system_->GetMouseTriggerOn(1)) {
 		isChooseKeyFrame_ = false;
@@ -318,47 +318,47 @@ void AnimationEditor::MarkerPart() {
 void AnimationEditor::PingPart() {
 
 	/// ============ ピン移動ロジック ============///
-	if (!keyFrameList_.empty()) {
-		if (pickedKeyFrame_ >= 0) {
-			if (selectedKeyFrame_ < keyFrameList_.size()) {
-
-				/// キーフレームリストから選んでるキーフレームを探す
-				auto iterator = std::find_if(keyFrameList_.begin(), keyFrameList_.end(),
-					[this](const KeyFrame& kf) {
-						return kf.index_ == selectedKeyFrame_;
-					});
-				KeyFrame& listKeyFrame = *iterator;
-
-				int index = int(iterator - keyFrameList_.begin());
-
-				/// 指定されたキーフレームのピンを取得
-				SpritePart& pingSprite = ping_->objectParts_[index];
-
-				/// ピン移動処理
-				float Leight = EndPos_.x - startPos_.x;
-				if (isChooseKeyFrame_) {
-					Vector2 mousePos = system_->GetMousePosVector2();
-					float nowLeight = mousePos.x - startPos_.x - 5;
-					if (nowLeight < 0) nowLeight = 0;
-					if (nowLeight > Leight) nowLeight = Leight;
-					float timeParameter = nowLeight / Leight;
-
-					listKeyFrame.time_ = timeParameter * mainTimer_->maxTime_;
-				}
-
-				/// ピン位置更新
-				float time = listKeyFrame.time_ / mainTimer_->maxTime_;
-				if (time < 0)time = 0;
-				if (time > 1)time = 1;
-				pingSprite.transform.translate.x = startPos_.x + Leight * time + 5;
-				listKeyFrame.hitBox_.midPos.x = pingSprite.transform.translate.x;
-			}
-		}
-	}
-
+	//if (!keyFrameList_.empty()) {
+	//	if (pickedKeyFrame_ >= 0) {
+	//		if (selectedKeyFrame_ < keyFrameList_.size()) {
+	//
+	//			/// キーフレームリストから選んでるキーフレームを探す
+	//			auto iterator = std::find_if(keyFrameList_.begin(), keyFrameList_.end(),
+	//				[this](const KeyFrame& kf) {
+	//					return kf.index_ == selectedKeyFrame_;
+	//				});
+	//			KeyFrame& listKeyFrame = *iterator;
+	//
+	//			int index = int(iterator - keyFrameList_.begin());
+	//
+	//			/// 指定されたキーフレームのピンを取得
+	//			SpritePart& pingSprite = ping_->objectParts_[index];
+	//
+	//			/// ピン移動処理
+	//			float Leight = EndPos_.x - startPos_.x;
+	//			if (isChooseKeyFrame_) {
+	//				Vector2 mousePos = system_->GetMousePosVector2();
+	//				float nowLeight = mousePos.x - startPos_.x - 5;
+	//				if (nowLeight < 0) nowLeight = 0;
+	//				if (nowLeight > Leight) nowLeight = Leight;
+	//				float timeParameter = nowLeight / Leight;
+	//
+	//				listKeyFrame.time_ = timeParameter * mainTimer_->maxTime_;
+	//			}
+	//
+	//			/// ピン位置更新
+	//			float time = listKeyFrame.time_ / mainTimer_->maxTime_;
+	//			if (time < 0)time = 0;
+	//			if (time > 1)time = 1;
+	//			pingSprite.transform.translate.x = startPos_.x + Leight * time + 5;
+	//			listKeyFrame.hitBox_.midPos.x = pingSprite.transform.translate.x;
+	//		}
+	//	}
+	//}
+	
 	SortKeyFrame();
 	AdjuctKeyFrameTexture();
-
+	
 	ping_->Update(camera_);
 }
 
@@ -407,16 +407,16 @@ void AnimationEditor::AdjustMarker() {
 void AnimationEditor::KeyFrameTurnning() {
 	if (isChooseKeyFrame_) {
 		if (system_->GetMouseTriggerOn(0)) {
-
-			auto iterator = std::find_if(keyFrameList_.begin(), keyFrameList_.end(),
-				[this](const KeyFrame& kf) {
-					return kf.index_ == selectedKeyFrame_;
-				});
-			int index = int(iterator - keyFrameList_.begin());
-
-			//SetChooseModel(&animationListKey_.transformData);
-			SetChooseModel(&animationList_[0].keyList[index].transformData);
-			//SetChooseModel(&animationList_[0].keyList[selectedKeyFrame_].transformData);
+	
+			//auto iterator = std::find_if(keyFrameList_.begin(), keyFrameList_.end(),
+			//	[this](const KeyFrame& kf) {
+			//		return kf.index_ == selectedKeyFrame_;
+			//	});
+			//int index = int(iterator - keyFrameList_.begin());
+			//
+			////SetChooseModel(&animationListKey_.transformData);
+			//SetChooseModel(&animationList_[0].keyList[index].transformData);
+			////SetChooseModel(&animationList_[0].keyList[selectedKeyFrame_].transformData);
 		}
 	} else {
 		keyFrameModel_ = nullptr;
@@ -433,19 +433,19 @@ void AnimationEditor::CreateKeyFrame(float time_) {
 			100.0f
 		};
 		ping_->objectParts_.back().anchorPoint = { 5.0f,0.0f };
-
-		KeyFrame newKeyFrame;
-		newKeyFrame.index_ = (int)keyFrameList_.size();
-		newKeyFrame.time_ = mainTimer_->parameter_;
-		newKeyFrame.hitBox_ = {
-			{ ping_->objectParts_.back().transform.translate.x ,
-			  ping_->objectParts_.back().transform.translate.y + 5.0f },
-			10.0f, 10.0f
-		};
-		keyFrameList_.push_back(newKeyFrame);
-
-		animationList_[0].AddKeyFrame();
-
+	
+		//KeyFrame newKeyFrame;
+		//newKeyFrame.index_ = (int)keyFrameList_.size();
+		//newKeyFrame.time_ = mainTimer_->parameter_;
+		//newKeyFrame.hitBox_ = {
+		//	{ ping_->objectParts_.back().transform.translate.x ,
+		//	  ping_->objectParts_.back().transform.translate.y + 5.0f },
+		//	10.0f, 10.0f
+		//};
+		//keyFrameList_.push_back(newKeyFrame);
+	
+		//animationList_[0].AddKeyFrame();
+	
 	} else {
 		ping_->CreateDefaultData();
 		ping_->objectParts_.back().materialConfig->textureHandle = pingTH_;
@@ -457,104 +457,104 @@ void AnimationEditor::CreateKeyFrame(float time_) {
 			100.0f
 		};
 		ping_->objectParts_.back().anchorPoint = { 5.0f,0.0f };
-		KeyFrame newKeyFrame;
-		newKeyFrame.index_ = (int)keyFrameList_.size();
-		newKeyFrame.time_ = time_;
-		newKeyFrame.hitBox_ = {
-			{ ping_->objectParts_.back().transform.translate.x ,
-			  ping_->objectParts_.back().transform.translate.y + 5.0f },
-			10.0f, 10.0f
-		};
-		keyFrameList_.push_back(newKeyFrame);
-
+		//KeyFrame newKeyFrame;
+		//newKeyFrame.index_ = (int)keyFrameList_.size();
+		//newKeyFrame.time_ = time_;
+		//newKeyFrame.hitBox_ = {
+		//	{ ping_->objectParts_.back().transform.translate.x ,
+		//	  ping_->objectParts_.back().transform.translate.y + 5.0f },
+		//	10.0f, 10.0f
+		//};
+		//keyFrameList_.push_back(newKeyFrame);
+	
 		animationList_[0].AddKeyFrame(time_);
 	}
 
 }
 
-void AnimationEditor::DeleteKeyFrame(KeyFrame* keyFrame) {
-	if (keyFrame == nullptr) {
-		auto keyFrameListTarget = std::find_if(keyFrameList_.begin(), keyFrameList_.end(),
-			[&](const KeyFrame& kf) {
-				return kf.index_ == selectedKeyFrame_;
-			}
-		);
-
-		int index = int(keyFrameListTarget - keyFrameList_.begin());
-		if (keyFrameListTarget != keyFrameList_.end())keyFrameList_.erase(keyFrameListTarget);
-
-		for (int i = 0; i < keyFrameList_.size(); ++i) {
-			keyFrameList_[i].index_ = i;
-		}
-
-
-		auto aniamtionListTarget = std::find_if(animationList_[0].keyList.begin(), animationList_[0].keyList.end(),
-			[&](const KeyFrame& kf) {
-				return kf.index_ == selectedKeyFrame_;
-			}
-		);
-		if (aniamtionListTarget != animationList_[0].keyList.end())animationList_[0].keyList.erase(aniamtionListTarget);
-
-		for (auto& objectData : animationList_) {
-			for (int i = 0; i < objectData.keyList.size(); ++i) {
-				objectData.keyList[i].index_ = i;
-			}
-		}
-
-		if (!ping_->objectParts_.empty() && index < ping_->objectParts_.size()) {
-			ping_->objectParts_.erase(ping_->objectParts_.begin() + index);
-		}
-
-
-		pickedKeyFrame_ = -1;
-		selectedKeyFrame_ = -1;
-		isPickKeyFrame_ = false;
-		isChooseKeyFrame_ = false;
-		keyFrameModel_ = nullptr;
-		choosingModel_ = nullptr;
-
-	} else {
-		int targetIndex = keyFrame->index_;
-		auto target = std::find_if(keyFrameList_.begin(), keyFrameList_.end(),
-			[&](const KeyFrame& kf) {
-				return kf.index_ == targetIndex;
-			}
-		);
-	}
-}
+//void AnimationEditor::DeleteKeyFrame(KeyFrame* keyFrame) {
+	//if (keyFrame == nullptr) {
+	//	auto keyFrameListTarget = std::find_if(keyFrameList_.begin(), keyFrameList_.end(),
+	//		[&](const KeyFrame& kf) {
+	//			return kf.index_ == selectedKeyFrame_;
+	//		}
+	//	);
+	//
+	//	int index = int(keyFrameListTarget - keyFrameList_.begin());
+	//	if (keyFrameListTarget != keyFrameList_.end())keyFrameList_.erase(keyFrameListTarget);
+	//
+	//	for (int i = 0; i < keyFrameList_.size(); ++i) {
+	//		keyFrameList_[i].index_ = i;
+	//	}
+	//
+	//
+	//	auto aniamtionListTarget = std::find_if(animationList_[0].keyList.begin(), animationList_[0].keyList.end(),
+	//		[&](const KeyFrame& kf) {
+	//			return kf.index_ == selectedKeyFrame_;
+	//		}
+	//	);
+	//	if (aniamtionListTarget != animationList_[0].keyList.end())animationList_[0].keyList.erase(aniamtionListTarget);
+	//
+	//	for (auto& objectData : animationList_) {
+	//		for (int i = 0; i < objectData.keyList.size(); ++i) {
+	//			objectData.keyList[i].index_ = i;
+	//		}
+	//	}
+	//
+	//	if (!ping_->objectParts_.empty() && index < ping_->objectParts_.size()) {
+	//		ping_->objectParts_.erase(ping_->objectParts_.begin() + index);
+	//	}
+	//
+	//
+	//	pickedKeyFrame_ = -1;
+	//	selectedKeyFrame_ = -1;
+	//	isPickKeyFrame_ = false;
+	//	isChooseKeyFrame_ = false;
+	//	keyFrameModel_ = nullptr;
+	//	choosingModel_ = nullptr;
+	//
+	//} else {
+	//	int targetIndex = keyFrame->index_;
+	//	auto target = std::find_if(keyFrameList_.begin(), keyFrameList_.end(),
+	//		[&](const KeyFrame& kf) {
+	//			return kf.index_ == targetIndex;
+	//		}
+	//	);
+	//}
+//}
 
 void AnimationEditor::SortKeyFrame() {
 
-	std::sort(keyFrameList_.begin(), keyFrameList_.end(),
-		[](const KeyFrame& a, const KeyFrame& b) {
-			return a.time_ < b.time_;
-		}
-	);
-
-	std::sort(ping_->objectParts_.begin(), ping_->objectParts_.end(),
-		[](const SpritePart& a, const SpritePart& b) {
-			return a.transform.translate.x < b.transform.translate.x;
-		}
-	);
-
-	for (auto& objectData : animationList_) {
-
-		for (int i = 0; i < objectData.keyList.size(); i++) {
-			if (keyFrameList_[i].time_ != objectData.keyList[i].time_) {
-				objectData.keyList[i].time_ = keyFrameList_[i].time_;
-			}
-		}
-
-		for (int i = 0; i < keyFrameList_.size(); i++) {
-			auto it = std::find_if(objectData.keyList.begin(), objectData.keyList.end(),
-				[&](const KeyFrame& kf) { return kf.index_ == keyFrameList_[i].index_; });
-			if (it != objectData.keyList.end()) {
-				// 把它移動到正確位置
-				std::iter_swap(objectData.keyList.begin() + i, it);
-			}
-		}
-
-	}
+	//std::sort(keyFrameList_.begin(), keyFrameList_.end(),
+	//	[](const KeyFrame& a, const KeyFrame& b) {
+	//		return a.time_ < b.time_;
+	//	}
+	//);
+	//
+	//std::sort(ping_->objectParts_.begin(), ping_->objectParts_.end(),
+	//	[](const SpritePart& a, const SpritePart& b) {
+	//		return a.transform.translate.x < b.transform.translate.x;
+	//	}
+	//);
+	//
+	//for (auto& objectData : animationList_) {
+	//
+	//	for (int i = 0; i < objectData.keyList.size(); i++) {
+	//		if (keyFrameList_[i].time_ != objectData.keyList[i].time_) {
+	//			objectData.keyList[i].time_ = keyFrameList_[i].time_;
+	//		}
+	//	}
+	//
+	//	for (int i = 0; i < keyFrameList_.size(); i++) {
+	//		auto it = std::find_if(objectData.keyList.begin(), objectData.keyList.end(),
+	//			[&](const KeyFrame& kf) { return kf.index_ == keyFrameList_[i].index_; });
+	//		if (it != objectData.keyList.end()) {
+	//			// 把它移動到正確位置
+	//			std::iter_swap(objectData.keyList.begin() + i, it);
+	//		}
+	//	}
+	//
+	//}
 }
 
 void AnimationEditor::AdjuctKeyFrameTexture() {
@@ -571,57 +571,57 @@ void AnimationEditor::AdjuctKeyFrameTexture() {
 	}
 }
 
-void AnimationEditor::SaveAnimationData(const AnimationObjectData& animationList, const std::string& filePath) {
+void AnimationEditor::SaveAnimationData(const AnimationNodeData& animationList, const std::string& filePath) {
 	nlohmann::json file{};
-
-	file["AnimationID"] = animationList.animationID;
-	file["KeyFrameNum"] = animationList.keyList.size();
-	file["ObjectPartNum"] = animationList.SimpleObject.objectParts_.size();
-	for (const auto& kf : animationList.keyList) {
-		nlohmann::json keyFrameJson;
-		keyFrameJson["Index"] = kf.index_;
-		keyFrameJson["Time"] = kf.time_;
-		keyFrameJson["AnimationType"] = (int)kf.animationType_;
-		keyFrameJson["EaseRate"] = kf.easeRate_;
-
-		// MainPosition
-		keyFrameJson["TransformData"]["MainPosition"] = {
-			{"TranslateX", kf.transformData.mainPosition.transform.translate.x},
-			{"TranslateY", kf.transformData.mainPosition.transform.translate.y},
-			{"TranslateZ", kf.transformData.mainPosition.transform.translate.z},
-			{"RotateX",    kf.transformData.mainPosition.transform.rotate.x},
-			{"RotateY",    kf.transformData.mainPosition.transform.rotate.y},
-			{"RotateZ",    kf.transformData.mainPosition.transform.rotate.z},
-			{"ScaleX",     kf.transformData.mainPosition.transform.scale.x},
-			{"ScaleY",     kf.transformData.mainPosition.transform.scale.y},
-			{"ScaleZ",     kf.transformData.mainPosition.transform.scale.z}
-		};
-
-		// ObjectParts
-		for (const auto& part : kf.transformData.objectParts_) {
-			keyFrameJson["TransformData"]["ObjectPart"].push_back({
-				{"TranslateX", part.transform.translate.x},
-				{"TranslateY", part.transform.translate.y},
-				{"TranslateZ", part.transform.translate.z},
-				{"RotateX",    part.transform.rotate.x},
-				{"RotateY",    part.transform.rotate.y},
-				{"RotateZ",    part.transform.rotate.z},
-				{"ScaleX",     part.transform.scale.x},
-				{"ScaleY",     part.transform.scale.y},
-				{"ScaleZ",     part.transform.scale.z}
-				});
-		}
-
-		file["KeyFrameList"].push_back(keyFrameJson);
-	}
-
-	std::ofstream output(filePath);
-	output << file.dump(4);
+	
+	//file["AnimationID"] = animationList.animationNodeID;
+	//file["KeyFrameNum"] = animationList.keyList.size();
+	//file["ObjectPartNum"] = animationList.SimpleObject.objectParts_.size();
+	//for (const auto& kf : animationList.keyList) {
+	//	nlohmann::json keyFrameJson;
+	//	keyFrameJson["Index"] = kf.index_;
+	//	keyFrameJson["Time"] = kf.time_;
+	//	keyFrameJson["AnimationType"] = (int)kf.animationType_;
+	//	keyFrameJson["EaseRate"] = kf.easeRate_;
+	//
+	//	// MainPosition
+	//	keyFrameJson["TransformData"]["MainPosition"] = {
+	//		{"TranslateX", kf.transformData.mainPosition.transform.translate.x},
+	//		{"TranslateY", kf.transformData.mainPosition.transform.translate.y},
+	//		{"TranslateZ", kf.transformData.mainPosition.transform.translate.z},
+	//		{"RotateX",    kf.transformData.mainPosition.transform.rotate.x},
+	//		{"RotateY",    kf.transformData.mainPosition.transform.rotate.y},
+	//		{"RotateZ",    kf.transformData.mainPosition.transform.rotate.z},
+	//		{"ScaleX",     kf.transformData.mainPosition.transform.scale.x},
+	//		{"ScaleY",     kf.transformData.mainPosition.transform.scale.y},
+	//		{"ScaleZ",     kf.transformData.mainPosition.transform.scale.z}
+	//	};
+	//
+	//	// ObjectParts
+	//	for (const auto& part : kf.transformData.objectParts_) {
+	//		keyFrameJson["TransformData"]["ObjectPart"].push_back({
+	//			{"TranslateX", part.transform.translate.x},
+	//			{"TranslateY", part.transform.translate.y},
+	//			{"TranslateZ", part.transform.translate.z},
+	//			{"RotateX",    part.transform.rotate.x},
+	//			{"RotateY",    part.transform.rotate.y},
+	//			{"RotateZ",    part.transform.rotate.z},
+	//			{"ScaleX",     part.transform.scale.x},
+	//			{"ScaleY",     part.transform.scale.y},
+	//			{"ScaleZ",     part.transform.scale.z}
+	//			});
+	//	}
+	//
+	//	file["KeyFrameList"].push_back(keyFrameJson);
+	//}
+	//
+	//std::ofstream output(filePath);
+	//output << file.dump(4);
 }
 
 /// ======================= アニメーションデータ読み込関連 ========================///
 
-void AnimationEditor::LoadAnimationData(AnimationObjectData* animationList, const std::string& filePath) {
+void AnimationEditor::LoadAnimationData(AnimationNodeData* animationList, const std::string& filePath) {
 	size_t dotPos = filePath.rfind('.');
 
 	/// ファイルが変
@@ -646,7 +646,7 @@ void AnimationEditor::LoadAnimationData(AnimationObjectData* animationList, cons
 	Logger::Log("[kError] AE :: File not support.");
 }
 
-void AnimationEditor::LoadAnimationDataFromGltf(AnimationObjectData* animationList, const std::string& filePath) {
+void AnimationEditor::LoadAnimationDataFromGltf(AnimationNodeData* animationList, const std::string& filePath) {
 
 	std::ifstream input(filePath);
 	if (!input.is_open()) {
@@ -666,90 +666,90 @@ void AnimationEditor::LoadAnimationDataFromGltf(AnimationObjectData* animationLi
 
 	aiAnimation* animationAssimp = scene->mAnimations[0];
 	
-	animationList->duration = float(animationAssimp->mDuration / animationAssimp->mTicksPerSecond);
+	//animationList->duration = float(animationAssimp->mDuration / animationAssimp->mTicksPerSecond);
 
 }
 
-void AnimationEditor::LoadAnimationDataFromJson(AnimationObjectData* animationList, const std::string& filePath) {
-	std::ifstream input(filePath);
-	if (!input.is_open()) {
-		throw std::runtime_error("Failed to open file: " + filePath);
-	}
-
-	nlohmann::json file;
-	input >> file;  // 讀取並解析 JSON
-
-	// 基本資訊
-	animationList->keyList.clear();
-	animationList->animationID = file["AnimationID"].get<int>();
-
-	// KeyFrameList
-	for (const auto& kfJson : file["KeyFrameList"]) {
-		KeyFrame kf;
-		kf.index_ = kfJson["Index"].get<int>();
-		kf.time_ = kfJson["Time"].get<float>();
-		kf.animationType_ = static_cast<AnimationType>(kfJson["AnimationType"].get<int>());
-		kf.easeRate_ = kfJson["EaseRate"].get<float>();
-
-		// MainPosition
-		auto mp = kfJson["TransformData"]["MainPosition"];
-		kf.transformData.mainPosition.transform.translate.x = mp["TranslateX"].get<float>();
-		kf.transformData.mainPosition.transform.translate.y = mp["TranslateY"].get<float>();
-		kf.transformData.mainPosition.transform.translate.z = mp["TranslateZ"].get<float>();
-		kf.transformData.mainPosition.transform.rotate.x = mp["RotateX"].get<float>();
-		kf.transformData.mainPosition.transform.rotate.y = mp["RotateY"].get<float>();
-		kf.transformData.mainPosition.transform.rotate.z = mp["RotateZ"].get<float>();
-		kf.transformData.mainPosition.transform.scale.x = mp["ScaleX"].get<float>();
-		kf.transformData.mainPosition.transform.scale.y = mp["ScaleY"].get<float>();
-		kf.transformData.mainPosition.transform.scale.z = mp["ScaleZ"].get<float>();
-
-		// ObjectParts
-		for (const auto& partJson : kfJson["TransformData"]["ObjectPart"]) {
-			ObjectPart part;
-			part.transform.translate.x = partJson["TranslateX"].get<float>();
-			part.transform.translate.y = partJson["TranslateY"].get<float>();
-			part.transform.translate.z = partJson["TranslateZ"].get<float>();
-			part.transform.rotate.x = partJson["RotateX"].get<float>();
-			part.transform.rotate.y = partJson["RotateY"].get<float>();
-			part.transform.rotate.z = partJson["RotateZ"].get<float>();
-			part.transform.scale.x = partJson["ScaleX"].get<float>();
-			part.transform.scale.y = partJson["ScaleY"].get<float>();
-			part.transform.scale.z = partJson["ScaleZ"].get<float>();
-
-			kf.transformData.objectParts_.push_back(part);
-		}
-
-		animationList->keyList.push_back(kf);
-	}
-	keyFrameList_.clear();
-	for (auto& kf : animationList->keyList) {
-		KeyFrame newKf;
-		newKf.index_ = kf.index_;
-		newKf.time_ = kf.time_;
-		newKf.animationType_ = kf.animationType_;
-		newKf.easeRate_ = kf.easeRate_;
-		newKf.transformData = kf.transformData;
-		newKf.hitBox_ = {
-			{ startPos_.x + ((EndPos_.x - startPos_.x) / mainTimer_->maxTime_) * kf.time_,
-			  (float)config::GetClientHeight() - 10.0f + 5.0f },
-			10.0f, 10.0f
-		};
-		keyFrameList_.push_back(newKf);
-	}
-
-	ping_->objectParts_.clear();
-	for (const auto& kf : keyFrameList_) {
-		ping_->CreateDefaultData();
-		float Leight = EndPos_.x - startPos_.x;
-		float timeParameter = kf.time_ / mainTimer_->maxTime_;
-		ping_->objectParts_.back().materialConfig->textureHandle = pingTH_;
-		ping_->objectParts_.back().transform.translate = {
-			startPos_.x + Leight * timeParameter,
-			(float)config::GetClientHeight() - 10.0f,
-			100.0f
-		};
-		ping_->objectParts_.back().anchorPoint = { 5.0f,0.0f };
-	}
+void AnimationEditor::LoadAnimationDataFromJson(AnimationNodeData* animationList, const std::string& filePath) {
+	//std::ifstream input(filePath);
+	//if (!input.is_open()) {
+	//	throw std::runtime_error("Failed to open file: " + filePath);
+	//}
+	//
+	//nlohmann::json file;
+	//input >> file;  // 讀取並解析 JSON
+	//
+	//// 基本資訊
+	//animationList->keyList.clear();
+	//animationList->animationNodeID = file["AnimationID"].get<int>();
+	//
+	//// KeyFrameList
+	//for (const auto& kfJson : file["KeyFrameList"]) {
+	//	KeyFrame kf;
+	//	kf.index_ = kfJson["Index"].get<int>();
+	//	kf.time_ = kfJson["Time"].get<float>();
+	//	kf.animationType_ = static_cast<AnimationType>(kfJson["AnimationType"].get<int>());
+	//	kf.easeRate_ = kfJson["EaseRate"].get<float>();
+	//
+	//	// MainPosition
+	//	auto mp = kfJson["TransformData"]["MainPosition"];
+	//	kf.transformData.mainPosition.transform.translate.x = mp["TranslateX"].get<float>();
+	//	kf.transformData.mainPosition.transform.translate.y = mp["TranslateY"].get<float>();
+	//	kf.transformData.mainPosition.transform.translate.z = mp["TranslateZ"].get<float>();
+	//	kf.transformData.mainPosition.transform.rotate.x = mp["RotateX"].get<float>();
+	//	kf.transformData.mainPosition.transform.rotate.y = mp["RotateY"].get<float>();
+	//	kf.transformData.mainPosition.transform.rotate.z = mp["RotateZ"].get<float>();
+	//	kf.transformData.mainPosition.transform.scale.x = mp["ScaleX"].get<float>();
+	//	kf.transformData.mainPosition.transform.scale.y = mp["ScaleY"].get<float>();
+	//	kf.transformData.mainPosition.transform.scale.z = mp["ScaleZ"].get<float>();
+	//
+	//	// ObjectParts
+	//	for (const auto& partJson : kfJson["TransformData"]["ObjectPart"]) {
+	//		ObjectPart part;
+	//		part.transform.translate.x = partJson["TranslateX"].get<float>();
+	//		part.transform.translate.y = partJson["TranslateY"].get<float>();
+	//		part.transform.translate.z = partJson["TranslateZ"].get<float>();
+	//		part.transform.rotate.x = partJson["RotateX"].get<float>();
+	//		part.transform.rotate.y = partJson["RotateY"].get<float>();
+	//		part.transform.rotate.z = partJson["RotateZ"].get<float>();
+	//		part.transform.scale.x = partJson["ScaleX"].get<float>();
+	//		part.transform.scale.y = partJson["ScaleY"].get<float>();
+	//		part.transform.scale.z = partJson["ScaleZ"].get<float>();
+	//
+	//		kf.transformData.objectParts_.push_back(part);
+	//	}
+	//
+	//	animationList->keyList.push_back(kf);
+	//}
+	//keyFrameList_.clear();
+	//for (auto& kf : animationList->keyList) {
+	//	KeyFrame newKf;
+	//	newKf.index_ = kf.index_;
+	//	newKf.time_ = kf.time_;
+	//	newKf.animationType_ = kf.animationType_;
+	//	newKf.easeRate_ = kf.easeRate_;
+	//	newKf.transformData = kf.transformData;
+	//	newKf.hitBox_ = {
+	//		{ startPos_.x + ((EndPos_.x - startPos_.x) / mainTimer_->maxTime_) * kf.time_,
+	//		  (float)config::GetClientHeight() - 10.0f + 5.0f },
+	//		10.0f, 10.0f
+	//	};
+	//	keyFrameList_.push_back(newKf);
+	//}
+	//
+	//ping_->objectParts_.clear();
+	//for (const auto& kf : keyFrameList_) {
+	//	ping_->CreateDefaultData();
+	//	float Leight = EndPos_.x - startPos_.x;
+	//	float timeParameter = kf.time_ / mainTimer_->maxTime_;
+	//	ping_->objectParts_.back().materialConfig->textureHandle = pingTH_;
+	//	ping_->objectParts_.back().transform.translate = {
+	//		startPos_.x + Leight * timeParameter,
+	//		(float)config::GetClientHeight() - 10.0f,
+	//		100.0f
+	//	};
+	//	ping_->objectParts_.back().anchorPoint = { 5.0f,0.0f };
+	//}
 }
 
 #ifdef USE_IMGUI
@@ -792,30 +792,30 @@ void AnimationEditor::ImguiPart() {
 
 	ImGui::Begin("AnimtionEditor");
 	if (ImGui::CollapsingHeader("pingInformation", ImGuiTreeNodeFlags_DefaultOpen)) {
-		ImGui::Text("AllKeyFrame Num: %d", (int)keyFrameList_.size());
+		//ImGui::Text("AllKeyFrame Num: %d", (int)keyFrameList_.size());
 		if (selectedKeyFrame_ != -1) {
 			ImGui::Text("SelectKeyFrame: %d", selectedKeyFrame_);
-			auto iterator = std::find_if(keyFrameList_.begin(), keyFrameList_.end(),
-				[this](const KeyFrame& kf) {
-					return kf.index_ == selectedKeyFrame_;
-				});
-			KeyFrame& listKeyFrame = *iterator;
-
-			ImGui::SliderFloat("KeyFrameTime", &listKeyFrame.time_, 0, mainTimer_->maxTime_);
-
-			auto iterator2 = std::find_if(animationList_[0].keyList.begin(), animationList_[0].keyList.end(),
-				[this](const KeyFrame& kf) {
-					return kf.index_ == selectedKeyFrame_;
-				});
-			KeyFrame& animationListKeyFrame = *iterator2;
-			const char* animationType[] = { "LINEARITY", "EASY_IN","EASY_OUT","EASY_IN_OUT","EASY_IN_BACK","EASY_OUT_BACK" };
-			int typeIndex = static_cast<int>(animationListKeyFrame.animationType_);
-			if (ImGui::Combo("AnimationType", &typeIndex, animationType, IM_ARRAYSIZE(animationType))) {
-				animationListKeyFrame.animationType_ = static_cast<AnimationType>(typeIndex);
-			}
-			if (animationListKeyFrame.animationType_ != AnimationType::LINEARITY) {
-				ImGui::SliderFloat("EaseRate", &animationListKeyFrame.easeRate_, 0.0f, 5.0f);
-			}
+			//auto iterator = std::find_if(keyFrameList_.begin(), keyFrameList_.end(),
+			//	[this](const KeyFrame& kf) {
+			//		return kf.index_ == selectedKeyFrame_;
+			//	});
+			//KeyFrame& listKeyFrame = *iterator;
+			//
+			//ImGui::SliderFloat("KeyFrameTime", &listKeyFrame.time_, 0, mainTimer_->maxTime_);
+			//
+			//auto iterator2 = std::find_if(animationList_[0].keyList.begin(), animationList_[0].keyList.end(),
+			//	[this](const KeyFrame& kf) {
+			//		return kf.index_ == selectedKeyFrame_;
+			//	});
+			//KeyFrame& animationListKeyFrame = *iterator2;
+			//const char* animationType[] = { "LINEARITY", "EASY_IN","EASY_OUT","EASY_IN_OUT","EASY_IN_BACK","EASY_OUT_BACK" };
+			//int typeIndex = static_cast<int>(animationListKeyFrame.animationType_);
+			//if (ImGui::Combo("AnimationType", &typeIndex, animationType, IM_ARRAYSIZE(animationType))) {
+			//	animationListKeyFrame.animationType_ = static_cast<AnimationType>(typeIndex);
+			//}
+			//if (animationListKeyFrame.animationType_ != AnimationType::LINEARITY) {
+			//	ImGui::SliderFloat("EaseRate", &animationListKeyFrame.easeRate_, 0.0f, 5.0f);
+			//}
 		} else {
 			ImGui::Text("SelectKeyFrame: --");
 			ImGui::Text("KeyFrame Time: --");
@@ -824,13 +824,13 @@ void AnimationEditor::ImguiPart() {
 			CreateKeyFrame();
 		}
 		if (ImGui::Button("Delete KeyFrame")) {
-			DeleteKeyFrame();
+			//DeleteKeyFrame();
 		}
-
-		ImGui::Text("KeyFrame num: %d", keyFrameList_.size());
+	
+		//ImGui::Text("KeyFrame num: %d", keyFrameList_.size());
 		ImGui::Text("ObjectPart num: %d", ping_->objectParts_.size());
 		ImGui::Text("animationObjectDataList_ num: %d", animationList_.size());
-
+	
 	}
 	if (keyFrameModel_ != nullptr) {
 		if (ImGui::CollapsingHeader("Object", ImGuiTreeNodeFlags_DefaultOpen)) {

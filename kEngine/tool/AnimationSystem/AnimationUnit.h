@@ -3,20 +3,10 @@
 #include "kEngine.h"
 #include "Transform.h"
 #include "Geometry/Collision/crashDecision.h"
+#include "Data/Animation/Animation.h"
+#include "Data/Animation/AnimationNodeData.h"
 #include "Object/Object.h"
-#include "Keyframe.h"
-
-struct AnimationObjectData {
-	int animationID{};
-	std::vector <KeyFrame> keyList{};
-	AnimationObjectData* parent_ = nullptr;
-
-	float duration = 0;
-
-	Object SimpleObject{};
-	void SetSimpleObject(const Object& obj);
-	void AddKeyFrame(float time_ = 0);
-};
+#include "Data/Animation/Keyframe.h"
 
 class AnimationUnit
 {
@@ -24,7 +14,7 @@ public:
 	AnimationUnit(kEngine* system);
 	~AnimationUnit();
 
-	void ReadAnimationData(AnimationObjectData* animationData);
+	void ReadAnimationData(AnimationNodeData* animationData);
 	void SetTime(float time_);
 	void TakeControlObject(Object* object);
 	void RelistControlObject();
@@ -39,7 +29,7 @@ public:
 private:
 	kEngine* system_{};
 	
-	AnimationObjectData* animationData_{};
+	AnimationNodeData* animationData_{};
 	float allMaxTime_{};
 	float allStartTime_{};
 
@@ -55,7 +45,7 @@ private:
 private:
 	bool CheckObjectNumMeet(Object* target);
 
-	void TunningTime();
+	void TunningTime() {};
 	void ResetTimer();
 
 	void UpdateInstanceObject();

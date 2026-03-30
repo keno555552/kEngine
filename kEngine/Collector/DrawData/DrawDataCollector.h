@@ -99,42 +99,6 @@ public:
 	uint32_t GetLightCount();
 
 private:
-
-	/// =========== DebugLine 関連 ============///
-	
-	TransformationMatrix DLWVPAdjustment(DebugLine* debugLine);
-	
-	/// ============ スプライト関連 ==============///
-	/// ｚバッファ調整
-	float SpriteLayerManagement(float zBuffer);
-	/// フォローマトリックス作成
-	Matrix4x4 MakeFollowObjectMatrix2D(SpriteData* sprite);
-	/// WVP調整
-	TransformationMatrix SpriteWVPAdjustment2D(SpriteData& sprite, SpritePart& part);
-	/// バケット追加
-	void AddSpriteToBucket2D(RenderData& renderData, int meshID);
-
-	/// =============== 3D関連 ================///
-	/// フォローマトリックス作成 
-	Matrix4x4 MakeFollowObjectMatrix3D(ObjectData* object);
-	/// WVP調整
-	TransformationMatrix ObjectWVPAdjustment3D(ObjectData& object, ObjectPart& part, ModelData modelData);
-	/// バケット追加
-	void AddObjectToBucket3D(RenderData& renderData, int meshID);
-
-	/// ============ パーティクル関連 ============///
-	/// フォローマトリックス作成 
-	// 3Dのフォローマトリックスを流用
-	/// WVP調整
-	TransformationMatrix ObjectWVPAdjustmentPC(ObjectData& object, ObjectPart& part, ModelData modelData);
-	/// バケット追加
-	void AddObjectToBucketPC(RenderData& renderData);
-
-	/// ============ マテリアル関連 ==============///
-
-	uint32_t PSODecision(MaterialConfig& material);
-
-private:
 	InstanceManager* instanceManager_ = nullptr; /*借り*/
 
 	/// ============ Light関連 ==============///
@@ -190,5 +154,47 @@ private:
 	int instanceCounter2D_ = 0;
 	int instanceCounter3D_ = 0;
 	int instanceCounterParticleC_ = 0;
+
+private:
+
+	/// =========== DebugLine 関連 ============///
+	
+	TransformationMatrix DLWVPAdjustment(DebugLine* debugLine);
+	
+	/// ============ スプライト関連 ==============///
+	/// ｚバッファ調整
+	float SpriteLayerManagement(float zBuffer);
+	/// フォローマトリックス作成
+	Matrix4x4 MakeFollowObjectMatrix2D(SpriteData* sprite);
+	/// WVP調整
+	TransformationMatrix SpriteWVPAdjustment2D(SpriteData& sprite, SpritePart& part);
+	/// バケット追加
+	void AddSpriteToBucket2D(RenderData& renderData, int meshID);
+
+	/// =============== 3D関連 ================///
+	/// フォローマトリックス作成 
+	Matrix4x4 MakeFollowObjectMatrix3D(ObjectData* object);
+	/// Animationマトリックス作成
+	Matrix4x4 MakeAnimationMatrix(ObjectPart& part);
+	/// WVP調整
+	TransformationMatrix ObjectWVPAdjustment3D(ObjectData& object, ObjectPart& part, ModelData modelData);
+	/// バケット追加
+	void AddObjectToBucket3D(RenderData& renderData, int meshID);
+	/// rotateのダーティフラグを確認して、必要ならば回転行列を作成する
+	void DirtyEulerToQuat(ObjectPart& part);
+	void DirtyEulerToQuat(ObjectData& part);
+
+	/// ============ パーティクル関連 ============///
+	/// フォローマトリックス作成 
+	// 3Dのフォローマトリックスを流用
+	/// WVP調整
+	TransformationMatrix ObjectWVPAdjustmentPC(ObjectData& object, ObjectPart& part, ModelData modelData);
+	/// バケット追加
+	void AddObjectToBucketPC(RenderData& renderData);
+
+	/// ============ マテリアル関連 ==============///
+
+	uint32_t PSODecision(MaterialConfig& material);
+
 
 };

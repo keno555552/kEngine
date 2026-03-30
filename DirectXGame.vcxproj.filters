@@ -591,7 +591,13 @@
     <ClCompile Include="kEngine\Physics\SpringUtility.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Tool\AnimationSystem\Keyframe.cpp">
+    <ClCompile Include="kEngine\Data\Animation\Keyframe.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Animation\Animation.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Animation\AnimationNodeData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1271,7 +1277,13 @@
     <ClInclude Include="kEngine\Physics\SpringUtility.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Tool\AnimationSystem\Keyframe.h">
+    <ClInclude Include="kEngine\Data\Animation\Keyframe.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Animation\Animation.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Animation\AnimationNodeData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

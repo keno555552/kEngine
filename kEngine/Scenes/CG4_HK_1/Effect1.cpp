@@ -94,7 +94,7 @@ void Effect1::ImguiPart() {
 	ImGui::SliderFloat3("CameraRotate", &CameraRotation.x , -1.0f, 1.0f);
 	ImGui::End();
 
-	usingCamera_->SetCamera(Transform{ Vector3(1.0f,1.0f,1.0f),CameraRotation,CameraPosition });
+	//usingCamera_->SetCamera(Transform{ Vector3(1.0f,1.0f,1.0f),CameraRotation,CameraPosition });
 
 	{
 		ImGui::Begin("SpherePos");

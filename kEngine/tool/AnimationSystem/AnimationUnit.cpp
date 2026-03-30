@@ -16,21 +16,20 @@ AnimationUnit::~AnimationUnit() {
 	instanceObject_.reset();
 }
 
-void AnimationUnit::ReadAnimationData(AnimationObjectData* animationData) {
+void AnimationUnit::ReadAnimationData(AnimationNodeData* animationData) {
 	animationData_ = animationData;
-	if (!animationData->keyList.empty()) {
-		allMaxTime_ = animationData->keyList.back().time_;
-		allStartTime_ = animationData->keyList.front().time_;
-		ResetTimer();
-	}
+	//if (!animationData->keyList.empty()) {
+	//	allMaxTime_ = animationData->keyList.back().time_;
+	//	allStartTime_ = animationData->keyList.front().time_;
+	//	ResetTimer();
+	//}
 }
-
 
 
 void AnimationUnit::SetTime(float time_) {
 	nowTime_ = time_;
-	allStartTime_ = animationData_->keyList.front().time_;
-	allMaxTime_ = animationData_->keyList.back().time_;
+	//allStartTime_ = animationData_->keyList.front().time_;
+	//allMaxTime_ = animationData_->keyList.back().time_;
 	if (nowTime_ < allStartTime_)nowTime_ = allStartTime_;
 	if (nowTime_ > allMaxTime_)nowTime_ = allMaxTime_;
 }
@@ -63,67 +62,42 @@ void AnimationUnit::KariDraw() {
 }
 
 bool AnimationUnit::CheckObjectNumMeet(Object* target) {
-	if (target->objectParts_.size() != animationData_->keyList[0].transformData.objectParts_.size())return false;
+	//if (target->objectParts_.size() != animationData_->keyList[0].transformData.objectParts_.size())return false;
 	return true;
-}
-
-void AnimationUnit::TunningTime() {
-	for (size_t i = 0; i + 1 < animationData_->keyList.size(); ++i) {
-		const auto& current = animationData_->keyList[i];
-		const auto& next = animationData_->keyList[i + 1];
-
-		if (nowTime_ >= current.time_ && nowTime_ < next.time_) {
-			usingKeyFrameIndex_ = static_cast<int>(i);
-			usingStartTime_ = current.time_;
-			usingEndTime_ = next.time_;
-
-			break;
-		}
-	}
-
-	if (nowTime_ >= animationData_->keyList.back().time_) {
-		usingKeyFrameIndex_ = static_cast<int>(animationData_->keyList.size() - 1);
-		usingStartTime_ = animationData_->keyList.back().time_;
-		usingEndTime_ = allMaxTime_;
-	}
-
-	time_->maxTime_ = usingEndTime_ - usingStartTime_;
-	time_->parameter_ = nowTime_ - usingStartTime_;
-	if (usingEndTime_ == usingStartTime_)time_->parameter_ = usingEndTime_;
 }
 
 
 void AnimationUnit::ResetTimer() {
 	usingStartTime_ = 0;
-	usingEndTime_ = animationData_->keyList.front().time_;
+	//usingEndTime_ = animationData_->keyList.front().time_;
 }
 
 void AnimationUnit::UpdateInstanceObject() {
 	float T = ChangeEasing(AnimationType::LINEARITY);
 	int index = usingKeyFrameIndex_;
-	if (index + 1 >= animationData_->keyList.size())index -= 1;
-	KeyFrame usingKeyFrame = animationData_->keyList[index + 1];
-	KeyFrame frontKeyFrame = animationData_->keyList[index];
+	//if (index + 1 >= animationData_->keyList.size())index -= 1;
+	//KeyFrame usingKeyFrame = animationData_->keyList[index + 1];
+	//KeyFrame frontKeyFrame = animationData_->keyList[index];
 	
-	if (instanceObject_ != nullptr) {
-		T = ChangeEasing(usingKeyFrame.animationType_, (float)usingKeyFrame.easeRate_);
-	
-		instanceObject_->mainPosition.transform = {
-			frontKeyFrame.transformData.mainPosition.transform.scale * (1 - T) + usingKeyFrame.transformData.mainPosition.transform.scale * T,
-			frontKeyFrame.transformData.mainPosition.transform.rotate * (1 - T) + usingKeyFrame.transformData.mainPosition.transform.rotate * T,
-			frontKeyFrame.transformData.mainPosition.transform.translate * (1 - T) + usingKeyFrame.transformData.mainPosition.transform.translate * T
-		};
-	
-		int partNum = 0;
-		for (auto& part : instanceObject_->objectParts_) {
-			instanceObject_->objectParts_[partNum].transform = {
-				frontKeyFrame.transformData.objectParts_[partNum].transform.scale * (1 - T) + usingKeyFrame.transformData.objectParts_[partNum].transform.scale * T,
-				frontKeyFrame.transformData.objectParts_[partNum].transform.rotate * (1 - T) + usingKeyFrame.transformData.objectParts_[partNum].transform.rotate * T,
-				frontKeyFrame.transformData.objectParts_[partNum].transform.translate * (1 - T) + usingKeyFrame.transformData.objectParts_[partNum].transform.translate * T
-			};
-			partNum++;
-		}
-	}
+	//if (instanceObject_ != nullptr) {
+	//	T = ChangeEasing(usingKeyFrame.animationType_, (float)usingKeyFrame.easeRate_);
+	//
+	//	instanceObject_->mainPosition.transform = {
+	//		frontKeyFrame.transformData.mainPosition.transform.scale * (1 - T) + usingKeyFrame.transformData.mainPosition.transform.scale * T,
+	//		frontKeyFrame.transformData.mainPosition.transform.rotate * (1 - T) + usingKeyFrame.transformData.mainPosition.transform.rotate * T,
+	//		frontKeyFrame.transformData.mainPosition.transform.translate * (1 - T) + usingKeyFrame.transformData.mainPosition.transform.translate * T
+	//	};
+	//
+	//	int partNum = 0;
+	//	for (auto& part : instanceObject_->objectParts_) {
+	//		instanceObject_->objectParts_[partNum].transform = {
+	//			frontKeyFrame.transformData.objectParts_[partNum].transform.scale * (1 - T) + usingKeyFrame.transformData.objectParts_[partNum].transform.scale * T,
+	//			frontKeyFrame.transformData.objectParts_[partNum].transform.rotate * (1 - T) + usingKeyFrame.transformData.objectParts_[partNum].transform.rotate * T,
+	//			frontKeyFrame.transformData.objectParts_[partNum].transform.translate * (1 - T) + usingKeyFrame.transformData.objectParts_[partNum].transform.translate * T
+	//		};
+	//		partNum++;
+	//	}
+	//}
 }
 
 float AnimationUnit::ChangeEasing(AnimationType type, float R) {
@@ -203,33 +177,41 @@ void AnimationUnit::ControlleObject(Camera* camera) {
 	//}
 }
 
-void AnimationObjectData::SetSimpleObject(const Object& obj) {
+void AnimationNodeData::SetSimpleObject(const Object& obj) {
 	Object obje = obj;
 	SimpleObject.CopyObject(&obje);
 }
 
-void AnimationObjectData::AddKeyFrame(float time_) {
-	KeyFrame keyFrame;
-	if (time_ > 0.0f)keyFrame.time_ = time_;
-	keyFrame.index_ = (int)keyList.size();
-	keyFrame.animationType_ = AnimationType::LINEARITY;
-	keyFrame.easeRate_ = 0.0f;
-	keyFrame.transformData.CopyObject(&SimpleObject);
+void AnimationNodeData::AddKeyFrame(int keyFrameType, float time_) {
 
-	keyList.push_back(keyFrame);
+	if (keyFrameType < 0 || keyFrameType >= (int)KeyFrameType::NumOfType) {
+		Logger::Log("[kError] AND :: Invalid KeyFrameType.");
+		return;
+	}
+
+	//KeyFrame keyFrame;
+	//if (time_ > 0.0f)keyFrame.time_ = time_;
+	//keyFrame.animationType_ = AnimationType::LINEARITY;
+	//keyFrame.easeRate_ = 0.0f;
+	//keyFrame.value_ = { 0.0f,0.0f,0.0f };
+
+	//if (keyFrameType == (int)KeyFrameType::SCALE)		{ scaleList.push_back(keyFrame)			; return; }
+	//if (keyFrameType == (int)KeyFrameType::ROTATE)		{ rotateList.push_back(keyFrame)		; return; }
+	//if (keyFrameType == (int)KeyFrameType::TRANSLATION) { translationList.push_back(keyFrame)	; return; }
+
 }
 
 #ifdef USE_IMGUI
 void AnimationUnit::ImguiPart() {
-//	ImGui::Begin("AU0");
-//	ImGui::Text("NowTime: %.02f", nowTime_);
-//	ImGui::Text("parameterTime: %.02f", time_->parameter_);
-//	ImGui::Text("usingStartTime: %.02f", usingStartTime_);
-//	ImGui::Text("usingEndTime: %.02f", usingEndTime_);
-//	ImGui::Text("allMaxTime: %.02f", allMaxTime_);
-//	ImGui::Text("allStartTime: %.02f", allStartTime_);
-//	ImGui::Text("controlledObjectPos.x: %.02f", controlledObject_->mainPosition.transform.translate.x);
-//	ImGui::Text("instanceObjectPos.x: %.02f", instanceObject_->mainPosition.transform.translate.x);
-//	ImGui::End();
+	ImGui::Begin("AU0");
+	ImGui::Text("NowTime: %.02f", nowTime_);
+	ImGui::Text("parameterTime: %.02f", time_->parameter_);
+	ImGui::Text("usingStartTime: %.02f", usingStartTime_);
+	ImGui::Text("usingEndTime: %.02f", usingEndTime_);
+	ImGui::Text("allMaxTime: %.02f", allMaxTime_);
+	ImGui::Text("allStartTime: %.02f", allStartTime_);
+	ImGui::Text("controlledObjectPos.x: %.02f", controlledObject_->mainPosition.transform.translate.x);
+	ImGui::Text("instanceObjectPos.x: %.02f", instanceObject_->mainPosition.transform.translate.x);
+	ImGui::End();
 }
 #endif

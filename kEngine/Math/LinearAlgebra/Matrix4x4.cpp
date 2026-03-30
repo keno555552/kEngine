@@ -1,4 +1,5 @@
 #include "Matrix4x4.h"
+#include "Quaternion.h"
 
 Matrix4x4 Matrix4x4::Identity() {
 	Matrix4x4 result = {};
@@ -526,6 +527,16 @@ Matrix4x4 MakeAffineMatrix(Vector3 scale, Vector3 rotate, Vector3 translate) {
 	Matrix4x4 s = MakeScaleMatrix4x4(scale);
 
 	Matrix4x4 r = MakeRotateMatrix4x4(rotate);
+
+	Matrix4x4 t = MakeTranslateMatrix(translate);
+
+	return Matrix4x4{ s * r * t };
+}
+
+Matrix4x4 MakeAffineMatrix(Vector3 scale, Quaternion rotate, Vector3 translate) {
+	Matrix4x4 s = MakeScaleMatrix4x4(scale);
+
+	Matrix4x4 r = MakeRotateMatrix(rotate);
 
 	Matrix4x4 t = MakeTranslateMatrix(translate);
 

@@ -156,7 +156,6 @@ Vector3 RotateVector(const Vector3& vector, const Quaternion& quaternion) {
 }
 
 Quaternion EulerToQuaternion(const Vector3& euler) {
-
 	float cx = cosf(euler.x * 0.5f);
 	float sx = sinf(euler.x * 0.5f);
 	float cy = cosf(euler.y * 0.5f);
@@ -165,52 +164,71 @@ Quaternion EulerToQuaternion(const Vector3& euler) {
 	float sz = sinf(euler.z * 0.5f);
 
 	Quaternion q;
-	q.w = cx * cy * cz + sx * sy * sz;
-	q.x = sx * cy * cz - cx * sy * sz;
-	q.y = cx * sy * cz + sx * cy * sz;
-	q.z = cx * cy * sz - sx * sy * cz;
+
+	// xyz 順序
+	//q.w = cz * cy * cx + sz * sy * sx;
+	//q.x = cz * cy * sx - sz * sy * cx;
+	//q.y = cz * sy * cx + sz * cy * sx;
+	//q.z = sz * cy * cx - cz * sy * sx;
+
+	q.w = cz * cy * cx + sz * sy * sx;
+	q.x = cz * cy * sx - sz * sy * cx;
+	q.y = cz * sy * cx + sz * cy * sx;
+	q.z = sz * cy * cx - cz * sy * sx;
+
 	return q;
 }
 
-Vector3 QuaternionToEuler(const Quaternion& quaternion) {
+
+Vector3 QuaternionToEuler(const Quaternion& q) {
 	Vector3 euler;
 
-	float x = quaternion.x;
-	float y = quaternion.y;
-	float z = quaternion.z;
-	float w = quaternion.w;
+	float x = q.x;
+	float y = q.y;
+	float z = q.z;
+	float w = q.w;
 
-	// pitch (x-axis rotation)
-	float sinp = 2.0f * (w * x + y * z);
-	float cosp = 1.0f - 2.0f * (x * x + y * y);
-	euler.x = atan2f(sinp, cosp);
+	// yaw (Y)
+	float siny = 2.0f * (w * y + x * z);
+	float cosy = 1.0f - 2.0f * (y * y + x * x);
+	euler.y = atan2f(siny, cosy);
 
-	// yaw (y-axis rotation)
-	float siny = 2.0f * (w * y - z * x);
-	siny = siny > 1.0f ? 1.0f : siny;
-	siny = siny < -1.0f ? -1.0f : siny;
-	euler.y = asinf(siny);
+	// pitch (X)
+	float sinp = 2.0f * (w * x - y * z);
+	sinp = sinp > 1.0f ? 1.0f : sinp;
+	sinp = sinp < -1.0f ? -1.0f : sinp;
+	euler.x = asinf(sinp);
 
-	// roll (z-axis rotation)
+	// roll (Z)
 	float sinr = 2.0f * (w * z + x * y);
-	float cosr = 1.0f - 2.0f * (y * y + z * z);
+	float cosr = 1.0f - 2.0f * (z * z + y * y);
 	euler.z = atan2f(sinr, cosr);
 
 	return euler;
 }
 
+Matrix4x4 MakeRotateMatrix(const Quaternion& q) {
+	float x = q.x;
+	float y = q.y;
+	float z = q.z;
+	float w = q.w;
 
-Matrix4x4 MakeRotateMatrix(const Quaternion& quaternion) {
-	float x = quaternion.x;
-	float y = quaternion.y;
-	float z = quaternion.z;
-	float w = quaternion.w;
+	float xx = x * x;
+	float yy = y * y;
+	float zz = z * z;
+	float xy = x * y;
+	float xz = x * z;
+	float yz = y * z;
+	float wx = w * x;
+	float wy = w * y;
+	float wz = w * z;
 
+	// row-major, v' = v * M，右手系
 	return {
-		x * x - y * y - z * z + w * w,        2.0f * (x * y + z * w),	     2.0f * (x * z - y * w),			0.0f,
-			  2.0f * (x * y - z * w),  w * w - x * x + y * y - z * z,	     2.0f * (y * z + x * w),			0.0f,
-			  2.0f * (x * z + y * w),		 2.0f * (y * z - x * w),  w * w - x * x - y * y + z * z ,	        0.0f,
-								0.0f,						   0.0f,						   0.0f,			1.0f
+		1.0f - 2.0f * (yy + zz),  2.0f * (xy - wz),        2.0f * (xz + wy),        0.0f,
+		2.0f * (xy + wz),         1.0f - 2.0f * (xx + zz), 2.0f * (yz - wx),        0.0f,
+		2.0f * (xz - wy),         2.0f * (yz + wx),        1.0f - 2.0f * (xx + yy), 0.0f,
+		0.0f,                     0.0f,                    0.0f,                    1.0f
 	};
 }
 

@@ -258,8 +258,7 @@ float easyOut(float a, float b, float t, float r) {
 	return (1.0f - easedT) * a + (easedT)*b;
 }
 
-float easyInOut(int a, int b, int c, int t, float r) {
-	float time = float(c) / t;
+float easyInOut(int a, int b, float time, float r) {
 	float easedT = {};
 	if (time <= 0.5) {
 		easedT = (1.0f - sqrtf(1.0f - powf(2.0f * time, r))) / 2;
@@ -269,16 +268,14 @@ float easyInOut(int a, int b, int c, int t, float r) {
 	return (1.0f - easedT) * a + (easedT)*b;
 }
 
-float easyInBack(int a, int b, int c, int t, float r) {
-	float time = float(c) / t;
+float easyInBack(int a, int b, float time, float r) {
 	float c1 = r;
 	float c3 = c1 + 1;
 	float easedT = c3 * powf(time, 4) - c1 * powf(time, 3);
 	return (1.0f - easedT) * a + (easedT)*b;
 }
 
-float easyOutBack(int a, int b, int c, int t, float r) {
-	float time = float(c) / t;
+float easyOutBack(int a, int b, float time, float r) {
 	float c1 = r;
 	float c3 = c1 + 1;
 	float easedT = 1 + c3 * powf(time - 1, 3) + c1 * powf(time - 1, 2);

@@ -72,7 +72,7 @@ TransformationMatrix DrawDataCollector::DLWVPAdjustment(DebugLine* debugLine) {
 
 	Matrix4x4 worldMatrix = Identity(); // 因為點已經是世界座標
 
-	TransformationMatrix result;
+	TransformationMatrix result{};
 	result.WVP = worldMatrix * viewMatrix * projectionMatrix;
 	result.world = worldMatrix;
 	result.WorldInverseTranspose = worldMatrix.Inverse().Transpose();
@@ -313,9 +313,10 @@ void DrawDataCollector::Collect3D(ObjectData* object) {
 
 Matrix4x4 DrawDataCollector::MakeFollowObjectMatrix3D(ObjectData* object) {
 
+	DirtyEulerToQuat(object->mainPosition);
 	Matrix4x4 objectMainMatrix = MakeAffineMatrix(
 		object->mainPosition.transform.scale,
-		object->mainPosition.transform.rotate,
+		object->mainPosition.transform.rotateQuat,
 		object->mainPosition.transform.translate
 	);
 
@@ -323,9 +324,10 @@ Matrix4x4 DrawDataCollector::MakeFollowObjectMatrix3D(ObjectData* object) {
 
 	ObjectPart* parent = object->followObject_;
 	while (parent != nullptr) {
+		DirtyEulerToQuat(*parent);
 		Matrix4x4 local = MakeAffineMatrix(
 			parent->transform.scale,
-			parent->transform.rotate,
+			parent->transform.rotateQuat,
 			parent->transform.translate
 		);
 
@@ -336,12 +338,24 @@ Matrix4x4 DrawDataCollector::MakeFollowObjectMatrix3D(ObjectData* object) {
 	return objectMainMatrix * parentMatrix;
 }
 
+Matrix4x4 DrawDataCollector::MakeAnimationMatrix(ObjectPart& part) {
+
+	Matrix4x4 result = Identity();
+	if (part.transform.isAnimated) {
+		result = MakeAffineMatrix(
+			part.transform.aniScale,
+			part.transform.aniRotate,
+			part.transform.aniTranslate
+		);
+	}
+	return result;
+}
+
 TransformationMatrix DrawDataCollector::ObjectWVPAdjustment3D(ObjectData& object, ObjectPart& part, ModelData modelData) {
 	Camera* cam = cameraManager_->GetActiveCamera();
 	Matrix4x4 viewMatrix = cam->GetViewMatrix();
 	Matrix4x4 projectionMatrix = cam->GetProjectionMatrix();
 
-	Matrix4x4 followWorldMatrix = MakeFollowObjectMatrix3D(&object);
 
 	// Billboard 子物件：XY 旋轉を0にする
 	if (object.isBillboard_) {
@@ -349,16 +363,21 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustment3D(ObjectData& object
 		part.transform.rotate.x = camRot.x;
 		part.transform.rotate.y = camRot.y;
 		part.transform.rotate.z = 0.0f;
+		DirtyEulerToQuat(part);
 	}
 
 	Matrix4x4 localMatrix = MakeAffineMatrix(
 		part.transform.scale,
-		part.transform.rotate,
+		part.transform.rotateQuat,
 		part.transform.translate
 	);
 
+	Matrix4x4 animationMatrix = MakeAnimationMatrix(part);
+
+	Matrix4x4 followWorldMatrix = MakeFollowObjectMatrix3D(&object);
+
 	//Matrix4x4 worldMatrix = localMatrix * partParentMatrix * followWorldMatrix;
-	Matrix4x4 worldMatrix = localMatrix * followWorldMatrix;
+	Matrix4x4 worldMatrix = localMatrix * animationMatrix * followWorldMatrix;
 
 	TransformationMatrix result{};
 	result.WVP = modelData.rootNode.localMatrix * worldMatrix * viewMatrix * projectionMatrix;
@@ -400,6 +419,18 @@ void DrawDataCollector::AddObjectToBucket3D(RenderData& renderData, int meshID) 
 			/// 不透明オブジェクトバケットへ追加
 			opaqueBuckets3D_[static_cast<PSOType>(renderData.psoID)][renderData.materialID][meshID].emplace_back(renderData);
 		}
+	}
+}
+
+void DrawDataCollector::DirtyEulerToQuat(ObjectPart& part) {
+	if (part.transform.CheckRotateDirty()) {
+		part.transform.UpdateRotateQuat();
+	}
+}
+
+void DrawDataCollector::DirtyEulerToQuat(ObjectData& part) {
+	if (part.mainPosition.transform.CheckRotateDirty()) {
+		part.mainPosition.transform.UpdateRotateQuat();
 	}
 }
 

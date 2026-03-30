@@ -32,10 +32,10 @@ public:
 	void SceneChanger();
 
 private:
+
 	std::map<std::string,std::string> sceneFlow_ = {
 		//{"TITLE","STAGE_01"},
 	};
-
 
 private:
 	static std::unique_ptr <SceneManager> sceneManager_;

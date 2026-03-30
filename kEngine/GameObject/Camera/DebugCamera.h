@@ -26,9 +26,9 @@ public:
 	void isKeySAvailable(bool available) { isS_ = available; }
 	void isKeyZAvailable(bool available) { isZ_ = available; }
 	void isKeyRAvailable(bool available) { isR_ = available; }
-	void isMouseMiddleAvailable(bool available) { isQ_ = available; }
-	void isMouseRightvailable(bool available) { isQ_ = available; }
-	void isGamePadAvailable(bool available) { isQ_ = available; }
+	void isMouseMiddleAvailable(bool available) { isMouseM_ = available; }
+	void isMouseRightvailable(bool available) { isMouseR_ = available; }
+	void isGamePadAvailable(bool available) { isGamePad_ = available; }
 
 private:
 	/// 初期化

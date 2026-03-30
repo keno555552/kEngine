@@ -252,6 +252,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="kEngine\Data\Animation\Animation.cpp" />
+    <ClCompile Include="kEngine\Data\Animation\AnimationNodeData.cpp" />
     <ClCompile Include="kEngine\Data\Kinematics\Types\CircleMotionPlane.cpp" />
     <ClCompile Include="kEngine\Data\Physics\PhysicalBall.cpp" />
     <ClCompile Include="kEngine\Math\Kinematics\CircularMation.cpp" />
@@ -359,7 +361,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Data\Render\GPUData\LightGPU.cpp" />
     <ClCompile Include="kEngine\Data\Render\Types\LightingType.cpp" />
     <ClCompile Include="kEngine\Data\Geometry\Shape\Line\Line.cpp" />
-    <ClCompile Include="kEngine\Tool\AnimationSystem\Keyframe.cpp" />
+    <ClCompile Include="kEngine\Data\Animation\Keyframe.cpp" />
     <ClCompile Include="main.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -416,6 +418,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Physics\SpringUtility.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="kEngine\Data\Animation\Animation.h" />
+    <ClInclude Include="kEngine\Data\Animation\AnimationNodeData.h" />
     <ClInclude Include="kEngine\Data\Kinematics\Types\CircleMotionPlane.h" />
     <ClInclude Include="kEngine\Data\Physics\PhysicalBall.h" />
     <ClInclude Include="kEngine\Math\Kinematics\CircularMation.h" />
@@ -624,7 +628,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Data\Geometry\Shape\Plane\Plane.h" />
     <ClInclude Include="kEngine\Data\Geometry\Shape\Line\Line.h" />
     <ClInclude Include="kEngine\Data\Physics\PhysicalObject.h" />
-    <ClInclude Include="kEngine\Tool\AnimationSystem\Keyframe.h" />
+    <ClInclude Include="kEngine\Data\Animation\Keyframe.h" />
     <ClInclude Include="ResourceLoader.h" />
     <ClInclude Include="kEngine\Scenes\BaseSceneFactory.h" />
     <ClInclude Include="kEngine\Scenes\CG3_HK_2\SceneCGHK2.h" />

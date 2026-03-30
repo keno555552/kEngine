@@ -2,6 +2,7 @@
 #include "Vector3.h"
 #include "Vector4.h"
 
+struct Quaternion;
 typedef struct Matrix4x4 {
 
 	///定義
@@ -118,6 +119,15 @@ Vector3 ExtractTranslate(const Matrix4x4 matrix4x4);
 /// <param name="translate">Vector3</param>
 /// <returns>結果Matrix4x4</returns>
 Matrix4x4 MakeAffineMatrix(Vector3 scole, Vector3 rotate, Vector3 translate);
+
+/// <summary>
+/// Matrix4x4のアフィン変換(Quat版)
+/// </summary>
+/// <param name="scale"></param>
+/// <param name="rotate"></param>
+/// <param name="translate"></param>
+/// <returns></returns>
+Matrix4x4 MakeAffineMatrix(Vector3 scale, Quaternion rotate, Vector3 translate);
 
 /// <summary>
 /// 最大4つのMatrix4x4を掛け算する

@@ -32,11 +32,13 @@ struct KeyframeQuaternion {
 //	HitBox hitBox_{};
 //};
 
+template<typename tValue>
 struct KeyFrame {
-	int index_{};
 	float time_{};
+	tValue value_{};
 	AnimationType animationType_{};
 	float easeRate_{};
-	Object transformData{};
-	HitBox hitBox_{};
 };
+
+using KeyFrameVector3 = KeyFrame<Vector3>;
+using KeyFrameQuaternion = KeyFrame<Quaternion>;

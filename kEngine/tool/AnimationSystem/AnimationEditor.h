@@ -2,7 +2,7 @@
 #include "externals/nlohmann/json.hpp"
 #include "BaseScene.h"
 #include "config.h"
-#include "Keyframe.h"
+#include "Data/Animation/Keyframe.h"
 #include "Object/Sprite.h"
 #include "Object/Object.h"
 #include "Geometry/Collision/crashDecision.h"
@@ -89,8 +89,8 @@ private:
 
 	/// ======== アニメーション内部用 ==========///
 	/// キーフレームリスト
-	std::vector<AnimationObjectData> animationList_{};
-	std::vector<KeyFrame> keyFrameList_{};
+	std::vector<AnimationNodeData> animationList_{};
+	//std::vector<KeyFrame> keyFrameList_{};
 
 	/// 選んでるキーフレーム(by IP)
 	int pickedKeyFrame_{-1};
@@ -146,7 +146,7 @@ private:
 
 	/// キーフレーム関連関数
 	void CreateKeyFrame(float time_ = -1);
-	void DeleteKeyFrame(KeyFrame* keyFrame = nullptr);
+	//void DeleteKeyFrame(KeyFrame* keyFrame = nullptr);
 	void SortKeyFrame();
 	void AdjuctKeyFrameTexture();
 
@@ -154,11 +154,11 @@ private:
 	void SetUsingModel(Object* model);
 
 	/// セーブ/ロード関連関数
-	void SaveAnimationData(const AnimationObjectData& animationList, const std::string& filePath);
-	void LoadAnimationData(AnimationObjectData* animationList, const std::string& filePath);
+	void SaveAnimationData(const AnimationNodeData& animationList, const std::string& filePath);
+	void LoadAnimationData(AnimationNodeData* animationList, const std::string& filePath);
 
-	void LoadAnimationDataFromGltf(AnimationObjectData* animationList, const std::string& filePath);
-	void LoadAnimationDataFromJson(AnimationObjectData* animationList, const std::string& filePath);
+	void LoadAnimationDataFromGltf(AnimationNodeData* animationList, const std::string& filePath);
+	void LoadAnimationDataFromJson(AnimationNodeData* animationList, const std::string& filePath);
 
 #ifdef USE_IMGUI
 	void ImguiPart();
