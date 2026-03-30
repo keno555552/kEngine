@@ -1,10 +1,11 @@
 #include "DebugCamera.h"
 #include "kEngine.h"
 
-DebugCamera::DebugCamera(kEngine* system) {
+DebugCamera::DebugCamera(kEngine* system, ConstructorKey) :
+	Camera(ConstructorKey()) 
+{
 	system_ = system;
 }
-
 
 void DebugCamera::Update() {
 	Camera::Update();
@@ -34,13 +35,16 @@ void DebugCamera::MouseControlUpdate() {
 	if (before != cameraTransform.translate.z) {
 		isMoved = true;
 	}
+	if (isMouseM_) {
+		cameraTransform.translate.z += system_->GetMouseScroll();
+		isMoved = true;
+	}
 
 	///マウス操作
 	//中鍵平行移動
 	if (system_->GetMouseIsPush(2) && isMouseM_) {
 		cameraTransform.translate.x += (float)system_->GetMousePosXIns() * -0.005f;
 		cameraTransform.translate.y += (float)system_->GetMousePosYIns() * 0.005f;
-		cameraTransform.translate.z += system_->GetMouseScroll();
 		isMoved = true;
 	}
 	//右鍵視覚移動

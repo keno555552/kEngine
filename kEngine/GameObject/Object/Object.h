@@ -14,7 +14,7 @@ class Object : public ObjectData {
 public:
 	void IntObject(kEngine* system);
 
-	virtual void Update(Camera* camera);
+	virtual void Update(Camera* camera = 0);
 
 	virtual void Draw();
 

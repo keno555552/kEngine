@@ -16,9 +16,7 @@ Particle::Particle(kEngine* system) {
 Particle::~Particle() {
 	commonMaterialConfig.reset();
 
-	for (auto& object : particleObjectList_) {
-		delete object, object = nullptr;
-	}
+	particleObjectList_.clear();
 
 	randomMaker_.reset();
 
@@ -28,18 +26,17 @@ void Particle::Update(Camera* camera) {
 
 	for (auto object = particleObjectList_.begin(); object != particleObjectList_.end();) {
 		if ((*object)->isAlive == false) {
-			delete* object, * object = nullptr;
 			object = particleObjectList_.erase(object);
 		} else {
-			auto obj = (*object);
+			auto& obj = *object->get();
 
 			float deltaTime = system_->GetDeltaTime();
 
-			obj->lifeTimeTimer.ToMix();
+			obj.lifeTimeTimer.ToMix();
 			//obj->part->mainPosition.transform.scale *= obj->direction.scale * obj->scaleSpeed * deltaTime;
-			obj->part->mainPosition.transform.rotate += obj->direction.rotate * obj->rotateSpeed * deltaTime;
-			obj->part->mainPosition.transform.translate += obj->velocity * deltaTime;
-			obj->part->Update(camera);
+			obj.part->mainPosition.transform.rotate += obj.direction.rotate * obj.rotateSpeed * deltaTime;
+			obj.part->mainPosition.transform.translate += obj.velocity * deltaTime;
+			obj.part->Update(camera);
 			object++;
 		}
 	}
@@ -69,8 +66,8 @@ void Particle::SetRootScale(Vector3 pos) {
 }
 
 void Particle::AddObject() {
-	ParticleData* newParticle = new ParticleData();
-	particleObjectList_.insert(particleObjectList_.end(), newParticle);
+	std::unique_ptr<ParticleData> newParticle = std::make_unique<ParticleData>();
+	particleObjectList_.insert(particleObjectList_.end(), std::move(newParticle));
 	particleObjectList_.back()->part = new Object();
 	particleObjectList_.back()->part->IntObject(system_);
 }

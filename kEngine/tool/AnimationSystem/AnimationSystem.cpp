@@ -147,7 +147,7 @@ Animation AnimationSystem::LoadAnimationDataFromGltf(const std::string& filePath
 		nodeData.name = nodeAnim->mNodeName.C_Str();
 		nodeData.animationNodeID = channelIndex;
 		/// スケールのKeyFrameを保存
-		for (int keyIndex = 0; keyIndex < nodeAnim->mNumScalingKeys; keyIndex++) {
+		for (int keyIndex = 0; keyIndex < (int)nodeAnim->mNumScalingKeys; keyIndex++) {
 			KeyFrameVector3 keyFrame;
 			keyFrame.time_ = float(nodeAnim->mScalingKeys[keyIndex].mTime);
 			keyFrame.value_ = { nodeAnim->mScalingKeys[keyIndex].mValue.x,
@@ -156,7 +156,7 @@ Animation AnimationSystem::LoadAnimationDataFromGltf(const std::string& filePath
 			nodeData.scaleList.push_back(keyFrame);
 		}
 		/// 回転のKeyFrameを保存
-		for (int keyIndex = 0; keyIndex < nodeAnim->mNumRotationKeys; keyIndex++) {
+		for (int keyIndex = 0; keyIndex < (int)nodeAnim->mNumRotationKeys; keyIndex++) {
 			KeyFrameQuaternion keyFrame;
 			keyFrame.time_ = float(nodeAnim->mRotationKeys[keyIndex].mTime);
 			Quaternion quatValue = { nodeAnim->mRotationKeys[keyIndex].mValue.x,
@@ -167,7 +167,7 @@ Animation AnimationSystem::LoadAnimationDataFromGltf(const std::string& filePath
 			nodeData.rotateList.push_back(keyFrame);
 		};
 		/// 平行移動のKeyFrameを保存
-		for (int keyIndex = 0; keyIndex < nodeAnim->mNumPositionKeys; keyIndex++) {
+		for (int keyIndex = 0; keyIndex < (int)nodeAnim->mNumPositionKeys; keyIndex++) {
 			KeyFrameVector3 keyFrame;
 			keyFrame.time_ = float(nodeAnim->mPositionKeys[keyIndex].mTime);
 			keyFrame.value_ = { nodeAnim->mPositionKeys[keyIndex].mValue.x,

@@ -26,6 +26,7 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 	lightManager = std::make_unique<LightManager>();
 	lightManager->Initialize();
 	cameraManager = std::make_unique<CameraManager>();
+	cameraManager->Initialize();
 
 	drawDataCollector = std::make_unique<DrawDataCollector>();
 	drawDataCollector->Initialize(cameraManager.get(), lightManager.get());
@@ -153,19 +154,19 @@ void kEngine::RemoveLight(Light* light) {
 	lightManager->RemoveLight(light);
 }
 
-DebugCamera* kEngine::CreateDebugCamera() {
+std::weak_ptr <DebugCamera> kEngine::CreateDebugCamera() {
 	return cameraManager->CreateDebugCamera(this);
 }
 
-Camera* kEngine::CreateCamera() {
+std::weak_ptr <Camera> kEngine::CreateCamera() {
 	return cameraManager->CreateCamera();
 }
 
-void kEngine::DestroyCamera(Camera* camera) {
+void kEngine::DestroyCamera(std::weak_ptr <Camera> camera) {
 	cameraManager->DestroyCamera(camera);
 }
 
-void kEngine::SetCamera(Camera* camera) {
+void kEngine::SetCamera(std::weak_ptr <Camera> camera) {
 	cameraManager->SetActiveCamera(camera);
 }
 

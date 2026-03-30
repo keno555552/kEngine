@@ -5,6 +5,9 @@ class kEngine;
 class DebugCamera :public Camera {
 public:
 
+	explicit DebugCamera(kEngine* system, ConstructorKey);
+	~DebugCamera() = default;
+
 	/// CameraManagerからのみ生成・破棄可能
 	friend class CameraManager;
 	friend class kEngine;
@@ -30,10 +33,6 @@ public:
 	void isMouseRightvailable(bool available) { isMouseR_ = available; }
 	void isGamePadAvailable(bool available) { isGamePad_ = available; }
 
-private:
-	/// 初期化
-	DebugCamera(kEngine* system);
-	~DebugCamera() = default;
 private:
 	kEngine* system_ = nullptr;
 

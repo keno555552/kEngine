@@ -6,8 +6,8 @@ void SceneManager::Initialize(kEngine* system) {
 	system_ = system;
 	sceneFactory_ = std::make_unique<SceneFactory>(system);
 	//sceneUsingNameHandle_ = "CGHK2";
-	//sceneUsingNameHandle_ = "UITest";
-	sceneUsingNameHandle_ = "ANIMATIONEDITOR";
+	sceneUsingNameHandle_ = "UITest";
+	//sceneUsingNameHandle_ = "ANIMATIONEDITOR";
 
 	helperTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/texture/helper.png");
 	helperSprite_ = std::make_unique <SimpleSprite>();

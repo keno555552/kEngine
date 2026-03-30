@@ -32,7 +32,16 @@ public:
 
 	/// シングルトン取得
 	static ResourceManager* GetInstance();
-	~ResourceManager() = default;
+
+	class ConstructorKey {
+	private:
+		/// からのみ生成・破棄可能
+		friend class ResourceManager;
+		friend class kEnigne;
+		ConstructorKey() {}
+	};
+
+	explicit ResourceManager(ConstructorKey) {};
 
 	void Initialize(DirectXCore* device);
 	void Finalize();
@@ -125,9 +134,9 @@ public:
 
 private:
 
-	/// インストラクター・デストラクター封印
-	ResourceManager() = default;
-
+	friend struct std::default_delete<ResourceManager>;
+	~ResourceManager() = default;
+private:
 
 	/// リソース作り
 	int CreateSimpleSpriteMeshResource();

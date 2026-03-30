@@ -285,15 +285,6 @@
     <ClCompile Include="kEngine\Data\Render\CPUData\CornerData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Scenes\CG4_HK_1\Effect1.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\Scenes\CG4_HK_1\Effect2.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\Scenes\CG4_HK_1\menu.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="ResourceLoader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -498,9 +489,6 @@
     <ClCompile Include="kEngine\Scenes\SceneFactory.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Scenes\CG3_HK_2\SceneCGHK2.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="GAME\scenes\scene1.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -598,6 +586,18 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Data\Animation\AnimationNodeData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Scenes\CG4_HK_1\menu.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Scenes\CG3_HK_2\SceneCGHK2.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Scenes\CG4_HK_1\Effect1.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Scenes\CG4_HK_1\Effect2.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -750,15 +750,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Data\Render\CPUData\CornerData.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\Scenes\CG4_HK_1\Effect1.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\Scenes\CG4_HK_1\Effect2.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\Scenes\CG4_HK_1\menu.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="ResourceLoader.h">
@@ -1184,9 +1175,6 @@
     <ClInclude Include="kEngine\Scenes\SceneFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Scenes\CG3_HK_2\SceneCGHK2.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="GAME\scenes\scene1.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -1284,6 +1272,18 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Data\Animation\AnimationNodeData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Scenes\CG4_HK_1\menu.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Scenes\CG3_HK_2\SceneCGHK2.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Scenes\CG4_HK_1\Effect1.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Scenes\CG4_HK_1\Effect2.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

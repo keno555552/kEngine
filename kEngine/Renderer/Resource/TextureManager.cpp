@@ -15,15 +15,9 @@ void TextureManager::EndUploadingTexture() {
 	if (intermediateResource_->GetResourceCounter() != 0)intermediateResource_->ClearResource();
 }
 
-//TextureManager* TextureManager::GetInstance() {
-//	if (instance_ == nullptr) {
-//		instance_ = std::make_unique<TextureManager>();
-//	}
-//	return instance_.get();
-//}
 TextureManager* TextureManager::GetInstance() {
 	if (!instance_) {
-		instance_.reset(new TextureManager());
+		instance_ = std::make_unique<TextureManager>(ConstructorKey());
 	}
 	return instance_.get();
 }

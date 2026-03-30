@@ -70,10 +70,10 @@ public:
 	void RemoveLight(Light* light);
 
 
-	DebugCamera* CreateDebugCamera();
-	Camera* CreateCamera();
-	void DestroyCamera(Camera* camera);
-	void SetCamera(Camera* camera);
+	std::weak_ptr <DebugCamera> CreateDebugCamera();
+	std::weak_ptr <Camera> CreateCamera();
+	void DestroyCamera(std::weak_ptr<Camera> camera);
+	void SetCamera(std::weak_ptr<Camera> camera);
 	void ResetToDefaultCamera();
 
 	int commonTextureHandleReader(int handle);

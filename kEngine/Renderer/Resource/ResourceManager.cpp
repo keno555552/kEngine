@@ -5,7 +5,8 @@ std::unique_ptr <ResourceManager> ResourceManager::instance_ = nullptr;
 
 ResourceManager* ResourceManager::GetInstance() {
 	if (instance_ == nullptr) {
-		instance_.reset(new ResourceManager);
+		instance_ = std::make_unique<ResourceManager>(ConstructorKey{});
+		//instance_.reset(new ResourceManager);
 	}
 	return instance_.get();
 }

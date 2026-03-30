@@ -258,6 +258,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Data\Physics\PhysicalBall.cpp" />
     <ClCompile Include="kEngine\Math\Kinematics\CircularMation.cpp" />
     <ClCompile Include="kEngine\Math\LinearAlgebra\Quaternion.cpp" />
+    <ClCompile Include="kEngine\Scenes\CG3_HK_2\SceneCGHK2.cpp" />
+    <ClCompile Include="kEngine\Scenes\CG4_HK_1\Effect1.cpp" />
+    <ClCompile Include="kEngine\Scenes\CG4_HK_1\Effect2.cpp" />
+    <ClCompile Include="kEngine\Scenes\CG4_HK_1\menu.cpp" />
     <ClCompile Include="kEngine\Utility\Bit.cpp" />
     <ClCompile Include="kEngine\Math\Geometry\Interpolation.cpp" />
     <ClCompile Include="kEngine\Math\Geometry\Curve.cpp" />
@@ -397,10 +401,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Data\Physics\PhysicalObject.cpp" />
     <ClCompile Include="ResourceLoader.cpp" />
     <ClCompile Include="kEngine\Scenes\BaseSceneFactory.cpp" />
-    <ClCompile Include="kEngine\Scenes\CG3_HK_2\SceneCGHK2.cpp" />
-    <ClCompile Include="kEngine\Scenes\CG4_HK_1\menu.cpp" />
-    <ClCompile Include="kEngine\Scenes\CG4_HK_1\Effect1.cpp" />
-    <ClCompile Include="kEngine\Scenes\CG4_HK_1\Effect2.cpp" />
     <ClCompile Include="kEngine\GameObject\Object\Sprite.cpp" />
     <ClCompile Include="kEngine\Data\Render\CPUData\SpriteData.cpp" />
     <ClCompile Include="kEngine\Renderer\Resource\TextureManager.cpp" />
@@ -424,6 +424,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Data\Physics\PhysicalBall.h" />
     <ClInclude Include="kEngine\Math\Kinematics\CircularMation.h" />
     <ClInclude Include="kEngine\Math\LinearAlgebra\Quaternion.h" />
+    <ClInclude Include="kEngine\Scenes\CG3_HK_2\SceneCGHK2.h" />
+    <ClInclude Include="kEngine\Scenes\CG4_HK_1\Effect1.h" />
+    <ClInclude Include="kEngine\Scenes\CG4_HK_1\Effect2.h" />
+    <ClInclude Include="kEngine\Scenes\CG4_HK_1\menu.h" />
     <ClInclude Include="kEngine\Utility\Bit.h" />
     <ClInclude Include="kEngine\Math\Geometry\Interpolation.h" />
     <ClInclude Include="kEngine\Math\Geometry\Curve.h" />
@@ -631,10 +635,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Data\Animation\Keyframe.h" />
     <ClInclude Include="ResourceLoader.h" />
     <ClInclude Include="kEngine\Scenes\BaseSceneFactory.h" />
-    <ClInclude Include="kEngine\Scenes\CG3_HK_2\SceneCGHK2.h" />
-    <ClInclude Include="kEngine\Scenes\CG4_HK_1\menu.h" />
-    <ClInclude Include="kEngine\Scenes\CG4_HK_1\Effect1.h" />
-    <ClInclude Include="kEngine\Scenes\CG4_HK_1\Effect2.h" />
     <ClInclude Include="kEngine\GameObject\Object\Sprite.h" />
     <ClInclude Include="kEngine\Data\Render\CPUData\SpriteData.h" />
     <ClInclude Include="kEngine\Renderer\Resource\TextureManager.h" />

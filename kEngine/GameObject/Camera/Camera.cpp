@@ -11,7 +11,7 @@ Transform CameraDefaultTransform() {
 	return defaultTransform;
 }
 
-Camera::Camera()
+Camera::Camera(ConstructorKey)
 	:fovY_(0.45f)
 	, aspect_(float(config::GetClientWidth()) / float(config::GetClientHeight()))
 	, nearClip_(0.1f)

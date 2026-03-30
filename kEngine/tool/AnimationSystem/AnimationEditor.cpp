@@ -4,10 +4,10 @@ AnimationEditor::AnimationEditor(kEngine* system) {
 	system_ = system;
 
 	/// ============ カメラ設定 ============///
-	camera_ = system_->CreateCamera();
-	camera_->Move({ 0.0f,0.5f,-10.0f });
-	camera_->SetDefaultTransform(camera_->GetTransform());
-	system_->SetCamera(camera_);
+	//camera_ = system_->CreateCamera();
+	//camera_->Move({ 0.0f,0.5f,-10.0f });
+	//camera_->SetDefaultTransform(camera_->GetTransform());
+	//system_->SetCamera(camera_);
 
 	/// ============ アニメーションエディター設定 ============///
 	SetupAnimationEditor();
@@ -32,7 +32,7 @@ AnimationEditor::AnimationEditor(kEngine* system) {
 }
 
 AnimationEditor::~AnimationEditor() {
-	system_->DestroyCamera(camera_);
+	//system_->DestroyCamera(camera_);
 
 	mainNeedle_.reset();
 	mainTimeBar_.reset();
@@ -467,7 +467,7 @@ void AnimationEditor::CreateKeyFrame(float time_) {
 		//};
 		//keyFrameList_.push_back(newKeyFrame);
 	
-		animationList_[0].AddKeyFrame(time_);
+		//animationList_[0].AddKeyFrame(time_);
 	}
 
 }

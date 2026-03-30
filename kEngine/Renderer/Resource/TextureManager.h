@@ -15,7 +15,16 @@ class TextureManager
 public:
 	/// シングルトン取得
 	static TextureManager* GetInstance();
-	~TextureManager() = default;
+
+	class ConstructorKey {
+	private:
+		/// からのみ生成・破棄可能
+		friend class TextureManager;
+		friend class kEnigne;
+		ConstructorKey() {}
+	};
+
+	explicit TextureManager(ConstructorKey) {};
 
 	/// 初期化
 	void Initialize(DirectXCore* core, SrvManager* srvManager);
@@ -66,6 +75,9 @@ public:
 
 	void EndUploadingTexture();
 
+private:
+	friend struct std::default_delete<TextureManager>;
+	~TextureManager() = default;
 private:
 
 	/// すべきのテクスチャハンドル

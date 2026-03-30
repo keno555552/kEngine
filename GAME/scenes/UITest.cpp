@@ -114,9 +114,9 @@ void UITest::Update() {
 	CameraPart();
 
 	/// Skydome更新
-	skydome_->Update(usingCamera_);
+	skydome_->Update();
 
-	ground_->Update(usingCamera_);
+	ground_->Update();
 
 	detailButton_->Update();
 
@@ -162,8 +162,11 @@ void UITest::Update() {
 }
 
 void UITest::MouseLogic() {
+	
+	auto cam = usingCamera_.lock();
+	if (!cam) return;
 
-	Ray mouseRay = usingCamera_->ScreenPointToRay(system_->GetMousePosVector2());
+	Ray mouseRay = usingCamera_.lock()->ScreenPointToRay(system_->GetMousePosVector2());
 
 	Sphere target;
 	target.center = box_->mainPosition.transform.translate;
@@ -176,9 +179,9 @@ void UITest::MouseLogic() {
 	bool aabbHit = crashDecision(aabb, mouseRay);
 
 	if (isHit) {
-		DebugDraw::AddSphere(target, { 1.0f,0.0f,0.0f,1.0f }, usingCamera_);
+		DebugDraw::AddSphere(target, { 1.0f,0.0f,0.0f,1.0f }, cam.get());
 	} else {	
-		DebugDraw::AddSphere(target, { 1.0f,1.0f,0.0f,1.0f }, usingCamera_);
+		DebugDraw::AddSphere(target, { 1.0f,1.0f,0.0f,1.0f }, cam.get());
 	}
 
 	if (aabbHit) {
@@ -207,7 +210,9 @@ void UITest::Draw() {
 void UITest::CameraPart() {
 	if (useDebugCamera) {
 		usingCamera_ = debugCamera_;
-		debugCamera_->MouseControlUpdate();
+		if (auto sp = debugCamera_.lock()) {
+			sp->MouseControlUpdate();
+		}
 	} else {
 		//Transform cameraTransform = CreateDefaultTransform();
 		//cameraTransform.translate.x = player_->mainPosition.transform.translate.x;
