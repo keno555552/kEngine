@@ -33,8 +33,6 @@ public:
 
 	void Update();
 
-
-
 private:
 	kEngine* system_{};
 
