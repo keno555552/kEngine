@@ -11,7 +11,16 @@ class SceneManager {
 public:
 
 	static SceneManager& GetInstance();
-	~SceneManager() = default;
+
+	class ConstructorKey {
+	private:
+		/// からのみ生成・破棄可能
+		friend class SceneManager;
+		friend class kEnigne;
+		ConstructorKey() {}
+	};
+
+	explicit SceneManager(ConstructorKey) {};
 
 	void Initialize(kEngine* system);
 	void Finalize();
@@ -38,9 +47,13 @@ private:
 	};
 
 private:
+	friend struct std::default_delete<SceneManager>;
+	~SceneManager() = default;
+
+private:
 	static std::unique_ptr <SceneManager> sceneManager_;
 
-	SceneManager() = default;
+
 private:
 	std::unique_ptr <BaseScene> sceneUsing_ = nullptr;
 	std::unique_ptr <BaseScene> sceneOld_ = nullptr;

@@ -30,7 +30,7 @@ void SceneManager::Finalize() {
 
 SceneManager& SceneManager::GetInstance() {
 	if (!sceneManager_) {
-		sceneManager_.reset(new SceneManager);
+		sceneManager_ = std::make_unique<SceneManager>(ConstructorKey());
 	}
 	return *sceneManager_;
 }
