@@ -2,6 +2,7 @@
 #include <vector>
 #include "MathsIncluder.h"
 #include <memory>
+#include <string>
 #include "LinearAlgebra/Transform.h"
 #include "LinearAlgebra/TransformationMatrix.h"
 #include "MaterialConfig.h"
@@ -17,6 +18,10 @@ public:
 	friend class DrawDataCollector;
 	friend class ResourceManager;
 	friend class AnimationUnit;
+
+	/// ============== 雑用データ ============== ///
+
+	std::string name{};
 
 	/// ============= 基本変換情報 ============= ///
 

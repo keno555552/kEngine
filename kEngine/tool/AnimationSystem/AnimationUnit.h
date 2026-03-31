@@ -29,11 +29,11 @@ public:
 private:
 	kEngine* system_{};
 	
-	AnimationNodeData* animationData_{};
+	std::weak_ptr<AnimationNodeData> animationData_;
 	float allMaxTime_{};
 	float allStartTime_{};
 
-	Object* controlledObject_{};             // 借り
+	std::weak_ptr <Object> controlledObject_{};
 	std::unique_ptr<Object> instanceObject_{};
 
 	int usingKeyFrameIndex_{};

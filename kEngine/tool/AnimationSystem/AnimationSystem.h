@@ -1,5 +1,8 @@
 #pragma once
 #include <vector>
+#include <string>
+#include <memory>
+#include <map>
 #include "kEngine.h"
 #include "Object/Object.h"
 #include "Data/Animation/Animation.h"
@@ -34,13 +37,29 @@ public:
 	void Update();
 
 private:
+
+	/// ============= システム関連 ============== ///
 	kEngine* system_{};
 
+	/// ============= アニメーション関連 ============== ///
 	Animation* animationData_{}; // 借り
 	float allMaxTime_{};
 	float allStartTime_{};
 
-	Object* controlledObject_{};             // 借り
+	/// ============= 操作物体関連 ============== ///
+	struct AnimationClip {
+		float duration;
+		std::vector<AnimationNodeData> nodeList;
+	};
+
+	struct AnimationState {
+		AnimationClip* clip;
+		float time;
+		float speed;
+		bool loop;
+		bool playing;
+	};
+
 
 	/// 計算用アニメーションのオブジェクト
 	std::unique_ptr <Object> instanceObject_{};
@@ -85,6 +104,7 @@ private:
 		return Slerp(a, b, t);
 	}
 
+	// main関数
 	template<class T>
 	T MakeTimeValue(const std::vector<KeyFrame<T>>& keys, float nowTime) {
 
