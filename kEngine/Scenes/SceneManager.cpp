@@ -6,8 +6,8 @@ void SceneManager::Initialize(kEngine* system) {
 	system_ = system;
 	sceneFactory_ = std::make_unique<SceneFactory>(system);
 	//sceneUsingNameHandle_ = "CGHK2";
-	sceneUsingNameHandle_ = "UITest";
-	//sceneUsingNameHandle_ = "ANIMATIONEDITOR";
+	//sceneUsingNameHandle_ = "UITest";
+	sceneUsingNameHandle_ = "ANIMATIONEDITOR";
 
 	helperTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/texture/helper.png");
 	helperSprite_ = std::make_unique <SimpleSprite>();
@@ -38,43 +38,50 @@ SceneManager& SceneManager::GetInstance() {
 void SceneManager::SceneChanger() {
 
 	if (sceneUsing_) {
+
+		/// ステージが変わるかどうかのフラグ
 		bool isSceneChange = false;
 
-		switch (sceneUsing_->GetOutcome()) {
+		/// シーンの結果を取得
+		SceneOutcome outcome = sceneUsing_->GetOutcome();
 
-		case SceneOutcome::NEXT:
-		{
-			auto targetScene = sceneFlow_.find(sceneUsingNameHandle_);
-			if (targetScene != sceneFlow_.end()) {
+		/// まずはシーンがマップに存在するかを確認する
+		auto targetFlow = sceneFlow_.find(sceneUsingNameHandle_);
+		if (targetFlow == sceneFlow_.end()) {
+
+			/// もし見つからなかった場合、エラーログを出力する
+			Logger::Log("[kError] SM :: SceneChanger: Scene not found in sceneFlow_: " + sceneUsingNameHandle_);
+
+		} else {
+
+			/// もし見つかった場合、シーンの結果がマップに存在するかを確認する
+			auto targetScene = targetFlow->second.find(outcome);
+			if (targetScene == targetFlow->second.end()) {
+
+				/// 同じく見つからなかった場合
+				Logger::Log("[kError] SM :: SceneChanger: Scene not found in sceneFlow_: " + sceneUsingNameHandle_);
+
+			} else {
+
+				/// 見つかった場合、次のシーンに遷移するためのフラグを立てる
 				sceneUsingNameHandle_ = targetScene->second;
 				isSceneChange = true;
-			} else {
-				Logger::Log("[kError] SM :: SceneChanger: Scene not found in sceneFlow_: " + sceneUsingNameHandle_);
 			}
 		}
-		break;
 
-		case SceneOutcome::RETRY:
-			isSceneChange = true;
-			break;
-
-		case SceneOutcome::RETURN:
-			isSceneChange = true;
-			sceneUsingNameHandle_ = "TITLE";
-			break;
-		case SceneOutcome::EXIT:
-			kEngine::EndGame();
-			break;
-
-		}
-
+		/// デフォルトメニューによって流れを上書きする
 		if (defaultMenu_->IsBack()) {
 			isSceneChange = true;
 			sceneUsingNameHandle_ = "TITLE";
 		}
-
 		if (defaultMenu_->IsRetry()) {
 			isSceneChange = true;
+		}
+
+		/// EXITが押されたらゲーム終了
+		if (outcome == SceneOutcome::EXIT) {
+			kEngine::EndGame();
+			return;
 		}
 
 		if (!isSceneChange)return;

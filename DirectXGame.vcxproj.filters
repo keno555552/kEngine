@@ -294,7 +294,7 @@
     <ClCompile Include="kEngine\Data\Game\MapChip\MapChipData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Tool\AnimationSystem\AnimationSystem.cpp">
+    <ClCompile Include="kEngine\Tool\AnimationSystem\AnimationManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Tool\AnimationSystem\AnimationUnit.cpp">
@@ -764,7 +764,7 @@
     <ClInclude Include="kEngine\Tool\AnimationSystem\AnimationEditor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Tool\AnimationSystem\AnimationSystem.h">
+    <ClInclude Include="kEngine\Tool\AnimationSystem\AnimationManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Tool\AnimationSystem\AnimationUnit.h">

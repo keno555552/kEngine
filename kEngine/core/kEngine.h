@@ -8,12 +8,20 @@
 #include "LinearAlgebra/Vector2.h"
 #include "Data/Render/CPUData/materialconfig.h"
 #include "TimeManager/TimeManager.h"
+#include "AnimationSystem/AnimationManager.h"
 #include "DrawData/DrawDataCollector.h"
 #include "CameraManager/CameraManager.h"
 
 #ifdef USE_IMGUI
 #include "ImGuiManager.h"
 #endif // USE_IMGUI
+
+#ifdef _DEBUG
+#include "DebugDraw.h"
+#endif
+
+#include <CPUData/DebugLine.h>
+
 #include <string>
 #include "Data/Render/CPUData/ObjectData.h"
 #include "Data/Render/CPUData/SpriteData.h"
@@ -24,10 +32,6 @@
 #include "GPUData/DirectionalLightGPU.h"
 #include "Camera/Camera.h"
 
-#ifdef _DEBUG
-#include "DebugDraw.h"
-#endif
-#include <CPUData/DebugLine.h>
 
 class kEngine
 {
@@ -63,6 +67,7 @@ public:
 
 	int GetModelTextureHandle(int modelHandle, int part);
 
+	const Model* GetModel(int modelHandle, int partHandle);
 	int GetMutiModelNum(int modelHandle);
 	int SetModelObj(std::string path);
 
@@ -80,6 +85,18 @@ public:
 	int commonModelHandleReader(int handle);
 
 	int LoadTexture(const std::string& filePath);
+
+#pragma endregion
+
+#pragma region アニメーションシステム
+
+	Animation LoadAnimationData(const std::string& filePath);
+
+	int LoadAnimation(const std::string& filePath);
+
+	void AnimationUnitSetTime(int unitHandle, float time);
+
+	void AnimationTakeControlObject(int unitHandle, Object* object);
 
 #pragma endregion
 
@@ -190,6 +207,7 @@ public:
 	TextureManager* GetTextureManager() const;
 	LightManager* GetLightManager() const;
 	CameraManager* GetCameraManager() const;
+	AnimationManager* GetAnimationManager() const;
 	DrawDataCollector* GetDrawDataCollector() const;
 	DrawEngine* GetDrawEngine() const;
 	SoundManager* GetSoundManager() const;
@@ -202,6 +220,9 @@ private:
 	/// ============ コアシステム ============///
 	std::unique_ptr <DirectXController> dxComm = nullptr;
 
+	/// ========= アニメーション関連 =========///
+
+	std::unique_ptr <AnimationManager> animationManager{};
 
 	/// ============ 描画関連 ============///
 

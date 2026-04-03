@@ -28,4 +28,6 @@ void Transform::CopyAniTranFrom(Transform& target) {
 	aniScale = target.aniScale;
 	aniRotate = target.aniRotate;
 	aniTranslate = target.aniTranslate;
+
+	isAnimated = target.isAnimated;
 }

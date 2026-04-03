@@ -1,25 +1,26 @@
 #include "AnimationEditor.h"
+#include "config.h"
 
 AnimationEditor::AnimationEditor(kEngine* system) {
 	system_ = system;
 
 	/// ============ カメラ設定 ============///
-	//camera_ = system_->CreateCamera();
-	//camera_->Move({ 0.0f,0.5f,-10.0f });
-	//camera_->SetDefaultTransform(camera_->GetTransform());
-	//system_->SetCamera(camera_);
+	camera_ = system_->CreateDebugCamera();
+	camera_.lock()->Move({0.0f,0.5f,-10.0f});
+	//camera_.lock()->SetDefaultTransform(camera_.lock()->GetTransform());
+	system_->SetCamera(camera_);
 
 	/// ============ アニメーションエディター設定 ============///
 	SetupAnimationEditor();
 
 	/// =============== モデル設定 ===============///
-	std::string modelPath = "kEngine/EngineAssets/Object/";
-	targetModelHandle_ = system_->SetModelObj(modelPath + "charater/charater.obj");
+	std::string modelPath = "GAME/gltf/";
+	targetModelHandle_ = system_->SetModelObj(modelPath + "both/AnimatedCube/AnimatedCube.gltf");
 
 	targetModel_ = std::make_unique<Object>();
 	targetModel_->IntObject(system_);
 	targetModel_->CreateModelData(targetModelHandle_);
-	targetModel_->objectParts_[2].parentPart = &targetModel_->objectParts_[1];
+	targetModel_->modelHandle_ = targetModelHandle_;
 	SetUsingModel(targetModel_.get());
 
 
@@ -27,12 +28,12 @@ AnimationEditor::AnimationEditor(kEngine* system) {
 
 	/// ================ システム最終設定 ================///
 	SetupAnimationEditorEnd();
-	animationUnit_->ReadAnimationData(&animationList_[0]);
-	animationUnit_->TakeControlObject(targetModel_.get());
+	
+	animationUnitHandle_ = system_->LoadAnimation(modelPath + "both/AnimatedCube/AnimatedCube.gltf");
+	system_->AnimationTakeControlObject(animationUnitHandle_, targetModel_.get());
 }
 
 AnimationEditor::~AnimationEditor() {
-	//system_->DestroyCamera(camera_);
 
 	mainNeedle_.reset();
 	mainTimeBar_.reset();
@@ -45,7 +46,6 @@ AnimationEditor::~AnimationEditor() {
 	mainTimer_.reset();
 	skydome_.reset();
 
-	animationUnit_.reset();
 }
 
 void AnimationEditor::Update() {
@@ -53,10 +53,11 @@ void AnimationEditor::Update() {
 
 	/// =============== モデル更新 =================///
 
+	system_->AnimationUnitSetTime(animationUnitHandle_, mainTimer_->parameter_);
 	//targetModel_->Update(camera_);
 	//animationUnit_->ReadAnimationData(animationList_[0]);
-	animationUnit_->SetTime(mainTimer_->parameter_);
-	animationUnit_->Update(camera_);
+	//animationUnit_->SetTime(mainTimer_->parameter_);
+	//animationUnit_->Update(camera_);
 }
 
 void AnimationEditor::Draw() {
@@ -65,7 +66,7 @@ void AnimationEditor::Draw() {
 
 	targetModel_->Draw();
 
-	animationUnit_->KariDraw();
+	//animationUnit_->KariDraw();
 
 #ifdef USE_IMGUI
 	ImguiPart();
@@ -168,8 +169,7 @@ void AnimationEditor::SetupAnimationEditorEnd() {
 	/// ======= デイタ設定 =======///
 	AnimationNodeData testData{};
 	testData.SetSimpleObject(*targetModel_);
-	animationList_.push_back({ testData });
-	animationUnit_ = std::make_unique<AnimationUnit>(system_);
+	//animationList_.push_back({ testData });
 
 
 	/// ======= 最初のピン設定 =======///
@@ -178,6 +178,7 @@ void AnimationEditor::SetupAnimationEditorEnd() {
 }
 
 void AnimationEditor::UIUpdate() {
+
 	/// =============== mouse調整 ================///
 	mouseMovement();
 
@@ -192,8 +193,10 @@ void AnimationEditor::UIUpdate() {
 	KeyFrameTurnning();
 
 	/// ============= 3D基本とカメラ更新 =============///
-	skydome_->Update(camera_);
-	//camera_->Update();
+	skydome_->Update();
+
+	camera_.lock()->MouseControlUpdate();
+	system_->SetCamera(camera_);
 }
 
 void AnimationEditor::UIDraw() {
@@ -359,7 +362,7 @@ void AnimationEditor::PingPart() {
 	SortKeyFrame();
 	AdjuctKeyFrameTexture();
 	
-	ping_->Update(camera_);
+	ping_->Update();
 }
 
 void AnimationEditor::AdjustMarker() {
@@ -758,11 +761,11 @@ void AnimationEditor::ImguiPart() {
 	ImGui::Begin("File");
 	ImGui::InputText("SavePath", &saveFilePath_);
 	if (ImGui::Button("Save")) {
-		SaveAnimationData(animationList_[0], saveFilePath_);
+		//SaveAnimationData(animationList_[0], saveFilePath_);
 	}
 	ImGui::InputText("LoadPath", &loadFilePath_);
 	if (ImGui::Button("Load")) {
-		LoadAnimationData(&animationList_[0], loadFilePath_);
+		//LoadAnimationData(&animationList_[0], loadFilePath_);
 	}
 	ImGui::End();
 
@@ -829,7 +832,8 @@ void AnimationEditor::ImguiPart() {
 	
 		//ImGui::Text("KeyFrame num: %d", keyFrameList_.size());
 		ImGui::Text("ObjectPart num: %d", ping_->objectParts_.size());
-		ImGui::Text("animationObjectDataList_ num: %d", animationList_.size());
+		ImGui::Text("animationHandle: %d", animationUnitHandle_);
+		//ImGui::Text("animationObjectDataList_ num: %d", animationList_.size());
 	
 	}
 	if (keyFrameModel_ != nullptr) {

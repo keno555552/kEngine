@@ -11,6 +11,8 @@ enum class AnimationType {
 	EASY_IN_OUT,
 	EASY_IN_BACK,
 	EASY_OUT_BACK,
+	STEP,
+	CUBICSPLINE,
 };
 
 struct KeyframeVector3 {

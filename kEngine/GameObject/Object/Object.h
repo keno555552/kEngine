@@ -5,11 +5,11 @@
 #include "TransformationMatrix.h"
 #include "Data/Render/CPUData/MaterialConfig.h"
 #include "MathsIncluder.h"
-#include "kEngine.h"
 #include "Camera/Camera.h"
 #include "Data/Render/CPUData/ObjectData.h"
 #include "Geometry/Collision/crashDecision.h"
 
+class kEngine;
 class Object : public ObjectData {
 public:
 	void IntObject(kEngine* system);

@@ -20,6 +20,7 @@ struct NodeData
 {
 	Matrix4x4 localMatrix = Identity();
 	std::string name;
+	std::vector<uint32_t> meshIndices;
 	std::vector<NodeData> children;
 };
 
@@ -40,7 +41,7 @@ MaterialData LoadTargetMaterialTemplateFile(const std::string& directoryPath, co
 class Model :public MeshBuffer
 {
 public:
-	ModelData GetModelData() { return modelData_; }
+	const ModelData& GetModelData() const{ return modelData_; }
 	void SetModelData(ModelData modeldata);
 	ID3D12Resource* CreateVertexResource_(ID3D12Device* device)override;
 	ID3D12Resource* CreateVertexResourceG_(ID3D12Device* device);

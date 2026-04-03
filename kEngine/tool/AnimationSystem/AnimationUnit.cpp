@@ -1,217 +1,168 @@
 #include "AnimationUnit.h"
+#include "kEngine.h"
+#include "externals/nlohmann/json.hpp"
+#include <Camera/Camera.h>
 
 AnimationUnit::AnimationUnit(kEngine* system) {
 	system_ = system;
 
-	time_ = std::make_unique<Timer>();
-	time_->Init0(1.0f, system_->GetTimeManager());
+	nowTime_ = 0.0f;
 
 	instanceObject_ = std::make_unique<Object>();
 	instanceObject_->IntObject(system_);
-
 }
 
 AnimationUnit::~AnimationUnit() {
-	time_.reset();
-	instanceObject_.reset();
 }
 
-void AnimationUnit::ReadAnimationData(AnimationNodeData* animationData) {
-	animationData_ = animationData;
-	//if (!animationData->keyList.empty()) {
-	//	allMaxTime_ = animationData->keyList.back().time_;
-	//	allStartTime_ = animationData->keyList.front().time_;
-	//	ResetTimer();
-	//}
-}
+AnimationUnit* AnimationUnit::ReadAnimationData(std::shared_ptr<Animation> animation) {
 
+	if (!animation) {
+		Logger::Log("[kError] AS :: ReadAnimationData: animation pointer is null.");
+		return nullptr;
+	}
 
-void AnimationUnit::SetTime(float time_) {
-	nowTime_ = time_;
-	//allStartTime_ = animationData_->keyList.front().time_;
-	//allMaxTime_ = animationData_->keyList.back().time_;
-	if (nowTime_ < allStartTime_)nowTime_ = allStartTime_;
-	if (nowTime_ > allMaxTime_)nowTime_ = allMaxTime_;
+	animationData_ = animation;
+	allMaxTime_ = animation->duration;
+	allStartTime_ = animation->startTime;
+
+	return this;
 }
 
 void AnimationUnit::TakeControlObject(Object* object) {
-	if (object == nullptr)return;
-	if (!CheckObjectNumMeet(object))return;
+
+	if (!object) {
+		Logger::Log("[kError] AS :: No such object.");
+		return;
+	}
+
 	controlledObject_ = object;
 	instanceObject_->CopyObject(controlledObject_);
+
+	BindingAnimationNodeToObjectPart();
+
 }
 
-void AnimationUnit::RelistControlObject() {
-	controlledObject_ = nullptr;
-	instanceObject_.reset();
-}
-
-void AnimationUnit::Update(Camera* camera) {
-	TunningTime();
+void AnimationUnit::Update() {
 
 	UpdateInstanceObject();
 
-	ControlleObject(camera);
+	ControlleObject();
 
 }
 
-void AnimationUnit::KariDraw() {
-#ifdef USE_IMGUI
-	ImguiPart();
-#endif
+void AnimationUnit::ControlleObject() {
+
+	if (!isObjectChange_)return;
+
+	auto& cObjectTransform = controlledObject_->mainPosition.transform;
+	auto& iObjectTransform = instanceObject_->mainPosition.transform;
+
+	cObjectTransform.CopyAniTranFrom(iObjectTransform);
+
+	int partCount = std::min(
+		(int)controlledObject_->objectParts_.size(),
+		(int)instanceObject_->objectParts_.size()
+	);
+
+	for (int i = 0; i < partCount; i++) {
+		controlledObject_->objectParts_[i].transform.CopyAniTranFrom(instanceObject_->objectParts_[i].transform);
+	}
 }
 
-bool AnimationUnit::CheckObjectNumMeet(Object* target) {
-	//if (target->objectParts_.size() != animationData_->keyList[0].transformData.objectParts_.size())return false;
-	return true;
-}
+void AnimationUnit::SetTime(float time_) {
 
+	/// 時間を制限内に収める
+	nowTime_ = time_;
+	if (nowTime_ < allStartTime_)nowTime_ = allStartTime_;
+	if (nowTime_ > allMaxTime_)nowTime_ = allMaxTime_;
 
-void AnimationUnit::ResetTimer() {
-	usingStartTime_ = 0;
-	//usingEndTime_ = animationData_->keyList.front().time_;
 }
 
 void AnimationUnit::UpdateInstanceObject() {
-	float T = ChangeEasing(AnimationType::LINEARITY);
-	int index = usingKeyFrameIndex_;
-	//if (index + 1 >= animationData_->keyList.size())index -= 1;
-	//KeyFrame usingKeyFrame = animationData_->keyList[index + 1];
-	//KeyFrame frontKeyFrame = animationData_->keyList[index];
-	
-	//if (instanceObject_ != nullptr) {
-	//	T = ChangeEasing(usingKeyFrame.animationType_, (float)usingKeyFrame.easeRate_);
-	//
-	//	instanceObject_->mainPosition.transform = {
-	//		frontKeyFrame.transformData.mainPosition.transform.scale * (1 - T) + usingKeyFrame.transformData.mainPosition.transform.scale * T,
-	//		frontKeyFrame.transformData.mainPosition.transform.rotate * (1 - T) + usingKeyFrame.transformData.mainPosition.transform.rotate * T,
-	//		frontKeyFrame.transformData.mainPosition.transform.translate * (1 - T) + usingKeyFrame.transformData.mainPosition.transform.translate * T
-	//	};
-	//
-	//	int partNum = 0;
-	//	for (auto& part : instanceObject_->objectParts_) {
-	//		instanceObject_->objectParts_[partNum].transform = {
-	//			frontKeyFrame.transformData.objectParts_[partNum].transform.scale * (1 - T) + usingKeyFrame.transformData.objectParts_[partNum].transform.scale * T,
-	//			frontKeyFrame.transformData.objectParts_[partNum].transform.rotate * (1 - T) + usingKeyFrame.transformData.objectParts_[partNum].transform.rotate * T,
-	//			frontKeyFrame.transformData.objectParts_[partNum].transform.translate * (1 - T) + usingKeyFrame.transformData.objectParts_[partNum].transform.translate * T
-	//		};
-	//		partNum++;
-	//	}
-	//}
+
+	auto anim = animationData_.lock();
+	/// アニメーションがなければ終わる
+	if (!anim) {
+		isObjectChange_ = false;
+		return;
+	}
+
+	for (size_t i = 0; i < anim->nodeList.size(); i++) {
+
+		if (animationBindings.animToObject.empty()) {
+			isObjectChange_ = false;
+			return;
+		}
+
+		int objIndex = animationBindings.animToObject[i];
+
+		// nodeに対応するobject partがない場合はスキップ
+		if (objIndex < 0 || objIndex >= instanceObject_->objectParts_.size()) {
+			continue;
+		}
+
+		auto& node = anim->nodeList[i];
+		auto& part = instanceObject_->objectParts_[objIndex].transform;
+
+		part.aniScale = MakeTimeValue(node.scaleList, nowTime_);
+		part.aniRotate = MakeTimeValue(node.rotateList, nowTime_);
+		part.aniTranslate = MakeTimeValue(node.translationList, nowTime_);
+
+		part.isAnimated = true;
+	}
+	isObjectChange_ = true;
 }
 
-float AnimationUnit::ChangeEasing(AnimationType type, float R) {
-	if (time_->parameter_ == 0) return 0;
-	float T{};
+
+float AnimationUnit::ChangeEasing(AnimationType type, float t, float rate) {
+
 	switch (type) {
 	case AnimationType::LINEARITY:
-		return time_->linearity();
+		return linearity(0, 1, t);
 	case AnimationType::EASY_IN:
-		return time_->easyIn(R);
+		return easyIn(0, 1, t, rate);
 	case AnimationType::EASY_OUT:
-		return time_->easyOut(R);
+		return easyOut(0, 1, t, rate);
 	case AnimationType::EASY_IN_OUT:
-		return time_->easyInOut(R);
+		return easyInOut(0, 1, t, rate);
 	case AnimationType::EASY_IN_BACK:
-		return time_->easyInBack(R);
+		return easyInBack(0, 1, t, rate);
 	case AnimationType::EASY_OUT_BACK:
-		return time_->easyOutBack(R);
+		return easyOutBack(0, 1, t, rate);
 	}
 	return 0;
 }
 
-void AnimationUnit::ControlleObject(Camera* camera) {
-	camera;
+void AnimationUnit::BindingAnimationNodeToObjectPart() {
 
-	controlledObject_->mainPosition = instanceObject_->mainPosition;
+	auto anim = animationData_.lock();
+	if (!anim) return;
 
-	for (int i = 0; i < controlledObject_->objectParts_.size(); i++) {
-		controlledObject_->objectParts_[i].transform = instanceObject_->objectParts_[i].transform;
+	animationBindings.animToObject.resize(animationData_.lock()->nodeList.size(), -1);
+
+	for (int i = 0; i < anim->nodeList.size(); i++) {
+
+		const std::string& nodeName = anim->nodeList[i].name;
+
+		auto target = std::find_if(
+			controlledObject_->objectParts_.begin(),
+			controlledObject_->objectParts_.end(),
+			[&](const ObjectPart& object) {
+				return nodeName == object.name;
+			}
+		);
+
+		/// partのIndexをとる
+		int partIndex = (int)std::distance(controlledObject_->objectParts_.begin(), target);
+
+		/// アニメーションのノードが見つかったら、partIndexとnodeIndexを紐づける
+		if (target != controlledObject_->objectParts_.end()) {
+
+			animationBindings.animToObject[i] = partIndex;
+		} else {
+			Logger::Log("[kWarning] AS_Unit :: No object part found for animation node: " + nodeName);
+			animationBindings.animToObject[i] = -1; // No animation
+		}
 	}
-
-
-	//Matrix4x4 parentMatrix = Identity();
-	//if (controlledObject_->followObject_ != nullptr) {
-	//	parentMatrix = MakeAffineMatrix(
-	//		controlledObject_->followObject_->transform.scale,
-	//		controlledObject_->followObject_->transform.rotate,
-	//		controlledObject_->followObject_->transform.translate
-	//	);
-	//}
-	//
-	//Matrix4x4 objectMainMatrix = MakeAffineMatrix(
-	//	controlledObject_->mainPosition.transform.scale,
-	//	controlledObject_->mainPosition.transform.rotate,
-	//	controlledObject_->mainPosition.transform.translate
-	//);
-	//
-	//Matrix4x4 objectAnimateMainMatrix = MakeAffineMatrix(
-	//	instanceObject_->mainPosition.transform.scale,
-	//	instanceObject_->mainPosition.transform.rotate,
-	//	instanceObject_->mainPosition.transform.translate
-	//);
-	//Matrix4x4 objectWorldMatrix = objectMainMatrix * objectAnimateMainMatrix * parentMatrix;
-	//controlledObject_->mainPosition.transformationMatrix = camera->transformationMatrixTransform(objectWorldMatrix);
-	//
-	//int partNum = 0;
-	//for (auto& part : controlledObject_->objectParts_) {
-	//	Matrix4x4 objectParentMatrix = Identity();
-	//	if (part.parentPart != nullptr) {
-	//		objectParentMatrix = MakeAffineMatrix(
-	//			part.parentPart->transform.scale,
-	//			part.parentPart->transform.rotate,
-	//			part.parentPart->transform.translate
-	//		);
-	//	}
-	//
-	//	Matrix4x4 localMatrix = MakeAffineMatrix(
-	//		instanceObject_->objectParts_[partNum].transform.scale,
-	//		instanceObject_->objectParts_[partNum].transform.rotate,
-	//		instanceObject_->objectParts_[partNum].transform.translate
-	//	);
-	//
-	//	Matrix4x4 worldMatrix = localMatrix * objectParentMatrix * objectWorldMatrix;
-	//	part.transformationMatrix = camera->transformationMatrixTransform(worldMatrix);
-	//	part.materialConfig->MakeUVMatrix();
-	//	partNum++;
-	//}
 }
-
-void AnimationNodeData::SetSimpleObject(const Object& obj) {
-	Object obje = obj;
-	SimpleObject.CopyObject(&obje);
-}
-
-void AnimationNodeData::AddKeyFrame(int keyFrameType, float time_) {
-
-	if (keyFrameType < 0 || keyFrameType >= (int)KeyFrameType::NumOfType) {
-		Logger::Log("[kError] AND :: Invalid KeyFrameType.");
-		return;
-	}
-
-	//KeyFrame keyFrame;
-	//if (time_ > 0.0f)keyFrame.time_ = time_;
-	//keyFrame.animationType_ = AnimationType::LINEARITY;
-	//keyFrame.easeRate_ = 0.0f;
-	//keyFrame.value_ = { 0.0f,0.0f,0.0f };
-
-	//if (keyFrameType == (int)KeyFrameType::SCALE)		{ scaleList.push_back(keyFrame)			; return; }
-	//if (keyFrameType == (int)KeyFrameType::ROTATE)		{ rotateList.push_back(keyFrame)		; return; }
-	//if (keyFrameType == (int)KeyFrameType::TRANSLATION) { translationList.push_back(keyFrame)	; return; }
-
-}
-
-#ifdef USE_IMGUI
-void AnimationUnit::ImguiPart() {
-	ImGui::Begin("AU0");
-	ImGui::Text("NowTime: %.02f", nowTime_);
-	ImGui::Text("parameterTime: %.02f", time_->parameter_);
-	ImGui::Text("usingStartTime: %.02f", usingStartTime_);
-	ImGui::Text("usingEndTime: %.02f", usingEndTime_);
-	ImGui::Text("allMaxTime: %.02f", allMaxTime_);
-	ImGui::Text("allStartTime: %.02f", allStartTime_);
-	ImGui::Text("controlledObjectPos.x: %.02f", controlledObject_->mainPosition.transform.translate.x);
-	ImGui::Text("instanceObjectPos.x: %.02f", instanceObject_->mainPosition.transform.translate.x);
-	ImGui::End();
-}
-#endif

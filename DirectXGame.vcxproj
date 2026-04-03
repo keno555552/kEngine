@@ -329,7 +329,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\core\WinAPI.cpp" />
     <ClCompile Include="kEngine\Renderer\Mesh\SimpleSpriteMesh.cpp" />
     <ClCompile Include="kEngine\Tool\AnimationSystem\AnimationEditor.cpp" />
-    <ClCompile Include="kEngine\Tool\AnimationSystem\AnimationSystem.cpp" />
+    <ClCompile Include="kEngine\Tool\AnimationSystem\AnimationManager.cpp" />
     <ClCompile Include="kEngine\Tool\AnimationSystem\AnimationUnit.cpp" />
     <ClCompile Include="kEngine\GameObject\Camera\Camera.cpp" />
     <ClCompile Include="kEngine\GameObject\Button\button.cpp" />
@@ -566,7 +566,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\core\WinAPI.h" />
     <ClInclude Include="kEngine\Renderer\Mesh\SimpleSpriteMesh.h" />
     <ClInclude Include="kEngine\Tool\AnimationSystem\AnimationEditor.h" />
-    <ClInclude Include="kEngine\Tool\AnimationSystem\AnimationSystem.h" />
+    <ClInclude Include="kEngine\Tool\AnimationSystem\AnimationManager.h" />
     <ClInclude Include="kEngine\Tool\AnimationSystem\AnimationUnit.h" />
     <ClInclude Include="kEngine\GameObject\Camera\Camera.h" />
     <ClInclude Include="kEngine\GameObject\Button\button.h" />

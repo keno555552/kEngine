@@ -28,6 +28,8 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 	cameraManager = std::make_unique<CameraManager>();
 	cameraManager->Initialize();
 
+	animationManager = std::make_unique<AnimationManager>(this);
+
 	drawDataCollector = std::make_unique<DrawDataCollector>();
 	drawDataCollector->Initialize(cameraManager.get(), lightManager.get());
 
@@ -60,6 +62,7 @@ void kEngine::Finalize() {
 
 	drawEngine->Finalize();
 	drawDataCollector->Finalize();
+	animationManager.reset();
 	cameraManager->Finalize();
 	lightManager->Finalize();
 	srvManager->Finalize();
@@ -84,6 +87,7 @@ void kEngine::EndFrame() {
 
 #endif
 
+	animationManager->Update();
 	drawDataCollector->EndCollect();
 	drawEngine->PreDraw();
 	drawEngine->CommitDraw();
@@ -93,6 +97,26 @@ void kEngine::EndFrame() {
 
 bool kEngine::ProcessMessage() {
 	return dxComm->ProcessMessage();
+}
+
+#pragma endregion
+
+#pragma region アニメーションシステム
+
+Animation kEngine::LoadAnimationData(const std::string& filePath) {
+	return animationManager->LoadAnimationData(filePath);
+}
+
+int kEngine::LoadAnimation(const std::string& filePath) {
+	return animationManager->LoadAnimation(filePath);
+}
+
+void kEngine::AnimationUnitSetTime(int unitHandle, float time) {
+	animationManager->UnitSetTime(unitHandle, time);
+}
+
+void kEngine::AnimationTakeControlObject(int unitHandle, Object* object) {
+	animationManager->TakeControlObject(unitHandle, object);
 }
 
 #pragma endregion
@@ -135,6 +159,10 @@ void kEngine::Draw3D(ObjectData* object) {
 
 int kEngine::GetModelTextureHandle(int modelHandle, int part) {
 	return ResourceManager::GetInstance()->GetTextureHandleFromModelGroup(modelHandle, part);
+}
+
+const Model* kEngine::GetModel(int modelHandle, int partHandle) {
+	return ResourceManager::GetInstance()->modelGroupList_[modelHandle]->GetModel(partHandle);
 }
 
 int kEngine::GetMutiModelNum(int modelHandle) {
@@ -468,6 +496,10 @@ LightManager* kEngine::GetLightManager() const {
 
 CameraManager* kEngine::GetCameraManager() const {
 	return cameraManager.get();
+}
+
+AnimationManager* kEngine::GetAnimationManager() const {
+	return nullptr;
 }
 
 DrawDataCollector* kEngine::GetDrawDataCollector() const {

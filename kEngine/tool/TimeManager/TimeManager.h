@@ -214,6 +214,8 @@ public:
 	/// <returns>0から1までの変化値</returns>
 	float easyOutBack(float r);
 
+	float step(float a, float b);
+
 	bool GetIsMax() const;
 
 	bool GetIsZero() const;
@@ -305,6 +307,8 @@ float easyInBack(int a, int b, float time, float r);
 /// <param name="r">変動率[1.0f以上]</param>
 /// <returns>aからbまで今どれくらい進んでる値</returns>
 float easyOutBack(int a, int b, float time, float r);
+
+float step(float a, float b, float t);
 
 float smootherstep(float t);
 

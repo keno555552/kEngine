@@ -43,6 +43,11 @@ NodeData ReadNode(aiNode* node) {
 		result.children[childIndex] = ReadNode(node->mChildren[childIndex]); // 再帰的に子ノードを読み込む
 	}
 
+	// node 綁定 mesh index，之後用
+	for (uint32_t i = 0; i < node->mNumMeshes; i++) {
+		result.meshIndices.push_back(node->mMeshes[i]);
+	}
+
 	return result;
 }
 

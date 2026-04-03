@@ -348,6 +348,8 @@ Matrix4x4 DrawDataCollector::MakeAnimationMatrix(ObjectPart& part) {
 			part.transform.aniTranslate
 		);
 	}
+	// アニメーション行列は毎フレーム更新されるため、使用後にフラグをリセット
+	part.transform.isAnimated = false; 
 	return result;
 }
 

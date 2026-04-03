@@ -224,6 +224,11 @@ float Timer::easyOutBack(float r) {
 	return 1 + c3 * powf(T - 1, 3) + c1 * powf(T - 1, 2);
 }
 
+float Timer::step(float a, float b) {
+	float T = parameter_ / maxTime_;
+	return (T < 1.0f) ? a : b;
+}
+
 bool Timer::GetIsMax() const {
 	if (parameter_ == maxTime_)return true;
 	return false;
@@ -281,6 +286,12 @@ float easyOutBack(int a, int b, float time, float r) {
 	float easedT = 1 + c3 * powf(time - 1, 3) + c1 * powf(time - 1, 2);
 	return (1.0f - easedT) * a + (easedT)*b;
 }
+
+float step(float a, float b, float t) {
+	return (t < 1.0f) ? a : b;
+}
+
+
 
 float smootherstep(float t) {
 	return t * t * t * (t * (t * 6.0f - 15.0f) + 10.0f);

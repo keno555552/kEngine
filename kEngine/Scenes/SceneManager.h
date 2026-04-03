@@ -33,7 +33,7 @@ public:
 
 	void Update();
 	void Render();
-;
+	;
 
 public:
 	std::string sceneUsingNameHandle_ = "NONE";
@@ -42,8 +42,22 @@ public:
 
 private:
 
-	std::map<std::string,std::string> sceneFlow_ = {
-		//{"TITLE","STAGE_01"},
+	/// シーンの遷移の流れを管理するマップ
+	std::map<std::string, std::map<SceneOutcome, std::string>> sceneFlow_ =
+	{
+		// シーン転移の書き方
+		//{"TITLE",
+		//	{
+		//		{SceneOutcome::NEXT,"STAGE_01"},
+		//		{SceneOutcome::WIN,"WIN"},
+		//	}
+		//},
+		//{"SCENE1",
+		//	{
+		//		{SceneOutcome::NEXT,"STAGE_01"},
+		//		{SceneOutcome::WIN,"WIN"},
+		//	}
+		//},
 	};
 
 private:
@@ -76,7 +90,7 @@ private:
 	Vector2 helperSpritePos_ = { 50.0f,50.0f };
 
 	/// =============== ステージ管理 ===============///
-	
+
 	bool stage[10]{};
 
 	bool isFirst_ = true;

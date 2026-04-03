@@ -5,6 +5,45 @@ float Lerp(float a, float b, int c, int t) {
 	return (time)*a + (1.0f - time) * b;
 }
 
+Vector3 CubicSpline(const Vector3& v0, const Vector3& outTan0, const Vector3& v1, const Vector3& inTan1, float t, float dt) {
+    float t2 = t * t;
+    float t3 = t2 * t;
+
+    Vector3 IoutTan0 = outTan0;
+    Vector3 IinTan0 = inTan1;
+
+    Vector3 T0 = IoutTan0 * dt;
+    Vector3 T1 = IinTan0 * dt;
+
+    return
+        (2.0f * t3 - 3.0f * t2 + 1.0f) * v0 +
+        (t3 - 2.0f * t2 + t) * T0 +
+        (-2.0f * t3 + 3.0f * t2) * v1 +
+        (t3 - t2) * T1;
+}
+
+Quaternion CubicSplineQuat(const Quaternion& v0, const Quaternion& outTan0, const Quaternion& v1, const Quaternion& inTan1, float t, float dt) {
+    Quaternion Iv0 = v0;
+	Quaternion Iv1 = v1;
+    Quaternion IoutTan0 = outTan0;
+    Quaternion IinTan0 = inTan1;
+
+    // glTF tangent for quaternion is stored as derivative, not normalized
+    Quaternion T0 = IoutTan0 * dt;
+    Quaternion T1 = IinTan0 * dt;
+
+    float t2 = t * t;
+    float t3 = t2 * t;
+
+    Quaternion result =
+        Iv0 * (2 * t3 - 3 * t2 + 1) +
+        T0 * (t3 - 2 * t2 + t) +
+        Iv1 * (-2 * t3 + 3 * t2) +
+        T1 * (t3 - t2);
+
+    return Normalize(result);
+}
+
 //void Draw3DLine(const Line& line, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, int color) {
 //	// 線分は両端をそれぞれスクリーン座標系まで変換し、Novice::DrawLineを利用して描画する
 //	Vector3 start = viewFinilTransform(viewFinilTransform(line.origin, viewProjectionMatrix), viewportMatrix);

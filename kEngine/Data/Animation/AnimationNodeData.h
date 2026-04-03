@@ -3,6 +3,14 @@
 #include "MathsIncluder.h"
 #include "Data/Animation/Keyframe.h"
 
+/// アニメーションのノードの補間方法(gltfの補間方法に合わせる)
+enum class InterpolationMode {
+	LINEARITY,
+	STEP,
+	CUBICSPLINE,
+};
+
+
 /// 一つのアニメーションのノードデータ
 struct AnimationNodeData {
 

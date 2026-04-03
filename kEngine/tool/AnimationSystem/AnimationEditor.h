@@ -7,8 +7,7 @@
 #include "Object/Object.h"
 #include "Geometry/Collision/crashDecision.h"
 #include "Camera/DebugCamera.h"
-#include "AnimationSystem.h"
-#include "AnimationUnit.h"
+#include "AnimationManager.h"
 
 class AnimationEditor : public BaseScene
 {
@@ -60,7 +59,7 @@ private:
 	Object* choosingModel_{};	/// 選んでるモデル　　 // 借り
 
 	/// ============== カメラ関連 ==============///
-	Camera* camera_{};
+	std::weak_ptr<DebugCamera> camera_{};
 
 	/// ============= バー用定数 ===============///
 
@@ -88,9 +87,7 @@ private:
 	HitBox mainTimeBarHitBox_{};
 
 	/// ======== アニメーション内部用 ==========///
-	/// キーフレームリスト
-	std::vector<AnimationNodeData> animationList_{};
-	//std::vector<KeyFrame> keyFrameList_{};
+	int animationUnitHandle_{ -1 };
 
 	/// 選んでるキーフレーム(by IP)
 	int pickedKeyFrame_{-1};
@@ -112,10 +109,6 @@ private:
 	std::unique_ptr<Object> targetModel_{};
 
 	/// ============ アニメーションユニット ==========///
-	std::unique_ptr <AnimationUnit> animationUnit_{};
-
-
-	///////////////// 使うどころ /////////////////
 
 
 	/// ============== テスト用 ==============///

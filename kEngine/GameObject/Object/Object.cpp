@@ -1,4 +1,6 @@
 #include "Object.h"
+
+#include "kEngine.h"
 #include "Vector3.h"
 void Object::CreateDefaultData() {
 	modelHandle_ = 0;
@@ -136,6 +138,8 @@ void Object::CreateModelData(int modelHandle) {
 
 	for (int i = 0; i < numOfPart; i++) {
 		ObjectPart newObjectPart;
+
+		newObjectPart.name = system_->GetModel(modelHandle, i)->GetModelData().rootNode.name;
 		newObjectPart.materialConfig = std::make_shared<MaterialConfig>();
 		InitMaterialConfig(newObjectPart.materialConfig.get());
 		newObjectPart.materialConfig->lightModelType = LightModelType::HalfLambert;

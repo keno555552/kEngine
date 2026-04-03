@@ -1,20 +1,16 @@
-#include "AnimationSystem.h"
+#include "AnimationManager.h"
+#include "kEngine.h"
 #include "externals/nlohmann/json.hpp"
 #include <Camera/Camera.h>
 
-AnimationSystem::AnimationSystem(kEngine* system) {
+AnimationManager::AnimationManager(kEngine* system) {
 	system_ = system;
-
-	nowTime_ = 0.0f;
-
-	instanceObject_ = std::make_unique<Object>();
-	instanceObject_->IntObject(system_);
 }
 
-AnimationSystem::~AnimationSystem() {
+AnimationManager::~AnimationManager() {
 }
 
-Animation AnimationSystem::LoadAnimationData(const std::string& filePath) {
+Animation AnimationManager::LoadAnimationData(const std::string& filePath) {
 	size_t dotPos = filePath.rfind('.');
 
 	/// ファイルが変
@@ -43,79 +39,66 @@ Animation AnimationSystem::LoadAnimationData(const std::string& filePath) {
 	return {};
 }
 
-void AnimationSystem::ReadAnimationData(Animation* animation) {
+int AnimationManager::LoadAnimation(const std::string& filePath) {
 
-	if (!animation) {
-		Logger::Log("[kError] AS :: ReadAnimationData: animation pointer is null.");
-		return;
+	/// すでに読み込んでいるファイルならばハンドルを返す
+	if (animationHandleList_.contains(filePath)) {
+		return animationHandleList_[filePath];
 	}
 
-	animationData_ = animation;
-	allMaxTime_ = animation->duration;
-	allStartTime_ = animation->startTime;
-	ResetTimer();
+	/// 読み込んでいないファイルならば読み込む
+	Animation animationData = LoadAnimationData(filePath);
+	if (animationData.nodeList.size() == 0) {
+		Logger::Log("[kError] AE :: Failed to load animation data.");
+		return -1;
+	}
 
+	/// 読み込んだアニメーションデータを保存する
+	std::shared_ptr<Animation> animationDataPtr = std::make_shared<Animation>(animationData);
+	animationDataList_.push_back(animationDataPtr);
+	int index = (int)animationDataList_.size() - 1;
+
+	/// HandleListに保存する
+	animationHandleList_[filePath] = index;
+
+	/// Unitを作って、アニメーションデータを読み込む
+	unitList_[index] = std::make_unique<AnimationUnit>(system_);
+	unitList_[index]->ReadAnimationData(animationDataPtr);
+
+	///ハンドルを返す
+	return index;
 }
 
-void AnimationSystem::TakeControlObject(Object* object) {
+void AnimationManager::UnitSetTime(int unitHandle, float time) {
+
+	bool retFlag = CheckHaveHandle(unitHandle);
+	if (!retFlag) return;
+
+	unitList_[unitHandle]->SetTime(time);
+}
+
+
+void AnimationManager::TakeControlObject(int unitHandle, Object* object) {
+
+	if (!CheckHaveHandle(unitHandle)) {
+		return;
+	}
 
 	if (!object) {
-		Logger::Log("[kError] AS :: No such object.");
+		Logger::Log("[kError] AS :: Invalid animation unit handle.");
 		return;
 	}
-	controlledObject_ = object;
-	instanceObject_->CopyObject(controlledObject_);
+
+	unitList_[unitHandle]->TakeControlObject(object);
 }
 
-void AnimationSystem::Update() {
-
-	UpdateInstanceObject();
-
-	ControlleObject();
-
-}
-
-void AnimationSystem::ControlleObject() {
-
-	auto& cObjectTransform = controlledObject_->mainPosition.transform;
-	auto& iObjectTransform = instanceObject_->mainPosition.transform;
-
-	cObjectTransform.CopyAniTranFrom(iObjectTransform);
-
-	for (int i = 0; i < controlledObject_->objectParts_.size(); i++) {
-		controlledObject_->objectParts_[i].transform.CopyAniTranFrom(instanceObject_->objectParts_[i].transform);
+void AnimationManager::Update() {
+	for (auto& [handle, unit] : unitList_) {
+		unit->Update();
 	}
 }
 
-void AnimationSystem::SetTime(float time_) {
-
-	/// 時間を制限内に収める
-	nowTime_ = time_;
-	if (nowTime_ < allStartTime_)nowTime_ = allStartTime_;
-	if (nowTime_ > allMaxTime_)nowTime_ = allMaxTime_;
-
-}
-
-void AnimationSystem::UpdateInstanceObject() {
-
-	for (size_t nodeNum = 0; nodeNum < animationData_->nodeList.size(); nodeNum++) {
-
-		auto& nowNodeList = animationData_->nodeList[nodeNum];
-
-		auto& part = instanceObject_->objectParts_[nodeNum].transform;
-
-		part.aniScale = MakeTimeValue(nowNodeList.scaleList, nowTime_);
-		part.aniRotate = MakeTimeValue(nowNodeList.rotateList, nowTime_);
-		part.aniTranslate = MakeTimeValue(nowNodeList.translationList, nowTime_);
-
-		part.isAnimated = true;
-
-
-		instanceObject_->objectParts_[nodeNum].transform.isAnimated = true;
-	}
-}
-
-Animation AnimationSystem::LoadAnimationDataFromGltf(const std::string& filePath) {
+Animation AnimationManager::LoadAnimationDataFromGltf(const std::string& filePath) {
 
 	std::ifstream input(filePath);
 	if (!input.is_open()) {
@@ -127,7 +110,7 @@ Animation AnimationSystem::LoadAnimationDataFromGltf(const std::string& filePath
 	const aiScene* scene = importer.ReadFile(filePath.c_str(), 0);
 
 	/// アニメーションデータがない
-	if (scene->mNumAnimations != 0) {
+	if (scene->mNumAnimations == 0) {
 		Logger::Log("[kError] AE :: This file does not contain animation data.");
 		return{};
 	}
@@ -149,30 +132,33 @@ Animation AnimationSystem::LoadAnimationDataFromGltf(const std::string& filePath
 		/// スケールのKeyFrameを保存
 		for (int keyIndex = 0; keyIndex < (int)nodeAnim->mNumScalingKeys; keyIndex++) {
 			KeyFrameVector3 keyFrame;
-			keyFrame.time_ = float(nodeAnim->mScalingKeys[keyIndex].mTime);
+			keyFrame.time_ = float(nodeAnim->mScalingKeys[keyIndex].mTime / animationAssimp->mTicksPerSecond);
 			keyFrame.value_ = { nodeAnim->mScalingKeys[keyIndex].mValue.x,
 								nodeAnim->mScalingKeys[keyIndex].mValue.y,
 								nodeAnim->mScalingKeys[keyIndex].mValue.z, };
+			keyFrame.animationType_ = AnimationType::LINEARITY;
 			nodeData.scaleList.push_back(keyFrame);
 		}
 		/// 回転のKeyFrameを保存
 		for (int keyIndex = 0; keyIndex < (int)nodeAnim->mNumRotationKeys; keyIndex++) {
 			KeyFrameQuaternion keyFrame;
-			keyFrame.time_ = float(nodeAnim->mRotationKeys[keyIndex].mTime);
+			keyFrame.time_ = float(nodeAnim->mRotationKeys[keyIndex].mTime / animationAssimp->mTicksPerSecond);
 			Quaternion quatValue = { nodeAnim->mRotationKeys[keyIndex].mValue.x,
 									 nodeAnim->mRotationKeys[keyIndex].mValue.y,
 									 nodeAnim->mRotationKeys[keyIndex].mValue.z,
 									 nodeAnim->mRotationKeys[keyIndex].mValue.w, };
 			keyFrame.value_ = quatValue;
+			keyFrame.animationType_ = AnimationType::LINEARITY;
 			nodeData.rotateList.push_back(keyFrame);
 		};
 		/// 平行移動のKeyFrameを保存
 		for (int keyIndex = 0; keyIndex < (int)nodeAnim->mNumPositionKeys; keyIndex++) {
 			KeyFrameVector3 keyFrame;
-			keyFrame.time_ = float(nodeAnim->mPositionKeys[keyIndex].mTime);
+			keyFrame.time_ = float(nodeAnim->mPositionKeys[keyIndex].mTime / animationAssimp->mTicksPerSecond);
 			keyFrame.value_ = { nodeAnim->mPositionKeys[keyIndex].mValue.x,
 								nodeAnim->mPositionKeys[keyIndex].mValue.y,
 								nodeAnim->mPositionKeys[keyIndex].mValue.z, };
+			keyFrame.animationType_ = AnimationType::LINEARITY;
 			nodeData.translationList.push_back(keyFrame);
 		}
 		result.nodeList.push_back(nodeData);
@@ -181,7 +167,7 @@ Animation AnimationSystem::LoadAnimationDataFromGltf(const std::string& filePath
 	return result;
 }
 
-Animation AnimationSystem::LoadAnimationDataFromJson(const std::string& filePath) {
+Animation AnimationManager::LoadAnimationDataFromJson(const std::string& filePath) {
 	//std::ifstream input(filePath);
 	//if (!input.is_open()) {
 	//	throw std::runtime_error("Failed to open file: " + filePath);
@@ -265,24 +251,13 @@ Animation AnimationSystem::LoadAnimationDataFromJson(const std::string& filePath
 	return {};
 }
 
-void AnimationSystem::ResetTimer() {
-}
 
-float AnimationSystem::ChangeEasing(AnimationType type, float t, float rate) {
+bool AnimationManager::CheckHaveHandle(int unitHandle) {
 
-	switch (type) {
-	case AnimationType::LINEARITY:
-		return linearity(0, 1, t);
-	case AnimationType::EASY_IN:
-		return easyIn(0, 1, t, rate);
-	case AnimationType::EASY_OUT:
-		return easyOut(0, 1, t, rate);
-	case AnimationType::EASY_IN_OUT:
-		return easyInOut(0, 1, t, rate);
-	case AnimationType::EASY_IN_BACK:
-		return easyInBack(0, 1, t, rate);
-	case AnimationType::EASY_OUT_BACK:
-		return easyOutBack(0, 1, t, rate);
+	/// すでに読み込んでいるファイルならばハンドルを返す
+	if (!unitList_.contains(unitHandle)) {
+		Logger::Log("[kError] AS :: No such unit.");
+		return false;
 	}
-	return 0;
+	return true;
 }

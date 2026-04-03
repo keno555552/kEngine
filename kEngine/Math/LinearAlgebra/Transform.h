@@ -3,7 +3,8 @@
 #include "Quaternion.h"
 
 class DrawDataCollector;
-class AnimationSystem;
+class AnimationManager;
+class AnimationUnit;
 class Transform {
 public:
 	Vector3 scale{1.0f,1.0f,1.0f};
@@ -12,7 +13,8 @@ public:
 
 private:
 	friend class DrawDataCollector;
-	friend class AnimationSystem;
+	friend class AnimationManager;
+	friend class AnimationUnit;
 
 	/// 回転のクォータニオン関連
 	bool eulerDirty = true;
