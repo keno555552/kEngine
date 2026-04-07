@@ -29,6 +29,8 @@ public:
 
 	void TakeControlObject(Object* object);
 
+	Object* GetInstanceObject() const { return instanceObject_.get(); }
+
 	void Update();
 
 public:

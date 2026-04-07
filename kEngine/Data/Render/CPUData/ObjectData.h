@@ -11,6 +11,7 @@ class drawEngine;
 class DrawDataCollector;
 class ResourceManager;
 class AnimationUnit;
+class Object;
 class ObjectPart {
 public:
 
@@ -59,6 +60,8 @@ public:
 	bool isDelete_ = false;
 
 	bool isBillboard_ = false;
+
+	Object* ownerObject = nullptr;	// ObjectDataをObject(皮)のポインタを持つと色々便利になるからやる
 
 	ObjectPart* followObject_ = nullptr;
 };

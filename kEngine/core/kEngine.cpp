@@ -31,7 +31,7 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 	animationManager = std::make_unique<AnimationManager>(this);
 
 	drawDataCollector = std::make_unique<DrawDataCollector>();
-	drawDataCollector->Initialize(cameraManager.get(), lightManager.get());
+	drawDataCollector->Initialize(cameraManager.get(), lightManager.get(), animationManager.get());
 
 
 	drawEngine = std::make_unique<DrawEngine>();

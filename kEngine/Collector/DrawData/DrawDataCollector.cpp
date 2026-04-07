@@ -5,9 +5,10 @@
 #include "Resource/ResourceManager.h"
 
 
-void DrawDataCollector::Initialize(CameraManager* cm, LightManager* lm) {
+void DrawDataCollector::Initialize(CameraManager* cm, LightManager* lm, AnimationManager* am) {
 	cameraManager_ = cm;
 	lightManager_ = lm;
+	animationManager_ = am;
 }
 
 void DrawDataCollector::Finalize() {
@@ -374,11 +375,16 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustment3D(ObjectData& object
 		part.transform.translate
 	);
 
-	Matrix4x4 animationMatrix = MakeAnimationMatrix(part);
+	auto animationIt = animationManager_->GetControlObjectPartHandle(&object);
+
+	Matrix4x4 animationMatrix;
+	if( animationIt != -1) {
+		animationMatrix = MakeAnimationMatrix(part);
+	}
+	animationMatrix = Identity();
 
 	Matrix4x4 followWorldMatrix = MakeFollowObjectMatrix3D(&object);
 
-	//Matrix4x4 worldMatrix = localMatrix * partParentMatrix * followWorldMatrix;
 	Matrix4x4 worldMatrix = localMatrix * animationMatrix * followWorldMatrix;
 
 	TransformationMatrix result{};

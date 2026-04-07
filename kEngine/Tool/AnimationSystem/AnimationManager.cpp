@@ -90,6 +90,22 @@ void AnimationManager::TakeControlObject(int unitHandle, Object* object) {
 	}
 
 	unitList_[unitHandle]->TakeControlObject(object);
+	objectToUnitHandleList_[object] = unitHandle;
+}
+
+int AnimationManager::GetControlObjectPartHandle(ObjectData* object) {
+	if (!objectToUnitHandleList_.contains(object)) {
+		return -1;
+	}
+	return objectToUnitHandleList_[object];
+}
+
+Object* AnimationManager::GetInstanceObjectByUnitHandle(int unitHandle) {
+	if(unitList_.contains(unitHandle)){
+		return unitList_[unitHandle]->GetInstanceObject();
+	}
+	Logger::Log("[kError] AS :: Invalid animation unit handle.");
+	return nullptr;
 }
 
 void AnimationManager::Update() {

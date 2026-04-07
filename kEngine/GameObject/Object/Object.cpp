@@ -16,6 +16,7 @@ void Object::CreateDefaultData() {
 
 void Object::IntObject(kEngine* system) {
 	system_ = system;
+	ObjectData::ownerObject = this;
 }
 
 void Object::Update(Camera* camera) {

@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include <map>
+#include <unordered_map>
 #include "Object/Object.h"
 #include "AnimationUnit.h"
 
@@ -29,6 +29,10 @@ public:
 
 	void TakeControlObject(int unitHandle, Object* object);
 
+	int GetControlObjectPartHandle(ObjectData* object);
+
+	Object* GetInstanceObjectByUnitHandle(int unitHandle);
+
 	void Update();
 
 private:
@@ -43,6 +47,7 @@ private:
 
 	// Unitのリスト
 	std::map<int, std::unique_ptr<AnimationUnit>> unitList_{};
+	std::unordered_map<ObjectData*, int> objectToUnitHandleList_{};
 
 private:
 	 

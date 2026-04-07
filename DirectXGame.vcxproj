@@ -252,6 +252,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="kEngine\Data\Animation\Joint.cpp" />
     <ClCompile Include="kEngine\Data\Animation\Animation.cpp" />
     <ClCompile Include="kEngine\Data\Animation\AnimationNodeData.cpp" />
     <ClCompile Include="kEngine\Data\Kinematics\Types\CircleMotionPlane.cpp" />
@@ -416,8 +417,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Math\Geometry\VectorUtility.cpp" />
     <ClCompile Include="kEngine\Data\Physics\Spring.cpp" />
     <ClCompile Include="kEngine\Physics\SpringUtility.cpp" />
+    <ClCompile Include="kEngine\Data\Animation\Skeleton.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="kEngine\Data\Animation\Joint.h" />
     <ClInclude Include="kEngine\Data\Animation\Animation.h" />
     <ClInclude Include="kEngine\Data\Animation\AnimationNodeData.h" />
     <ClInclude Include="kEngine\Data\Kinematics\Types\CircleMotionPlane.h" />
@@ -650,6 +653,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Math\Geometry\VectorUtility.h" />
     <ClInclude Include="kEngine\Data\Physics\Spring.h" />
     <ClInclude Include="kEngine\Physics\SpringUtility.h" />
+    <ClInclude Include="kEngine\Data\Animation\Skeleton.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl">

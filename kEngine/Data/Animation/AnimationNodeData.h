@@ -22,9 +22,6 @@ struct AnimationNodeData {
 	std::vector <KeyFrameVector3> translationList{};
 	AnimationNodeData* parent_ = nullptr;
 
-	Object SimpleObject{};
-	void SetSimpleObject(const Object& obj);
-
 	enum class KeyFrameType {
 		SCALE,
 		ROTATE,

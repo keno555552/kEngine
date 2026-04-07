@@ -15,6 +15,7 @@
 #include "Mesh/Model.h"
 #include "Data/Render/CPUData/DebugLine.h"
 #include "Data/Render/GPUData/DebugLineGPU.h"
+#include "AnimationSystem/AnimationManager.h"
 using ModelID = int;
 
 inline const float layerDepth_Sprite = 0.0001f;
@@ -32,8 +33,10 @@ class DrawDataCollector
 {
 public:
 
-	void Initialize(CameraManager* cm,
-		LightManager* lm);
+	void Initialize(
+		CameraManager* cm,
+		LightManager* lm,
+		AnimationManager* am);
 
 	void Finalize();
 
@@ -106,6 +109,9 @@ private:
 
 	/// ============ カメラ関連 ==============///
 	CameraManager* cameraManager_ = nullptr; /*借り*/
+
+	/// ============ アニメーション関連 ==============///
+	AnimationManager* animationManager_ = nullptr; /*借り*/
 
 	/// ================ デバッグドロー関連 =================///
 

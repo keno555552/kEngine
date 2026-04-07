@@ -167,9 +167,6 @@ void AnimationEditor::SetupAnimationEditor() {
 void AnimationEditor::SetupAnimationEditorEnd() {
 
 	/// ======= デイタ設定 =======///
-	AnimationNodeData testData{};
-	testData.SetSimpleObject(*targetModel_);
-	//animationList_.push_back({ testData });
 
 
 	/// ======= 最初のピン設定 =======///
