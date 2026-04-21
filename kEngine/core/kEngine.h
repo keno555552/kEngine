@@ -198,7 +198,6 @@ public:
 	float GetTimerTimeScale_() const;
 	float GetTimerScaledDeltaTime_() const;
 
-
 #pragma endregion
 
 #pragma region システムインターフェース
