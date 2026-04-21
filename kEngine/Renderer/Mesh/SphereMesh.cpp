@@ -1,5 +1,5 @@
 #include "SphereMesh.h"
-#define M_PI 3.1415926f
+//#define M_PI 3.1415926f
 
 ID3D12Resource* SphereMesh::CreateVertexResource_(ID3D12Device* device) {
 	kSudivision_ = kMaxSudivision_;

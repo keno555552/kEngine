@@ -1,6 +1,7 @@
 #include "AnimationManager.h"
 #include "kEngine.h"
 #include "externals/nlohmann/json.hpp"
+#include "Resource/ResourceManager.h"
 #include <Camera/Camera.h>
 
 AnimationManager::AnimationManager(kEngine* system) {
@@ -10,63 +11,40 @@ AnimationManager::AnimationManager(kEngine* system) {
 AnimationManager::~AnimationManager() {
 }
 
-Animation AnimationManager::LoadAnimationData(const std::string& filePath) {
-	size_t dotPos = filePath.rfind('.');
+std::vector<int> AnimationManager::LoadAnimation(const std::string& filePath) {
 
-	/// ファイルが変
-	if (dotPos == std::string::npos) {
-		Logger::Log("[kError] AE :: File path does not contain an extension.");
-		return {};
+	/// まずリストを作る
+	std::vector<int> result;
+
+	/// Listに元々あるかどうか確認する,あったらそれをリストに作って返す
+	for (int i = 0; i < animationDataList_.size(); ++i) {
+		if (animationDataList_[i].filePath == filePath) {
+			result.push_back(i);
+		}
+	}
+	if (!result.empty()) return result;
+
+
+	/// ResourceManagerにローディング/ハンドルを求む
+	int modelDataHandle = system_->GetResourceManager()->ReadFile(filePath);
+	std::weak_ptr<ModelData> modelData = ResourceManager::GetInstance()->GetModelData(modelDataHandle);
+
+	for (int i = 0; i < modelData.lock()->animationList.size(); ++i) {
+		AnimationClip clip{};
+		clip.modelDataHandle = modelDataHandle;
+		clip.modelDataPtr = modelData;
+		clip.animationIndex = i;
+		clip.filePath = filePath;
+		animationDataList_.push_back(clip);
+		result.push_back(int(animationDataList_.size() - 1));
 	}
 
-	/// ファイル拡張子による処理分岐
-	std::string fileExt = filePath.substr(dotPos);
-
-	/// AnimationDataを読み込むための構造体を作る
-	Animation result;
-
-	if (fileExt == ".json") {
-		//result = LoadAnimationDataFromJson(filePath);
-		Logger::Log("[kError] AE :: json reader not Ready.");
-		return {};
+	if (result.empty()) {
+		Logger::Log("[kEngine] AM :: Unknow Error.");
 	}
-	if (fileExt == ".gltf") {
-		result = LoadAnimationDataFromGltf(filePath);
-		return result;
-	}
-
-	Logger::Log("[kError] AE :: File not support.");
-	return {};
-}
-
-int AnimationManager::LoadAnimation(const std::string& filePath) {
-
-	/// すでに読み込んでいるファイルならばハンドルを返す
-	if (animationHandleList_.contains(filePath)) {
-		return animationHandleList_[filePath];
-	}
-
-	/// 読み込んでいないファイルならば読み込む
-	Animation animationData = LoadAnimationData(filePath);
-	if (animationData.nodeList.size() == 0) {
-		Logger::Log("[kError] AE :: Failed to load animation data.");
-		return -1;
-	}
-
-	/// 読み込んだアニメーションデータを保存する
-	std::shared_ptr<Animation> animationDataPtr = std::make_shared<Animation>(animationData);
-	animationDataList_.push_back(animationDataPtr);
-	int index = (int)animationDataList_.size() - 1;
-
-	/// HandleListに保存する
-	animationHandleList_[filePath] = index;
-
-	/// Unitを作って、アニメーションデータを読み込む
-	unitList_[index] = std::make_unique<AnimationUnit>(system_);
-	unitList_[index]->ReadAnimationData(animationDataPtr);
 
 	///ハンドルを返す
-	return index;
+	return result;
 }
 
 void AnimationManager::UnitSetTime(int unitHandle, float time) {
@@ -77,31 +55,55 @@ void AnimationManager::UnitSetTime(int unitHandle, float time) {
 	unitList_[unitHandle]->SetTime(time);
 }
 
+int AnimationManager::TakeControlObject(int animationHandle, Object* object) {
 
-void AnimationManager::TakeControlObject(int unitHandle, Object* object) {
-
-	if (!CheckHaveHandle(unitHandle)) {
-		return;
+	/// ハンドルが存在するか確認する
+	if (!CheckHaveHandle(animationHandle)) {
+		return -1;
 	}
 
+	/// nullcheck
 	if (!object) {
 		Logger::Log("[kError] AS :: Invalid animation unit handle.");
-		return;
+		return -1;
 	}
 
-	unitList_[unitHandle]->TakeControlObject(object);
-	objectToUnitHandleList_[object] = unitHandle;
+	/// animationHandleからアニメーションデータを読み込む
+	auto& ani = animationDataList_[animationHandle];
+
+	/// モデルデータが有効か確認する
+	auto model = ani.modelDataPtr.lock();
+	if (!model) {
+		Logger::Log("[kError] AM :: ModelData expired.");
+		return -1;
+	}
+
+	/// Unitを作成して、アニメーションデータを読み込む
+	unitList_[unitHandleCounter_] = std::make_unique<AnimationUnit>(system_);
+	unitList_[unitHandleCounter_]->ReadAnimationData(model, ani.animationIndex);
+	unitList_[unitHandleCounter_]->TakeControlObject(object);
+
+	/// objectとUnitのHandleを紐づける
+	objectToUnitHandleList_[object] = unitHandleCounter_;
+	return unitHandleCounter_++;/// Unitのハンドルを返す,そしてカウンター＋1
 }
 
 int AnimationManager::GetControlObjectPartHandle(ObjectData* object) {
-	if (!objectToUnitHandleList_.contains(object)) {
+
+	/// nullcheck
+	if (!object)return -1;
+
+	/// objectがUnitに紐づいているか確認する
+	auto it = objectToUnitHandleList_.find(object);
+	if (it == objectToUnitHandleList_.end()) {
 		return -1;
 	}
-	return objectToUnitHandleList_[object];
+	/// 紐づいているUnitのHandleを返す
+	return it->second;
 }
 
 Object* AnimationManager::GetInstanceObjectByUnitHandle(int unitHandle) {
-	if(unitList_.contains(unitHandle)){
+	if (unitList_.contains(unitHandle)) {
 		return unitList_[unitHandle]->GetInstanceObject();
 	}
 	Logger::Log("[kError] AS :: Invalid animation unit handle.");
@@ -112,75 +114,6 @@ void AnimationManager::Update() {
 	for (auto& [handle, unit] : unitList_) {
 		unit->Update();
 	}
-}
-
-Animation AnimationManager::LoadAnimationDataFromGltf(const std::string& filePath) {
-
-	std::ifstream input(filePath);
-	if (!input.is_open()) {
-		throw std::runtime_error("Failed to open file: " + filePath);
-	}
-
-	/// ファイルを読み込む
-	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(filePath.c_str(), 0);
-
-	/// アニメーションデータがない
-	if (scene->mNumAnimations == 0) {
-		Logger::Log("[kError] AE :: This file does not contain animation data.");
-		return{};
-	}
-
-	/// 受け皿を作る
-	Animation result;
-	/// 最初のアニメーションを読み込む
-	aiAnimation* animationAssimp = scene->mAnimations[0];
-
-	/// アニメーションの長さを秒数で計算して保存
-	result.duration = float(animationAssimp->mDuration / animationAssimp->mTicksPerSecond);
-
-	/// assimpで一つずつのNodeのAnimationをchannelと呼んでいるのてchannelを回してNodeAnimationの情報をお取ってくる
-	for (int channelIndex = 0; channelIndex < (int)animationAssimp->mNumChannels; channelIndex++) {
-		AnimationNodeData nodeData{};
-		aiNodeAnim* nodeAnim = animationAssimp->mChannels[channelIndex];
-		nodeData.name = nodeAnim->mNodeName.C_Str();
-		nodeData.animationNodeID = channelIndex;
-		/// スケールのKeyFrameを保存
-		for (int keyIndex = 0; keyIndex < (int)nodeAnim->mNumScalingKeys; keyIndex++) {
-			KeyFrameVector3 keyFrame;
-			keyFrame.time_ = float(nodeAnim->mScalingKeys[keyIndex].mTime / animationAssimp->mTicksPerSecond);
-			keyFrame.value_ = { nodeAnim->mScalingKeys[keyIndex].mValue.x,
-								nodeAnim->mScalingKeys[keyIndex].mValue.y,
-								nodeAnim->mScalingKeys[keyIndex].mValue.z, };
-			keyFrame.animationType_ = AnimationType::LINEARITY;
-			nodeData.scaleList.push_back(keyFrame);
-		}
-		/// 回転のKeyFrameを保存
-		for (int keyIndex = 0; keyIndex < (int)nodeAnim->mNumRotationKeys; keyIndex++) {
-			KeyFrameQuaternion keyFrame;
-			keyFrame.time_ = float(nodeAnim->mRotationKeys[keyIndex].mTime / animationAssimp->mTicksPerSecond);
-			Quaternion quatValue = { nodeAnim->mRotationKeys[keyIndex].mValue.x,
-									 nodeAnim->mRotationKeys[keyIndex].mValue.y,
-									 nodeAnim->mRotationKeys[keyIndex].mValue.z,
-									 nodeAnim->mRotationKeys[keyIndex].mValue.w, };
-			keyFrame.value_ = quatValue;
-			keyFrame.animationType_ = AnimationType::LINEARITY;
-			nodeData.rotateList.push_back(keyFrame);
-		};
-		/// 平行移動のKeyFrameを保存
-		for (int keyIndex = 0; keyIndex < (int)nodeAnim->mNumPositionKeys; keyIndex++) {
-			KeyFrameVector3 keyFrame;
-			keyFrame.time_ = float(nodeAnim->mPositionKeys[keyIndex].mTime / animationAssimp->mTicksPerSecond);
-			keyFrame.value_ = { nodeAnim->mPositionKeys[keyIndex].mValue.x,
-								nodeAnim->mPositionKeys[keyIndex].mValue.y,
-								nodeAnim->mPositionKeys[keyIndex].mValue.z, };
-			keyFrame.animationType_ = AnimationType::LINEARITY;
-			nodeData.translationList.push_back(keyFrame);
-		}
-		result.nodeList.push_back(nodeData);
-	}
-
-	return result;
 }
 
 Animation AnimationManager::LoadAnimationDataFromJson(const std::string& filePath) {
@@ -268,11 +201,18 @@ Animation AnimationManager::LoadAnimationDataFromJson(const std::string& filePat
 }
 
 
-bool AnimationManager::CheckHaveHandle(int unitHandle) {
+bool AnimationManager::CheckHaveHandle(int animHandle) {
+
+	/// ハンドルが存在するか確認する
+	if (animHandle < 0 ||
+		animHandle >= animationDataList_.size()) {
+		Logger::Log("[kError] AS :: Invalid animation handle.");
+		return false;
+	}
 
 	/// すでに読み込んでいるファイルならばハンドルを返す
-	if (!unitList_.contains(unitHandle)) {
-		Logger::Log("[kError] AS :: No such unit.");
+	if (animationDataList_[animHandle].modelDataPtr.expired()) {
+		Logger::Log("[kError] AM :: ModelData expired.");
 		return false;
 	}
 	return true;

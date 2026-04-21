@@ -5,9 +5,18 @@
 
 /// ========== グローバル定数宣言 ========== ///
 const uint32_t SrvManager::kMaxSRVCount = 512;
+std::unique_ptr <SrvManager> SrvManager::instance_ = nullptr;
+
+SrvManager* SrvManager::GetInstance() {
+	if (instance_ == nullptr) {
+		instance_ = std::make_unique<SrvManager>(ConstructorKey{});
+		//instance_.reset(new ResourceManager);
+	}
+	return instance_.get();
+}
 
 void SrvManager::Initialize(DirectXCore* core) {
-	
+
 	/// コアを保存
 	directXCore_ = core;
 
@@ -24,13 +33,14 @@ void SrvManager::Initialize(DirectXCore* core) {
 	);
 }
 
-SrvManager::~SrvManager() {
-}
-
 void SrvManager::Finalize() {
 	descriptorHeap.Reset();
 	freeIndices.clear();
 	nextNewIndex = 0;
+}
+
+void SrvManager::Destroy() {
+	instance_.reset();
 }
 
 
@@ -72,12 +82,20 @@ uint32_t SrvManager::GetDescriptorSizeSRV() {
 	return descriptorSize;
 }
 
-void SrvManager::CreateSRVForTexture2D(uint32_t srvIndex, ID3D12Resource* pResource, DXGI_FORMAT Format, UINT MipLevels) {
+
+void SrvManager::CreateSRVForTexture2D(uint32_t srvIndex, ID3D12Resource* pResource, DirectX::TexMetadata metaData) {
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Format = Format;
+	srvDesc.Format = metaData.format;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; // シェーダーでのコンポーネントマッピング
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
-	srvDesc.Texture2D.MipLevels = MipLevels; // 最初のMipLevelを使用
+	if (metaData.IsCubemap()) {
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE; // キューブマップ
+		srvDesc.TextureCube.MostDetailedMip = 0; // unionがTextureCubeになったが、内部パラメイタの意味はTexture2Dと変わらない
+		srvDesc.TextureCube.MipLevels = UINT_MAX; // 最初のMipLevelを使用
+		srvDesc.TextureCube.ResourceMinLODClamp = 0.0f; // LODの最小値
+	}else {
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
+		srvDesc.Texture2D.MipLevels = UINT(metaData.mipLevels); // 最初のMipLevelを使用
+	}
 
 	directXCore_->GetDevice()->CreateShaderResourceView(
 		pResource,

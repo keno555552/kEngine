@@ -16,6 +16,7 @@ class ObjectPart {
 public:
 
 	friend class drawEngine;
+	friend class DrawEngine;
 	friend class DrawDataCollector;
 	friend class ResourceManager;
 	friend class AnimationUnit;
@@ -43,7 +44,13 @@ public:
 	/// ========== エンジン側用データ =========== ///
 
 private:
+	/// 描画のときに、DrawDataCollectorのどこにこskinningMatrixを入れるどころのハンドル
+	int wellHandle = -1;
+
+	/// 計算用のワールド行列 
 	TransformationMatrix transformationMatrix{};
+
+	/// アンカーポイントを考慮したワールド行列
 	Matrix4x4 worldAnchorPointMatrix{};
 
 };

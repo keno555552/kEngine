@@ -6,6 +6,7 @@
 #include "Object/Object.h"
 #include "Data/Animation/Animation.h"
 #include "TimeManager/TimeManager.h"
+#include "Data/Render/CPUData/ModelData.h"
 
 class kEngine;
 class AnimationUnit
@@ -17,10 +18,7 @@ public:
 
 	/// ====================== アニメーションシステムの基本的な流れ ========================///
 	/// アニメーションデータを読み込む
-	AnimationUnit* ReadAnimationData(std::shared_ptr<Animation> animation);
-
-	/// Objectにアニメーションの計算結果を反映させる
-	void ControlleObject();
+	AnimationUnit* ReadAnimationData(std::shared_ptr<ModelData> modelData,int animationIndex);
 
 	/// 時間を調整する
 	void SetTime(float time);
@@ -28,6 +26,8 @@ public:
 	/// ======================= 操作関連 ========================///
 
 	void TakeControlObject(Object* object);
+	void SetHaveSkeleton(bool have) { haveSkeleton_ = have; }
+	bool GetHaveSkeleton() const { return haveSkeleton_; }
 
 	Object* GetInstanceObject() const { return instanceObject_.get(); }
 
@@ -48,7 +48,8 @@ private:
 
 	/// ============= アニメーション関連 ============== ///
 
-	std::weak_ptr<Animation> animationData_{};	// 借り
+	std::weak_ptr<ModelData> modelData_{};	// 借り
+	int animationIndex_{};
 	float allMaxTime_{};						// duration
 	float allStartTime_{};
 	bool isObjectChange_{};
@@ -62,13 +63,19 @@ private:
 	/// 計算用アニメーションのオブジェクト
 	std::unique_ptr<Object> instanceObject_{};
 
+	/// 計算用アニメーションのskeleton
+	std::unique_ptr<Skeleton> instanceSkeleton_{};
+	bool haveSkeleton_{};
+
 	float nowTime_{};
 
 private:
 
 	/// ====================== プレイ関連 ======================== ///
 
-	void UpdateInstanceObject();
+	void UpdateLocalPose();
+	void UpdateLocalMatrix();
+	void UpdateGolbalMatrixAndFinalMatrix();
 
 	/// ======================= ツール関数 ======================= ///
 	float ChangeEasing(AnimationType type, float t, float rate = 0);

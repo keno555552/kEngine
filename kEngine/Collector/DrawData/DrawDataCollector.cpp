@@ -41,6 +41,9 @@ void DrawDataCollector::PreCollect() {
 	simpleSpriteCounter_ = 0;
 	unlayeredSpriteCounter_ = 0;
 
+	/// skinning用リストクリア
+	skinningDataList_ = {};
+
 	/// インスタンスリストクリア
 	instanceCounterDL_ = 0;
 	instanceCounter2D_ = 0;
@@ -49,7 +52,6 @@ void DrawDataCollector::PreCollect() {
 }
 
 void DrawDataCollector::EndCollect() {
-
 
 	/// ネールスキップ
 	if (opaqueBucket2D_.empty() && transparentBucket2D_.empty() &&
@@ -280,7 +282,7 @@ void DrawDataCollector::Collect3D(ObjectData* object) {
 	/// nullチェック
 	if (!object)return;
 
-	int moderCounter = 0;
+	int modelCounter = 0;
 	for (auto& objectPart : object->objectParts_) {
 
 		/// ========================================  RenderData作成  ========================================///
@@ -289,7 +291,7 @@ void DrawDataCollector::Collect3D(ObjectData* object) {
 		RenderData renderData;
 
 		/// メッシュ設定
-		Model* modelData = ResourceManager::GetInstance()->modelGroupList_[object->modelHandle_]->GetModel(moderCounter);
+		Model* modelData = ResourceManager::GetInstance()->modelGroupList_[object->modelHandle_]->GetModel(modelCounter);
 		renderData.mesh = modelData;
 
 		/// マテリアル設定
@@ -297,7 +299,7 @@ void DrawDataCollector::Collect3D(ObjectData* object) {
 		renderData.materialID = ResourceManager::GetInstance()->InputMaterialConfig(objectPart.materialConfig);
 
 		/// 変換行列設定
-		renderData.transformData = ObjectWVPAdjustment3D(*object, objectPart, modelData->GetModelData());
+		renderData.transformData = ObjectWVPAdjustment3D(*object, objectPart, modelData->GetModelData().get(), modelCounter);
 
 		/// PSO設定
 		renderData.psoID = PSODecision(*objectPart.materialConfig);
@@ -308,7 +310,7 @@ void DrawDataCollector::Collect3D(ObjectData* object) {
 		/// ========================================  バケット振り分け  ========================================///
 		AddObjectToBucket3D(renderData, object->modelHandle_);
 
-		moderCounter++;
+		modelCounter++;
 	}
 }
 
@@ -350,11 +352,11 @@ Matrix4x4 DrawDataCollector::MakeAnimationMatrix(ObjectPart& part) {
 		);
 	}
 	// アニメーション行列は毎フレーム更新されるため、使用後にフラグをリセット
-	part.transform.isAnimated = false; 
+	part.transform.isAnimated = false;
 	return result;
 }
 
-TransformationMatrix DrawDataCollector::ObjectWVPAdjustment3D(ObjectData& object, ObjectPart& part, ModelData modelData) {
+TransformationMatrix DrawDataCollector::ObjectWVPAdjustment3D(ObjectData& object, ObjectPart& part, ModelData* modelData, int modelCounter) {
 	Camera* cam = cameraManager_->GetActiveCamera();
 	Matrix4x4 viewMatrix = cam->GetViewMatrix();
 	Matrix4x4 projectionMatrix = cam->GetProjectionMatrix();
@@ -375,22 +377,56 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustment3D(ObjectData& object
 		part.transform.translate
 	);
 
-	auto animationIt = animationManager_->GetControlObjectPartHandle(&object);
+	int animationIt = animationManager_->GetControlObjectPartHandle(&object);
+
+	auto animationPartIt = std::find_if(
+		object.objectParts_.begin(),
+		object.objectParts_.end(),
+		[&](const ObjectPart& p) {
+			return &p == &part;
+		}
+	);
+
+	int animationPartInt = (int)std::distance(object.objectParts_.begin(), animationPartIt);
 
 	Matrix4x4 animationMatrix;
-	if( animationIt != -1) {
-		animationMatrix = MakeAnimationMatrix(part);
+	if (animationIt == -1) {
+		animationMatrix = Identity();
+	} else {
+		auto object = animationManager_->GetInstanceObjectByUnitHandle(animationIt);
+		Vector3 aniScale = object->objectParts_[animationPartInt].transform.aniScale;
+		Quaternion aniRotate = object->objectParts_[animationPartInt].transform.aniRotate;
+		Vector3 aniTranslate = object->objectParts_[animationPartInt].transform.aniTranslate;
+
+		animationMatrix = MakeAffineMatrix(
+			aniScale,
+			aniRotate,
+			aniTranslate
+		);
 	}
-	animationMatrix = Identity();
 
 	Matrix4x4 followWorldMatrix = MakeFollowObjectMatrix3D(&object);
 
 	Matrix4x4 worldMatrix = localMatrix * animationMatrix * followWorldMatrix;
 
+	Matrix4x4 nodeMatrix = Identity();
+
+	if (modelData != nullptr) {
+		if (modelCounter >= 0 && modelCounter < modelData->meshDataList.size()) {
+
+			uint32_t nodeIndex = modelData->meshDataList[modelCounter].nodeIndex;
+
+			if (nodeIndex < modelData->nodeList.size()) {
+				nodeMatrix = modelData->nodeList[nodeIndex].globalMatrix;
+			}
+		}
+	}
+	Matrix4x4 finalWorld = nodeMatrix * worldMatrix;
+
 	TransformationMatrix result{};
-	result.WVP = modelData.rootNode.localMatrix * worldMatrix * viewMatrix * projectionMatrix;
-	result.world = modelData.rootNode.localMatrix * worldMatrix;
-	result.WorldInverseTranspose = worldMatrix.Inverse().Transpose();
+	result.WVP = (finalWorld * viewMatrix * projectionMatrix);
+	result.world = finalWorld;
+	result.WorldInverseTranspose = finalWorld.Inverse().Transpose();
 	return result;
 }
 
@@ -444,13 +480,70 @@ void DrawDataCollector::DirtyEulerToQuat(ObjectData& part) {
 
 #pragma endregion
 
+
+
+#pragma region /// ================================= skinning関連 ================================== ///
+
+
+int DrawDataCollector::SetSkinningData(WellForGPU* mappedPalette, int mappedNum, VertexInfluence* influenceSpan, int VertexNum) {
+
+	/// VertexInfluenceがnullの場合はエラー
+	if (!influenceSpan) {
+		Logger::Log("[kEngine]DDC:VertexInfluence pointer is null!");
+		return -1;
+	}
+
+	/// MappedPaletteがnullの場合はエラー
+	if (!mappedPalette) {
+		Logger::Log("[kEngine]DDC:WellForGPU pointer is null!");
+		return -1;
+	}
+
+	/// 頂点数が0以下の場合はエラー
+	if (VertexNum <= 0) {
+		Logger::Log("[kEngine]DDC:VertexNum must be greater than 0!");
+		return -1;
+	}
+
+	/// MappedNumが0以下の場合はエラー
+	if (mappedNum <= 0) {
+		Logger::Log("[kEngine]DDC:MappedNum must be greater than 0!");
+		return -1;
+	}
+
+	/// Dataの追加
+	skinningDataList_.emplace_back(
+		std::span<VertexInfluence>(influenceSpan, VertexNum),
+		std::span<WellForGPU>(mappedPalette, mappedNum)
+	);
+
+	/// mappedPaletteすべての行列をIdentityで埋める
+	std::generate(
+		skinningDataList_.back().mappedPalette.begin(),
+		skinningDataList_.back().mappedPalette.end(), 
+		[](){return WellForGPU{ Identity(),Identity() }; }
+	);
+
+	return int(skinningDataList_.size() - 1);
+}
+
+void DrawDataCollector::ClearSkinningData(int index) {
+
+	skinningDataList_[index] = SkinningData{};
+
+}
+
+#pragma endregion
+
+
+
 #pragma region /// ================================= パーティクル関連 ================================== ///
 
 void DrawDataCollector::CollectParticleC(ObjectData* object) {
 	/// nullチェック
 	if (!object)return;
 
-	int moderCounter = 0;
+	int modelCounter = 0;
 	for (auto& objectPart : object->objectParts_) {
 
 		/// ========================================  RenderData作成  ========================================///
@@ -459,7 +552,7 @@ void DrawDataCollector::CollectParticleC(ObjectData* object) {
 		RenderData renderData;
 
 		/// メッシュ設定
-		Model* modelData = ResourceManager::GetInstance()->modelGroupList_[object->modelHandle_]->GetModel(moderCounter);
+		Model* modelData = ResourceManager::GetInstance()->modelGroupList_[object->modelHandle_]->GetModel(modelCounter);
 		renderData.mesh = modelData;
 
 		/// マテリアル設定
@@ -467,7 +560,7 @@ void DrawDataCollector::CollectParticleC(ObjectData* object) {
 		renderData.materialID = ResourceManager::GetInstance()->InputMaterialConfig(objectPart.materialConfig);
 
 		/// 変換行列設定
-		renderData.transformData = ObjectWVPAdjustmentPC(*object, objectPart, modelData->GetModelData());
+		renderData.transformData = ObjectWVPAdjustmentPC(*object, objectPart, *modelData->GetModelData().get(), modelCounter);
 
 		/// PSO設定
 		renderData.psoID = PSODecision(*objectPart.materialConfig);
@@ -478,11 +571,12 @@ void DrawDataCollector::CollectParticleC(ObjectData* object) {
 		/// ========================================  バケット振り分け  ========================================///
 		AddObjectToBucketPC(renderData);
 
-		moderCounter++;
+		modelCounter++;
 	}
 }
 
-TransformationMatrix DrawDataCollector::ObjectWVPAdjustmentPC(ObjectData& object, ObjectPart& part, ModelData modelData) {
+
+TransformationMatrix DrawDataCollector::ObjectWVPAdjustmentPC(ObjectData& object, ObjectPart& part, ModelData& modelData, int modelCounter) {
 	Camera* cam = cameraManager_->GetActiveCamera();
 	Matrix4x4 viewMatrix = cam->GetViewMatrix();
 	Matrix4x4 projectionMatrix = cam->GetProjectionMatrix();
@@ -506,10 +600,14 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustmentPC(ObjectData& object
 	//Matrix4x4 worldMatrix = localMatrix * partParentMatrix * followWorldMatrix;
 	Matrix4x4 worldMatrix = localMatrix * followWorldMatrix;
 
+	uint32_t nodeIndex = modelData.meshDataList[modelCounter].nodeIndex;
+	Matrix4x4 nodeMatrix = modelData.nodeList[nodeIndex].globalMatrix;
+	Matrix4x4 finalWorld = nodeMatrix * worldMatrix;
+
 	TransformationMatrix result{};
-	result.WVP = modelData.rootNode.localMatrix * worldMatrix * viewMatrix * projectionMatrix;
-	result.world = modelData.rootNode.localMatrix * worldMatrix;
-	result.WorldInverseTranspose = worldMatrix.Inverse().Transpose();
+	result.WVP = (finalWorld * viewMatrix * projectionMatrix);
+	result.world = finalWorld;
+	result.WorldInverseTranspose = finalWorld.Inverse().Transpose();
 	return result;
 }
 
@@ -615,6 +713,8 @@ uint32_t DrawDataCollector::PSODecision(MaterialConfig& material) {
 		return (uint32_t)PSOType::FlameNeonGlow;
 	case LightModelType::DebugLine:
 		return (uint32_t)PSOType::DebugLine;
+	case LightModelType::SkyCube:
+		return (uint32_t)PSOType::SkyCube;
 	}
 	return (uint32_t)PSOType::NONE;
 }

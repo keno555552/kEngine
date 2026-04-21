@@ -14,6 +14,12 @@ void Object::CreateDefaultData() {
 	objectParts_.push_back(newObjectPart);
 }
 
+Object::~Object() {
+
+	system_->ClearModelRoot(this);
+
+}
+
 void Object::IntObject(kEngine* system) {
 	system_ = system;
 	ObjectData::ownerObject = this;
@@ -123,7 +129,6 @@ void Object::Update(Camera* camera) {
 	//}
 }
 
-
 void Object::Draw() {
 	system_->Draw3D(this);
 }
@@ -140,7 +145,9 @@ void Object::CreateModelData(int modelHandle) {
 	for (int i = 0; i < numOfPart; i++) {
 		ObjectPart newObjectPart;
 
-		newObjectPart.name = system_->GetModel(modelHandle, i)->GetModelData().rootNode.name;
+		auto modelData = system_->GetModel(modelHandle, i)->GetModelData().get();
+
+		newObjectPart.name = modelData->meshDataList[i].name;
 		newObjectPart.materialConfig = std::make_shared<MaterialConfig>();
 		InitMaterialConfig(newObjectPart.materialConfig.get());
 		newObjectPart.materialConfig->lightModelType = LightModelType::HalfLambert;
@@ -150,6 +157,9 @@ void Object::CreateModelData(int modelHandle) {
 		objectParts_.push_back(newObjectPart);
 	}
 
+	/// Modelに必要なものルードを準備する
+	// 今はskinning用な行列を生成だけ
+	system_->CreateModelRoot(this);
 }
 // �Փ˂����I�u�W�F�N�g�̃|�C���^�[��n��
 Object* Object::Collision(const std::vector<Object*>& obj)

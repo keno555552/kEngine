@@ -16,6 +16,7 @@ int config::default_Triangle_MeshBufferHandle_	= 0;
 int config::default_Sprite2D_MeshBufferHandle_	= 0;
 int config::default_Cube_MeshBufferHandle_		= 0;
 int config::default_Sphere_MeshBufferHandle_	= 0;
+int config::default_SkyCube_MeshBufferHandle_   = 0;
 
 void config::SaveClientTitle(const std::string& clientTitle) {
 

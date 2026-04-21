@@ -1,5 +1,6 @@
 #include "ResourceManager.h"
 #include <Object/Object.h>
+#include "Importer/Loader/LoadModel.h"
 
 std::unique_ptr <ResourceManager> ResourceManager::instance_ = nullptr;
 
@@ -20,6 +21,8 @@ void ResourceManager::Initialize(DirectXCore* device) {
 	config::default_Triangle_MeshBufferHandle_ = CreateTriangleResource();
 	config::default_Cube_MeshBufferHandle_ = CreateCubeResource();
 	config::default_Sphere_MeshBufferHandle_ = CreateSphereResource(10);
+	config::default_SkyCube_MeshBufferHandle_ = CreateSkyCubeResource();
+
 }
 
 void ResourceManager::Finalize() {
@@ -34,14 +37,16 @@ void ResourceManager::Finalize() {
 	materialList_.clear();
 	idToIndex_.clear();
 	materialCounter_ = 0;
+
+	modelGroupList_.clear();
+	meshBufferList_.clear();
 }
 
 void ResourceManager::Destroy() {
 	instance_.reset();
 }
 
-void ResourceManager::CreateTurnResource() {
-}
+void ResourceManager::CreateTurnResource() {}
 
 
 void ResourceManager::ClearTurnResource() {
@@ -96,7 +101,6 @@ int ResourceManager::CreateCubeResource() {
 	return (int)modelGroupList_.size() - 1;
 }
 
-
 int ResourceManager::CreateSphereResource(int sudivision) {
 	sudivision;
 
@@ -115,38 +119,58 @@ int ResourceManager::CreateSphereResource(int sudivision) {
 
 }
 
-int ResourceManager::CreateModelResource(std::string Path) {
+int ResourceManager::CreateSkyCubeResource() {
+
+	std::shared_ptr <SkyCube> newSkyCube;
+	newSkyCube = std::make_shared<SkyCube>();
+	newSkyCube->CreateVertexResource_(BDevice_);
+	newSkyCube->CreateIndexResource_(BDevice_);
+	meshBufferList_.push_back(newSkyCube);
 
 	auto modelGroup = std::make_shared<ModelGroup>();
-	modelGroup->SetModelObj(Path);
+	modelGroup->PushModel(newSkyCube);
+	modelGroup->PushModelHandle((int)meshBufferList_.size() - 1);
+	modelGroupList_.push_back(modelGroup);
+
+	return (int)modelGroupList_.size() - 1;
+
+}
+
+int ResourceManager::CreateModelResource(std::string Path) {
 
 	/// パースによって同じモデルがリストにいるかを確認
 	if (!modelGroupList_.empty()) {
 		for (int i = 0; i < (int)modelGroupList_.size(); i++) {
-			std::string checkPath = modelGroupList_[i]->GetDirectoryPath();
-			std::string checkName = modelGroupList_[i]->GetObjName_();
-			if (checkPath == modelGroup->GetDirectoryPath()) {
-				if (checkName == modelGroup->GetObjName_()) {
-					return i;
-				}
+			std::string checkPath = modelGroupList_[i]->GetFilePath();
+			if (checkPath == Path) {
+				return i;
 			}
 		}
 	}
 
-	/// Model読み込み
-	std::vector<ModelData> modelList = LoadAssimpFile(modelGroup->GetDirectoryPath(), modelGroup->GetObjName_());
-	//std::vector<ModelData> modelList = LoadMuitObjFile(modelGroup->GetDirectoryPath(), modelGroup->GetObjName_());
-	for (auto& ptr : modelList) {
+	/// ないからモデルグループを作成
+	auto modelGroup = std::make_shared<ModelGroup>();
+
+	/// ファイルを読み取る,或は読んだファイルのハンドルを探す
+	int modelDataHandle = ReadFile(Path);
+
+	/// ModelDataを準備
+	std::shared_ptr<ModelData> modelDataPointer = modelDataList_[Path];
+
+	/// ModelDataからModelを作成してModelGroupに追加
+	for (int i = 0; i < modelDataPointer.get()->meshDataList.size(); i++) {
 		auto newModel = std::make_shared<Model>();
-		newModel->SetModelData(ptr);
-		newModel->SetModelObj(Path);
-		newModel->CreateVertexResourceG_(BDevice_);
+		newModel->SetModelData(modelDataPointer, i);
+		newModel->CreateVertexResource_(BDevice_);
 		modelGroup->PushModel(newModel);
 		meshBufferList_.push_back(newModel);
 		modelGroup->PushModelHandle((int)meshBufferList_.size() - 1);
 	}
+
+	/// ModelGroupをModelGroupListに追加
 	modelGroupList_.push_back(modelGroup);
 
+	/// ハンドルを返す
 	return (int)modelGroupList_.size() - 1;
 }
 
@@ -155,7 +179,7 @@ int ResourceManager::LoadModel(std::string Path) {
 	auto target = std::find_if(
 		modelGroupList_.begin(),
 		modelGroupList_.end(),
-		[&](std::shared_ptr <ModelGroup> ptr) {return ptr->GetFullPath_() == Path; }
+		[&](std::shared_ptr <ModelGroup> ptr) {return ptr->GetFilePath() == Path; }
 	);
 	if (target != modelGroupList_.end()) {
 		return (int)std::distance(modelGroupList_.begin(), target);
@@ -169,6 +193,39 @@ int ResourceManager::LoadModel(std::string Path) {
 		SetModelTexture(modelGroupList_[ModelGroupHandle]->GetModel(i));
 	}
 	return ModelGroupHandle;
+
+}
+
+int ResourceManager::ReadFile(std::string Path) {
+
+	/// あるからそのハンドルを返す
+	if (modelDataList_.contains(Path)) {
+		for (const auto& pair : modelDataHandleMap_) {
+			if (pair.second == Path) {
+				return pair.first;
+			}
+		}
+	}
+
+	/// ないからモデルグループを作成
+	auto modelData = std::make_shared<ModelData>(LoadModelBranch(Path));
+
+	/// Listに追加
+	modelDataList_[Path] = modelData;
+	modelDataHandleMap_[modelDataCounter_] = Path;
+
+	/// ハンドルを返し、カウンター＋1
+	return modelDataCounter_++;
+}
+
+std::shared_ptr<ModelData> ResourceManager::GetModelData(int handle) {
+
+	if (!modelDataHandleMap_.contains(handle)) {
+		Logger::Log("kEngine:: RM :: ModelData handle %d not found.", handle);
+		return nullptr;
+	} else {
+		return modelDataList_[modelDataHandleMap_[handle]];
+	}
 
 }
 

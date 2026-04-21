@@ -27,7 +27,7 @@ public:
 	explicit TextureManager(ConstructorKey) {};
 
 	/// 初期化
-	void Initialize(DirectXCore* core, SrvManager* srvManager);
+	void Initialize(DirectXCore* core);
 	/// シングルトン解放
 	void Finalize();
 	/// 

@@ -20,12 +20,13 @@ void PSOFactory::Finalize() {
 
 Microsoft::WRL::ComPtr <ID3D12PipelineState> PSOFactory::createPSO(LightModelType lightModelType) {
 	bool isDebugLine = (lightModelType == LightModelType::DebugLine);
+	bool isSkyCube = (lightModelType == LightModelType::SkyCube);
 	createRootSignature();
 	isDebugLine ? createInputLayoutForDebugLine() : createInputLayout();
 	SetBlendState();
 	SetRasterizerState();
 	ShaderCompile(lightModelType);
-	SetDepthStencilState();
+	isSkyCube ? SetDepthStencilStateForSkyCube() : SetDepthStencilState();
 
 	isDebugLine ? SetGraphicsPipelineStateForDebugLine() : SetGraphicsPipelineState();
 	return graphicsPipelineState_;
@@ -244,6 +245,10 @@ void PSOFactory::ShaderCompile(LightModelType lightModelType) {
 		vertexShaderBlob_ = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder + "DebugLine.VS.hlsl"), L"vs_6_0");
 		pixelShaderBlob_ = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder + "DebugLine.PS.hlsl"), L"ps_6_0");
 		break;
+	case LightModelType::SkyCube:
+		vertexShaderBlob_ = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder + "SkyCube.VS.hlsl"), L"vs_6_0");
+		pixelShaderBlob_ = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder + "SkyCube.PS.hlsl"), L"ps_6_0");
+		break;
 	}
 	assert(vertexShaderBlob_.Get());
 	assert(pixelShaderBlob_.Get());
@@ -256,6 +261,17 @@ void PSOFactory::SetDepthStencilState() {
 	depthStencilDesc.DepthEnable = true;
 	// 書き込みします
 	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	// 比較関数はLessEqual。つまり、近ければ描画される
+	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+}
+
+void PSOFactory::SetDepthStencilStateForSkyCube() {
+	// DepthStencilStateの設定
+	depthStencilDesc = {};
+	// Depthの機能を有効化する
+	depthStencilDesc.DepthEnable = true;
+	// 書き込みします
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 	// 比較関数はLessEqual。つまり、近ければ描画される
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 }

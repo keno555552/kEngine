@@ -11,17 +11,18 @@
 #include "Data/Render/CPUData/ObjectData.h"
 #include "Data/Render/CPUData/SpriteData.h"
 #include "SrvManager/SrvManager.h"
+#include <memory>
 using MaterialID = int;
 
 class ResourceManager
 {
 public:
-	struct TextureInfo {
-		Microsoft::WRL::ComPtr<ID3D12Resource> texture;
-		int width;
-		int height;
-		Vector4 uvOffset;
-	};
+	//struct TextureInfo {
+	//	Microsoft::WRL::ComPtr<ID3D12Resource> texture;
+	//	int width;
+	//	int height;
+	//	Vector4 uvOffset;
+	//};
 
 #pragma region Instance管理
 
@@ -57,6 +58,12 @@ public:
 
 public:
 	//////////////////////////////命令
+
+	/// ファイル読み込み
+	int ReadFile(std::string Path);
+	
+	/// ハンドルからModelDataを取得
+	std::shared_ptr<ModelData> GetModelData(int handle);
 
 	/// モデル読み込み
 	int LoadModel(std::string Path);
@@ -103,6 +110,12 @@ public:
 	DirectXCore* core_ = nullptr;
 	ID3D12Device* BDevice_ = nullptr;
 
+	//////////////////////////////ModelDataList
+
+	std::unordered_map<std::string, std::shared_ptr<ModelData>> modelDataList_;	/// ModelDataを収納するリスト
+	std::unordered_map<int,std::string> modelDataHandleMap_; /// ModelDataのハンドルを管理するマップ
+	int modelDataCounter_{}; /// ModelDataのハンドルカウンター
+
 	//////////////////////////////Texture関係
 
 	/// Material関係
@@ -124,8 +137,8 @@ public:
 
 	/// 図形関係
 	std::vector	<std::shared_ptr<MeshBuffer>> meshBufferList_;				/// すべでのモデルを収納するどころ		これを使って解放する
+	std::vector <std::shared_ptr<ModelGroup>> modelGroupList_;				/// モデルグループを	収納する		解放に使えない
 	std::vector <std::shared_ptr<Sprite2DMesh>> spriteMeshHandles_;			/// スブライドのハンドルを収納する		解放に使えない
-	std::vector <std::shared_ptr<ModelGroup>> modelGroupList_;				/// モデルグループを	収納する			解放に使えない
 	std::vector <std::shared_ptr<SimpleSpriteMesh>> simpleSpriteMeshList_;	/// デフォルトのスプライトメッシュ
 
 	/// ModelHandle
@@ -143,6 +156,8 @@ private:
 	int CreateTriangleResource();
 	int CreateCubeResource();
 	int CreateSphereResource(int sudivision);
+	int CreateSkyCubeResource();
+
 
 	int CreateModelResource(std::string Path);
 

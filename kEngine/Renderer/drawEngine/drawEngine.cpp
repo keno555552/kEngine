@@ -2,18 +2,19 @@
 #include "Transform.h"
 #include <math.h>
 #include "Vector3.h"
-#define M_PI 3.1415926f
 #include "Logger.h"
 
 #include "Queue/RenderData.h"
 #include <vector>
 
-void DrawEngine::Initialize
-(DirectXCore* directXDriver, SrvManager* srvManager, ResourceManager* resourceManager, DrawDataCollector* drawDataCollector) {
+void DrawEngine::Initialize(
+	DirectXCore* directXDriver,
+	DrawDataCollector* drawDataCollector
+) {
 	directXDriver_ = directXDriver;
 	commandList_ = directXDriver_->GetCommandList();
-	srvManager_ = srvManager;
-	resourceManager_ = resourceManager;
+	srvManager_ = SrvManager::GetInstance();
+	resourceManager_ = ResourceManager::GetInstance();
 	drawDataCollector_ = drawDataCollector;
 	///
 	kClientWidth_ = config::GetClientWidth();
@@ -42,41 +43,53 @@ void DrawEngine::Initialize
 	scissorRect = createScissorRect(kClientWidth_, kClientHeight_);
 
 	/// Lighting
-	lightBuffer_ = std::make_unique<BasicResource>();
-	InitializeLighting();
+
+	int numOfLight = config::GetMaxLightNum();
+
+	lightBuffer_ = std::make_unique<InstanceBuffer<LightGPU>>(directXDriver_);
+	lightListData_ = lightBuffer_->CreateInstanceBuffer(numOfLight);
+
 
 	/// =========================== Tile用wvpBufferを作成 =========================== ///
 
-	/// DebugLine
-	TransformationMatrix* instanceListPtrDL = CreateInstanceBuffer<TransformationMatrix>(debugLineResource_, config::GetDebugLineNumInstance());
+	/// ============== DebugLine
+
+	int numInstanceDL = config::GetDebugLineNumInstance();
+
+	/// DebugLine用のインスタンスバッファを作成して、DrawDataCollectorに渡す
+	debugLineResource_ = std::make_unique<InstanceBuffer<TransformationMatrix>>(directXDriver_);
+	TransformationMatrix* instanceListPtrDL = debugLineResource_->CreateInstanceBuffer(numInstanceDL);
 	drawDataCollector_->SetInstanceListDL(instanceListPtrDL);
 
-	intializeInstanceTMBuffer(instanceListPtrDL, config::GetDebugLineNumInstance());
-
-	int srvHandleIndex = srvManager_->Allocate();
-	srvManager_->CreateSRVForStructuredBuffer(srvHandleIndex, debugLineResource_->GetResource().Get(), config::GetDebugLineNumInstance(), sizeof(TransformationMatrix));
-	TileDLSrvHandleGPU_ = srvManager_->GetGPUDescriptorHandle(srvHandleIndex);
+	/// DebugLine用のインスタンスバッファを初期化
+	IntializeInstanceTMBuffer(instanceListPtrDL, (size_t)numInstanceDL);
 
 
-	/// 2Dタイル用WVPバッファ
-	TransformationMatrix* instanceListPtr2D = CreateInstanceBuffer<TransformationMatrix>(tile2DWVPResource_, config::Get2DTileNumInstance());
+	/// ============== 2Dタイル用WVPバッファ
+
+	int numInstance2D = config::Get2DTileNumInstance();
+
+	/// DebugLine用のインスタンスバッファを作成して、DrawDataCollectorに渡す
+	tile2DWVPResource_ = std::make_unique<InstanceBuffer<TransformationMatrix>>(directXDriver_);
+	TransformationMatrix* instanceListPtr2D = tile2DWVPResource_->CreateInstanceBuffer(numInstance2D);
 	drawDataCollector_->SetInstanceList2D(instanceListPtr2D);
 
-	intializeInstanceTMBuffer(instanceListPtr2D, config::Get2DTileNumInstance());
+	/// DebugLine用のインスタンスバッファを初期化
+	IntializeInstanceTMBuffer(instanceListPtr2D, (size_t)numInstance2D);
 
-	srvHandleIndex = srvManager_->Allocate();
-	srvManager_->CreateSRVForStructuredBuffer(srvHandleIndex, tile2DWVPResource_->GetResource().Get(), config::Get2DTileNumInstance(), sizeof(TransformationMatrix));
-	Tile2DSrvHandleGPU_ = srvManager_->GetGPUDescriptorHandle(srvHandleIndex);
 
-	/// 3Dタイル用WVPバッファ
-	TransformationMatrix* instanceListPtr3D = CreateInstanceBuffer<TransformationMatrix>(tile3DWVPResource_, config::Get3DTileNumInstance());
+	/// ============== 3Dタイル用WVPバッファ
+
+	int numInstance3D = config::Get3DTileNumInstance();
+
+	/// DebugLine用のインスタンスバッファを作成して、DrawDataCollectorに渡す
+	tile3DWVPResource_ = std::make_unique<InstanceBuffer<TransformationMatrix>>(directXDriver_);
+	TransformationMatrix* instanceListPtr3D = tile3DWVPResource_->CreateInstanceBuffer(numInstance3D);
 	drawDataCollector_->SetInstanceList3D(instanceListPtr3D);
 
-	intializeInstanceTMBuffer(instanceListPtr3D, config::Get3DTileNumInstance());
+	/// DebugLine用のインスタンスバッファを初期化
+	IntializeInstanceTMBuffer(instanceListPtr3D, (size_t)numInstance3D);
 
-	srvHandleIndex = srvManager_->Allocate();
-	srvManager_->CreateSRVForStructuredBuffer(srvHandleIndex, tile3DWVPResource_->GetResource().Get(), config::Get3DTileNumInstance(), sizeof(TransformationMatrix));
-	Tile3DSrvHandleGPU_ = srvManager_->GetGPUDescriptorHandle(srvHandleIndex);
 
 	/// ====================== InstanceOffset用バッファを作成 ======================= ///
 	for (int i = 0; i < config::GetMaxMaterialNum(); i++) {
@@ -111,8 +124,7 @@ void DrawEngine::Finalize() {
 	pso_->Finalize();
 	pso_.reset();
 
-	tile2DWVPResource_->ClearResource();
-	tile3DWVPResource_->ClearResource();
+	debugLineResource_.reset();
 	tile2DWVPResource_.reset();
 	tile3DWVPResource_.reset();
 
@@ -127,7 +139,6 @@ void DrawEngine::Finalize() {
 	//if (depthStencilResource) depthStencilResource->Release();
 	depthStencilResource.Reset();
 
-	lightBuffer_->ClearResource();
 	lightBuffer_.reset();
 
 }
@@ -204,7 +215,7 @@ void DrawEngine::DrawDebugLine() {
 	if (vertices.empty()) return;
 
 	/// TileSRV
-	commandList_->SetGraphicsRootDescriptorTable(1, TileDLSrvHandleGPU_);
+	commandList_->SetGraphicsRootDescriptorTable(1, debugLineResource_->GetGPUDescriptorHandle());
 
 	/// ========== PSO ==========
 	PSODecision((int)PSOType::DebugLine);
@@ -238,7 +249,7 @@ void DrawEngine::Draw2DTransparent() {
 	auto& transparent2D_ = drawDataCollector_->GetTransparentObjectParts2D();
 
 	/// TileSRV
-	commandList_->SetGraphicsRootDescriptorTable(1, Tile2DSrvHandleGPU_);
+	commandList_->SetGraphicsRootDescriptorTable(1, tile2DWVPResource_->GetGPUDescriptorHandle());
 
 
 	for (auto& object : transparent2D_) {
@@ -287,7 +298,7 @@ void DrawEngine::Draw2DOpaque() {
 	auto& transparentObjectParts2D_ = drawDataCollector_->GetOpaqueBuckets2D();
 
 	/// TileSRV
-	commandList_->SetGraphicsRootDescriptorTable(1, Tile2DSrvHandleGPU_);
+	commandList_->SetGraphicsRootDescriptorTable(1, tile2DWVPResource_->GetGPUDescriptorHandle());
 
 	for (auto& [psoID, materialBuckets] : transparentObjectParts2D_) {
 
@@ -370,7 +381,7 @@ void DrawEngine::Draw3DTransparent() {
 	auto& transparent3D_ = drawDataCollector_->GetTransparentObjectParts3D();
 
 	/// TileSRV
-	commandList_->SetGraphicsRootDescriptorTable(1, Tile3DSrvHandleGPU_);
+	commandList_->SetGraphicsRootDescriptorTable(1, tile3DWVPResource_->GetGPUDescriptorHandle());
 
 	for (auto& object : transparent3D_) {
 
@@ -418,7 +429,7 @@ void DrawEngine::Draw3DOpaque() {
 	auto& transparentObjectParts3D_ = drawDataCollector_->GetOpaqueBuckets3D();
 
 	/// TileSRV
-	commandList_->SetGraphicsRootDescriptorTable(1, Tile3DSrvHandleGPU_);
+	commandList_->SetGraphicsRootDescriptorTable(1, tile3DWVPResource_->GetGPUDescriptorHandle());
 
 	for (auto& [psoID, materialBuckets] : transparentObjectParts3D_) {
 
@@ -489,6 +500,79 @@ void DrawEngine::DrawCall() {
 	DrawDebugLine();
 }
 
+void DrawEngine::CreateSkinningBuffer(ObjectData* objectData) {
+
+	ModelGroup* modelGroup = ResourceManager::GetInstance()->modelGroupList_[objectData->modelHandle_].get();
+
+	for (int i = 0; i < modelGroup->GetModelNum(); ++i) {
+		/// 必要な資料をとる
+		Model* model = modelGroup->GetModel(i);
+		std::weak_ptr<ModelData> modelData = model->GetModelData();
+		int skeletonJointNum = (int)modelData.lock()->skeleton.jointList.size();
+		int vertexInfluenceNum = (int)modelData.lock()->meshDataList[i].vertices.size();
+
+		/// WellForGPUのバッファを作成する
+		std::unique_ptr<InstanceBuffer<WellForGPU>> skinningWFGResource_ = std::make_unique<InstanceBuffer<WellForGPU>>(directXDriver_);
+		WellForGPU* instanceListPtrDL = skinningWFGResource_->CreateInstanceBuffer(skeletonJointNum);
+
+		/// VertexInfluenceのバッファを集まる
+		auto span = model->GetSkinClusterData().GetVertexInfluences();
+		VertexInfluence* instanceListPtrVI = span.data();
+
+		/// ListにInstanceBuffer of WellForGPUを追加
+		int bufferIndex = -1;
+
+		if (!skinningBufferFreeList_.empty()) {
+			bufferIndex = skinningBufferFreeList_.back();
+			skinningBufferFreeList_.pop_back();
+			skinningWFGResourceList_[bufferIndex] = std::move(skinningWFGResource_);
+		} else {
+			bufferIndex = (int)skinningWFGResourceList_.size();
+			skinningWFGResourceList_.push_back(std::move(skinningWFGResource_));
+		}
+
+		/// DrawDataCollectorに渡す
+		int handle = drawDataCollector_->SetSkinningData(instanceListPtrDL, skeletonJointNum, instanceListPtrVI, vertexInfluenceNum);
+
+		/// HandleをModelに保存する
+		skinningDatDDC2DEaMap_[handle] = bufferIndex;
+		objectData->objectParts_[i].wellHandle = handle;
+	}
+}
+
+void DrawEngine::ClearSkinningBuffer(ObjectData* objectData) {
+
+	for (auto& part : objectData->objectParts_) {
+
+		int ddcHandle = part.wellHandle;
+		if (ddcHandle < 0) continue;
+
+		// 1. 找到 DrawEngine buffer index
+		auto it = skinningDatDDC2DEaMap_.find(ddcHandle);
+		if (it != skinningDatDDC2DEaMap_.end()) {
+
+			int bufferIndex = it->second;
+
+			// 2. 清除 GPU buffer
+			skinningWFGResourceList_[bufferIndex].reset();
+
+			// 3. 放回 free-list
+			skinningBufferFreeList_.push_back(bufferIndex);
+
+			// 4. 移除 mapping
+			skinningDatDDC2DEaMap_.erase(it);
+		} else {
+			continue;
+		}
+
+		// 5. 清除 DDC 的資料
+		drawDataCollector_->ClearSkinningData(ddcHandle);
+
+		// 6. 清除 ObjectPart 的 handle
+		part.wellHandle = -1;
+	}
+}
+
 int DrawEngine::readCommonTextureHandle(int handle) {
 	return resourceManager_->GetTextureHandleFromCommonList(handle);
 }
@@ -528,7 +612,7 @@ D3D12_RECT DrawEngine::createScissorRect(int kClientWidth, int kClientHeight) {
 	return scissorRect;
 }
 
-void DrawEngine::intializeInstanceTMBuffer(TransformationMatrix* bufferPointer, size_t count) {
+void DrawEngine::IntializeInstanceTMBuffer(TransformationMatrix* bufferPointer, size_t count) {
 	for (size_t index = 0; index < count; ++index) {
 		bufferPointer[index].WVP = Identity();
 		bufferPointer[index].world = Identity();
@@ -569,22 +653,6 @@ void DrawEngine::SetCameraForGPU() {
 	commandList_->SetGraphicsRootConstantBufferView(5, cameraBuffer_->GetResource()->GetGPUVirtualAddress());
 }
 
-void DrawEngine::InitializeLighting() {
-
-	// マテリアルにデータを書き込む
-	//resourceManager_->lightingResource_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(DirectionalLightGPU));
-	//resourceManager_->lightingResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&lightingData));
-
-	/// LightListGPU 作成
-	lightBuffer_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(LightGPU) * config::GetMaxLightNum());
-	lightBuffer_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&lightListData_));
-	/// 時間あれば初期化をここでやる
-	int srvHandleIndex = srvManager_->Allocate();
-	srvManager_->CreateSRVForStructuredBuffer(srvHandleIndex, lightBuffer_->GetResource().Get(), config::GetMaxLightNum(), sizeof(LightGPU));
-
-	lightListSrvHandleGPU_ = srvManager_->GetGPUDescriptorHandle(srvHandleIndex);
-}
-
 void DrawEngine::UpdateLighting() {
 
 	// Lightingにデータを書き込む
@@ -599,7 +667,7 @@ void DrawEngine::UpdateLighting() {
 void DrawEngine::SetLightingGPU() {
 
 	// LightListGPU Set
-	commandList_->SetGraphicsRootDescriptorTable(6, lightListSrvHandleGPU_);
+	commandList_->SetGraphicsRootDescriptorTable(6, lightBuffer_->GetGPUDescriptorHandle());
 	// LightingCount Set
 	commandList_->SetGraphicsRoot32BitConstants(3, 1, &lightCount_, 0);
 }
@@ -670,7 +738,13 @@ void DrawEngine::UpdateDebugLineVertexBuffer(const std::vector<DebugLineVertexGP
 		debugLineVB_.Reset();
 
 		// 用你現有的 BasicResource 工具建立 Upload Buffer
-		debugLineVB_ = debugLineResource_->CreateResourceClass_(directXDriver_->GetDevice(), bufferSize);
+
+		TransformationMatrix* instanceListPtrDL = debugLineResource_->CreateInstanceBuffer((int)bufferSize);
+		drawDataCollector_->SetInstanceListDL(instanceListPtrDL);
+
+		IntializeInstanceTMBuffer(instanceListPtrDL, (size_t)bufferSize);
+
+		debugLineVB_ = CreateResource(directXDriver_->GetDevice(), (size_t)bufferSize);
 	}
 
 	// Map + Copy

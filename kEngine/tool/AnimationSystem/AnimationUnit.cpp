@@ -12,19 +12,15 @@ AnimationUnit::AnimationUnit(kEngine* system) {
 	instanceObject_->IntObject(system_);
 }
 
-AnimationUnit::~AnimationUnit() {
-}
+AnimationUnit::~AnimationUnit() {}
 
-AnimationUnit* AnimationUnit::ReadAnimationData(std::shared_ptr<Animation> animation) {
+AnimationUnit* AnimationUnit::ReadAnimationData(std::shared_ptr<ModelData> modelData, int animationIndex) {
 
-	if (!animation) {
-		Logger::Log("[kError] AS :: ReadAnimationData: animation pointer is null.");
-		return nullptr;
-	}
 
-	animationData_ = animation;
-	allMaxTime_ = animation->duration;
-	allStartTime_ = animation->startTime;
+	modelData_ = modelData;
+	animationIndex_ = animationIndex;
+	allMaxTime_ = modelData->animationList[animationIndex].duration;
+	allStartTime_ = modelData->animationList[animationIndex].startTime;
 
 	return this;
 }
@@ -39,35 +35,35 @@ void AnimationUnit::TakeControlObject(Object* object) {
 	controlledObject_ = object;
 	instanceObject_->CopyObject(controlledObject_);
 
+	if (modelData_.lock()->skeleton.rootID >= 0) {
+
+		haveSkeleton_ = true;
+
+		instanceSkeleton_ = std::make_unique<Skeleton>(modelData_.lock()->skeleton);
+		for (auto& j : instanceSkeleton_->jointList) {
+			j.localMatrix = Identity();
+			j.skeletonSpaceMatrix = Identity();
+		}
+
+	} else {
+		haveSkeleton_ = false;
+	}
 	BindingAnimationNodeToObjectPart();
 
 }
 
 void AnimationUnit::Update() {
 
-	UpdateInstanceObject();
+	/// ローカルポーズを更新する
+	UpdateLocalPose();
 
-	ControlleObject();
+	/// スケルトンがあれば続く
+	if (!haveSkeleton_)return;
 
-}
+	/// skeleton行列を更新する
+	UpdateLocalMatrix();
+	UpdateGolbalMatrixAndFinalMatrix();
 
-void AnimationUnit::ControlleObject() {
-
-	if (!isObjectChange_)return;
-
-	auto& cObjectTransform = controlledObject_->mainPosition.transform;
-	auto& iObjectTransform = instanceObject_->mainPosition.transform;
-
-	cObjectTransform.CopyAniTranFrom(iObjectTransform);
-
-	int partCount = std::min(
-		(int)controlledObject_->objectParts_.size(),
-		(int)instanceObject_->objectParts_.size()
-	);
-
-	for (int i = 0; i < partCount; i++) {
-		controlledObject_->objectParts_[i].transform.CopyAniTranFrom(instanceObject_->objectParts_[i].transform);
-	}
 }
 
 void AnimationUnit::SetTime(float time_) {
@@ -79,21 +75,27 @@ void AnimationUnit::SetTime(float time_) {
 
 }
 
-void AnimationUnit::UpdateInstanceObject() {
+void AnimationUnit::UpdateLocalPose() {
 
-	auto anim = animationData_.lock();
 	/// アニメーションがなければ終わる
-	if (!anim) {
+	if (!modelData_.lock()) {
 		isObjectChange_ = false;
 		return;
 	}
 
-	for (size_t i = 0; i < anim->nodeList.size(); i++) {
+	/// アニメーションとobject partの対応がなければ終わる
+	if (animationBindings.animToObject.empty()) {
+		isObjectChange_ = false;
+		return;
+	}
 
-		if (animationBindings.animToObject.empty()) {
-			isObjectChange_ = false;
-			return;
-		}
+	/// まずはアニメーションをとる
+	auto& anim = modelData_.lock()->animationList[animationIndex_];
+
+	/// nodeごとに、object partのアニメーションを更新する
+	for (size_t i = 0; i < anim.nodeList.size(); i++) {
+
+		if(i >= animationBindings.animToObject.size()) continue;
 
 		int objIndex = animationBindings.animToObject[i];
 
@@ -102,7 +104,7 @@ void AnimationUnit::UpdateInstanceObject() {
 			continue;
 		}
 
-		auto& node = anim->nodeList[i];
+		auto& node = anim.nodeList[i];
 		auto& part = instanceObject_->objectParts_[objIndex].transform;
 
 		part.aniScale = MakeTimeValue(node.scaleList, nowTime_);
@@ -114,6 +116,64 @@ void AnimationUnit::UpdateInstanceObject() {
 	isObjectChange_ = true;
 }
 
+void AnimationUnit::UpdateLocalMatrix() {
+
+	auto& anim = modelData_.lock()->animationList[animationIndex_];
+	for (size_t i = 0; i < anim.nodeList.size(); i++) {
+
+		int objIndex = animationBindings.animToObject[i];
+
+		/// nodeに対応するobject partがない場合はスキップ
+		if (objIndex < 0 || objIndex >= instanceObject_->objectParts_.size()) {
+			continue;
+		}
+
+		/// jointIndexを探す（iと同じとは限らない）
+		const std::string& nodeName = anim.nodeList[i].name;
+		auto it = instanceSkeleton_->jointMap.find(nodeName);
+		if (it == instanceSkeleton_->jointMap.end()) {
+			Logger::Log("[kWarning] No joint found for animation node: " + nodeName);
+			continue;
+		}
+		int jointIndex = it->second;
+
+		/// ローカル行列を更新する
+		auto& part = instanceObject_->objectParts_[objIndex].transform;
+		instanceSkeleton_->jointList[jointIndex].localMatrix =
+			MakeAffineMatrix(
+				part.aniScale,
+				part.aniRotate,
+				part.aniTranslate
+			);
+
+	}
+}
+
+void AnimationUnit::UpdateGolbalMatrixAndFinalMatrix() {
+
+	/// skeletonをとる
+	auto& joints = instanceSkeleton_->jointList;
+	auto& bindJoints = modelData_.lock()->skeleton.jointList;
+
+	/// Jointを沿ってglobal行列を更新する
+	for (size_t i = 0; i < joints.size(); i++) {
+
+		Joint& joint = joints[i];
+
+		// 親のglobal行列と自分のlocal行列をかける
+		if (!joint.parentID.has_value()) {
+			// root
+			joint.skeletonSpaceMatrix = joint.localMatrix;
+		} else {
+			int parentIndex = joint.parentID.value();
+			joint.skeletonSpaceMatrix = joints[parentIndex].skeletonSpaceMatrix * joint.localMatrix;
+		}
+
+		// 2. finalMatrixの更新
+		joint.skeletonSpaceMatrixInvers = bindJoints[i].skeletonSpaceMatrix.Inverse();
+		joint.finalMatrix = joint.skeletonSpaceMatrix * joint.skeletonSpaceMatrixInvers;
+	}
+}
 
 float AnimationUnit::ChangeEasing(AnimationType type, float t, float rate) {
 
@@ -136,14 +196,14 @@ float AnimationUnit::ChangeEasing(AnimationType type, float t, float rate) {
 
 void AnimationUnit::BindingAnimationNodeToObjectPart() {
 
-	auto anim = animationData_.lock();
-	if (!anim) return;
+	auto& anim = modelData_.lock()->animationList[animationIndex_];
+	if (!modelData_.lock()) return;
 
-	animationBindings.animToObject.resize(animationData_.lock()->nodeList.size(), -1);
+	animationBindings.animToObject.resize(anim.nodeList.size(), -1);
 
-	for (int i = 0; i < anim->nodeList.size(); i++) {
+	for (int i = 0; i < anim.nodeList.size(); i++) {
 
-		const std::string& nodeName = anim->nodeList[i].name;
+		const std::string& nodeName = anim.nodeList[i].name;
 
 		auto target = std::find_if(
 			controlledObject_->objectParts_.begin(),

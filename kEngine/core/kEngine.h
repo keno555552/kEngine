@@ -71,6 +71,10 @@ public:
 	int GetMutiModelNum(int modelHandle);
 	int SetModelObj(std::string path);
 
+	/// Modelに必要なものルードを準備する
+	void CreateModelRoot(ObjectData* objectData);
+	void ClearModelRoot(ObjectData* objectData);
+
 	void AddLight(Light* light);
 	void RemoveLight(Light* light);
 
@@ -90,9 +94,7 @@ public:
 
 #pragma region アニメーションシステム
 
-	Animation LoadAnimationData(const std::string& filePath);
-
-	int LoadAnimation(const std::string& filePath);
+	std::vector<int> LoadAnimation(const std::string& filePath);
 
 	void AnimationUnitSetTime(int unitHandle, float time);
 
@@ -227,7 +229,7 @@ private:
 	/// ============ 描画関連 ============///
 
 	/// 資源管理
-	std::unique_ptr <SrvManager> srvManager{};
+	///SrvManager* srvManager{};
 	///ResourceManager* resourceManager{};					/// シングルトン
 	///TextureManager* textureManager{};					/// シングルトン
 

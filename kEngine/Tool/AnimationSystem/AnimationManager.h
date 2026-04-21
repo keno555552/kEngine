@@ -13,13 +13,9 @@ public:
 
 	AnimationManager(kEngine* system);
 	~AnimationManager();
-	
-	/// ====================== 独立読み込関連 ======================== ///
-	/// アニメーションデータを読み込む
-	static Animation LoadAnimationData(const std::string& filePath);
 
 	/// ====================== アニメーションシステムの基本的な流れ ========================///
-	int LoadAnimation(const std::string& filePath);
+	std::vector<int> LoadAnimation(const std::string& filePath);
 
 	/// 時間を調整する
 	void UnitSetTime(int unitHandle, float time);
@@ -27,7 +23,7 @@ public:
 
 	/// ======================= 操作関連 ========================///
 
-	void TakeControlObject(int unitHandle, Object* object);
+	int TakeControlObject(int animationHandle, Object* object);
 
 	int GetControlObjectPartHandle(ObjectData* object);
 
@@ -41,22 +37,28 @@ private:
 	kEngine* system_{};
 
 	/// ============= アニメーション関連 ============== ///
+	struct AnimationClip {
+		int modelDataHandle{};
+		std::weak_ptr<ModelData> modelDataPtr;
+		int animationIndex{};
+		std::string filePath;
+	};
+
 	// アニメーションデータのリスト
-	std::vector<std::shared_ptr<Animation>> animationDataList_{};
-	std::map<std::string, int> animationHandleList_{};
+	std::vector<AnimationClip> animationDataList_{};
 
 	// Unitのリスト
 	std::map<int, std::unique_ptr<AnimationUnit>> unitList_{};
 	std::unordered_map<ObjectData*, int> objectToUnitHandleList_{};
+	int unitHandleCounter_{};
 
 private:
-	 
-	/// ====================== 読み込関連 ======================== ///
-	static Animation LoadAnimationDataFromGltf(const std::string& filePath);
+	
+	/// 残るのはやり直しのために,Jsonの記録と読み込みはまだ支援しない
 	static Animation LoadAnimationDataFromJson(const std::string& filePath);
 
 
-	// Unitのハンドルが存在するか確認する,存在しないならばエラーを出してfalseを返す
-	bool CheckHaveHandle(int unitHandle);
+	/// Unitのハンドルが存在するか確認する,存在しないならばエラーを出してfalseを返す
+	bool CheckHaveHandle(int animHandle);
 };
 

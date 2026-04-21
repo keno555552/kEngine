@@ -57,6 +57,7 @@ private:
 	void SetRasterizerState();
 	void ShaderCompile(LightModelType lightModelType);
 	void SetDepthStencilState();
+	void SetDepthStencilStateForSkyCube();
 	void SetGraphicsPipelineState();
 	void SetGraphicsPipelineStateForDebugLine();
 };

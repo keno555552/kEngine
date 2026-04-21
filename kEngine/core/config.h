@@ -70,4 +70,5 @@ public:
 	static int default_Sprite2D_MeshBufferHandle_;
 	static int default_Cube_MeshBufferHandle_;
 	static int default_Sphere_MeshBufferHandle_;
+	static int default_SkyCube_MeshBufferHandle_;
 };

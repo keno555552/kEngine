@@ -64,6 +64,9 @@ UITest::UITest(kEngine* system) {
 
 	whiteTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/white5x5.png");
 
+	//ddsTest = system_->LoadTexture("./GAME/resources/texture/skyCube/rostock_laage_airport_4k.dds");
+	ddsTest = system_->LoadTexture("./GAME/resources/texture/skyCube/output_skybox.dds");
+
 	skydome_ = std::make_unique<Object>();
 	skydome_->IntObject(system_);
 	skydome_->CreateModelData(skydomeModelHandle_);
@@ -84,6 +87,13 @@ UITest::UITest(kEngine* system) {
 	box_->mainPosition.transform.scale = Vector3(0.5f, 0.5f, 0.5f);
 	box_->mainPosition.transform.translate = Vector3(0.0f, 0.0f, 0.0f);
 
+	skybox_ = std::make_unique<Object>();
+	skybox_->IntObject(system_);
+	skybox_->CreateDefaultData();
+	skybox_->modelHandle_ = config::default_SkyCube_MeshBufferHandle_;
+	skybox_->objectParts_[0].materialConfig->textureHandle = ddsTest;
+	skybox_->objectParts_[0].materialConfig->lightModelType = LightModelType::SkyCube;
+	skybox_->mainPosition.transform.scale = Vector3(200.0f, 200.0f, 200.0f);
 
 	detailButton_ = std::make_unique<DetailButton>(system_);
 	detailButton_->SetButton({ 100.0f,100.0f }, 200.0f, 80.0f);
@@ -195,7 +205,8 @@ void UITest::MouseLogic() {
 void UITest::Draw() {
 
 	/// 実体処理
-	skydome_->Draw();
+	//skydome_->Draw();
+	skybox_->Draw();
 	ground_->Draw();
 	box_->Draw();
 	detailButton_->Render();

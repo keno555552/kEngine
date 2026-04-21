@@ -28,14 +28,15 @@
 
 #include "SrvManager/SrvManager.h"
 #include "DrawData/DrawDataCollector.h"
+#include "Renderer/Resource/InstanceBuffer.h"
 
 class DrawEngine
 {
 public:
-	void Initialize(DirectXCore* directXDirver,
-		SrvManager* srvManager,
-		ResourceManager* resourceManager,
-		DrawDataCollector* drawDataCollector);
+	void Initialize(
+		DirectXCore* directXDirver,
+		DrawDataCollector* drawDataCollector
+	);
 
 	void Finalize();
 
@@ -60,6 +61,10 @@ public:
 	void Draw3DOpaque();
 
 	void DrawCall();
+
+	/// Skinning関連関数
+	void CreateSkinningBuffer(ObjectData* objectData);
+	void ClearSkinningBuffer(ObjectData* objectData);
 
 	/// リソースローディング
 	int GetModelTextureHandle(int modelHandle, int part);
@@ -101,9 +106,6 @@ private:
 
 	/// Texture関連
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
-	D3D12_GPU_DESCRIPTOR_HANDLE TileDLSrvHandleGPU_{};
-	D3D12_GPU_DESCRIPTOR_HANDLE Tile2DSrvHandleGPU_{};
-	D3D12_GPU_DESCRIPTOR_HANDLE Tile3DSrvHandleGPU_{};
 	uint32_t descriptorIndex_ = 1;						// 0はImGui用に予約
 	std::vector<int> commonTextureSRVMap_;
 	std::vector<int> modelTextureSRVMap_;
@@ -113,8 +115,10 @@ private:
 
 
 	///Lighting関連
-	D3D12_GPU_DESCRIPTOR_HANDLE lightListSrvHandleGPU_{};
-	std::unique_ptr <BasicResource> lightBuffer_;
+	//D3D12_GPU_DESCRIPTOR_HANDLE lightListSrvHandleGPU_{};
+	//std::unique_ptr <BasicResource> lightBuffer_;
+
+	std::unique_ptr<InstanceBuffer<LightGPU>>lightBuffer_;
 	LightGPU* lightListData_ = nullptr;                  // 受け皿
 
 	uint32_t lightCount_ = 0;
@@ -129,13 +133,19 @@ private:
 	size_t debugLineVertexBufferSize_ = 0;
 
 	/// Instance-GPU交換用容器
-	std::unique_ptr <BasicResource> debugLineResource_;
-	std::unique_ptr <BasicResource> tile2DWVPResource_;
-	std::unique_ptr <BasicResource> tile3DWVPResource_;
+	std::unique_ptr<InstanceBuffer<TransformationMatrix>> debugLineResource_;
+	std::unique_ptr<InstanceBuffer<TransformationMatrix>> tile2DWVPResource_;
+	std::unique_ptr<InstanceBuffer<TransformationMatrix>> tile3DWVPResource_;
 	int instanceDLCounter_ = 0;
 	int instance2DCounter_ = 0;
 	int instance3DCounter_ = 0;
 
+	/// Skinning関連
+	std::vector<std::unique_ptr<InstanceBuffer<WellForGPU>>> skinningWFGResourceList_;
+	// DDCにのSkinningDataのハンドルと、実際のWellForGPUのマップ
+	std::map<int,int> skinningDatDDC2DEaMap_;
+	std::vector<int> skinningBufferFreeList_;
+	//int skinningCounter_ = 0;
 
 private:
 
@@ -154,12 +164,11 @@ private:
 	D3D12_VIEWPORT createViewport(int kClientWidth, int kClientHeight);
 	D3D12_RECT createScissorRect(int kClientWidth, int kClientHeight);
 
-	void intializeInstanceTMBuffer(TransformationMatrix* bufferPointer, size_t count);
+	void IntializeInstanceTMBuffer(TransformationMatrix* bufferPointer, size_t count);
 
 	void SetMaterial(int materialID);
 	void SetTexture(int materialID);
 	void SetCameraForGPU();
-	void InitializeLighting();
 	void UpdateLighting();
 	void SetLightingGPU();
 
@@ -169,8 +178,6 @@ private:
 	void MakeDepthStencilView();
 
 	void UpdateDebugLineVertexBuffer(const std::vector<DebugLineVertexGPU>& vertices);
-
-
 
 private:
 
@@ -194,9 +201,6 @@ private:
 		resource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&cpuPtr));
 		return cpuPtr;
 	}
-
-
-
 
 private:
 	bool isFinish = false;

@@ -30,7 +30,7 @@ AnimationEditor::AnimationEditor(kEngine* system) {
 	SetupAnimationEditorEnd();
 	
 	animationUnitHandle_ = system_->LoadAnimation(modelPath + "both/AnimatedCube/AnimatedCube.gltf");
-	system_->AnimationTakeControlObject(animationUnitHandle_, targetModel_.get());
+	system_->AnimationTakeControlObject(animationUnitHandle_[0], targetModel_.get());
 }
 
 AnimationEditor::~AnimationEditor() {
@@ -53,7 +53,7 @@ void AnimationEditor::Update() {
 
 	/// =============== モデル更新 =================///
 
-	system_->AnimationUnitSetTime(animationUnitHandle_, mainTimer_->parameter_);
+	system_->AnimationUnitSetTime(animationUnitHandle_[0], mainTimer_->parameter_);
 	//targetModel_->Update(camera_);
 	//animationUnit_->ReadAnimationData(animationList_[0]);
 	//animationUnit_->SetTime(mainTimer_->parameter_);

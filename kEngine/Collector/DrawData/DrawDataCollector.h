@@ -2,6 +2,7 @@
 #include <vector>
 #include <memory>
 #include <map>
+#include <span>
 #include <unordered_map>
 #include "Data/Render/CPUData/materialConfig.h"
 #include "Data/Render/CPUData/ObjectData.h"
@@ -16,6 +17,9 @@
 #include "Data/Render/CPUData/DebugLine.h"
 #include "Data/Render/GPUData/DebugLineGPU.h"
 #include "AnimationSystem/AnimationManager.h"
+
+#include "Data/Render/GPUData/WellForGPU.h"
+#include "Data/Render/CPUData/VertexInfluence.h"
 using ModelID = int;
 
 inline const float layerDepth_Sprite = 0.0001f;
@@ -78,11 +82,21 @@ public:
 
 	std::vector<RenderData>& GetTransparentObjectParts3D() { return transparentBucket3D_; }
 
+
 	/// ========== パーティクル関連 ===========///
 
 	void CollectParticleC(ObjectData* object);
 	
 	std::vector<RenderData>& GetBucketsParticleC() { return bucketParticleC_; }
+
+	/// ================= skinning関連 ===================///
+	
+	/// NOTE: これも一時的な実装。まだUnloadがない
+	int SetSkinningData( WellForGPU* mappedPalette, int mappedNum, VertexInfluence* influenceSpan, int VertexNum);
+	void ClearSkinningData(int index);
+
+	std::span<VertexInfluence> GetInfluenceSpan(int index) { return skinningDataList_[index].influenceSpan; }
+	std::span<WellForGPU> GetMappedPalette(int index) { return skinningDataList_[index].mappedPalette; }
 
 	/// =========== Instance関連 ============///
 
@@ -149,6 +163,17 @@ private:
 	/// パーティクルバケット
 	std::vector<RenderData> bucketParticleC_;
 
+
+	/// ================= skinning関連 ===================///
+
+	struct SkinningData
+	{
+		std::span<VertexInfluence> influenceSpan;
+		std::span<WellForGPU> mappedPalette;
+	};
+
+	std::vector<SkinningData> skinningDataList_;
+
 	/// ================ インスタンスデータ =================///
 
 	TransformationMatrix* instancingListDL_ = nullptr;
@@ -183,18 +208,20 @@ private:
 	/// Animationマトリックス作成
 	Matrix4x4 MakeAnimationMatrix(ObjectPart& part);
 	/// WVP調整
-	TransformationMatrix ObjectWVPAdjustment3D(ObjectData& object, ObjectPart& part, ModelData modelData);
+	TransformationMatrix ObjectWVPAdjustment3D(ObjectData& object, ObjectPart& part, ModelData* modelData, int modelCounter);
 	/// バケット追加
 	void AddObjectToBucket3D(RenderData& renderData, int meshID);
 	/// rotateのダーティフラグを確認して、必要ならば回転行列を作成する
 	void DirtyEulerToQuat(ObjectPart& part);
 	void DirtyEulerToQuat(ObjectData& part);
 
+	/// ================= skinning関連 ===================///
+
 	/// ============ パーティクル関連 ============///
 	/// フォローマトリックス作成 
 	// 3Dのフォローマトリックスを流用
 	/// WVP調整
-	TransformationMatrix ObjectWVPAdjustmentPC(ObjectData& object, ObjectPart& part, ModelData modelData);
+	TransformationMatrix ObjectWVPAdjustmentPC(ObjectData& object, ObjectPart& part, ModelData& modelData, int modelCounter);
 	/// バケット追加
 	void AddObjectToBucketPC(RenderData& renderData);
 

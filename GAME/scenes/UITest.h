@@ -45,8 +45,11 @@ private:
 	/// サントラハンドル
 	int soundHandle_ = 0;
 
+	int ddsTest = 0;
+
 	/// =========== ゲームオブジェクト ==========///
 	std::unique_ptr<Object> skydome_ = nullptr;
+	std::unique_ptr<Object> skybox_ = nullptr;
 	std::unique_ptr<Object> ground_ = nullptr;
 	std::unique_ptr<Object> box_ = nullptr;
 

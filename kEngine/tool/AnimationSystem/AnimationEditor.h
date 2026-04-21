@@ -87,7 +87,7 @@ private:
 	HitBox mainTimeBarHitBox_{};
 
 	/// ======== アニメーション内部用 ==========///
-	int animationUnitHandle_{ -1 };
+	std::vector<int> animationUnitHandle_{ -1 };
 
 	/// 選んでるキーフレーム(by IP)
 	int pickedKeyFrame_{-1};

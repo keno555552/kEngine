@@ -6,3 +6,4 @@
 #include "Mesh/CubeMesh.h"
 #include "Mesh/Model.h"
 #include "Mesh/ModelGroup.h"
+#include "Mesh/SkyCube.h"

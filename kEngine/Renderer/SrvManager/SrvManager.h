@@ -3,16 +3,32 @@
 #include <cstdint>
 #include <d3d12.h>
 #include <vector>
+#include <memory>
+
+#include "externals/DirectXTex/DirectXTex.h"
 
 class DirectXCore;
 class SrvManager
 {
 public:
-	~SrvManager();  // 添加解構函式聲明
+
+	/// シングルトン取得
+	static SrvManager* GetInstance();
+
+	class ConstructorKey {
+	private:
+		/// からのみ生成・破棄可能
+		friend class SrvManager;
+		friend class kEnigne;
+		ConstructorKey() {}
+	};
+
+	explicit SrvManager(ConstructorKey) {};
 	
 	void Initialize(DirectXCore* core);
-
 	void Finalize();
+
+	static void Destroy();
 
 	uint32_t Allocate();
 
@@ -24,7 +40,7 @@ public:
 	/// =========== SRV生成・解放 ===========///
 	/// /// SRV生成 (バッファ用)
 	/// SRV生成 (テクスチャ用)
-	void CreateSRVForTexture2D(uint32_t srvIndex, ID3D12Resource* pResource, DXGI_FORMAT Format, UINT MipLevels);
+	void CreateSRVForTexture2D(uint32_t srvIndex, ID3D12Resource* pResource, DirectX::TexMetadata metaData);
 
 	/// SRV生成 (Structured Buffer用)
 	void CreateSRVForStructuredBuffer(uint32_t srvIndex, ID3D12Resource* pResource, UINT numElements, UINT structureByteStride);
@@ -47,6 +63,16 @@ public:
 	void SetGraphicsRootDescriptorTable(UINT RootParameterIndex, uint32_t srvIndex);
 
 private:
+
+	friend struct std::default_delete<SrvManager>;
+	~SrvManager() = default;
+
+private:
+
+	/// singletonドライブ
+	static std::unique_ptr<SrvManager> instance_;
+
+	/// 借りのDevice
 	DirectXCore* directXCore_ = nullptr; //借り
 
 	/// 最大SRV数（最大テクスチャ枚数）

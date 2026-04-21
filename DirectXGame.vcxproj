@@ -252,6 +252,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="kEngine\Renderer\Resource\InstanceBuffer.cpp" />
+    <ClCompile Include="kEngine\Data\Geometry\ModelStructure\JointWeightData.cpp" />
+    <ClCompile Include="kEngine\Tool\Importer\Reader\AssimpReader.cpp" />
+    <ClCompile Include="kEngine\Tool\Importer\Reader\GLTFReader.cpp" />
     <ClCompile Include="kEngine\Data\Animation\Joint.cpp" />
     <ClCompile Include="kEngine\Data\Animation\Animation.cpp" />
     <ClCompile Include="kEngine\Data\Animation\AnimationNodeData.cpp" />
@@ -367,6 +371,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Data\Render\Types\LightingType.cpp" />
     <ClCompile Include="kEngine\Data\Geometry\Shape\Line\Line.cpp" />
     <ClCompile Include="kEngine\Data\Animation\Keyframe.cpp" />
+    <ClCompile Include="kEngine\Tool\Importer\Loader\LoadModel.cpp" />
     <ClCompile Include="main.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -400,6 +405,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Data\Geometry\Shape\Quad\OBB.cpp" />
     <ClCompile Include="kEngine\Data\Geometry\Shape\Plane\Plane.cpp" />
     <ClCompile Include="kEngine\Data\Physics\PhysicalObject.cpp" />
+    <ClCompile Include="kEngine\Data\Render\CPUData\MaterialData.cpp" />
+    <ClCompile Include="kEngine\Data\Render\CPUData\ModelData.cpp" />
+    <ClCompile Include="kEngine\Data\Geometry\ModelStructure\NodeData.cpp" />
+    <ClCompile Include="kEngine\Data\Render\CPUData\MeshData.cpp" />
+    <ClCompile Include="kEngine\Tool\Importer\Reader\ObjReader.cpp" />
     <ClCompile Include="ResourceLoader.cpp" />
     <ClCompile Include="kEngine\Scenes\BaseSceneFactory.cpp" />
     <ClCompile Include="kEngine\GameObject\Object\Sprite.cpp" />
@@ -418,8 +428,18 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Data\Physics\Spring.cpp" />
     <ClCompile Include="kEngine\Physics\SpringUtility.cpp" />
     <ClCompile Include="kEngine\Data\Animation\Skeleton.cpp" />
+    <ClCompile Include="kEngine\Data\Geometry\ModelStructure\SkinData.cpp" />
+    <ClCompile Include="kEngine\Data\Geometry\ModelStructure\VertexWeightData.cpp" />
+    <ClCompile Include="kEngine\Data\Render\CPUData\SkinClusterData.cpp" />
+    <ClCompile Include="kEngine\Data\Render\CPUData\VertexInfluence.cpp" />
+    <ClCompile Include="kEngine\Data\Render\GPUData\WellForGPU.cpp" />
+    <ClCompile Include="kEngine\Renderer\Mesh\SkyCube.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="kEngine\Renderer\Resource\InstanceBuffer.h" />
+    <ClInclude Include="kEngine\Data\Geometry\ModelStructure\JointWeightData.h" />
+    <ClInclude Include="kEngine\Tool\Importer\Reader\AssimpReader.h" />
+    <ClInclude Include="kEngine\Tool\Importer\Reader\GLTFReader.h" />
     <ClInclude Include="kEngine\Data\Animation\Joint.h" />
     <ClInclude Include="kEngine\Data\Animation\Animation.h" />
     <ClInclude Include="kEngine\Data\Animation\AnimationNodeData.h" />
@@ -636,6 +656,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Data\Geometry\Shape\Line\Line.h" />
     <ClInclude Include="kEngine\Data\Physics\PhysicalObject.h" />
     <ClInclude Include="kEngine\Data\Animation\Keyframe.h" />
+    <ClInclude Include="kEngine\Data\Render\CPUData\MaterialData.h" />
+    <ClInclude Include="kEngine\Data\Render\CPUData\ModelData.h" />
+    <ClInclude Include="kEngine\Data\Geometry\ModelStructure\NodeData.h" />
+    <ClInclude Include="kEngine\Data\Render\CPUData\MeshData.h" />
+    <ClInclude Include="kEngine\Tool\Importer\Loader\LoadModel.h" />
+    <ClInclude Include="kEngine\Tool\Importer\Reader\ObjReader.h" />
     <ClInclude Include="ResourceLoader.h" />
     <ClInclude Include="kEngine\Scenes\BaseSceneFactory.h" />
     <ClInclude Include="kEngine\GameObject\Object\Sprite.h" />
@@ -654,6 +680,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Data\Physics\Spring.h" />
     <ClInclude Include="kEngine\Physics\SpringUtility.h" />
     <ClInclude Include="kEngine\Data\Animation\Skeleton.h" />
+    <ClInclude Include="kEngine\Data\Geometry\ModelStructure\SkinData.h" />
+    <ClInclude Include="kEngine\Data\Geometry\ModelStructure\VertexWeightData.h" />
+    <ClInclude Include="kEngine\Data\Render\CPUData\SkinClusterData.h" />
+    <ClInclude Include="kEngine\Data\Render\CPUData\VertexInfluence.h" />
+    <ClInclude Include="kEngine\Data\Render\GPUData\WellForGPU.h" />
+    <ClInclude Include="kEngine\Renderer\Mesh\SkyCube.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl">

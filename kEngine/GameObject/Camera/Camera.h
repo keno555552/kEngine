@@ -41,7 +41,6 @@ public:
 	void Move(Vector3 speed);
 	void Rotate(Vector3 Theta);
 
-
 	/// セットカメラ
 	void SetRotation(Vector3 rotate);
 	void SetTranslate(Vector3 translate);

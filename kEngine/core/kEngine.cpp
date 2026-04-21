@@ -12,15 +12,14 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 	dxComm = std::make_unique<DirectXController>();
 	dxComm->InitializeDrive(kClientTitle, kClientWidth, kClientHeight);
 
-	srvManager = std::make_unique<SrvManager>();
-	srvManager->Initialize(dxComm.get());
+	SrvManager::GetInstance()->Initialize(dxComm.get());
 
 #ifdef USE_IMGUI
-	ImGuiManager::Initialize(dxComm.get(), srvManager.get());
+	ImGuiManager::Initialize(dxComm.get());
 #endif
 
 	//instanceManager = std::make_unique < InstanceManager>();
-	TextureManager::GetInstance()->Initialize(dxComm.get(), srvManager.get());
+	TextureManager::GetInstance()->Initialize(dxComm.get());
 	ResourceManager::GetInstance()->Initialize(dxComm.get());
 
 	lightManager = std::make_unique<LightManager>();
@@ -35,7 +34,7 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 
 
 	drawEngine = std::make_unique<DrawEngine>();
-	drawEngine->Initialize(dxComm.get(), srvManager.get(), ResourceManager::GetInstance(), drawDataCollector.get());
+	drawEngine->Initialize(dxComm.get(), drawDataCollector.get());
 
 	soundManager = std::make_unique<SoundManager>();
 	soundManager->Initialize();
@@ -65,7 +64,10 @@ void kEngine::Finalize() {
 	animationManager.reset();
 	cameraManager->Finalize();
 	lightManager->Finalize();
-	srvManager->Finalize();
+
+	SrvManager::GetInstance()->Finalize();
+	SrvManager::Destroy();
+
 	dxComm->Finalize();
 }
 
@@ -103,11 +105,8 @@ bool kEngine::ProcessMessage() {
 
 #pragma region アニメーションシステム
 
-Animation kEngine::LoadAnimationData(const std::string& filePath) {
-	return animationManager->LoadAnimationData(filePath);
-}
 
-int kEngine::LoadAnimation(const std::string& filePath) {
+std::vector<int> kEngine::LoadAnimation(const std::string& filePath) {
 	return animationManager->LoadAnimation(filePath);
 }
 
@@ -171,7 +170,27 @@ int kEngine::GetMutiModelNum(int modelHandle) {
 
 int kEngine::SetModelObj(std::string path) {
 	//return drawEngine->SetModel(path);
-	return ResourceManager::GetInstance()->LoadModel(path);
+	int modelHandle = ResourceManager::GetInstance()->LoadModel(path);
+	return modelHandle;
+}
+
+void kEngine::CreateModelRoot(ObjectData* objectData) {
+	int modelHandle = objectData->modelHandle_;
+	ModelGroup* modelGroup = ResourceManager::GetInstance()->modelGroupList_[modelHandle].get();
+	
+	int handleNum = -1;
+
+	if (modelGroup->HasSkinClusterData()) {
+		drawEngine->CreateSkinningBuffer(objectData);
+	}
+}
+
+void kEngine::ClearModelRoot(ObjectData* objectData) {
+
+	int modelHandle = objectData->modelHandle_;
+	drawEngine->ClearSkinningBuffer(objectData);
+
+
 }
 
 void kEngine::AddLight(Light* light) {
@@ -479,7 +498,7 @@ DirectXController* kEngine::GetDirectXController() {
 }
 
 SrvManager* kEngine::GetSrvManager() {
-	return srvManager.get();
+	return SrvManager::GetInstance();
 }
 
 ResourceManager* kEngine::GetResourceManager() const {

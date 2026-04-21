@@ -12,6 +12,8 @@
 class kEngine;
 class Object : public ObjectData {
 public:
+	~Object();
+
 	void IntObject(kEngine* system);
 
 	virtual void Update(Camera* camera = 0);

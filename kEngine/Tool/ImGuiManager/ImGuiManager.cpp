@@ -6,7 +6,8 @@ bool ImGuiManager::HandleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
     return ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam);
 }
 
-void ImGuiManager::Initialize(DirectXController* dxComm, SrvManager* srvManager) {
+void ImGuiManager::Initialize(DirectXController* dxComm) {
+	SrvManager* srvManager = SrvManager::GetInstance();
     uint32_t srvIndex = srvManager->Allocate();
     dxComm->GetCommandQueue();
 
