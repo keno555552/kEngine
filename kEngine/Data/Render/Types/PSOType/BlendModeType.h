@@ -3,7 +3,14 @@
 
 enum class BlendModeType
 {
-	Alpha_Blend
+
+	NormalBlend,
+	AddBlend,
+	SubtractBlend,
+	MultiplyBlend,
+	ScreenBlend,
+
+	NumOfBlends
 };
 
 std::string GetBlendModeMarco(BlendModeType model);

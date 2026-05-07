@@ -15,7 +15,7 @@ void DrawDataCollector::Finalize() {
 	/// bucketクリア
 	opaqueBucket2D_.clear();
 	transparentBucket2D_.clear();
-	opaqueBuckets3D_.clear();
+	opaqueBucket3D_.clear();
 	transparentBucket3D_.clear();
 	bucketParticleC_.clear();
 
@@ -33,7 +33,7 @@ void DrawDataCollector::PreCollect() {
 	/// bucketクリア
 	opaqueBucket2D_.clear();
 	transparentBucket2D_.clear();
-	opaqueBuckets3D_.clear();
+	opaqueBucket3D_.clear();
 	transparentBucket3D_.clear();
 	debugLinesVertexBucket_.clear();
 
@@ -55,7 +55,7 @@ void DrawDataCollector::EndCollect() {
 
 	/// ネールスキップ
 	if (opaqueBucket2D_.empty() && transparentBucket2D_.empty() &&
-		opaqueBuckets3D_.empty() && transparentBucket3D_.empty())
+		opaqueBucket3D_.empty() && transparentBucket3D_.empty())
 		return;
 
 	/// 実際のインスタンスリスト作成
@@ -140,7 +140,7 @@ void DrawDataCollector::Collect2D(SpriteData* sprite) {
 		renderData.transformData = SpriteWVPAdjustment2D(*sprite, object);
 
 		/// PSO設定
-		renderData.psoID = PSODecision(*object.materialConfig);
+		renderData.psoKey = PSODecision(*object.materialConfig);
 
 		/// サブメッシュインデックス設定
 		renderData.subMeshIndex = 0;
@@ -269,7 +269,7 @@ void DrawDataCollector::AddSpriteToBucket2D(RenderData& renderData, int meshID) 
 			}
 		} else {
 			/// 不透明オブジェクトバケットへ追加
-			opaqueBucket2D_[static_cast<PSOType>(renderData.psoID)][renderData.materialID][meshID].emplace_back(renderData);
+			opaqueBucket2D_[static_cast<PSOKey>(renderData.psoKey)][renderData.materialID][meshID].emplace_back(renderData);
 		}
 	}
 }
@@ -302,7 +302,7 @@ void DrawDataCollector::Collect3D(ObjectData* object) {
 		renderData.transformData = ObjectWVPAdjustment3D(*object, objectPart, modelData->GetModelData().get(), modelCounter);
 
 		/// PSO設定
-		renderData.psoID = PSODecision(*objectPart.materialConfig);
+		renderData.psoKey = PSODecision(*objectPart.materialConfig);
 
 		/// サブメッシュインデックス設定
 		renderData.subMeshIndex = 0;
@@ -461,7 +461,7 @@ void DrawDataCollector::AddObjectToBucket3D(RenderData& renderData, int meshID) 
 			}
 		} else {
 			/// 不透明オブジェクトバケットへ追加
-			opaqueBuckets3D_[static_cast<PSOType>(renderData.psoID)][renderData.materialID][meshID].emplace_back(renderData);
+			opaqueBucket3D_[static_cast<PSOKey>(renderData.psoKey)][renderData.materialID][meshID].emplace_back(renderData);
 		}
 	}
 }
@@ -563,7 +563,7 @@ void DrawDataCollector::CollectParticleC(ObjectData* object) {
 		renderData.transformData = ObjectWVPAdjustmentPC(*object, objectPart, *modelData->GetModelData().get(), modelCounter);
 
 		/// PSO設定
-		renderData.psoID = PSODecision(*objectPart.materialConfig);
+		renderData.psoKey = PSODecision(*objectPart.materialConfig);
 
 		/// サブメッシュインデックス設定
 		renderData.subMeshIndex = 0;
@@ -659,10 +659,10 @@ void DrawDataCollector::BuildInstanceList2D() {
 }
 
 void DrawDataCollector::BuildInstanceList3D() {
-	if (opaqueBuckets3D_.empty() && transparentBucket3D_.empty())return;
+	if (opaqueBucket3D_.empty() && transparentBucket3D_.empty())return;
 
 	/// 不透明物件
-	for (auto& [psoID, materialBuckets] : opaqueBuckets3D_) {
+	for (auto& [psoID, materialBuckets] : opaqueBucket3D_) {
 		for (auto& [materialID, RenderDataGroup] : materialBuckets) {
 			if (RenderDataGroup.empty()) continue;
 			for (auto& [meshBuffer, RenderData] : RenderDataGroup) {
@@ -694,29 +694,41 @@ Vector3 DrawDataCollector::GetCameraPosition() const {
 	return cameraManager_->GetActiveCamera()->GetTransform().translate;
 }
 
-uint32_t DrawDataCollector::PSODecision(MaterialConfig& material) {
+PSOKey DrawDataCollector::PSODecision(MaterialConfig& material) {
 
-	LightModelType lightModelType = (LightModelType)(int)material.lightModelType;
+	/// 新しいkeyを準備
+	PSOKey key{};
 
-	switch (lightModelType) {
-	case LightModelType::Sprite2D:
-		return (uint32_t)PSOType::Sprite2D;
-	case LightModelType::Lambert:
-		return (uint32_t)PSOType::Lambert;
-	case LightModelType::HalfLambert:
-		return (uint32_t)PSOType::HalfLambert;
-	case LightModelType::PhongReflection:
-		return (uint32_t)PSOType::PhongReflection;
-	case LightModelType::BlinnPhongReflection:
-		return (uint32_t)PSOType::BlinnPhongReflection;
-	case LightModelType::FlameNeonGlow:
-		return (uint32_t)PSOType::FlameNeonGlow;
-	case LightModelType::DebugLine:
-		return (uint32_t)PSOType::DebugLine;
-	case LightModelType::SkyCube:
-		return (uint32_t)PSOType::SkyCube;
+	/// PSOKeyの各要素をMaterialConfigから設定
+	key = {
+		.lightModelType = material.lightModelType,
+		.renderModelType = material.renderModelType,
+		.rasterizerMode = material.rasterizerMode,
+		.blendModeType = material.blendModeType,
+		.depthStencilType = material.depthStencilType,
+	};
+
+	/// PrimitiveTypeの決定
+	switch (material.renderModelType) {
+
+	case RenderModelType::DebugLine:
+		key.primitiveType = PrimitiveType::LINE;
+		break;
+
+	case RenderModelType::Sprite2D:
+	case RenderModelType::SkyCube:
+	case RenderModelType::Static:
+	case RenderModelType::Skinned:
+	case RenderModelType::FlameNeonGlow:
+		key.primitiveType = PrimitiveType::TRIANGLE;
+		break;
+
+	default:
+		key.primitiveType = PrimitiveType::TRIANGLE;
+		break;
 	}
-	return (uint32_t)PSOType::NONE;
+
+	return key;
 }
 
 

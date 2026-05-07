@@ -124,6 +124,7 @@ void AnimationEditor::SetupAnimationEditor() {
 	skydome_->IntObject(system_);
 	skydome_->CreateModelData(Skydome_modelHandle_);
 	skydome_->objectParts_[0].materialConfig->enableLighting = false;
+	skydome_->mainPosition.transform.scale = Vector3(0.2f, 0.2f, 0.2f);
 
 	/// ========= sprite設定 ========///
 	mainTimeBar_->IntObject(system_);

@@ -10,6 +10,7 @@
 #pragma comment(lib,"dxcompiler.lib")
 
 #include "DirectXCore.h"
+#include "Data/Render/Types/PSOType/LightModelType.h"
 
 
 class Shader_compile{

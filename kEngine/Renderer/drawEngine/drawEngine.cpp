@@ -16,24 +16,16 @@ void DrawEngine::Initialize(
 	srvManager_ = SrvManager::GetInstance();
 	resourceManager_ = ResourceManager::GetInstance();
 	drawDataCollector_ = drawDataCollector;
+
 	///
 	kClientWidth_ = config::GetClientWidth();
 	kClientHeight_ = config::GetClientHeight();
 
-	///
-	pso_->Initialize(directXDriver_);
 
-	///================== PSO関連 ==================
-	/// PSOつくり
-	for (int i = 0; i < (int)LightModelType::NumLightModels; i++) {
+	/// ================== PSO関連 ================== ///
+	psoManager_ = std::make_unique<PSOManager>();
+	psoManager_->Initialize(directXDriver_);
 
-		//auto pso = std::make_unique<PSO>();
-		//pso->Initialize(directXDriver_);
-
-		psoList_.push_back(pso_->createPSO((LightModelType)i));
-	}
-
-	rootSignature_ = pso_->getRootSignature((int)PSOType::defaultPSO);
 
 	depthStencilResource = CreateDepthStencilTextureResource(directXDriver_->GetDevice(), kClientWidth_, kClientHeight_);
 	MakeDepthStencilView();
@@ -119,10 +111,8 @@ void DrawEngine::Finalize() {
 
 	resourceManager_->CreateTurnResource();
 
-	psoList_.clear();
-
-	pso_->Finalize();
-	pso_.reset();
+	psoManager_->Finalize();
+	psoManager_.reset();
 
 	debugLineResource_.reset();
 	tile2DWVPResource_.reset();
@@ -163,11 +153,6 @@ void DrawEngine::StartFrame() {
 
 void DrawEngine::PreDraw() {
 
-	/// 形状を設定。PSOに設定しているものとはまた別。同じものを設定するとUpdateLighting考えておけば良い
-	commandList_->SetGraphicsRootSignature(rootSignature_);
-	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	currentPSO_ = PSOType::NONE;
-
 	/// Lighting
 	drawDataCollector_->UpdateLightData();
 	UpdateLighting();
@@ -196,15 +181,8 @@ void DrawEngine::EndDraw() {
 	}
 }
 
-void DrawEngine::PSODecision(int psoID) {
-	auto newPSO = static_cast<PSOType>(psoID);
-	if (currentPSO_ != newPSO) {
-		commandList_->SetPipelineState(psoList_[psoID].Get());
-		currentPSO_ = newPSO;
-
-		rootSignature_ = pso_->getRootSignature((int)currentPSO_);
-		commandList_->SetGraphicsRootSignature(rootSignature_);
-	}
+void DrawEngine::PSODecision(PSOKey& psoKey) {
+	psoManager_->SetPso(psoKey);
 }
 
 void DrawEngine::DrawDebugLine() {
@@ -218,7 +196,9 @@ void DrawEngine::DrawDebugLine() {
 	commandList_->SetGraphicsRootDescriptorTable(1, debugLineResource_->GetGPUDescriptorHandle());
 
 	/// ========== PSO ==========
-	PSODecision((int)PSOType::DebugLine);
+	PSOKey psoKey = CreateDebugLinePSOKey();
+
+	PSODecision(psoKey);
 
 	/// ========== Camera CBV (b1) ==========
 	SetCameraForGPU();
@@ -255,7 +235,7 @@ void DrawEngine::Draw2DTransparent() {
 	for (auto& object : transparent2D_) {
 
 		/// Set PSO
-		PSODecision((int)object.psoID);
+		PSODecision(object.psoKey);
 
 		SetLightingGPU();
 
@@ -300,10 +280,11 @@ void DrawEngine::Draw2DOpaque() {
 	/// TileSRV
 	commandList_->SetGraphicsRootDescriptorTable(1, tile2DWVPResource_->GetGPUDescriptorHandle());
 
-	for (auto& [psoID, materialBuckets] : transparentObjectParts2D_) {
+	for (auto& [psoKey, materialBuckets] : transparentObjectParts2D_) {
 
 		/// Set PSO
-		PSODecision((int)psoID);
+		PSOKey psoKeyInt = psoKey;
+		PSODecision(psoKeyInt);
 
 		for (auto& [materialID, RenderDataGroup] : materialBuckets) {
 
@@ -386,7 +367,8 @@ void DrawEngine::Draw3DTransparent() {
 	for (auto& object : transparent3D_) {
 
 		/// Set PSO
-		PSODecision((int)object.psoID);
+		PSOKey psoKeyInt = object.psoKey;
+		PSODecision(psoKeyInt);
 
 		SetLightingGPU();
 
@@ -431,10 +413,11 @@ void DrawEngine::Draw3DOpaque() {
 	/// TileSRV
 	commandList_->SetGraphicsRootDescriptorTable(1, tile3DWVPResource_->GetGPUDescriptorHandle());
 
-	for (auto& [psoID, materialBuckets] : transparentObjectParts3D_) {
+	for (auto& [psoKey, materialBuckets] : transparentObjectParts3D_) {
 
 		/// Set PSO
-		PSODecision((int)psoID);
+		PSOKey psoKeyInt = psoKey;
+		PSODecision(psoKeyInt);
 
 
 		for (auto& [materialID, RenderDataGroup] : materialBuckets) {

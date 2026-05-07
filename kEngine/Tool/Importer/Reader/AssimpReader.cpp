@@ -73,7 +73,7 @@ ModelData ReadAssimp(const std::string& filePath) {
 			//assert(face.mNumIndices == 3); // 三角形以外は非対応
 			// 面の頂点インデックスを逆順に格納して、左右手座標系変換を行う
 			for (uint32_t element = 0; element < face.mNumIndices; element++) {
-				uint32_t vertexIndex = face.mIndices[(face.mNumIndices - 1) - element];
+				uint32_t vertexIndex = face.mIndices[element];
 				//uint32_t vertexIndex = face.mIndices[element];
 				aiVector3D aiPosition = mesh->mVertices[vertexIndex];
 				aiVector3D aiNormal = mesh->mNormals[vertexIndex];
@@ -85,10 +85,6 @@ ModelData ReadAssimp(const std::string& filePath) {
 				vertex.normal = { aiNormal.x, aiNormal.y, aiNormal.z };
 				// テクスチャ座標
 				vertex.texcoord = { aiTexCoord.x, aiTexCoord.y };
-				//aiProcess_MakeLeftHandedはz*=-1をしてくれるので、右手系から左手系への変換は頂点の順番を反転するだけで良い
-				//vertex.position.z *= -1.0f;
-				//vertex.normal.z *= -1.0f;
-				vertex.texcoord.x *= -1.0f;
 
 				// push index
 				meshData.indices.push_back((uint32_t)meshData.vertices.size());

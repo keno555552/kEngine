@@ -346,40 +346,47 @@ void ResourceManager::DeleteExtraSpriteMesh(int spriteNumber) {
 int ResourceManager::InputMaterialConfig(std::shared_ptr<MaterialConfig> material) {
 
 	/// ================================= 既にあるか確認 =================================== ///
-	auto checker = std::find_if(
-		materialList_.begin(),
-		materialList_.end(),
-		[&](MaterialEntry& entry) {
-			auto locked = entry.config.lock();
-			return locked && (locked.get() == material.get());
+	MaterialEntry* samePtrEntry = nullptr;
+	MaterialEntry* sameValueEntry = nullptr;
 
+	for (auto& entry : materialList_) {
 
-			//auto locked = entry.config.lock().get();
-			//Logger::Log("Comparing material config pointers: %p and %p", locked, material.get());
-			//return locked == material.get();
+		auto locked = entry.config.lock();
+		if (!locked) continue;
+
+		// pointerが一緒なら更新してIDを返す
+		if (locked.get() == material.get()) {
+			samePtrEntry = &entry;
+			break;
 		}
-	);
 
+		// pointerが違っても値が一緒ならIDを返す
+		if (*locked == *material) {
+			sameValueEntry = &entry;
+		}
+	}
 	/// =========================== 既にある場合、更新してIDを返す =========================== ///
-	if (checker != materialList_.end()) {
+	if (samePtrEntry) {
 
-		/// pointerが一緒だから更新なくてok
-		//checker->config = material;
+		// CPUマテリアル更新 
+		samePtrEntry->cpuMaterial->inputMaterialConfig(*material);
 
-		/// 更新 CPU 材質
-		checker->cpuMaterial->inputMaterialConfig(*material.get());
-
-		/// 更新 GPU 材質
+		// GPUマテリアル更新
 		MaterialForGPU* gpuPtr = nullptr;
-		checker->gpuMaterial->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&gpuPtr));
-		*gpuPtr = *checker->cpuMaterial;
-		checker->gpuMaterial->GetResource()->Unmap(0, nullptr);
+		samePtrEntry->gpuMaterial->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&gpuPtr));
+		*gpuPtr = *samePtrEntry->cpuMaterial;
+		samePtrEntry->gpuMaterial->GetResource()->Unmap(0, nullptr);
 
-		return checker->materialID;
+		return samePtrEntry->materialID;
 	}
 
-	/// ======================== ない場合、新しいMaterialEntryを作成 ======================== ///
-	MaterialEntry entry;
+	/// =========================== ない場合、まず完全一致なマテリアルを探す =========================== ///
+	if (sameValueEntry) {
+		return sameValueEntry->materialID;
+	}
+
+	/// ======================== それでもない場合、新しいMaterialEntryを作成 ======================== ///
+	MaterialEntry entry;	
 
 	/// MaterialIDを設定
 	entry.materialID = materialCounter_;

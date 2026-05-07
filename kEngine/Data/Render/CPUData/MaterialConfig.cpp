@@ -29,15 +29,24 @@ void MaterialConfig::MakeUVMatrix() {
 void InitMaterialConfig(MaterialConfig* materialConfig) {
 	materialConfig->useModelTexture = true;
 	materialConfig->textureHandle = 0;
+
 	materialConfig->uvTranslate = { 0,0,0 };
 	materialConfig->uvScale = { 1,1,1 };
 	materialConfig->uvRotate = { 0,0,0 };
 	materialConfig->uvTransformMatrix = {};
 	materialConfig->textureColor = { 1.0f,1.0f,1.0f,1.0f };
-	materialConfig->lightModelType = LightModelType::HalfLambert;
+
+	LightModelType lightModelType = (LightModelType)config::default_LightModel_;
+	RenderModelType renderModelType = (RenderModelType)config::default_RenderModelTypes_;
+	RasterizerMode rasterizerMode = (RasterizerMode)config::default_RasterizerMode_;
+	BlendModeType blendModeType = (BlendModeType)config::default_BlendMode_;
+	DepthStencilType depthStencilType = (DepthStencilType)config::default_DepthStenctilState_;
+
 	materialConfig->enableLighting = true;
+
 	materialConfig->materialResourceHandle = -1;
 	materialConfig->drawState = 0;
+
 	materialConfig->textureColor2 = { 1.0f,1.0f,1.0f,1.0f };
 	materialConfig->textureColor3 = { 1.0f,1.0f,1.0f,1.0f };
 	materialConfig->shininess = 32.0f;

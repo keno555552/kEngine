@@ -5,7 +5,7 @@
 #include <vector>
 #include <memory>
 #include "Config.h"
-#include "PSOManager/PSOFactory.h"
+#include "PSOManager/PSOManager.h"
 #include "Resource/ResourceManager.h"
 #include "Data/Render/CPUData/VertexData.h"
 #include "Data/Render/GPUData/MaterialForGPU.h"
@@ -14,8 +14,6 @@
 #include "MathsIncluder.h"
 #include "TransformationMatrix.h"
 #include "StringManage/ConvertString.h"
-#include "Data/Render/Types/LightModelType.h"
-#include "Data/Render/Types/PSOType.h"
 #include "Data/Render/CPUData/MaterialConfig.h"
 #include "mesh/VertexIndex.h"
 #include "Camera/Camera.h"
@@ -77,10 +75,13 @@ public:
 
 private:
 
-	std::unique_ptr<PSOFactory> pso_ = std::make_unique<PSOFactory>();
+
+	std::unique_ptr<PSOManager> psoManager_{};
 	ResourceManager* resourceManager_{};			/*依存*/
 	DirectXCore* directXDriver_{};					/*依存*/
 	ID3D12GraphicsCommandList* commandList_{};		/*依存*/
+
+
 	SrvManager* srvManager_{};						/*依存*/
 	DrawDataCollector* drawDataCollector_{};		/*依存*/
 
@@ -96,11 +97,8 @@ private:
 	/// PSO関連
 
 	LightModelType defaultLightModel_ = LightModelType::Lambert;
-	PSOType currentPSO_ = PSOType::NONE;
 
 private:
-	std::vector <Microsoft::WRL::ComPtr<ID3D12PipelineState>> psoList_;
-	ID3D12RootSignature* rootSignature_ = nullptr; 			// Listからもセーブしたから解放しなくていい	
 	D3D12_VIEWPORT viewport{};
 	D3D12_RECT scissorRect{};
 
@@ -173,7 +171,7 @@ private:
 	void SetLightingGPU();
 
 
-	void PSODecision(int psoID);
+	void PSODecision(PSOKey& psoKey);
 	ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);
 	void MakeDepthStencilView();
 

@@ -7,7 +7,6 @@
 #include "Data/Render/CPUData/materialConfig.h"
 #include "Data/Render/CPUData/ObjectData.h"
 #include "Data/Render/CPUData/SpriteData.h"
-#include "Data/Render/Types/PSOType.h"
 #include "Camera/Camera.h"
 #include "Mesh/VertexResource.h"
 #include "Data/Render/Queue/RenderData.h"
@@ -62,7 +61,7 @@ public:
 
 	void Collect2D(SpriteData* sprite);
 
-	std::unordered_map <PSOType,
+	std::unordered_map <PSOKey,
 		std::unordered_map <MaterialID,
 		std::unordered_map <ModelID,
 		std::vector<RenderData>>>
@@ -74,11 +73,11 @@ public:
 
 	void Collect3D(ObjectData* object);
 
-	std::unordered_map <PSOType,
+	std::unordered_map <PSOKey,
 		std::unordered_map <MaterialID,
 		std::unordered_map <ModelID,
 		std::vector<RenderData>>>
-		>& GetOpaqueBuckets3D() { return opaqueBuckets3D_; }
+		>& GetOpaqueBuckets3D() { return opaqueBucket3D_; }
 
 	std::vector<RenderData>& GetTransparentObjectParts3D() { return transparentBucket3D_; }
 
@@ -86,13 +85,13 @@ public:
 	/// ========== パーティクル関連 ===========///
 
 	void CollectParticleC(ObjectData* object);
-	
+
 	std::vector<RenderData>& GetBucketsParticleC() { return bucketParticleC_; }
 
 	/// ================= skinning関連 ===================///
-	
+
 	/// NOTE: これも一時的な実装。まだUnloadがない
-	int SetSkinningData( WellForGPU* mappedPalette, int mappedNum, VertexInfluence* influenceSpan, int VertexNum);
+	int SetSkinningData(WellForGPU* mappedPalette, int mappedNum, VertexInfluence* influenceSpan, int VertexNum);
 	void ClearSkinningData(int index);
 
 	std::span<VertexInfluence> GetInfluenceSpan(int index) { return skinningDataList_[index].influenceSpan; }
@@ -133,7 +132,7 @@ private:
 
 	/// ==================== 2Dデータ ====================///
 	/// 不透明オブジェクトバケット
-	std::unordered_map <PSOType,
+	std::unordered_map <PSOKey,
 		std::unordered_map <MaterialID,
 		std::unordered_map <ModelID,
 		std::vector<RenderData>>>
@@ -149,11 +148,11 @@ private:
 
 	/// ==================== 3Dデータ ====================///
 	/// 不透明オブジェクトバケット
-	std::unordered_map <PSOType,
+	std::unordered_map <PSOKey,
 		std::unordered_map <MaterialID,
 		std::unordered_map <ModelID,
 		std::vector<RenderData>>>
-		> opaqueBuckets3D_;
+		> opaqueBucket3D_;
 
 	/// 透明オブジェクトバケット
 	std::vector<RenderData> transparentBucket3D_;
@@ -189,9 +188,9 @@ private:
 private:
 
 	/// =========== DebugLine 関連 ============///
-	
+
 	TransformationMatrix DLWVPAdjustment(DebugLine* debugLine);
-	
+
 	/// ============ スプライト関連 ==============///
 	/// ｚバッファ調整
 	float SpriteLayerManagement(float zBuffer);
@@ -227,7 +226,7 @@ private:
 
 	/// ============ マテリアル関連 ==============///
 
-	uint32_t PSODecision(MaterialConfig& material);
+	PSOKey PSODecision(MaterialConfig& material);
 
 
 };

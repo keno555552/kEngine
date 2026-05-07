@@ -252,6 +252,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="kEngine\Data\Render\Types\PSOType\DepthStencilType.cpp" />
+    <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\DepthStencilFactory.cpp" />
+    <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\BlendStateFactory.cpp" />
+    <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\InputLayoutFactory.cpp" />
     <ClCompile Include="kEngine\Renderer\Resource\InstanceBuffer.cpp" />
     <ClCompile Include="kEngine\Data\Geometry\ModelStructure\JointWeightData.cpp" />
     <ClCompile Include="kEngine\Tool\Importer\Reader\AssimpReader.cpp" />
@@ -314,7 +318,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\GameObject\CountdownTimer\CountdownTimer.cpp" />
     <ClCompile Include="kEngine\Renderer\Lighting\AeraLight.cpp" />
     <ClCompile Include="kEngine\Renderer\Lighting\DirectionalLight.cpp" />
-    <ClCompile Include="kEngine\Data\Render\Types\BlendModeType.cpp" />
+    <ClCompile Include="kEngine\Data\Render\Types\PSOType\BlendModeType.cpp" />
     <ClCompile Include="kEngine\Tool\DebugTool\DebugObject.cpp" />
     <ClCompile Include="kEngine\Renderer\CameraManager\CameraManager.cpp" />
     <ClCompile Include="kEngine\Collector\DrawData\DrawDataCollector.cpp" />
@@ -350,7 +354,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Math\PerlinNoise\PerlinNoise.cpp" />
     <ClCompile Include="kEngine\Utility\randomMaker.cpp" />
     <ClCompile Include="kEngine\Renderer\Mesh\Model.cpp" />
-    <ClCompile Include="kEngine\Data\Render\Types\LightModelType.cpp" />
+    <ClCompile Include="kEngine\Data\Render\Types\PSOType\LightModelType.cpp" />
     <ClCompile Include="kEngine\Data\Render\CPUData\MaterialConfig.cpp" />
     <ClCompile Include="kEngine\Renderer\Mesh\ModelGroup.cpp" />
     <ClCompile Include="kEngine\Math\MathsIncluder.cpp" />
@@ -379,7 +383,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Data\Render\GPUData\MaterialForGPU.cpp" />
     <ClCompile Include="kEngine\Math\LinearAlgebra\Matrix3x3.cpp" />
     <ClCompile Include="kEngine\Math\LinearAlgebra\Matrix4x4.cpp" />
-    <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory.cpp" />
+    <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\PSOFactory.cpp" />
     <ClCompile Include="kEngine\Renderer\Resource\ResourceManager.cpp" />
     <ClCompile Include="kEngine\Scenes\SceneManager.cpp" />
     <ClCompile Include="kEngine\Renderer\ShaderManager\shader_compile.cpp" />
@@ -397,7 +401,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Data\Game\MapChip\MapChipData.cpp" />
     <ClCompile Include="kEngine\GameObject\Particle\P_Ball\P_Ball.cpp" />
     <ClCompile Include="kEngine\Data\Render\Queue\RenderData.cpp" />
-    <ClCompile Include="kEngine\Data\Render\Types\PSOType.cpp" />
+    <ClCompile Include="kEngine\Data\Render\Types\PSOType\PSOType.cpp" />
     <ClCompile Include="kEngine\Renderer\Lighting\PointLight.cpp" />
     <ClCompile Include="kEngine\Math\LinearAlgebra\Matrix3x3Math.cpp" />
     <ClCompile Include="kEngine\Data\Geometry\Shape\Line\Ray.cpp" />
@@ -410,6 +414,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Data\Geometry\ModelStructure\NodeData.cpp" />
     <ClCompile Include="kEngine\Data\Render\CPUData\MeshData.cpp" />
     <ClCompile Include="kEngine\Tool\Importer\Reader\ObjReader.cpp" />
+    <ClCompile Include="kEngine\Renderer\PSOManager\PSOKeys.cpp" />
+    <ClCompile Include="kEngine\Renderer\PSOManager\PSOManager.cpp" />
+    <ClCompile Include="kEngine\Data\Render\Types\PSOType\RenderModelType.cpp" />
+    <ClCompile Include="kEngine\Data\Render\Types\PSOType\RasterizerMode.cpp" />
+    <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\RasterizerModeFactory.cpp" />
+    <ClCompile Include="kEngine\Data\Render\Types\PSOType\PrimitiveType.cpp" />
     <ClCompile Include="ResourceLoader.cpp" />
     <ClCompile Include="kEngine\Scenes\BaseSceneFactory.cpp" />
     <ClCompile Include="kEngine\GameObject\Object\Sprite.cpp" />
@@ -434,8 +444,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Data\Render\CPUData\VertexInfluence.cpp" />
     <ClCompile Include="kEngine\Data\Render\GPUData\WellForGPU.cpp" />
     <ClCompile Include="kEngine\Renderer\Mesh\SkyCube.cpp" />
+    <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\ShaderFactory.cpp" />
+    <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\RootSignatureFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="kEngine\Data\Render\Types\PSOType\DepthStencilType.h" />
+    <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\DepthStencilFactory.h" />
+    <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\BlendStateFactory.h" />
+    <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\InputLayoutFactory.h" />
     <ClInclude Include="kEngine\Renderer\Resource\InstanceBuffer.h" />
     <ClInclude Include="kEngine\Data\Geometry\ModelStructure\JointWeightData.h" />
     <ClInclude Include="kEngine\Tool\Importer\Reader\AssimpReader.h" />
@@ -571,7 +587,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\GameObject\CountdownTimer\CountdownTimer.h" />
     <ClInclude Include="kEngine\Renderer\Lighting\AeraLight.h" />
     <ClInclude Include="kEngine\Renderer\Lighting\DirectionalLight.h" />
-    <ClInclude Include="kEngine\Data\Render\Types\BlendModeType.h" />
+    <ClInclude Include="kEngine\Data\Render\Types\PSOType\BlendModeType.h" />
     <ClInclude Include="kEngine\Tool\DebugTool\DebugObject.h" />
     <ClInclude Include="kEngine\Renderer\CameraManager\CameraManager.h" />
     <ClInclude Include="kEngine\Collector\DrawData\DrawDataCollector.h" />
@@ -606,7 +622,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Renderer\Mesh\VertexIndex.h" />
     <ClInclude Include="kEngine\Utility\randomMaker.h" />
     <ClInclude Include="kEngine\Renderer\Mesh\Model.h" />
-    <ClInclude Include="kEngine\Data\Render\Types\LightModelType.h" />
+    <ClInclude Include="kEngine\Data\Render\Types\PSOType\LightModelType.h" />
     <ClInclude Include="kEngine\Data\Render\CPUData\MaterialConfig.h" />
     <ClInclude Include="kEngine\Renderer\Mesh\ModelGroup.h" />
     <ClInclude Include="kEngine\Math\MathsIncluder.h" />
@@ -627,7 +643,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Math\LinearAlgebra\Vector2.h" />
     <ClInclude Include="kEngine\Math\LinearAlgebra\Vector3.h" />
     <ClInclude Include="kEngine\core\kEngine.h" />
-    <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory.h" />
+    <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\PSOFactory.h" />
     <ClInclude Include="kEngine\Renderer\ShaderManager\shader_compile.h" />
     <ClInclude Include="kEngine\core\DirectXCore.h" />
     <ClInclude Include="kEngine\Math\LinearAlgebra\TransformationMatrix.h" />
@@ -642,7 +658,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Data\Game\MapChip\MapChipData.h" />
     <ClInclude Include="kEngine\GameObject\Particle\P_Ball\P_Ball.h" />
     <ClInclude Include="kEngine\Data\Render\Queue\RenderData.h" />
-    <ClInclude Include="kEngine\Data\Render\Types\PSOType.h" />
+    <ClInclude Include="kEngine\Data\Render\Types\PSOType\PSOType.h" />
     <ClInclude Include="kEngine\Renderer\LightManager\LightManager.h" />
     <ClInclude Include="kEngine\Renderer\Lighting\Light.h" />
     <ClInclude Include="kEngine\Data\Render\GPUData\LightGPU.h" />
@@ -662,6 +678,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Data\Render\CPUData\MeshData.h" />
     <ClInclude Include="kEngine\Tool\Importer\Loader\LoadModel.h" />
     <ClInclude Include="kEngine\Tool\Importer\Reader\ObjReader.h" />
+    <ClInclude Include="kEngine\Renderer\PSOManager\PSOKeys.h" />
+    <ClInclude Include="kEngine\Renderer\PSOManager\PSOManager.h" />
+    <ClInclude Include="kEngine\Data\Render\Types\PSOType\RenderModelType.h" />
+    <ClInclude Include="kEngine\Data\Render\Types\PSOType\RasterizerMode.h" />
+    <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\RasterizerModeFactory.h" />
+    <ClInclude Include="kEngine\Data\Render\Types\PSOType\PrimitiveType.h" />
     <ClInclude Include="ResourceLoader.h" />
     <ClInclude Include="kEngine\Scenes\BaseSceneFactory.h" />
     <ClInclude Include="kEngine\GameObject\Object\Sprite.h" />
@@ -686,6 +708,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Data\Render\CPUData\VertexInfluence.h" />
     <ClInclude Include="kEngine\Data\Render\GPUData\WellForGPU.h" />
     <ClInclude Include="kEngine\Renderer\Mesh\SkyCube.h" />
+    <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\ShaderFactory.h" />
+    <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\RootSignatureFactory.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl">

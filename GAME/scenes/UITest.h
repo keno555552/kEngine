@@ -38,6 +38,8 @@ private:
 	/// =========== リソースハンドル ============///
 	/// モデルハンドル
 	int skydomeModelHandle_ = 0;
+	int smallStageHandel_ = 0;
+	int objectHandle_ = 0;
 
 	/// テキスチャーハンドル
 	int whiteTextureHandle_ = 0;

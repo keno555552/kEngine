@@ -126,7 +126,8 @@ public:
 		std::weak_ptr<MaterialConfig> config{}; 
 		std::unique_ptr<MaterialForGPU> cpuMaterial;  
 		BasicResource* gpuMaterial{};
-		int textureHandle{};                    
+		int textureHandle{};
+		int isUsed{}; // 0:未使用 1:使用中 2:解放予定
 	};
 
 	std::vector<MaterialEntry> materialList_;

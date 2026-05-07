@@ -61,8 +61,13 @@ UITest::UITest(kEngine* system) {
 
 	/// =========== リソースロード ============///
 	skydomeModelHandle_ = system_->SetModelObj("./kEngine/EngineAssets/TemplateResource/object/skydome/skydome.obj");
+	smallStageHandel_ = system_->SetModelObj("./GAME/Object/smallStage/smallStage.obj");
 
 	whiteTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/white5x5.png");
+
+	//BGObject.obj
+	objectHandle_ = system_->SetModelObj("./GAME/Object/Goal/Goal.obj");
+	//objectHandle_ = system_->SetModelObj("./kEngine/EngineAssets/Object/charater/charater.obj");
 
 	//ddsTest = system_->LoadTexture("./GAME/resources/texture/skyCube/rostock_laage_airport_4k.dds");
 	ddsTest = system_->LoadTexture("./GAME/resources/texture/skyCube/output_skybox.dds");
@@ -73,14 +78,17 @@ UITest::UITest(kEngine* system) {
 
 	ground_ = std::make_unique<Object>();
 	ground_->IntObject(system_);
-	ground_->CreateDefaultData();
-	ground_->modelHandle_ = config::default_Cube_MeshBufferHandle_;
-	ground_->objectParts_[0].materialConfig->textureHandle = whiteTextureHandle_;
-	ground_->mainPosition.transform.scale = Vector3(50.0f, 0.1f, 50.0f);
-	ground_->mainPosition.transform.translate = Vector3(0.0f, -1.0f, 0.0f);
+	ground_->CreateModelData(objectHandle_);
+	//ground_->mainPosition.transform.translate = Vector3(1.0f., 1.0f, 1.0f);
+	//ground_->CreateDefaultData();
+	//ground_->modelHandle_ = config::default_Cube_MeshBufferHandle_;
+	//ground_->objectParts_[0].materialConfig->textureHandle = whiteTextureHandle_;
+	//ground_->mainPosition.transform.scale = Vector3(50.0f, 0.1f, 50.0f);
+	//ground_->mainPosition.transform.translate = Vector3(0.0f, -1.0f, 0.0f);
 
 	box_ = std::make_unique<Object>();
 	box_->IntObject(system_);
+	//box_->CreateModelData(objectHandle_);
 	box_->CreateDefaultData();
 	box_->modelHandle_ = config::default_Sphere_MeshBufferHandle_;
 	box_->objectParts_[0].materialConfig->textureHandle = whiteTextureHandle_;
