@@ -1,0 +1,13 @@
+{
+    "pso_keys": [
+        "OrderBy:",
+        "LightModel,RenderModel,BlendMode,RasterizerMode,DepthStencil,PrimitiveType",
+        0,
+        [4,0,0,0,0,3],
+        [2,0,0,0,0,3],
+        [7,4,0,0,1,3],
+        [0,0,0,0,0,3],
+        [6,2,0,3,2,2],
+        [2,3,0,0,0,3]
+    ]
+}

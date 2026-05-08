@@ -44,7 +44,7 @@ private:
 
 	ShaderPair CompileShader(const std::string& shaderName);
 	ShaderPair Compile2DShader();
-	ShaderPair Compile3DShader(PSOKey& psoKeys);
+	ShaderPair Compile3DShader(PSOKey& psoKeys,bool isEnvironmentReflection = false);
 	ShaderPair CompileDebugLineShader();
 	ShaderPair CompileSkyCubeShader();
 	ShaderPair CompileFlameNeonGlowShader();

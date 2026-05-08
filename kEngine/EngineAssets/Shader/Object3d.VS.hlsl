@@ -28,9 +28,9 @@ struct VertexShaderInput
 VertexShaderOutput main(VertexShaderInput input)
 {
     VertexShaderOutput output;
-    output.position = mul(input.position, gTransformationMatrices.WVP);
+    //output.position = mul(input.position, gTransformationMatrices.WVP);
     output.texcoord = input.texcoord;
-    output.normal = normalize(mul(input.normal, (float3x3) gTransformationMatrices.world));
+    //output.normal = normalize(mul(input.normal, (float3x3) gTransformationMatrices.world));
     return output;
 }
 

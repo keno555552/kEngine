@@ -5,7 +5,6 @@ enum class RasterizerMode{
     CullFront,              // フロントカリングモデル
     CullNone,               // ダブルサイドモデル / パーティクル
     Wireframe,              // デバッグ
-    SkyCube,                // スカイキューブ専用
     //Shadow,               // シャドウマップ専用
     NumRasterizerModes
 };

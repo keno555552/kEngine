@@ -15,6 +15,8 @@
 #include "./LightingLambert/BlinnPhongReflection.hlsl"
 #endif
 
+
+
 struct Material
 {
     float4 color;
@@ -64,6 +66,9 @@ cbuffer LightCountCB : register(b2)
 // Resources
 Texture2D<float4> gTexture : register(t0);
 StructuredBuffer<LightGPU> gLights : register(t1);
+
+// 環形マップ
+TextureCube<float4> gEnvironmentTexture : register(t2);
 
 // Resources
 SamplerState gSampler : register(s0);
@@ -188,6 +193,19 @@ PixelShaderOutput main(VertexShaderOutput input)
         
         float3 finalColor = gMaterial.color.rgb * textureColor.rgb * lightFactor;
        
+        
+#if defined(USE_ENVIRONMENT_REFLECTION)
+        float3 cameraToPosition = normalize(input.worldPosition - gCamera.position);
+        float3 reflectedVector = normalize(reflect(cameraToPosition, normalize(input.normal)));
+        float3 environmentColor = gEnvironmentTexture.Sample(gSampler, reflectedVector).rgb;
+
+        // 反射強度（你可以調整）
+        float envStrength = 0.3;
+ 
+        // 混合
+        finalColor += environmentColor * envStrength;
+#endif
+        
         output.color.rgb = finalColor;
         output.color.a = gMaterial.color.a * textureColor.a;
     }

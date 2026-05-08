@@ -31,12 +31,13 @@ Microsoft::WRL::ComPtr <IDxcBlob> Shader_compile::CompileShader(// Compilerす�
 	const std::wstring& filePath,
 	// Compilerに使用するProfile
 	const wchar_t* profile,
-	LightModelType modelType
+	LightModelType modelType,
+	bool isEnvironmentReflection
 ) {
 	/// ここの中身をこの後書いていく
 	/// 1.hlslファイルを読む
 	// これからシェーダーをコンパイルする旨をログに出す
-	Logger::Log(ConvertString::SwitchStdStringWstring(std::format(L"Begin CompileShader, path:{}, profile:{}\n", filePath, profile)));
+	//Logger::Log(ConvertString::SwitchStdStringWstring(std::format(L"Begin CompileShader, path:{}, profile:{}\n", filePath, profile)));
 	// hlslファイルを読む
 	Microsoft::WRL::ComPtr <IDxcBlobEncoding> shaderSource{};
 	HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, shaderSource.GetAddressOf());
@@ -50,7 +51,14 @@ Microsoft::WRL::ComPtr <IDxcBlob> Shader_compile::CompileShader(// Compilerす�
 
 	/// 2.Compileする
 	// 実際にShaderをコンパイルする
-	Microsoft::WRL::ComPtr <IDxcResult> shaderResult = BuildAndCompileShader(filePath, profile, modelType, hr, shaderSourceBuffer);
+	Microsoft::WRL::ComPtr <IDxcResult> shaderResult = BuildAndCompileShader(
+		filePath,
+		profile,
+		modelType,
+		hr,
+		shaderSourceBuffer,
+		isEnvironmentReflection
+	);
 
 	/// 3.警告・エラーがでていないか確認する
 	// 警告・エラーが出てたらログに出して止める
@@ -75,7 +83,14 @@ Microsoft::WRL::ComPtr <IDxcBlob> Shader_compile::CompileShader(// Compilerす�
 }
 
 
-Microsoft::WRL::ComPtr<IDxcResult> Shader_compile::BuildAndCompileShader(const std::wstring& filePath, const wchar_t* profile, LightModelType modelType, HRESULT& hr, DxcBuffer& shaderSourceBuffer) {
+Microsoft::WRL::ComPtr<IDxcResult> Shader_compile::BuildAndCompileShader(
+	const std::wstring& filePath,
+	const wchar_t* profile,
+	LightModelType modelType,
+	HRESULT& hr,
+	DxcBuffer& shaderSourceBuffer,
+	bool isEnvironmentReflection
+) {
 
 	Microsoft::WRL::ComPtr<IDxcResult> shaderResult{};
 
@@ -101,6 +116,11 @@ Microsoft::WRL::ComPtr<IDxcResult> Shader_compile::BuildAndCompileShader(const s
 	} else if (modelType == LightModelType::BlinnPhongReflection) {
 		arguments.push_back(L"-D");
 		arguments.push_back(L"LIGHT_MODEL_BLINN_PHONG=1");
+	}
+
+	if (isEnvironmentReflection) {
+		arguments.push_back(L"-D");
+		arguments.push_back(L"USE_ENVIRONMENT_REFLECTION=1");
 	}
 
 	hr = dxcCompiler->Compile(

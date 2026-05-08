@@ -56,6 +56,7 @@ private:
 	void LasyCreatePSO();
 	void CreateDefaultPSOcacheJson(std::string fullPath);
 	void AppendPSOKeyRecord(const PSOKey& key);
+	std::string FormatPSOJson(const nlohmann::json& file);
 	
 
 	/// 全部のPSOを作成する。もはやバガのやり方(現時点でもう20000くらいのPSOがある

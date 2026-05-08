@@ -23,8 +23,8 @@ public:
 	/// PSO関連
     LightModelType lightModelType =       (LightModelType)    config::default_LightModel_;
     RenderModelType renderModelType =     (RenderModelType)   config::default_RenderModelTypes_;
-    RasterizerMode rasterizerMode =       (RasterizerMode)    config::default_RasterizerMode_;
     BlendModeType blendModeType =         (BlendModeType)     config::default_BlendMode_;
+    RasterizerMode rasterizerMode =       (RasterizerMode)    config::default_RasterizerMode_;
     DepthStencilType depthStencilType =   (DepthStencilType)  config::default_DepthStenctilState_;
 	//PrimitiveTypeは他のPSOデータにより決定されるため、MaterialConfigには含めない
 
@@ -45,6 +45,11 @@ public:
 	bool operator!=(const MaterialConfig& target)const;
 
 	void MakeUVMatrix();
+
+	/// =================== 便利PSO関連生成関数 =================== ///
+
+	void MakePSOSkyCube();
+	void MakePSODebugLine();
 };
 
 //struct MaterialConfigHash {

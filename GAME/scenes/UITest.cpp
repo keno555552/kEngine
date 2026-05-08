@@ -72,19 +72,21 @@ UITest::UITest(kEngine* system) {
 	//ddsTest = system_->LoadTexture("./GAME/resources/texture/skyCube/rostock_laage_airport_4k.dds");
 	ddsTest = system_->LoadTexture("./GAME/resources/texture/skyCube/output_skybox.dds");
 
+	system_->GetDrawEngine()->SetEnviromentReflectionTexture(ddsTest);
+
 	skydome_ = std::make_unique<Object>();
 	skydome_->IntObject(system_);
 	skydome_->CreateModelData(skydomeModelHandle_);
 
 	ground_ = std::make_unique<Object>();
 	ground_->IntObject(system_);
-	ground_->CreateModelData(objectHandle_);
-	//ground_->mainPosition.transform.translate = Vector3(1.0f., 1.0f, 1.0f);
-	//ground_->CreateDefaultData();
-	//ground_->modelHandle_ = config::default_Cube_MeshBufferHandle_;
-	//ground_->objectParts_[0].materialConfig->textureHandle = whiteTextureHandle_;
-	//ground_->mainPosition.transform.scale = Vector3(50.0f, 0.1f, 50.0f);
-	//ground_->mainPosition.transform.translate = Vector3(0.0f, -1.0f, 0.0f);
+	//ground_->CreateModelData(objectHandle_);
+	ground_->mainPosition.transform.translate = Vector3(1.0f, 1.0f, 1.0f);
+	ground_->CreateDefaultData();
+	ground_->modelHandle_ = config::default_Cube_MeshBufferHandle_;
+	ground_->objectParts_[0].materialConfig->textureHandle = whiteTextureHandle_;
+	ground_->mainPosition.transform.scale = Vector3(50.0f, 0.1f, 50.0f);
+	ground_->mainPosition.transform.translate = Vector3(0.0f, -1.0f, 0.0f);
 
 	box_ = std::make_unique<Object>();
 	box_->IntObject(system_);
@@ -92,6 +94,7 @@ UITest::UITest(kEngine* system) {
 	box_->CreateDefaultData();
 	box_->modelHandle_ = config::default_Sphere_MeshBufferHandle_;
 	box_->objectParts_[0].materialConfig->textureHandle = whiteTextureHandle_;
+	box_->objectParts_[0].materialConfig->renderModelType = RenderModelType::PARTICLEENVREFLECTION;
 	box_->mainPosition.transform.scale = Vector3(0.5f, 0.5f, 0.5f);
 	box_->mainPosition.transform.translate = Vector3(0.0f, 0.0f, 0.0f);
 
@@ -100,7 +103,7 @@ UITest::UITest(kEngine* system) {
 	skybox_->CreateDefaultData();
 	skybox_->modelHandle_ = config::default_SkyCube_MeshBufferHandle_;
 	skybox_->objectParts_[0].materialConfig->textureHandle = ddsTest;
-	skybox_->objectParts_[0].materialConfig->lightModelType = LightModelType::SkyCube;
+	skybox_->objectParts_[0].materialConfig->MakePSOSkyCube();
 	skybox_->mainPosition.transform.scale = Vector3(200.0f, 200.0f, 200.0f);
 
 	detailButton_ = std::make_unique<DetailButton>(system_);

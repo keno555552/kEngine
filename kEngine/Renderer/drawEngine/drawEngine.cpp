@@ -26,7 +26,6 @@ void DrawEngine::Initialize(
 	psoManager_ = std::make_unique<PSOManager>();
 	psoManager_->Initialize(directXDriver_);
 
-
 	depthStencilResource = CreateDepthStencilTextureResource(directXDriver_->GetDevice(), kClientWidth_, kClientHeight_);
 	MakeDepthStencilView();
 
@@ -153,6 +152,13 @@ void DrawEngine::StartFrame() {
 
 void DrawEngine::PreDraw() {
 
+	/// PSOReset
+	// デフォルトのPSOをセット
+	PSOKey defaultPSOKey = CreateDefaultPSOKey();
+	psoManager_->SetPso(defaultPSOKey);
+
+
+
 	/// Lighting
 	drawDataCollector_->UpdateLightData();
 	UpdateLighting();
@@ -183,6 +189,17 @@ void DrawEngine::EndDraw() {
 
 void DrawEngine::PSODecision(PSOKey& psoKey) {
 	psoManager_->SetPso(psoKey);
+
+	/// Topology設定
+	switch (psoKey.primitiveType) {
+	case PrimitiveType::LINE:
+		commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+		break;
+
+	case PrimitiveType::TRIANGLE:
+		commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		break;
+	}
 }
 
 void DrawEngine::DrawDebugLine() {
@@ -202,9 +219,6 @@ void DrawEngine::DrawDebugLine() {
 
 	/// ========== Camera CBV (b1) ==========
 	SetCameraForGPU();
-
-	/// ========== Topology ==========
-	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 
 	/// ========== VertexBuffer ==========
 	UpdateDebugLineVertexBuffer(vertices);
@@ -245,6 +259,7 @@ void DrawEngine::Draw2DTransparent() {
 
 		/// MeshIndex 數量
 		int meshIndexCount = object.mesh->GetIndexNum();
+
 
 		/// VBV/IBV 設定 
 		D3D12_VERTEX_BUFFER_VIEW vbv = object.mesh->GetVertexBufferView();
@@ -370,6 +385,10 @@ void DrawEngine::Draw3DTransparent() {
 		PSOKey psoKeyInt = object.psoKey;
 		PSODecision(psoKeyInt);
 
+		if (psoKeyInt.renderModelType == RenderModelType::PARTICLEENVREFLECTION) {
+			SetEnviromentReflectionGPU();
+		}
+
 		SetLightingGPU();
 
 		SetMaterial(object.materialID);
@@ -419,6 +438,9 @@ void DrawEngine::Draw3DOpaque() {
 		PSOKey psoKeyInt = psoKey;
 		PSODecision(psoKeyInt);
 
+		if(psoKey.renderModelType == RenderModelType::PARTICLEENVREFLECTION) {
+			SetEnviromentReflectionGPU();
+		}
 
 		for (auto& [materialID, RenderDataGroup] : materialBuckets) {
 
@@ -481,6 +503,10 @@ void DrawEngine::DrawCall() {
 	Draw3D();
 	Draw2D();
 	DrawDebugLine();
+}
+
+void DrawEngine::SetEnviromentReflectionTexture(int textureHandle) {
+	enviromentReflectionTextureHandle_ = textureHandle;
 }
 
 void DrawEngine::CreateSkinningBuffer(ObjectData* objectData) {
@@ -655,6 +681,15 @@ void DrawEngine::SetLightingGPU() {
 	commandList_->SetGraphicsRoot32BitConstants(3, 1, &lightCount_, 0);
 }
 
+void DrawEngine::SetEnviromentReflectionGPU() {
+	
+	auto it = resourceManager_->GetTextureGPUDescriptorHandle(enviromentReflectionTextureHandle_);
+
+	// 綁定到 RootSignature 的 slot 7 (t2)
+	commandList_->SetGraphicsRootDescriptorTable(7, it);
+
+}
+
 
 ID3D12Resource* DrawEngine::CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height) {
 
@@ -724,7 +759,7 @@ void DrawEngine::UpdateDebugLineVertexBuffer(const std::vector<DebugLineVertexGP
 
 		TransformationMatrix* instanceListPtrDL = debugLineResource_->CreateInstanceBuffer((int)bufferSize);
 		drawDataCollector_->SetInstanceListDL(instanceListPtrDL);
-
+		
 		IntializeInstanceTMBuffer(instanceListPtrDL, (size_t)bufferSize);
 
 		debugLineVB_ = CreateResource(directXDriver_->GetDevice(), (size_t)bufferSize);

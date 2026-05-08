@@ -60,6 +60,9 @@ public:
 
 	void DrawCall();
 
+	/// EnviromentReflection関連関数
+	void SetEnviromentReflectionTexture(int textureHandle);
+
 	/// Skinning関連関数
 	void CreateSkinningBuffer(ObjectData* objectData);
 	void ClearSkinningBuffer(ObjectData* objectData);
@@ -138,6 +141,10 @@ private:
 	int instance2DCounter_ = 0;
 	int instance3DCounter_ = 0;
 
+	/// EnviromentReflection関連
+	std::unique_ptr <BasicResource> enviromentReflectionTexture_;
+	int enviromentReflectionTextureHandle_ = 0;
+
 	/// Skinning関連
 	std::vector<std::unique_ptr<InstanceBuffer<WellForGPU>>> skinningWFGResourceList_;
 	// DDCにのSkinningDataのハンドルと、実際のWellForGPUのマップ
@@ -169,7 +176,7 @@ private:
 	void SetCameraForGPU();
 	void UpdateLighting();
 	void SetLightingGPU();
-
+	void SetEnviromentReflectionGPU();
 
 	void PSODecision(PSOKey& psoKey);
 	ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);

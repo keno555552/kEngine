@@ -129,6 +129,7 @@ private:
 	/// ================ デバッグドロー関連 =================///
 
 	std::vector<DebugLineVertexGPU> debugLinesVertexBucket_;
+	int maxDebugLineInstance = config::GetDebugLineNumInstance();
 
 	/// ==================== 2Dデータ ====================///
 	/// 不透明オブジェクトバケット

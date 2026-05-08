@@ -35,6 +35,8 @@ void DrawDataCollector::PreCollect() {
 	transparentBucket2D_.clear();
 	opaqueBucket3D_.clear();
 	transparentBucket3D_.clear();
+
+	memset(instancingListDL_, 0, sizeof(TransformationMatrix) * maxDebugLineInstance);
 	debugLinesVertexBucket_.clear();
 
 	/// レイヤードスプライト用リストクリア
@@ -703,8 +705,8 @@ PSOKey DrawDataCollector::PSODecision(MaterialConfig& material) {
 	key = {
 		.lightModelType = material.lightModelType,
 		.renderModelType = material.renderModelType,
-		.rasterizerMode = material.rasterizerMode,
 		.blendModeType = material.blendModeType,
+		.rasterizerMode = material.rasterizerMode,
 		.depthStencilType = material.depthStencilType,
 	};
 

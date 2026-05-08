@@ -39,18 +39,34 @@ void PSOManager::SetPso(PSOKey keys) {
 
 	/// PSOKeyからハンドルを探す
 	int newPSOHandle = GetPSOHandle(keys);
+
+	/// PSOがない場合PSO生成する
 	if (newPSOHandle == -1) {
-		Logger::Log("[kEngine]PSOManager::SetPso() PSOKey not found");
-		assert(false);
+		Logger::Log("[kEngine]PSOManager::SetPso() pso not found, create Pso");
+
+		// factoryで新しいPSO生成
+		auto pso = psoFactory_.createPSO(keys);
+
+		// PSOKeyとハンドルのマップに追加
+		int handle = (int)psoMap_.size();
+		psoMap_[handle] = pso;
+		psoKeyToHandleMap_[keys] = handle;
+
+		// 記録
+		AppendPSOKeyRecord(keys);
+
+		// PSO更新
+		newPSOHandle = handle;
 	}
 
+	/// ある場合、今使ってるPSOと比較。違う場合更新する
 	if (currentPSOHandle_ != newPSOHandle) {
 
-		/// PSOをセット
+		// PSOをセット
 		commandList_->SetPipelineState(psoMap_[newPSOHandle].Get());
 		currentPSOHandle_ = newPSOHandle;
 
-		/// RootSignatureをセット
+		// RootSignatureをセット
 		rootSignature_ = psoFactory_.getRootSignatureFactory()->Make(keys, directXDriver_).Get();
 		commandList_->SetGraphicsRootSignature(rootSignature_);
 	}
@@ -63,8 +79,8 @@ void PSOManager::LasyCreatePSO() {
 	/// ===================== ファイルがなければ作って、終わり ===================== ///
 	std::ifstream input(fullPath);
 	if (!input.is_open()) {
-		
-		std::cout << "[kEngine] PSOManager: Cache file not found, creating a new one: "
+
+		std::cout << "[kEngine] PSOManager:LasyCreatePSO() Cache file not found, creating a new one: "
 			<< fullPath << std::endl;
 
 		CreateDefaultPSOcacheJson(fullPath);
@@ -74,7 +90,15 @@ void PSOManager::LasyCreatePSO() {
 
 	/// ============== あれば読み込み、前に使ったPSOKeyをもとにPSOを作る ============== ///
 	nlohmann::json file;
-	input >> file;
+	try {
+		input >> file;   // ← JSON 壞掉時會 throw，所以要放在 try 裡
+	} catch (...) {
+		std::cout << "[kEngine] PSOManager:LasyCreatePSO() Cache corrupted, recreating.\n";
+
+		// 壞掉就重建
+		CreateDefaultPSOcacheJson(fullPath);
+		return;
+	}
 
 	auto& arr = file["pso_keys"];
 
@@ -111,12 +135,12 @@ void PSOManager::LasyCreatePSO() {
 		key.rasterizerMode = (RasterizerMode)record[3].get<int>();
 		key.depthStencilType = (DepthStencilType)record[4].get<int>();
 		key.primitiveType = (PrimitiveType)record[5].get<int>();
-		
+
 		// PSOを作る
 		auto pso = psoFactory_.createPSO(key);
 
 		// PSOKeyとハンドルのマップに追加
-		int handle = psoMap_.size();
+		int handle = (int)psoMap_.size();
 		psoMap_[handle] = pso;
 		psoKeyToHandleMap_[key] = handle;
 	}
@@ -190,12 +214,12 @@ void PSOManager::AppendPSOKeyRecord(const PSOKey& key) {
 		(int)key.blendModeType,
 		(int)key.rasterizerMode,
 		(int)key.depthStencilType,
-		(int)key.primitiveType 
-	});
+		(int)key.primitiveType
+		});
 
 	/// ファイルに保存
 	std::ofstream output(fullPath);
-	output << file.dump(4);
+	output << FormatPSOJson(file);
 }
 
 void PSOManager::CreateAllPSO() {
@@ -238,10 +262,91 @@ int PSOManager::GetPSOHandle(PSOKey keys) {
 	auto it = psoKeyToHandleMap_.find(keys);
 	if (it != psoKeyToHandleMap_.end()) {
 		return it->second;
-	} else {
-		Logger::Log("[kEngine]PSOManager::GetPSOHandle() PSOKey not found");
-		assert(false);
 	}
 	return -1;
 
 }
+
+std::string PSOManager::FormatPSOJson(const nlohmann::json& file) {
+
+	std::string s = file.dump(4);
+
+	std::string out;
+	out.reserve(s.size());
+
+	bool afterZero = false;
+	bool inPSOArray = false;
+	int bracketDepth = 0;
+
+	for (size_t i = 0; i < s.size(); ++i) {
+		char c = s[i];
+
+		// ============================
+		// 0 之前不壓縮
+		// ============================
+		if (!afterZero) {
+			out += c;
+
+			if (c == '0') {
+				bool isZero = true;
+				if (i > 0 && std::isdigit(s[i - 1])) isZero = false;
+				if (i + 1 < s.size() && std::isdigit(s[i + 1])) isZero = false;
+				if (isZero) afterZero = true;
+			}
+			continue;
+		}
+
+		// ============================
+		// 0 之後開始壓縮 PSOKey
+		// ============================
+
+		if (c == '[') {
+			bracketDepth++;
+			if (bracketDepth == 1) {
+				inPSOArray = true;
+				out += '[';
+				continue;
+			}
+		}
+
+		if (c == ']') {
+			bracketDepth--;
+			if (bracketDepth == 0 && inPSOArray) {
+				inPSOArray = false;
+				out += ']';
+
+				// 吃掉 dump(4) 的換行
+				if (i + 1 < s.size() && s[i + 1] == '\n') {
+					i++;
+				}
+
+				// 吃掉 dump(4) 的逗號
+				if (i + 1 < s.size() && s[i + 1] == ',') {
+					out += ',';
+					i++;
+				}
+
+				// 吃掉 dump(4) 逗號後的換行
+				if (i + 1 < s.size() && s[i + 1] == '\n') {
+					i++;
+				}
+
+				// 最終換行（只加一次）
+				out += "\n";
+				continue;
+			}
+		}
+
+		if (inPSOArray) {
+			if (c != '\n' && c != ' ' && c != '\t') {
+				out += c;
+			}
+			continue;
+		}
+
+		out += c;
+	}
+
+	return out;
+}
+

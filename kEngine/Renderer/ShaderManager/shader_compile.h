@@ -23,7 +23,9 @@ public:
 					  const std::wstring& filePath,
 					  // Compilerに使用するProfile
 					  const wchar_t* profile,
-					  LightModelType modelType = LightModelType::NONE);
+					  LightModelType modelType = LightModelType::NONE,
+					  bool isEnvironmentReflection = false
+	);
 
 private:
 	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
@@ -31,5 +33,12 @@ private:
 	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler = nullptr;
 private:
 	/// シェーダーをビルドしてコンパイルする
-	Microsoft::WRL::ComPtr<IDxcResult> BuildAndCompileShader(const std::wstring& filePath, const wchar_t* profile, LightModelType modelType, HRESULT& hr, DxcBuffer& shaderSourceBuffer);
+	Microsoft::WRL::ComPtr<IDxcResult> BuildAndCompileShader(
+						const std::wstring& filePath, 
+						const wchar_t* profile,
+						LightModelType modelType,
+						HRESULT& hr,
+						DxcBuffer& shaderSourceBuffer,
+						bool isEnvironmentReflection
+	);
 };

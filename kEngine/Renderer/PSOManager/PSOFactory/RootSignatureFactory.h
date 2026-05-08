@@ -35,6 +35,7 @@ private:
 	std::unordered_map<RenderModelType, Microsoft::WRL::ComPtr <ID3D12RootSignature>> rootSignatureMap_;
 
 	Microsoft::WRL::ComPtr <ID3D12RootSignature> MakeStatic(DirectXCore* directXDriver_);
+	Microsoft::WRL::ComPtr <ID3D12RootSignature> MakeStaticREFLECTION(DirectXCore* directXDriver_);
 
 	Microsoft::WRL::ComPtr <ID3D12RootSignature> MakeStaticSkinning(DirectXCore* directXDriver_);
 

@@ -10,6 +10,7 @@ ShaderFactory::ShaderFactory() {
 	shaderRegistry_[RenderModelType::Sprite2D] = [this](PSOKey& key) { return Compile2DShader(); };
 	shaderRegistry_[RenderModelType::Static] = [this](PSOKey& key) { return Compile3DShader(key); };
 	shaderRegistry_[RenderModelType::Skinned] = [this](PSOKey& key) { return Compile3DShader(key); };
+	shaderRegistry_[RenderModelType::PARTICLEENVREFLECTION] = [this](PSOKey& key) { return Compile3DShader(key,true); };
 	shaderRegistry_[RenderModelType::DebugLine] = [this](PSOKey& key) { return CompileDebugLineShader(); };
 	shaderRegistry_[RenderModelType::SkyCube] = [this](PSOKey& key) { return CompileSkyCubeShader(); };
 	shaderRegistry_[RenderModelType::FlameNeonGlow] = [this](PSOKey& key) { return CompileFlameNeonGlowShader(); };
@@ -45,7 +46,7 @@ ShaderPair ShaderFactory::Compile2DShader() {
 	return CompileShader("Tile2D");
 }
 
-ShaderPair ShaderFactory::Compile3DShader(PSOKey& psoKeys) {
+ShaderPair ShaderFactory::Compile3DShader(PSOKey& psoKeys,bool isEnvironmentReflection) {
 	ShaderPair shaderPair;
 
 	/// 3DモデルにskinningがあるかどうかでShaderを分ける
@@ -55,7 +56,7 @@ ShaderPair ShaderFactory::Compile3DShader(PSOKey& psoKeys) {
 		shaderPair.vs = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + "Particle.VS.hlsl"), L"vs_6_0");
 	}
 
-	shaderPair.ps = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + "Particle.PS.hlsl"), L"ps_6_0", psoKeys.lightModelType);
+	shaderPair.ps = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + "Particle.PS.hlsl"), L"ps_6_0", psoKeys.lightModelType, isEnvironmentReflection);
 
 	checkCompileResult(shaderPair);
 	return shaderPair;

@@ -4,12 +4,20 @@
 bool MaterialConfig::operator==(const MaterialConfig& target)const {
 	if (useModelTexture != target.useModelTexture)return false;
 	if (textureHandle != target.textureHandle)return false;
+
 	if (uvTranslate != target.uvTranslate)return false;
 	if (uvScale != target.uvScale)return false;
 	if (uvRotate != target.uvRotate)return false;
 	if (textureColor != target.textureColor)return false;
+
 	if (lightModelType != target.lightModelType)return false;
+	if (renderModelType != target.renderModelType)return false;
+	if (blendModeType != target.blendModeType)return false;
+	if (rasterizerMode != target.rasterizerMode)return false;
+	if (depthStencilType != target.depthStencilType)return false;
+
 	if (enableLighting != target.enableLighting)return false;
+
 	if (textureColor2 != target.textureColor2)return false;
 	if (textureColor3 != target.textureColor3)return false;
 	if (shininess != target.shininess)return false;
@@ -38,8 +46,8 @@ void InitMaterialConfig(MaterialConfig* materialConfig) {
 
 	LightModelType lightModelType = (LightModelType)config::default_LightModel_;
 	RenderModelType renderModelType = (RenderModelType)config::default_RenderModelTypes_;
-	RasterizerMode rasterizerMode = (RasterizerMode)config::default_RasterizerMode_;
 	BlendModeType blendModeType = (BlendModeType)config::default_BlendMode_;
+	RasterizerMode rasterizerMode = (RasterizerMode)config::default_RasterizerMode_;
 	DepthStencilType depthStencilType = (DepthStencilType)config::default_DepthStenctilState_;
 
 	materialConfig->enableLighting = true;
@@ -58,4 +66,27 @@ MaterialConfig InitMaterialConfig() {
 	MaterialConfig newMaterialConfig;
 	InitMaterialConfig(&newMaterialConfig);
 	return newMaterialConfig;
+}
+
+
+/// ========================= 便利PSO関連生成関数 ========================= ///
+
+void MaterialConfig::MakePSOSkyCube() {
+
+	lightModelType = LightModelType::SkyCube;
+	renderModelType = RenderModelType::SkyCube;
+	blendModeType = BlendModeType::NormalBlend;
+	rasterizerMode = RasterizerMode::CullBack;
+	depthStencilType = DepthStencilType::ReadOnly;
+
+}
+
+void MaterialConfig::MakePSODebugLine() {
+
+	lightModelType = LightModelType::DebugLine;
+	renderModelType = RenderModelType::DebugLine;
+	blendModeType = BlendModeType::NormalBlend;
+	rasterizerMode = RasterizerMode::CullBack;
+	depthStencilType = DepthStencilType::Disable;
+
 }

@@ -6,7 +6,6 @@ RasterizerModeFactory::RasterizerModeFactory() {
 	rasterizerModeRegistry[RasterizerMode::CullFront] = [this](PSOKey& key) { return MakeRasterizerModeCullFront(); };
 	rasterizerModeRegistry[RasterizerMode::CullNone] = [this](PSOKey& key) { return MakeRasterizerModeCullNone(); };
 	rasterizerModeRegistry[RasterizerMode::Wireframe] = [this](PSOKey& key) { return MakeRasterizerModeWireframe(); };
-	rasterizerModeRegistry[RasterizerMode::SkyCube] = [this](PSOKey& key) { return MakeRasterizerModeCullFront(); };
 
 }
 
@@ -69,7 +68,7 @@ D3D12_RASTERIZER_DESC RasterizerModeFactory::MakeRasterizerModeWireframe() {
 	// RasterizerStateの設定
 	D3D12_RASTERIZER_DESC rasterizerDesc = {};
 	/// 裏面（時計回り）を表示しない
-	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
 	/// 三角形の中を塗りつぶす
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_WIREFRAME;
 
