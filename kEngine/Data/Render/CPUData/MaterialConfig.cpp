@@ -16,7 +16,10 @@ bool MaterialConfig::operator==(const MaterialConfig& target)const {
 	if (rasterizerMode != target.rasterizerMode)return false;
 	if (depthStencilType != target.depthStencilType)return false;
 
+	if (isReflective != target.isReflective)return false;
+
 	if (enableLighting != target.enableLighting)return false;
+	if (reflectiveStrength != target.reflectiveStrength)return false;
 
 	if (textureColor2 != target.textureColor2)return false;
 	if (textureColor3 != target.textureColor3)return false;
@@ -49,6 +52,9 @@ void InitMaterialConfig(MaterialConfig* materialConfig) {
 	BlendModeType blendModeType = (BlendModeType)config::default_BlendMode_;
 	RasterizerMode rasterizerMode = (RasterizerMode)config::default_RasterizerMode_;
 	DepthStencilType depthStencilType = (DepthStencilType)config::default_DepthStenctilState_;
+
+	materialConfig->isReflective = false;
+	materialConfig->reflectiveStrength = 0.3f;
 
 	materialConfig->enableLighting = true;
 

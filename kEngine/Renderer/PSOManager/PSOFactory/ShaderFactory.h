@@ -42,12 +42,15 @@ private:
 
 private:
 
-	ShaderPair CompileShader(const std::string& shaderName);
-	ShaderPair Compile2DShader();
-	ShaderPair Compile3DShader(PSOKey& psoKeys,bool isEnvironmentReflection = false);
-	ShaderPair CompileDebugLineShader();
-	ShaderPair CompileSkyCubeShader();
-	ShaderPair CompileFlameNeonGlowShader();
+	/// 他の関数に呼び出す用のShaderCompile関数
+	ShaderPair CompileShader(const std::string& shaderName, PSOKey& key);
+
+	/// PSOKeyのRenderModelTypeごとにShaderをコンパイルする関数
+	ShaderPair Compile2DShader(PSOKey& psoKeys);
+	ShaderPair Compile3DShader(PSOKey& psoKeys);
+	ShaderPair CompileDebugLineShader(PSOKey& psoKeys);
+	ShaderPair CompileSkyCubeShader(PSOKey& psoKeys);
+	ShaderPair CompileFlameNeonGlowShader(PSOKey& psoKeys);
 
 	void checkCompileResult(ShaderPair shaderPair);
     

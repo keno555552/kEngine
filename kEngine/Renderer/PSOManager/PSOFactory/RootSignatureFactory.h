@@ -28,16 +28,15 @@ public:
 private:
 
 	/// シェーダーコンパイルクラス
-	std::unordered_map<RenderModelType, std::function<Microsoft::WRL::ComPtr <ID3D12RootSignature>(DirectXCore*)>> rootSignatureRegistry;
+	std::unordered_map<RenderModelType, std::function<Microsoft::WRL::ComPtr <ID3D12RootSignature>(DirectXCore*,PSOKey&)>> rootSignatureRegistry;
 
 private:
 
 	std::unordered_map<RenderModelType, Microsoft::WRL::ComPtr <ID3D12RootSignature>> rootSignatureMap_;
 
-	Microsoft::WRL::ComPtr <ID3D12RootSignature> MakeStatic(DirectXCore* directXDriver_);
-	Microsoft::WRL::ComPtr <ID3D12RootSignature> MakeStaticREFLECTION(DirectXCore* directXDriver_);
+	Microsoft::WRL::ComPtr <ID3D12RootSignature> MakeStatic(DirectXCore* directXDriver_, PSOKey& key);
 
-	Microsoft::WRL::ComPtr <ID3D12RootSignature> MakeStaticSkinning(DirectXCore* directXDriver_);
+	Microsoft::WRL::ComPtr <ID3D12RootSignature> MakeStaticSkinning(DirectXCore* directXDriver_, PSOKey& key);
 
 };
 

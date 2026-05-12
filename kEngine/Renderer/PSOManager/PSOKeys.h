@@ -1,4 +1,9 @@
 #pragma once
+#include <cstdint>
+#include <tuple>
+#include <functional>
+#include <type_traits>
+
 #include "Data/Render/Types/PSOType/LightModelType.h"
 #include "Data/Render/Types/PSOType/RenderModelType.h"
 #include "Data/Render/Types/PSOType/RasterizerMode.h"
@@ -8,25 +13,49 @@
 
 #include "config.h"
 
-struct PSOKey{
+enum FeatureFlags : uint64_t {
+	None = 0,
+	EnvReflection = 1 << 0,
+	Shadow = 1 << 1,
+	NormalMap = 1 << 2,
+	Instancing = 1 << 3,
+	IBL = 1 << 4,
+	// ...
+};
 
+struct PSOKey {
+
+	// Shader Feature
 	LightModelType lightModelType = (LightModelType)config::default_LightModel_;
+
+	// Render Model
 	RenderModelType renderModelType = (RenderModelType)config::default_RenderModelTypes_;
+
+	// Pipeline State
 	BlendModeType blendModeType = (BlendModeType)config::default_BlendMode_;
 	RasterizerMode rasterizerMode = (RasterizerMode)config::default_RasterizerMode_;
 	DepthStencilType depthStencilType = (DepthStencilType)config::default_DepthStenctilState_;
 	PrimitiveType primitiveType = PrimitiveType::TRIANGLE;
 
+	// FeatureFlags
+	uint64_t featureMask = (uint64_t)FeatureFlags::None;
+
 };
 
 // 比較
 inline bool operator==(const PSOKey& a, const PSOKey& b) {
-	return a.lightModelType == b.lightModelType
+	return
+
+		a.lightModelType == b.lightModelType
+
 		&& a.renderModelType == b.renderModelType
+
 		&& a.blendModeType == b.blendModeType
 		&& a.rasterizerMode == b.rasterizerMode
 		&& a.depthStencilType == b.depthStencilType
-		&& a.primitiveType == b.primitiveType;
+		&& a.primitiveType == b.primitiveType
+
+		&& a.featureMask == b.featureMask;
 }
 
 // 比較
@@ -37,19 +66,21 @@ inline bool operator!=(const PSOKey& a, const PSOKey& b) {
 // 順序比較（std::map用）
 inline bool operator<(const PSOKey& a, const PSOKey& b) {
 	return std::tie(
-		a.lightModelType,
 		a.renderModelType,
 		a.blendModeType,
 		a.rasterizerMode,
 		a.depthStencilType,
-		a.primitiveType
+		a.primitiveType,
+		a.featureMask,
+		a.lightModelType
 	) < std::tie(
-		b.lightModelType,
 		b.renderModelType,
 		b.blendModeType,
 		b.rasterizerMode,
 		b.depthStencilType,
-		b.primitiveType
+		b.primitiveType,
+		b.featureMask,
+		b.lightModelType
 	);
 }
 
@@ -59,21 +90,31 @@ struct std::hash<PSOKey> {
 	size_t operator()(const PSOKey& key) const noexcept {
 		size_t h = 0;
 		auto hash_combine = [&h](auto v) {
-			h ^= std::hash<std::underlying_type_t<decltype(v)>>{}(
-				static_cast<std::underlying_type_t<decltype(v)>>(v)
-				) + 0x9e3779b97f4a7c15ULL + (h << 6) + (h >> 2);
+			using T = decltype(v);
+			if constexpr (std::is_enum_v<T>) {
+				h ^= std::hash<std::underlying_type_t<T>>{}(
+					static_cast<std::underlying_type_t<T>>(v)
+					) + 0x9e3779b97f4a7c15ULL + (h << 7) + (h >> 2);
+			} else {
+				h ^= std::hash<T>{}(v)
+					+0x9e3779b97f4a7c15ULL + (h << 6) + (h >> 2);
+			}
 			};
 		hash_combine(key.lightModelType);
+
 		hash_combine(key.renderModelType);
+
 		hash_combine(key.blendModeType);
 		hash_combine(key.rasterizerMode);
 		hash_combine(key.depthStencilType);
 		hash_combine(key.primitiveType);
+
+		hash_combine(key.featureMask);
 		return h;
 	}
 };
 
-inline PSOKey CreateDefaultPSOKey(){
+inline PSOKey CreateDefaultPSOKey() {
 	PSOKey defaultKey;
 	defaultKey.lightModelType = (LightModelType)config::default_LightModel_;
 	defaultKey.renderModelType = (RenderModelType)config::default_RenderModelTypes_;
@@ -84,7 +125,7 @@ inline PSOKey CreateDefaultPSOKey(){
 	return defaultKey;
 }
 
-inline PSOKey CreateDebugLinePSOKey(){
+inline PSOKey CreateDebugLinePSOKey() {
 	PSOKey debugLineKey;
 	debugLineKey.lightModelType = LightModelType::DebugLine;
 	debugLineKey.renderModelType = RenderModelType::DebugLine;

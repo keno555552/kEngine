@@ -17,7 +17,7 @@ public:
 	void Draw() override;
 
 private:
-	kEngine* system_ = nullptr;				// 借り
+	kEngine* system_ = nullptr;							// 借り
 
 	/// ============= ライト関連 ==============///
 	std::unique_ptr<Light> light1_ = nullptr;
@@ -72,8 +72,6 @@ private:
 #ifdef USE_IMGUI
 	void ImGuiPart();
 #endif
-
-
 
 };
 

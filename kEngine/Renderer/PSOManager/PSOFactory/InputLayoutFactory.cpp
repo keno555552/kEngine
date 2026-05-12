@@ -6,7 +6,6 @@ InputLayoutFactory::InputLayoutFactory() {
 	inputLayoutRegistry[RenderModelType::Sprite2D] = [this](PSOKey& key) { return MakeInputLayoutStatic(); };
 	inputLayoutRegistry[RenderModelType::Static] = [this](PSOKey& key) { return MakeInputLayoutStatic(); };
 	inputLayoutRegistry[RenderModelType::Skinned] = [this](PSOKey& key) { return MakeInputLayoutSkinning(); };
-	inputLayoutRegistry[RenderModelType::PARTICLEENVREFLECTION] = [this](PSOKey& key) { return MakeInputLayoutStatic(); };
 	inputLayoutRegistry[RenderModelType::DebugLine] = [this](PSOKey& key) { return MakeInputLayoutDebugLine(); };
 	inputLayoutRegistry[RenderModelType::SkyCube] = [this](PSOKey& key) { return MakeInputLayoutStatic(); };
 	inputLayoutRegistry[RenderModelType::FlameNeonGlow] = [this](PSOKey& key) { return MakeInputLayoutStatic(); };

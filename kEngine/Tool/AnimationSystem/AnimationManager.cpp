@@ -64,7 +64,7 @@ int AnimationManager::TakeControlObject(int animationHandle, Object* object) {
 
 	/// nullcheck
 	if (!object) {
-		Logger::Log("[kError] AS :: Invalid animation unit handle.");
+		Logger::Log("[kError] AM::UnitSetTime() Invalid animation unit handle.");
 		return -1;
 	}
 
@@ -74,7 +74,7 @@ int AnimationManager::TakeControlObject(int animationHandle, Object* object) {
 	/// モデルデータが有効か確認する
 	auto model = ani.modelDataPtr.lock();
 	if (!model) {
-		Logger::Log("[kError] AM :: ModelData expired.");
+		Logger::Log("[kError] AM::UnitSetTime() ModelData expired.");
 		return -1;
 	}
 
@@ -106,7 +106,7 @@ Object* AnimationManager::GetInstanceObjectByUnitHandle(int unitHandle) {
 	if (unitList_.contains(unitHandle)) {
 		return unitList_[unitHandle]->GetInstanceObject();
 	}
-	Logger::Log("[kError] AS :: Invalid animation unit handle.");
+	Logger::Log("[kError] AM::GetInstanceObjectByUnitHandle() Invalid animation unit handle.");
 	return nullptr;
 }
 
@@ -206,13 +206,13 @@ bool AnimationManager::CheckHaveHandle(int animHandle) {
 	/// ハンドルが存在するか確認する
 	if (animHandle < 0 ||
 		animHandle >= animationDataList_.size()) {
-		Logger::Log("[kError] AS :: Invalid animation handle.");
+		Logger::Log("[kError] AM::CheckHaveHandle() Invalid animation handle.");
 		return false;
 	}
 
 	/// すでに読み込んでいるファイルならばハンドルを返す
 	if (animationDataList_[animHandle].modelDataPtr.expired()) {
-		Logger::Log("[kError] AM :: ModelData expired.");
+		Logger::Log("[kError] AM::CheckHaveHandle() ModelData expired.");
 		return false;
 	}
 	return true;

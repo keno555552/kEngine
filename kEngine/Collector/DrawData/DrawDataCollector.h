@@ -75,8 +75,7 @@ public:
 
 	std::unordered_map <PSOKey,
 		std::unordered_map <MaterialID,
-		std::unordered_map <ModelID,
-		std::vector<RenderData>>>
+		std::vector<RenderData>>
 		>& GetOpaqueBuckets3D() { return opaqueBucket3D_; }
 
 	std::vector<RenderData>& GetTransparentObjectParts3D() { return transparentBucket3D_; }
@@ -151,8 +150,7 @@ private:
 	/// 不透明オブジェクトバケット
 	std::unordered_map <PSOKey,
 		std::unordered_map <MaterialID,
-		std::unordered_map <ModelID,
-		std::vector<RenderData>>>
+		std::vector<RenderData>>
 		> opaqueBucket3D_;
 
 	/// 透明オブジェクトバケット

@@ -212,3 +212,6 @@ private:
 };
 
 //TODO: DrawEngineは移動したが、それに関わる対応がしてない
+// 今のは本当のInstance描きではない
+// 本当のInstance描きはmeshを融合しないと呼べない
+// 今はただ分類して描いてるだけ

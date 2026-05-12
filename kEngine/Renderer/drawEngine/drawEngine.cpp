@@ -385,7 +385,7 @@ void DrawEngine::Draw3DTransparent() {
 		PSOKey psoKeyInt = object.psoKey;
 		PSODecision(psoKeyInt);
 
-		if (psoKeyInt.renderModelType == RenderModelType::PARTICLEENVREFLECTION) {
+		if (psoKeyInt.featureMask & FeatureFlags::EnvReflection) {
 			SetEnviromentReflectionGPU();
 		}
 
@@ -438,7 +438,7 @@ void DrawEngine::Draw3DOpaque() {
 		PSOKey psoKeyInt = psoKey;
 		PSODecision(psoKeyInt);
 
-		if(psoKey.renderModelType == RenderModelType::PARTICLEENVREFLECTION) {
+		if (psoKeyInt.featureMask & FeatureFlags::EnvReflection) {
 			SetEnviromentReflectionGPU();
 		}
 
@@ -454,17 +454,25 @@ void DrawEngine::Draw3DOpaque() {
 
 			/// 不透明ものの描画
 
-			for (auto& [meshBuffer, RenderData] : RenderDataGroup) {
+			for (auto& RenderData : RenderDataGroup) {
 
 				/// Instancing 用のデータを準備
 				int instancesCounter = 0;
 
+				/// Meshを呼び出す
+				auto mesh = RenderData.mesh;
+
 				/// MeshIndex 數量
-				int meshIndexCount = RenderData[0].mesh->GetIndexNum();
+				int meshIndexCount{};
+				int meshVertexCount{};
+
+
+				meshVertexCount = mesh->GetVertexNum();
+				meshIndexCount = mesh->GetIndexNum();
 
 				/// VBV/IBV 設定
-				D3D12_VERTEX_BUFFER_VIEW vbv = RenderData[0].mesh->GetVertexBufferView();
-				D3D12_INDEX_BUFFER_VIEW ibv = RenderData[0].mesh->GetIndexBufferView();
+				D3D12_VERTEX_BUFFER_VIEW vbv = mesh->GetVertexBufferView();
+				D3D12_INDEX_BUFFER_VIEW ibv = mesh->GetIndexBufferView();
 				commandList_->IASetVertexBuffers(0, 1, &vbv);
 				commandList_->IASetIndexBuffer(&ibv);
 
@@ -472,10 +480,8 @@ void DrawEngine::Draw3DOpaque() {
 				int instIdx = instance3DCounter_;
 
 				/// WVP計算
-				for (auto& object : RenderData) {
-					instancesCounter++;
-					instance3DCounter_++;
-				}
+				instancesCounter++;
+				instance3DCounter_++;
 
 				/// 設定 offset
 				OffsetData& inUse = instanceOffsetData_[offsetDataCounter_];
@@ -485,18 +491,60 @@ void DrawEngine::Draw3DOpaque() {
 
 				++offsetDataCounter_;
 
-
 				if (meshIndexCount != 0) {
-					commandList_->DrawIndexedInstanced(meshIndexCount, instancesCounter, 0, 0, 0);
+					commandList_->DrawIndexedInstanced(meshIndexCount, 1, 0, 0, 0);
 				} else {
-					int meshVertexCount = RenderData[0].mesh->GetVertexNum();
-					commandList_->DrawInstanced(meshVertexCount, instancesCounter, 0, 0);
+					int meshVertexCount_ = mesh->GetVertexNum();
+					commandList_->DrawInstanced(meshVertexCount_, 1, 0, 0);
 				}
-				//Logger::Log("Draw3D: pso=%d mat=%u meshID=%d instances=%d",(int)psoID, materialID, meshBuffer, instancesCounter);
+
 			}
 		}
 	}
 }
+
+//for (auto& object : RenderData) {
+//	/// Instancing 用のデータを準備
+//	int instancesCounter = 0;
+//
+//	/// MeshIndex 數量
+//	int meshIndexCount{};
+//	int meshVertexCount{};
+//
+//	meshVertexCount = object.mesh->GetVertexNum();
+//	meshIndexCount = object.mesh->GetIndexNum();
+//
+//	/// VBV/IBV 設定
+//	D3D12_VERTEX_BUFFER_VIEW vbv = object.mesh->GetVertexBufferView();
+//	D3D12_INDEX_BUFFER_VIEW ibv = object.mesh->GetIndexBufferView();
+//	commandList_->IASetVertexBuffers(0, 1, &vbv);
+//	commandList_->IASetIndexBuffer(&ibv);
+//
+//	/// インスタンスの開始位置を保存
+//	int instIdx = instance3DCounter_;
+//
+//	/// WVP計算
+//	//for (auto& object : RenderData) {
+//	instancesCounter++;
+//	instance3DCounter_++;
+//	//}
+//
+//	/// 設定 offset
+//	OffsetData& inUse = instanceOffsetData_[offsetDataCounter_];
+//	*inUse.instanceOffset = static_cast<UINT>(instIdx);
+//	inUse.state = 1;
+//	commandList_->SetGraphicsRootConstantBufferView(4, inUse.instanceOffsetResource->GetResource()->GetGPUVirtualAddress());
+//
+//	++offsetDataCounter_;
+//
+//	if (meshIndexCount != 0) {
+//		commandList_->DrawIndexedInstanced(meshVertexCount, instancesCounter, 0, 0, 0);
+//	} else {
+//		int meshVertexCount_ = RenderData[0].mesh->GetVertexNum();
+//		commandList_->DrawInstanced(meshVertexCount_, instancesCounter, 0, 0);
+//	}
+//}
+
 
 
 void DrawEngine::DrawCall() {
@@ -682,7 +730,7 @@ void DrawEngine::SetLightingGPU() {
 }
 
 void DrawEngine::SetEnviromentReflectionGPU() {
-	
+
 	auto it = resourceManager_->GetTextureGPUDescriptorHandle(enviromentReflectionTextureHandle_);
 
 	// 綁定到 RootSignature 的 slot 7 (t2)
@@ -759,7 +807,7 @@ void DrawEngine::UpdateDebugLineVertexBuffer(const std::vector<DebugLineVertexGP
 
 		TransformationMatrix* instanceListPtrDL = debugLineResource_->CreateInstanceBuffer((int)bufferSize);
 		drawDataCollector_->SetInstanceListDL(instanceListPtrDL);
-		
+
 		IntializeInstanceTMBuffer(instanceListPtrDL, (size_t)bufferSize);
 
 		debugLineVB_ = CreateResource(directXDriver_->GetDevice(), (size_t)bufferSize);

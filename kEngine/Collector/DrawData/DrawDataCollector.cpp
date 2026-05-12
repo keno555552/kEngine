@@ -375,7 +375,7 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustment3D(ObjectData& object
 
 	Matrix4x4 localMatrix = MakeAffineMatrix(
 		part.transform.scale,
-		part.transform.rotateQuat,
+		part.transform.rotate,
 		part.transform.translate
 	);
 
@@ -463,7 +463,7 @@ void DrawDataCollector::AddObjectToBucket3D(RenderData& renderData, int meshID) 
 			}
 		} else {
 			/// 不透明オブジェクトバケットへ追加
-			opaqueBucket3D_[static_cast<PSOKey>(renderData.psoKey)][renderData.materialID][meshID].emplace_back(renderData);
+			opaqueBucket3D_[static_cast<PSOKey>(renderData.psoKey)][renderData.materialID].emplace_back(renderData);
 		}
 	}
 }
@@ -667,14 +667,12 @@ void DrawDataCollector::BuildInstanceList3D() {
 	for (auto& [psoID, materialBuckets] : opaqueBucket3D_) {
 		for (auto& [materialID, RenderDataGroup] : materialBuckets) {
 			if (RenderDataGroup.empty()) continue;
-			for (auto& [meshBuffer, RenderData] : RenderDataGroup) {
+			for (auto& RenderData : RenderDataGroup) {
 				/// WVP計算
-				for (auto& object : RenderData) {
-					instancingList3D_[instanceCounter3D_].WVP = object.transformData.WVP;;
-					instancingList3D_[instanceCounter3D_].world = object.transformData.world;
-					instancingList3D_[instanceCounter3D_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
-					instanceCounter3D_++;
-				}
+				instancingList3D_[instanceCounter3D_].WVP = RenderData.transformData.WVP;;
+				instancingList3D_[instanceCounter3D_].world = RenderData.transformData.world;
+				instancingList3D_[instanceCounter3D_].WorldInverseTranspose = RenderData.transformData.WorldInverseTranspose;
+				instanceCounter3D_++;
 			}
 		}
 	}
@@ -728,6 +726,11 @@ PSOKey DrawDataCollector::PSODecision(MaterialConfig& material) {
 	default:
 		key.primitiveType = PrimitiveType::TRIANGLE;
 		break;
+	}
+
+	/// PSOKeyのFeatureFlagsをMaterialConfigから設定
+	if (material.isReflective) {
+		key.featureMask |= (uint64_t)FeatureFlags::EnvReflection;
 	}
 
 	return key;

@@ -446,6 +446,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Renderer\Mesh\SkyCube.cpp" />
     <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\ShaderFactory.cpp" />
     <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\RootSignatureFactory.cpp" />
+    <ClCompile Include="kEngine\Renderer\PSOManager\RootSlot.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kEngine\Data\Render\Types\PSOType\DepthStencilType.h" />
@@ -710,6 +711,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Renderer\Mesh\SkyCube.h" />
     <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\ShaderFactory.h" />
     <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\RootSignatureFactory.h" />
+    <ClInclude Include="kEngine\Renderer\PSOManager\RootSlot.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl">

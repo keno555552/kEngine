@@ -148,8 +148,6 @@ int ResourceManager::CreateModelResource(std::string Path) {
 		}
 	}
 
-	/// ないからモデルグループを作成
-	auto modelGroup = std::make_shared<ModelGroup>();
 
 	/// ファイルを読み取る,或は読んだファイルのハンドルを探す
 	int modelDataHandle = ReadFile(Path);
@@ -157,12 +155,20 @@ int ResourceManager::CreateModelResource(std::string Path) {
 	/// ModelDataを準備
 	std::shared_ptr<ModelData> modelDataPointer = modelDataList_[Path];
 
+	/// ないからモデルグループを作成
+	auto modelGroup = std::make_shared<ModelGroup>();
+
 	/// ModelDataからModelを作成してModelGroupに追加
 	for (int i = 0; i < modelDataPointer.get()->meshDataList.size(); i++) {
+
 		auto newModel = std::make_shared<Model>();
+
 		newModel->SetModelData(modelDataPointer, i);
 		newModel->CreateVertexResource_(BDevice_);
+		newModel->CreateIndexResource_(BDevice_);
+
 		modelGroup->PushModel(newModel);
+
 		meshBufferList_.push_back(newModel);
 		modelGroup->PushModelHandle((int)meshBufferList_.size() - 1);
 	}

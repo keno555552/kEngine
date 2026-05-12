@@ -26,9 +26,12 @@ public:
     BlendModeType blendModeType =         (BlendModeType)     config::default_BlendMode_;
     RasterizerMode rasterizerMode =       (RasterizerMode)    config::default_RasterizerMode_;
     DepthStencilType depthStencilType =   (DepthStencilType)  config::default_DepthStenctilState_;
+
+	bool isReflective = false;
 	//PrimitiveTypeは他のPSOデータにより決定されるため、MaterialConfigには含めない
 
 	bool enableLighting = true;
+	float reflectiveStrength = 0.3f;
 
 	/// 内部処理用
 	int materialResourceHandle = -1;

@@ -7,13 +7,12 @@ ShaderFactory::ShaderFactory() {
 	shader_compile_->Initialize();
 
 	shaderFolder_ = "./kEngine/EngineAssets/Shader/";
-	shaderRegistry_[RenderModelType::Sprite2D] = [this](PSOKey& key) { return Compile2DShader(); };
+	shaderRegistry_[RenderModelType::Sprite2D] = [this](PSOKey& key) { return Compile2DShader(key); };
 	shaderRegistry_[RenderModelType::Static] = [this](PSOKey& key) { return Compile3DShader(key); };
 	shaderRegistry_[RenderModelType::Skinned] = [this](PSOKey& key) { return Compile3DShader(key); };
-	shaderRegistry_[RenderModelType::PARTICLEENVREFLECTION] = [this](PSOKey& key) { return Compile3DShader(key,true); };
-	shaderRegistry_[RenderModelType::DebugLine] = [this](PSOKey& key) { return CompileDebugLineShader(); };
-	shaderRegistry_[RenderModelType::SkyCube] = [this](PSOKey& key) { return CompileSkyCubeShader(); };
-	shaderRegistry_[RenderModelType::FlameNeonGlow] = [this](PSOKey& key) { return CompileFlameNeonGlowShader(); };
+	shaderRegistry_[RenderModelType::DebugLine] = [this](PSOKey& key) { return CompileDebugLineShader(key); };
+	shaderRegistry_[RenderModelType::SkyCube] = [this](PSOKey& key) { return CompileSkyCubeShader(key); };
+	shaderRegistry_[RenderModelType::FlameNeonGlow] = [this](PSOKey& key) { return CompileFlameNeonGlowShader(key); };
 }
 
 ShaderPair ShaderFactory::MakeShaderBlob(PSOKey& key) {
@@ -32,46 +31,50 @@ ShaderPair ShaderFactory::MakeShaderBlob(PSOKey& key) {
 }
 
 
-ShaderPair ShaderFactory::CompileShader(const std::string& shaderName) {
+ShaderPair ShaderFactory::CompileShader(const std::string& shaderName, PSOKey& key) {
 
 	ShaderPair shaderPair;
-	shaderPair.vs = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + shaderName + ".VS.hlsl"), L"vs_6_0");
-	shaderPair.ps = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + shaderName + ".PS.hlsl"), L"ps_6_0");
+	shaderPair.vs = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + shaderName + ".VS.hlsl"), L"vs_6_0",key);
+	shaderPair.ps = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + shaderName + ".PS.hlsl"), L"ps_6_0",key);
 
 	checkCompileResult(shaderPair);
 	return shaderPair;
 }
 
-ShaderPair ShaderFactory::Compile2DShader() {
-	return CompileShader("Tile2D");
+ShaderPair ShaderFactory::Compile2DShader(PSOKey& key) {
+	return CompileShader("Tile2D", key);
 }
 
-ShaderPair ShaderFactory::Compile3DShader(PSOKey& psoKeys,bool isEnvironmentReflection) {
+ShaderPair ShaderFactory::Compile3DShader(PSOKey& key) {
 	ShaderPair shaderPair;
 
 	/// 3DモデルにskinningがあるかどうかでShaderを分ける
-	if (psoKeys.renderModelType == RenderModelType::Skinned) {
-		shaderPair.vs = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + "SkinningObject3D.VS.hlsl"), L"vs_6_0");
+	if (key.renderModelType == RenderModelType::Skinned) {
+		shaderPair.vs = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + "SkinningObject3D.VS.hlsl"), L"vs_6_0", key);
 	} else {
-		shaderPair.vs = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + "Particle.VS.hlsl"), L"vs_6_0");
+		shaderPair.vs = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + "Particle.VS.hlsl"), L"vs_6_0",key);
 	}
 
-	shaderPair.ps = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + "Particle.PS.hlsl"), L"ps_6_0", psoKeys.lightModelType, isEnvironmentReflection);
+	/// FeatureFlagsを摘出
+	bool environmentReflectionFlag = (key.featureMask & (uint64_t)FeatureFlags::EnvReflection) != 0;
+
+	/// 3DモデルのShaderは、LightModelTypeによって分ける
+	shaderPair.ps = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + "Particle.PS.hlsl"), L"ps_6_0", key);
 
 	checkCompileResult(shaderPair);
 	return shaderPair;
 }
 
-ShaderPair ShaderFactory::CompileDebugLineShader() {
-	return CompileShader("DebugLine");
+ShaderPair ShaderFactory::CompileDebugLineShader(PSOKey& key) {
+	return CompileShader("DebugLine", key);
 }
 
-ShaderPair ShaderFactory::CompileSkyCubeShader() {
-	return CompileShader("SkyCube");;
+ShaderPair ShaderFactory::CompileSkyCubeShader(PSOKey& key) {
+	return CompileShader("SkyCube", key);
 }
 
-ShaderPair ShaderFactory::CompileFlameNeonGlowShader() {
-	return CompileShader("FlameNeonGlow");
+ShaderPair ShaderFactory::CompileFlameNeonGlowShader(PSOKey& key) {
+	return CompileShader("FlameNeonGlow", key);
 }
 
 void ShaderFactory::checkCompileResult(ShaderPair shaderPair) {

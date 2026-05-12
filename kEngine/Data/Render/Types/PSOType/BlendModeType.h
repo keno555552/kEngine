@@ -9,7 +9,6 @@ enum class BlendModeType
 	SubtractBlend,
 	MultiplyBlend,
 	ScreenBlend,
-
 	NumOfBlends
 };
 

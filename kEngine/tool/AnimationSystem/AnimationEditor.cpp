@@ -15,13 +15,15 @@ AnimationEditor::AnimationEditor(kEngine* system) {
 
 	/// =============== モデル設定 ===============///
 	std::string modelPath = "GAME/gltf/";
-	targetModelHandle_ = system_->SetModelObj(modelPath + "both/AnimatedCube/AnimatedCube.gltf");
+	//targetModelHandle_ = system_->SetModelObj(modelPath + "both/AnimatedCube/AnimatedCube.gltf");
+	//targetModelHandle_ = system_->SetModelObj("kEngine/EngineAssets/Object/charater.obj");
+	targetModelHandle_ = system_->SetModelObj("kEngine/EngineAssets/Object/charater/charater.obj");
 
 	targetModel_ = std::make_unique<Object>();
 	targetModel_->IntObject(system_);
 	targetModel_->CreateModelData(targetModelHandle_);
 	targetModel_->modelHandle_ = targetModelHandle_;
-	SetUsingModel(targetModel_.get());
+	//SetUsingModel(targetModel_.get());
 
 
 	/// ================= Test ================///
@@ -29,8 +31,8 @@ AnimationEditor::AnimationEditor(kEngine* system) {
 	/// ================ システム最終設定 ================///
 	SetupAnimationEditorEnd();
 	
-	animationUnitHandle_ = system_->LoadAnimation(modelPath + "both/AnimatedCube/AnimatedCube.gltf");
-	system_->AnimationTakeControlObject(animationUnitHandle_[0], targetModel_.get());
+	//animationUnitHandle_ = system_->LoadAnimation(modelPath + "both/AnimatedCube/AnimatedCube.gltf");
+	//system_->AnimationTakeControlObject(animationUnitHandle_[0], targetModel_.get());
 }
 
 AnimationEditor::~AnimationEditor() {
@@ -53,7 +55,7 @@ void AnimationEditor::Update() {
 
 	/// =============== モデル更新 =================///
 
-	system_->AnimationUnitSetTime(animationUnitHandle_[0], mainTimer_->parameter_);
+	//system_->AnimationUnitSetTime(animationUnitHandle_[0], mainTimer_->parameter_);
 	//targetModel_->Update(camera_);
 	//animationUnit_->ReadAnimationData(animationList_[0]);
 	//animationUnit_->SetTime(mainTimer_->parameter_);
@@ -881,7 +883,13 @@ void AnimationEditor::ImguiPart() {
 			ImGui::Unindent();
 		}
 	}
+
+
+
+	ImGui::SliderFloat3("Rotate-", &targetModel_->mainPosition.transform.rotate.x, 0.0f, 500.0f);
+	ImGui::ColorEdit4("Color", &targetModel_->objectParts_[0].materialConfig->textureColor.x);
 	ImGui::End();
+
 
 }
 #endif

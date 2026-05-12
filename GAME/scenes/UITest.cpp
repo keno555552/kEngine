@@ -94,7 +94,7 @@ UITest::UITest(kEngine* system) {
 	box_->CreateDefaultData();
 	box_->modelHandle_ = config::default_Sphere_MeshBufferHandle_;
 	box_->objectParts_[0].materialConfig->textureHandle = whiteTextureHandle_;
-	box_->objectParts_[0].materialConfig->renderModelType = RenderModelType::PARTICLEENVREFLECTION;
+	//box_->objectParts_[0].materialConfig->isReflective = true;
 	box_->mainPosition.transform.scale = Vector3(0.5f, 0.5f, 0.5f);
 	box_->mainPosition.transform.translate = Vector3(0.0f, 0.0f, 0.0f);
 
@@ -156,6 +156,12 @@ void UITest::Update() {
 
 	if (system_->GetTriggerOn(DIK_Q)) {
 		system_->SoundPlaySE(soundHandle_, 0.5f);
+	}
+
+	if (detailButton_->GetIsClicked() || detailButton_->GetIsRelease()) {
+		box_->objectParts_[0].materialConfig->isReflective = true;
+	} else {
+		box_->objectParts_[0].materialConfig->isReflective = false;
 	}
 
 	/// Panelのロジック処理
@@ -221,7 +227,7 @@ void UITest::Draw() {
 	ground_->Draw();
 	box_->Draw();
 	detailButton_->Render();
-	panel_->Render();
+	//panel_->Render();
 
 #ifdef USE_IMGUI
 	/// ImGui処理
