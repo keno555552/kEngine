@@ -45,6 +45,8 @@ public:
 	/// <returns>float (*0.001 x layer)</returns>
 	float TransLayerDepth(int layer);
 
+	void CopySprite(SimpleSprite* target);
+
 protected:
 	kEngine* system_ = nullptr; /// 借り
 };

@@ -27,4 +27,3 @@ int config::default_RenderModelTypes_	= (int)RenderModelType::	Static;
 int config::default_RasterizerMode_		= (int)RasterizerMode::		CullBack;
 int config::default_BlendMode_			= (int)BlendModeType::		NormalBlend;
 int config::default_DepthStenctilState_ = (int)DepthStencilType::	Default;
-

@@ -44,6 +44,7 @@ public:
 	static int GetDebugLineNumInstance() { return kDebugLineNumInstance_; }
 	static int Get2DTileNumInstance() { return k2DTileNumInstance_; }
 	static int Get3DTileNumInstance() { return k3DTileNumInstance_; }
+	static int GetParticleNumInstance() { return kParticleNumInstance_; }
 	static int GetMaxMaterialNum() { return kMaxMaterialNum_; }
 	static int GetMaxSRVNum() { return kMaxSRVNum_; }
 	static int GetMaxLightNum() { return kMaxLightNum_; }

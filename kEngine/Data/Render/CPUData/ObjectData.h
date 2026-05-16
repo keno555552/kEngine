@@ -20,6 +20,7 @@ public:
 	friend class DrawDataCollector;
 	friend class ResourceManager;
 	friend class AnimationUnit;
+	friend class ObjectData;
 
 	/// ============== 雑用データ ============== ///
 

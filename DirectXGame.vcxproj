@@ -252,6 +252,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="kEngine\Tool\EffectSystem\EffectManager.cpp" />
     <ClCompile Include="kEngine\Data\Render\Types\PSOType\DepthStencilType.cpp" />
     <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\DepthStencilFactory.cpp" />
     <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\BlendStateFactory.cpp" />
@@ -420,6 +421,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Data\Render\Types\PSOType\RasterizerMode.cpp" />
     <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\RasterizerModeFactory.cpp" />
     <ClCompile Include="kEngine\Data\Render\Types\PSOType\PrimitiveType.cpp" />
+    <ClCompile Include="kEngine\GameObject\Particle\P_Primitive\P_HitSpark.cpp" />
+    <ClCompile Include="kEngine\Renderer\Mesh\PlaneMesh.cpp" />
+    <ClCompile Include="kEngine\Tool\EffectSystem\ParticleSystem\ParticleManager.cpp" />
+    <ClCompile Include="kEngine\Tool\EffectSystem\ParticleSystem\ParticleEmitter.cpp" />
     <ClCompile Include="ResourceLoader.cpp" />
     <ClCompile Include="kEngine\Scenes\BaseSceneFactory.cpp" />
     <ClCompile Include="kEngine\GameObject\Object\Sprite.cpp" />
@@ -449,6 +454,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Renderer\PSOManager\RootSlot.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="kEngine\Data\Render\Queue\ParticleInstanceForDDC.h" />
+    <ClInclude Include="kEngine\EngineAssets\Particle\HitSpark.h" />
+    <ClInclude Include="kEngine\Tool\EffectSystem\EffectManager.h" />
     <ClInclude Include="kEngine\Data\Render\Types\PSOType\DepthStencilType.h" />
     <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\DepthStencilFactory.h" />
     <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\BlendStateFactory.h" />
@@ -685,6 +693,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Data\Render\Types\PSOType\RasterizerMode.h" />
     <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\RasterizerModeFactory.h" />
     <ClInclude Include="kEngine\Data\Render\Types\PSOType\PrimitiveType.h" />
+    <ClInclude Include="kEngine\GameObject\Particle\P_Primitive\P_HitSpark.h" />
+    <ClInclude Include="kEngine\Renderer\Mesh\PlaneMesh.h" />
+    <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\ParticleManager.h" />
+    <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\ParticleEmitter.h" />
+    <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\ParticleInstance.h" />
+    <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\ParticlePrototype.h" />
     <ClInclude Include="ResourceLoader.h" />
     <ClInclude Include="kEngine\Scenes\BaseSceneFactory.h" />
     <ClInclude Include="kEngine\GameObject\Object\Sprite.h" />

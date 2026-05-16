@@ -17,6 +17,8 @@ struct Material
     float shininess;
     float intensity;
     float heightScale;
+    
+    float reflectiveStrength;
 };
 
 // Resources

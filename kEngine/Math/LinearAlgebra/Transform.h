@@ -18,8 +18,8 @@ private:
 
 	/// 回転のクォータニオン関連
 	bool eulerDirty = true;
-	Vector3 lastRotate;
-	Quaternion rotateQuat;
+	Vector3 lastRotate{};
+	Quaternion rotateQuat{};
 
 	/// 動画Transform関連
 	bool isAnimated = false;

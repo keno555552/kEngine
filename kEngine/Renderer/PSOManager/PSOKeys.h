@@ -38,7 +38,9 @@ struct PSOKey {
 	PrimitiveType primitiveType = PrimitiveType::TRIANGLE;
 
 	// FeatureFlags
-	uint64_t featureMask = (uint64_t)FeatureFlags::None;
+	uint64_t featureMask{
+		FeatureFlags::EnvReflection
+	};
 
 };
 

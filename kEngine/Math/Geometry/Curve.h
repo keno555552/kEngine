@@ -13,7 +13,7 @@
 /// <param name="time">補間用変数t</param>
 /// <param name="clock">総分割数</param>
 /// <returns>曲線上にtの対応点</returns>
-Vector2 Bezier(const Vector2 p0, const Vector2 p1, const Vector2 p2, int time, int clock);
+Vector2 Bezier(const Vector2 p0, const Vector2 p1, const Vector2 p2, float time, float clock);
 
 /// <summary>
 /// 3次元2次ベジェ曲線の点計算
@@ -25,6 +25,6 @@ Vector2 Bezier(const Vector2 p0, const Vector2 p1, const Vector2 p2, int time, i
 /// <param name="time">補間用変数t</param>
 /// <param name="clock">総分割数</param>
 /// <returns>曲線上にtの対応点</returns>
-Vector3 Bezier(const Vector3 p0, const Vector3 p1, const Vector3 p2, int time, int clock);
+Vector3 Bezier(const Vector3 p0, const Vector3 p1, const Vector3 p2, float time, float clock);
 
 

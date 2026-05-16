@@ -7,7 +7,7 @@ InputLayoutFactory::InputLayoutFactory() {
 	inputLayoutRegistry[RenderModelType::Static] = [this](PSOKey& key) { return MakeInputLayoutStatic(); };
 	inputLayoutRegistry[RenderModelType::Skinned] = [this](PSOKey& key) { return MakeInputLayoutSkinning(); };
 	inputLayoutRegistry[RenderModelType::DebugLine] = [this](PSOKey& key) { return MakeInputLayoutDebugLine(); };
-	inputLayoutRegistry[RenderModelType::SkyCube] = [this](PSOKey& key) { return MakeInputLayoutStatic(); };
+	inputLayoutRegistry[RenderModelType::Environment] = [this](PSOKey& key) { return MakeInputLayoutStatic(); };
 	inputLayoutRegistry[RenderModelType::FlameNeonGlow] = [this](PSOKey& key) { return MakeInputLayoutStatic(); };
 
 }

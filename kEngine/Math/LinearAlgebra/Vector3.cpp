@@ -8,7 +8,7 @@ Vector3 Vector3::operator-(const Vector3& target) {
 }
 
 Vector3 Vector3::operator*(const Vector3& target) {
-	return { x * target.x, y * target.y };
+	return { x * target.x, y * target.y, z * target.z };
 }
 
 Vector3 Vector3::operator/(const Vector3& target) {

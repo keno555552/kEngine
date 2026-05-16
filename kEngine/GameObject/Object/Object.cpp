@@ -202,12 +202,17 @@ AABB Object::GetAABB(const Object* obj) const
 void Object::CopyObject(Object* target) {
 	if (target == nullptr)return;
 	mainPosition = target->mainPosition;
+	modelHandle_ = target->modelHandle_;
+	isBillboard_ = target->isBillboard_;
+	ownerObject = target->ownerObject;
 	followObject_ = target->followObject_;
 	for (auto& ptr : target->objectParts_) {
 		CreateDefaultData();
+		objectParts_.back().name = ptr.name;
 		objectParts_.back().transform = ptr.transform;
 		objectParts_.back().materialConfig = ptr.materialConfig;
 		objectParts_.back().parentPart = ptr.parentPart;
+		objectParts_.back().forward = ptr.forward;
 	}
 }
 

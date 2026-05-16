@@ -11,7 +11,7 @@ ShaderFactory::ShaderFactory() {
 	shaderRegistry_[RenderModelType::Static] = [this](PSOKey& key) { return Compile3DShader(key); };
 	shaderRegistry_[RenderModelType::Skinned] = [this](PSOKey& key) { return Compile3DShader(key); };
 	shaderRegistry_[RenderModelType::DebugLine] = [this](PSOKey& key) { return CompileDebugLineShader(key); };
-	shaderRegistry_[RenderModelType::SkyCube] = [this](PSOKey& key) { return CompileSkyCubeShader(key); };
+	shaderRegistry_[RenderModelType::Environment] = [this](PSOKey& key) { return CompileSkyCubeShader(key); };
 	shaderRegistry_[RenderModelType::FlameNeonGlow] = [this](PSOKey& key) { return CompileFlameNeonGlowShader(key); };
 }
 

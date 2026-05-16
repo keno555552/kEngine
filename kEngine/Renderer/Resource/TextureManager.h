@@ -20,7 +20,7 @@ public:
 	private:
 		/// からのみ生成・破棄可能
 		friend class TextureManager;
-		friend class kEnigne;
+		friend class kEngine;
 		ConstructorKey() {}
 	};
 

@@ -10,6 +10,9 @@
 #include "Camera/Camera.h"
 #include "Mesh/VertexResource.h"
 #include "Data/Render/Queue/RenderData.h"
+#include "Data/Render/Queue/ParticleInstanceForDDC.h"
+
+#include "Tool/EffectSystem/ParticleSystem/ParticleInstance.h"
 #include "GPUData/LightGPU.h"
 #include <cstdint>
 #include "Mesh/Model.h"
@@ -83,9 +86,13 @@ public:
 
 	/// ========== パーティクル関連 ===========///
 
-	void CollectParticleC(ObjectData* object);
+	void CollectParticle(std::vector<ObjectData>& objectList, std::vector<ParticleInstance>& instance);
 
-	std::vector<RenderData>& GetBucketsParticleC() { return bucketParticleC_; }
+	std::unordered_map<MeshBuffer*,
+		std::unordered_map<PSOKey,
+		std::unordered_map<MaterialID,
+		std::vector<TransformationMatrix>>>
+		>& GetParticleBucket() { return bucketParticleC_; }
 
 	/// ================= skinning関連 ===================///
 
@@ -101,11 +108,14 @@ public:
 	void SetInstanceListDL(TransformationMatrix* instancingListDL) { instancingListDL_ = instancingListDL; }
 	void SetInstanceList2D(TransformationMatrix* instancingList2D) { instancingList2D_ = instancingList2D; }
 	void SetInstanceList3D(TransformationMatrix* instancingList3D) { instancingList3D_ = instancingList3D; }
+	void SetInstanceListParticle(TransformationMatrix* instancingListParticleC) { instancingListParticleC_ = instancingListParticleC; }
 	TransformationMatrix* GetInstanceListDL() { return instancingListDL_; }
 	TransformationMatrix* GetInstancingList2D() { return instancingList2D_; }
 	TransformationMatrix* GetInstancingList3D() { return instancingList3D_; }
+	TransformationMatrix* GetInstancingListParticleC() { return instancingListParticleC_; }
 	void BuildInstanceList2D();
 	void BuildInstanceList3D();
+	void BuildInstanceListParticle();
 
 	/// ============ Light関連 ==============///
 
@@ -125,18 +135,19 @@ private:
 	/// ============ アニメーション関連 ==============///
 	AnimationManager* animationManager_ = nullptr; /*借り*/
 
-	/// ================ デバッグドロー関連 =================///
+	/// ================ debugDraw関連 =================///
 
 	std::vector<DebugLineVertexGPU> debugLinesVertexBucket_;
 	int maxDebugLineInstance = config::GetDebugLineNumInstance();
 
 	/// ==================== 2Dデータ ====================///
 	/// 不透明オブジェクトバケット
-	std::unordered_map <PSOKey,
+	std::unordered_map <
+		PSOKey,
 		std::unordered_map <MaterialID,
 		std::unordered_map <ModelID,
-		std::vector<RenderData>>>
-		> opaqueBucket2D_;
+		std::vector<RenderData>
+		>>> opaqueBucket2D_;
 
 
 	/// 透明オブジェクトリスト
@@ -148,10 +159,11 @@ private:
 
 	/// ==================== 3Dデータ ====================///
 	/// 不透明オブジェクトバケット
-	std::unordered_map <PSOKey,
+	std::unordered_map <
+		PSOKey,
 		std::unordered_map <MaterialID,
-		std::vector<RenderData>>
-		> opaqueBucket3D_;
+		std::vector<RenderData>
+		>> opaqueBucket3D_;
 
 	/// 透明オブジェクトバケット
 	std::vector<RenderData> transparentBucket3D_;
@@ -159,10 +171,14 @@ private:
 	/// ========== パーティクル関連 ===========///
 
 	/// パーティクルバケット
-	std::vector<RenderData> bucketParticleC_;
+	std::unordered_map<
+		MeshBuffer*,
+		std::unordered_map<PSOKey,
+		std::unordered_map<MaterialID,
+		std::vector<TransformationMatrix>
+		>>> bucketParticleC_;
 
-
-	/// ================= skinning関連 ===================///
+	/// ================= skinning関連 ====================///
 
 	struct SkinningData
 	{
@@ -219,9 +235,9 @@ private:
 	/// フォローマトリックス作成 
 	// 3Dのフォローマトリックスを流用
 	/// WVP調整
-	TransformationMatrix ObjectWVPAdjustmentPC(ObjectData& object, ObjectPart& part, ModelData& modelData, int modelCounter);
+	TransformationMatrix ObjectWVPAdjustmentPC(ObjectData& object, ModelData& modelData, int modelCounter, ParticleInstance particleData);
 	/// バケット追加
-	void AddObjectToBucketPC(RenderData& renderData);
+	void AddObjectToBucketPC(ParticleInstanceForDDC& renderData);
 
 	/// ============ マテリアル関連 ==============///
 

@@ -41,7 +41,7 @@ D3D12_RASTERIZER_DESC RasterizerModeFactory::MakeRasterizerModeCullFront() {
 
 	// RasterizerStateの設定
 	D3D12_RASTERIZER_DESC rasterizerDesc = {};
-	/// 表面（時計回り）を表示しない
+	/// 表面（時計回り）を表示する
 	rasterizerDesc.CullMode = D3D12_CULL_MODE_FRONT;
 	/// 三角形の中を塗りつぶす
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;

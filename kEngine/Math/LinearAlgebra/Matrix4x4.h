@@ -85,6 +85,13 @@ Matrix4x4 Transpose(Matrix4x4 tranpose);
 /// <returns>結果Matrix4x4</returns>
 Matrix4x4 MakeScaleMatrix4x4(const Vector3 scole);
 
+
+Matrix4x4 MakeRXMatrix4x4(const float rotate);
+
+Matrix4x4 MakeRYMatrix4x4(const float rotate);
+
+Matrix4x4 MakeRZMatrix4x4(const float rotate);
+
 /// <summary>
 /// 回転のVector3からMatrix4x4への変換
 /// </summary>

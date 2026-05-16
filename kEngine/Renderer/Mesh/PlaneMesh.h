@@ -6,7 +6,7 @@
 #include "Config.h"
 #include "Model.h"
 
-class SkyCube :public Model
+class PlaneMesh :public Model
 {
 public:
 
@@ -15,13 +15,16 @@ public:
 
 private:
 	enum {
-		FRONT_TOP_LEFT = 0,
-		FRONT_TOP_RIGHT,
-		BACK_TOP_RIGHT,
-		BACK_TOP_LEFT,
-		FRONT_BOTTOM_LEFT,
-		FRONT_BOTTOM_RIGHT,
-		BACK_BOTTOM_RIGHT,
-		BACK_BOTTOM_LEFT
+		TOP_LEFT = 0,
+		TOP_RIGHT,
+		BOTTOM_LEFT,
+		BOTTOM_RIGHT
+	};
+
+	Vector4 p[4]{
+		{ -0.5f,  0.5f, 0.0f, 1.0f }, // TL
+		{  0.5f,  0.5f, 0.0f, 1.0f }, // TR
+		{ -0.5f, -0.5f, 0.0f, 1.0f }, // BL
+		{  0.5f, -0.5f, 0.0f, 1.0f }  // BR
 	};
 };

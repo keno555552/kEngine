@@ -2,6 +2,7 @@
 #include <vector>
 #include "MathsIncluder.h"
 #include <memory>
+#include <string>
 #include "LinearAlgebra/Transform.h"
 #include "LinearAlgebra/TransformationMatrix.h"
 #include "MaterialConfig.h"
@@ -10,6 +11,8 @@
 
 struct SpritePart
 {
+	std::string name{};
+
 	///================= デイタ保存 =================///
 	Transform transform = CreateDefaultTransform();
 

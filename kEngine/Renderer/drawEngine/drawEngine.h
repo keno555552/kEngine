@@ -58,6 +58,10 @@ public:
 	void Draw3DTransparent();
 	void Draw3DOpaque();
 
+	/// Particle描画関数
+	void DrawParticle();
+
+	/// 描画関数のコア
 	void DrawCall();
 
 	/// EnviromentReflection関連関数
@@ -137,13 +141,15 @@ private:
 	std::unique_ptr<InstanceBuffer<TransformationMatrix>> debugLineResource_;
 	std::unique_ptr<InstanceBuffer<TransformationMatrix>> tile2DWVPResource_;
 	std::unique_ptr<InstanceBuffer<TransformationMatrix>> tile3DWVPResource_;
+	std::unique_ptr<InstanceBuffer<TransformationMatrix>> tilePCWVPResource_;
 	int instanceDLCounter_ = 0;
 	int instance2DCounter_ = 0;
 	int instance3DCounter_ = 0;
+	int instancePCCounter_ = 0;
 
 	/// EnviromentReflection関連
 	std::unique_ptr <BasicResource> enviromentReflectionTexture_;
-	int enviromentReflectionTextureHandle_ = 0;
+	int enviromentReflectionTextureHandle_ = -1;
 
 	/// Skinning関連
 	std::vector<std::unique_ptr<InstanceBuffer<WellForGPU>>> skinningWFGResourceList_;

@@ -474,22 +474,31 @@ Matrix4x4 MakeScaleMatrix4x4(const Vector3 scole) {
 						 0.0f,    0.0f,	   0.0f, 1.0f };
 }
 
+Matrix4x4 MakeRXMatrix4x4(const float rotate) {
+	return {		 1.0f, 		   0.0f,		   0.0f, 0.0f,
+					 0.0f, cosf(rotate),   sinf(rotate), 0.0f,
+					 0.0f,-sinf(rotate),   cosf(rotate), 0.0f,
+					 0.0f, 	       0.0f,		   0.0f, 1.0f };
+}
+
+Matrix4x4 MakeRYMatrix4x4(const float rotate) {
+	return { cosf(rotate),		   0.0f,  -sinf(rotate), 0.0f,
+					 0.0f,		   1.0f,		   0.0f, 0.0f,
+			 sinf(rotate),		   0.0f,   cosf(rotate), 0.0f,
+					 0.0f,		   0.0f,		   0.0f, 1.0f };
+}
+
+Matrix4x4 MakeRZMatrix4x4(const float rotate) {
+	return { cosf(rotate), sinf(rotate),		   0.0f, 0.0f,
+			-sinf(rotate), cosf(rotate),		   0.0f, 0.0f,
+					 0.0f, 	       0.0f,		   1.0f, 0.0f,
+					 0.0f, 	       0.0f,		   0.0f, 1.0f };
+}
+
 Matrix4x4 MakeRotateMatrix4x4(const Vector3 rotate) {
-	Matrix4x4 rX = { 1.0f,		   0.0f,		   0.0f, 0.0f,
-							   0.0f, cosf(rotate.x), sinf(rotate.x), 0.0f,
-							   0.0f,-sinf(rotate.x), cosf(rotate.x), 0.0f,
-							   0.0f,	       0.0f,		   0.0f, 1.0f };
-
-	Matrix4x4 rY = { cosf(rotate.y),		   0.0f,-sinf(rotate.y), 0.0f,
-							   0.0f,		   1.0f,		   0.0f, 0.0f,
-					 sinf(rotate.y),		   0.0f, cosf(rotate.y), 0.0f,
-							   0.0f,		   0.0f,		   0.0f, 1.0f };
-
-	Matrix4x4 rZ = { cosf(rotate.z), sinf(rotate.z),		   0.0f, 0.0f,
-					-sinf(rotate.z), cosf(rotate.z),		   0.0f, 0.0f,
-							   0.0f, 	       0.0f,		   1.0f, 0.0f,
-							   0.0f, 	       0.0f,		   0.0f, 1.0f };
-
+	Matrix4x4 rX = MakeRXMatrix4x4(rotate.x);
+	Matrix4x4 rY = MakeRYMatrix4x4(rotate.y);
+	Matrix4x4 rZ = MakeRZMatrix4x4(rotate.z);
 	return Matrix4x4{ rX * (rY * rZ) };
 }
 

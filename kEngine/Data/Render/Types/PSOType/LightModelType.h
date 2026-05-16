@@ -10,7 +10,7 @@ enum class LightModelType {
     BlinnPhongReflection,
 	FlameNeonGlow,
     DebugLine,
-	SkyCube,
+	Environment,
     NumLightModels,
 };
 

@@ -12,6 +12,8 @@ struct Material
     float shininess;
     float intensity;
     float heightScale;
+    
+    float reflectiveStrength;
 };
 
 ConstantBuffer<Material> gMaterial : register(b0);

@@ -7,7 +7,7 @@ RootSignatureFactory::RootSignatureFactory() {
 	rootSignatureRegistry[RenderModelType::Static] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStatic(directXDriver_, key); };
 	rootSignatureRegistry[RenderModelType::Skinned] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticSkinning(directXDriver_, key); };
 	rootSignatureRegistry[RenderModelType::DebugLine] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStatic(directXDriver_, key); };
-	rootSignatureRegistry[RenderModelType::SkyCube] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStatic(directXDriver_, key); };
+	rootSignatureRegistry[RenderModelType::Environment] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStatic(directXDriver_, key); };
 	rootSignatureRegistry[RenderModelType::FlameNeonGlow] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStatic(directXDriver_, key); };
 }
 

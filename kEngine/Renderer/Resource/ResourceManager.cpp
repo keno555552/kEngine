@@ -17,6 +17,7 @@ void ResourceManager::Initialize(DirectXCore* device) {
 	core_ = device;
 	BDevice_ = core_->GetDevice();
 
+	config::default_Plane_MeshBufferHandle_ = CreatePlaneResource();
 	config::default_Sprite2D_MeshBufferHandle_ = CreateSimpleSpriteMeshResource();
 	config::default_Triangle_MeshBufferHandle_ = CreateTriangleResource();
 	config::default_Cube_MeshBufferHandle_ = CreateCubeResource();
@@ -77,6 +78,23 @@ int ResourceManager::CreateTriangleResource() {
 
 	auto modelGroup = std::make_shared<ModelGroup>();
 	modelGroup->PushModel(newTriangle);
+	modelGroup->PushModelHandle((int)meshBufferList_.size() - 1);
+	modelGroupList_.push_back(modelGroup);
+
+	return (int)modelGroupList_.size() - 1;
+}
+
+int ResourceManager::CreatePlaneResource() {
+	std::shared_ptr<PlaneMesh> newPlane;
+	newPlane = std::make_shared<PlaneMesh>();
+	newPlane->CreateVertexResource_(BDevice_);
+	newPlane->CreateVertexBufferView_(4);
+	newPlane->CreateIndexResource_(BDevice_);
+	newPlane->CreateIndexBufferView_(6);
+	meshBufferList_.push_back(newPlane);
+
+	auto modelGroup = std::make_shared<ModelGroup>();
+	modelGroup->PushModel(newPlane);
 	modelGroup->PushModelHandle((int)meshBufferList_.size() - 1);
 	modelGroupList_.push_back(modelGroup);
 

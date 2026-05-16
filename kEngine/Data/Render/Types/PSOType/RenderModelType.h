@@ -5,7 +5,7 @@ enum class RenderModelType {
 	Static = 0,
 	Skinned,
 	DebugLine,
-	SkyCube,
+	Environment,
 	Sprite2D,
 	FlameNeonGlow,
 	NumOfRenderModels

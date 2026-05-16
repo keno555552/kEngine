@@ -29,6 +29,8 @@ struct Material
     float shininess;
     float intensity;
     float heightScale;
+    
+    float reflectiveStrength;
 };
 
 struct LightGPU
@@ -203,7 +205,7 @@ PixelShaderOutput main(VertexShaderOutput input)
         float envStrength = 0.3;
  
         // 混合
-        finalColor += environmentColor * envStrength;
+        finalColor += environmentColor * gMaterial.reflectiveStrength;
 #endif
         
         output.color.rgb = finalColor;

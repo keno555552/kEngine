@@ -81,6 +81,18 @@ void DrawEngine::Initialize(
 	/// DebugLine用のインスタンスバッファを初期化
 	IntializeInstanceTMBuffer(instanceListPtr3D, (size_t)numInstance3D);
 
+	/// ============== Particleタイル用WVPバッファ
+
+	int numInstancePC = config::GetParticleNumInstance();
+
+	/// DebugLine用のインスタンスバッファを作成して、DrawDataCollectorに渡す
+	tilePCWVPResource_ = std::make_unique<InstanceBuffer<TransformationMatrix>>(directXDriver_);
+	TransformationMatrix* instanceListPtrPC = tilePCWVPResource_->CreateInstanceBuffer(numInstancePC);
+	drawDataCollector_->SetInstanceListParticle(instanceListPtrPC);
+
+	/// DebugLine用のインスタンスバッファを初期化
+	IntializeInstanceTMBuffer(instanceListPtrPC, (size_t)numInstancePC);
+
 
 	/// ====================== InstanceOffset用バッファを作成 ======================= ///
 	for (int i = 0; i < config::GetMaxMaterialNum(); i++) {
@@ -101,7 +113,6 @@ void DrawEngine::Initialize(
 
 
 	/// ========================== デフォルトのモデルを設定 ========================== ///
-	config::default_Plane_MeshBufferHandle_ = resourceManager_->LoadModel("./kEngine/EngineAssets/TemplateResource/object/plane/plane.obj");
 	defaultTextureHandle_ = resourceManager_->LoadModelTexture("./kEngine/EngineAssets/TemplateResource/texture/white5x5.png");
 
 }
@@ -116,7 +127,7 @@ void DrawEngine::Finalize() {
 	debugLineResource_.reset();
 	tile2DWVPResource_.reset();
 	tile3DWVPResource_.reset();
-
+	tilePCWVPResource_.reset();
 	cameraBuffer_.reset();
 
 	for (auto& ptr : instanceOffsetData_) {
@@ -147,6 +158,7 @@ void DrawEngine::StartFrame() {
 	/// InstanceCounterReset
 	instance2DCounter_ = 0;
 	instance3DCounter_ = 0;
+	instancePCCounter_ = 0;
 	offsetDataCounter_ = 0;
 }
 
@@ -155,7 +167,7 @@ void DrawEngine::PreDraw() {
 	/// PSOReset
 	// デフォルトのPSOをセット
 	PSOKey defaultPSOKey = CreateDefaultPSOKey();
-	psoManager_->SetPso(defaultPSOKey);
+	psoManager_->SetPsoStrong(defaultPSOKey);
 
 
 
@@ -188,10 +200,16 @@ void DrawEngine::EndDraw() {
 }
 
 void DrawEngine::PSODecision(PSOKey& psoKey) {
-	psoManager_->SetPso(psoKey);
+
+	PSOKey psoKeyInt = psoKey;
+	if (enviromentReflectionTextureHandle_ == -1) {
+		psoKeyInt.featureMask &= ~(uint64_t)FeatureFlags::EnvReflection;
+	}
+
+	psoManager_->SetPso(psoKeyInt);
 
 	/// Topology設定
-	switch (psoKey.primitiveType) {
+	switch (psoKeyInt.primitiveType) {
 	case PrimitiveType::LINE:
 		commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 		break;
@@ -383,9 +401,10 @@ void DrawEngine::Draw3DTransparent() {
 
 		/// Set PSO
 		PSOKey psoKeyInt = object.psoKey;
+		psoKeyInt.depthStencilType = DepthStencilType::ReadOnly;
 		PSODecision(psoKeyInt);
 
-		if (psoKeyInt.featureMask & FeatureFlags::EnvReflection) {
+		if (enviromentReflectionTextureHandle_ != -1) {
 			SetEnviromentReflectionGPU();
 		}
 
@@ -438,7 +457,7 @@ void DrawEngine::Draw3DOpaque() {
 		PSOKey psoKeyInt = psoKey;
 		PSODecision(psoKeyInt);
 
-		if (psoKeyInt.featureMask & FeatureFlags::EnvReflection) {
+		if (enviromentReflectionTextureHandle_ != -1) {
 			SetEnviromentReflectionGPU();
 		}
 
@@ -503,53 +522,93 @@ void DrawEngine::Draw3DOpaque() {
 	}
 }
 
-//for (auto& object : RenderData) {
-//	/// Instancing 用のデータを準備
-//	int instancesCounter = 0;
-//
-//	/// MeshIndex 數量
-//	int meshIndexCount{};
-//	int meshVertexCount{};
-//
-//	meshVertexCount = object.mesh->GetVertexNum();
-//	meshIndexCount = object.mesh->GetIndexNum();
-//
-//	/// VBV/IBV 設定
-//	D3D12_VERTEX_BUFFER_VIEW vbv = object.mesh->GetVertexBufferView();
-//	D3D12_INDEX_BUFFER_VIEW ibv = object.mesh->GetIndexBufferView();
-//	commandList_->IASetVertexBuffers(0, 1, &vbv);
-//	commandList_->IASetIndexBuffer(&ibv);
-//
-//	/// インスタンスの開始位置を保存
-//	int instIdx = instance3DCounter_;
-//
-//	/// WVP計算
-//	//for (auto& object : RenderData) {
-//	instancesCounter++;
-//	instance3DCounter_++;
-//	//}
-//
-//	/// 設定 offset
-//	OffsetData& inUse = instanceOffsetData_[offsetDataCounter_];
-//	*inUse.instanceOffset = static_cast<UINT>(instIdx);
-//	inUse.state = 1;
-//	commandList_->SetGraphicsRootConstantBufferView(4, inUse.instanceOffsetResource->GetResource()->GetGPUVirtualAddress());
-//
-//	++offsetDataCounter_;
-//
-//	if (meshIndexCount != 0) {
-//		commandList_->DrawIndexedInstanced(meshVertexCount, instancesCounter, 0, 0, 0);
-//	} else {
-//		int meshVertexCount_ = RenderData[0].mesh->GetVertexNum();
-//		commandList_->DrawInstanced(meshVertexCount_, instancesCounter, 0, 0);
-//	}
-//}
+void DrawEngine::DrawParticle() {
+
+	auto& objectBucket_ = drawDataCollector_->GetParticleBucket();
+
+	/// TileSRV
+	commandList_->SetGraphicsRootDescriptorTable(1, tilePCWVPResource_->GetGPUDescriptorHandle());
+
+	for (auto& [MeshBuffer, materialBuckets] : objectBucket_) {
+
+		/// Meshを呼び出す
+		auto mesh = MeshBuffer;
+
+		/// MeshIndex 數量
+		int meshIndexCount{};
+		int meshVertexCount{};
+
+		for (auto& [psoKey, RenderDataGroup] : materialBuckets) {
+
+			/// Set PSO
+			PSOKey psoKeyInt = psoKey;
+			PSODecision(psoKeyInt);
+
+			if (enviromentReflectionTextureHandle_ != -1) {
+				SetEnviromentReflectionGPU();
+			}
+
+			if (RenderDataGroup.empty()) continue;
+
+			SetLightingGPU();
 
 
+			/// 不透明ものの描画
+
+			for (auto& [materialID, TransformMatirx] : RenderDataGroup) {
+
+				SetMaterial(materialID);
+
+				SetTexture(materialID);
+
+				/// Instancing 用のデータを準備
+				int instancesCounter = 0;
+
+				/// MeshIndex 数設定
+				meshVertexCount = mesh->GetVertexNum();
+				meshIndexCount = mesh->GetIndexNum();
+
+				/// VBV/IBV 設定
+				D3D12_VERTEX_BUFFER_VIEW vbv = mesh->GetVertexBufferView();
+				D3D12_INDEX_BUFFER_VIEW ibv = mesh->GetIndexBufferView();
+				commandList_->IASetVertexBuffers(0, 1, &vbv);
+				commandList_->IASetIndexBuffer(&ibv);
+
+				/// インスタンスの開始位置を保存
+				int instIdx = instancePCCounter_;
+
+				/// WVP計算
+				int instanceNum = (int)TransformMatirx.size();
+				instancesCounter += instanceNum;
+				instancePCCounter_ += instanceNum;
+
+				/// 設定 offset
+				OffsetData& inUse = instanceOffsetData_[offsetDataCounter_];
+				*inUse.instanceOffset = static_cast<UINT>(instIdx);
+				inUse.state = 1;
+				commandList_->SetGraphicsRootConstantBufferView(4, inUse.instanceOffsetResource->GetResource()->GetGPUVirtualAddress());
+				++offsetDataCounter_;
+
+				if (meshIndexCount != 0) {
+					commandList_->DrawIndexedInstanced(meshIndexCount, instancesCounter, 0, 0, 0);
+				} else {
+					int meshVertexCount_ = mesh->GetVertexNum();
+					commandList_->DrawInstanced(meshVertexCount_, instancesCounter, 0, 0);
+				}
+
+			}
+		}
+	}
+}
 
 void DrawEngine::DrawCall() {
+
+	/// 非透明、透明順で
+	/// 3D、Sprite、Particle、DebugLineの順
+	/// で描画する
 	Draw3D();
 	Draw2D();
+	DrawParticle();
 	DrawDebugLine();
 }
 

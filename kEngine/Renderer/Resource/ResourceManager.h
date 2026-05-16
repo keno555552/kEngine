@@ -38,7 +38,7 @@ public:
 	private:
 		/// からのみ生成・破棄可能
 		friend class ResourceManager;
-		friend class kEnigne;
+		friend class kEngine;
 		ConstructorKey() {}
 	};
 
@@ -155,6 +155,7 @@ private:
 	/// リソース作り
 	int CreateSimpleSpriteMeshResource();
 	int CreateTriangleResource();
+	int CreatePlaneResource();
 	int CreateCubeResource();
 	int CreateSphereResource(int sudivision);
 	int CreateSkyCubeResource();

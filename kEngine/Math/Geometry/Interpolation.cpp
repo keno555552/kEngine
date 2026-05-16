@@ -1,8 +1,8 @@
 #include "Interpolation.h"
 
-float Lerp(float a, float b, int c, int t) {
-	float time = float(c) / t;
-	return (time)*a + (1.0f - time) * b;
+float Lerp(float a, float b, float c, float t) {
+	float time = c / t;
+	return (1.0f - time) * a + (time) * b;
 }
 
 Vector3 CubicSpline(const Vector3& v0, const Vector3& outTan0, const Vector3& v1, const Vector3& inTan1, float t, float dt) {

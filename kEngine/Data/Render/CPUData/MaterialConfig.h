@@ -27,11 +27,10 @@ public:
     RasterizerMode rasterizerMode =       (RasterizerMode)    config::default_RasterizerMode_;
     DepthStencilType depthStencilType =   (DepthStencilType)  config::default_DepthStenctilState_;
 
-	bool isReflective = false;
+	float reflectiveStrength = 0.0f;
 	//PrimitiveTypeは他のPSOデータにより決定されるため、MaterialConfigには含めない
 
 	bool enableLighting = true;
-	float reflectiveStrength = 0.3f;
 
 	/// 内部処理用
 	int materialResourceHandle = -1;
@@ -51,7 +50,8 @@ public:
 
 	/// =================== 便利PSO関連生成関数 =================== ///
 
-	void MakePSOSkyCube();
+	void MakePSOParticle();
+	void MakePSOEnvironment();
 	void MakePSODebugLine();
 };
 

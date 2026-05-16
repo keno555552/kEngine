@@ -3,14 +3,15 @@
 #include "inputCore.h"
 #include "soundManager.h"
 #include "SrvManager/SrvManager.h"
-#include "drawEngine/drawEngine.h"
 #include "LinearAlgebra/TransformationMatrix.h"
 #include "LinearAlgebra/Vector2.h"
 #include "Data/Render/CPUData/materialconfig.h"
+#include "Tool/EffectSystem/ParticleSystem/ParticleInstance.h"
 #include "TimeManager/TimeManager.h"
 #include "AnimationSystem/AnimationManager.h"
 #include "DrawData/DrawDataCollector.h"
 #include "CameraManager/CameraManager.h"
+#include "drawEngine/drawEngine.h"
 
 #ifdef USE_IMGUI
 #include "ImGuiManager.h"
@@ -26,6 +27,7 @@
 #include "Data/Render/CPUData/ObjectData.h"
 #include "Data/Render/CPUData/SpriteData.h"
 //#include "InstanceManager.h"
+#include "Tool/EffectSystem/EffectManager.h"
 #include "Resource/ResourceManager.h"
 #include "Resource/TextureManager.h"
 #include "LightManager/LightManager.h"
@@ -64,6 +66,7 @@ public:
 	void DrawDebugLine(DebugLine* debugLine);
 	void Draw2D(SpriteData* spriteData);
 	void Draw3D(ObjectData* objectData);
+	void DrawParticle(std::vector<ObjectData>& objectList, std::vector<ParticleInstance>& instance);
 
 	int GetModelTextureHandle(int modelHandle, int part);
 
@@ -211,9 +214,11 @@ public:
 	AnimationManager* GetAnimationManager() const;
 	DrawDataCollector* GetDrawDataCollector() const;
 	DrawEngine* GetDrawEngine() const;
+
 	SoundManager* GetSoundManager() const;
 	InputCore* GetInputManager() const;
 	TimeManager* GetTimeManager()const;
+	EffectManager* GetEffectManager() const;
 
 #pragma endregion
 
@@ -253,6 +258,9 @@ private:
 
 	/// ============ 時間関連 ============///
 	std::unique_ptr <TimeManager> timeManager{};
+
+	/// ============ Effect関連 ============///
+	std::unique_ptr <EffectManager> effectManager{};
 
 	/// =========== ゲーム継続関連 ===========///
 	static bool isGameOn_;

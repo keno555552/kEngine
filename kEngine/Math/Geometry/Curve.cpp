@@ -1,6 +1,6 @@
 #include "Curve.h"
 
-Vector2 Bezier(const Vector2 p0, const Vector2 p1, const Vector2 p2, int time, int clock) {
+Vector2 Bezier(const Vector2 p0, const Vector2 p1, const Vector2 p2, float time, float clock) {
 	Vector2 Np0 = {
 		Lerp(p0.x,p1.x,time,clock),
 		Lerp(p0.y,p1.y,time,clock)
@@ -16,7 +16,7 @@ Vector2 Bezier(const Vector2 p0, const Vector2 p1, const Vector2 p2, int time, i
 }
 
 
-Vector3 Bezier(const Vector3 p0, const Vector3 p1, const Vector3 p2, int time, int clock) {
+Vector3 Bezier(const Vector3 p0, const Vector3 p1, const Vector3 p2, float time, float clock) {
 	Vector3 Np0 = {
 		Lerp(p0.x,p1.x,time,clock),
 		Lerp(p0.y,p1.y,time,clock),

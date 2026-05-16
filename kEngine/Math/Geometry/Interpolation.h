@@ -9,7 +9,7 @@
 /// <param name="c">補間用変数t</param>
 /// <param name="t">総分割数</param>
 /// <returns></returns>
-float Lerp(float a, float b, int c, int t);
+float Lerp(float a, float b, float c, float t);
 
 //void Draw3DLine(const Line& line, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, int color);
 

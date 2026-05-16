@@ -43,6 +43,9 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 
 	inputManager = std::make_unique<InputCore>();
 	inputManager->Initialize(dxComm.get(), timeManager.get());
+	
+	effectManager = std::make_unique<EffectManager>();
+	effectManager->Initialize(this);
 
 }
 
@@ -64,6 +67,7 @@ void kEngine::Finalize() {
 	animationManager.reset();
 	cameraManager->Finalize();
 	lightManager->Finalize();
+	effectManager->Finalize();
 
 	SrvManager::GetInstance()->Finalize();
 	SrvManager::Destroy();
@@ -88,6 +92,9 @@ void kEngine::EndFrame() {
 	DebugDraw::Clear();
 
 #endif
+
+	effectManager->Update();
+	effectManager->Draw();
 
 	animationManager->Update();
 	drawDataCollector->EndCollect();
@@ -154,6 +161,10 @@ void kEngine::Draw3D(ObjectData* object) {
 	} 
 
 	drawDataCollector->Collect3D(object);
+}
+
+void kEngine::DrawParticle(std::vector<ObjectData>& objectList, std::vector<ParticleInstance>& instance) {
+	drawDataCollector->CollectParticle(objectList, instance);
 }
 
 int kEngine::GetModelTextureHandle(int modelHandle, int part) {
@@ -539,6 +550,10 @@ InputCore* kEngine::GetInputManager() const {
 
 TimeManager* kEngine::GetTimeManager() const {
 	return timeManager.get();
+}
+
+EffectManager* kEngine::GetEffectManager() const {
+	return effectManager.get();
 }
 
 #pragma endregion

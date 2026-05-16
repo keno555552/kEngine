@@ -28,6 +28,7 @@ public:
 
 	Microsoft::WRL::ComPtr <ID3D12PipelineState> GetPso(PSOKey keys);
 	void SetPso(PSOKey keys);
+	void SetPsoStrong(PSOKey keys);
 
 private:
 

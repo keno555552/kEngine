@@ -7,3 +7,4 @@
 #include "Mesh/Model.h"
 #include "Mesh/ModelGroup.h"
 #include "Mesh/SkyCube.h"
+#include "Mesh/PlaneMesh.h"

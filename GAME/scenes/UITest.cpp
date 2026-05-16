@@ -1,5 +1,6 @@
 #include "UITest.h"
 #include "DebugDraw.h"
+#include "EngineAssets/Particle/HitSpark.h"
 
 UITest::UITest(kEngine* system) {
 	/// =========== システム初期化 ============///
@@ -64,9 +65,11 @@ UITest::UITest(kEngine* system) {
 	smallStageHandel_ = system_->SetModelObj("./GAME/Object/smallStage/smallStage.obj");
 
 	whiteTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/white5x5.png");
+	clicleTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/circle_withAlpha.png");
+	//clicleTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/uvChecker.png");
 
 	//BGObject.obj
-	objectHandle_ = system_->SetModelObj("./GAME/Object/Goal/Goal.obj");
+	//objectHandle_ = system_->SetModelObj("./GAME/Object/Goal/Goal.obj");
 	//objectHandle_ = system_->SetModelObj("./kEngine/EngineAssets/Object/charater/charater.obj");
 
 	//ddsTest = system_->LoadTexture("./GAME/resources/texture/skyCube/rostock_laage_airport_4k.dds");
@@ -92,10 +95,12 @@ UITest::UITest(kEngine* system) {
 	box_->IntObject(system_);
 	//box_->CreateModelData(objectHandle_);
 	box_->CreateDefaultData();
-	box_->modelHandle_ = config::default_Sphere_MeshBufferHandle_;
-	box_->objectParts_[0].materialConfig->textureHandle = whiteTextureHandle_;
+	//box_->modelHandle_ = config::default_Cube_MeshBufferHandle_;
+	box_->modelHandle_ = config::default_Plane_MeshBufferHandle_;
+	box_->objectParts_[0].materialConfig->textureHandle = clicleTextureHandle_;
+	box_->isBillboard_ = true;
 	//box_->objectParts_[0].materialConfig->isReflective = true;
-	box_->mainPosition.transform.scale = Vector3(0.5f, 0.5f, 0.5f);
+	//box_->mainPosition.transform.scale = Vector3(0.5f, 0.5f, 0.5f);
 	box_->mainPosition.transform.translate = Vector3(0.0f, 0.0f, 0.0f);
 
 	skybox_ = std::make_unique<Object>();
@@ -103,7 +108,7 @@ UITest::UITest(kEngine* system) {
 	skybox_->CreateDefaultData();
 	skybox_->modelHandle_ = config::default_SkyCube_MeshBufferHandle_;
 	skybox_->objectParts_[0].materialConfig->textureHandle = ddsTest;
-	skybox_->objectParts_[0].materialConfig->MakePSOSkyCube();
+	skybox_->objectParts_[0].materialConfig->MakePSOEnvironment();
 	skybox_->mainPosition.transform.scale = Vector3(200.0f, 200.0f, 200.0f);
 
 	detailButton_ = std::make_unique<DetailButton>(system_);
@@ -111,6 +116,15 @@ UITest::UITest(kEngine* system) {
 
 	panel_ = std::make_unique<Panel>(system_);
 	panel_->SetPanel({ 720.0f,300.0f }, 500.0f, 500.0f);
+
+	/// =========== パーティクル作る ============///
+
+	HitSpark hitSpark;
+	hitSpark.startPosition = { 0.0f, 0.0f, 0.0f };
+	hitSpark.objectList[0].objectParts_[0].materialConfig->textureHandle = clicleTextureHandle_;
+	hitSpark.objectList[0].objectParts_[0].materialConfig->reflectiveStrength = 0.0f;
+	particleHandle_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitSpark, 0);
+
 }
 
 UITest::~UITest() {
@@ -158,11 +172,23 @@ void UITest::Update() {
 		system_->SoundPlaySE(soundHandle_, 0.5f);
 	}
 
-	if (detailButton_->GetIsClicked() || detailButton_->GetIsRelease()) {
-		box_->objectParts_[0].materialConfig->isReflective = true;
-	} else {
-		box_->objectParts_[0].materialConfig->isReflective = false;
+	//if (detailButton_->GetIsPress()) {
+	//	for(auto& object : box_->objectParts_){ object.materialConfig->reflectiveStrength = 1.0f; }
+	//} else {
+	//	for(auto& object : box_->objectParts_){ object.materialConfig->reflectiveStrength = 0.0f; }
+	//}
+
+	if (detailButton_->GetIsClicked()) {
+		system_->GetEffectManager()->GetParticleManager()->ShootEmitter(particleHandle_, 1);
 	}
+
+	//if (system_->GetMouseTriggerOn(0)) {
+	//	box_->objectParts_[0].materialConfig->reflectiveStrength += 0.05f;
+	//}
+	//
+	//if (system_->GetMouseTriggerOn(1)) {
+	//	box_->objectParts_[0].materialConfig->reflectiveStrength -= 0.05f;
+	//}
 
 	/// Panelのロジック処理
 	if (isPress_) {
@@ -189,33 +215,33 @@ void UITest::Update() {
 }
 
 void UITest::MouseLogic() {
-	
+
 	auto cam = usingCamera_.lock();
 	if (!cam) return;
 
 	Ray mouseRay = usingCamera_.lock()->ScreenPointToRay(system_->GetMousePosVector2());
 
-	Sphere target;
-	target.center = box_->mainPosition.transform.translate;
-	target.radius = 0.5f;
-	isHit = crashDecision(target, mouseRay);
-
-	AABB aabb;
-	aabb.min = box_->mainPosition.transform.translate - Vector3(0.5f, 0.5f, 0.5f);
-	aabb.max = box_->mainPosition.transform.translate + Vector3(0.5f, 0.5f, 0.5f);
-	bool aabbHit = crashDecision(aabb, mouseRay);
-
-	if (isHit) {
-		DebugDraw::AddSphere(target, { 1.0f,0.0f,0.0f,1.0f }, cam.get());
-	} else {	
-		DebugDraw::AddSphere(target, { 1.0f,1.0f,0.0f,1.0f }, cam.get());
-	}
-
-	if (aabbHit) {
-		DebugDraw::AddAABB(aabb, { 1.0f,0.0f,0.0f,1.0f });
-	} else {	
-		DebugDraw::AddAABB(aabb, { 0.0f,1.0f,0.0f,1.0f });
-	}
+	//Sphere target;
+	//target.center = box_->mainPosition.transform.translate;
+	//target.radius = 0.5f;
+	//isHit = crashDecision(target, mouseRay);
+	//
+	//AABB aabb;
+	//aabb.min = box_->mainPosition.transform.translate - Vector3(0.5f, 0.5f, 0.5f);
+	//aabb.max = box_->mainPosition.transform.translate + Vector3(0.5f, 0.5f, 0.5f);
+	//bool aabbHit = crashDecision(aabb, mouseRay);
+	//
+	//if (isHit) {
+	//	DebugDraw::AddSphere(target, { 1.0f,0.0f,0.0f,1.0f }, cam.get());
+	//} else {	
+	//	DebugDraw::AddSphere(target, { 1.0f,1.0f,0.0f,1.0f }, cam.get());
+	//}
+	//
+	//if (aabbHit) {
+	//	DebugDraw::AddAABB(aabb, { 1.0f,0.0f,0.0f,1.0f });
+	//} else {	
+	//	DebugDraw::AddAABB(aabb, { 0.0f,1.0f,0.0f,1.0f });
+	//}
 
 }
 
@@ -274,5 +300,11 @@ void UITest::ImGuiPart() {
 	ImGui::Begin("Panel");
 	ImGui::SliderFloat3("Position", &panel_->mainPosition.transform.translate.x, 0.0f, 500.0f);
 	ImGui::End();
+
+	ImGui::Begin("Plane");
+	ImGui::SliderFloat3("Position", &box_->objectParts_[0].transform.rotate.x, -6.0f, 6.0f);
+	ImGui::Checkbox("isClicked", &isPress);
+	ImGui::End();
+
 }
 #endif 

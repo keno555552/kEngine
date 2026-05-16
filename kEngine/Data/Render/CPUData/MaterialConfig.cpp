@@ -16,8 +16,6 @@ bool MaterialConfig::operator==(const MaterialConfig& target)const {
 	if (rasterizerMode != target.rasterizerMode)return false;
 	if (depthStencilType != target.depthStencilType)return false;
 
-	if (isReflective != target.isReflective)return false;
-
 	if (enableLighting != target.enableLighting)return false;
 	if (reflectiveStrength != target.reflectiveStrength)return false;
 
@@ -53,8 +51,7 @@ void InitMaterialConfig(MaterialConfig* materialConfig) {
 	RasterizerMode rasterizerMode = (RasterizerMode)config::default_RasterizerMode_;
 	DepthStencilType depthStencilType = (DepthStencilType)config::default_DepthStenctilState_;
 
-	materialConfig->isReflective = false;
-	materialConfig->reflectiveStrength = 0.3f;
+	materialConfig->reflectiveStrength = 0.0f;
 
 	materialConfig->enableLighting = true;
 
@@ -77,10 +74,20 @@ MaterialConfig InitMaterialConfig() {
 
 /// ========================= 便利PSO関連生成関数 ========================= ///
 
-void MaterialConfig::MakePSOSkyCube() {
+void MaterialConfig::MakePSOParticle() {
 
-	lightModelType = LightModelType::SkyCube;
-	renderModelType = RenderModelType::SkyCube;
+	lightModelType = LightModelType::BlinnPhongReflection;
+	renderModelType = RenderModelType::Static;
+	blendModeType = BlendModeType::AddBlend;
+	rasterizerMode = RasterizerMode::CullBack;
+	depthStencilType = DepthStencilType::ReadOnly;
+
+}
+
+void MaterialConfig::MakePSOEnvironment() {
+
+	lightModelType = LightModelType::Environment;
+	renderModelType = RenderModelType::Environment;
 	blendModeType = BlendModeType::NormalBlend;
 	rasterizerMode = RasterizerMode::CullBack;
 	depthStencilType = DepthStencilType::ReadOnly;

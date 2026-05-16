@@ -35,6 +35,7 @@ void DrawDataCollector::PreCollect() {
 	transparentBucket2D_.clear();
 	opaqueBucket3D_.clear();
 	transparentBucket3D_.clear();
+	bucketParticleC_.clear();
 
 	memset(instancingListDL_, 0, sizeof(TransformationMatrix) * maxDebugLineInstance);
 	debugLinesVertexBucket_.clear();
@@ -56,13 +57,18 @@ void DrawDataCollector::PreCollect() {
 void DrawDataCollector::EndCollect() {
 
 	/// ネールスキップ
-	if (opaqueBucket2D_.empty() && transparentBucket2D_.empty() &&
-		opaqueBucket3D_.empty() && transparentBucket3D_.empty())
+	bool no2D = opaqueBucket2D_.empty() && transparentBucket2D_.empty();
+	bool no3D = opaqueBucket3D_.empty() && transparentBucket3D_.empty();
+	bool noParticle = bucketParticleC_.empty();
+	if (no2D &&
+		no3D &&
+		noParticle)
 		return;
 
 	/// 実際のインスタンスリスト作成
-	BuildInstanceList2D();
-	BuildInstanceList3D();
+	if (!no2D)			BuildInstanceList2D();
+	if (!no3D)			BuildInstanceList3D();
+	if (!noParticle)	BuildInstanceListParticle();
 
 }
 
@@ -364,20 +370,42 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustment3D(ObjectData& object
 	Matrix4x4 projectionMatrix = cam->GetProjectionMatrix();
 
 
-	// Billboard 子物件：XY 旋轉を0にする
-	if (object.isBillboard_) {
-		Vector3 camRot = cam->GetTransform().rotate;
-		part.transform.rotate.x = camRot.x;
-		part.transform.rotate.y = camRot.y;
-		part.transform.rotate.z = 0.0f;
-		DirtyEulerToQuat(part);
-	}
+	//if (object.isBillboard_) {
+	//	Vector3 camRot = cam->GetTransform().rotate;
+	//	part.transform.rotate.x = camRot.x;
+	//	part.transform.rotate.y = camRot.y;
+	//	//part.transform.rotate.z = 2;
+	//	DirtyEulerToQuat(part);
+	//}
+	Matrix4x4 localMatrix;
 
-	Matrix4x4 localMatrix = MakeAffineMatrix(
-		part.transform.scale,
-		part.transform.rotate,
-		part.transform.translate
-	);
+	/// Billboard計算--カメラの回転を打ち消
+	if (object.isBillboard_) {
+
+		localMatrix = MakeAffineMatrix(
+			part.transform.scale,
+			Vector3{ 0, 0, part.transform.rotate.z },
+			part.transform.translate
+		);
+
+		/// 回転の移動を行列を取り除く
+		Matrix4x4 rot = viewMatrix;
+		rot.m[3][0] = rot.m[3][1] = rot.m[3][2] = 0;
+		rot = rot.Inverse();
+
+		/// 
+		//Matrix4x4 roll = MakeRZMatrix4x4(part.transform.rotate.z);
+		//Matrix4x4 finalRot = rot * roll;
+
+		localMatrix = localMatrix * rot;
+	} else {
+
+		localMatrix = MakeAffineMatrix(
+			part.transform.scale,
+			part.transform.rotate,
+			part.transform.translate
+		);
+	}
 
 	int animationIt = animationManager_->GetControlObjectPartHandle(&object);
 
@@ -407,7 +435,15 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustment3D(ObjectData& object
 		);
 	}
 
-	Matrix4x4 followWorldMatrix = MakeFollowObjectMatrix3D(&object);
+	Matrix4x4 followWorldMatrix;
+
+	if (object.isBillboard_) {
+		followWorldMatrix = Identity();
+	} else {
+		followWorldMatrix = MakeFollowObjectMatrix3D(&object);
+	}
+
+	localMatrix;
 
 	Matrix4x4 worldMatrix = localMatrix * animationMatrix * followWorldMatrix;
 
@@ -522,8 +558,8 @@ int DrawDataCollector::SetSkinningData(WellForGPU* mappedPalette, int mappedNum,
 	/// mappedPaletteすべての行列をIdentityで埋める
 	std::generate(
 		skinningDataList_.back().mappedPalette.begin(),
-		skinningDataList_.back().mappedPalette.end(), 
-		[](){return WellForGPU{ Identity(),Identity() }; }
+		skinningDataList_.back().mappedPalette.end(),
+		[]() {return WellForGPU{ Identity(),Identity() }; }
 	);
 
 	return int(skinningDataList_.size() - 1);
@@ -541,70 +577,99 @@ void DrawDataCollector::ClearSkinningData(int index) {
 
 #pragma region /// ================================= パーティクル関連 ================================== ///
 
-void DrawDataCollector::CollectParticleC(ObjectData* object) {
+void DrawDataCollector::CollectParticle(std::vector<ObjectData>& objectList, std::vector<ParticleInstance>& instance) {
+
 	/// nullチェック
-	if (!object)return;
+	if (objectList.empty()) {
+		Logger::Log("[kEngine]DDC:CollectParticlePrototype() ObjectList is null!");
+		return;
+	}
 
-	int modelCounter = 0;
-	for (auto& objectPart : object->objectParts_) {
+	for (int i = 0; i < instance.size(); ++i) {
 
-		/// ========================================  RenderData作成  ========================================///
+		const auto& inst = instance[i];
 
-		/// RenderData作成
-		RenderData renderData;
+		/// パーティクルのObjectIndexがRenderDataのインデックス範囲内かチェック
+		if (inst.objectIndex < 0 || inst.objectIndex >= (int)objectList.size()) {
+			Logger::Log("[kEngine]DDC:ParticleInstance objectIndex is out of range! Data will not be input.");
+			Logger::Log("[kEngine]DDC:ParticleInstance ObjectIndex:%d", i);
+			continue;
+		}
 
-		/// メッシュ設定
-		Model* modelData = ResourceManager::GetInstance()->modelGroupList_[object->modelHandle_]->GetModel(modelCounter);
-		renderData.mesh = modelData;
+		auto& targetObject = objectList[inst.objectIndex];
 
-		/// マテリアル設定
-		objectPart.materialConfig->MakeUVMatrix();
-		renderData.materialID = ResourceManager::GetInstance()->InputMaterialConfig(objectPart.materialConfig);
+		for (int i = 0; i < targetObject.objectParts_.size(); ++i) {
+			/// ================ RenderData作成
+			/// RenderData作成
+			ParticleInstanceForDDC data;
 
-		/// 変換行列設定
-		renderData.transformData = ObjectWVPAdjustmentPC(*object, objectPart, *modelData->GetModelData().get(), modelCounter);
+			/// メッシュ設定
+			Model* modelData = ResourceManager::GetInstance()->modelGroupList_[targetObject.modelHandle_]->GetModel(i);
+			data.mesh = modelData;
 
-		/// PSO設定
-		renderData.psoKey = PSODecision(*objectPart.materialConfig);
+			/// Material制作, ID獲得
+			MaterialConfig materialConfig = *targetObject.objectParts_[i].materialConfig;
+			materialConfig.textureColor = inst.nowColor;
+			materialConfig.MakeUVMatrix();
 
-		/// サブメッシュインデックス設定
-		renderData.subMeshIndex = 0;
+			auto matPtr = std::make_shared<MaterialConfig>(materialConfig);
+			data.materialID = ResourceManager::GetInstance()->InputMaterialConfig(matPtr);
 
-		/// ========================================  バケット振り分け  ========================================///
-		AddObjectToBucketPC(renderData);
+			/// PSO制作
+			data.psoKey = PSODecision(materialConfig);
 
-		modelCounter++;
+			/// 変換行列設定
+			data.transMatrix = ObjectWVPAdjustmentPC(targetObject, *modelData->GetModelData().get(), i, inst);
+
+			/// バケットに入れる
+			AddObjectToBucketPC(data);
+		}
 	}
 }
 
-
-TransformationMatrix DrawDataCollector::ObjectWVPAdjustmentPC(ObjectData& object, ObjectPart& part, ModelData& modelData, int modelCounter) {
+TransformationMatrix DrawDataCollector::ObjectWVPAdjustmentPC(ObjectData& object, ModelData& modelData, int modelCounter, ParticleInstance particleData) {
 	Camera* cam = cameraManager_->GetActiveCamera();
 	Matrix4x4 viewMatrix = cam->GetViewMatrix();
 	Matrix4x4 projectionMatrix = cam->GetProjectionMatrix();
 
 	Matrix4x4 followWorldMatrix = MakeFollowObjectMatrix3D(&object);
 
-	// Billboard 子物件：XY 旋轉を0にする
-	if (object.isBillboard_) {
-		Vector3 camRot = cam->GetTransform().rotate;
-		part.transform.rotate.x = camRot.x;
-		part.transform.rotate.y = camRot.y;
-		part.transform.rotate.z = 0.0f;
-	}
+	auto& part = object.objectParts_[modelCounter];
 
-	Matrix4x4 localMatrix = MakeAffineMatrix(
-		part.transform.scale,
-		part.transform.rotate,
-		part.transform.translate
-	);
+	Matrix4x4 localMatrix;
+
+	/// Billboard計算--カメラの回転を打ち消
+	if (object.isBillboard_) {
+
+		localMatrix = MakeAffineMatrix(
+			particleData.nowScale,
+			Vector3{ 0, 0, particleData.nowRotate.z },
+			particleData.nowTranslate
+		);
+
+		/// 回転の移動を行列を取り除く
+		Matrix4x4 rot = viewMatrix;
+		rot.m[3][0] = rot.m[3][1] = rot.m[3][2] = 0;
+		rot = rot.Inverse();
+
+		/// 
+		//Matrix4x4 roll = MakeRZMatrix4x4(part.transform.rotate.z);
+		//Matrix4x4 finalRot = rot * roll;
+
+		localMatrix = localMatrix * rot;
+	} else {
+
+		localMatrix = MakeAffineMatrix(
+			particleData.nowScale,
+			particleData.nowRotate,
+			particleData.nowTranslate
+		);
+	}
 
 	//Matrix4x4 worldMatrix = localMatrix * partParentMatrix * followWorldMatrix;
 	Matrix4x4 worldMatrix = localMatrix * followWorldMatrix;
 
-	uint32_t nodeIndex = modelData.meshDataList[modelCounter].nodeIndex;
-	Matrix4x4 nodeMatrix = modelData.nodeList[nodeIndex].globalMatrix;
-	Matrix4x4 finalWorld = nodeMatrix * worldMatrix;
+	Matrix4x4 finalWorld = worldMatrix;
 
 	TransformationMatrix result{};
 	result.WVP = (finalWorld * viewMatrix * projectionMatrix);
@@ -613,18 +678,10 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustmentPC(ObjectData& object
 	return result;
 }
 
-void DrawDataCollector::AddObjectToBucketPC(RenderData& renderData) {
+void DrawDataCollector::AddObjectToBucketPC(ParticleInstanceForDDC& renderData) {
 
-	auto checker = ResourceManager::GetInstance()->idToIndex_.find(renderData.materialID);
-
-	if (checker == ResourceManager::GetInstance()->idToIndex_.end()) {
-		Logger::Log("[kError]DDC:MaterialID not found in ResourceManager!");
-		return;
-	} else {
-		bucketParticleC_.emplace_back(renderData);
-	}
-
-	auto& t = renderData.transformData;
+	/// 分類収納
+	bucketParticleC_[renderData.mesh][renderData.psoKey][renderData.materialID].emplace_back(renderData.transMatrix);
 }
 
 #pragma endregion
@@ -686,6 +743,21 @@ void DrawDataCollector::BuildInstanceList3D() {
 	}
 }
 
+void DrawDataCollector::BuildInstanceListParticle() {
+	for (auto& [mesh, psoBuckets] : bucketParticleC_) {
+		for (auto& [psoKey, materialBuckets] : psoBuckets) {
+			for (auto& [materialID, instanceDataList] : materialBuckets) {
+				for (const auto& instanceData : instanceDataList) {
+					instancingListParticleC_[instanceCounterParticleC_].WVP = instanceData.WVP;;
+					instancingListParticleC_[instanceCounterParticleC_].world = instanceData.world;
+					instancingListParticleC_[instanceCounterParticleC_].WorldInverseTranspose = instanceData.WorldInverseTranspose;
+					instanceCounterParticleC_++;
+				}
+			}
+		}
+	}
+}
+
 #pragma endregion
 
 #pragma region /// ========================== カメラ/マテリアル/ライティング関連 ========================= ///
@@ -716,7 +788,7 @@ PSOKey DrawDataCollector::PSODecision(MaterialConfig& material) {
 		break;
 
 	case RenderModelType::Sprite2D:
-	case RenderModelType::SkyCube:
+	case RenderModelType::Environment:
 	case RenderModelType::Static:
 	case RenderModelType::Skinned:
 	case RenderModelType::FlameNeonGlow:
@@ -726,11 +798,6 @@ PSOKey DrawDataCollector::PSODecision(MaterialConfig& material) {
 	default:
 		key.primitiveType = PrimitiveType::TRIANGLE;
 		break;
-	}
-
-	/// PSOKeyのFeatureFlagsをMaterialConfigから設定
-	if (material.isReflective) {
-		key.featureMask |= (uint64_t)FeatureFlags::EnvReflection;
 	}
 
 	return key;
