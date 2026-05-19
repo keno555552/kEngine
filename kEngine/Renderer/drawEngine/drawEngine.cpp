@@ -207,6 +207,16 @@ void DrawEngine::CommitDraw() {
 
 void DrawEngine::EndDraw() {
 
+	// ⭐ 切回 BackBuffer（第二次渲染）
+	auto backRTV = directXDriver_->GetCurrentBackBufferRTV();
+	commandList_->OMSetRenderTargets(1, &backRTV, FALSE, nullptr);
+
+	// ⭐ 綁定 OffscreenRT 的 SRV
+	commandList_->SetGraphicsRootDescriptorTable(0, m_OffscreenRT.srvHandleGPU);
+
+	/// 画面をフルスクリーンで描画
+	DrawFullscreenQuad();
+
 	/// 各種のリソースを解放
 	resourceManager_->ClearTurnResource();
 
@@ -215,18 +225,7 @@ void DrawEngine::EndDraw() {
 		if (ptr.state == 2) { ptr.state = 0; }
 	}
 
-	// ⭐ 切回 BackBuffer（第二次渲染）
-	auto backRTV = directXDriver_->GetCurrentBackBufferRTV();
-	commandList_->OMSetRenderTargets(1, &backRTV, FALSE, nullptr);
 
-	// ⭐ 綁定 OffscreenRT 的 SRV
-	commandList_->SetGraphicsRootDescriptorTable(0, m_OffscreenRT.srvHandleGPU);
-
-	// ⭐ 畫 Fullscreen Quad
-	DrawFullscreenQuad();
-
-	// 清理
-	resourceManager_->ClearTurnResource();
 }
 
 void DrawEngine::PSODecision(PSOKey& psoKey) {

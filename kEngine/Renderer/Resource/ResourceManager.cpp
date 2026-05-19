@@ -527,8 +527,9 @@ RenderTexture ResourceManager::CreateRenderTexture(
 
 	RenderTexture renderTexture{};
 	renderTexture.resource = renderTextureResource;
-	renderTexture.rtvHandleCPU = SrvManager::GetInstance()->GetCPUDescriptorHandle(rtvIndex);
+	renderTexture.rtvHandleCPU = RtvManager::GetInstance()->GetCPUDescriptorHandle(rtvIndex);
 	renderTexture.srvHandleCPU = SrvManager::GetInstance()->GetCPUDescriptorHandle(srvIndex);
+	renderTexture.srvHandleGPU = SrvManager::GetInstance()->GetGPUDescriptorHandle(srvIndex);
 	renderTexture.width = width;
 	renderTexture.height = height;
 	renderTexture.format = format;

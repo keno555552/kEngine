@@ -64,6 +64,9 @@ public:
 	/// 描画関数のコア
 	void DrawCall();
 
+	/// ===== Offscreen描画関数
+	void DrawFullscreenQuad();
+
 	/// EnviromentReflection関連関数
 	void SetEnviromentReflectionTexture(int textureHandle);
 
