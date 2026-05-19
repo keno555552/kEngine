@@ -51,6 +51,7 @@ private:
 	ShaderPair CompileDebugLineShader(PSOKey& psoKeys);
 	ShaderPair CompileSkyCubeShader(PSOKey& psoKeys);
 	ShaderPair CompileFlameNeonGlowShader(PSOKey& psoKeys);
+	ShaderPair CompileParticleScreenQuad(PSOKey& psoKeys);
 
 	void checkCompileResult(ShaderPair shaderPair);
     

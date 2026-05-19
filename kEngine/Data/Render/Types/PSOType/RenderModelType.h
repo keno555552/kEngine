@@ -8,6 +8,7 @@ enum class RenderModelType {
 	Environment,
 	Sprite2D,
 	FlameNeonGlow,
-	NumOfRenderModels
+	FullscreenQuad,
+	NumOfRenderModels,
 
 };

@@ -40,6 +40,7 @@ void DrawEngine::Initialize(
 
 	lightBuffer_ = std::make_unique<InstanceBuffer<LightGPU>>(directXDriver_);
 	lightListData_ = lightBuffer_->CreateInstanceBuffer(numOfLight);
+	lightBuffer_->GetResource()->SetName("LightBuffer");
 
 
 	/// =========================== Tile用wvpBufferを作成 =========================== ///
@@ -52,6 +53,8 @@ void DrawEngine::Initialize(
 	debugLineResource_ = std::make_unique<InstanceBuffer<TransformationMatrix>>(directXDriver_);
 	TransformationMatrix* instanceListPtrDL = debugLineResource_->CreateInstanceBuffer(numInstanceDL);
 	drawDataCollector_->SetInstanceListDL(instanceListPtrDL);
+
+	debugLineResource_->GetResource()->SetName("DebugLineWVPBuffer");
 
 	/// DebugLine用のインスタンスバッファを初期化
 	IntializeInstanceTMBuffer(instanceListPtrDL, (size_t)numInstanceDL);
@@ -66,6 +69,8 @@ void DrawEngine::Initialize(
 	TransformationMatrix* instanceListPtr2D = tile2DWVPResource_->CreateInstanceBuffer(numInstance2D);
 	drawDataCollector_->SetInstanceList2D(instanceListPtr2D);
 
+	tile2DWVPResource_->GetResource()->SetName("2DTileWVPBuffer");
+
 	/// DebugLine用のインスタンスバッファを初期化
 	IntializeInstanceTMBuffer(instanceListPtr2D, (size_t)numInstance2D);
 
@@ -79,6 +84,8 @@ void DrawEngine::Initialize(
 	TransformationMatrix* instanceListPtr3D = tile3DWVPResource_->CreateInstanceBuffer(numInstance3D);
 	drawDataCollector_->SetInstanceList3D(instanceListPtr3D);
 
+	tile3DWVPResource_->GetResource()->SetName("3DTileWVPBuffer");
+
 	/// DebugLine用のインスタンスバッファを初期化
 	IntializeInstanceTMBuffer(instanceListPtr3D, (size_t)numInstance3D);
 
@@ -90,6 +97,7 @@ void DrawEngine::Initialize(
 	tilePCWVPResource_ = std::make_unique<InstanceBuffer<TransformationMatrix>>(directXDriver_);
 	TransformationMatrix* instanceListPtrPC = tilePCWVPResource_->CreateInstanceBuffer(numInstancePC);
 	drawDataCollector_->SetInstanceListParticle(instanceListPtrPC);
+	tilePCWVPResource_->GetResource()->SetName("ParticleWVPBuffer");
 
 	/// DebugLine用のインスタンスバッファを初期化
 	IntializeInstanceTMBuffer(instanceListPtrPC, (size_t)numInstancePC);
@@ -104,23 +112,25 @@ void DrawEngine::Initialize(
 		offsetData.instanceOffsetResource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&offset));
 		offsetData.instanceOffset = offset;
 		offsetData.state = 0;
+
+		offsetData.instanceOffsetResource->SetName("InstanceOffsetBuffer" + std::to_string(i));
 		instanceOffsetData_.push_back(std::move(offsetData));
 	}
 
 	/// =========================== OffscreenRT初期化 =========================== ///
-	
+
 	m_OffscreenRT = resourceManager_->CreateRenderTexture(
 		kClientWidth_,
 		kClientHeight_,
 		GetDXGIFormat(RenderTargetFormatType::BackBuffer),
 		Vector4{ 1.0f, 0.0f, 0.0f, 1.0f }
-		);
+	);
 
 	/// =========================== カメラバッファの初期化 =========================== ///
 	cameraBuffer_ = std::make_unique<BasicResource>();
 	cameraBuffer_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(CameraForGPU));
 	cameraBuffer_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&cameraPtr_));
-
+	cameraBuffer_->SetName("CameraBuffer");
 
 	/// ========================== デフォルトのモデルを設定 ========================== ///
 	defaultTextureHandle_ = resourceManager_->LoadModelTexture("./kEngine/EngineAssets/TemplateResource/texture/white5x5.png");
@@ -154,12 +164,16 @@ void DrawEngine::Finalize() {
 }
 
 void DrawEngine::StartFrame() {
+
 	// 描画用のDescriptorHeapの設定
 	ID3D12DescriptorHeap* descriptorHeaps[] = { srvManager_->GetDescriptorHeap() };  // 現在使用正確的 getter 函式
 	commandList_->SetDescriptorHeaps(1, descriptorHeaps);
 
 	commandList_->RSSetViewports(1, &viewport);  // Viewportを設定
 	commandList_->RSSetScissorRects(1, &scissorRect);  // Scissorを設定
+
+	///// 前フリームの各種のリソースを解放
+	//resourceManager_->ClearTurnResource();
 
 	/// 各種のリソースを設定(今内容がない)
 	resourceManager_->CreateTurnResource();
@@ -187,11 +201,18 @@ void DrawEngine::PreDraw() {
 
 
 	/// ==================== OffscreenRT関連設定 ==================== ///
+	CD3DX12_RESOURCE_BARRIER offscreenToRT =
+		CD3DX12_RESOURCE_BARRIER::Transition(
+			m_OffscreenRT.resource.Get(),
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+			D3D12_RESOURCE_STATE_RENDER_TARGET
+		);
+	commandList_->ResourceBarrier(1, &offscreenToRT);
+
+	/// RenderTargetをセット
 	auto rtv = m_OffscreenRT.rtvHandleCPU;
 	auto dsv = directXDriver_->GetDsvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart();
-
 	commandList_->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
-
 
 	float clearColor[4] = { 1, 0, 0, 1 };
 	commandList_->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
@@ -207,25 +228,36 @@ void DrawEngine::CommitDraw() {
 
 void DrawEngine::EndDraw() {
 
-	// ⭐ 切回 BackBuffer（第二次渲染）
+	CD3DX12_RESOURCE_BARRIER offscreenToRT =
+		CD3DX12_RESOURCE_BARRIER::Transition(
+			m_OffscreenRT.resource.Get(),
+			D3D12_RESOURCE_STATE_RENDER_TARGET,
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+		);
+
+	commandList_->ResourceBarrier(1, &offscreenToRT);
+
 	auto backRTV = directXDriver_->GetCurrentBackBufferRTV();
 	commandList_->OMSetRenderTargets(1, &backRTV, FALSE, nullptr);
 
-	// ⭐ 綁定 OffscreenRT 的 SRV
+	// 1. 設定 Fullscreen PSO
+	PSOKey psoKey = CreateFullscreenPSOKey();
+	psoManager_->SetPSO(psoKey);
+
+	// 2. ⭐ 綁「OffscreenRT 所在的 SRV heap」
+	ID3D12DescriptorHeap* heaps[] = { SrvManager::GetInstance()->GetDescriptorHeap() };
+	commandList_->SetDescriptorHeaps(1, heaps);
+
+	// 3. 綁 t0
 	commandList_->SetGraphicsRootDescriptorTable(0, m_OffscreenRT.srvHandleGPU);
 
-	/// 画面をフルスクリーンで描画
+	// 4. 畫 Fullscreen Triangle
 	DrawFullscreenQuad();
-
-	/// 各種のリソースを解放
-	resourceManager_->ClearTurnResource();
 
 	for (auto& ptr : instanceOffsetData_) {
 		if (ptr.state == 1) { ptr.state = 2; }
 		if (ptr.state == 2) { ptr.state = 0; }
 	}
-
-
 }
 
 void DrawEngine::PSODecision(PSOKey& psoKey) {
@@ -235,7 +267,7 @@ void DrawEngine::PSODecision(PSOKey& psoKey) {
 		psoKeyInt.featureMask &= ~(uint64_t)FeatureFlags::EnvReflection;
 	}
 
-	psoManager_->SetPso(psoKeyInt);
+	psoManager_->SetPSO(psoKeyInt);
 
 	/// Topology設定
 	switch (psoKeyInt.primitiveType) {
@@ -248,6 +280,9 @@ void DrawEngine::PSODecision(PSOKey& psoKey) {
 		break;
 	}
 }
+
+/// ======================================== Draw関数 ========================================== ///
+/// -------------------------------------- DebugLine関連 --------------------------------------- ///
 
 void DrawEngine::DrawDebugLine() {
 
@@ -274,6 +309,8 @@ void DrawEngine::DrawDebugLine() {
 	/// ========== Draw ==========
 	commandList_->DrawInstanced((UINT)vertices.size(), 1, 0, 0);
 }
+
+/// ------------------------------------------ 2D関連 ------------------------------------------ ///
 
 void DrawEngine::Draw2D() {
 
@@ -402,9 +439,7 @@ void DrawEngine::Draw2DOpaque() {
 	}
 }
 
-/// ======================================================================================================== ///
-/// ======================================================================================================== ///
-/// ======================================================================================================== ///
+/// ------------------------------------------ 3D関連 ------------------------------------------ ///
 
 void DrawEngine::Draw3D() {
 
@@ -547,6 +582,7 @@ void DrawEngine::Draw3DOpaque() {
 		}
 	}
 }
+/// --------------------------------------- Particle関連 --------------------------------------- ///
 
 void DrawEngine::DrawParticle() {
 
@@ -627,6 +663,8 @@ void DrawEngine::DrawParticle() {
 	}
 }
 
+/// ------------------------------------- まとめのDrawCell -------------------------------------- ///
+
 void DrawEngine::DrawCall() {
 
 	/// 非透明、透明順で
@@ -636,6 +674,23 @@ void DrawEngine::DrawCall() {
 	Draw2D();
 	DrawParticle();
 	DrawDebugLine();
+}
+
+/// --------------------------------- OffScreenRendering関連 ----------------------------------- ///
+
+void DrawEngine::DrawFullscreenQuad() {
+
+
+	// 2. 不需要 VB / IB
+	commandList_->IASetVertexBuffers(0, 0, nullptr);
+	commandList_->IASetIndexBuffer(nullptr);
+
+	// 3. 設定 primitive type
+	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	// 4. Draw 3 vertices（Fullscreen Triangle）
+	commandList_->DrawInstanced(3, 1, 0, 0);
+
 }
 
 void DrawEngine::SetEnviromentReflectionTexture(int textureHandle) {
@@ -858,6 +913,8 @@ ID3D12Resource* DrawEngine::CreateDepthStencilTextureResource(ID3D12Device* devi
 		IID_PPV_ARGS(&resource));			// 作成するResourceポインタへのポインタ
 	assert(SUCCEEDED(hr));
 
+	resource->SetName(L"DepthStencilResource");
+
 	char buffer[128];
 	sprintf_s(buffer, "Create resource at %p\n", resource);
 	OutputDebugStringA(buffer);
@@ -885,8 +942,6 @@ void DrawEngine::UpdateDebugLineVertexBuffer(const std::vector<DebugLineVertexGP
 	// 如果 buffer 不夠大 → 重建
 	if (!debugLineVB_ || debugLineVertexBufferSize_ < bufferSize) {
 		debugLineVertexBufferSize_ = bufferSize;
-
-		debugLineVB_.Reset();
 
 		// 用你現有的 BasicResource 工具建立 Upload Buffer
 

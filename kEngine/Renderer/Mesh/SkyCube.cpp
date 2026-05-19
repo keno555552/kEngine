@@ -98,6 +98,9 @@ ID3D12Resource* SkyCube::CreateVertexResource_(ID3D12Device* device) {
 	}
 
 	vertexResource_->GetResource()->Unmap(0, nullptr);
+
+	vertexResource_->SetName("SkyCubeVertexResource");
+
 	return vertexResource_->GetResource().Get();
 }
 
@@ -133,6 +136,8 @@ ID3D12Resource* SkyCube::CreateIndexResource_(ID3D12Device* device) {
 
 	MeshBuffer::vertexNum_ = 24;
 	MeshBuffer::indexNum_ = 36;
+
+	indexResource_->SetName("SkyCubeIndexResource");
 
 	return indexResource_->GetResource().Get();
 }

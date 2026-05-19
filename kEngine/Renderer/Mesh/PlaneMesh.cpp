@@ -27,6 +27,9 @@ ID3D12Resource* PlaneMesh::CreateVertexResource_(ID3D12Device* device) {
 	MeshBuffer::vertexNum_ = 4;
 
 	vertexResource_->GetResource()->Unmap(0, nullptr);
+
+	vertexResource_->SetName("PlaneVertexResource");
+
 	return vertexResource_->GetResource().Get();
 }
 
@@ -57,6 +60,8 @@ ID3D12Resource* PlaneMesh::CreateIndexResource_(ID3D12Device* device) {
 	indexResource_->GetResource()->Unmap(0, nullptr);
 
 	MeshBuffer::indexNum_ = 6;
+
+	indexResource_->SetName("PlaneIndexResource");
 
 	return indexResource_->GetResource().Get();
 }

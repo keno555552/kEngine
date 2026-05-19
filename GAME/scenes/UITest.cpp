@@ -264,7 +264,7 @@ void UITest::Draw() {
 
 	/// 実体処理
 	//skydome_->Draw();
-	skybox_->Draw();
+	//skybox_->Draw();
 	ground_->Draw();
 	box_->Draw();
 	detailButton_->Render();

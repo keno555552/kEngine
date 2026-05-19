@@ -166,7 +166,6 @@ int ResourceManager::CreateModelResource(std::string Path) {
 		}
 	}
 
-
 	/// ファイルを読み取る,或は読んだファイルのハンドルを探す
 	int modelDataHandle = ReadFile(Path);
 
@@ -380,14 +379,31 @@ int ResourceManager::InputMaterialConfig(std::shared_ptr<MaterialConfig> materia
 	/// =========================== 既にある場合、更新してIDを返す =========================== ///
 	if (samePtrEntry) {
 
-		// CPUマテリアル更新 
-		samePtrEntry->cpuMaterial->inputMaterialConfig(*material);
+		//// CPUマテリアル更新 
+		//samePtrEntry->cpuMaterial->inputMaterialConfig(*material);
+		//
+		//// GPUマテリアル更新
+		//MaterialForGPU* gpuPtr = nullptr;
+		//samePtrEntry->gpuMaterial->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&gpuPtr));
+		//*gpuPtr = *samePtrEntry->cpuMaterial;
+		//samePtrEntry->gpuMaterial->GetResource()->Unmap(0, nullptr);
 
-		// GPUマテリアル更新
+		/// GPUマテリアル更新 
 		MaterialForGPU* gpuPtr = nullptr;
-		samePtrEntry->gpuMaterial->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&gpuPtr));
+
+		auto res = samePtrEntry->gpuMaterial->GetResource();
+		Logger::Log("InputMaterialConfig: res = %p\n", res);
+
+		HRESULT hr = res ? res->Map(0, nullptr, reinterpret_cast<void**>(&gpuPtr)) : E_FAIL;
+		Logger::Log("InputMaterialConfig: Map hr = 0x%08X\n", hr);
+
+		if (FAILED(hr)) {
+			// 先不要崩，讓我們看到 log
+			return samePtrEntry->materialID;
+		}
+
 		*gpuPtr = *samePtrEntry->cpuMaterial;
-		samePtrEntry->gpuMaterial->GetResource()->Unmap(0, nullptr);
+		res->Unmap(0, nullptr);
 
 		return samePtrEntry->materialID;
 	}
@@ -421,6 +437,8 @@ int ResourceManager::InputMaterialConfig(std::shared_ptr<MaterialConfig> materia
 	newResource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&gpuPtr));
 	*gpuPtr = *entry.cpuMaterial;
 	newResource->GetResource()->Unmap(0, nullptr);
+	
+	newResource->SetName("MaterialResource"+ std::to_string(entry.materialID));
 
 	materialResourceList_.push_back(std::move(newResource));
 	materialList_.push_back(std::move(entry));
@@ -467,10 +485,12 @@ Microsoft::WRL::ComPtr<ID3D12Resource> ResourceManager::CreateRenderTextureResou
 		&heapProperties,					// Heapの設定
 		D3D12_HEAP_FLAG_NONE,				// Heapの特殊な設定。特になし。
 		&resourceDesc,						// Resourceの設定
-		D3D12_RESOURCE_STATE_RENDER_TARGET,	// 初回のResourceState。RenderTargetとして使うのでRenderTarget状態
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,	// 初回のResourceState。RenderTargetとして使うのでRenderTarget状態
 		&clearValue,						// Clear最適値。
 		IID_PPV_ARGS(&resource));			// 作成するResourceポインタへのポインタ
 	assert(SUCCEEDED(hr));
+
+	resource->SetName(L"RenderTextureResource");
 
 	return resource;
 }

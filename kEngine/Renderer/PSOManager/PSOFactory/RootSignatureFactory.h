@@ -38,6 +38,8 @@ private:
 
 	Microsoft::WRL::ComPtr <ID3D12RootSignature> MakeStaticSkinning(DirectXCore* directXDriver_, PSOKey& key);
 
+	Microsoft::WRL::ComPtr <ID3D12RootSignature> MakeStaticFullscreenQuad(DirectXCore* directXDriver_, PSOKey& key);
+
 };
 
 /// RootSignatureは特別で

@@ -3,6 +3,7 @@
 
 InputLayoutFactory::InputLayoutFactory() {
 	
+	inputLayoutRegistry[RenderModelType::FullscreenQuad] = [this](PSOKey& key) { return MakeInputLayoutFullscreenQuad(); };
 	inputLayoutRegistry[RenderModelType::Sprite2D] = [this](PSOKey& key) { return MakeInputLayoutStatic(); };
 	inputLayoutRegistry[RenderModelType::Static] = [this](PSOKey& key) { return MakeInputLayoutStatic(); };
 	inputLayoutRegistry[RenderModelType::Skinned] = [this](PSOKey& key) { return MakeInputLayoutSkinning(); };
@@ -114,6 +115,28 @@ D3D12_INPUT_LAYOUT_DESC InputLayoutFactory::MakeInputLayoutDebugLine() {
 	inputElementDESCs[1].AlignedByteOffset = 12; // float3 = 12 bytes
 	inputElementDESCs[1].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
 	inputElementDESCs[1].InstanceDataStepRate = 0;
+
+	D3D12_INPUT_LAYOUT_DESC inputLayoutDESC = {};
+	inputLayoutDESC.pInputElementDescs = inputElementDESCs;
+	inputLayoutDESC.NumElements = _countof(inputElementDESCs);
+
+	return inputLayoutDESC;
+}
+
+D3D12_INPUT_LAYOUT_DESC InputLayoutFactory::MakeInputLayoutFullscreenQuad() {
+	///InputLayout
+	static D3D12_INPUT_ELEMENT_DESC inputElementDESCs[2] = {};
+	inputElementDESCs[0] = {};
+	inputElementDESCs[0].SemanticName = "POSITION";
+	inputElementDESCs[0].SemanticIndex = 0;
+	inputElementDESCs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	inputElementDESCs[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+
+	inputElementDESCs[1] = {};
+	inputElementDESCs[1].SemanticName = "TEXCOORD";
+	inputElementDESCs[1].SemanticIndex = 0;
+	inputElementDESCs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	inputElementDESCs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDESC = {};
 	inputLayoutDESC.pInputElementDescs = inputElementDESCs;

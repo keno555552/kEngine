@@ -19,7 +19,7 @@ public:
 	private:
 		/// からのみ生成・破棄可能
 		friend class SrvManager;
-		friend class kEnigne;
+		friend class kEngine;
 		ConstructorKey() {}
 	};
 

@@ -33,5 +33,6 @@ private:
 	D3D12_INPUT_LAYOUT_DESC MakeInputLayoutStatic();
 	D3D12_INPUT_LAYOUT_DESC MakeInputLayoutSkinning();
 	D3D12_INPUT_LAYOUT_DESC MakeInputLayoutDebugLine();
+	D3D12_INPUT_LAYOUT_DESC MakeInputLayoutFullscreenQuad();
 
 };

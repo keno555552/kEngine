@@ -35,7 +35,7 @@ Microsoft::WRL::ComPtr<ID3D12PipelineState> PSOManager::GetPso(PSOKey keys) {
 
 }
 
-void PSOManager::SetPso(PSOKey keys) {
+void PSOManager::SetPSO(PSOKey keys) {
 
 	/// PSOKeyからハンドルを探す
 	int newPSOHandle = GetPSOHandle(keys);
@@ -79,7 +79,7 @@ void PSOManager::SetPSOStrong(PSOKey keys) {
 
 	/// PSOがない場合PSO生成する
 	if (newPSOHandle == -1) {
-		Logger::Log("[kEngine]PSOManager::SetPso() pso not found, create Pso");
+		Logger::Log("[kEngine]PSOManager::SetPSOStrong() pso not found, create Pso");
 
 		// factoryで新しいPSO生成
 		auto pso = psoFactory_.createPSO(keys);

@@ -7,6 +7,7 @@ ShaderFactory::ShaderFactory() {
 	shader_compile_->Initialize();
 
 	shaderFolder_ = "./kEngine/EngineAssets/Shader/";
+	shaderRegistry_[RenderModelType::FullscreenQuad] = [this](PSOKey& key) { return CompileParticleScreenQuad(key); };
 	shaderRegistry_[RenderModelType::Sprite2D] = [this](PSOKey& key) { return Compile2DShader(key); };
 	shaderRegistry_[RenderModelType::Static] = [this](PSOKey& key) { return Compile3DShader(key); };
 	shaderRegistry_[RenderModelType::Skinned] = [this](PSOKey& key) { return Compile3DShader(key); };
@@ -75,6 +76,10 @@ ShaderPair ShaderFactory::CompileSkyCubeShader(PSOKey& key) {
 
 ShaderPair ShaderFactory::CompileFlameNeonGlowShader(PSOKey& key) {
 	return CompileShader("FlameNeonGlow", key);
+}
+
+ShaderPair ShaderFactory::CompileParticleScreenQuad(PSOKey& key) {
+	return CompileShader("CopyImage", key);
 }
 
 void ShaderFactory::checkCompileResult(ShaderPair shaderPair) {

@@ -150,3 +150,15 @@ inline PSOKey CreateDebugLinePSOKey() {
 	debugLineKey.primitiveType = PrimitiveType::LINE;
 	return debugLineKey;
 }
+
+inline PSOKey CreateFullscreenPSOKey() {
+	PSOKey fullscreenKey;
+	fullscreenKey.lightModelType = LightModelType::NONE;
+	fullscreenKey.renderModelType = RenderModelType::FullscreenQuad;
+	fullscreenKey.blendModeType = BlendModeType::NormalBlend;
+	fullscreenKey.rasterizerMode = RasterizerMode::CullNone;
+	fullscreenKey.depthStencilType = DepthStencilType::Disable;
+	fullscreenKey.renderTargetFormatType = RenderTargetFormatType::BackBuffer;
+	fullscreenKey.primitiveType = PrimitiveType::TRIANGLE;
+	return fullscreenKey;
+}

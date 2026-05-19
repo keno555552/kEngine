@@ -75,7 +75,7 @@ public:
 
 	int GetCount() const { return bufferSize_; }
 
-	BasicResource* GetResource() const { return tileResource_.get()->GetResource(); }
+	BasicResource* GetResource() const { return tileResource_.get(); }
 
 	bool IsNull() { return isNull_; }
 

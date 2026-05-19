@@ -3,6 +3,7 @@
 
 RootSignatureFactory::RootSignatureFactory() {
 
+	rootSignatureRegistry[RenderModelType::FullscreenQuad] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticFullscreenQuad(directXDriver_, key); };
 	rootSignatureRegistry[RenderModelType::Sprite2D] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStatic(directXDriver_, key); };
 	rootSignatureRegistry[RenderModelType::Static] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStatic(directXDriver_, key); };
 	rootSignatureRegistry[RenderModelType::Skinned] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticSkinning(directXDriver_, key); };
@@ -293,6 +294,74 @@ Microsoft::WRL::ComPtr <ID3D12RootSignature> RootSignatureFactory::MakeStaticSki
 	rootParameters[8].DescriptorTable.pDescriptorRanges = wellRange;
 	rootParameters[8].DescriptorTable.NumDescriptorRanges = _countof(wellRange);
 
+
+	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ
+	descriptionRootSignature.NumParameters = _countof(rootParameters);  // 配列の長さ
+
+
+	// シリアライズしてバイナリにする
+	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob_;
+	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob_;
+	HRESULT hr = D3D12SerializeRootSignature(&descriptionRootSignature,
+		D3D_ROOT_SIGNATURE_VERSION_1,
+		signatureBlob_.GetAddressOf(),
+		errorBlob_.GetAddressOf());
+	if (FAILED(hr)) {
+		if (errorBlob_) {
+			Logger::Log(reinterpret_cast<char*>(errorBlob_->GetBufferPointer()));
+		}
+		assert(false);
+	}
+	// バイナリを元に生成
+	Microsoft::WRL::ComPtr <ID3D12RootSignature> rootSignature;
+	hr = directXDriver_->GetDevice()->CreateRootSignature(0,
+		signatureBlob_->GetBufferPointer(),
+		signatureBlob_->GetBufferSize(),
+		IID_PPV_ARGS(rootSignature.GetAddressOf()));
+	assert(SUCCEEDED(hr));
+
+	return rootSignature;
+}
+
+Microsoft::WRL::ComPtr<ID3D12RootSignature> RootSignatureFactory::MakeStaticFullscreenQuad(DirectXCore* directXDriver_, PSOKey& key) {
+	key;	/// 使われなかった
+	
+	/// s0:Sampler 				(PS)
+	/// t0:SourceTexture		(PS)
+
+	///RootSignature作成
+	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
+	descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+	/// -------------------------------- Static Sampler (s0) -------------------------------- ///
+	D3D12_STATIC_SAMPLER_DESC staticSampler[1]{};
+	staticSampler[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;          //バイリニアフィルタ
+	staticSampler[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;        // 0~1の範囲外をリピート
+	staticSampler[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	staticSampler[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	staticSampler[0].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;      // 比較しない
+	staticSampler[0].MaxLOD = D3D12_FLOAT32_MAX;                        // ありったけのMipmapを使う
+	staticSampler[0].ShaderRegister = 0;                                // レジスタ0番を使う
+	staticSampler[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;  // PixelShaderで使う
+	descriptionRootSignature.pStaticSamplers = staticSampler;
+	descriptionRootSignature.NumStaticSamplers = _countof(staticSampler);
+
+	/// RootParameter作成。PixelShaderのMaterialとVertexShaderのTransform
+	/// ------------------------------- Descriptor Range (t0) ------------------------------- ///
+	D3D12_ROOT_PARAMETER rootParameters[1] = {};
+
+	// Transform用
+	static D3D12_DESCRIPTOR_RANGE descriptorRangeForInstancing[1]{};
+	descriptorRangeForInstancing[0].BaseShaderRegister = 0;
+	descriptorRangeForInstancing[0].NumDescriptors = 1;
+	descriptorRangeForInstancing[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	descriptorRangeForInstancing[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	// TransformMatrices（b0, VertexShader）
+	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;						/// DescriptorTableを使う
+	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;									/// PixelShaderで使う
+	rootParameters[0].DescriptorTable.pDescriptorRanges = descriptorRangeForInstancing;					/// Tableの中身の配列を指定
+	rootParameters[0].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeForInstancing);		/// Tableで利用する数
 
 	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameters);  // 配列の長さ

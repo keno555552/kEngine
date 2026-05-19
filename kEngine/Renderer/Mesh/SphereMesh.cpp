@@ -64,6 +64,9 @@ ID3D12Resource* SphereMesh::CreateVertexResource_(ID3D12Device* device) {
 		};
 	}
 	vertexResource_->GetResource()->Unmap(0, nullptr);
+
+	vertexResource_->SetName("SphereVertexResource");
+
 	return vertexResource_->GetResource().Get();
 }
 
@@ -96,5 +99,8 @@ ID3D12Resource* SphereMesh::CreateIndexResource_(ID3D12Device* device) {
 		}
 	}
 	indexResource_->GetResource()->Unmap(0, nullptr);
+
+	indexResource_->SetName("SphereIndexResource");
+
 	return indexResource_->GetResource().Get();
 }

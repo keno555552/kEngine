@@ -35,8 +35,7 @@ bool CheckXInputDeviceConnected() {
 
 #pragma region DirectXCommon
 
-DirectXCore::DirectXCore() {
-}
+DirectXCore::DirectXCore() {}
 
 uint32_t DirectXCore::GetDescriptorSizeRTV() {
 	return device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
@@ -57,6 +56,16 @@ D3D12_GPU_DESCRIPTOR_HANDLE DirectXCore::GetGPUDescriptorHandle(ID3D12Descriptor
 	D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
 	handleGPU.ptr += (descriptorSize * index);
 	return handleGPU;
+}
+
+D3D12_CPU_DESCRIPTOR_HANDLE DirectXCore::GetCurrentBackBufferRTV() {
+	UINT index = SwapChain->GetCurrentBackBufferIndex();
+	return rtvHandles[index];
+}
+
+ID3D12Resource* DirectXCore::GetCurrentBackBufferResource() {
+	UINT index = SwapChain->GetCurrentBackBufferIndex();
+	return swapChainResources[index].Get();
 }
 
 bool DirectXCore::isDirectInputCreated() {
@@ -170,8 +179,7 @@ ID3D12Device* DirectXCore::CreateDevice(IDXGIAdapter4* adapter) {
 	return device;
 }
 
-void DirectXCore::InitializeGameInput() {
-}
+void DirectXCore::InitializeGameInput() {}
 
 //void DirectXBase::InitializeGameInput() {
 //	HRESULT GetCurrentReading(

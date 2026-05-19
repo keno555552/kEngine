@@ -28,6 +28,8 @@ ID3D12Resource* Model::CreateVertexResource_(ID3D12Device* device) {
 		skinClusterData_.SetVertexInfluences();
 	}
 
+	vertexResource_->SetName("ModelVertexResource:" + modelData.name);
+
 	return vertexResource_->GetResource().Get();
 }
 
@@ -44,6 +46,8 @@ ID3D12Resource* Model::CreateIndexResource_(ID3D12Device* device) {
 	indexResource_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
 	std::memcpy(indexData, modelData.indices.data(), sizeof(uint32_t) * modelData.indices.size());
 	indexResource_->GetResource()->Unmap(0, nullptr);
+
+	indexResource_->SetName("ModelIndexResource:" + modelData.name);
 
 	return indexResource_->GetResource().Get();
 }

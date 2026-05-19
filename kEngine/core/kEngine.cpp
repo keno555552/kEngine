@@ -85,6 +85,7 @@ void kEngine::StartFrame() {
 	inputManager->KeysUpdata();
 	timeManager->Update();
 	drawDataCollector->PreCollect();
+	drawEngine->PreDraw();
 }
 
 void kEngine::EndFrame() {
@@ -102,10 +103,11 @@ void kEngine::EndFrame() {
 
 	animationManager->Update();
 	drawDataCollector->EndCollect();
-	drawEngine->PreDraw();
+	/// AAA　それ以前はロジック処理、集めとかの前処理 AAA
 	drawEngine->CommitDraw();
-	dxComm->EndFrame();
 	drawEngine->EndDraw();
+	dxComm->EndFrame();
+
 }
 
 bool kEngine::ProcessMessage() {
