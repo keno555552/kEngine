@@ -10,6 +10,8 @@
 #include <unordered_map>
 #include "config.h"
 
+#include "Vector4.h"
+
 class TextureManager
 {
 public:
@@ -46,7 +48,6 @@ public:
 	/// <param name="filePath">テクスチャファイルのパス</param>
 	/// <returns>テキスチャハンドル</returns>
 	int LoadModelTexture(const std::string& filePath);
-
 
 	/// <summary>
 	/// 

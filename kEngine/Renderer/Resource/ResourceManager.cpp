@@ -330,18 +330,6 @@ void ResourceManager::ResizeSimpleSpriteMesh(DirectX::TexMetadata Metadata, int 
 	}
 }
 
-int ResourceManager::GetTextureCounter() {
-	return TextureManager::GetInstance()->GetTextureCounter();
-}
-
-void ResourceManager::TextureCounterPlus(int index) {
-	TextureManager::GetInstance()->TextureCounterPlus(index);
-}
-
-void ResourceManager::TextureCounterAdjust(int index) {
-	TextureManager::GetInstance()->TextuerCounterAdjust(index);
-}
-
 D3D12_CPU_DESCRIPTOR_HANDLE ResourceManager::GetTextureCPUDescriptorHandle(int handle) {
 	return TextureManager::GetInstance()->GetTextureCPUDescriptorHandle(handle);
 }
@@ -439,4 +427,112 @@ int ResourceManager::InputMaterialConfig(std::shared_ptr<MaterialConfig> materia
 	idToIndex_.emplace(materialList_.back().materialID, (int)materialList_.size() - 1);
 
 	return materialList_.back().materialID;
+}
+
+Microsoft::WRL::ComPtr<ID3D12Resource> ResourceManager::CreateRenderTextureResource(
+	uint32_t width,
+	uint32_t height,
+	DXGI_FORMAT format,
+	const Vector4& clearColor
+) {
+
+	///  textureの元、時関があればこれをセーブして以降使う<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	/// 1. metadataを基にResourceの設定
+	D3D12_RESOURCE_DESC resourceDesc{};
+	resourceDesc.Width = UINT(width);
+	resourceDesc.Height = UINT(height);
+	resourceDesc.MipLevels = 1;
+	resourceDesc.DepthOrArraySize = 1;
+	resourceDesc.Format = format;
+	resourceDesc.SampleDesc.Count = 1;
+	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;		   // Textureの次元数。普段使ってるのは2次元
+	resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;		   // RenderTargetとして使うためのフラグ
+
+
+	/// 2.利用するHeapの設定
+	D3D12_HEAP_PROPERTIES heapProperties{};
+	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT; // VRAM上に作る
+
+	/// 4.色のクリア設定
+	D3D12_CLEAR_VALUE clearValue{};
+	clearValue.Format = format;
+	clearValue.Color[0] = clearColor.x;
+	clearValue.Color[1] = clearColor.y;
+	clearValue.Color[2] = clearColor.z;
+	clearValue.Color[3] = clearColor.w;
+
+	/// 3.Resourceを生成する
+	Microsoft::WRL::ComPtr<ID3D12Resource> resource;
+	HRESULT hr = BDevice_->CreateCommittedResource(
+		&heapProperties,					// Heapの設定
+		D3D12_HEAP_FLAG_NONE,				// Heapの特殊な設定。特になし。
+		&resourceDesc,						// Resourceの設定
+		D3D12_RESOURCE_STATE_RENDER_TARGET,	// 初回のResourceState。RenderTargetとして使うのでRenderTarget状態
+		&clearValue,						// Clear最適値。
+		IID_PPV_ARGS(&resource));			// 作成するResourceポインタへのポインタ
+	assert(SUCCEEDED(hr));
+
+	return resource;
+}
+
+void ResourceManager::CreateRTV(ID3D12Resource* renderTexture, DXGI_FORMAT format, D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle) {
+
+	D3D12_RENDER_TARGET_VIEW_DESC desc{};
+	desc.Format = format;
+	desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+
+	BDevice_->CreateRenderTargetView(renderTexture, &desc, rtvHandle);
+}
+
+void ResourceManager::CreateSRV(ID3D12Resource* renderTexture, DXGI_FORMAT format, D3D12_CPU_DESCRIPTOR_HANDLE srvHandle) {
+
+	/// SRVの設定
+	D3D12_SHADER_RESOURCE_VIEW_DESC renderTargetSRVDesc{};
+	renderTargetSRVDesc.Format = format;
+	renderTargetSRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	renderTargetSRVDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	renderTargetSRVDesc.Texture2D.MipLevels = 1;
+
+	/// SRVを作成
+	BDevice_->CreateShaderResourceView(renderTexture, &renderTargetSRVDesc, srvHandle);
+}
+
+RenderTexture ResourceManager::CreateRenderTexture(
+	uint32_t width,
+	uint32_t height,
+	DXGI_FORMAT format,
+	const Vector4& clearColor
+) {
+
+	/// RTVの設定
+	auto renderTextureResource = CreateRenderTextureResource(
+		width,
+		height,
+		format,
+		clearColor
+	);
+
+	/// Alloとり
+	uint32_t rtvIndex = RtvManager::GetInstance()->Allocate();
+
+	/// RTV
+	CreateRTV(renderTextureResource.Get(), format, RtvManager::GetInstance()->GetCPUDescriptorHandle(rtvIndex));
+
+	/// Alloとり
+	uint32_t srvIndex = SrvManager::GetInstance()->Allocate();
+
+	/// SRVの作成
+	CreateSRV(renderTextureResource.Get(), format, SrvManager::GetInstance()->GetCPUDescriptorHandle(srvIndex));
+
+
+	RenderTexture renderTexture{};
+	renderTexture.resource = renderTextureResource;
+	renderTexture.rtvHandleCPU = SrvManager::GetInstance()->GetCPUDescriptorHandle(rtvIndex);
+	renderTexture.srvHandleCPU = SrvManager::GetInstance()->GetCPUDescriptorHandle(srvIndex);
+	renderTexture.width = width;
+	renderTexture.height = height;
+	renderTexture.format = format;
+	renderTexture.clearColor = clearColor;
+
+	return renderTexture;
 }

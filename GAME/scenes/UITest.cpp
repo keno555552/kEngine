@@ -100,6 +100,7 @@ UITest::UITest(kEngine* system) {
 	box_->objectParts_[0].materialConfig->textureHandle = clicleTextureHandle_;
 	box_->isBillboard_ = true;
 	//box_->objectParts_[0].materialConfig->isReflective = true;
+	box_->objectParts_[0].materialConfig->textureColor = { 1.0f,1.0f,1.0f,0.999f };
 	//box_->mainPosition.transform.scale = Vector3(0.5f, 0.5f, 0.5f);
 	box_->mainPosition.transform.translate = Vector3(0.0f, 0.0f, 0.0f);
 
@@ -113,6 +114,15 @@ UITest::UITest(kEngine* system) {
 
 	detailButton_ = std::make_unique<DetailButton>(system_);
 	detailButton_->SetButton({ 100.0f,100.0f }, 200.0f, 80.0f);
+
+	button_ = std::make_unique<Button>(system_);
+	button_->Init({ 100.0f,350.0f }, 200.0f, 80.0f, whiteTextureHandle_, whiteTextureHandle_, whiteTextureHandle_, whiteTextureHandle_, soundHandle_, soundHandle_);
+	button_->ChangeTextureCColor({ 1.0f,1.0f,1.0f,1.0f });
+	button_->ChangeTextureSColor({ 1.0f,0.8f,0.8f,1.0f });
+	button_->ChangeTexturePColor({ 0.5f,0.5f,1.0f,1.0f });
+	button_->ChangeTextureNColor({ 0.5f,0.5f,0.5f,1.0f });
+
+	defaultMenu_ = std::make_unique<DefaultMenu>(system_);
 
 	panel_ = std::make_unique<Panel>(system_);
 	panel_->SetPanel({ 720.0f,300.0f }, 500.0f, 500.0f);
@@ -155,7 +165,11 @@ void UITest::Update() {
 
 	detailButton_->Update();
 
+	button_->Update();
+
 	panel_->Update();
+
+	defaultMenu_->Updata();
 
 	MouseLogic();
 
@@ -178,9 +192,10 @@ void UITest::Update() {
 	//	for(auto& object : box_->objectParts_){ object.materialConfig->reflectiveStrength = 0.0f; }
 	//}
 
-	if (detailButton_->GetIsClicked()) {
+	if (button_->GetIsClick()) {
 		system_->GetEffectManager()->GetParticleManager()->ShootEmitter(particleHandle_, 1);
 	}
+
 
 	//if (system_->GetMouseTriggerOn(0)) {
 	//	box_->objectParts_[0].materialConfig->reflectiveStrength += 0.05f;
@@ -253,7 +268,9 @@ void UITest::Draw() {
 	ground_->Draw();
 	box_->Draw();
 	detailButton_->Render();
+	//button_->Render();
 	//panel_->Render();
+	defaultMenu_->Draw();
 
 #ifdef USE_IMGUI
 	/// ImGui処理

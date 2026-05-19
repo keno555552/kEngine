@@ -154,12 +154,13 @@ private:
 	/// Skinning関連
 	std::vector<std::unique_ptr<InstanceBuffer<WellForGPU>>> skinningWFGResourceList_;
 	// DDCにのSkinningDataのハンドルと、実際のWellForGPUのマップ
-	std::map<int,int> skinningDatDDC2DEaMap_;
+	std::map<int, int> skinningDatDDC2DEaMap_;
 	std::vector<int> skinningBufferFreeList_;
 	//int skinningCounter_ = 0;
 
 private:
 
+	/// Instance資料指定用のOffsetData構造体とリスト
 	struct OffsetData {
 		std::unique_ptr <BasicResource> instanceOffsetResource;
 		UINT* instanceOffset{};
@@ -169,6 +170,9 @@ private:
 	std::vector<OffsetData> instanceOffsetData_;
 	int offsetDataCounter_{};
 
+private:
+
+	RenderTexture m_OffscreenRT{};
 
 private:
 	/// 内部関数
@@ -189,6 +193,7 @@ private:
 	void MakeDepthStencilView();
 
 	void UpdateDebugLineVertexBuffer(const std::vector<DebugLineVertexGPU>& vertices);
+
 
 private:
 

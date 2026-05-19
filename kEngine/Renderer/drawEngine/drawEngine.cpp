@@ -6,6 +6,7 @@
 
 #include "Queue/RenderData.h"
 #include <vector>
+#include <Types/PSOType/RenderTargetFormat.h>
 
 void DrawEngine::Initialize(
 	DirectXCore* directXDriver,
@@ -106,6 +107,15 @@ void DrawEngine::Initialize(
 		instanceOffsetData_.push_back(std::move(offsetData));
 	}
 
+	/// =========================== OffscreenRT初期化 =========================== ///
+	
+	m_OffscreenRT = resourceManager_->CreateRenderTexture(
+		kClientWidth_,
+		kClientHeight_,
+		GetDXGIFormat(RenderTargetFormatType::BackBuffer),
+		Vector4{ 1.0f, 0.0f, 0.0f, 1.0f }
+		);
+
 	/// =========================== カメラバッファの初期化 =========================== ///
 	cameraBuffer_ = std::make_unique<BasicResource>();
 	cameraBuffer_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(CameraForGPU));
@@ -154,7 +164,6 @@ void DrawEngine::StartFrame() {
 	/// 各種のリソースを設定(今内容がない)
 	resourceManager_->CreateTurnResource();
 
-
 	/// InstanceCounterReset
 	instance2DCounter_ = 0;
 	instance3DCounter_ = 0;
@@ -167,9 +176,7 @@ void DrawEngine::PreDraw() {
 	/// PSOReset
 	// デフォルトのPSOをセット
 	PSOKey defaultPSOKey = CreateDefaultPSOKey();
-	psoManager_->SetPsoStrong(defaultPSOKey);
-
-
+	psoManager_->SetPSOStrong(defaultPSOKey);
 
 	/// Lighting
 	drawDataCollector_->UpdateLightData();
@@ -178,6 +185,16 @@ void DrawEngine::PreDraw() {
 	/// Set Camera
 	SetCameraForGPU();
 
+
+	/// ==================== OffscreenRT関連設定 ==================== ///
+	auto rtv = m_OffscreenRT.rtvHandleCPU;
+	auto dsv = directXDriver_->GetDsvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart();
+
+	commandList_->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
+
+
+	float clearColor[4] = { 1, 0, 0, 1 };
+	commandList_->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
 }
 
 void DrawEngine::CommitDraw() {
@@ -197,6 +214,19 @@ void DrawEngine::EndDraw() {
 		if (ptr.state == 1) { ptr.state = 2; }
 		if (ptr.state == 2) { ptr.state = 0; }
 	}
+
+	// ⭐ 切回 BackBuffer（第二次渲染）
+	auto backRTV = directXDriver_->GetCurrentBackBufferRTV();
+	commandList_->OMSetRenderTargets(1, &backRTV, FALSE, nullptr);
+
+	// ⭐ 綁定 OffscreenRT 的 SRV
+	commandList_->SetGraphicsRootDescriptorTable(0, m_OffscreenRT.srvHandleGPU);
+
+	// ⭐ 畫 Fullscreen Quad
+	DrawFullscreenQuad();
+
+	// 清理
+	resourceManager_->ClearTurnResource();
 }
 
 void DrawEngine::PSODecision(PSOKey& psoKey) {
@@ -362,23 +392,20 @@ void DrawEngine::Draw2DOpaque() {
 
 				++offsetDataCounter_;
 
-
 				if (meshIndexCount != 0) {
 					commandList_->DrawIndexedInstanced(meshIndexCount, instancesCounter, 0, 0, 0);
 				} else {
 					int meshVertexCount = RenderData[0].mesh->GetVertexNum();
 					commandList_->DrawInstanced(meshVertexCount, instancesCounter, 0, 0);
 				}
-
-				//Logger::Log("Draw3D: pso=%d mat=%u meshID=%d instances=%d",(int)psoID, materialID, meshBuffer, instancesCounter);
 			}
 		}
 	}
 }
 
-/// ===========================================================================!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-/// ===========================================================================!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-/// ===========================================================================!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/// ======================================================================================================== ///
+/// ======================================================================================================== ///
+/// ======================================================================================================== ///
 
 void DrawEngine::Draw3D() {
 

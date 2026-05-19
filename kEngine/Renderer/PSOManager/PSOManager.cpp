@@ -72,7 +72,7 @@ void PSOManager::SetPso(PSOKey keys) {
 	}
 }
 
-void PSOManager::SetPsoStrong(PSOKey keys) {
+void PSOManager::SetPSOStrong(PSOKey keys) {
 
 	/// PSOKeyからハンドルを探す
 	int newPSOHandle = GetPSOHandle(keys);

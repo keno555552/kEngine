@@ -291,10 +291,6 @@ ID3D12Resource* TextureManager::CreateTextureResource(const DirectX::TexMetadata
 		IID_PPV_ARGS(&resource));			// 作成するResourceポインタへのポインタ
 	assert(SUCCEEDED(hr));
 
-	//char buffer[128];
-	//sprintf_s(buffer, "Create resource at %p\n", resource);
-	//OutputDebugStringA(buffer);
-
 	return resource;
 }
 

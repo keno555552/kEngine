@@ -11,6 +11,3 @@ enum class BlendModeType
 	ScreenBlend,
 	NumOfBlends
 };
-
-std::string GetBlendModeMarco(BlendModeType model);
-

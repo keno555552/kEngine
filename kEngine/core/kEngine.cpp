@@ -13,6 +13,7 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 	dxComm->InitializeDrive(kClientTitle, kClientWidth, kClientHeight);
 
 	SrvManager::GetInstance()->Initialize(dxComm.get());
+	RtvManager::GetInstance()->Initialize(dxComm.get());
 
 #ifdef USE_IMGUI
 	ImGuiManager::Initialize(dxComm.get());
@@ -71,6 +72,9 @@ void kEngine::Finalize() {
 
 	SrvManager::GetInstance()->Finalize();
 	SrvManager::Destroy();
+
+	RtvManager::GetInstance()->Finalize();
+	RtvManager::Destroy();
 
 	dxComm->Finalize();
 }
@@ -510,6 +514,10 @@ DirectXController* kEngine::GetDirectXController() {
 
 SrvManager* kEngine::GetSrvManager() {
 	return SrvManager::GetInstance();
+}
+
+RtvManager* kEngine::GetRtvManager() {
+	return RtvManager::GetInstance();
 }
 
 ResourceManager* kEngine::GetResourceManager() const {

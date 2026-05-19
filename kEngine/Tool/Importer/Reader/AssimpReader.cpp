@@ -96,7 +96,7 @@ ModelData ReadAssimp(const std::string& filePath) {
 		}
 
 		/// マテリアルのインデックスを格納
-		meshData.materialIndex = std::min(
+		meshData.materialIndex = min(
 			mesh->mMaterialIndex,
 			(uint32_t)result.materialList.size() - 1
 		);

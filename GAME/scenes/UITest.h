@@ -6,6 +6,8 @@
 #include "Camera\DebugCamera.h"
 #include "GAME\Object\DetailButton\DetailButton.h"
 #include "GAME\Object\Panel\Panel.h"
+#include "GameObject\button\button.h"
+#include "Tool\DefaultMenu\DefaultMenu.h"
 
 class UITest : public BaseScene
 {
@@ -60,7 +62,9 @@ private:
 	std::unique_ptr<Object> box_ = nullptr;
 
 	std::unique_ptr<DetailButton> detailButton_ = nullptr;
+	std::unique_ptr<Button> button_ = nullptr;
 	std::unique_ptr<Panel> panel_ = nullptr;
+	std::unique_ptr<DefaultMenu> defaultMenu_ = nullptr;
 
 	/// =============== フラグ ================///
 	bool useDebugCamera = false;

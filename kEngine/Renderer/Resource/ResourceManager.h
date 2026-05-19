@@ -11,8 +11,19 @@
 #include "Data/Render/CPUData/ObjectData.h"
 #include "Data/Render/CPUData/SpriteData.h"
 #include "SrvManager/SrvManager.h"
+#include "RtvManager/RtvManager.h"
 #include <memory>
 using MaterialID = int;
+
+struct RenderTexture {
+	Microsoft::WRL::ComPtr<ID3D12Resource> resource;
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandleCPU{};
+	D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU{};
+	UINT width{};
+	UINT height{};
+	DXGI_FORMAT format;
+	Vector4 clearColor;
+};
 
 class ResourceManager
 {
@@ -87,10 +98,26 @@ public:
 
 	void ResizeSimpleSpriteMesh(DirectX::TexMetadata Metadata, int counter, CornerData corner, Vector2 anchorPoint, Vector2 cropLT, Vector2 cropSize);
 
-	/// 暫くのCounter管理
-	int GetTextureCounter();
-	void TextureCounterPlus(int index = 1);
-	void TextureCounterAdjust(int index);
+
+	/// ==================== RenderTexture制作用 ===================== ///
+
+	RenderTexture CreateRenderTexture(
+		uint32_t width,
+		uint32_t height,
+		DXGI_FORMAT format,
+		const Vector4& clearColor);
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateRenderTextureResource(
+		uint32_t width,
+		uint32_t height,
+		DXGI_FORMAT format,
+		const Vector4& clearColor
+	);
+
+	void CreateRTV(ID3D12Resource* renderTexture,DXGI_FORMAT format, D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle);
+	void CreateSRV(ID3D12Resource* renderTexture,DXGI_FORMAT format, D3D12_CPU_DESCRIPTOR_HANDLE srvHandle);
+
+	/// ==================== TextureManager関連 ===================== ///
 
 	D3D12_CPU_DESCRIPTOR_HANDLE GetTextureCPUDescriptorHandle(int handle);
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureGPUDescriptorHandle(int handle);
@@ -99,7 +126,6 @@ public:
 	void DeleteExtraSpriteMesh(int spriteNumber);
 
 	int InputMaterialConfig(std::shared_ptr<MaterialConfig> material);
-
 
 public:
 

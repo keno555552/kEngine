@@ -3,6 +3,7 @@
 #include "inputCore.h"
 #include "soundManager.h"
 #include "SrvManager/SrvManager.h"
+#include "RtvManager/RtvManager.h"
 #include "LinearAlgebra/TransformationMatrix.h"
 #include "LinearAlgebra/Vector2.h"
 #include "Data/Render/CPUData/materialconfig.h"
@@ -207,6 +208,7 @@ public:
 
 	DirectXController* GetDirectXController();
 	SrvManager* GetSrvManager();
+	RtvManager* GetRtvManager();
 	ResourceManager* GetResourceManager() const;
 	TextureManager* GetTextureManager() const;
 	LightManager* GetLightManager() const;

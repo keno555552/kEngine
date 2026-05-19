@@ -88,4 +88,5 @@ public:
 	static int default_RasterizerMode_;
 	static int default_BlendMode_;
 	static int default_DepthStenctilState_;
+	static int default_RenderTargetFormatType_;
 };

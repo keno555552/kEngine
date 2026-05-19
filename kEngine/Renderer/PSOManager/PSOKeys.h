@@ -11,6 +11,8 @@
 #include "Data/Render/Types/PSOType/DepthStencilType.h"
 #include "Data/Render/Types/PSOType/PrimitiveType.h"
 
+#include "Data/Render/Types/PSOType/RenderTargetFormat.h"
+
 #include "config.h"
 
 enum FeatureFlags : uint64_t {
@@ -37,6 +39,9 @@ struct PSOKey {
 	DepthStencilType depthStencilType = (DepthStencilType)config::default_DepthStenctilState_;
 	PrimitiveType primitiveType = PrimitiveType::TRIANGLE;
 
+	// Render Target
+	RenderTargetFormatType renderTargetFormatType = (RenderTargetFormatType)config::default_RenderTargetFormatType_;
+
 	// FeatureFlags
 	uint64_t featureMask{
 		FeatureFlags::EnvReflection
@@ -57,6 +62,8 @@ inline bool operator==(const PSOKey& a, const PSOKey& b) {
 		&& a.depthStencilType == b.depthStencilType
 		&& a.primitiveType == b.primitiveType
 
+		&& a.renderTargetFormatType == b.renderTargetFormatType
+
 		&& a.featureMask == b.featureMask;
 }
 
@@ -74,7 +81,8 @@ inline bool operator<(const PSOKey& a, const PSOKey& b) {
 		a.depthStencilType,
 		a.primitiveType,
 		a.featureMask,
-		a.lightModelType
+		a.lightModelType,
+		a.renderTargetFormatType
 	) < std::tie(
 		b.renderModelType,
 		b.blendModeType,
@@ -82,9 +90,11 @@ inline bool operator<(const PSOKey& a, const PSOKey& b) {
 		b.depthStencilType,
 		b.primitiveType,
 		b.featureMask,
-		b.lightModelType
+		b.lightModelType,
+		b.renderTargetFormatType
 	);
 }
+
 
 // hash
 template<>
@@ -112,6 +122,7 @@ struct std::hash<PSOKey> {
 		hash_combine(key.primitiveType);
 
 		hash_combine(key.featureMask);
+		hash_combine(key.renderTargetFormatType);
 		return h;
 	}
 };
@@ -123,6 +134,7 @@ inline PSOKey CreateDefaultPSOKey() {
 	defaultKey.blendModeType = (BlendModeType)config::default_BlendMode_;
 	defaultKey.rasterizerMode = (RasterizerMode)config::default_RasterizerMode_;
 	defaultKey.depthStencilType = (DepthStencilType)config::default_DepthStenctilState_;
+	defaultKey.renderTargetFormatType = (RenderTargetFormatType)config::default_RenderTargetFormatType_;
 	defaultKey.primitiveType = PrimitiveType::TRIANGLE;
 	return defaultKey;
 }
@@ -134,6 +146,7 @@ inline PSOKey CreateDebugLinePSOKey() {
 	debugLineKey.blendModeType = BlendModeType::NormalBlend;
 	debugLineKey.rasterizerMode = RasterizerMode::Wireframe;
 	debugLineKey.depthStencilType = DepthStencilType::Disable;
+	debugLineKey.renderTargetFormatType = (RenderTargetFormatType)config::default_RenderTargetFormatType_;
 	debugLineKey.primitiveType = PrimitiveType::LINE;
 	return debugLineKey;
 }
