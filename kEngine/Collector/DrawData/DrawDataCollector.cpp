@@ -480,22 +480,41 @@ void DrawDataCollector::AddObjectToBucket3D(RenderData& renderData, int meshID) 
 
 		if (material->color.w < 1.0f) {
 
-			float z = renderData.transformData.world.m[3][2];
+			// 1. 取得物件世界座標
+			Vector3 pos{
+				renderData.transformData.world.m[3][0],
+				renderData.transformData.world.m[3][1],
+				renderData.transformData.world.m[3][2]
+			};
 
-			auto checker2 = std::find_if(
+			// 2. 取得相機位置
+			Vector3 camPos = GetCameraPosition();
+
+			// 3. 計算距離平方（不用開根號）
+			float dist = Length(pos - camPos);
+
+			// 4. Back-to-Front 排序：遠的先畫
+			auto it = std::find_if(
 				transparentBucket3D_.begin(),
 				transparentBucket3D_.end(),
-				[z](const RenderData& data) {
-					float dataZ = data.transformData.world.m[3][2];
-					return z > dataZ;
+				[&](const RenderData& data) {
+
+					Vector3 pos2{
+						data.transformData.world.m[3][0],
+						data.transformData.world.m[3][1],
+						data.transformData.world.m[3][2]
+					};
+
+					float dist2 = Length(pos2 - camPos);
+
+					return dist > dist2; // 遠的先畫
 				}
 			);
 
-			if (checker2 == transparentBucket3D_.end()) {
-				transparentBucket3D_.emplace_back(renderData);
+			if (it == transparentBucket3D_.end()) {
+				transparentBucket3D_.push_back(renderData);
 			} else {
-				std::size_t index = std::distance(transparentBucket3D_.begin(), checker2);
-				transparentBucket3D_.insert(transparentBucket3D_.begin() + index, renderData);
+				transparentBucket3D_.insert(it, renderData);
 			}
 		} else {
 			/// 不透明オブジェクトバケットへ追加

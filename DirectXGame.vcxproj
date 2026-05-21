@@ -252,6 +252,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="kEngine\Renderer\DescriptorManager\DsvManager\DsvManager.cpp" />
     <ClCompile Include="kEngine\Tool\EffectSystem\EffectManager.cpp" />
     <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\DepthStencilFactory.cpp" />
     <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\BlendStateFactory.cpp" />
@@ -420,12 +421,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Tool\EffectSystem\ParticleSystem\ParticleManager.cpp" />
     <ClCompile Include="kEngine\Tool\EffectSystem\ParticleSystem\ParticleEmitter.cpp" />
     <ClCompile Include="kEngine\Data\Render\Types\PSOType\RenderTargetFormat.cpp" />
+    <ClCompile Include="kEngine\Renderer\PostProcessRunner\PostProcessRunner.cpp" />
     <ClCompile Include="ResourceLoader.cpp" />
     <ClCompile Include="kEngine\Scenes\BaseSceneFactory.cpp" />
     <ClCompile Include="kEngine\GameObject\Object\Sprite.cpp" />
     <ClCompile Include="kEngine\Data\Render\CPUData\SpriteData.cpp" />
     <ClCompile Include="kEngine\Renderer\Resource\TextureManager.cpp" />
-    <ClCompile Include="kEngine\Renderer\SrvManager\SrvManager.cpp" />
+    <ClCompile Include="kEngine\Renderer\DescriptorManager\SrvManager\SrvManager.cpp" />
     <ClCompile Include="kEngine\Renderer\Lighting\SpotLight.cpp" />
     <ClCompile Include="kEngine\GameObject\StartTimer\StartTimer.cpp" />
     <ClCompile Include="kEngine\Scenes\SceneFactory.cpp" />
@@ -447,9 +449,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\ShaderFactory.cpp" />
     <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\RootSignatureFactory.cpp" />
     <ClCompile Include="kEngine\Renderer\PSOManager\RootSlot.cpp" />
-    <ClCompile Include="kEngine\Renderer\RtvManager\RtvManager.cpp" />
+    <ClCompile Include="kEngine\Renderer\DescriptorManager\RtvManager\RtvManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="kEngine\Data\Render\Types\PostProcessType.h" />
+    <ClInclude Include="kEngine\Renderer\DescriptorManager\DsvManager\DsvManager.h" />
+    <ClInclude Include="kEngine\Data\Render\CPUData\RenderTexture.h" />
     <ClInclude Include="kEngine\Data\Render\Queue\ParticleInstanceForDDC.h" />
     <ClInclude Include="kEngine\EngineAssets\Particle\HitSpark.h" />
     <ClInclude Include="kEngine\Tool\EffectSystem\EffectManager.h" />
@@ -696,12 +701,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\ParticleInstance.h" />
     <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\ParticlePrototype.h" />
     <ClInclude Include="kEngine\Data\Render\Types\PSOType\RenderTargetFormat.h" />
+    <ClInclude Include="kEngine\Renderer\PostProcessRunner\PostProcessRunner.h" />
     <ClInclude Include="ResourceLoader.h" />
     <ClInclude Include="kEngine\Scenes\BaseSceneFactory.h" />
     <ClInclude Include="kEngine\GameObject\Object\Sprite.h" />
     <ClInclude Include="kEngine\Data\Render\CPUData\SpriteData.h" />
     <ClInclude Include="kEngine\Renderer\Resource\TextureManager.h" />
-    <ClInclude Include="kEngine\Renderer\SrvManager\SrvManager.h" />
+    <ClInclude Include="kEngine\Renderer\DescriptorManager\SrvManager\SrvManager.h" />
     <ClInclude Include="kEngine\Renderer\Lighting\SpotLight.h" />
     <ClInclude Include="kEngine\GameObject\StartTimer\StartTimer.h" />
     <ClInclude Include="kEngine\Scenes\SceneFactory.h" />
@@ -723,7 +729,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\ShaderFactory.h" />
     <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\RootSignatureFactory.h" />
     <ClInclude Include="kEngine\Renderer\PSOManager\RootSlot.h" />
-    <ClInclude Include="kEngine\Renderer\RtvManager\RtvManager.h" />
+    <ClInclude Include="kEngine\Renderer\DescriptorManager\RtvManager\RtvManager.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl">

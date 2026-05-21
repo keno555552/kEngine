@@ -25,6 +25,6 @@ int config::default_SkyCube_MeshBufferHandle_   = 0;
 int config::default_LightModel_				= (int)LightModelType::			BlinnPhongReflection;
 int config::default_RenderModelTypes_		= (int)RenderModelType::		Static;
 int config::default_RasterizerMode_			= (int)RasterizerMode::			CullBack;
-int config::default_BlendMode_				= (int)BlendModeType::			NormalBlend;
+int config::default_BlendMode_				= (int)BlendModeType::			AlphaBlend;
 int config::default_DepthStenctilState_		= (int)DepthStencilType::		Default;
 int config::default_RenderTargetFormatType_ = (int)RenderTargetFormatType:: BackBuffer;

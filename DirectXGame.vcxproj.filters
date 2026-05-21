@@ -330,7 +330,7 @@
     <ClCompile Include="kEngine\GameObject\Particle\P_Ball\P_Ball.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Renderer\SrvManager\SrvManager.cpp">
+    <ClCompile Include="kEngine\Renderer\DescriptorManager\SrvManager\SrvManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Tool\ImGuiManager\ImGuiManager.cpp">
@@ -693,7 +693,13 @@
     <ClCompile Include="kEngine\Data\Render\Types\PSOType\RenderTargetFormat.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Renderer\RtvManager\RtvManager.cpp">
+    <ClCompile Include="kEngine\Renderer\DescriptorManager\RtvManager\RtvManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Renderer\DescriptorManager\DsvManager\DsvManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Renderer\PostProcessRunner\PostProcessRunner.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -893,7 +899,7 @@
     <ClInclude Include="kEngine\GameObject\Particle\P_Ball\P_Ball.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Renderer\SrvManager\SrvManager.h">
+    <ClInclude Include="kEngine\Renderer\DescriptorManager\SrvManager\SrvManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Tool\ImGuiManager\ImGuiManager.h">
@@ -1505,7 +1511,19 @@
     <ClInclude Include="kEngine\Data\Render\Types\PSOType\RenderTargetFormat.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Renderer\RtvManager\RtvManager.h">
+    <ClInclude Include="kEngine\Renderer\DescriptorManager\RtvManager\RtvManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\CPUData\RenderTexture.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Renderer\DescriptorManager\DsvManager\DsvManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Renderer\PostProcessRunner\PostProcessRunner.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\Types\PostProcessType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

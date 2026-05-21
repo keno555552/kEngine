@@ -5,7 +5,7 @@
 #include "Data/Render/GPUData/WellForGPU.h"
 #include "Data/Render/CPUData/ModelData.h"
 #include "Data/Animation/Skeleton.h"
-#include "Renderer/SrvManager/SrvManager.h"
+#include "DescriptorManager/SrvManager/SrvManager.h"
 #include <string>
 
 class SkinClusterData {

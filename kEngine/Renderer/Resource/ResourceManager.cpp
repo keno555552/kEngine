@@ -2,6 +2,7 @@
 #include <Object/Object.h>
 #include "Importer/Loader/LoadModel.h"
 
+
 std::unique_ptr <ResourceManager> ResourceManager::instance_ = nullptr;
 
 ResourceManager* ResourceManager::GetInstance() {
@@ -392,10 +393,10 @@ int ResourceManager::InputMaterialConfig(std::shared_ptr<MaterialConfig> materia
 		MaterialForGPU* gpuPtr = nullptr;
 
 		auto res = samePtrEntry->gpuMaterial->GetResource();
-		Logger::Log("InputMaterialConfig: res = %p\n", res);
+		//Logger::Log("InputMaterialConfig: res = %p\n", res);
 
 		HRESULT hr = res ? res->Map(0, nullptr, reinterpret_cast<void**>(&gpuPtr)) : E_FAIL;
-		Logger::Log("InputMaterialConfig: Map hr = 0x%08X\n", hr);
+		//Logger::Log("InputMaterialConfig: Map hr = 0x%08X\n", hr);
 
 		if (FAILED(hr)) {
 			// 先不要崩，讓我們看到 log
@@ -446,6 +447,8 @@ int ResourceManager::InputMaterialConfig(std::shared_ptr<MaterialConfig> materia
 
 	return materialList_.back().materialID;
 }
+
+/// ================================ RenderTexture制作用 ================================ ///
 
 Microsoft::WRL::ComPtr<ID3D12Resource> ResourceManager::CreateRenderTextureResource(
 	uint32_t width,
@@ -555,5 +558,93 @@ RenderTexture ResourceManager::CreateRenderTexture(
 	renderTexture.format = format;
 	renderTexture.clearColor = clearColor;
 
+	CreateDepthStencilForRenderTexture(renderTexture);
+
 	return renderTexture;
+}
+
+/// ================================= DepthStencil制作用 ================================ ///
+ID3D12Resource* ResourceManager::CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height) {
+
+	/// 1.生成するResourceの設定
+	D3D12_RESOURCE_DESC resourceDesc{};
+	resourceDesc.Width = width;                                      // Textureの幅
+	resourceDesc.Height = height;									 // Textureの高さ
+	resourceDesc.MipLevels = 1;										 // mipmapの数
+	resourceDesc.DepthOrArraySize = 1;								 // 奥行き or 配列Textureの配列数
+	resourceDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;			 // DepthStencilとして利用可能なフォーマット
+	resourceDesc.SampleDesc.Count = 1;								 // サンプリングカウント。1固定
+	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;	 // 2次元
+	resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;	 // DepthStencilとして使う通知
+
+
+	/// 2.利用するHeapの設定
+	D3D12_HEAP_PROPERTIES heapProperties{};
+	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;// VRAM上に作る
+
+	/// EX1.深度値のクリア設定
+	D3D12_CLEAR_VALUE depthClearValue{};
+	depthClearValue.DepthStencil.Depth = 1.0f; //1.0f (最大値)でクリア
+	depthClearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;// フォーマット。Resourceと合わせる
+
+	/// 3.Resourceを生成する
+	ID3D12Resource* resource = nullptr;
+	HRESULT hr = device->CreateCommittedResource(
+		&heapProperties,					// Heapの設定
+		D3D12_HEAP_FLAG_NONE,				// Heapの特殊な設定。特になし。
+		&resourceDesc,						// Resourceの設定
+		D3D12_RESOURCE_STATE_DEPTH_WRITE,	// 深度値を書き込む状態にしてお
+		&depthClearValue,					// Clear最適値
+		IID_PPV_ARGS(&resource));			// 作成するResourceポインタへのポインタ
+	assert(SUCCEEDED(hr));
+
+
+
+	resource->SetName(L"DepthStencilResource");
+
+	char buffer[128];
+	sprintf_s(buffer, "Create resource at %p\n", resource);
+	OutputDebugStringA(buffer);
+
+	return resource;
+}
+
+
+void ResourceManager::CreateDepthStencilForRenderTexture(RenderTexture& rt) {
+	D3D12_RESOURCE_DESC desc{};
+	desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	desc.Width = rt.width;
+	desc.Height = rt.height;
+	desc.DepthOrArraySize = 1;
+	desc.MipLevels = 1;
+	desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	desc.SampleDesc.Count = 1;
+	desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+
+	D3D12_HEAP_PROPERTIES heapProperties{};
+	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;// VRAM上に作る
+
+	D3D12_CLEAR_VALUE clearValue{};
+	clearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	clearValue.DepthStencil.Depth = 1.0f;
+
+
+	HRESULT hr = BDevice_->CreateCommittedResource(
+		&heapProperties,
+		D3D12_HEAP_FLAG_NONE,
+		&desc,
+		D3D12_RESOURCE_STATE_DEPTH_WRITE,
+		&clearValue,
+		IID_PPV_ARGS(&rt.depthResource)
+	);
+	assert(SUCCEEDED(hr));
+
+	// 建立 DSV
+	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
+	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+
+	uint32_t dsvIndex = DsvManager::GetInstance()->Allocate();
+	rt.dsvHandleCPU = DsvManager::GetInstance()->GetCPUDescriptorHandle(dsvIndex); // 你自己的 DSV heap allocator
+	BDevice_->CreateDepthStencilView(rt.depthResource.Get(), &dsvDesc, rt.dsvHandleCPU);
 }

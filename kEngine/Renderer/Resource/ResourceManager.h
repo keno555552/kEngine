@@ -10,21 +10,12 @@
 #include "config.h"
 #include "Data/Render/CPUData/ObjectData.h"
 #include "Data/Render/CPUData/SpriteData.h"
-#include "SrvManager/SrvManager.h"
-#include "RtvManager/RtvManager.h"
+#include "Data/Render/CpuData/RenderTexture.h"
+#include "DescriptorManager/SrvManager/SrvManager.h"
+#include "DescriptorManager/RtvManager/RtvManager.h"
+#include "DescriptorManager/DsvManager/DsvManager.h"
 #include <memory>
 using MaterialID = int;
-
-struct RenderTexture {
-	Microsoft::WRL::ComPtr<ID3D12Resource> resource;
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandleCPU{};
-	D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU{};
-	D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU{};
-	UINT width{};
-	UINT height{};
-	DXGI_FORMAT format;
-	Vector4 clearColor;
-};
 
 class ResourceManager
 {
@@ -73,7 +64,7 @@ public:
 
 	/// ファイル読み込み
 	int ReadFile(std::string Path);
-	
+
 	/// ハンドルからModelDataを取得
 	std::shared_ptr<ModelData> GetModelData(int handle);
 
@@ -108,6 +99,7 @@ public:
 		DXGI_FORMAT format,
 		const Vector4& clearColor);
 
+
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateRenderTextureResource(
 		uint32_t width,
 		uint32_t height,
@@ -115,8 +107,18 @@ public:
 		const Vector4& clearColor
 	);
 
-	void CreateRTV(ID3D12Resource* renderTexture,DXGI_FORMAT format, D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle);
-	void CreateSRV(ID3D12Resource* renderTexture,DXGI_FORMAT format, D3D12_CPU_DESCRIPTOR_HANDLE srvHandle);
+	void CreateRTV(ID3D12Resource* renderTexture, DXGI_FORMAT format, D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle);
+	void CreateSRV(ID3D12Resource* renderTexture, DXGI_FORMAT format, D3D12_CPU_DESCRIPTOR_HANDLE srvHandle);
+
+
+
+	/// ===================== DepthStencil関連 ====================== ///
+	/// 普通のDepthStencilを作る関数
+	ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);
+
+	/// RenderTexture専用のDepthStencilを作る関数
+	void CreateDepthStencilForRenderTexture(RenderTexture& rt);
+
 
 	/// ==================== TextureManager関連 ===================== ///
 
@@ -140,7 +142,7 @@ public:
 	//////////////////////////////ModelDataList
 
 	std::unordered_map<std::string, std::shared_ptr<ModelData>> modelDataList_;	/// ModelDataを収納するリスト
-	std::unordered_map<int,std::string> modelDataHandleMap_; /// ModelDataのハンドルを管理するマップ
+	std::unordered_map<int, std::string> modelDataHandleMap_; /// ModelDataのハンドルを管理するマップ
 	int modelDataCounter_{}; /// ModelDataのハンドルカウンター
 
 	//////////////////////////////Texture関係
@@ -150,8 +152,8 @@ public:
 
 	struct MaterialEntry {
 		MaterialID materialID{};
-		std::weak_ptr<MaterialConfig> config{}; 
-		std::unique_ptr<MaterialForGPU> cpuMaterial;  
+		std::weak_ptr<MaterialConfig> config{};
+		std::unique_ptr<MaterialForGPU> cpuMaterial;
 		BasicResource* gpuMaterial{};
 		int textureHandle{};
 		int isUsed{}; // 0:未使用 1:使用中 2:解放予定
@@ -216,4 +218,6 @@ private:
 
 };
 
+
 //Todo: MeshBufferリストの管理仕方を見直す。
+//Todo: MeshBufferを作る関数を追加する。

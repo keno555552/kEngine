@@ -3,8 +3,8 @@
 
 enum class BlendModeType
 {
-
-	NormalBlend,
+	Opaque,
+	AlphaBlend,
 	AddBlend,
 	SubtractBlend,
 	MultiplyBlend,

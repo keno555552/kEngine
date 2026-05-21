@@ -264,7 +264,7 @@ void UITest::Draw() {
 
 	/// 実体処理
 	//skydome_->Draw();
-	//skybox_->Draw();
+	skybox_->Draw();
 	ground_->Draw();
 	box_->Draw();
 	detailButton_->Render();
@@ -319,9 +319,26 @@ void UITest::ImGuiPart() {
 	ImGui::End();
 
 	ImGui::Begin("Plane");
-	ImGui::SliderFloat3("Position", &box_->objectParts_[0].transform.rotate.x, -6.0f, 6.0f);
-	ImGui::Checkbox("isClicked", &isPress);
+	// BlendModeType 對應的字串（順序必須與 enum 完全一致）
+	static const char* blendModeNames[] = {
+	"Opaque",
+	"Normal",
+	"Add",
+	"Subtract",
+	"Multiply",
+	"Screen"
+	};
+
+	// 目前的 BlendMode
+	int currentBlend = static_cast<int>(box_->objectParts_[0].materialConfig->blendModeType);
+
+	// 下拉選單
+	if (ImGui::Combo("Blend Mode", &currentBlend, blendModeNames, IM_ARRAYSIZE(blendModeNames))) {
+		box_->objectParts_[0].materialConfig->blendModeType =
+			static_cast<BlendModeType>(currentBlend);
+	}
 	ImGui::End();
+
 
 }
 #endif 

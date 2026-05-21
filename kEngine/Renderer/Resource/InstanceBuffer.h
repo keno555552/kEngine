@@ -1,7 +1,7 @@
 #pragma once
 #include "DirectXCore.h"
 #include "Renderer/Resource/BasicResource.h"
-#include "SrvManager/SrvManager.h"
+#include "DescriptorManager/SrvManager/SrvManager.h"
 
 template<typename T>
 class InstanceBuffer

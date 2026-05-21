@@ -88,7 +88,7 @@ void MaterialConfig::MakePSOEnvironment() {
 
 	lightModelType = LightModelType::Environment;
 	renderModelType = RenderModelType::Environment;
-	blendModeType = BlendModeType::NormalBlend;
+	blendModeType = BlendModeType::AlphaBlend;
 	rasterizerMode = RasterizerMode::CullBack;
 	depthStencilType = DepthStencilType::ReadOnly;
 
@@ -98,7 +98,7 @@ void MaterialConfig::MakePSODebugLine() {
 
 	lightModelType = LightModelType::DebugLine;
 	renderModelType = RenderModelType::DebugLine;
-	blendModeType = BlendModeType::NormalBlend;
+	blendModeType = BlendModeType::AlphaBlend;
 	rasterizerMode = RasterizerMode::CullBack;
 	depthStencilType = DepthStencilType::Disable;
 

@@ -11,7 +11,7 @@
 void DrawEngine::Initialize(
 	DirectXCore* directXDriver,
 	DrawDataCollector* drawDataCollector
-) {
+){
 	directXDriver_ = directXDriver;
 	commandList_ = directXDriver_->GetCommandList();
 	srvManager_ = SrvManager::GetInstance();
@@ -27,7 +27,7 @@ void DrawEngine::Initialize(
 	psoManager_ = std::make_unique<PSOManager>();
 	psoManager_->Initialize(directXDriver_);
 
-	depthStencilResource = CreateDepthStencilTextureResource(directXDriver_->GetDevice(), kClientWidth_, kClientHeight_);
+	depthStencilResource = resourceManager_->CreateDepthStencilTextureResource(directXDriver_->GetDevice(), kClientWidth_, kClientHeight_);
 	MakeDepthStencilView();
 
 	///
@@ -119,12 +119,23 @@ void DrawEngine::Initialize(
 
 	/// =========================== OffscreenRT初期化 =========================== ///
 
-	m_OffscreenRT = resourceManager_->CreateRenderTexture(
+	postProcessRunner_ = std::make_unique<PostProcessRunner>();
+
+	m_Offscreen_InputRT = resourceManager_->CreateRenderTexture(
 		kClientWidth_,
 		kClientHeight_,
 		GetDXGIFormat(RenderTargetFormatType::BackBuffer),
-		Vector4{ 1.0f, 0.0f, 0.0f, 1.0f }
+		Vector4{ 0.0f, 0.0f, 0.0f, 1.0f }
 	);
+
+	m_Offscreen_OutputRT = resourceManager_->CreateRenderTexture(
+		kClientWidth_,
+		kClientHeight_,
+		GetDXGIFormat(RenderTargetFormatType::BackBuffer),
+		Vector4{ 0.0f, 0.0f, 0.0f, 1.0f }
+	);
+
+
 
 	/// =========================== カメラバッファの初期化 =========================== ///
 	cameraBuffer_ = std::make_unique<BasicResource>();
@@ -166,8 +177,7 @@ void DrawEngine::Finalize() {
 void DrawEngine::StartFrame() {
 
 	// 描画用のDescriptorHeapの設定
-	ID3D12DescriptorHeap* descriptorHeaps[] = { srvManager_->GetDescriptorHeap() };  // 現在使用正確的 getter 函式
-	commandList_->SetDescriptorHeaps(1, descriptorHeaps);
+	SetSRVHeap();
 
 	commandList_->RSSetViewports(1, &viewport);  // Viewportを設定
 	commandList_->RSSetScissorRects(1, &scissorRect);  // Scissorを設定
@@ -203,18 +213,19 @@ void DrawEngine::PreDraw() {
 	/// ==================== OffscreenRT関連設定 ==================== ///
 	CD3DX12_RESOURCE_BARRIER offscreenToRT =
 		CD3DX12_RESOURCE_BARRIER::Transition(
-			m_OffscreenRT.resource.Get(),
+			m_Offscreen_InputRT.resource.Get(),
 			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 			D3D12_RESOURCE_STATE_RENDER_TARGET
 		);
 	commandList_->ResourceBarrier(1, &offscreenToRT);
 
 	/// RenderTargetをセット
-	auto rtv = m_OffscreenRT.rtvHandleCPU;
-	auto dsv = directXDriver_->GetDsvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart();
+	auto rtv = m_Offscreen_InputRT.rtvHandleCPU;
+	auto dsv = m_Offscreen_InputRT.dsvHandleCPU;
 	commandList_->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
 
-	float clearColor[4] = { 1, 0, 0, 1 };
+	commandList_->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	float clearColor[4] = { 0, 1, 0, 1 };
 	commandList_->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
 }
 
@@ -228,31 +239,7 @@ void DrawEngine::CommitDraw() {
 
 void DrawEngine::EndDraw() {
 
-	CD3DX12_RESOURCE_BARRIER offscreenToRT =
-		CD3DX12_RESOURCE_BARRIER::Transition(
-			m_OffscreenRT.resource.Get(),
-			D3D12_RESOURCE_STATE_RENDER_TARGET,
-			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-		);
-
-	commandList_->ResourceBarrier(1, &offscreenToRT);
-
-	auto backRTV = directXDriver_->GetCurrentBackBufferRTV();
-	commandList_->OMSetRenderTargets(1, &backRTV, FALSE, nullptr);
-
-	// 1. 設定 Fullscreen PSO
-	PSOKey psoKey = CreateFullscreenPSOKey();
-	psoManager_->SetPSO(psoKey);
-
-	// 2. ⭐ 綁「OffscreenRT 所在的 SRV heap」
-	ID3D12DescriptorHeap* heaps[] = { SrvManager::GetInstance()->GetDescriptorHeap() };
-	commandList_->SetDescriptorHeaps(1, heaps);
-
-	// 3. 綁 t0
-	commandList_->SetGraphicsRootDescriptorTable(0, m_OffscreenRT.srvHandleGPU);
-
-	// 4. 畫 Fullscreen Triangle
-	DrawFullscreenQuad();
+	postProcessRunner_->Execute(this);
 
 	for (auto& ptr : instanceOffsetData_) {
 		if (ptr.state == 1) { ptr.state = 2; }
@@ -676,22 +663,112 @@ void DrawEngine::DrawCall() {
 	DrawDebugLine();
 }
 
-/// --------------------------------- OffScreenRendering関連 ----------------------------------- ///
+/// ------------------------------------- PostProcess関連 -----------------------------===------ ///
+
+
+void DrawEngine::TransitionRenderTarget(
+	Microsoft::WRL::ComPtr<ID3D12Resource> resource,
+	D3D12_RESOURCE_STATES fromState,
+	D3D12_RESOURCE_STATES toState) 
+{
+	CD3DX12_RESOURCE_BARRIER offscreenToRT =
+		CD3DX12_RESOURCE_BARRIER::Transition(
+			resource.Get(),
+			fromState,
+			toState
+		);
+	commandList_->ResourceBarrier(1, &offscreenToRT);
+}
+
+void DrawEngine::SetRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE renderTarget) {
+	auto dsv = directXDriver_->GetDsvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart();
+	commandList_->OMSetRenderTargets(1, &renderTarget, FALSE, &dsv);
+}
+
+void DrawEngine::SetSRVHeap() {
+	ID3D12DescriptorHeap* srvHeaps[] = { SrvManager::GetInstance()->GetDescriptorHeap() };
+	commandList_->SetDescriptorHeaps(1, srvHeaps);
+}
+
+void DrawEngine::SetRootDescriptorTable(UINT rootParameterIndex, D3D12_GPU_DESCRIPTOR_HANDLE descriptorHandle) {
+	commandList_->SetGraphicsRootDescriptorTable(rootParameterIndex, descriptorHandle);
+}
+
+void DrawEngine::DrawColorGrading() {
+
+	/// RenderTargetを切り替える
+	TransitionRenderTarget(
+		m_Offscreen_InputRT.resource,
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+	);
+
+	SetRenderTarget(m_Offscreen_OutputRT.rtvHandleCPU);
+
+	/// PSOを設定
+	PSOKey psoKey = CreateColorGradingPSOKey();
+	psoManager_->SetPSO(psoKey);
+
+	/// SRV Heapを設定
+	SetSRVHeap();
+
+	/// DescriptorTableを設定
+	SetRootDescriptorTable(0, m_Offscreen_InputRT.srvHandleGPU);
+
+	/// 最終のドロー
+	DrawFullscreenQuad();
+
+	/// RenderTargetを切り替える
+	TransitionRenderTarget(
+		m_Offscreen_OutputRT.resource,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		D3D12_RESOURCE_STATE_RENDER_TARGET
+	);
+
+	/// OffscreenRTを入れ替える
+	std::swap(m_Offscreen_InputRT, m_Offscreen_OutputRT);
+
+}
+
+void DrawEngine::DrawRenderCopy() {
+
+	/// RenderTargetを切り替える
+	TransitionRenderTarget(
+		m_Offscreen_InputRT.resource,
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+	);
+
+	/// RenderTargetを設定
+	auto backRTV = directXDriver_->GetCurrentBackBufferRTV();
+	SetRenderTarget(backRTV);
+
+	/// PSOを設定
+	PSOKey psoKey = CreateFullscreenPSOKey();
+	psoManager_->SetPSO(psoKey);
+
+	/// SRV Heapを設定
+	SetSRVHeap();
+
+	/// DescriptorTableを設定
+	SetRootDescriptorTable(0, m_Offscreen_InputRT.srvHandleGPU);
+
+	/// 最終のドロー
+	DrawFullscreenQuad();
+
+}
 
 void DrawEngine::DrawFullscreenQuad() {
 
-
-	// 2. 不需要 VB / IB
+	/// VB/IBがいらないのでnullptrをセット
 	commandList_->IASetVertexBuffers(0, 0, nullptr);
 	commandList_->IASetIndexBuffer(nullptr);
 
-	// 3. 設定 primitive type
+	/// primitive typeの設定 
 	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	// 4. Draw 3 vertices（Fullscreen Triangle）
+	/// Draw
 	commandList_->DrawInstanced(3, 1, 0, 0);
-
-
 }
 
 void DrawEngine::SetEnviromentReflectionTexture(int textureHandle) {
@@ -877,50 +954,6 @@ void DrawEngine::SetEnviromentReflectionGPU() {
 	// 綁定到 RootSignature 的 slot 7 (t2)
 	commandList_->SetGraphicsRootDescriptorTable(7, it);
 
-}
-
-
-ID3D12Resource* DrawEngine::CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height) {
-
-	/// 1.生成するResourceの設定
-	D3D12_RESOURCE_DESC resourceDesc{};
-	resourceDesc.Width = width;                                      // Textureの幅
-	resourceDesc.Height = height;									 // Textureの高さ
-	resourceDesc.MipLevels = 1;										 // mipmapの数
-	resourceDesc.DepthOrArraySize = 1;								 // 奥行き or 配列Textureの配列数
-	resourceDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;			 // DepthStencilとして利用可能なフォーマット
-	resourceDesc.SampleDesc.Count = 1;								 // サンプリングカウント。1固定
-	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;	 // 2次元
-	resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;	 // DepthStencilとして使う通知
-
-
-	/// 2.利用するHeapの設定
-	D3D12_HEAP_PROPERTIES heapProperties{};
-	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;// VRAM上に作る
-
-	/// EX1.深度値のクリア設定
-	D3D12_CLEAR_VALUE depthClearValue{};
-	depthClearValue.DepthStencil.Depth = 1.0f; //1.0f (最大値)でクリア
-	depthClearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;// フォーマット。Resourceと合わせる
-
-	/// 3.Resourceを生成する
-	ID3D12Resource* resource = nullptr;
-	HRESULT hr = device->CreateCommittedResource(
-		&heapProperties,					// Heapの設定
-		D3D12_HEAP_FLAG_NONE,				// Heapの特殊な設定。特になし。
-		&resourceDesc,						// Resourceの設定
-		D3D12_RESOURCE_STATE_DEPTH_WRITE,	// 深度値を書き込む状態にしてお
-		&depthClearValue,					// Clear最適値
-		IID_PPV_ARGS(&resource));			// 作成するResourceポインタへのポインタ
-	assert(SUCCEEDED(hr));
-
-	resource->SetName(L"DepthStencilResource");
-
-	char buffer[128];
-	sprintf_s(buffer, "Create resource at %p\n", resource);
-	OutputDebugStringA(buffer);
-
-	return resource;
 }
 
 void DrawEngine::MakeDepthStencilView() {

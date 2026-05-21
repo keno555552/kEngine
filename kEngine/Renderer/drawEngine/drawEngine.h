@@ -24,13 +24,18 @@
 #include "Data/Render/CPUData/SpriteData.h"
 #include <format>
 
-#include "SrvManager/SrvManager.h"
+#include "DescriptorManager/SrvManager/SrvManager.h"
 #include "DrawData/DrawDataCollector.h"
 #include "Renderer/Resource/InstanceBuffer.h"
+#include "Renderer/PostProcessRunner/PostProcessRunner.h"
 
 class DrawEngine
 {
 public:
+
+	friend class PostProcessRunner;
+
+
 	void Initialize(
 		DirectXCore* directXDirver,
 		DrawDataCollector* drawDataCollector
@@ -64,9 +69,6 @@ public:
 	/// 描画関数のコア
 	void DrawCall();
 
-	/// ===== Offscreen描画関数
-	void DrawFullscreenQuad();
-
 	/// EnviromentReflection関連関数
 	void SetEnviromentReflectionTexture(int textureHandle);
 
@@ -87,6 +89,7 @@ private:
 
 
 	std::unique_ptr<PSOManager> psoManager_{};
+	std::unique_ptr<PostProcessRunner> postProcessRunner_{};
 	ResourceManager* resourceManager_{};			/*依存*/
 	DirectXCore* directXDriver_{};					/*依存*/
 	ID3D12GraphicsCommandList* commandList_{};		/*依存*/
@@ -175,7 +178,9 @@ private:
 
 private:
 
-	RenderTexture m_OffscreenRT{};
+	/// PingPong用のRenderTexture
+	RenderTexture m_Offscreen_InputRT{};
+	RenderTexture m_Offscreen_OutputRT{};
 
 private:
 	/// 内部関数
@@ -192,11 +197,34 @@ private:
 	void SetEnviromentReflectionGPU();
 
 	void PSODecision(PSOKey& psoKey);
-	ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);
 	void MakeDepthStencilView();
 
 	void UpdateDebugLineVertexBuffer(const std::vector<DebugLineVertexGPU>& vertices);
 
+	/// ===== PostProcess描画関数
+
+	void TransitionRenderTarget(
+		Microsoft::WRL::ComPtr<ID3D12Resource> resource,
+		D3D12_RESOURCE_STATES fromState,
+		D3D12_RESOURCE_STATES toState
+	);
+
+	void SetRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE renderTarget);
+
+	void SetSRVHeap();
+
+	void SetRootDescriptorTable(UINT rootParameterIndex, D3D12_GPU_DESCRIPTOR_HANDLE descriptorHandle);
+
+	/// PostProcess群
+
+	void DrawColorGrading();
+
+
+	/// RenderCopy(描画内容をそのまま描画する、最後の処理)
+	void DrawRenderCopy();
+
+	/// Offscreen描画関数
+	void DrawFullscreenQuad();
 
 private:
 

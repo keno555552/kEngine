@@ -32,6 +32,7 @@ private:
 
 private:
 
+	D3D12_BLEND_DESC MakeBlendOpaque();
 	D3D12_BLEND_DESC MakeBlendNormal();
 	D3D12_BLEND_DESC MakeBlendAddAlpha();
 	D3D12_BLEND_DESC MakeBlendSubAlpha();

@@ -14,6 +14,7 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 
 	SrvManager::GetInstance()->Initialize(dxComm.get());
 	RtvManager::GetInstance()->Initialize(dxComm.get());
+	DsvManager::GetInstance()->Initialize(dxComm.get());
 
 #ifdef USE_IMGUI
 	ImGuiManager::Initialize(dxComm.get());
@@ -75,6 +76,11 @@ void kEngine::Finalize() {
 
 	RtvManager::GetInstance()->Finalize();
 	RtvManager::Destroy();
+
+	DsvManager::GetInstance()->Finalize();
+	DsvManager::Destroy();
+
+
 
 	dxComm->Finalize();
 }
@@ -520,6 +526,10 @@ SrvManager* kEngine::GetSrvManager() {
 
 RtvManager* kEngine::GetRtvManager() {
 	return RtvManager::GetInstance();
+}
+
+DsvManager* kEngine::GetDsvManager() {
+	return DsvManager::GetInstance();
 }
 
 ResourceManager* kEngine::GetResourceManager() const {

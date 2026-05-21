@@ -143,7 +143,7 @@ inline PSOKey CreateDebugLinePSOKey() {
 	PSOKey debugLineKey;
 	debugLineKey.lightModelType = LightModelType::DebugLine;
 	debugLineKey.renderModelType = RenderModelType::DebugLine;
-	debugLineKey.blendModeType = BlendModeType::NormalBlend;
+	debugLineKey.blendModeType = BlendModeType::AlphaBlend;
 	debugLineKey.rasterizerMode = RasterizerMode::Wireframe;
 	debugLineKey.depthStencilType = DepthStencilType::Disable;
 	debugLineKey.renderTargetFormatType = (RenderTargetFormatType)config::default_RenderTargetFormatType_;
@@ -151,14 +151,31 @@ inline PSOKey CreateDebugLinePSOKey() {
 	return debugLineKey;
 }
 
+
+
+/// ========================================= Offscreen用PSOKey ========================================== ///
+
 inline PSOKey CreateFullscreenPSOKey() {
 	PSOKey fullscreenKey;
 	fullscreenKey.lightModelType = LightModelType::NONE;
 	fullscreenKey.renderModelType = RenderModelType::FullscreenQuad;
-	fullscreenKey.blendModeType = BlendModeType::NormalBlend;
+	fullscreenKey.blendModeType = BlendModeType::Opaque;
 	fullscreenKey.rasterizerMode = RasterizerMode::CullNone;
 	fullscreenKey.depthStencilType = DepthStencilType::Disable;
 	fullscreenKey.renderTargetFormatType = RenderTargetFormatType::BackBuffer;
 	fullscreenKey.primitiveType = PrimitiveType::TRIANGLE;
 	return fullscreenKey;
+}
+
+inline PSOKey CreateColorGradingPSOKey() {
+	PSOKey colorGradingKey;
+	colorGradingKey.lightModelType = LightModelType::NONE;
+	colorGradingKey.renderModelType = RenderModelType::FullscreenQuad;
+	colorGradingKey.blendModeType = BlendModeType::Opaque;
+	colorGradingKey.rasterizerMode = RasterizerMode::CullNone;
+	colorGradingKey.depthStencilType = DepthStencilType::Disable;
+	colorGradingKey.renderTargetFormatType = RenderTargetFormatType::BackBuffer;
+	colorGradingKey.primitiveType = PrimitiveType::TRIANGLE;
+	colorGradingKey.featureMask |= FeatureFlags::IBL; // 例如，启用IBL特性
+	return colorGradingKey;
 }

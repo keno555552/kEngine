@@ -72,6 +72,7 @@ void PSOManager::SetPSO(PSOKey keys) {
 	}
 }
 
+
 void PSOManager::SetPSOStrong(PSOKey keys) {
 
 	/// PSOKeyからハンドルを探す
@@ -248,6 +249,7 @@ void PSOManager::AppendPSOKeyRecord(const PSOKey& key) {
 				psoFields[3] == (int)key.rasterizerMode &&
 				psoFields[4] == (int)key.depthStencilType &&
 				psoFields[5] == (int)key.primitiveType &&
+				psoFields[6] == (int)key.renderTargetFormatType &&
 				flags[0] == (int)(key.featureMask & (uint64_t)FeatureFlags::EnvReflection);
 
 			if (same)return;
@@ -263,6 +265,7 @@ void PSOManager::AppendPSOKeyRecord(const PSOKey& key) {
 				(int)key.blendModeType,
 				(int)key.rasterizerMode,
 				(int)key.depthStencilType,
+				(int)key.renderTargetFormatType,
 				(int)key.primitiveType
 			},
 
@@ -294,6 +297,7 @@ void PSOManager::CreateAllPSO() {
 							key.blendModeType = (BlendModeType)BlendNB;
 							key.depthStencilType = (DepthStencilType)DepthStencilNB;
 							key.primitiveType = (PrimitiveType)PrimitiveNB;
+							key.renderTargetFormatType = (RenderTargetFormatType)config::default_RenderTargetFormatType_;
 
 							/// PSOKeyとハンドルのマップに追加
 							psoMap_[handle] = psoFactory_.createPSO(key);

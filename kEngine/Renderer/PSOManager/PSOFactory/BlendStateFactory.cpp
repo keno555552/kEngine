@@ -3,12 +3,12 @@
 
 BlendStateFactory::BlendStateFactory() {
 
-	blendStateRegistry[BlendModeType::NormalBlend] = [this](PSOKey& key) { return MakeBlendNormal(); };
+	blendStateRegistry[BlendModeType::AlphaBlend] = [this](PSOKey& key) { return MakeBlendNormal(); };
 	blendStateRegistry[BlendModeType::AddBlend] = [this](PSOKey& key) { return MakeBlendAddAlpha(); };
 	blendStateRegistry[BlendModeType::SubtractBlend] = [this](PSOKey& key) { return MakeBlendSubAlpha(); };
 	blendStateRegistry[BlendModeType::MultiplyBlend] = [this](PSOKey& key) { return MakeBlendMultiply(); };
 	blendStateRegistry[BlendModeType::ScreenBlend] = [this](PSOKey& key) { return MakeBlendScreen(); };
-
+	blendStateRegistry[BlendModeType::Opaque] = [this](PSOKey& key) { return MakeBlendOpaque(); };
 }
 
 D3D12_BLEND_DESC BlendStateFactory::Make(PSOKey& key) {
@@ -25,6 +25,19 @@ D3D12_BLEND_DESC BlendStateFactory::Make(PSOKey& key) {
 	}
 
 	return D3D12_BLEND_DESC();
+}
+
+
+D3D12_BLEND_DESC BlendStateFactory::MakeBlendOpaque() {
+
+	// BlendStateの設定
+	D3D12_BLEND_DESC blendDesc_ = {};
+
+	// Blendしない
+	blendDesc_.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+	blendDesc_.RenderTarget[0].BlendEnable = FALSE;
+
+	return blendDesc_;
 }
 
 D3D12_BLEND_DESC BlendStateFactory::MakeBlendNormal() {
