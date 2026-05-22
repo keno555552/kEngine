@@ -45,13 +45,18 @@ private:
 	/// 他の関数に呼び出す用のShaderCompile関数
 	ShaderPair CompileShader(const std::string& shaderName, PSOKey& key);
 
+	ShaderPair CompilePostProcessShader(const std::string& shaderName, PSOKey& key);
+
 	/// PSOKeyのRenderModelTypeごとにShaderをコンパイルする関数
 	ShaderPair Compile2DShader(PSOKey& psoKeys);
 	ShaderPair Compile3DShader(PSOKey& psoKeys);
 	ShaderPair CompileDebugLineShader(PSOKey& psoKeys);
 	ShaderPair CompileSkyCubeShader(PSOKey& psoKeys);
 	ShaderPair CompileFlameNeonGlowShader(PSOKey& psoKeys);
+
+	/// PostProcess用のShaderをコンパイルする関数
 	ShaderPair CompileParticleScreenQuad(PSOKey& psoKeys);
+	ShaderPair CompileParticleColorGuard(PSOKey& key);
 
 	void checkCompileResult(ShaderPair shaderPair);
     

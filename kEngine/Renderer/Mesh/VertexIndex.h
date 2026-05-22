@@ -8,3 +8,4 @@
 #include "Mesh/ModelGroup.h"
 #include "Mesh/SkyCube.h"
 #include "Mesh/PlaneMesh.h"
+#include "Mesh/RingMesh.h"

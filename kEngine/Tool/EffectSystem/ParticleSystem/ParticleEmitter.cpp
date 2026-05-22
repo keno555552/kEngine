@@ -100,35 +100,44 @@ void ParticleEmitter::Update() {
 	/// 無序刪除
 	for (int i = (int)particles_.size() - 1; i >= 0; --i) {
 		if (!particles_[i].isAlive) {
+			dexpiredData_.push_back(particles_.back());
 			particles_[i] = std::move(particles_.back());
 			particles_.pop_back();
 		}
 	}
 }
 
-void ParticleEmitter::Emit(int count) {
+void ParticleEmitter::Emit(int count, ParticlePrototypeOverride* prototype) {
+
+	ParticlePrototype usedPrototype{prototype_};
+	if (prototype) {
+		CopyPPbyActiveData(usedPrototype, *prototype);
+	}
 
 	/// 発射停止中は発射しない
 	if (!isEmitting_) return;
 
+
 	for (int i = 0; i < count; i++) {
 
-		float emitRate = randomMaker_->randomFloat(1.0f - prototype_.emitNumRandom, 1.0f + prototype_.emitNumRandom);
-		int shootTime = (int)(prototype_.burstCount * emitRate);
+		float emitRate = randomMaker_->randomFloat(1.0f - usedPrototype.emitNumRandom, 1.0f + usedPrototype.emitNumRandom);
+		int shootTime = (int)(usedPrototype.burstCount * emitRate);
 
-		for (int i = 0; i < shootTime; i++) {
+		for (int s = 0; s < shootTime; s++) {
 			ParticleInstance p;
+
+			p.particleId = counter_++;
 			p.isAlive = true;
 			p.life.parameter_ = 0.0f;
 
 			// 壽命
-			float randLife = prototype_.lifetimeRandomness * prototype_.lifetime;
-			p.life.maxTime_ = prototype_.lifetime + randomMaker_->randomFloat(-randLife, randLife);
+			float randLife = usedPrototype.lifetimeRandomness * usedPrototype.lifetime;
+			p.life.maxTime_ = usedPrototype.lifetime + randomMaker_->randomFloat(-randLife, randLife);
 
 			// 外觀
-			int listSize = (prototype_.renderType == ParticleRenderType::Object) ?
-				(int)prototype_.objectList.size() :
-				(int)prototype_.spriteList.size();
+			int listSize = (usedPrototype.renderType == ParticleRenderType::Object) ?
+				(int)usedPrototype.objectList.size() :
+				(int)usedPrototype.spriteList.size();
 
 			if (listSize > 0) {
 				p.objectIndex = randomMaker_->randomInt(0, listSize - 1);
@@ -140,80 +149,80 @@ void ParticleEmitter::Emit(int count) {
 
 			// 初速
 			Vector3 rv = {
-				randomMaker_->randomFloat(-prototype_.startVelocityRandom.x, prototype_.startVelocityRandom.x),
-				randomMaker_->randomFloat(-prototype_.startVelocityRandom.y, prototype_.startVelocityRandom.y),
-				randomMaker_->randomFloat(-prototype_.startVelocityRandom.z, prototype_.startVelocityRandom.z)
+				randomMaker_->randomFloat(-usedPrototype.startVelocityRandom.x, usedPrototype.startVelocityRandom.x),
+				randomMaker_->randomFloat(-usedPrototype.startVelocityRandom.y, usedPrototype.startVelocityRandom.y),
+				randomMaker_->randomFloat(-usedPrototype.startVelocityRandom.z, usedPrototype.startVelocityRandom.z)
 			};
 
-			p.velocity = prototype_.startVelocity + rv;
+			p.velocity = usedPrototype.startVelocity + rv;
 
 			// 初期状態設定
 			p.startTranslate = emitterPosition;
 
 			Vector3 ranScale = {
-				randomMaker_->randomFloat(1.0f - prototype_.startScaleRandom.x, 1.0f + prototype_.startScaleRandom.x),
-				randomMaker_->randomFloat(1.0f - prototype_.startScaleRandom.y, 1.0f + prototype_.startScaleRandom.y),
-				randomMaker_->randomFloat(1.0f - prototype_.startScaleRandom.z, 1.0f + prototype_.startScaleRandom.z)
+				randomMaker_->randomFloat(1.0f - usedPrototype.startScaleRandom.x, 1.0f + usedPrototype.startScaleRandom.x),
+				randomMaker_->randomFloat(1.0f - usedPrototype.startScaleRandom.y, 1.0f + usedPrototype.startScaleRandom.y),
+				randomMaker_->randomFloat(1.0f - usedPrototype.startScaleRandom.z, 1.0f + usedPrototype.startScaleRandom.z)
 			};
-			p.startScale = emitterScale * (prototype_.startScale * ranScale);
+			p.startScale = emitterScale * (usedPrototype.startScale * ranScale);
 
 
 			Vector3 ranRotate = {
-				randomMaker_->randomFloat(-prototype_.startRotationRandom.x, prototype_.startRotationRandom.x),
-				randomMaker_->randomFloat(-prototype_.startRotationRandom.y, prototype_.startRotationRandom.y),
-				randomMaker_->randomFloat(-prototype_.startRotationRandom.z, prototype_.startRotationRandom.z)
+				randomMaker_->randomFloat(-usedPrototype.startRotationRandom.x, usedPrototype.startRotationRandom.x),
+				randomMaker_->randomFloat(-usedPrototype.startRotationRandom.y, usedPrototype.startRotationRandom.y),
+				randomMaker_->randomFloat(-usedPrototype.startRotationRandom.z, usedPrototype.startRotationRandom.z)
 			};
-			p.startRotate = emitterRotation + prototype_.startRotation + ranRotate;
+			p.startRotate = emitterRotation + usedPrototype.startRotation + ranRotate;
 
 			Vector4 ranColor = {
-				randomMaker_->randomFloat(1.0f - prototype_.startColorRandom.x, 1.0f + prototype_.startColorRandom.x),
-				randomMaker_->randomFloat(1.0f - prototype_.startColorRandom.y, 1.0f + prototype_.startColorRandom.y),
-				randomMaker_->randomFloat(1.0f - prototype_.startColorRandom.z, 1.0f + prototype_.startColorRandom.z),
-				randomMaker_->randomFloat(1.0f - prototype_.startColorRandom.w, 1.0f + prototype_.startColorRandom.w)
+				randomMaker_->randomFloat(1.0f - usedPrototype.startColorRandom.x, 1.0f + usedPrototype.startColorRandom.x),
+				randomMaker_->randomFloat(1.0f - usedPrototype.startColorRandom.y, 1.0f + usedPrototype.startColorRandom.y),
+				randomMaker_->randomFloat(1.0f - usedPrototype.startColorRandom.z, 1.0f + usedPrototype.startColorRandom.z),
+				randomMaker_->randomFloat(1.0f - usedPrototype.startColorRandom.w, 1.0f + usedPrototype.startColorRandom.w)
 			};
-			p.startColor.x = prototype_.startColor.x * ranColor.x;
-			p.startColor.y = prototype_.startColor.y * ranColor.y;
-			p.startColor.z = prototype_.startColor.z * ranColor.z;
-			p.startColor.w = prototype_.startColor.w * ranColor.w;
+			p.startColor.x = usedPrototype.startColor.x * ranColor.x;
+			p.startColor.y = usedPrototype.startColor.y * ranColor.y;
+			p.startColor.z = usedPrototype.startColor.z * ranColor.z;
+			p.startColor.w = usedPrototype.startColor.w * ranColor.w;
 
 			/// ============================== 最終状態設定 ============================== ///
 
-			if (prototype_.isConstantScale) {
+			if (usedPrototype.isConstantScale) {
 				p.endScale = p.startScale;
 			} else {
 				ranScale = {
-					randomMaker_->randomFloat(1.0f - prototype_.endScaleRandom.x, 1.0f + prototype_.endScaleRandom.x),
-					randomMaker_->randomFloat(1.0f - prototype_.endScaleRandom.y, 1.0f + prototype_.endScaleRandom.y),
-					randomMaker_->randomFloat(1.0f - prototype_.endScaleRandom.z, 1.0f + prototype_.endScaleRandom.z)
+					randomMaker_->randomFloat(1.0f - usedPrototype.endScaleRandom.x, 1.0f + usedPrototype.endScaleRandom.x),
+					randomMaker_->randomFloat(1.0f - usedPrototype.endScaleRandom.y, 1.0f + usedPrototype.endScaleRandom.y),
+					randomMaker_->randomFloat(1.0f - usedPrototype.endScaleRandom.z, 1.0f + usedPrototype.endScaleRandom.z)
 				};
-				p.endScale = emitterScale * (prototype_.endScale * ranScale);
+				p.endScale = emitterScale * (usedPrototype.endScale * ranScale);
 			}
 
 
-			if (prototype_.isConstantRotation) {
+			if (usedPrototype.isConstantRotation) {
 				p.endRotate = p.startRotate;
 			} else {
 				ranRotate = {
-				   randomMaker_->randomFloat(-prototype_.endRotationRandom.x, prototype_.endRotationRandom.x),
-				   randomMaker_->randomFloat(-prototype_.endRotationRandom.y, prototype_.endRotationRandom.y),
-				   randomMaker_->randomFloat(-prototype_.endRotationRandom.z, prototype_.endRotationRandom.z)
+				   randomMaker_->randomFloat(-usedPrototype.endRotationRandom.x, usedPrototype.endRotationRandom.x),
+				   randomMaker_->randomFloat(-usedPrototype.endRotationRandom.y, usedPrototype.endRotationRandom.y),
+				   randomMaker_->randomFloat(-usedPrototype.endRotationRandom.z, usedPrototype.endRotationRandom.z)
 				};
-				p.endRotate = emitterRotation + prototype_.endRotation + ranRotate;
+				p.endRotate = emitterRotation + usedPrototype.endRotation + ranRotate;
 			}
 
-			if (prototype_.isConstantColor) {
+			if (usedPrototype.isConstantColor) {
 				p.endColor = p.startColor;
 			} else {
 				ranColor = {
-					randomMaker_->randomFloat(1.0f - prototype_.endColorRandom.x, 1.0f + prototype_.endColorRandom.x),
-					randomMaker_->randomFloat(1.0f - prototype_.endColorRandom.y, 1.0f + prototype_.endColorRandom.y),
-					randomMaker_->randomFloat(1.0f - prototype_.endColorRandom.z, 1.0f + prototype_.endColorRandom.z),
-					randomMaker_->randomFloat(1.0f - prototype_.endColorRandom.w, 1.0f + prototype_.endColorRandom.w)
+					randomMaker_->randomFloat(1.0f - usedPrototype.endColorRandom.x, 1.0f + usedPrototype.endColorRandom.x),
+					randomMaker_->randomFloat(1.0f - usedPrototype.endColorRandom.y, 1.0f + usedPrototype.endColorRandom.y),
+					randomMaker_->randomFloat(1.0f - usedPrototype.endColorRandom.z, 1.0f + usedPrototype.endColorRandom.z),
+					randomMaker_->randomFloat(1.0f - usedPrototype.endColorRandom.w, 1.0f + usedPrototype.endColorRandom.w)
 				};
-				p.endColor.x = prototype_.endColor.x * ranColor.x;
-				p.endColor.y = prototype_.endColor.y * ranColor.y;
-				p.endColor.z = prototype_.endColor.z * ranColor.z;
-				p.endColor.w = prototype_.endColor.w * ranColor.w;
+				p.endColor.x = usedPrototype.endColor.x * ranColor.x;
+				p.endColor.y = usedPrototype.endColor.y * ranColor.y;
+				p.endColor.z = usedPrototype.endColor.z * ranColor.z;
+				p.endColor.w = usedPrototype.endColor.w * ranColor.w;
 			}
 
 			/// ============================== 現在状態設定 ============================== ///
@@ -224,6 +233,7 @@ void ParticleEmitter::Emit(int count) {
 			p.nowColor = p.startColor;		/// 顏色
 
 			particles_.push_back(p);
+			emittingData_.push_back(p);
 		}
 	}
 }
@@ -238,5 +248,32 @@ void ParticleEmitter::Draw() {
 		if (!particles_.empty()) {
 			system_->DrawParticle(prototype_.objectList, particles_);
 		}
+	}
+}
+
+std::vector<ParticleInstance>& ParticleEmitter::GetEmittingData(){
+	return emittingData_;
+}
+
+std::vector<ParticleInstance>& ParticleEmitter::GetDexpiredData(){
+	return dexpiredData_;
+}
+
+ParticleInstance* ParticleEmitter::FindParticleById(int id) {
+	for (auto& p : particles_) {
+		if (p.particleId == id) return &p;
+	}
+	return nullptr;
+}
+
+void ParticleEmitter::ClearEmittingData() {
+	if(!emittingData_.empty()) {
+		emittingData_.clear();
+	}
+}
+
+void ParticleEmitter::ClearDexpiredData() {
+	if (!dexpiredData_.empty()) {
+		dexpiredData_.clear();
 	}
 }

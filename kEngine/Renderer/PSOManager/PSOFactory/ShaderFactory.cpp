@@ -7,13 +7,15 @@ ShaderFactory::ShaderFactory() {
 	shader_compile_->Initialize();
 
 	shaderFolder_ = "./kEngine/EngineAssets/Shader/";
-	shaderRegistry_[RenderModelType::FullscreenQuad] = [this](PSOKey& key) { return CompileParticleScreenQuad(key); };
 	shaderRegistry_[RenderModelType::Sprite2D] = [this](PSOKey& key) { return Compile2DShader(key); };
 	shaderRegistry_[RenderModelType::Static] = [this](PSOKey& key) { return Compile3DShader(key); };
 	shaderRegistry_[RenderModelType::Skinned] = [this](PSOKey& key) { return Compile3DShader(key); };
 	shaderRegistry_[RenderModelType::DebugLine] = [this](PSOKey& key) { return CompileDebugLineShader(key); };
 	shaderRegistry_[RenderModelType::Environment] = [this](PSOKey& key) { return CompileSkyCubeShader(key); };
 	shaderRegistry_[RenderModelType::FlameNeonGlow] = [this](PSOKey& key) { return CompileFlameNeonGlowShader(key); };
+
+	shaderRegistry_[RenderModelType::FullscreenQuad] = [this](PSOKey& key) { return CompileParticleScreenQuad(key); };
+	shaderRegistry_[RenderModelType::ColorGradient] = [this](PSOKey& key) { return CompileParticleColorGuard(key); };
 }
 
 ShaderPair ShaderFactory::MakeShaderBlob(PSOKey& key) {
@@ -37,6 +39,17 @@ ShaderPair ShaderFactory::CompileShader(const std::string& shaderName, PSOKey& k
 	ShaderPair shaderPair;
 	shaderPair.vs = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + shaderName + ".VS.hlsl"), L"vs_6_0",key);
 	shaderPair.ps = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + shaderName + ".PS.hlsl"), L"ps_6_0",key);
+
+	checkCompileResult(shaderPair);
+	return shaderPair;
+}
+
+ShaderPair ShaderFactory::CompilePostProcessShader(const std::string& shaderName, PSOKey& key) {
+
+	ShaderPair shaderPair;
+	std::string postProcessFolder = "PostProcess/";
+	shaderPair.vs = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + postProcessFolder + shaderName + ".VS.hlsl"), L"vs_6_0",key);
+	shaderPair.ps = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + postProcessFolder + shaderName + ".PS.hlsl"), L"ps_6_0",key);
 
 	checkCompileResult(shaderPair);
 	return shaderPair;
@@ -78,9 +91,19 @@ ShaderPair ShaderFactory::CompileFlameNeonGlowShader(PSOKey& key) {
 	return CompileShader("FlameNeonGlow", key);
 }
 
+
+/// =============================== Checker =============================== ///
+
 ShaderPair ShaderFactory::CompileParticleScreenQuad(PSOKey& key) {
-	return CompileShader("CopyImage", key);
+	return CompilePostProcessShader("CopyImage", key);
 }
+
+ShaderPair ShaderFactory::CompileParticleColorGuard(PSOKey& key) {
+	return CompilePostProcessShader("CopyImage", key);
+}
+
+
+/// =============================== Checker =============================== ///
 
 void ShaderFactory::checkCompileResult(ShaderPair shaderPair) {
 

@@ -46,12 +46,14 @@ private:
 	/// テキスチャーハンドル
 	int whiteTextureHandle_ = 0;
 	int clicleTextureHandle_ = 0;
+	int effectTextureHandle_ = 0;
 
 	/// サントラハンドル
 	int soundHandle_ = 0;
 
 	/// パーティクルハンドル
 	int particleHandle_ = 0;
+	int particleHandle2_ = 0;
 
 	int ddsTest = 0;
 

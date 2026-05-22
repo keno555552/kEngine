@@ -66,6 +66,7 @@ UITest::UITest(kEngine* system) {
 
 	whiteTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/white5x5.png");
 	clicleTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/circle_withAlpha.png");
+	effectTextureHandle_ = system_->LoadTexture("./GAME/resources/texture/gradationLine.png");
 	//clicleTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/uvChecker.png");
 
 	//BGObject.obj
@@ -96,9 +97,10 @@ UITest::UITest(kEngine* system) {
 	//box_->CreateModelData(objectHandle_);
 	box_->CreateDefaultData();
 	//box_->modelHandle_ = config::default_Cube_MeshBufferHandle_;
-	box_->modelHandle_ = config::default_Plane_MeshBufferHandle_;
-	box_->objectParts_[0].materialConfig->textureHandle = clicleTextureHandle_;
-	box_->isBillboard_ = true;
+	box_->modelHandle_ = config::default_Ring_MeshBufferHandle_;
+	box_->objectParts_[0].materialConfig->textureHandle = effectTextureHandle_;
+	//box_->objectParts_[0].materialConfig->textureHandle = clicleTextureHandle_;
+	//box_->isBillboard_ = true;
 	//box_->objectParts_[0].materialConfig->isReflective = true;
 	box_->objectParts_[0].materialConfig->textureColor = { 1.0f,1.0f,1.0f,0.999f };
 	//box_->mainPosition.transform.scale = Vector3(0.5f, 0.5f, 0.5f);
@@ -132,8 +134,17 @@ UITest::UITest(kEngine* system) {
 	HitSpark hitSpark;
 	hitSpark.startPosition = { 0.0f, 0.0f, 0.0f };
 	hitSpark.objectList[0].objectParts_[0].materialConfig->textureHandle = clicleTextureHandle_;
-	hitSpark.objectList[0].objectParts_[0].materialConfig->reflectiveStrength = 0.0f;
 	particleHandle_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitSpark, 0);
+
+	HitImpact hitImpact;
+	hitImpact.startPosition = { 0.0f, 0.0f, 0.0f };
+	hitImpact.objectList[0].objectParts_[0].materialConfig->textureHandle = effectTextureHandle_;
+	particleHandle2_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitImpact, 1);
+
+	HitSpackImpactLink linkData;
+	linkData.sourceId = particleHandle2_;
+	linkData.targetId = particleHandle_;
+	system_->GetEffectManager()->GetParticleManager()->LinkEmitterToEmitter(linkData);
 
 }
 
@@ -192,7 +203,7 @@ void UITest::Update() {
 	//	for(auto& object : box_->objectParts_){ object.materialConfig->reflectiveStrength = 0.0f; }
 	//}
 
-	if (button_->GetIsClick()) {
+	if (detailButton_->GetIsClicked()) {
 		system_->GetEffectManager()->GetParticleManager()->ShootEmitter(particleHandle_, 1);
 	}
 
@@ -337,6 +348,8 @@ void UITest::ImGuiPart() {
 		box_->objectParts_[0].materialConfig->blendModeType =
 			static_cast<BlendModeType>(currentBlend);
 	}
+
+	ImGui::SliderFloat3("Rotation", &box_->mainPosition.transform.rotate.x, 0.0f, 10.0f);
 	ImGui::End();
 
 

@@ -80,6 +80,7 @@ public:
 	static int default_Cube_MeshBufferHandle_;
 	static int default_Sphere_MeshBufferHandle_;
 	static int default_SkyCube_MeshBufferHandle_;
+	static int default_Ring_MeshBufferHandle_;
 
 public:
 	/// デフォルトPSoハンドル

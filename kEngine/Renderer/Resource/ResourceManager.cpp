@@ -24,6 +24,7 @@ void ResourceManager::Initialize(DirectXCore* device) {
 	config::default_Cube_MeshBufferHandle_ = CreateCubeResource();
 	config::default_Sphere_MeshBufferHandle_ = CreateSphereResource(10);
 	config::default_SkyCube_MeshBufferHandle_ = CreateSkyCubeResource();
+	config::default_Ring_MeshBufferHandle_ = CreateRingResource(32, 1.0f, 0.5f);
 
 }
 
@@ -153,6 +154,25 @@ int ResourceManager::CreateSkyCubeResource() {
 
 	return (int)modelGroupList_.size() - 1;
 
+}
+
+int ResourceManager::CreateRingResource(int subdivision, float OuterRadius, float InnerRadius) {
+
+	std::shared_ptr <RingMesh> newRing;
+	newRing = std::make_shared<RingMesh>();
+	newRing->SetRingDivide(subdivision);
+	newRing->SetOuterRadius(OuterRadius);
+	newRing->SetInnerRadius(InnerRadius);
+	newRing->CreateVertexResource_(BDevice_);
+	newRing->CreateIndexResource_(BDevice_);
+	meshBufferList_.push_back(newRing);
+
+	auto modelGroup = std::make_shared<ModelGroup>();
+	modelGroup->PushModel(newRing);
+	modelGroup->PushModelHandle((int)meshBufferList_.size() - 1);
+	modelGroupList_.push_back(modelGroup);
+
+	return (int)modelGroupList_.size() - 1;
 }
 
 int ResourceManager::CreateModelResource(std::string Path) {

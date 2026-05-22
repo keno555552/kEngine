@@ -125,14 +125,14 @@ void DrawEngine::Initialize(
 		kClientWidth_,
 		kClientHeight_,
 		GetDXGIFormat(RenderTargetFormatType::BackBuffer),
-		Vector4{ 0.0f, 0.0f, 0.0f, 1.0f }
+		Vector4{ 0.1f, 0.25f, 0.5f, 1.0f }
 	);
 
 	m_Offscreen_OutputRT = resourceManager_->CreateRenderTexture(
 		kClientWidth_,
 		kClientHeight_,
 		GetDXGIFormat(RenderTargetFormatType::BackBuffer),
-		Vector4{ 0.0f, 0.0f, 0.0f, 1.0f }
+		Vector4{ 0.1f, 0.25f, 0.5f, 1.0f }
 	);
 
 
@@ -225,7 +225,7 @@ void DrawEngine::PreDraw() {
 	commandList_->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
 
 	commandList_->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-	float clearColor[4] = { 0, 1, 0, 1 };
+	float clearColor[4] = { 0.1f, 0.25f, 0.5f, 1.0f };
 	commandList_->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
 }
 

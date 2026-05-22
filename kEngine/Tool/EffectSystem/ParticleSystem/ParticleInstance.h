@@ -8,6 +8,9 @@
 struct ParticleInstance
 {
 	/// パーティクル状態
+
+	int particleId = -1;		/// 粒子ID（Emitter内で一意）
+
 	bool isAlive = false;		/// 生存フラグ
 	Timer life{};				/// 寿命タイマー
 

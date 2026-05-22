@@ -41,18 +41,21 @@ void TimeManager::Update() {
 Timer::Timer() {
 	parameter_ = 0.0f;
 	maxTime_ = 0.0f;
+	isTimerRun_ = true;
 }
 
 void Timer::Init0(float time, TimeManager* timeManager) {
 	timeManager_ = timeManager;
 	parameter_ = 0.0f;
 	maxTime_ = time;
+	isTimerRun_ = true;
 }
 
 void Timer::InitM(float time, TimeManager* timeManager) {
 	timeManager_ = timeManager;
 	parameter_ = time;
 	maxTime_ = time;
+	isTimerRun_ = true;
 }
 
 void Timer::Reset0() {
@@ -63,66 +66,91 @@ void Timer::ResetM() {
 	parameter_ = maxTime_;
 }
 
-void Timer::ToMix() {
+void Timer::TimerONOff(bool isOn) {
+	isTimerRun_ = isOn;
+}
+
+bool Timer::ToMix() {
+	if (!isTimerRun_) return false;
 	float t = TimerSpeed();
 	if (parameter_ < maxTime_) {
 		parameter_ += t;
+		return false;
 	} else {
 		parameter_ = maxTime_;
+		return true;
 	}
 }
 
-void Timer::ToMixZero() {
+bool Timer::ToMixZero() {
+	if (!isTimerRun_) return false;
 	float t = TimerSpeed();
 	if (parameter_ < maxTime_ - 1 && parameter_ > 0) {
 		parameter_ += t;
+		return false;
 	} else {
 		parameter_ = 0.0f;
-	};
-}
-
-void Timer::ToZero() {
-	float t = TimerSpeed();
-	if (parameter_ > 0) {
-		parameter_ -= t;
-	} else {
-		parameter_ = 0.0f;
+		return true;
 	}
 }
 
-void Timer::ToZeroMix() {
+bool Timer::ToZero() {
+	if (!isTimerRun_) return false;
+	float t = TimerSpeed();
+	if (parameter_ > 0) {
+		parameter_ -= t;
+		return false;
+	} else {
+		parameter_ = 0.0f;
+		return true;
+	}
+}
+
+bool Timer::ToZeroMix() {
+	if (!isTimerRun_) return false;
 	float t = TimerSpeed();
 	if (parameter_ > 0 && parameter_ < maxTime_) {
 		parameter_ -= t;
+		return false;
 	} else {
 		parameter_ = maxTime_;
+		return true;
 	}
 }
 
-void Timer::foreverUp() {
+bool Timer::foreverUp() {
+	if (!isTimerRun_) return false;
 	float t = TimerSpeed();
 	if (parameter_ < maxTime_) {
 		parameter_ += t;
+		return false;
 	} else {
 		parameter_ = 0.0f;
+		return true;
 	}
 }
 
-void Timer::foreverDown() {
+bool Timer::foreverDown() {
+	if (!isTimerRun_) return false;
 	float t = TimerSpeed();
 	if (parameter_ > 0) {
 		parameter_ -= t;
+		return false;
 	} else {
 		parameter_ = maxTime_;
+		return true;
 	}
 }
 
-void Timer::AnimationF() {
+bool Timer::AnimationF() {
+	if (!isTimerRun_) return false;
 	float t = TimerSpeed();
 	if (parameter_ < maxTime_ - 1) {
 		parameter_ += t;
+		return false;
 	} else {
 		parameter_ = 0.0f;
+		return true;
 	}
 }
 

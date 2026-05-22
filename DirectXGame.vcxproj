@@ -252,6 +252,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="kEngine\Tool\EffectSystem\ParticleSystem\EmitterLink.cpp" />
     <ClCompile Include="kEngine\Renderer\DescriptorManager\DsvManager\DsvManager.cpp" />
     <ClCompile Include="kEngine\Tool\EffectSystem\EffectManager.cpp" />
     <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\DepthStencilFactory.cpp" />
@@ -259,6 +260,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\InputLayoutFactory.cpp" />
     <ClCompile Include="kEngine\Renderer\Resource\InstanceBuffer.cpp" />
     <ClCompile Include="kEngine\Data\Geometry\ModelStructure\JointWeightData.cpp" />
+    <ClCompile Include="kEngine\Tool\EffectSystem\ParticleSystem\ParticlePrototype.cpp" />
     <ClCompile Include="kEngine\Tool\Importer\Reader\AssimpReader.cpp" />
     <ClCompile Include="kEngine\Tool\Importer\Reader\GLTFReader.cpp" />
     <ClCompile Include="kEngine\Data\Animation\Joint.cpp" />
@@ -450,13 +452,16 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\RootSignatureFactory.cpp" />
     <ClCompile Include="kEngine\Renderer\PSOManager\RootSlot.cpp" />
     <ClCompile Include="kEngine\Renderer\DescriptorManager\RtvManager\RtvManager.cpp" />
+    <ClCompile Include="kEngine\Renderer\Mesh\RingMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\EmitterLink.h" />
     <ClInclude Include="kEngine\Data\Render\Types\PostProcessType.h" />
     <ClInclude Include="kEngine\Renderer\DescriptorManager\DsvManager\DsvManager.h" />
     <ClInclude Include="kEngine\Data\Render\CPUData\RenderTexture.h" />
     <ClInclude Include="kEngine\Data\Render\Queue\ParticleInstanceForDDC.h" />
     <ClInclude Include="kEngine\EngineAssets\Particle\HitSpark.h" />
+    <ClInclude Include="kEngine\Renderer\Mesh\RingMesh.h" />
     <ClInclude Include="kEngine\Tool\EffectSystem\EffectManager.h" />
     <ClInclude Include="kEngine\Data\Render\Types\PSOType\DepthStencilType.h" />
     <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\DepthStencilFactory.h" />
@@ -742,16 +747,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="kEngine\EngineAssets\Shader\CopyImage.PS.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="kEngine\EngineAssets\Shader\CopyImage.VS.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
     <FxCompile Include="resources\Shader\FlameNeonGlow.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
@@ -952,11 +947,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
     <None Include="externals\DirectXTex\Shaders\CompileShaders.cmd">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </None>
-    <None Include="kEngine\EngineAssets\Shader\CopyImage.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>

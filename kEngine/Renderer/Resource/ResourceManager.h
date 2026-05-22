@@ -188,6 +188,7 @@ private:
 	int CreateCubeResource();
 	int CreateSphereResource(int sudivision);
 	int CreateSkyCubeResource();
+	int CreateRingResource(int subdivision,float OuterRadius, float InnerRadius);
 
 
 	int CreateModelResource(std::string Path);

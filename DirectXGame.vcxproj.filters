@@ -702,6 +702,15 @@
     <ClCompile Include="kEngine\Renderer\PostProcessRunner\PostProcessRunner.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="kEngine\Renderer\Mesh\RingMesh.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\EffectSystem\ParticleSystem\EmitterLink.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\EffectSystem\ParticleSystem\ParticlePrototype.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kEngine\Math\LinearAlgebra\Vector2.h">
@@ -1526,6 +1535,12 @@
     <ClInclude Include="kEngine\Data\Render\Types\PostProcessType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="kEngine\Renderer\Mesh\RingMesh.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\EmitterLink.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\LightingLambert\HalfLambert.hlsl">
@@ -1550,8 +1565,6 @@
     <FxCompile Include="resources\Shader\GlowSphere.VS.hlsl" />
     <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl" />
     <FxCompile Include="externals\DirectXTex\Shaders\BC7Encode.hlsl" />
-    <FxCompile Include="kEngine\EngineAssets\Shader\CopyImage.PS.hlsl" />
-    <FxCompile Include="kEngine\EngineAssets\Shader\CopyImage.VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -1638,6 +1651,5 @@
     <None Include="externals\DirectXTex\Shaders\Compiled\BC7Encode_TryMode456CS_cs40.inc">
       <Filter>ヘッダー ファイル</Filter>
     </None>
-    <None Include="kEngine\EngineAssets\Shader\CopyImage.hlsli" />
   </ItemGroup>
 </Project>

@@ -69,40 +69,45 @@ public:
 	void ResetM();
 
 	/// <summary>
+	/// timerを-1にする
+	/// </summary>
+	void TimerONOff(bool isOn);
+
+	/// <summary>
 	/// Timerをマクスにすると止まる
 	/// </summary>
-	void ToMix();
+	bool ToMix();
 
 	/// <summary>
 	/// Timerをマクスにすると0になって、止まる。1以上になると動く
 	/// </summary>
-	void ToMixZero();
+	bool ToMixZero();
 
 	/// <summary>
 	/// Timerを0にすると止まる
 	/// </summary>
-	void ToZero();
+	bool ToZero();
 
 	/// <summary>
 	/// Timerを0にするとマクスになって、止まる。Mix - 1以下になると動く
 	/// </summary>
-	void ToZeroMix();
+	bool ToZeroMix();
 
 	/// <summary>
 	/// 無休Upタイマー
 	/// </summary>
-	void foreverUp();
+	bool foreverUp();
 
 	/// <summary>
 	/// 無休Downタイマー
 	/// </summary>
-	void foreverDown();
+	bool foreverDown();
 
 	/// <summary>
 	/// アニメーション用の無休タイマー、1秒12フレームで int形数字を出力
 	/// </summary>
 	/// <returns></returns>
-	void AnimationF();
+	bool AnimationF();
 
 	/// <summary>
 	/// アニメーション用のタイマー、秒を12フレームの形で int形数字を出力
@@ -233,6 +238,8 @@ public:
 	float maxTime_;
 	/// scaleに影響されるか
 	bool isInfluenceByTimeScale_ = false;
+	/// On/off
+	bool isTimerRun_ = true;
 
 private:
 
