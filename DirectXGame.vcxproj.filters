@@ -1651,5 +1651,6 @@
     <None Include="externals\DirectXTex\Shaders\Compiled\BC7Encode_TryMode456CS_cs40.inc">
       <Filter>ヘッダー ファイル</Filter>
     </None>
+    <None Include=".github\copilot-instructions.md" />
   </ItemGroup>
 </Project>

@@ -90,6 +90,7 @@ void ParticleManager::UpdateEmitterLinks() {
 
 		/// 連動処理
 		ParticleEmitter* sourceEmitter = sourceIt->second.get();
+
 		std::vector<ParticleInstance> emittingData;
 		if (linkData.emitterTiming != EmitterTiming::SourceEnd) {
 			emittingData = sourceEmitter->GetEmittingData();
@@ -130,6 +131,7 @@ void ParticleManager::UpdateEmitterLinks() {
 			if (linkData.linkFollow == LinkFollow::Emitter) {
 				d.followParticle = false;
 				d.particleId = -1;
+
 				d.positionOffset = sourceEmitter->GetPosition();
 				d.rotationOffset = sourceEmitter->GetRotation();
 				d.scaleOffset = sourceEmitter->GetScale();
@@ -140,6 +142,8 @@ void ParticleManager::UpdateEmitterLinks() {
 				d.rotationOffset = p->nowRotate;
 				d.scaleOffset = p->nowScale;
 			}
+
+
 
 			if (linkData.emitterTiming == EmitterTiming::SourceEmit ||
 				linkData.emitterTiming == EmitterTiming::SourceEnd) {
@@ -180,23 +184,30 @@ void ParticleManager::UpdateEmitterLinks() {
 
 		ParticlePrototypeOverride protoOverride{};
 		protoOverride.hasStartPosition = true;
-		protoOverride.hasStartScale = true;
-		protoOverride.hasStartRotation = true;
+		if(linkData.followScale)protoOverride.hasStartScale = true;
+		if (linkData.followRotation)protoOverride.hasStartRotation = true;
 
+		auto particle = sourceEmitter->FindParticleById(delayData.particleId);
 		if (linkData.followPosition) {
-			auto particle = sourceEmitter->FindParticleById(delayData.particleId);
-			if (particle) {
-				protoOverride.startPosition = particle->nowTranslate;
-				protoOverride.startScale = particle->nowScale;
-				protoOverride.startRotation = particle->nowRotate;
-			} else {
+			protoOverride.startPosition = (particle) ?
+				protoOverride.startPosition = particle->nowTranslate :
 				protoOverride.startPosition = delayData.positionOffset;
-				protoOverride.startScale = delayData.scaleOffset;
-				protoOverride.startRotation = delayData.rotationOffset;
-			}
 		} else {
 			protoOverride.startPosition = delayData.positionOffset;
-			protoOverride.startScale = delayData.scaleOffset;
+		}
+
+		if (linkData.followScale) {
+			protoOverride.startScale = (particle) ?
+				protoOverride.startScale = particle->nowScale :
+				protoOverride.startScale = delayData.scaleOffset;
+		} else {
+				protoOverride.startScale = delayData.scaleOffset;
+		}
+		if (linkData.followRotation) {
+			protoOverride.startRotation = (particle) ?
+				protoOverride.startRotation = particle->nowRotate :
+				protoOverride.startRotation = delayData.rotationOffset;
+		} else {
 			protoOverride.startRotation = delayData.rotationOffset;
 		}
 

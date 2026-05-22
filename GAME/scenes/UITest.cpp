@@ -142,8 +142,8 @@ UITest::UITest(kEngine* system) {
 	particleHandle2_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitImpact, 1);
 
 	HitSpackImpactLink linkData;
-	linkData.sourceId = particleHandle2_;
-	linkData.targetId = particleHandle_;
+	linkData.sourceId = particleHandle_;
+	linkData.targetId = particleHandle2_;
 	system_->GetEffectManager()->GetParticleManager()->LinkEmitterToEmitter(linkData);
 
 }
@@ -277,7 +277,7 @@ void UITest::Draw() {
 	//skydome_->Draw();
 	skybox_->Draw();
 	ground_->Draw();
-	box_->Draw();
+	//box_->Draw();
 	detailButton_->Render();
 	//button_->Render();
 	//panel_->Render();

@@ -52,9 +52,9 @@ struct HitImpact : ParticlePrototype
 		lifetime = 0.5f;
 		/// 移動しないから設定要らない
 		/// スケール設定、その後変わらない
-		startScale = { 0.5f, 0.5f, 0.5f };
-		endScale = { 0.5f, 0.5f, 0.5f };
-		isConstantScale = true;
+		startScale = { 0.2f, 0.2f, 1.0f };
+		endScale = { 0.3f, 0.3f, 1.0f };
+		isConstantScale = false;
 		/// 回転はランダム
 		startRotationRandom = { 0.0f, 0.0f, 3.2f };
 		isConstantRotation = true;
@@ -63,7 +63,6 @@ struct HitImpact : ParticlePrototype
 		endColor = { 1.0f, 1.0f, 1.0f, 0.0f };
 		/// 行為設定
 		burstCount = 1;
-		emitNumRandom = 0.5f;
 		/// 見た目設定
 		ObjectData obj;
 		obj.isBillboard_ = true;

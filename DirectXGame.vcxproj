@@ -867,6 +867,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include=".github\copilot-instructions.md" />
     <None Include="externals\assimp\include\assimp\color4.inl" />
     <None Include="externals\assimp\include\assimp\material.inl" />
     <None Include="externals\assimp\include\assimp\matrix3x3.inl" />
