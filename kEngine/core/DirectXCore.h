@@ -33,6 +33,7 @@
 bool CheckXInputDeviceConnected();
 #pragma endregion
 
+
 #pragma region DirectXCommon
 
 class DirectXCore {
