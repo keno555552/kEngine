@@ -197,6 +197,24 @@ int kEngine::SetModelObj(std::string path) {
 	return modelHandle;
 }
 
+/// ----------------------------- EngineModel関連 ---------------------------- ///
+
+int kEngine::CreateEngineModel(SphereBuildMaterial& buildMaterial) {
+	return ResourceManager::GetInstance()->CreateEngineModel(buildMaterial);
+}
+
+int kEngine::CreateEngineModel(CylinderBuildMaterial& buildMaterial) {
+	return ResourceManager::GetInstance()->CreateEngineModel(buildMaterial);
+}
+
+void kEngine::ChangeEngineModel(SphereBuildMaterial& buildMaterial, int modelHandle, int meshHandle) {
+	ResourceManager::GetInstance()->UpdateEngineModel(buildMaterial, modelHandle, meshHandle);
+}
+
+void kEngine::ChangeEngineModel(CylinderBuildMaterial& buildMaterial, int modelHandle, int meshHandle) {
+	ResourceManager::GetInstance()->UpdateEngineModel(buildMaterial, modelHandle, meshHandle);
+}
+
 void kEngine::CreateModelRoot(ObjectData* objectData) {
 	int modelHandle = objectData->modelHandle_;
 	ModelGroup* modelGroup = ResourceManager::GetInstance()->modelGroupList_[modelHandle].get();

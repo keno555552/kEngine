@@ -711,6 +711,12 @@
     <ClCompile Include="kEngine\Tool\EffectSystem\ParticleSystem\ParticlePrototype.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="kEngine\Tool\EffectSystem\ParticleEditor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Renderer\Mesh\CylinderMesh.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kEngine\Math\LinearAlgebra\Vector2.h">
@@ -1539,6 +1545,12 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\EmitterLink.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\EffectSystem\ParticleEditor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Renderer\Mesh\CylinderMesh.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

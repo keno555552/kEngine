@@ -19,10 +19,12 @@ public:
 	std::string GetFilePath();
 
 	void SetModelGroupData(std::shared_ptr<ModelData> modelData);
-	void PushModelHandle(int handle) { modelHandle_.push_back(handle); }
+	void PushMeshHandle(int handle) { meshHandle_.push_back(handle); }
 
-	int GetModelHandle(int handle) { return modelHandle_[handle]; }
+	int GetMeshHandle(int handle) { return meshHandle_[handle]; }
 	int GetModelNum() { return (int)modelGroup_.size();}
+
+	void SwapModel(int modelIndex, std::shared_ptr<Model> newModel, int newMeshHandle);
 
 	bool HasSkinClusterData();
 
@@ -33,8 +35,8 @@ private:
 	/// Modelを保存するどころ
 	std::vector<std::shared_ptr<Model>> modelGroup_;
 
-	/// ResourceManagerからもらうハンドルを保存するどころ
-	std::vector<int> modelHandle_;
+	/// ResourceManagerからもらうMeshハンドルを保存するどころ
+	std::vector<int> meshHandle_;
 
 };
 

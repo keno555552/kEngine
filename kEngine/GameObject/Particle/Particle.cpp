@@ -16,6 +16,12 @@ Particle::Particle(kEngine* system) {
 Particle::~Particle() {
 	commonMaterialConfig.reset();
 
+
+	for (auto& data : particleObjectList_) {
+		if (data.get()->part) {
+			delete data.get()->part;
+		}
+	}
 	particleObjectList_.clear();
 
 	randomMaker_.reset();

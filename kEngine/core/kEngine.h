@@ -76,6 +76,12 @@ public:
 	int GetMutiModelNum(int modelHandle);
 	int SetModelObj(std::string path);
 
+	/// EngineModel関連
+	int CreateEngineModel(SphereBuildMaterial& buildMaterial);
+	int CreateEngineModel(CylinderBuildMaterial& buildMaterial);
+	void ChangeEngineModel(SphereBuildMaterial& buildMaterial, int modelHandle, int meshHandle = -1);
+	void ChangeEngineModel(CylinderBuildMaterial& buildMaterial, int modelHandle, int meshHandle = -1);
+
 	/// Modelに必要なものルードを準備する
 	void CreateModelRoot(ObjectData* objectData);
 	void ClearModelRoot(ObjectData* objectData);

@@ -9,11 +9,11 @@
 #include "GameObject\button\button.h"
 #include "Tool\DefaultMenu\DefaultMenu.h"
 
-class UITest : public BaseScene
+class ParticleEditor : public BaseScene
 {
 public:
-	UITest(kEngine* system);
-	~UITest();
+	ParticleEditor(kEngine* system);
+	~ParticleEditor();
 
 	void Update() override;
 	void Draw() override;
@@ -47,7 +47,6 @@ private:
 	int whiteTextureHandle_ = 0;
 	int clicleTextureHandle_ = 0;
 	int effectTextureHandle_ = 0;
-	int uvCheckerTextureHandle_ = 0;
 
 	/// サントラハンドル
 	int soundHandle_ = 0;
@@ -75,11 +74,6 @@ private:
 	bool isHit = false;
 
 	bool isPress_ = false;
-
-	/// =============== その他 ================///
-
-	SphereBuildMaterial sphereBuildMaterial_ = {};
-	CylinderBuildMaterial cylinderBuildMaterial_ = {};
 
 private:
 	/// ============= シーン内命令 =============///

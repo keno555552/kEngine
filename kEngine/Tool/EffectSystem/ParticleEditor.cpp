@@ -1,8 +1,8 @@
-#include "UITest.h"
+#include "ParticleEditor.h"
 #include "DebugDraw.h"
 #include "EngineAssets/Particle/HitSpark.h"
 
-UITest::UITest(kEngine* system) {
+ParticleEditor::ParticleEditor(kEngine* system) {
 	/// =========== システム初期化 ============///
 	system_ = system;
 
@@ -62,17 +62,16 @@ UITest::UITest(kEngine* system) {
 
 	/// =========== リソースロード ============///
 	skydomeModelHandle_ = system_->SetModelObj("./kEngine/EngineAssets/TemplateResource/object/skydome/skydome.obj");
-	smallStageHandel_ = system_->SetModelObj("./GAME/resources/Object/smallStage/smallStage.obj");
+	smallStageHandel_ = system_->SetModelObj("./GAME/Object/smallStage/smallStage.obj");
 
 	whiteTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/white5x5.png");
 	clicleTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/circle_withAlpha.png");
 	effectTextureHandle_ = system_->LoadTexture("./GAME/resources/texture/gradationLine.png");
-	uvCheckerTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/uvChecker.png");
+	//clicleTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/uvChecker.png");
 
 	//BGObject.obj
 	//objectHandle_ = system_->SetModelObj("./GAME/Object/Goal/Goal.obj");
 	//objectHandle_ = system_->SetModelObj("./kEngine/EngineAssets/Object/charater/charater.obj");
-	objectHandle_ = system_->CreateEngineModel(cylinderBuildMaterial_);
 
 	//ddsTest = system_->LoadTexture("./GAME/resources/texture/skyCube/rostock_laage_airport_4k.dds");
 	ddsTest = system_->LoadTexture("./GAME/resources/texture/skyCube/output_skybox.dds");
@@ -98,21 +97,14 @@ UITest::UITest(kEngine* system) {
 	//box_->CreateModelData(objectHandle_);
 	box_->CreateDefaultData();
 	//box_->modelHandle_ = config::default_Cube_MeshBufferHandle_;
-	//box_->modelHandle_ = config::default_Sphere_MeshBufferHandle_;
-	//box_->modelHandle_ = config::default_Cylinder_MeshBufferHandle_;
-	box_->modelHandle_ = objectHandle_;
-	//box_->objectParts_[0].materialConfig->textureHandle = whiteTextureHandle_;
-	//box_->objectParts_[0].materialConfig->textureHandle = uvCheckerTextureHandle_;
-	//box_->objectParts_[0].materialConfig->textureHandle = clicleTextureHandle_;
+	box_->modelHandle_ = config::default_Ring_MeshBufferHandle_;
 	box_->objectParts_[0].materialConfig->textureHandle = effectTextureHandle_;
+	//box_->objectParts_[0].materialConfig->textureHandle = clicleTextureHandle_;
 	//box_->isBillboard_ = true;
 	//box_->objectParts_[0].materialConfig->isReflective = true;
-	box_->objectParts_[0].materialConfig->enableLighting = false;
-	box_->objectParts_[0].materialConfig->lightModelType = LightModelType::Lambert;
-	box_->objectParts_[0].materialConfig->rasterizerMode = RasterizerMode::CullNone;
 	box_->objectParts_[0].materialConfig->textureColor = { 1.0f,1.0f,1.0f,0.999f };
 	//box_->mainPosition.transform.scale = Vector3(0.5f, 0.5f, 0.5f);
-	//box_->mainPosition.transform.translate = Vector3(0.0f, 0.0f, 0.0f);
+	box_->mainPosition.transform.translate = Vector3(0.0f, 0.0f, 0.0f);
 
 	skybox_ = std::make_unique<Object>();
 	skybox_->IntObject(system_);
@@ -126,14 +118,7 @@ UITest::UITest(kEngine* system) {
 	detailButton_->SetButton({ 100.0f,100.0f }, 200.0f, 80.0f);
 
 	button_ = std::make_unique<Button>(system_);
-	button_->Init(
-		{ 100.0f,350.0f },
-		200.0f,80.0f,
-		whiteTextureHandle_,
-		whiteTextureHandle_,
-		whiteTextureHandle_,
-		whiteTextureHandle_,
-		soundHandle_, soundHandle_);
+	button_->Init({ 100.0f,350.0f }, 200.0f, 80.0f, whiteTextureHandle_, whiteTextureHandle_, whiteTextureHandle_, whiteTextureHandle_, soundHandle_, soundHandle_);
 	button_->ChangeTextureCColor({ 1.0f,1.0f,1.0f,1.0f });
 	button_->ChangeTextureSColor({ 1.0f,0.8f,0.8f,1.0f });
 	button_->ChangeTexturePColor({ 0.5f,0.5f,1.0f,1.0f });
@@ -163,7 +148,7 @@ UITest::UITest(kEngine* system) {
 
 }
 
-UITest::~UITest() {
+ParticleEditor::~ParticleEditor() {
 	system_->DestroyCamera(camera_);
 	system_->DestroyCamera(debugCamera_);
 
@@ -180,7 +165,7 @@ UITest::~UITest() {
 }
 
 
-void UITest::Update() {
+void ParticleEditor::Update() {
 
 	CameraPart();
 
@@ -222,13 +207,6 @@ void UITest::Update() {
 		system_->GetEffectManager()->GetParticleManager()->ShootEmitter(particleHandle_, 1);
 	}
 
-	//if (button_->GetIsClick()) {
-	//	system_->ChangeEngineModel(sphereBuildMaterial_, objectHandle_);
-	//}
-	if (button_->GetIsClick()) {
-		system_->ChangeEngineModel(cylinderBuildMaterial_, objectHandle_);
-	}
-
 
 	//if (system_->GetMouseTriggerOn(0)) {
 	//	box_->objectParts_[0].materialConfig->reflectiveStrength += 0.05f;
@@ -262,7 +240,7 @@ void UITest::Update() {
 
 }
 
-void UITest::MouseLogic() {
+void ParticleEditor::MouseLogic() {
 
 	auto cam = usingCamera_.lock();
 	if (!cam) return;
@@ -293,15 +271,15 @@ void UITest::MouseLogic() {
 
 }
 
-void UITest::Draw() {
+void ParticleEditor::Draw() {
 
 	/// 実体処理
 	//skydome_->Draw();
 	skybox_->Draw();
 	ground_->Draw();
-	box_->Draw();
+	//box_->Draw();
 	detailButton_->Render();
-	button_->Render();
+	//button_->Render();
 	//panel_->Render();
 	defaultMenu_->Draw();
 
@@ -311,7 +289,7 @@ void UITest::Draw() {
 #endif
 }
 
-void UITest::CameraPart() {
+void ParticleEditor::CameraPart() {
 	if (useDebugCamera) {
 		usingCamera_ = debugCamera_;
 		if (auto sp = debugCamera_.lock()) {
@@ -330,7 +308,7 @@ void UITest::CameraPart() {
 }
 
 #ifdef USE_IMGUI
-void UITest::ImGuiPart() {
+void ParticleEditor::ImGuiPart() {
 	ImGui::Begin("DebugCamera");
 	ImGui::Checkbox("isUse", &useDebugCamera);
 	ImGui::End();
@@ -350,66 +328,30 @@ void UITest::ImGuiPart() {
 	ImGui::Begin("Panel");
 	ImGui::SliderFloat3("Position", &panel_->mainPosition.transform.translate.x, 0.0f, 500.0f);
 	ImGui::End();
-	{
 
-		ImGui::Begin("SphereBuildMaterial");
-		ImGui::Text("SphereBuildMaterial");
-		ImGui::SliderInt("Latitude", &sphereBuildMaterial_.LatitudeSegments, 0, 50);
-		ImGui::SliderInt("Longitude", &sphereBuildMaterial_.LongitudeSegments, 0, 50);
+	ImGui::Begin("Plane");
+	// BlendModeType 對應的字串（順序必須與 enum 完全一致）
+	static const char* blendModeNames[] = {
+	"Opaque",
+	"Normal",
+	"Add",
+	"Subtract",
+	"Multiply",
+	"Screen"
+	};
 
-		ImGui::Text("CylinderBuildMaterial");
-		ImGui::SliderInt("Division", &cylinderBuildMaterial_.Division, 0, 50);
-		ImGui::SliderFloat("Height", &cylinderBuildMaterial_.Height, 0.0f, 8.0f);
-		ImGui::SliderFloat("TopRadius", &cylinderBuildMaterial_.TopRadius, 0.0f, 2.0f);
-		ImGui::SliderFloat("BottomRadius", &cylinderBuildMaterial_.BottomRadius, 0.0f, 2.0f);
-		ImGui::Checkbox("ReverseY", &cylinderBuildMaterial_.isReverseY);
-		ImGui::End();
+	// 目前的 BlendMode
+	int currentBlend = static_cast<int>(box_->objectParts_[0].materialConfig->blendModeType);
+
+	// 下拉選單
+	if (ImGui::Combo("Blend Mode", &currentBlend, blendModeNames, IM_ARRAYSIZE(blendModeNames))) {
+		box_->objectParts_[0].materialConfig->blendModeType =
+			static_cast<BlendModeType>(currentBlend);
 	}
 
-	{
-		ImGui::Begin("Box");
-		// BlendModeType 對應的字串（順序必須與 enum 完全一致）
-		static const char* blendModeNames[] = {
-		"Opaque",
-		"Normal",
-		"Add",
-		"Subtract",
-		"Multiply",
-		"Screen"
-		};
+	ImGui::SliderFloat3("Rotation", &box_->mainPosition.transform.rotate.x, 0.0f, 10.0f);
+	ImGui::End();
 
-		// 目前的 BlendMode
-		int currentBlend = static_cast<int>(box_->objectParts_[0].materialConfig->blendModeType);
-
-		// 下拉選單
-		if (ImGui::Combo("Blend Mode", &currentBlend, blendModeNames, IM_ARRAYSIZE(blendModeNames))) {
-			box_->objectParts_[0].materialConfig->blendModeType =
-				static_cast<BlendModeType>(currentBlend);
-		}
-		static const char* lightModeNames[] = {
-		"Sprite2D",
-		"Lambert",
-		"HalfLambert",
-		"PhongReflection",
-		"BlinnPhongReflection",
-		"FlameNeonGlow"
-		};
-
-		// 目前的 LightMode
-		int currentLight = static_cast<int>(box_->objectParts_[0].materialConfig->lightModelType);
-
-		// 下拉選單
-		if (ImGui::Combo("Light Mode", &currentLight, lightModeNames, IM_ARRAYSIZE(lightModeNames))) {
-			box_->objectParts_[0].materialConfig->lightModelType =
-				static_cast<LightModelType>(currentLight);
-		}
-
-		ImGui::SliderFloat3("Rotation", &box_->mainPosition.transform.rotate.x, 0.0f, 10.0f);
-		ImGui::SliderFloat3("Position", &box_->mainPosition.transform.translate.x, 0.0f, 10.0f);
-
-		ImGui::SliderFloat3("UVTrans", &box_->objectParts_[0].materialConfig->uvTranslate.x, -20.0f, 20.0f);
-		ImGui::End();
-	}
 
 }
 #endif 

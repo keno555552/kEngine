@@ -12,10 +12,13 @@ public:
 	ID3D12Resource* CreateVertexResource_(ID3D12Device* device)override;
 	ID3D12Resource* CreateIndexResource_(ID3D12Device* device)override;
 	int GetVertexNum() { return VertexNum_; }
+	void SetLat(int divideNum) { kLatitudeSegments_ = divideNum; };
+	void SetLong(int divideNum) { kLongitudeSegments_ = divideNum; };
 
 private:
-	int kMaxSudivision_ = 18;
-	int kSudivision_ = 0;
+	int kDefaultDivision_ = config::GetDefaultSphereDivideNum();
+	int kLatitudeSegments_ = 0;   // 緯度
+	int kLongitudeSegments_ = 0;  // 經度
 	int VertexNum_ = 0;
 };
 

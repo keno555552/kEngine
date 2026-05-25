@@ -30,7 +30,7 @@ void DrawEngine::Initialize(
 	depthStencilResource = resourceManager_->CreateDepthStencilTextureResource(directXDriver_->GetDevice(), kClientWidth_, kClientHeight_);
 	MakeDepthStencilView();
 
-	///
+
 	viewport = createViewport(kClientWidth_, kClientHeight_);
 	scissorRect = createScissorRect(kClientWidth_, kClientHeight_);
 

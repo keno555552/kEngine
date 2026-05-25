@@ -252,6 +252,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="kEngine\Renderer\Mesh\CylinderMesh.cpp" />
     <ClCompile Include="kEngine\Tool\EffectSystem\ParticleSystem\EmitterLink.cpp" />
     <ClCompile Include="kEngine\Renderer\DescriptorManager\DsvManager\DsvManager.cpp" />
     <ClCompile Include="kEngine\Tool\EffectSystem\EffectManager.cpp" />
@@ -261,6 +262,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Renderer\Resource\InstanceBuffer.cpp" />
     <ClCompile Include="kEngine\Data\Geometry\ModelStructure\JointWeightData.cpp" />
     <ClCompile Include="kEngine\Tool\EffectSystem\ParticleSystem\ParticlePrototype.cpp" />
+    <ClCompile Include="kEngine\Tool\EffectSystem\ParticleEditor.cpp" />
     <ClCompile Include="kEngine\Tool\Importer\Reader\AssimpReader.cpp" />
     <ClCompile Include="kEngine\Tool\Importer\Reader\GLTFReader.cpp" />
     <ClCompile Include="kEngine\Data\Animation\Joint.cpp" />
@@ -455,6 +457,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Renderer\Mesh\RingMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="kEngine\Renderer\Mesh\CylinderMesh.h" />
     <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\EmitterLink.h" />
     <ClInclude Include="kEngine\Data\Render\Types\PostProcessType.h" />
     <ClInclude Include="kEngine\Renderer\DescriptorManager\DsvManager\DsvManager.h" />
@@ -469,6 +472,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\InputLayoutFactory.h" />
     <ClInclude Include="kEngine\Renderer\Resource\InstanceBuffer.h" />
     <ClInclude Include="kEngine\Data\Geometry\ModelStructure\JointWeightData.h" />
+    <ClInclude Include="kEngine\Tool\EffectSystem\ParticleEditor.h" />
     <ClInclude Include="kEngine\Tool\Importer\Reader\AssimpReader.h" />
     <ClInclude Include="kEngine\Tool\Importer\Reader\GLTFReader.h" />
     <ClInclude Include="kEngine\Data\Animation\Joint.h" />

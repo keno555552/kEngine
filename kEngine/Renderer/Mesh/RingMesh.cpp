@@ -36,7 +36,6 @@ ID3D12Resource* RingMesh::CreateVertexResource_(ID3D12Device* device) {
 		float cos = std::cos(index * radianPerDivide);
 		float sinNext = std::sin((index + 1) * radianPerDivide);
 		float cosNext = std::cos((index + 1) * radianPerDivide);
-
 		float u = float(index) / float(kRingDivide_);
 		float uNext = float(index + 1) / float(kRingDivide_);
 

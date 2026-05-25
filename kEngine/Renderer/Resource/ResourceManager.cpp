@@ -18,13 +18,14 @@ void ResourceManager::Initialize(DirectXCore* device) {
 	core_ = device;
 	BDevice_ = core_->GetDevice();
 
-	config::default_Plane_MeshBufferHandle_ = CreatePlaneResource();
-	config::default_Sprite2D_MeshBufferHandle_ = CreateSimpleSpriteMeshResource();
-	config::default_Triangle_MeshBufferHandle_ = CreateTriangleResource();
-	config::default_Cube_MeshBufferHandle_ = CreateCubeResource();
-	config::default_Sphere_MeshBufferHandle_ = CreateSphereResource(10);
-	config::default_SkyCube_MeshBufferHandle_ = CreateSkyCubeResource();
-	config::default_Ring_MeshBufferHandle_ = CreateRingResource(32, 1.0f, 0.5f);
+	config::default_Plane_MeshBufferHandle_		= CreatePlaneResource();
+	config::default_Sprite2D_MeshBufferHandle_	= CreateSimpleSpriteMeshResource();
+	config::default_Triangle_MeshBufferHandle_	= CreateTriangleResource();
+	config::default_Cube_MeshBufferHandle_		= CreateCubeResource();
+	config::default_Sphere_MeshBufferHandle_	= CreateSphereResource(10);
+	config::default_SkyCube_MeshBufferHandle_	= CreateSkyCubeResource();
+	config::default_Ring_MeshBufferHandle_		= CreateRingResource(32, 1.0f, 0.5f);
+	config::default_Cylinder_MeshBufferHandle_	= CreateCylinderResource(32, 1.0f, 1.0f, 3.0f);
 
 }
 
@@ -80,7 +81,7 @@ int ResourceManager::CreateTriangleResource() {
 
 	auto modelGroup = std::make_shared<ModelGroup>();
 	modelGroup->PushModel(newTriangle);
-	modelGroup->PushModelHandle((int)meshBufferList_.size() - 1);
+	modelGroup->PushMeshHandle((int)meshBufferList_.size() - 1);
 	modelGroupList_.push_back(modelGroup);
 
 	return (int)modelGroupList_.size() - 1;
@@ -97,7 +98,7 @@ int ResourceManager::CreatePlaneResource() {
 
 	auto modelGroup = std::make_shared<ModelGroup>();
 	modelGroup->PushModel(newPlane);
-	modelGroup->PushModelHandle((int)meshBufferList_.size() - 1);
+	modelGroup->PushMeshHandle((int)meshBufferList_.size() - 1);
 	modelGroupList_.push_back(modelGroup);
 
 	return (int)modelGroupList_.size() - 1;
@@ -115,7 +116,7 @@ int ResourceManager::CreateCubeResource() {
 
 	auto modelGroup = std::make_shared<ModelGroup>();
 	modelGroup->PushModel(newCube_);
-	modelGroup->PushModelHandle((int)meshBufferList_.size() - 1);
+	modelGroup->PushMeshHandle((int)meshBufferList_.size() - 1);
 	modelGroupList_.push_back(modelGroup);
 
 	return (int)modelGroupList_.size() - 1;
@@ -132,7 +133,7 @@ int ResourceManager::CreateSphereResource(int sudivision) {
 
 	auto modelGroup = std::make_shared<ModelGroup>();
 	modelGroup->PushModel(newSphere);
-	modelGroup->PushModelHandle((int)meshBufferList_.size() - 1);
+	modelGroup->PushMeshHandle((int)meshBufferList_.size() - 1);
 	modelGroupList_.push_back(modelGroup);
 
 	return (int)modelGroupList_.size() - 1;
@@ -149,7 +150,7 @@ int ResourceManager::CreateSkyCubeResource() {
 
 	auto modelGroup = std::make_shared<ModelGroup>();
 	modelGroup->PushModel(newSkyCube);
-	modelGroup->PushModelHandle((int)meshBufferList_.size() - 1);
+	modelGroup->PushMeshHandle((int)meshBufferList_.size() - 1);
 	modelGroupList_.push_back(modelGroup);
 
 	return (int)modelGroupList_.size() - 1;
@@ -169,7 +170,94 @@ int ResourceManager::CreateRingResource(int subdivision, float OuterRadius, floa
 
 	auto modelGroup = std::make_shared<ModelGroup>();
 	modelGroup->PushModel(newRing);
-	modelGroup->PushModelHandle((int)meshBufferList_.size() - 1);
+	modelGroup->PushMeshHandle((int)meshBufferList_.size() - 1);
+	modelGroupList_.push_back(modelGroup);
+
+	return (int)modelGroupList_.size() - 1;
+}
+
+int ResourceManager::CreateCylinderResource(int division, float topRadius, float bottomRadius, float height) {
+
+	std::shared_ptr <CylinderMesh> cylinderMesh;
+	cylinderMesh = std::make_shared<CylinderMesh>();
+	cylinderMesh->SetCylinderDivide(division);
+	cylinderMesh->SetTopRadius(topRadius);
+	cylinderMesh->SetBottomRadius(bottomRadius);
+	cylinderMesh->SetHeight(height);
+	cylinderMesh->CreateVertexResource_(BDevice_);
+	//cylinderMesh->CreateIndexResource_(BDevice_);
+	meshBufferList_.push_back(cylinderMesh);
+
+	auto modelGroup = std::make_shared<ModelGroup>();
+	modelGroup->PushModel(cylinderMesh);
+	modelGroup->PushMeshHandle((int)meshBufferList_.size() - 1);
+	modelGroupList_.push_back(modelGroup);
+
+	return (int)modelGroupList_.size() - 1;
+}
+
+
+
+int ResourceManager::CreateEngineModel(RingBuildMaterial& buildMaterial) {
+
+	std::shared_ptr <RingMesh> newRing;
+	newRing = std::make_shared<RingMesh>();
+
+	if (buildMaterial.Subdivision != 0) newRing->SetRingDivide(buildMaterial.Subdivision);
+	if (buildMaterial.OuterRadius != 0) newRing->SetOuterRadius(buildMaterial.OuterRadius);
+	if (buildMaterial.InnerRadius != 0) newRing->SetInnerRadius(buildMaterial.InnerRadius);
+
+	newRing->CreateVertexResource_(BDevice_);
+	newRing->CreateIndexResource_(BDevice_);
+	meshBufferList_.push_back(newRing);
+
+	auto modelGroup = std::make_shared<ModelGroup>();
+	modelGroup->PushModel(newRing);
+	modelGroup->PushMeshHandle((int)meshBufferList_.size() - 1);
+	modelGroupList_.push_back(modelGroup);
+
+	return (int)modelGroupList_.size() - 1;
+}
+
+
+int ResourceManager::CreateEngineModel(SphereBuildMaterial& buildMaterial) {
+
+	std::shared_ptr <SphereMesh> newSphere;
+	newSphere = std::make_shared<SphereMesh>();
+
+	if (buildMaterial.LatitudeSegments != 0)	newSphere->SetLat(buildMaterial.LatitudeSegments);
+	if (buildMaterial.LongitudeSegments != 0)	newSphere->SetLong(buildMaterial.LongitudeSegments);
+
+	newSphere->CreateVertexResource_(BDevice_);
+	newSphere->CreateIndexResource_(BDevice_);
+	meshBufferList_.push_back(newSphere);
+
+	auto modelGroup = std::make_shared<ModelGroup>();
+	modelGroup->PushModel(newSphere);
+	modelGroup->PushMeshHandle((int)meshBufferList_.size() - 1);
+	modelGroupList_.push_back(modelGroup);
+
+	return (int)modelGroupList_.size() - 1;
+}
+
+int ResourceManager::CreateEngineModel(CylinderBuildMaterial& buildMaterial) {
+
+	std::shared_ptr <CylinderMesh> newCylinder;
+	newCylinder = std::make_shared<CylinderMesh>();
+
+	if (buildMaterial.Division != 0)	newCylinder->SetCylinderDivide(buildMaterial.Division);
+	if (buildMaterial.TopRadius != 0)	newCylinder->SetTopRadius(buildMaterial.TopRadius);
+	if (buildMaterial.BottomRadius != 0)	newCylinder->SetBottomRadius(buildMaterial.BottomRadius);
+	if (buildMaterial.Height != 0)	newCylinder->SetHeight(buildMaterial.Height);
+	newCylinder->SetReverseY(buildMaterial.isReverseY);
+
+	newCylinder->CreateVertexResource_(BDevice_);
+	newCylinder->CreateIndexResource_(BDevice_);
+	meshBufferList_.push_back(newCylinder);
+
+	auto modelGroup = std::make_shared<ModelGroup>();
+	modelGroup->PushModel(newCylinder);
+	modelGroup->PushMeshHandle((int)meshBufferList_.size() - 1);
 	modelGroupList_.push_back(modelGroup);
 
 	return (int)modelGroupList_.size() - 1;
@@ -208,7 +296,7 @@ int ResourceManager::CreateModelResource(std::string Path) {
 		modelGroup->PushModel(newModel);
 
 		meshBufferList_.push_back(newModel);
-		modelGroup->PushModelHandle((int)meshBufferList_.size() - 1);
+		modelGroup->PushMeshHandle((int)meshBufferList_.size() - 1);
 	}
 
 	/// ModelGroupをModelGroupListに追加
@@ -217,6 +305,91 @@ int ResourceManager::CreateModelResource(std::string Path) {
 	/// ハンドルを返す
 	return (int)modelGroupList_.size() - 1;
 }
+
+void ResourceManager::UpdateEngineModel(RingBuildMaterial& buildMaterial, int modelHandle, int meshHandle) {}
+
+void ResourceManager::UpdateEngineModel(SphereBuildMaterial& buildMaterial, int modelHandle, int meshHandle) {
+
+	std::shared_ptr <SphereMesh> newSphere;
+	newSphere = std::make_shared<SphereMesh>();
+
+	if (buildMaterial.LatitudeSegments != 0)	newSphere->SetLat(buildMaterial.LatitudeSegments);
+	if (buildMaterial.LongitudeSegments != 0)	newSphere->SetLong(buildMaterial.LongitudeSegments);
+
+	newSphere->CreateVertexResource_(BDevice_);
+	newSphere->CreateIndexResource_(BDevice_);
+	meshBufferList_.push_back(newSphere);
+
+	SwapMeshAndModelGroup(newSphere, modelHandle, meshHandle);
+}
+
+void ResourceManager::UpdateEngineModel(CylinderBuildMaterial& buildMaterial, int modelHandle, int meshHandle) {
+
+	std::shared_ptr <CylinderMesh> newCylinder;
+	newCylinder = std::make_shared<CylinderMesh>();
+
+	if (buildMaterial.Division != 0)	newCylinder->SetCylinderDivide(buildMaterial.Division);
+	if (buildMaterial.TopRadius != 0)	newCylinder->SetTopRadius(buildMaterial.TopRadius);
+	if (buildMaterial.BottomRadius != 0)	newCylinder->SetBottomRadius(buildMaterial.BottomRadius);
+	if (buildMaterial.Height != 0)	newCylinder->SetHeight(buildMaterial.Height);
+	newCylinder->SetReverseY(buildMaterial.isReverseY);
+
+	newCylinder->CreateVertexResource_(BDevice_);
+	newCylinder->CreateIndexResource_(BDevice_);
+	meshBufferList_.push_back(newCylinder);
+
+	SwapMeshAndModelGroup(newCylinder, modelHandle, meshHandle);
+}
+
+
+void ResourceManager::SwapMeshAndModelGroup(std::shared_ptr<Model> model, int modelHandle, int modelIndex) {
+
+	/// ................ 資料収集/チェック ................ ///
+
+	/// ハンドルが正しいか確認
+	if (modelHandle < 0 || modelHandle >= (int)modelGroupList_.size()) {
+		Logger::Log("[kEngine] RM : SwapMeshAndModelGroup() ModelGroup handle %d not found.", modelHandle);
+		return;
+	}
+
+	/// まずmodelGroupListの[0]番のMeshのハンドルを取得する。
+	int meshHandle = modelGroupList_[modelHandle]->GetMeshHandle(0);
+
+	bool isNewModelGroup = (modelIndex == -1);
+
+	/// modelIndexが正しいか確認
+	if(!isNewModelGroup) {
+		if (modelIndex < 0 || modelIndex >= (int)modelGroupList_[modelHandle]->GetModelNum()) {
+			Logger::Log("[kEngine] RM : SwapMeshAndModelGroup() Model index %d not found.", modelIndex);
+			return;
+		}
+
+		auto modelGroup = modelGroupList_[modelHandle];
+		meshHandle = modelGroup->GetMeshHandle(modelIndex);
+	}
+
+	/// このに走ると必ずmeshに何かの問題があり
+	if (meshHandle < 0 || meshHandle >= (int)meshBufferList_.size()) {
+		Logger::Log("[kEngine] RM : SwapMeshAndModelGroup() Mesh index %d not found.", meshHandle);
+		assert(false);
+	}
+
+	/// ................... 正式操作 .................... ///
+
+	/// MeshBufferListのMeshを新しいMeshに入れ替える
+	meshBufferList_[meshHandle] = model;
+
+	/// 
+	if(isNewModelGroup){
+		auto modelGroup = std::make_shared<ModelGroup>();
+		modelGroup->PushModel(model);
+		modelGroup->PushMeshHandle(meshHandle);
+		modelGroupList_[modelHandle] = modelGroup;
+	} else {
+		auto modelGroup = modelGroupList_[modelHandle];
+		modelGroup->SwapModel(modelIndex, model, meshHandle);
+	}
+};
 
 int ResourceManager::LoadModel(std::string Path) {
 	/// Resourceに同じものがあるがどうか捜索
@@ -400,31 +573,31 @@ int ResourceManager::InputMaterialConfig(std::shared_ptr<MaterialConfig> materia
 	/// =========================== 既にある場合、更新してIDを返す =========================== ///
 	if (samePtrEntry) {
 
-		//// CPUマテリアル更新 
-		//samePtrEntry->cpuMaterial->inputMaterialConfig(*material);
-		//
-		//// GPUマテリアル更新
-		//MaterialForGPU* gpuPtr = nullptr;
-		//samePtrEntry->gpuMaterial->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&gpuPtr));
-		//*gpuPtr = *samePtrEntry->cpuMaterial;
-		//samePtrEntry->gpuMaterial->GetResource()->Unmap(0, nullptr);
-
-		/// GPUマテリアル更新 
+		// CPUマテリアル更新 
+		samePtrEntry->cpuMaterial->inputMaterialConfig(*material);
+		
+		// GPUマテリアル更新
 		MaterialForGPU* gpuPtr = nullptr;
-
-		auto res = samePtrEntry->gpuMaterial->GetResource();
-		//Logger::Log("InputMaterialConfig: res = %p\n", res);
-
-		HRESULT hr = res ? res->Map(0, nullptr, reinterpret_cast<void**>(&gpuPtr)) : E_FAIL;
-		//Logger::Log("InputMaterialConfig: Map hr = 0x%08X\n", hr);
-
-		if (FAILED(hr)) {
-			// 先不要崩，讓我們看到 log
-			return samePtrEntry->materialID;
-		}
-
+		samePtrEntry->gpuMaterial->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&gpuPtr));
 		*gpuPtr = *samePtrEntry->cpuMaterial;
-		res->Unmap(0, nullptr);
+		samePtrEntry->gpuMaterial->GetResource()->Unmap(0, nullptr);
+
+		///// GPUマテリアル更新 
+		//MaterialForGPU* gpuPtr = nullptr;
+		//
+		//auto res = samePtrEntry->gpuMaterial->GetResource();
+		////Logger::Log("InputMaterialConfig: res = %p\n", res);
+		//
+		//HRESULT hr = res ? res->Map(0, nullptr, reinterpret_cast<void**>(&gpuPtr)) : E_FAIL;
+		////Logger::Log("InputMaterialConfig: Map hr = 0x%08X\n", hr);
+
+		//if (FAILED(hr)) {
+		//	// 先不要崩，讓我們看到 log
+		//	return samePtrEntry->materialID;
+		//}
+
+		//*gpuPtr = *samePtrEntry->cpuMaterial;
+		//res->Unmap(0, nullptr);
 
 		return samePtrEntry->materialID;
 	}
@@ -435,7 +608,7 @@ int ResourceManager::InputMaterialConfig(std::shared_ptr<MaterialConfig> materia
 	}
 
 	/// ======================== それでもない場合、新しいMaterialEntryを作成 ======================== ///
-	MaterialEntry entry;	
+	MaterialEntry entry;
 
 	/// MaterialIDを設定
 	entry.materialID = materialCounter_;
@@ -458,8 +631,8 @@ int ResourceManager::InputMaterialConfig(std::shared_ptr<MaterialConfig> materia
 	newResource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&gpuPtr));
 	*gpuPtr = *entry.cpuMaterial;
 	newResource->GetResource()->Unmap(0, nullptr);
-	
-	newResource->SetName("MaterialResource"+ std::to_string(entry.materialID));
+
+	newResource->SetName("MaterialResource" + std::to_string(entry.materialID));
 
 	materialResourceList_.push_back(std::move(newResource));
 	materialList_.push_back(std::move(entry));

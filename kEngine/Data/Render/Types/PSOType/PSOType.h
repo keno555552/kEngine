@@ -1,5 +1,7 @@
 #pragma once
 
+// TODO: 消す予定
+
 enum class PSOType {
 	NONE = -1,
 

@@ -71,6 +71,16 @@ public:
 	/// モデル読み込み
 	int LoadModel(std::string Path);
 
+	/// /// エンジン内蔵のモデルを作る
+	int CreateEngineModel(RingBuildMaterial& buildMaterial);
+	int CreateEngineModel(SphereBuildMaterial& buildMaterial);
+	int CreateEngineModel(CylinderBuildMaterial& buildMaterial);
+
+	/// /// エンジン内蔵のモデルを改変する
+	void UpdateEngineModel(RingBuildMaterial& buildMaterial, int modelHandle, int meshHandle = -1);
+	void UpdateEngineModel(SphereBuildMaterial& buildMaterial, int modelHandle, int meshHandle = -1);
+	void UpdateEngineModel(CylinderBuildMaterial& buildMaterial, int modelHandle, int meshHandle = -1);
+
 public:
 	//////////////////////////////エンジン内部命令
 
@@ -165,11 +175,17 @@ public:
 
 	//////////////////////////////Vertex\Index関係
 
+	// 1.モデルハンドルはModelGroupのIndex。
+	// 2.DDCにモデルの取り方はModelGroupから直接とること
+	// 3.モデルの解放はmeshBufferListから行う(今はshared_ptrで管理してるから自動的に解放されるはず)
+	// 4.ModelGroupの中のmeshHandleのlistはmeshBufferListのIndexを保存する
+
 	/// 図形関係
-	std::vector	<std::shared_ptr<MeshBuffer>> meshBufferList_;				/// すべでのモデルを収納するどころ		これを使って解放する
-	std::vector <std::shared_ptr<ModelGroup>> modelGroupList_;				/// モデルグループを	収納する		解放に使えない
-	std::vector <std::shared_ptr<Sprite2DMesh>> spriteMeshHandles_;			/// スブライドのハンドルを収納する		解放に使えない
-	std::vector <std::shared_ptr<SimpleSpriteMesh>> simpleSpriteMeshList_;	/// デフォルトのスプライトメッシュ
+	std::vector<std::shared_ptr<MeshBuffer>> meshBufferList_;				/// すべでのモデルを収納するどころ		これを使って解放する
+	std::vector<std::shared_ptr<ModelGroup>> modelGroupList_;				/// モデルグループを	収納する		解放に使えない
+	std::vector<std::shared_ptr<Sprite2DMesh>> spriteMeshHandles_;			/// スブライドのハンドルを収納する		解放に使えない
+	std::vector<std::shared_ptr<SimpleSpriteMesh>> simpleSpriteMeshList_;	/// デフォルトのスプライトメッシュ
+	std::vector<int> deleteMeshHandleList_;
 
 	/// ModelHandle
 	int modelHandleCounter_ = 0;
@@ -189,9 +205,15 @@ private:
 	int CreateSphereResource(int sudivision);
 	int CreateSkyCubeResource();
 	int CreateRingResource(int subdivision,float OuterRadius, float InnerRadius);
-
+	int CreateCylinderResource(int division, float topRadius, float bottomRadius, float height);
 
 	int CreateModelResource(std::string Path);
+
+	/// リソース解放
+
+
+	/// リソース切り替え
+	void SwapMeshAndModelGroup(std::shared_ptr<Model> model, int modelHandle, int modelIndex = -1);
 
 private:
 	////////////////////////////// 関数テンプレート

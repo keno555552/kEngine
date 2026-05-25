@@ -30,6 +30,15 @@ void ModelGroup::SetModelGroupData(std::shared_ptr<ModelData> modelData) {
 	modelData_ = modelData;
 }
 
+void ModelGroup::SwapModel(int modelIndex, std::shared_ptr<Model> newModel, int newMeshHandle) {
+	if (modelIndex >= 0 && modelIndex < static_cast<int>(modelGroup_.size())) {
+		modelGroup_[modelIndex] = newModel;
+		meshHandle_[modelIndex] = newMeshHandle;
+	} else {
+		Logger::Log("[kEngine]ModelGroup:SwapModel() Model index %d is out of range.", modelIndex);
+	}
+}
+
 bool ModelGroup::HasSkinClusterData() {
 
 	if (!modelData_.lock()) {

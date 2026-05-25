@@ -22,6 +22,7 @@ int config::default_Cube_MeshBufferHandle_		= 0;
 int config::default_Sphere_MeshBufferHandle_	= 0;
 int config::default_SkyCube_MeshBufferHandle_   = 0;
 int config::default_Ring_MeshBufferHandle_		= 0;
+int config::default_Cylinder_MeshBufferHandle_	= 0;
 
 int config::default_LightModel_				= (int)LightModelType::			BlinnPhongReflection;
 int config::default_RenderModelTypes_		= (int)RenderModelType::		Static;

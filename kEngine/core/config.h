@@ -25,6 +25,13 @@ private:
 	/// 最大ライト数設定
 	static const int kMaxLightNum_ = 50;              /// 最大ライト数
 
+private:
+
+	/// ============================= mesh関連 ============================= ///
+	/// Sphereの分割数
+	static const int kDefaultSphereDivideNum_ = 18;			/// Sphereの分割数
+
+
 
 private:
 	static std::string clientTitle_;
@@ -48,6 +55,8 @@ public:
 	static int GetMaxMaterialNum() { return kMaxMaterialNum_; }
 	static int GetMaxSRVNum() { return kMaxSRVNum_; }
 	static int GetMaxLightNum() { return kMaxLightNum_; }
+
+	static int GetDefaultSphereDivideNum() { return kDefaultSphereDivideNum_; }
 
 	static void SaveClientTitle(const std::string& clientTitle) { clientTitle_ = clientTitle; };
 	static const std::string GetClientTitle() { return clientTitle_; }
@@ -81,6 +90,7 @@ public:
 	static int default_Sphere_MeshBufferHandle_;
 	static int default_SkyCube_MeshBufferHandle_;
 	static int default_Ring_MeshBufferHandle_;
+	static int default_Cylinder_MeshBufferHandle_;
 
 public:
 	/// デフォルトPSoハンドル
