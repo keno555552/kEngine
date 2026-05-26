@@ -62,7 +62,7 @@ UITest::UITest(kEngine* system) {
 
 	/// PostEffectを設定
 	std::vector<PostProcessType> postProcessList = {
-		PostProcessType::ColorGrading,
+		PostProcessType::Vignette,
 	};
 	
 	system_->SetPostProcessChain(postProcessList);
