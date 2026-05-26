@@ -13,11 +13,14 @@ class ModelGroup
 public:
 	~ModelGroup();
 
+	/// モデル管理
 	Model* GetModel(int handle){return modelGroup_[handle].get();}
 	void PushModel(std::shared_ptr<Model> model);
 
+	/// モデルのファイルパスを取得
 	std::string GetFilePath();
 
+	/// ModelData
 	void SetModelGroupData(std::shared_ptr<ModelData> modelData);
 	void PushMeshHandle(int handle) { meshHandle_.push_back(handle); }
 

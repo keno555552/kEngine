@@ -69,6 +69,9 @@ public:
 	/// 描画関数のコア
 	void DrawCall();
 
+	/// PsotProcess関連関数
+	void SetPostProcessChain(const std::vector<PostProcessType>& chain);
+
 	/// EnviromentReflection関連関数
 	void SetEnviromentReflectionTexture(int textureHandle);
 
@@ -204,8 +207,7 @@ private:
 	/// ===== PostProcess描画関数
 
 	void TransitionRenderTarget(
-		Microsoft::WRL::ComPtr<ID3D12Resource> resource,
-		D3D12_RESOURCE_STATES fromState,
+		RenderTexture& renderTexture,
 		D3D12_RESOURCE_STATES toState
 	);
 
@@ -216,9 +218,8 @@ private:
 	void SetRootDescriptorTable(UINT rootParameterIndex, D3D12_GPU_DESCRIPTOR_HANDLE descriptorHandle);
 
 	/// PostProcess群
-
 	void DrawColorGrading();
-
+	void DrawVignette();
 
 	/// RenderCopy(描画内容をそのまま描画する、最後の処理)
 	void DrawRenderCopy();

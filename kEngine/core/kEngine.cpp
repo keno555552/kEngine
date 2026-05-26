@@ -242,6 +242,10 @@ void kEngine::RemoveLight(Light* light) {
 	lightManager->RemoveLight(light);
 }
 
+void kEngine::SetPostProcessChain(const std::vector<PostProcessType>& chain) {
+	drawEngine->SetPostProcessChain(chain);
+}
+
 std::weak_ptr <DebugCamera> kEngine::CreateDebugCamera() {
 	return cameraManager->CreateDebugCamera(this);
 }

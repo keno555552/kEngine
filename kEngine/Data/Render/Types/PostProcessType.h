@@ -12,7 +12,7 @@ enum class PostProcessType
 	//AmbientOcclusion = 7,
 	//EdgeDetection = 8,
 	//ChromaticAberration = 9,
-	//Vignette = 10,
+	Vignette = 10,
 };
 
 

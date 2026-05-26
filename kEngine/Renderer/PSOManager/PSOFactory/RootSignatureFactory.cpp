@@ -3,13 +3,17 @@
 
 RootSignatureFactory::RootSignatureFactory() {
 
-	rootSignatureRegistry[RenderModelType::FullscreenQuad] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticFullscreenQuad(directXDriver_, key); };
 	rootSignatureRegistry[RenderModelType::Sprite2D] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStatic(directXDriver_, key); };
 	rootSignatureRegistry[RenderModelType::Static] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStatic(directXDriver_, key); };
 	rootSignatureRegistry[RenderModelType::Skinned] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticSkinning(directXDriver_, key); };
 	rootSignatureRegistry[RenderModelType::DebugLine] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStatic(directXDriver_, key); };
 	rootSignatureRegistry[RenderModelType::Environment] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStatic(directXDriver_, key); };
 	rootSignatureRegistry[RenderModelType::FlameNeonGlow] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStatic(directXDriver_, key); };
+
+	/// PostProcess用の描画モデル
+	rootSignatureRegistry[RenderModelType::FullscreenQuad] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticFullscreenQuad(directXDriver_, key); };
+	rootSignatureRegistry[RenderModelType::ColorGradient] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticFullscreenQuad(directXDriver_, key); };
+	rootSignatureRegistry[RenderModelType::Vignette] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticFullscreenQuad(directXDriver_, key); };
 }
 
 Microsoft::WRL::ComPtr <ID3D12RootSignature> RootSignatureFactory::Make(PSOKey& key, DirectXCore* directXDriver_) {

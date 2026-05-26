@@ -89,6 +89,7 @@ public:
 	void AddLight(Light* light);
 	void RemoveLight(Light* light);
 
+	void SetPostProcessChain(const std::vector<PostProcessType>& chain);
 
 	std::weak_ptr <DebugCamera> CreateDebugCamera();
 	std::weak_ptr <Camera> CreateCamera();

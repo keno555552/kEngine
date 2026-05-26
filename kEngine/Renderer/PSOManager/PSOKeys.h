@@ -168,14 +168,13 @@ inline PSOKey CreateFullscreenPSOKey() {
 }
 
 inline PSOKey CreateColorGradingPSOKey() {
-	PSOKey colorGradingKey;
-	colorGradingKey.lightModelType = LightModelType::NONE;
-	colorGradingKey.renderModelType = RenderModelType::FullscreenQuad;
-	colorGradingKey.blendModeType = BlendModeType::Opaque;
-	colorGradingKey.rasterizerMode = RasterizerMode::CullNone;
-	colorGradingKey.depthStencilType = DepthStencilType::Disable;
-	colorGradingKey.renderTargetFormatType = RenderTargetFormatType::BackBuffer;
-	colorGradingKey.primitiveType = PrimitiveType::TRIANGLE;
-	colorGradingKey.featureMask |= FeatureFlags::IBL; // 例如，启用IBL特性
+	PSOKey colorGradingKey = CreateFullscreenPSOKey();
+	colorGradingKey.renderModelType = RenderModelType::ColorGradient;
 	return colorGradingKey;
+}
+
+inline PSOKey CreateVignettePSOKey() {
+	PSOKey vignetteKey = CreateFullscreenPSOKey();
+	vignetteKey.renderModelType = RenderModelType::Vignette;
+	return vignetteKey;
 }

@@ -19,7 +19,8 @@ void ModelGroup::PushModel(std::shared_ptr<Model> model) {
 std::string ModelGroup::GetFilePath() {
 
 	if (modelData_.lock() == nullptr) { 
-		Logger::Log("kEngine:: ModelGroup :: GetDirectoryPath :: ModelData is expired.");
+		/// 元々はなければログ出るだけと、エンジンモデルの場所パースがないのてここはないのてやらないようにした
+		//Logger::Log("kEngine:: ModelGroup :: GetDirectoryPath :: ModelData is expired.");
 		return std::string(); 
 	}
 	return modelData_.lock()->filePath;

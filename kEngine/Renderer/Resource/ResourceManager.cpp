@@ -750,6 +750,7 @@ RenderTexture ResourceManager::CreateRenderTexture(
 	renderTexture.height = height;
 	renderTexture.format = format;
 	renderTexture.clearColor = clearColor;
+	renderTexture.currentState = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 
 	CreateDepthStencilForRenderTexture(renderTexture);
 

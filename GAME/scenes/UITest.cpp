@@ -60,6 +60,13 @@ UITest::UITest(kEngine* system) {
 	usingCamera_ = camera_;
 	system_->SetCamera(usingCamera_);
 
+	/// PostEffectを設定
+	std::vector<PostProcessType> postProcessList = {
+		PostProcessType::Vignette,
+	};
+	
+	system_->SetPostProcessChain(postProcessList);
+
 	/// =========== リソースロード ============///
 	skydomeModelHandle_ = system_->SetModelObj("./kEngine/EngineAssets/TemplateResource/object/skydome/skydome.obj");
 	smallStageHandel_ = system_->SetModelObj("./GAME/resources/Object/smallStage/smallStage.obj");

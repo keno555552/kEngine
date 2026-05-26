@@ -43,7 +43,7 @@ private:
 private:
 
 	/// 他の関数に呼び出す用のShaderCompile関数
-	ShaderPair CompileShader(const std::string& shaderName, PSOKey& key);
+	ShaderPair CompileShaderByFileName(const std::string& shaderName, PSOKey& key);
 
 	ShaderPair CompilePostProcessShader(const std::string& shaderName, PSOKey& key);
 
@@ -57,6 +57,8 @@ private:
 	/// PostProcess用のShaderをコンパイルする関数
 	ShaderPair CompileParticleScreenQuad(PSOKey& psoKeys);
 	ShaderPair CompileParticleColorGuard(PSOKey& key);
+	ShaderPair CompileParticleVignetting(PSOKey& key);
+
 
 	void checkCompileResult(ShaderPair shaderPair);
     

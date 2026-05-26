@@ -1,5 +1,4 @@
-
-#include "CopyImage.hlsli"
+#include "FullScreenQuadVSO.hlsli"
 
 static const int kNumVertex = 3;
 static const float4 kPosition[kNumVertex] =

@@ -135,8 +135,6 @@ void DrawEngine::Initialize(
 		Vector4{ 0.1f, 0.25f, 0.5f, 1.0f }
 	);
 
-
-
 	/// =========================== カメラバッファの初期化 =========================== ///
 	cameraBuffer_ = std::make_unique<BasicResource>();
 	cameraBuffer_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(CameraForGPU));
@@ -211,13 +209,11 @@ void DrawEngine::PreDraw() {
 
 
 	/// ==================== OffscreenRT関連設定 ==================== ///
-	CD3DX12_RESOURCE_BARRIER offscreenToRT =
-		CD3DX12_RESOURCE_BARRIER::Transition(
-			m_Offscreen_InputRT.resource.Get(),
-			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-			D3D12_RESOURCE_STATE_RENDER_TARGET
-		);
-	commandList_->ResourceBarrier(1, &offscreenToRT);
+	/// 
+	TransitionRenderTarget(
+		m_Offscreen_InputRT,
+		D3D12_RESOURCE_STATE_RENDER_TARGET
+	);
 
 	/// RenderTargetをセット
 	auto rtv = m_Offscreen_InputRT.rtvHandleCPU;
@@ -666,18 +662,25 @@ void DrawEngine::DrawCall() {
 /// ------------------------------------- PostProcess関連 -----------------------------===------ ///
 
 
+void DrawEngine::SetPostProcessChain(const std::vector<PostProcessType>& chain) {
+	postProcessRunner_->SetChain(chain);
+}
+
 void DrawEngine::TransitionRenderTarget(
-	Microsoft::WRL::ComPtr<ID3D12Resource> resource,
-	D3D12_RESOURCE_STATES fromState,
-	D3D12_RESOURCE_STATES toState) 
-{
+	RenderTexture& renderTexture,
+	D3D12_RESOURCE_STATES toState
+){
+	if (renderTexture.currentState == toState)
+		return;
+
 	CD3DX12_RESOURCE_BARRIER offscreenToRT =
 		CD3DX12_RESOURCE_BARRIER::Transition(
-			resource.Get(),
-			fromState,
+			renderTexture.resource.Get(),
+			renderTexture.currentState,
 			toState
 		);
 	commandList_->ResourceBarrier(1, &offscreenToRT);
+	renderTexture.currentState = toState;
 }
 
 void DrawEngine::SetRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE renderTarget) {
@@ -698,9 +701,13 @@ void DrawEngine::DrawColorGrading() {
 
 	/// RenderTargetを切り替える
 	TransitionRenderTarget(
-		m_Offscreen_InputRT.resource,
-		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		m_Offscreen_InputRT,
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+	);
+
+	TransitionRenderTarget(
+		m_Offscreen_OutputRT,
+		D3D12_RESOURCE_STATE_RENDER_TARGET
 	);
 
 	SetRenderTarget(m_Offscreen_OutputRT.rtvHandleCPU);
@@ -718,12 +725,38 @@ void DrawEngine::DrawColorGrading() {
 	/// 最終のドロー
 	DrawFullscreenQuad();
 
+	/// OffscreenRTを入れ替える
+	std::swap(m_Offscreen_InputRT, m_Offscreen_OutputRT);
+
+}
+
+void DrawEngine::DrawVignette() {
+
 	/// RenderTargetを切り替える
 	TransitionRenderTarget(
-		m_Offscreen_OutputRT.resource,
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		m_Offscreen_InputRT,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+	);
+
+	TransitionRenderTarget(
+		m_Offscreen_OutputRT,
 		D3D12_RESOURCE_STATE_RENDER_TARGET
 	);
+
+	SetRenderTarget(m_Offscreen_OutputRT.rtvHandleCPU);
+
+	/// PSOを設定
+	PSOKey psoKey = CreateVignettePSOKey();
+	psoManager_->SetPSO(psoKey);
+
+	/// SRV Heapを設定
+	SetSRVHeap();
+
+	/// DescriptorTableを設定
+	SetRootDescriptorTable(0, m_Offscreen_InputRT.srvHandleGPU);
+
+	/// 最終のドロー
+	DrawFullscreenQuad();
 
 	/// OffscreenRTを入れ替える
 	std::swap(m_Offscreen_InputRT, m_Offscreen_OutputRT);
@@ -734,8 +767,7 @@ void DrawEngine::DrawRenderCopy() {
 
 	/// RenderTargetを切り替える
 	TransitionRenderTarget(
-		m_Offscreen_InputRT.resource,
-		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		m_Offscreen_InputRT,
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
 	);
 

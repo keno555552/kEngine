@@ -14,8 +14,10 @@ ShaderFactory::ShaderFactory() {
 	shaderRegistry_[RenderModelType::Environment] = [this](PSOKey& key) { return CompileSkyCubeShader(key); };
 	shaderRegistry_[RenderModelType::FlameNeonGlow] = [this](PSOKey& key) { return CompileFlameNeonGlowShader(key); };
 
+	/// PostProcess用の描画モデル
 	shaderRegistry_[RenderModelType::FullscreenQuad] = [this](PSOKey& key) { return CompileParticleScreenQuad(key); };
 	shaderRegistry_[RenderModelType::ColorGradient] = [this](PSOKey& key) { return CompileParticleColorGuard(key); };
+	shaderRegistry_[RenderModelType::Vignette] = [this](PSOKey& key) { return CompileParticleVignetting(key); };
 }
 
 ShaderPair ShaderFactory::MakeShaderBlob(PSOKey& key) {
@@ -34,7 +36,7 @@ ShaderPair ShaderFactory::MakeShaderBlob(PSOKey& key) {
 }
 
 
-ShaderPair ShaderFactory::CompileShader(const std::string& shaderName, PSOKey& key) {
+ShaderPair ShaderFactory::CompileShaderByFileName(const std::string& shaderName, PSOKey& key) {
 
 	ShaderPair shaderPair;
 	shaderPair.vs = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + shaderName + ".VS.hlsl"), L"vs_6_0",key);
@@ -48,15 +50,15 @@ ShaderPair ShaderFactory::CompilePostProcessShader(const std::string& shaderName
 
 	ShaderPair shaderPair;
 	std::string postProcessFolder = "PostProcess/";
-	shaderPair.vs = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + postProcessFolder + shaderName + ".VS.hlsl"), L"vs_6_0",key);
-	shaderPair.ps = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + postProcessFolder + shaderName + ".PS.hlsl"), L"ps_6_0",key);
+	shaderPair.vs = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + postProcessFolder + "FullScreenQuad.VS.hlsl"), L"vs_6_0", key);
+	shaderPair.ps = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + postProcessFolder + shaderName + ".PS.hlsl"), L"ps_6_0", key);
 
 	checkCompileResult(shaderPair);
 	return shaderPair;
 }
 
 ShaderPair ShaderFactory::Compile2DShader(PSOKey& key) {
-	return CompileShader("Tile2D", key);
+	return CompileShaderByFileName("Tile2D", key);
 }
 
 ShaderPair ShaderFactory::Compile3DShader(PSOKey& key) {
@@ -80,15 +82,15 @@ ShaderPair ShaderFactory::Compile3DShader(PSOKey& key) {
 }
 
 ShaderPair ShaderFactory::CompileDebugLineShader(PSOKey& key) {
-	return CompileShader("DebugLine", key);
+	return CompileShaderByFileName("DebugLine", key);
 }
 
 ShaderPair ShaderFactory::CompileSkyCubeShader(PSOKey& key) {
-	return CompileShader("SkyCube", key);
+	return CompileShaderByFileName("SkyCube", key);
 }
 
 ShaderPair ShaderFactory::CompileFlameNeonGlowShader(PSOKey& key) {
-	return CompileShader("FlameNeonGlow", key);
+	return CompileShaderByFileName("FlameNeonGlow", key);
 }
 
 
@@ -99,7 +101,11 @@ ShaderPair ShaderFactory::CompileParticleScreenQuad(PSOKey& key) {
 }
 
 ShaderPair ShaderFactory::CompileParticleColorGuard(PSOKey& key) {
-	return CompilePostProcessShader("CopyImage", key);
+	return CompilePostProcessShader("ColorGuard", key);
+}
+
+ShaderPair ShaderFactory::CompileParticleVignetting(PSOKey& key) {
+	return CompilePostProcessShader("Vignette", key);
 }
 
 

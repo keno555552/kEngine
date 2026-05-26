@@ -13,6 +13,8 @@ struct RenderTexture {
 	D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU{};
 	D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU{};
 
+	D3D12_RESOURCE_STATES currentState{};
+
 	/// DepthStencil用のリソースとビューハンドル
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthResource;
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandleCPU{};

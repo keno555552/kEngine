@@ -1664,5 +1664,7 @@
       <Filter>ヘッダー ファイル</Filter>
     </None>
     <None Include=".github\copilot-instructions.md" />
+    <None Include="kEngine\EngineAssets\Shader\PostProcess\ColorGuard.hlsli" />
+    <None Include="kEngine\EngineAssets\Shader\PostProcess\Vignette.hlsli" />
   </ItemGroup>
 </Project>
