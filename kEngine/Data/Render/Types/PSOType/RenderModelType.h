@@ -13,6 +13,7 @@ enum class RenderModelType {
 	/// PostProcess用の描画モデル
 	ColorGradient,
 	Vignette,
+	Blur,
 	FullscreenQuad,
 
 	/// RenderModelの数

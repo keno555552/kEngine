@@ -24,5 +24,8 @@ void PostProcessRunner::RunPass(DrawEngine* drawEngine, PostProcessType type) {
 	case PostProcessType::Vignette:
 		drawEngine->DrawVignette();
 		break;
+	case PostProcessType::Blur:
+		drawEngine->DrawBlur();
+		break;
 	}
 }

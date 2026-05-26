@@ -4,7 +4,7 @@ enum class PostProcessType
 {
 	None = 0,
 	//Bloom = 1,
-	//Blur = 2,
+	Blur = 2,
 	//DepthOfField = 3,
 	//MotionBlur = 4,
 	ColorGrading = 5,

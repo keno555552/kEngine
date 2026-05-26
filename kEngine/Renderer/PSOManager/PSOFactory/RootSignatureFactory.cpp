@@ -14,6 +14,7 @@ RootSignatureFactory::RootSignatureFactory() {
 	rootSignatureRegistry[RenderModelType::FullscreenQuad] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticFullscreenQuad(directXDriver_, key); };
 	rootSignatureRegistry[RenderModelType::ColorGradient] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticFullscreenQuad(directXDriver_, key); };
 	rootSignatureRegistry[RenderModelType::Vignette] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticFullscreenQuad(directXDriver_, key); };
+	rootSignatureRegistry[RenderModelType::Blur] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticFullscreenQuad(directXDriver_, key); };
 }
 
 Microsoft::WRL::ComPtr <ID3D12RootSignature> RootSignatureFactory::Make(PSOKey& key, DirectXCore* directXDriver_) {

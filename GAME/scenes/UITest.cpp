@@ -61,11 +61,11 @@ UITest::UITest(kEngine* system) {
 	system_->SetCamera(usingCamera_);
 
 	/// PostEffectを設定
-	std::vector<PostProcessType> postProcessList = {
-		PostProcessType::Vignette,
-	};
-	
-	system_->SetPostProcessChain(postProcessList);
+	//std::vector<PostProcessType> postProcessList = {
+	//	PostProcessType::Blur,
+	//};
+	//
+	//system_->SetPostProcessChain(postProcessList);
 
 	/// =========== リソースロード ============///
 	skydomeModelHandle_ = system_->SetModelObj("./kEngine/EngineAssets/TemplateResource/object/skydome/skydome.obj");
@@ -109,9 +109,9 @@ UITest::UITest(kEngine* system) {
 	//box_->modelHandle_ = config::default_Cylinder_MeshBufferHandle_;
 	box_->modelHandle_ = objectHandle_;
 	//box_->objectParts_[0].materialConfig->textureHandle = whiteTextureHandle_;
-	//box_->objectParts_[0].materialConfig->textureHandle = uvCheckerTextureHandle_;
+	box_->objectParts_[0].materialConfig->textureHandle = uvCheckerTextureHandle_;
 	//box_->objectParts_[0].materialConfig->textureHandle = clicleTextureHandle_;
-	box_->objectParts_[0].materialConfig->textureHandle = effectTextureHandle_;
+	//box_->objectParts_[0].materialConfig->textureHandle = effectTextureHandle_;
 	//box_->isBillboard_ = true;
 	//box_->objectParts_[0].materialConfig->isReflective = true;
 	box_->objectParts_[0].materialConfig->enableLighting = false;

@@ -18,6 +18,7 @@ ShaderFactory::ShaderFactory() {
 	shaderRegistry_[RenderModelType::FullscreenQuad] = [this](PSOKey& key) { return CompileParticleScreenQuad(key); };
 	shaderRegistry_[RenderModelType::ColorGradient] = [this](PSOKey& key) { return CompileParticleColorGuard(key); };
 	shaderRegistry_[RenderModelType::Vignette] = [this](PSOKey& key) { return CompileParticleVignetting(key); };
+	shaderRegistry_[RenderModelType::Blur] = [this](PSOKey& key) { return CompileParticleBlur(key); };
 }
 
 ShaderPair ShaderFactory::MakeShaderBlob(PSOKey& key) {
@@ -106,6 +107,10 @@ ShaderPair ShaderFactory::CompileParticleColorGuard(PSOKey& key) {
 
 ShaderPair ShaderFactory::CompileParticleVignetting(PSOKey& key) {
 	return CompilePostProcessShader("Vignette", key);
+}
+
+ShaderPair ShaderFactory::CompileParticleBlur(PSOKey& key) {
+	return CompilePostProcessShader("Blur", key);
 }
 
 

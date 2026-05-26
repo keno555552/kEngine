@@ -58,6 +58,8 @@ private:
 	ShaderPair CompileParticleScreenQuad(PSOKey& psoKeys);
 	ShaderPair CompileParticleColorGuard(PSOKey& key);
 	ShaderPair CompileParticleVignetting(PSOKey& key);
+	ShaderPair CompileParticleBlur(PSOKey& key);
+
 
 
 	void checkCompileResult(ShaderPair shaderPair);

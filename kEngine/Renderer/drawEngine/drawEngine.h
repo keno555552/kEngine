@@ -220,6 +220,7 @@ private:
 	/// PostProcess群
 	void DrawColorGrading();
 	void DrawVignette();
+	void DrawBlur();
 
 	/// RenderCopy(描画内容をそのまま描画する、最後の処理)
 	void DrawRenderCopy();

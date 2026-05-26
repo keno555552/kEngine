@@ -14,6 +14,7 @@ InputLayoutFactory::InputLayoutFactory() {
 	inputLayoutRegistry[RenderModelType::FullscreenQuad] = [this](PSOKey& key) { return MakeInputLayoutFullscreenQuad(); };
 	inputLayoutRegistry[RenderModelType::ColorGradient] = [this](PSOKey& key) { return MakeInputLayoutFullscreenQuad(); };
 	inputLayoutRegistry[RenderModelType::Vignette] = [this](PSOKey& key) { return MakeInputLayoutFullscreenQuad(); };
+	inputLayoutRegistry[RenderModelType::Blur] = [this](PSOKey& key) { return MakeInputLayoutFullscreenQuad(); };
 }
 
 D3D12_INPUT_LAYOUT_DESC InputLayoutFactory::Make(PSOKey& key) {

@@ -178,3 +178,9 @@ inline PSOKey CreateVignettePSOKey() {
 	vignetteKey.renderModelType = RenderModelType::Vignette;
 	return vignetteKey;
 }
+
+inline PSOKey CreateBlurPSOKey() {
+	PSOKey blurKey = CreateFullscreenPSOKey();
+	blurKey.renderModelType = RenderModelType::Blur;
+	return blurKey;
+}
