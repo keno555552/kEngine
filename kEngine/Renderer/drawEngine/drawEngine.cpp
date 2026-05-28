@@ -10,13 +10,15 @@
 
 void DrawEngine::Initialize(
 	DirectXCore* directXDriver,
-	DrawDataCollector* drawDataCollector
+	DrawDataCollector* drawDataCollector,
+	PostProcessRunner* postProcessRunner
 ){
 	directXDriver_ = directXDriver;
 	commandList_ = directXDriver_->GetCommandList();
 	srvManager_ = SrvManager::GetInstance();
 	resourceManager_ = ResourceManager::GetInstance();
 	drawDataCollector_ = drawDataCollector;
+	postProcessRunner_ = postProcessRunner;
 
 	///
 	kClientWidth_ = config::GetClientWidth();
@@ -118,8 +120,6 @@ void DrawEngine::Initialize(
 	}
 
 	/// =========================== OffscreenRT初期化 =========================== ///
-
-	postProcessRunner_ = std::make_unique<PostProcessRunner>();
 
 	m_Offscreen_InputRT = resourceManager_->CreateRenderTexture(
 		kClientWidth_,
@@ -661,11 +661,6 @@ void DrawEngine::DrawCall() {
 
 /// ------------------------------------- PostProcess関連 -----------------------------===------ ///
 
-
-void DrawEngine::SetPostProcessChain(const std::vector<PostProcessType>& chain) {
-	postProcessRunner_->SetChain(chain);
-}
-
 void DrawEngine::TransitionRenderTarget(
 	RenderTexture& renderTexture,
 	D3D12_RESOURCE_STATES toState
@@ -716,6 +711,9 @@ void DrawEngine::DrawColorGrading() {
 	PSOKey psoKey = CreateColorGradingPSOKey();
 	psoManager_->SetPSO(psoKey);
 
+	/// RenderCommandをPostProcessRunnerにセット
+	postProcessRunner_->SetRenderCommand(this);
+
 	/// SRV Heapを設定
 	SetSRVHeap();
 
@@ -749,6 +747,9 @@ void DrawEngine::DrawVignette() {
 	PSOKey psoKey = CreateVignettePSOKey();
 	psoManager_->SetPSO(psoKey);
 
+	/// RenderCommandをPostProcessRunnerにセット
+	postProcessRunner_->SetRenderCommand(this);
+
 	/// SRV Heapを設定
 	SetSRVHeap();
 
@@ -781,6 +782,9 @@ void DrawEngine::DrawBlur() {
 	/// PSOを設定
 	PSOKey psoKey = CreateBlurPSOKey();
 	psoManager_->SetPSO(psoKey);
+
+	/// RenderCommandをPostProcessRunnerにセット
+	postProcessRunner_->SetRenderCommand(this);
 
 	/// SRV Heapを設定
 	SetSRVHeap();

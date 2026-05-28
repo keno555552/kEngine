@@ -1,5 +1,4 @@
 #pragma once
-#include "DirectXCore.h"
 #include "Tool/EffectSystem/ParticleSystem/ParticleManager.h"
 
 class kEngine;

@@ -35,8 +35,9 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 	drawDataCollector->Initialize(cameraManager.get(), lightManager.get(), animationManager.get());
 
 
+	postProcessRunner_ = std::make_unique<PostProcessRunner>();
 	drawEngine = std::make_unique<DrawEngine>();
-	drawEngine->Initialize(dxComm.get(), drawDataCollector.get());
+	drawEngine->Initialize(dxComm.get(), drawDataCollector.get(), postProcessRunner_.get());
 
 	soundManager = std::make_unique<SoundManager>();
 	soundManager->Initialize();
@@ -243,7 +244,11 @@ void kEngine::RemoveLight(Light* light) {
 }
 
 void kEngine::SetPostProcessChain(const std::vector<PostProcessType>& chain) {
-	drawEngine->SetPostProcessChain(chain);
+	postProcessRunner_->SetChain(chain);
+}
+
+void kEngine::ChangeRenderCommand(RenderCommand& renderCommand) {
+	postProcessRunner_->ChangeRenderCommand(renderCommand);
 }
 
 std::weak_ptr <DebugCamera> kEngine::CreateDebugCamera() {

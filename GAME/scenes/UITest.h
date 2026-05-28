@@ -42,6 +42,7 @@ private:
 	int skydomeModelHandle_ = 0;
 	int smallStageHandel_ = 0;
 	int objectHandle_ = 0;
+	int BGObjectHandle_ = 0;
 
 	/// テキスチャーハンドル
 	int whiteTextureHandle_ = 0;
@@ -63,6 +64,7 @@ private:
 	std::unique_ptr<Object> skybox_ = nullptr;
 	std::unique_ptr<Object> ground_ = nullptr;
 	std::unique_ptr<Object> box_ = nullptr;
+	std::unique_ptr<Object>	BGObject_ = nullptr;
 
 	std::unique_ptr<DetailButton> detailButton_ = nullptr;
 	std::unique_ptr<Button> button_ = nullptr;
@@ -80,6 +82,7 @@ private:
 
 	SphereBuildMaterial sphereBuildMaterial_ = {};
 	CylinderBuildMaterial cylinderBuildMaterial_ = {};
+	RenderCommand renderCommand_ = {};
 
 private:
 	/// ============= シーン内命令 =============///

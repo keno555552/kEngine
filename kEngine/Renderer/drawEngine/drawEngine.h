@@ -38,7 +38,8 @@ public:
 
 	void Initialize(
 		DirectXCore* directXDirver,
-		DrawDataCollector* drawDataCollector
+		DrawDataCollector* drawDataCollector,
+		PostProcessRunner* postProcessRunner
 	);
 
 	void Finalize();
@@ -69,9 +70,6 @@ public:
 	/// 描画関数のコア
 	void DrawCall();
 
-	/// PsotProcess関連関数
-	void SetPostProcessChain(const std::vector<PostProcessType>& chain);
-
 	/// EnviromentReflection関連関数
 	void SetEnviromentReflectionTexture(int textureHandle);
 
@@ -92,7 +90,7 @@ private:
 
 
 	std::unique_ptr<PSOManager> psoManager_{};
-	std::unique_ptr<PostProcessRunner> postProcessRunner_{};
+	PostProcessRunner* postProcessRunner_{};		/*依存*/
 	ResourceManager* resourceManager_{};			/*依存*/
 	DirectXCore* directXDriver_{};					/*依存*/
 	ID3D12GraphicsCommandList* commandList_{};		/*依存*/

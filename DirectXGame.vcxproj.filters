@@ -1553,6 +1553,12 @@
     <ClInclude Include="kEngine\Renderer\Mesh\CylinderMesh.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\GPUData\RenderCommandGPU.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\CPUData\RenderCommand.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\LightingLambert\HalfLambert.hlsl">
@@ -1666,5 +1672,6 @@
     <None Include=".github\copilot-instructions.md" />
     <None Include="kEngine\EngineAssets\Shader\PostProcess\ColorGuard.hlsli" />
     <None Include="kEngine\EngineAssets\Shader\PostProcess\Vignette.hlsli" />
+    <None Include="kEngine\EngineAssets\Shader\PostProcess\RenderCommand.hlsli" />
   </ItemGroup>
 </Project>

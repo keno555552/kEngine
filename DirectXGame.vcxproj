@@ -457,6 +457,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Renderer\Mesh\RingMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="kEngine\Data\Render\CPUData\RenderCommand.h" />
+    <ClInclude Include="kEngine\Data\Render\GPUData\RenderCommandGPU.h" />
     <ClInclude Include="kEngine\Renderer\Mesh\CylinderMesh.h" />
     <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\EmitterLink.h" />
     <ClInclude Include="kEngine\Data\Render\Types\PostProcessType.h" />
@@ -957,6 +959,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
     <None Include="kEngine\EngineAssets\Shader\PostProcess\ColorGuard.hlsli" />
+    <None Include="kEngine\EngineAssets\Shader\PostProcess\RenderCommand.hlsli" />
     <None Include="kEngine\EngineAssets\Shader\PostProcess\Vignette.hlsli" />
     <None Include="packages.config" />
     <None Include="resources\map\map.csv" />

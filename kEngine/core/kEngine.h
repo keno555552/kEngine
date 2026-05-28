@@ -35,6 +35,7 @@
 #include "LightManager/LightManager.h"
 #include "GPUData/DirectionalLightGPU.h"
 #include "Camera/Camera.h"
+#include <CPUData/RenderCommand.h>
 
 
 class kEngine
@@ -90,6 +91,7 @@ public:
 	void RemoveLight(Light* light);
 
 	void SetPostProcessChain(const std::vector<PostProcessType>& chain);
+	void ChangeRenderCommand(RenderCommand& renderCommand);
 
 	std::weak_ptr <DebugCamera> CreateDebugCamera();
 	std::weak_ptr <Camera> CreateCamera();
@@ -260,6 +262,7 @@ private:
 
 	/// 描画ロジック
 	std::unique_ptr <DrawEngine> drawEngine{};
+	std::unique_ptr<PostProcessRunner> postProcessRunner_{};
 
 	/// ============ 入力関連 ============///
 	std::unique_ptr <InputCore> inputManager{};

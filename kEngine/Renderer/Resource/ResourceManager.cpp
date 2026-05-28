@@ -582,23 +582,6 @@ int ResourceManager::InputMaterialConfig(std::shared_ptr<MaterialConfig> materia
 		*gpuPtr = *samePtrEntry->cpuMaterial;
 		samePtrEntry->gpuMaterial->GetResource()->Unmap(0, nullptr);
 
-		///// GPUマテリアル更新 
-		//MaterialForGPU* gpuPtr = nullptr;
-		//
-		//auto res = samePtrEntry->gpuMaterial->GetResource();
-		////Logger::Log("InputMaterialConfig: res = %p\n", res);
-		//
-		//HRESULT hr = res ? res->Map(0, nullptr, reinterpret_cast<void**>(&gpuPtr)) : E_FAIL;
-		////Logger::Log("InputMaterialConfig: Map hr = 0x%08X\n", hr);
-
-		//if (FAILED(hr)) {
-		//	// 先不要崩，讓我們看到 log
-		//	return samePtrEntry->materialID;
-		//}
-
-		//*gpuPtr = *samePtrEntry->cpuMaterial;
-		//res->Unmap(0, nullptr);
-
 		return samePtrEntry->materialID;
 	}
 

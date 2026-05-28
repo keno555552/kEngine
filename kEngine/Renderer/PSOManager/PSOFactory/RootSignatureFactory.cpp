@@ -1,6 +1,8 @@
 #include "RootSignatureFactory.h"
 #include "Logger.h"
 
+#include "Data/Render/GPUData/RenderCommandGPU.h"
+
 RootSignatureFactory::RootSignatureFactory() {
 
 	rootSignatureRegistry[RenderModelType::Sprite2D] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStatic(directXDriver_, key); };
@@ -333,12 +335,15 @@ Microsoft::WRL::ComPtr<ID3D12RootSignature> RootSignatureFactory::MakeStaticFull
 	
 	/// s0:Sampler 				(PS)
 	/// t0:SourceTexture		(PS)
+	/// b0:RenderCommand		(PS)
 
 	///RootSignature作成
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
 	descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 	/// -------------------------------- Static Sampler (s0) -------------------------------- ///
+
+	// StaticSampler (s0, PixelShader)
 	D3D12_STATIC_SAMPLER_DESC staticSampler[1]{};
 	staticSampler[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;          //バイリニアフィルタ
 	staticSampler[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;        // 0~1の範囲外をリピート
@@ -353,20 +358,25 @@ Microsoft::WRL::ComPtr<ID3D12RootSignature> RootSignatureFactory::MakeStaticFull
 
 	/// RootParameter作成。PixelShaderのMaterialとVertexShaderのTransform
 	/// ------------------------------- Descriptor Range (t0) ------------------------------- ///
-	D3D12_ROOT_PARAMETER rootParameters[1] = {};
+	D3D12_ROOT_PARAMETER rootParameters[2] = {};
 
-	// Transform用
+	// Transform用descripter
 	static D3D12_DESCRIPTOR_RANGE descriptorRangeForInstancing[1]{};
 	descriptorRangeForInstancing[0].BaseShaderRegister = 0;
 	descriptorRangeForInstancing[0].NumDescriptors = 1;
 	descriptorRangeForInstancing[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	descriptorRangeForInstancing[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	// TransformMatrices（b0, VertexShader）
+	// TransformMatrices（t0, PixelShader）
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;						/// DescriptorTableを使う
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;									/// PixelShaderで使う
 	rootParameters[0].DescriptorTable.pDescriptorRanges = descriptorRangeForInstancing;					/// Tableの中身の配列を指定
 	rootParameters[0].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeForInstancing);		/// Tableで利用する数
+
+	// RenderCommand（b0, PixelShader）
+	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;							/// 32ビット定数を使う
+	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;									/// PixelShaderで使う
+	rootParameters[1].Constants.Num32BitValues = sizeof(RenderCommandGPU) / sizeof(uint32_t);			/// 定数の数
 
 	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameters);  // 配列の長さ

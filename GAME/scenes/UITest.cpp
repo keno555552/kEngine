@@ -62,19 +62,21 @@ UITest::UITest(kEngine* system) {
 
 	/// PostEffectを設定
 	std::vector<PostProcessType> postProcessList = {
-		PostProcessType::Blur,
+		PostProcessType::Vignette,
 	};
-	
+
 	system_->SetPostProcessChain(postProcessList);
 
 	/// =========== リソースロード ============///
 	skydomeModelHandle_ = system_->SetModelObj("./kEngine/EngineAssets/TemplateResource/object/skydome/skydome.obj");
 	smallStageHandel_ = system_->SetModelObj("./GAME/resources/Object/smallStage/smallStage.obj");
+	BGObjectHandle_ = system_->SetModelObj("./GAME/resources/Object/titleBG/titleBG.obj");
 
 	whiteTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/white5x5.png");
 	clicleTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/circle_withAlpha.png");
 	effectTextureHandle_ = system_->LoadTexture("./GAME/resources/texture/gradationLine.png");
 	uvCheckerTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/uvChecker.png");
+
 
 	//BGObject.obj
 	//objectHandle_ = system_->SetModelObj("./GAME/Object/Goal/Goal.obj");
@@ -135,7 +137,7 @@ UITest::UITest(kEngine* system) {
 	button_ = std::make_unique<Button>(system_);
 	button_->Init(
 		{ 100.0f,350.0f },
-		200.0f,80.0f,
+		200.0f, 80.0f,
 		whiteTextureHandle_,
 		whiteTextureHandle_,
 		whiteTextureHandle_,
@@ -150,6 +152,17 @@ UITest::UITest(kEngine* system) {
 
 	panel_ = std::make_unique<Panel>(system_);
 	panel_->SetPanel({ 720.0f,300.0f }, 500.0f, 500.0f);
+
+	BGObject_ = std::make_unique<Object>();
+	BGObject_->IntObject(system_);
+	BGObject_->CreateModelData(BGObjectHandle_);
+	BGObject_->objectParts_[0].materialConfig->enableLighting = false;
+	Vector4 color{ 255.0f,224.0f,136.0f,255.0f };
+	color.ColorBy1();
+	BGObject_->objectParts_[0].materialConfig->textureColor = color;
+	BGObject_->objectParts_[1].materialConfig->enableLighting = false;
+	BGObject_->objectParts_[1].materialConfig->textureColor = {1,1,1,1};
+	BGObject_->mainPosition.transform.scale = { 100.0f,100.0f,100.0f };
 
 	/// =========== パーティクル作る ============///
 
@@ -188,6 +201,8 @@ UITest::~UITest() {
 
 
 void UITest::Update() {
+
+	system_->ChangeRenderCommand(renderCommand_);
 
 	CameraPart();
 
@@ -266,6 +281,7 @@ void UITest::Update() {
 	//	}
 	//}
 
+	BGObject_->objectParts_[1].transform.rotate.z -= 0.001f;
 
 }
 
@@ -304,13 +320,14 @@ void UITest::Draw() {
 
 	/// 実体処理
 	//skydome_->Draw();
-	skybox_->Draw();
+	//skybox_->Draw();
 	ground_->Draw();
-	box_->Draw();
+	//box_->Draw();
 	detailButton_->Render();
 	button_->Render();
 	//panel_->Render();
 	defaultMenu_->Draw();
+	BGObject_->Draw();
 
 #ifdef USE_IMGUI
 	/// ImGui処理
@@ -342,8 +359,13 @@ void UITest::ImGuiPart() {
 	ImGui::Checkbox("isUse", &useDebugCamera);
 	ImGui::End();
 
-	ImGui::Begin("HitCheck");
-	ImGui::Checkbox("isMouseHitAABB", &isHit);
+	ImGui::Begin("BGObject");
+	ImGui::ColorEdit4("object0.color", &BGObject_->objectParts_[0].materialConfig->textureColor.x);
+	ImGui::SliderFloat("object0.rotate", &BGObject_->objectParts_[0].transform.rotate.z, -10.0f, 10.0f);
+	ImGui::SliderFloat("object1.rotate", &BGObject_->objectParts_[1].transform.rotate.z, -10.0f, 10.0f);
+	float scale = BGObject_->mainPosition.transform.scale.x;
+	ImGui::SliderFloat("object.scale", &scale, 0.1f, 500.0f);
+	BGObject_->mainPosition.transform.scale = { scale, scale, scale };
 	ImGui::End();
 
 	bool isPress = detailButton_->GetIsPress();
@@ -372,10 +394,24 @@ void UITest::ImGuiPart() {
 		ImGui::Checkbox("ReverseY", &cylinderBuildMaterial_.isReverseY);
 		ImGui::End();
 	}
+	{
+
+		ImGui::Begin("RenderCommand");
+		ImGui::Text("ColorGuard");
+		ImGui::SliderFloat3("Guard Color", &renderCommand_.guardColor[0], 0, 1);
+		ImGui::SliderFloat("Guard Amount", &renderCommand_.guardAmount, 0, 1);
+		ImGui::Text("Vignette");
+		ImGui::SliderFloat2("Vignette Center", &renderCommand_.vignetteCenter.x, 0, 1);
+		ImGui::SliderFloat("Vignette Radius", &renderCommand_.vignetteRadius, 0, 1);
+		ImGui::SliderFloat("Vignette Softness", &renderCommand_.vignetteSoftness, 0, 1);
+		ImGui::SliderFloat("Vignette Intensity", &renderCommand_.vignetteIntensity, 0, 100);
+		ImGui::ColorEdit4("Vignette Color", &renderCommand_.vignetteColor.x);
+		ImGui::End();
+	}
 
 	{
 		ImGui::Begin("Box");
-		// BlendModeType 對應的字串（順序必須與 enum 完全一致）
+		// BlendModeType 対応する文字列の配列
 		static const char* blendModeNames[] = {
 		"Opaque",
 		"Normal",
@@ -385,10 +421,10 @@ void UITest::ImGuiPart() {
 		"Screen"
 		};
 
-		// 目前的 BlendMode
+		// 今の BlendModeTypeをとる
 		int currentBlend = static_cast<int>(box_->objectParts_[0].materialConfig->blendModeType);
 
-		// 下拉選單
+		// 選択肢
 		if (ImGui::Combo("Blend Mode", &currentBlend, blendModeNames, IM_ARRAYSIZE(blendModeNames))) {
 			box_->objectParts_[0].materialConfig->blendModeType =
 				static_cast<BlendModeType>(currentBlend);
@@ -402,10 +438,10 @@ void UITest::ImGuiPart() {
 		"FlameNeonGlow"
 		};
 
-		// 目前的 LightMode
+		// 今の LightModeTypeをとる
 		int currentLight = static_cast<int>(box_->objectParts_[0].materialConfig->lightModelType);
 
-		// 下拉選單
+		// 選択肢
 		if (ImGui::Combo("Light Mode", &currentLight, lightModeNames, IM_ARRAYSIZE(lightModeNames))) {
 			box_->objectParts_[0].materialConfig->lightModelType =
 				static_cast<LightModelType>(currentLight);

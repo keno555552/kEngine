@@ -242,5 +242,12 @@ private:
 };
 
 
-//Todo: MeshBufferリストの管理仕方を見直す。
-//Todo: MeshBufferを作る関数を追加する。
+//TODO: MeshBufferを管理するクラスを作る
+//TODO: MaterialEntryをInstanceとPSOし、管理する
+
+// 像現在一樣，製作一個MaterialEntry和MaterialInstance
+// MaterialEntry用作收藏不宜變化的東西，照現在的邏輯去更新
+// 再加上一個一定時間會自動刪除沒在用的單元的邏輯
+// MaterialInstance則是用cbuffer形式儲存，在MaterialEntry處以index形式連接
+// Instance不需比較，直接更新帶入
+// 以做到快速更新
