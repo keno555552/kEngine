@@ -62,7 +62,7 @@ UITest::UITest(kEngine* system) {
 
 	/// PostEffectを設定
 	std::vector<PostProcessType> postProcessList = {
-		PostProcessType::Vignette,
+		PostProcessType::Blur,
 	};
 
 	system_->SetPostProcessChain(postProcessList);
@@ -281,7 +281,7 @@ void UITest::Update() {
 	//	}
 	//}
 
-	BGObject_->objectParts_[1].transform.rotate.z -= 0.001f;
+	// BGObject_->objectParts_[1].transform.rotate.z -= 0.001f;
 
 }
 
@@ -406,6 +406,20 @@ void UITest::ImGuiPart() {
 		ImGui::SliderFloat("Vignette Softness", &renderCommand_.vignetteSoftness, 0, 1);
 		ImGui::SliderFloat("Vignette Intensity", &renderCommand_.vignetteIntensity, 0, 100);
 		ImGui::ColorEdit4("Vignette Color", &renderCommand_.vignetteColor.x);
+		ImGui::Text("Blur");
+
+		// BlurType 対応する文字列の配列
+		static const char* blurType[] = {
+		"Box",
+		"Custom"
+		};
+		// 今の BlendModeTypeをとる
+		int currentBlurType = static_cast<int>(renderCommand_.blurType);
+		// 選択肢
+		if (ImGui::Combo("BlurType", &currentBlurType, blurType, IM_ARRAYSIZE(blurType))) {
+			renderCommand_.blurType = currentBlurType;
+		}
+		ImGui::SliderInt("Kernel Size", &renderCommand_.kernelSize, 1, 7);
 		ImGui::End();
 	}
 

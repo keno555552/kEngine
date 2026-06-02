@@ -146,6 +146,7 @@ private:
 	bool isAnimation_ = false;
 
 	Transform startTransform_{};
+	Vector2 lastMousePos_{};
 
 	int selectedMenuIndex_ = (int)ButtonIndex::Close;
 	int lastSelectedMenuIndex_ = (int)ButtonIndex::Retry;
@@ -161,9 +162,11 @@ private:
 	void WorkChange();
 	void ChangeButtonLight();
 
+	void ChangeButtonLightUnit(SimpleSprite* object, ButtonIndex buttonIndex, float onButtonAlpha, float offButtonAlpha, int selectedMenuIndex);
+
 	/// オブジェクト関係
 	void MenuObjectUpdate();
-
+	
 	/// Sound関連
 	float BarTuneVolume(Vector2 mousePos, float startX, float endX);
 

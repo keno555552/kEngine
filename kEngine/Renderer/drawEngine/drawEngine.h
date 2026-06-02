@@ -27,7 +27,9 @@
 #include "DescriptorManager/SrvManager/SrvManager.h"
 #include "DrawData/DrawDataCollector.h"
 #include "Renderer/Resource/InstanceBuffer.h"
+
 #include "Renderer/PostProcessRunner/PostProcessRunner.h"
+#include "Data/Render/GPUData/BlurDataGPU.h"
 
 class DrawEngine
 {
@@ -153,6 +155,10 @@ private:
 	int instance2DCounter_ = 0;
 	int instance3DCounter_ = 0;
 	int instancePCCounter_ = 0;
+
+	/// PostProcess関連
+	std::unique_ptr<InstanceBuffer<BlurDataGPU>> blurDataResource_;
+	int blurDataResourceCounter_ = 0;
 
 	/// EnviromentReflection関連
 	std::unique_ptr <BasicResource> enviromentReflectionTexture_;

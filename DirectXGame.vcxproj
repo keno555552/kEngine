@@ -252,6 +252,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="kEngine\Data\Render\CPUData\RenderCommand.cpp" />
+    <ClCompile Include="kEngine\Math\LinearAlgebra\Gauss.cpp" />
     <ClCompile Include="kEngine\Renderer\Mesh\CylinderMesh.cpp" />
     <ClCompile Include="kEngine\Tool\EffectSystem\ParticleSystem\EmitterLink.cpp" />
     <ClCompile Include="kEngine\Renderer\DescriptorManager\DsvManager\DsvManager.cpp" />
@@ -457,7 +459,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Renderer\Mesh\RingMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="kEngine\Math\LinearAlgebra\Gauss.h" />
     <ClInclude Include="kEngine\Data\Render\CPUData\RenderCommand.h" />
+    <ClInclude Include="kEngine\Data\Render\GPUData\BlurDataGPU.h" />
     <ClInclude Include="kEngine\Data\Render\GPUData\RenderCommandGPU.h" />
     <ClInclude Include="kEngine\Renderer\Mesh\CylinderMesh.h" />
     <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\EmitterLink.h" />

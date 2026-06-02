@@ -1,5 +1,9 @@
 #pragma once
 #include "Data/Render/CPUData/RenderCommand.h"
+#include <algorithm>
+
+#undef max
+#undef min
 
 struct RenderCommandGPU
 {
@@ -28,16 +32,14 @@ struct RenderCommandGPU
 	float vignetteColor[4]{};
 	// ------ padding counter line-------
 
-	///// ============= Blur用コマンド ============== ///
-	///// ここは毎回BlurをDraw前に、CPUDataを使ってこれを変わるように、使用するBlurCommandを選択すること
-	///// Blurの種類
-	//int blurType;
-	///// カーネルのサイズ（例：3なら3x3のカーネルを使う）
-	//int kernelSize;
-	///// カーネルの対応index
-	//int kernelIndex;
-	//int padding;
-	//// ------ padding counter line-------
+	/// ============= Blur用コマンド ============== ///
+	/// ここは毎回BlurをDraw前に、CPUDataを使ってこれを変わるように、使用するBlurCommandを選択すること
+	/// Blurの種類
+	int blurType;
+	/// カーネルのサイズ（例：3なら3x3のカーネルを使う）
+	int kernelSize;
+	/// カーネルの対応index
+	int kernelIndex;
 
 };
 
@@ -61,7 +63,34 @@ inline void ConvertRenderCommandToGPU(const RenderCommand& cpu, RenderCommandGPU
 	if (gpu.vignetteColor[3] != cpu.vignetteColor.w) gpu.vignetteColor[3] = cpu.vignetteColor.w;
 
 	/// ========== Blur =========== ///
-	//if (gpu.blurType != static_cast<int>(cpu.blurType)) gpu.blurType = static_cast<int>(cpu.blurType);
-	//if (gpu.kernelSize != cpu.kernelSize) gpu.kernelSize = cpu.kernelSize;
-	//if (gpu.kernelIndex != 0) gpu.kernelIndex = cpu.kernelIndex;
+	int newType = static_cast<int>(cpu.blurType);
+
+	if (gpu.blurType != newType) gpu.blurType = newType;
+	if (newType == static_cast<int>(BlurType::Box)) {
+		if (gpu.kernelSize != cpu.kernelSize) gpu.kernelSize = cpu.kernelSize;
+		gpu.kernelIndex = -1;
+	} else if (newType == static_cast<int>(BlurType::Custom)) {
+		/// kernelSizeを計算する
+
+		int maxIndex = -1;
+		for (int y = 6; y >= 0; --y) {
+			bool isData = false;
+			for (int x = 6; x >= 0; --x) {
+				if (cpu.blurKernelArray[y][x] != 0.0f) {
+					maxIndex = std::max(x, y);
+					isData = true;
+				}
+			}
+			if (isData) break;
+		}
+
+		// snap 成 3/5/7
+		int size = 3;
+		if (maxIndex >= 6) size = 7;
+		else if (maxIndex >= 4) size = 5;
+		else if (maxIndex < 0) size = -1; // データなし
+
+		// 更新 GPU
+		if (gpu.kernelSize != size) gpu.kernelSize = size;
+	}
 }

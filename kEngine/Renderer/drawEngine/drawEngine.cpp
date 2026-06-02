@@ -135,6 +135,12 @@ void DrawEngine::Initialize(
 		Vector4{ 0.1f, 0.25f, 0.5f, 1.0f }
 	);
 
+	blurDataResource_ = std::make_unique<InstanceBuffer<BlurDataGPU>>(directXDriver_);
+	BlurDataGPU* instanceListBlurData = blurDataResource_->CreateInstanceBuffer(5);
+	postProcessRunner_->SetInstanceListBlurData(instanceListBlurData);
+	blurDataResource_->GetResource()->SetName("BlurDataBuffer");
+
+
 	/// =========================== カメラバッファの初期化 =========================== ///
 	cameraBuffer_ = std::make_unique<BasicResource>();
 	cameraBuffer_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(CameraForGPU));
@@ -785,6 +791,9 @@ void DrawEngine::DrawBlur() {
 
 	/// RenderCommandをPostProcessRunnerにセット
 	postProcessRunner_->SetRenderCommand(this);
+	
+	/// BlurDataを設定
+	SetRootDescriptorTable(2, blurDataResource_->GetGPUDescriptorHandle());
 
 	/// SRV Heapを設定
 	SetSRVHeap();

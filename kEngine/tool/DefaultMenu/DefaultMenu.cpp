@@ -192,6 +192,32 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 	sMenuVolumeBarS->followObject_ = sMenuBG_.get();
 	sMenuVolumeBarS->Update(nullptr);
 
+	Vector4 BGColor = { 140.0f,140.0f,140.0f,255.0f };
+	BGColor.ColorBy1();
+	sMenuBG_->objectParts_[0].materialConfig->textureColor = BGColor;
+
+	Vector4 wordColor = { 103.0f,103.0f,103.0f,255.0f };
+	wordColor.ColorBy1();
+	sMenuTitle->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuBGM->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuMASTER->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuSE->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuClose_NL->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuBack_NL->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuRetry_NL->objectParts_[0].materialConfig->textureColor = wordColor;
+
+	Vector4 buttonColor = { 88.0f,88.0f,88.0f,255.0f };
+	buttonColor.ColorBy1();
+	sMenuButtonM_NL->objectParts_[0].materialConfig->textureColor = buttonColor;
+	sMenuButtonB_NL->objectParts_[0].materialConfig->textureColor = buttonColor;
+	sMenuButtonS_NL->objectParts_[0].materialConfig->textureColor = buttonColor;
+
+	Vector4 volumeBarColor = { 154.0f,154.0f,154.0f,255.0f };
+	volumeBarColor.ColorBy1();
+	sMenuVolumeBarM->objectParts_[0].materialConfig->textureColor = volumeBarColor;
+	sMenuVolumeBarB->objectParts_[0].materialConfig->textureColor = volumeBarColor;
+	sMenuVolumeBarS->objectParts_[0].materialConfig->textureColor = volumeBarColor;
+
 	/// ================== ボタン ==================///
 
 	bMenuClose = std::make_unique<Button>(system_);
@@ -241,10 +267,6 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 		-1, -1, -1, -1,
 		0, 0);
 	bMenuSE->SetFollowObject(sMenuButtonS.get());
-
-
-
-
 
 	/// ================ testSound ================///
 	//SH_menuSE_ = system_->SoundLoadSE("resources/TemplateResource/sound/SE/game_start.wav");
@@ -478,6 +500,9 @@ void DefaultMenu::CheckClick() {
 void DefaultMenu::CheckMouse() {
 
 	Vector2 mousePos = system_->GetMousePosVector2();
+	if (mousePos == lastMousePos_) return;
+	lastMousePos_ = mousePos;
+
 	bool isTrickingBar =
 		isSelectedBMenuSE_
 		|| isSelectedBMenuBGM_
@@ -681,35 +706,42 @@ void DefaultMenu::ChangeButtonLight() {
 				buttonsOnColor_[i]->w = 0.0f;
 			}
 		}
+	}
 
-		if (selectedMenuIndex_ == (int)ButtonIndex::VolumeMASTER) {
-			sMenuButtonM->objectParts_[0].materialConfig->textureColor.w = onButtonAlpha;
-		} else if (lastSelectedMenuIndex_ == (int)ButtonIndex::VolumeMASTER) {
-			sMenuButtonM->objectParts_[0].materialConfig->textureColor.w = offButtonAlpha;
-		} else {
-			if (sMenuButtonM->objectParts_[0].materialConfig->textureColor.w != 0.0f) {
-				sMenuButtonM->objectParts_[0].materialConfig->textureColor.w = 0.0f;
-			}
+	if (selectedMenuIndex_ == (int)ButtonIndex::VolumeMASTER) {
+		sMenuButtonM->objectParts_[0].materialConfig->textureColor.w = onButtonAlpha;
+	} else if (lastSelectedMenuIndex_ == (int)ButtonIndex::VolumeMASTER) {
+		sMenuButtonM->objectParts_[0].materialConfig->textureColor.w = offButtonAlpha;
+	} else {
+		if (sMenuButtonM->objectParts_[0].materialConfig->textureColor.w != 0.0f) {
+			sMenuButtonM->objectParts_[0].materialConfig->textureColor.w = 0.0f;
 		}
+	}
+	ChangeButtonLightUnit(
+		sMenuButtonB.get(),
+		ButtonIndex::VolumeBGM,
+		onButtonAlpha,
+		offButtonAlpha,
+		selectedMenuIndex_
+	);
 
-		if (selectedMenuIndex_ == (int)ButtonIndex::VolumeBGM) {
-			sMenuButtonB->objectParts_[0].materialConfig->textureColor.w = onButtonAlpha;
-		} else if (lastSelectedMenuIndex_ == (int)ButtonIndex::VolumeBGM) {
-			sMenuButtonB->objectParts_[0].materialConfig->textureColor.w = offButtonAlpha;
-		} else {
-			if (sMenuButtonB->objectParts_[0].materialConfig->textureColor.w != 0.0f) {
-				sMenuButtonB->objectParts_[0].materialConfig->textureColor.w = 0.0f;
-			}
-		}
+	ChangeButtonLightUnit(
+		sMenuButtonS.get(),
+		ButtonIndex::VolumeSE,
+		onButtonAlpha,
+		offButtonAlpha,
+		selectedMenuIndex_
+	);
+}
 
-		if (selectedMenuIndex_ == (int)ButtonIndex::VolumeSE) {
-			sMenuButtonS->objectParts_[0].materialConfig->textureColor.w = onButtonAlpha;
-		} else if (lastSelectedMenuIndex_ == (int)ButtonIndex::VolumeSE) {
-			sMenuButtonS->objectParts_[0].materialConfig->textureColor.w = offButtonAlpha;
-		} else {
-			if (sMenuButtonS->objectParts_[0].materialConfig->textureColor.w != 0.0f) {
-				sMenuButtonS->objectParts_[0].materialConfig->textureColor.w = 0.0f;
-			}
+void DefaultMenu::ChangeButtonLightUnit(SimpleSprite* object, ButtonIndex buttonIndex, float onButtonAlpha, float offButtonAlpha,int selectedMenuIndex) {
+	if (selectedMenuIndex == (int)buttonIndex) {
+		object->objectParts_[0].materialConfig->textureColor.w = onButtonAlpha;
+	} else if (lastSelectedMenuIndex_ == (int)buttonIndex) {
+		object->objectParts_[0].materialConfig->textureColor.w = offButtonAlpha;
+	} else {
+		if (object->objectParts_[0].materialConfig->textureColor.w != 0.0f) {
+			object->objectParts_[0].materialConfig->textureColor.w = 0.0f;
 		}
 	}
 }
@@ -742,7 +774,43 @@ void DefaultMenu::ImguiPart() {
 		ImGui::Text("IsBack: False");
 	}
 
+	ImGui::ColorEdit4("BGColor", &sMenuBG_->objectParts_[0].materialConfig->textureColor.x);
+	Vector4 wordColor = sMenuTitle->objectParts_[0].materialConfig->textureColor;
+	ImGui::ColorEdit4("wordColor", &wordColor.x);
+	sMenuTitle->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuBGM->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuMASTER->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuSE->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuClose_NL->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuBack_NL->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuRetry_NL->objectParts_[0].materialConfig->textureColor = wordColor;
 
+	Vector4 lightColor = sMenuClose->objectParts_[0].materialConfig->textureColor;
+	ImGui::ColorEdit4("lightColor", &lightColor.x);
+	sMenuClose->objectParts_[0].materialConfig->textureColor = lightColor;
+	sMenuBack->objectParts_[0].materialConfig->textureColor = lightColor;
+	sMenuRetry->objectParts_[0].materialConfig->textureColor = lightColor;
+
+	Vector4 buttonColor = sMenuButtonM_NL->objectParts_[0].materialConfig->textureColor;
+	ImGui::ColorEdit4("buttonColor", &buttonColor.x);
+	sMenuButtonM_NL->objectParts_[0].materialConfig->textureColor = buttonColor;
+	sMenuButtonB_NL->objectParts_[0].materialConfig->textureColor = buttonColor;
+	sMenuButtonS_NL->objectParts_[0].materialConfig->textureColor = buttonColor;
+
+	Vector4 lightButtonColor = sMenuButtonM->objectParts_[0].materialConfig->textureColor;
+	ImGui::ColorEdit4("lightButtonColor", &lightButtonColor.x);
+	sMenuButtonM->objectParts_[0].materialConfig->textureColor = lightButtonColor;
+	sMenuButtonB->objectParts_[0].materialConfig->textureColor = lightButtonColor;
+	sMenuButtonS->objectParts_[0].materialConfig->textureColor = lightButtonColor;
+
+	Vector4 volumeBarColor = sMenuVolumeBarM->objectParts_[0].materialConfig->textureColor;
+	ImGui::ColorEdit4("volumeBarColor", &volumeBarColor.x);
+	sMenuVolumeBarM->objectParts_[0].materialConfig->textureColor = volumeBarColor;
+	sMenuVolumeBarB->objectParts_[0].materialConfig->textureColor = volumeBarColor;
+	sMenuVolumeBarS->objectParts_[0].materialConfig->textureColor = volumeBarColor;
+
+	Vector4 masterColor = sMenuClose->objectParts_[0].materialConfig->textureColor;
+	ImGui::ColorEdit4("Close", &sMenuClose->objectParts_[0].materialConfig->textureColor.x);
 
 	ImGui::End();
 

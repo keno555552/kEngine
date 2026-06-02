@@ -2,6 +2,7 @@
 #include "Logger.h"
 
 #include "Data/Render/GPUData/RenderCommandGPU.h"
+#include "Data/Render/GPUData/BlurDataGPU.h"
 
 RootSignatureFactory::RootSignatureFactory() {
 
@@ -331,11 +332,12 @@ Microsoft::WRL::ComPtr <ID3D12RootSignature> RootSignatureFactory::MakeStaticSki
 }
 
 Microsoft::WRL::ComPtr<ID3D12RootSignature> RootSignatureFactory::MakeStaticFullscreenQuad(DirectXCore* directXDriver_, PSOKey& key) {
-	key;	/// 使われなかった
+	key;	/// 使われなかった、将来の拡張のために残しておく
 	
 	/// s0:Sampler 				(PS)
 	/// t0:SourceTexture		(PS)
 	/// b0:RenderCommand		(PS)
+	/// t1:BlurData				(PS)
 
 	///RootSignature作成
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
@@ -358,28 +360,44 @@ Microsoft::WRL::ComPtr<ID3D12RootSignature> RootSignatureFactory::MakeStaticFull
 
 	/// RootParameter作成。PixelShaderのMaterialとVertexShaderのTransform
 	/// ------------------------------- Descriptor Range (t0) ------------------------------- ///
-	D3D12_ROOT_PARAMETER rootParameters[2] = {};
+	D3D12_ROOT_PARAMETER rootParameters[3] = {};
 
-	// Transform用descripter
+	// SourceTexture用descriptor
 	static D3D12_DESCRIPTOR_RANGE descriptorRangeForInstancing[1]{};
 	descriptorRangeForInstancing[0].BaseShaderRegister = 0;
 	descriptorRangeForInstancing[0].NumDescriptors = 1;
 	descriptorRangeForInstancing[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	descriptorRangeForInstancing[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	// TransformMatrices（t0, PixelShader）
+	// SourceTexture（t0, PixelShader）
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;						/// DescriptorTableを使う
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;									/// PixelShaderで使う
 	rootParameters[0].DescriptorTable.pDescriptorRanges = descriptorRangeForInstancing;					/// Tableの中身の配列を指定
 	rootParameters[0].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeForInstancing);		/// Tableで利用する数
 
 	// RenderCommand（b0, PixelShader）
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;							/// 32ビット定数を使う
+	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;						/// 32ビット定数を使う
 	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;									/// PixelShaderで使う
 	rootParameters[1].Constants.Num32BitValues = sizeof(RenderCommandGPU) / sizeof(uint32_t);			/// 定数の数
 
+	// blurDataList 用 (t1, PS)
+	static D3D12_DESCRIPTOR_RANGE blurDataListRange[1]{};
+	blurDataListRange[0].BaseShaderRegister = 1; // t1
+	blurDataListRange[0].NumDescriptors = 1;
+	blurDataListRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	blurDataListRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[2].DescriptorTable.pDescriptorRanges = blurDataListRange;
+	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(blurDataListRange);
+
+
+
 	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameters);  // 配列の長さ
+
+
 
 
 	// シリアライズしてバイナリにする

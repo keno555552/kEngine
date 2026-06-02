@@ -1,6 +1,13 @@
 #pragma once
 #include "Vector2.h"
 #include "Vector4.h"
+#include <array>
+#include "LinearAlgebra/Gauss.h"
+#include "Logger.h"
+
+/// Blurのカーネルを作る関数
+std::array<std::array<float, 7>, 7> MakeBoxBlur(int kernelSize);
+std::array<std::array<float, 7>, 7> MakeGaussianBlur(int kernelSize, float sigma);
 
 enum class BlurType {
 	Box,
@@ -37,6 +44,19 @@ struct RenderCommand
 	Vector4 vignetteColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 	/// ============= Blur用コマンド ============== ///
-	BlurCommand blurCommand[5];
+	/// ここは毎回BlurをDraw前に、CPUDataを使ってこれを変わるように、使用するBlurCommandを選択すること
+	/// Blurの種類
+	int blurType = static_cast<int>(BlurType::Box);
+	/// カーネルのサイズ（例：3なら3x3のカーネルを使う）
+	int kernelSize = 5;
+	/// カーネルの対応index
+	int kernelIndex = -1;
+	/// Blurのカーネル
+	std::array<std::array<float, 7>, 7> blurKernelArray = MakeGaussianBlur(5, 13.0f);
+
+	/// blurの種類によって、使用するデータが変わる
+	/// もしBoxBlurにすると、後ろのblurKernelは無視されて、GPU側でボックスの数値を計算する
+	/// もしCustomBlurにすると、後ろのblurKernelが使用され、加えてkernelSizeも必要になる(なければ7x7からデータがあるところまでSizeとして使う)
+	///    その上でkernelIndexはPostProcessRunnerがデータのあり所により埋まる
 
 };
