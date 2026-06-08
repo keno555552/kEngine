@@ -428,6 +428,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Tool\EffectSystem\ParticleSystem\ParticleEmitter.cpp" />
     <ClCompile Include="kEngine\Data\Render\Types\PSOType\RenderTargetFormat.cpp" />
     <ClCompile Include="kEngine\Renderer\PostProcessRunner\PostProcessRunner.cpp" />
+    <ClCompile Include="kEngine\Renderer\PSOManager\PSORecorder.cpp" />
     <ClCompile Include="ResourceLoader.cpp" />
     <ClCompile Include="kEngine\Scenes\BaseSceneFactory.cpp" />
     <ClCompile Include="kEngine\GameObject\Object\Sprite.cpp" />
@@ -717,6 +718,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\ParticlePrototype.h" />
     <ClInclude Include="kEngine\Data\Render\Types\PSOType\RenderTargetFormat.h" />
     <ClInclude Include="kEngine\Renderer\PostProcessRunner\PostProcessRunner.h" />
+    <ClInclude Include="kEngine\Renderer\PSOManager\PSORecorder.h" />
     <ClInclude Include="ResourceLoader.h" />
     <ClInclude Include="kEngine\Scenes\BaseSceneFactory.h" />
     <ClInclude Include="kEngine\GameObject\Object\Sprite.h" />
@@ -963,7 +965,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
     <None Include="kEngine\EngineAssets\Shader\PostProcess\ColorGuard.hlsli" />
-    <None Include="kEngine\EngineAssets\Shader\PostProcess\RenderCommand.hlsli" />
     <None Include="kEngine\EngineAssets\Shader\PostProcess\Vignette.hlsli" />
     <None Include="packages.config" />
     <None Include="resources\map\map.csv" />

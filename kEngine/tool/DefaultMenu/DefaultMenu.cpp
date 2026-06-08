@@ -411,7 +411,7 @@ void DefaultMenu::Draw() {
 	sMenuButtonS->Draw();
 
 #ifdef USE_IMGUI
-	ImguiPart();
+	//ImguiPart();
 #endif
 }
 

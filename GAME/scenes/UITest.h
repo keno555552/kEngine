@@ -64,7 +64,6 @@ private:
 	std::unique_ptr<Object> skybox_ = nullptr;
 	std::unique_ptr<Object> ground_ = nullptr;
 	std::unique_ptr<Object> box_ = nullptr;
-	std::unique_ptr<Object>	BGObject_ = nullptr;
 
 	std::unique_ptr<DetailButton> detailButton_ = nullptr;
 	std::unique_ptr<Button> button_ = nullptr;

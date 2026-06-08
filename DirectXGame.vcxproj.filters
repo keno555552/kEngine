@@ -723,6 +723,9 @@
     <ClCompile Include="kEngine\Data\Render\CPUData\RenderCommand.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="kEngine\Renderer\PSOManager\PSORecorder.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kEngine\Math\LinearAlgebra\Vector2.h">
@@ -1571,6 +1574,9 @@
     <ClInclude Include="kEngine\Math\LinearAlgebra\Gauss.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="kEngine\Renderer\PSOManager\PSORecorder.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\LightingLambert\HalfLambert.hlsl">
@@ -1684,6 +1690,5 @@
     <None Include=".github\copilot-instructions.md" />
     <None Include="kEngine\EngineAssets\Shader\PostProcess\ColorGuard.hlsli" />
     <None Include="kEngine\EngineAssets\Shader\PostProcess\Vignette.hlsli" />
-    <None Include="kEngine\EngineAssets\Shader\PostProcess\RenderCommand.hlsli" />
   </ItemGroup>
 </Project>

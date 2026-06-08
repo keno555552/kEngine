@@ -315,6 +315,27 @@ void PSOManager::CreateAllPSO() {
 
 }
 
+void PSOManager::CreateDefaultPSOcacheJson(std::string fullPath) {
+
+	// 直接生成一個新的 JSON 檔案
+	nlohmann::json file;
+	file["pso_keys"] = nlohmann::json::array();
+	file["pso_keys"].push_back("OrderBy:");
+	file["pso_keys"].push_back("LightModel,RenderModel,BlendMode,RasterizerMode,DepthStencil,PrimitiveType");
+	file["pso_keys"].push_back("EnvReflection");
+	file["pso_keys"].push_back(0);
+
+	std::ofstream output(fullPath);
+	if (!output.is_open()) {
+		throw std::runtime_error("[kEngine] Failed to create JSON file: " + fullPath);
+	}
+
+	output << file.dump(4);
+	output.close();
+}
+
+
+
 int PSOManager::GetPSOHandle(PSOKey keys) {
 
 	auto it = psoKeyToHandleMap_.find(keys);

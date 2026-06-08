@@ -62,7 +62,7 @@ UITest::UITest(kEngine* system) {
 
 	/// PostEffectを設定
 	std::vector<PostProcessType> postProcessList = {
-		PostProcessType::Blur,
+		//PostProcessType::ColorGrading,
 	};
 
 	system_->SetPostProcessChain(postProcessList);
@@ -80,8 +80,8 @@ UITest::UITest(kEngine* system) {
 
 	//BGObject.obj
 	//objectHandle_ = system_->SetModelObj("./GAME/Object/Goal/Goal.obj");
-	//objectHandle_ = system_->SetModelObj("./kEngine/EngineAssets/Object/charater/charater.obj");
-	objectHandle_ = system_->CreateEngineModel(cylinderBuildMaterial_);
+	objectHandle_ = system_->SetModelObj("./kEngine/EngineAssets/Object/charater/charater.obj");
+	//objectHandle_ = system_->CreateEngineModel(cylinderBuildMaterial_);
 
 	//ddsTest = system_->LoadTexture("./GAME/resources/texture/skyCube/rostock_laage_airport_4k.dds");
 	ddsTest = system_->LoadTexture("./GAME/resources/texture/skyCube/output_skybox.dds");
@@ -104,24 +104,24 @@ UITest::UITest(kEngine* system) {
 
 	box_ = std::make_unique<Object>();
 	box_->IntObject(system_);
-	//box_->CreateModelData(objectHandle_);
-	box_->CreateDefaultData();
+	box_->CreateModelData(objectHandle_);
+	//box_->CreateDefaultData();
 	//box_->modelHandle_ = config::default_Cube_MeshBufferHandle_;
 	//box_->modelHandle_ = config::default_Sphere_MeshBufferHandle_;
 	//box_->modelHandle_ = config::default_Cylinder_MeshBufferHandle_;
-	box_->modelHandle_ = objectHandle_;
+	//box_->modelHandle_ = objectHandle_;
 	//box_->objectParts_[0].materialConfig->textureHandle = whiteTextureHandle_;
-	box_->objectParts_[0].materialConfig->textureHandle = uvCheckerTextureHandle_;
+	//box_->objectParts_[0].materialConfig->textureHandle = uvCheckerTextureHandle_;
 	//box_->objectParts_[0].materialConfig->textureHandle = clicleTextureHandle_;
 	//box_->objectParts_[0].materialConfig->textureHandle = effectTextureHandle_;
 	//box_->isBillboard_ = true;
 	//box_->objectParts_[0].materialConfig->isReflective = true;
-	box_->objectParts_[0].materialConfig->enableLighting = false;
-	box_->objectParts_[0].materialConfig->lightModelType = LightModelType::Lambert;
-	box_->objectParts_[0].materialConfig->rasterizerMode = RasterizerMode::CullNone;
-	box_->objectParts_[0].materialConfig->textureColor = { 1.0f,1.0f,1.0f,0.999f };
-	//box_->mainPosition.transform.scale = Vector3(0.5f, 0.5f, 0.5f);
-	//box_->mainPosition.transform.translate = Vector3(0.0f, 0.0f, 0.0f);
+	//box_->objectParts_[0].materialConfig->enableLighting = false;
+	//box_->objectParts_[0].materialConfig->lightModelType = LightModelType::Lambert;
+	//box_->objectParts_[0].materialConfig->rasterizerMode = RasterizerMode::CullNone;
+	//box_->objectParts_[0].materialConfig->textureColor = { 1.0f,1.0f,1.0f,0.999f };
+	box_->mainPosition.transform.scale = Vector3(0.5f, 0.5f, 0.5f);
+	box_->mainPosition.transform.translate = Vector3(0.0f, -0.5f, 0.0f);
 
 	skybox_ = std::make_unique<Object>();
 	skybox_->IntObject(system_);
@@ -152,17 +152,6 @@ UITest::UITest(kEngine* system) {
 
 	panel_ = std::make_unique<Panel>(system_);
 	panel_->SetPanel({ 720.0f,300.0f }, 500.0f, 500.0f);
-
-	BGObject_ = std::make_unique<Object>();
-	BGObject_->IntObject(system_);
-	BGObject_->CreateModelData(BGObjectHandle_);
-	BGObject_->objectParts_[0].materialConfig->enableLighting = false;
-	Vector4 color{ 255.0f,224.0f,136.0f,255.0f };
-	color.ColorBy1();
-	BGObject_->objectParts_[0].materialConfig->textureColor = color;
-	BGObject_->objectParts_[1].materialConfig->enableLighting = false;
-	BGObject_->objectParts_[1].materialConfig->textureColor = {1,1,1,1};
-	BGObject_->mainPosition.transform.scale = { 100.0f,100.0f,100.0f };
 
 	/// =========== パーティクル作る ============///
 
@@ -247,9 +236,9 @@ void UITest::Update() {
 	//if (button_->GetIsClick()) {
 	//	system_->ChangeEngineModel(sphereBuildMaterial_, objectHandle_);
 	//}
-	if (button_->GetIsClick()) {
-		system_->ChangeEngineModel(cylinderBuildMaterial_, objectHandle_);
-	}
+	//if (button_->GetIsClick()) {
+	//	system_->ChangeEngineModel(cylinderBuildMaterial_, objectHandle_);
+	//}
 
 
 	//if (system_->GetMouseTriggerOn(0)) {
@@ -320,14 +309,13 @@ void UITest::Draw() {
 
 	/// 実体処理
 	//skydome_->Draw();
-	//skybox_->Draw();
+	skybox_->Draw();
 	ground_->Draw();
-	//box_->Draw();
+	box_->Draw();
 	detailButton_->Render();
 	button_->Render();
 	//panel_->Render();
 	defaultMenu_->Draw();
-	BGObject_->Draw();
 
 #ifdef USE_IMGUI
 	/// ImGui処理
@@ -357,15 +345,6 @@ void UITest::CameraPart() {
 void UITest::ImGuiPart() {
 	ImGui::Begin("DebugCamera");
 	ImGui::Checkbox("isUse", &useDebugCamera);
-	ImGui::End();
-
-	ImGui::Begin("BGObject");
-	ImGui::ColorEdit4("object0.color", &BGObject_->objectParts_[0].materialConfig->textureColor.x);
-	ImGui::SliderFloat("object0.rotate", &BGObject_->objectParts_[0].transform.rotate.z, -10.0f, 10.0f);
-	ImGui::SliderFloat("object1.rotate", &BGObject_->objectParts_[1].transform.rotate.z, -10.0f, 10.0f);
-	float scale = BGObject_->mainPosition.transform.scale.x;
-	ImGui::SliderFloat("object.scale", &scale, 0.1f, 500.0f);
-	BGObject_->mainPosition.transform.scale = { scale, scale, scale };
 	ImGui::End();
 
 	bool isPress = detailButton_->GetIsPress();

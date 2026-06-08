@@ -25,6 +25,9 @@ enum FeatureFlags : uint64_t {
 	// ...
 };
 
+/// PSOKeyの要素数（FeatureFlagsは別で管理するため）!!!!(エレメントの数を増やしたらここも変えるのを忘れないで)!!!!
+static int keyElementCount = 7;	
+
 struct PSOKey {
 
 	// Shader Feature
@@ -82,7 +85,8 @@ inline bool operator<(const PSOKey& a, const PSOKey& b) {
 		a.primitiveType,
 		a.featureMask,
 		a.lightModelType,
-		a.renderTargetFormatType
+		a.renderTargetFormatType,
+		a.featureMask
 	) < std::tie(
 		b.renderModelType,
 		b.blendModeType,
@@ -91,7 +95,8 @@ inline bool operator<(const PSOKey& a, const PSOKey& b) {
 		b.primitiveType,
 		b.featureMask,
 		b.lightModelType,
-		b.renderTargetFormatType
+		b.renderTargetFormatType,
+		b.featureMask
 	);
 }
 
