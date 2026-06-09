@@ -2,8 +2,6 @@
 #include "kEngine.h"
 #include "SceneElement.h"
 
-
-
 class SceneManager;
 class BaseScene
 {

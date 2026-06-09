@@ -95,12 +95,12 @@ UITest::UITest(kEngine* system) {
 	ground_ = std::make_unique<Object>();
 	ground_->IntObject(system_);
 	//ground_->CreateModelData(objectHandle_);
-	ground_->mainPosition.transform.translate = Vector3(1.0f, 1.0f, 1.0f);
+	ground_->mainPosition.transform.translate = { 1.0f, 1.0f, 1.0f };
 	ground_->CreateDefaultData();
 	ground_->modelHandle_ = config::default_Cube_MeshBufferHandle_;
 	ground_->objectParts_[0].materialConfig->textureHandle = whiteTextureHandle_;
-	ground_->mainPosition.transform.scale = Vector3(50.0f, 0.1f, 50.0f);
-	ground_->mainPosition.transform.translate = Vector3(0.0f, -1.0f, 0.0f);
+	ground_->mainPosition.transform.scale = { 50.0f, 0.1f, 50.0f };
+	ground_->mainPosition.transform.translate = { 0.0f, -1.0f, 0.0f };
 
 	box_ = std::make_unique<Object>();
 	box_->IntObject(system_);
@@ -120,8 +120,8 @@ UITest::UITest(kEngine* system) {
 	//box_->objectParts_[0].materialConfig->lightModelType = LightModelType::Lambert;
 	//box_->objectParts_[0].materialConfig->rasterizerMode = RasterizerMode::CullNone;
 	//box_->objectParts_[0].materialConfig->textureColor = { 1.0f,1.0f,1.0f,0.999f };
-	box_->mainPosition.transform.scale = Vector3(0.5f, 0.5f, 0.5f);
-	box_->mainPosition.transform.translate = Vector3(0.0f, -0.5f, 0.0f);
+	box_->mainPosition.transform.scale = { 0.5f, 0.5f, 0.5f };
+	box_->mainPosition.transform.translate = { 0.0f, -0.5f, 0.0f };
 
 	skybox_ = std::make_unique<Object>();
 	skybox_->IntObject(system_);
@@ -129,7 +129,7 @@ UITest::UITest(kEngine* system) {
 	skybox_->modelHandle_ = config::default_SkyCube_MeshBufferHandle_;
 	skybox_->objectParts_[0].materialConfig->textureHandle = ddsTest;
 	skybox_->objectParts_[0].materialConfig->MakePSOEnvironment();
-	skybox_->mainPosition.transform.scale = Vector3(200.0f, 200.0f, 200.0f);
+	skybox_->mainPosition.transform.scale = { 200.0f, 200.0f, 200.0f };
 
 	detailButton_ = std::make_unique<DetailButton>(system_);
 	detailButton_->SetButton({ 100.0f,100.0f }, 200.0f, 80.0f);
