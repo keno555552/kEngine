@@ -206,7 +206,7 @@ void UITest::Update() {
 
 	panel_->Update();
 
-	defaultMenu_->Updata();
+	defaultMenu_->Update();
 
 	MouseLogic();
 

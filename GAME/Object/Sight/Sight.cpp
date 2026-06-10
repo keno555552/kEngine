@@ -1,9 +1,9 @@
 #include "Sight.h"
-#include "Player/Player.h"
-#include "tool/mathsUnit/Matrix4x4.h"
-#include "tool/mathsUnit/Vector4.h"
-#include "tool/Camera/Camera.h"
-#include "core/driver/config.h"
+#include "GAME/Object/Player/Player.h"
+#include "Matrix4x4.h"
+#include "Vector4.h"
+#include "Camera/Camera.h"
+#include "core/config.h"
 #include <numbers>
 #include <cmath>
 
@@ -24,8 +24,8 @@ void Sight::Update(Camera* camera) {
 	float mouseX = (float)system_->GetMousePosX();
 	float mouseY = (float)system_->GetMousePosY();
 
-	float w = config::GetClientWidth();
-	float h = config::GetClientHeight();
+	float w = (float)config::GetClientWidth();
+	float h = (float)config::GetClientHeight();
 
 	float ndcX = (mouseX / w) * 2.0f - 1.0f;
 	float ndcY = 1.0f - (mouseY / h) * 2.0f;

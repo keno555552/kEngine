@@ -4,7 +4,7 @@
 #include "Object\Sprite.h"
 #include "Particle\P_Fire\P_Fire.h"
 #include "Camera\DebugCamera.h"
-#include "Player\Player.h"
+#include "GAME\Object\Player\Player.h"
 #include "Particle\P_Ball\P_Ball.h"
 #include <random>
 

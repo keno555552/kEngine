@@ -2,7 +2,7 @@
 #include "Player.h"
 #include <algorithm>
 #include <numbers>
-#include "Bullet/Bullet.h"
+#include "GAME/Object/Bullet/Bullet.h"
 
 Player::Player(kEngine* system, const Vector3& position) {
 	Object::IntObject(system);
@@ -15,15 +15,15 @@ Player::Player(kEngine* system, const Vector3& position) {
 	shootCD_.Init0(kShootInterval, system_->GetTimeManager());
 	damageEffectTimer_.InitM(kPlayerDamageEffectTime, system_->GetTimeManager());
 
-	MH_playerModel_ = system_->SetModelObj("resources/object/player/player.obj");
-	MH_pickaxe_ = system_->SetModelObj("resources/object/pickaxe/pickaxe.obj");
+	MH_playerModel_ = system_->SetModelObj("GAME/resources/Object/player/player.obj");
+	MH_pickaxe_ = system_->SetModelObj("GAME/resources/Object/pickaxe/pickaxe.obj");
 
-	TH_playerTexture_ = system_->LoadTexture("resources/object/player/playerUV.png");
-	TH_White5x5_ = system_->LoadTexture("resources/TemplateResource/texture/white5x5.png");
+	TH_playerTexture_ = system_->LoadTexture("GAME/resources/Object/player/playerUV.png");
+	TH_White5x5_ = system_->LoadTexture("kEngine/EngineAssets/TemplateResource/texture/white5x5.png");
 
-	SH_JUMP_ = system_->SoundLoadSE("resources/sound/SE/player_jump.wav");
-	SH_SHOOT_ = system_->SoundLoadSE("resources/sound/SE/player_attack.wav");
-	SH_DAMAGE_ = system_->SoundLoadSE("resources/sound/SE/playerDamage.wav");
+	SH_JUMP_ = system_->SoundLoadSE("GAME/resources/sound/SE/player_jump.wav");
+	SH_SHOOT_ = system_->SoundLoadSE("GAME/resources/sound/SE/player_attack.wav");
+	SH_DAMAGE_ = system_->SoundLoadSE("GAME/resources/sound/SE/playerDamage.wav");
 
 	nearAttackChangeTimer_.InitM(kNearAttackChangeTime, system_->GetTimeManager());
 	nearAttackEffectTimer_.InitM(kNearAttackEffectTime, system_->GetTimeManager());

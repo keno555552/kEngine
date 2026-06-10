@@ -5,47 +5,38 @@ SceneTitle::SceneTitle(kEngine* system) {
 	system_ = system;
 	debugCamera_ = system_->CreateDebugCamera();
 	camera_ = system_->CreateCamera();
-	camera_->Move(Vector3(0.0f, 0.5f, -15.0f));
-	camera_->Rotate(Vector3(0.182f, 0, 0));
+	camera_.lock()->Move(Vector3(0.0f, 0.5f, -15.0f));
+	camera_.lock()->Rotate(Vector3(0.182f, 0, 0));
 
 	/// =========== ���\�[�X���[�h ============///
 
 	/// ���\�[�X�n���h��
-	std::string basePath = "resources/";
-	std::string templatePath = "TemplateResource/";
-	std::string objectPath = "object/";
-	std::string texturePath = "texture/";
-	std::string blockPath = "block/";
-	std::string buttonPath = "button/";
-	std::string soundPath = "sound/";
-	std::string BGMPath = "BGM/";
-	std::string SEPath = "SE/";
 
-	MH_skydome_ = system_->SetModelObj((basePath + templatePath + objectPath + "skydome/skydome.obj").c_str());
-	MH_ground_ = system_->SetModelObj((basePath + objectPath + "ground/ground.obj").c_str());
+	MH_skydome_ = system_->SetModelObj("kEngine/EngineAssets/TemplateResource/object/skydome/skydome.obj");
+	MH_ground_ = system_->SetModelObj("GAME/resources/Object/ground/ground.obj");
 
-	TH_buleSkySkydome_ = system_->LoadTexture((basePath + texturePath + "sky/bluesky.png").c_str());
-	TH_title = system_->LoadTexture((basePath + texturePath + "title.png").c_str());
+	TH_buleSkySkydome_ = system_->LoadTexture("kEngine/EngineAssets/texture/sky/bluesky.png");
+	TH_title = system_->LoadTexture("kEngine/EngineAssets/texture/title.png");
 
-	TH_startButton_ = system_->LoadTexture((basePath + texturePath + buttonPath + "startButton.png").c_str());
-	TH_settingButton_ = system_->LoadTexture((basePath + texturePath + buttonPath + "settingButton.png").c_str());
-	TH_quitButton_ = system_->LoadTexture((basePath + texturePath + buttonPath + "quitButton.png").c_str());
-	TH_buttonBack_notSelect_ = system_->LoadTexture((basePath + texturePath + buttonPath + "buttonNotSelect.png").c_str());
-	TH_buttonBack_Select_ = system_->LoadTexture((basePath + texturePath + buttonPath + "buttonSelect.png").c_str());
+	TH_startButton_ = system_->LoadTexture("kEngine/EngineAssets/texture/button/startButton.png");
+	TH_settingButton_ = system_->LoadTexture("kEngine/EngineAssets/texture/button/settingButton.png");
+	TH_quitButton_ = system_->LoadTexture("kEngine/EngineAssets/texture/button/quitButton.png");
+	TH_buttonBack_notSelect_ = system_->LoadTexture("kEngine/EngineAssets/texture/button/buttonNotSelect.png");
+	TH_buttonBack_Select_ = system_->LoadTexture("kEngine/EngineAssets/texture/button/buttonSelect.png");
 
-	SH_BGM_ = system_->SoundLoadSE((basePath + soundPath + BGMPath + "Title.wav").c_str());
-	SH_Select_ = system_->SoundLoadSE((basePath + soundPath + SEPath + "menuSelect.wav").c_str());
-	SH_Decide_ = system_->SoundLoadSE((basePath + soundPath + SEPath + "menuChoose.wav").c_str());
-	/// =========== �Q�[���I�u�W�F�N�g������ ==========///
+	SH_BGM_ = system_->SoundLoadSE("GAME/resources/sound/BGM/Title.wav");
+	SH_Select_ = system_->SoundLoadSE("GAME/resources/sound/SE/menuSelect.wav");
+	SH_Decide_ = system_->SoundLoadSE("GAME/resources/sound/SE/menuChoose.wav");
+	/// ===========Q[IuWFNg ==========///
 
-	skydome_ = new Object;
+	skydome_ = std::make_unique<Object>();
 	skydome_->IntObject(system_);
 	skydome_->CreateModelData(MH_skydome_);
 	skydome_->objectParts_[0].materialConfig->enableLighting = false;
 	skydome_->objectParts_[0].materialConfig->useModelTexture = false;
 	skydome_->objectParts_[0].materialConfig->textureHandle = TH_buleSkySkydome_;
 
-	ground_ = new Object;
+	ground_ = std::make_unique<Object>();
 	ground_->IntObject(system_);
 	ground_->CreateModelData(MH_ground_);
 	ground_->objectParts_[0].materialConfig->uvScale = { 100.0f,100.0f,0 };
@@ -98,8 +89,6 @@ SceneTitle::~SceneTitle() {
 	system_->DestroyCamera(camera_);
 	system_->DestroyCamera(debugCamera_);
 	delete title_;
-	delete skydome_;
-	delete ground_;
 
 	SimpleSprite* title_ = new SimpleSprite;
 
@@ -137,8 +126,8 @@ void SceneTitle::Draw() {
 #ifdef USE_IMGUI
 void SceneTitle::ImGuiPart() {
 
-	Transform debugCamTran = debugCamera_->GetTransform();
-	Transform camTran = camera_->GetTransform();
+	Transform debugCamTran = debugCamera_.lock()->GetTransform();
+	Transform camTran = camera_.lock()->GetTransform();
 
 	ImGui::Begin("DebugCamera");
 	ImGui::Checkbox("isUse", &useDebugCamera);
@@ -152,15 +141,15 @@ void SceneTitle::ImGuiPart() {
 	ImGui::SliderFloat3("GroundUVScale", &ground_->objectParts_[0].materialConfig->uvScale.x, -1.0f, 1.0f);
 	ImGui::End();
 
-	debugCamera_->SetCamera(debugCamTran);
-	camera_->SetCamera(camTran);
+	debugCamera_.lock()->SetCamera(debugCamTran);
+	camera_.lock()->SetCamera(camTran);
 }
 #endif
 
 void SceneTitle::CameraPart() {
 	if (useDebugCamera) {
 		usingCamera_ = debugCamera_;
-		debugCamera_->MouseControlUpdate();
+		debugCamera_.lock()->MouseControlUpdate();
 	} else {
 		usingCamera_ = camera_;
 	}

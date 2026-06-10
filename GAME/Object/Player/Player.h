@@ -5,8 +5,8 @@
 #include "Vector3.h"
 #include "kEngine.h"
 #include "BaseScene.h"
-#include "GameObject/Object/Corner.h"
-#include "crashDecision/crashDecision.h"
+#include "Data/Geometry/Corner/Corner.h"
+#include "Math/Geometry/Collision/crashDecision.h"
 
 
 /// 移動速度

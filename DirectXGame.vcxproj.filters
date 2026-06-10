@@ -261,7 +261,7 @@
     <ClCompile Include="kEngine\Utility\FrameRateLimiter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\GameObject\Player\Player.cpp">
+    <ClCompile Include="GAME\Object\Player\Player.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Data\Game\MapChip\MapChipField.cpp">
@@ -483,9 +483,6 @@
     <ClCompile Include="kEngine\Scenes\SceneFactory.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="GAME\scenes\scene1.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="kEngine\Math\LinearAlgebra\Matrix3x3Math.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -568,9 +565,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Data\Physics\PhysicalBall.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\Physics\SpringUtility.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Data\Animation\Keyframe.cpp">
@@ -726,6 +720,36 @@
     <ClCompile Include="kEngine\Renderer\PSOManager\PSORecorder.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="GAME\scenes\Scene1.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="GAME\scenes\SceneTest.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="GAME\scenes\SceneTitle.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\CollisionManager\CollisionManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="GAME\scenes\SceneWin.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="GAME\scenes\sceneLose.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="GAME\Object\Sight\Sight.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="GAME\Object\Enemy\Enemy.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="GAME\Object\Bullet\Bullet.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="GAME\Object\BackPoint\BackPoint.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kEngine\Math\LinearAlgebra\Vector2.h">
@@ -854,7 +878,7 @@
     <ClInclude Include="kEngine\Utility\FrameRateLimiter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\GameObject\Player\Player.h">
+    <ClInclude Include="GAME\Object\Player\Player.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Data\Game\MapChip\MapChipField.h">
@@ -1301,9 +1325,6 @@
     <ClInclude Include="kEngine\Scenes\SceneFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="GAME\scenes\scene1.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="kEngine\Math\LinearAlgebra\Matrix3x3Math.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -1386,9 +1407,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Data\Physics\PhysicalBall.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\Physics\SpringUtility.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Data\Animation\Keyframe.h">
@@ -1583,6 +1601,36 @@
     <ClInclude Include="kEngine\GameObject\StartTimer\StartTimer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="GAME\scenes\SceneTitle.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="GAME\scenes\Scene1.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="GAME\scenes\SceneTest.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\CollisionManager\CollisionManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="GAME\scenes\SceneWin.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="GAME\scenes\sceneLose.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="GAME\Object\Sight\Sight.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="GAME\Object\Enemy\Enemy.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="GAME\Object\Bullet\Bullet.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="GAME\Object\BackPoint\BackPoint.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\LightingLambert\HalfLambert.hlsl">
@@ -1606,6 +1654,9 @@
     <FxCompile Include="resources\Shader\GlowSphere.VS.hlsl" />
     <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl" />
     <FxCompile Include="externals\DirectXTex\Shaders\BC7Encode.hlsl" />
+    <FxCompile Include="resources\Shader\FlameNeonGlow.PS.hlsl" />
+    <FxCompile Include="resources\Shader\Particle.PS.hlsl" />
+    <FxCompile Include="resources\Shader\Particle.VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

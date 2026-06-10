@@ -6,10 +6,10 @@ Enemy::Enemy(kEngine* system, const Vector3& position) {
 	Object::CreateDefaultData();
 	mainPosition.transform.translate = position;
 
-	TH_White5x5_ = system_->LoadTexture("resources/TemplateResource/texture/white5x5.png");
-	TH_Model_ = system_->LoadTexture("resources/object/enemy/enemy.png");
+	TH_White5x5_ = system_->LoadTexture("kEngine/EngineAssets/TemplateResource/texture/white5x5.png");
+	TH_Model_ = system_->LoadTexture("GAME/resources/Object/enemy/enemy.png");
 
-	SH_Damage_ = system_->SoundLoadSE("resources/sound/SE/enemyDamage.wav");
+	SH_Damage_ = system_->SoundLoadSE("GAME/resources/Sound/SE/enemyDamage.wav");
 
 	/// Timer 初期化
 	turnTimer_.Init0(kEnemyTurnTime, system_->GetTimeManager());

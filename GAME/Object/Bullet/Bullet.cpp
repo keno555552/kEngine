@@ -1,5 +1,6 @@
 #include "Bullet.h"
-#include "core/driver/config.h"
+#include "kEngine.h"
+#include "core/config.h"
 #include <algorithm>
 #include <cmath>
 
@@ -11,7 +12,7 @@
 Bullet::Bullet(kEngine* system, const Vector3& position, const Vector3& direction) {
 
 	IntObject(system);
-	MH_bullet_ = system_->SetModelObj("resources/object/bullet/bullet.obj");
+	MH_bullet_ = system_->SetModelObj("GAME/resources/object/bullet/bullet.obj");
 
 	CreateModelData(MH_bullet_);
 	mainPosition.transform.translate = position;

@@ -3,7 +3,7 @@
 #include "Object\Object.h"
 #include "Object\Sprite.h"
 #include "Camera\DebugCamera.h"
-#include "Player\Player.h"
+#include "GAME\Object\Player\Player.h"
 
 class Effect1 :public BaseScene
 {

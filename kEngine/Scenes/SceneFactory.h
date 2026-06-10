@@ -5,10 +5,6 @@
 #include "BaseSceneFactory.h"
 
 #include "BaseScene.h"
-#include "SceneTitle.h"
-#include "Scene1.h"
-#include "SceneWin.h"
-#include "SceneLose.h"
 #include "AnimationSystem/AnimationEditor.h"
 #include "DefaultMenu/DefaultMenu.h"
 

@@ -2,12 +2,12 @@
 #include "BaseScene.h"
 #include "Object\Object.h"
 #include "Object\Sprite.h"
-#include "Sight\Sight.h"
-#include "Bullet\Bullet.h"
-#include "DebugCamera.h"
-#include "Player\Player.h"
-#include "Enemy\Enemy.h"
-#include "tool\MapChip\MapChipField.h"
+#include "GAME\Object\Sight\Sight.h"
+#include "GAME\Object\Bullet\Bullet.h"
+#include "Camera\DebugCamera.h"
+#include "GAME\Object\Player\Player.h"
+#include "GAME\Object\Enemy\Enemy.h"
+#include "Data\Game\MapChip\MapChipField.h"
 #include "tool\CollisionManager\CollisionManager.h"
 #include "StartTimer\StartTimer.h"
 #include "CountdownTimer\CountdownTimer.h"
@@ -26,11 +26,11 @@ private:
 
 	/// ============== カメラ関連 ==============///
 	/// ステージカメラ(mainカメラ)
-	Camera* camera_ = nullptr;
+	std::weak_ptr<Camera> camera_;
 	/// デバックカメラ
-	DebugCamera* debugCamera_ = nullptr;
+	std::weak_ptr<DebugCamera> debugCamera_;
 	/// 今使っているカメラ
-	Camera* usingCamera_ = nullptr;			// 借り用
+	std::weak_ptr <Camera> usingCamera_;			// 借り用
 
 	/// =========== リソースハンドル ============///
 	/// モデルハンドル

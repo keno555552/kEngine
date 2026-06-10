@@ -143,7 +143,7 @@ void SceneCGHK2::Update() {
 	skydome_->Update();
 
 	/// player更新
-	player_->Update();
+	player_->Update(nullptr);
 
 	sprite_->Update();
 

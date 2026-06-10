@@ -291,8 +291,7 @@ float easyOut(float a, float b, float t, float r) {
 	return (1.0f - easedT) * a + (easedT)*b;
 }
 
-float easyInOut(float a, float b, float c, float t, float r) {
-	float time = float(c) / t;
+float easyInOut(float a, float b, float time, float r) {
 	float easedT = {};
 	if (time <= 0.5) {
 		easedT = (1.0f - sqrtf(1.0f - powf(2.0f * time, r))) / 2;

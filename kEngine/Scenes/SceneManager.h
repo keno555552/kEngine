@@ -2,15 +2,11 @@
 #include "Data/Render/CPUData/MaterialConfig.h"
 #include "SceneFactory.h"
 #include "BaseScene.h"
-#include "SceneTitle.h"
-#include "Scene1.h"
-#include "SceneResult.h"
-#include "SceneTestForGE.h"
-#include "SceneTester.h"
-#include "SceneTest.h"
-#include "SceneTest2.h"
-#include "SceneWin.h"
-#include "SceneLose.h"
+#include "GAME/scenes/SceneTitle.h"
+#include "GAME/scenes/Scene1.h"
+#include "GAME/scenes/SceneTest.h"
+#include "GAME/scenes/SceneWin.h"
+#include "GAME/scenes/SceneLose.h"
 #include "AnimationSystem/AnimationEditor.h"
 #include "DefaultMenu/DefaultMenu.h"
 #include "CG4_HK_1/Effect2.h"
@@ -67,10 +63,21 @@ private:
 		//		{SceneOutcome::WIN,"WIN"},
 		//	}
 		//},
-	std::map<std::string,std::string> sceneFlow_ = {
-		{"TITLE","STAGE_01"},
-		{"WIN","TITLE"},
-		{"LOSE","TITLE"},
+		{"TITLE",
+			{
+					{SceneOutcome::NEXT,"STAGE_01"},
+			}
+		},
+		{"WIN",
+			{
+					{SceneOutcome::NEXT,"TITLE"},
+			}
+		},
+		{"LOSE",
+			{
+					{SceneOutcome::NEXT,"TITLE"},
+			}
+		},
 	};
 
 private:

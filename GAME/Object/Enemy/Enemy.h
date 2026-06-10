@@ -1,7 +1,7 @@
 #pragma once
 #include "Object/Object.h"
-#include "kEngine/kEngine.h"
-#include <crashDecision/crashDecision.h>
+#include "kEngine.h"
+#include "Math\Geometry\Collision\crashDecision.h"
 
 /// 移動速度
 static inline const float kEnemyAcceleration = 1.0f;

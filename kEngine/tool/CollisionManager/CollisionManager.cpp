@@ -1,9 +1,9 @@
 #include "CollisionManager.h"
-#include "Player/Player.h"
-#include "tool/MapChip/MapChipField.h"
-#include "Bullet/Bullet.h"
-#include "BackPoint/BackPoint.h"
-#include "GameObject/Enemy/Enemy.h"
+#include "GAME/Object/Player/Player.h"
+#include "Data/Game/MapChip/MapChipField.h"
+#include "GAME/Object/Bullet/Bullet.h"
+#include "GAME/Object/BackPoint/BackPoint.h"
+#include "GAME/Object/Enemy/Enemy.h"
 #include <algorithm>
 
 void CollisionManager::Update(float deltaTime) {

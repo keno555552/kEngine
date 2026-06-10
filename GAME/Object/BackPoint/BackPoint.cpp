@@ -1,10 +1,11 @@
 #include "BackPoint.h"
+#include "kEngine.h"
 
 BackPoint::BackPoint(kEngine* system, const Vector3& position) {
 	IntObject(system);
 
 	/// モデルハンドル
-	MH_Model_ = system_->SetModelObj("resources/object/backpoint/backpoint.obj");
+	MH_Model_ = system_->SetModelObj("GAME/resources/object/backpoint/backpoint.obj");
 	
 	CreateModelData(MH_Model_);
 	basePosition_ = position;
@@ -30,7 +31,7 @@ void BackPoint::Update(Camera* camera) {
 		animationTimer_.ToZero();
 		if (animationTimer_.parameter_ == 0.0f)isTimeUp_ = true;
 	}
-	float t = easyInOut(0.0f, 1.0f, animationTimer_.parameter_, animationTimer_.maxTime_, 1.2f);
+	float t = easyInOut(0.0f, 1.0f, animationTimer_.parameter_/animationTimer_.maxTime_, 1.2f);
 
 	objectParts_[0].transform.translate.y = -0.5f + 0.5f * t;
 	objectParts_[0].transform.scale.y = 0.5f + 0.5f * t;

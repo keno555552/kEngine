@@ -2,7 +2,7 @@
 #include "Object\Object.h"
 #include "BaseScene.h"
 #include "Object\Sprite.h"
-#include "DebugCamera.h"
+#include "GameObject\Camera\DebugCamera.h"
 #include "DefaultMenu/DefaultMenu.h"
 
 class SceneTitle :public BaseScene
@@ -27,11 +27,11 @@ private:
 private:
 	/// ============== カメラ関連 ==============///
 	/// ステージカメラ(mainカメラ)
-	Camera* camera_ = nullptr;
+	std::weak_ptr<Camera> camera_;
 	/// デバックカメラ
-	DebugCamera* debugCamera_ = nullptr;
+	std::weak_ptr<DebugCamera> debugCamera_;
 	/// 今使っているカメラ
-	Camera* usingCamera_ = nullptr;			// 借り用
+	std::weak_ptr<Camera> usingCamera_;			// 借り用
 
 	DefaultMenu* defaultMenu_ = nullptr;		// 借り用
 
@@ -55,8 +55,8 @@ private:
 	int SH_Decide_{};
 
 	/// =========== ゲームオブジェクト ==========///
-	Object* skydome_ = nullptr;
-	Object* ground_ = nullptr;
+	std::unique_ptr<Object> skydome_;
+	std::unique_ptr<Object> ground_;
 
 	SimpleSprite* title_ = new SimpleSprite;
 

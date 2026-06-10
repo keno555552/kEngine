@@ -252,9 +252,19 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GAME\Object\BackPoint\BackPoint.cpp" />
+    <ClCompile Include="GAME\Object\Bullet\Bullet.cpp" />
+    <ClCompile Include="GAME\scenes\Scene1.cpp" />
+    <ClCompile Include="GAME\scenes\sceneLose.cpp" />
+    <ClCompile Include="GAME\scenes\SceneTest.cpp" />
+    <ClCompile Include="GAME\scenes\SceneTitle.cpp" />
+    <ClCompile Include="GAME\scenes\SceneWin.cpp" />
     <ClCompile Include="kEngine\Data\Render\CPUData\RenderCommand.cpp" />
+    <ClCompile Include="GAME\Object\Sight\Sight.cpp" />
+    <ClCompile Include="GAME\Object\Enemy\Enemy.cpp" />
     <ClCompile Include="kEngine\Math\LinearAlgebra\Gauss.cpp" />
     <ClCompile Include="kEngine\Renderer\Mesh\CylinderMesh.cpp" />
+    <ClCompile Include="kEngine\Tool\CollisionManager\CollisionManager.cpp" />
     <ClCompile Include="kEngine\Tool\EffectSystem\ParticleSystem\EmitterLink.cpp" />
     <ClCompile Include="kEngine\Renderer\DescriptorManager\DsvManager\DsvManager.cpp" />
     <ClCompile Include="kEngine\Tool\EffectSystem\EffectManager.cpp" />
@@ -320,7 +330,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imgui\imgui_stdlib.cpp" />
     <ClCompile Include="externals\imgui\imgui_tables.cpp" />
     <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="GAME\scenes\scene1.cpp" />
     <ClCompile Include="GAME\Object\DetailButton\DetailButton.cpp" />
     <ClCompile Include="kEngine\GameObject\CountdownTimer\CountdownTimer.cpp" />
     <ClCompile Include="kEngine\Renderer\Lighting\AeraLight.cpp" />
@@ -401,7 +410,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Renderer\Mesh\VertexResource.cpp" />
     <ClCompile Include="kEngine\Tool\TimeManager\TimeManager.cpp" />
     <ClCompile Include="kEngine\GameObject\Object\Object.cpp" />
-    <ClCompile Include="kEngine\GameObject\Player\Player.cpp" />
+    <ClCompile Include="GAME\Object\Player\Player.cpp" />
     <ClCompile Include="kEngine\Data\Render\CPUData\ObjectData.cpp" />
     <ClCompile Include="kEngine\GameObject\Particle\Particle.cpp" />
     <ClCompile Include="kEngine\Data\Game\MapChip\MapChipData.cpp" />
@@ -445,7 +454,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Math\Geometry\SegmentUtility.cpp" />
     <ClCompile Include="kEngine\Math\Geometry\VectorUtility.cpp" />
     <ClCompile Include="kEngine\Data\Physics\Spring.cpp" />
-    <ClCompile Include="kEngine\Physics\SpringUtility.cpp" />
     <ClCompile Include="kEngine\Data\Animation\Skeleton.cpp" />
     <ClCompile Include="kEngine\Data\Geometry\ModelStructure\SkinData.cpp" />
     <ClCompile Include="kEngine\Data\Geometry\ModelStructure\VertexWeightData.cpp" />
@@ -460,11 +468,21 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Renderer\Mesh\RingMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GAME\Object\BackPoint\BackPoint.h" />
+    <ClInclude Include="GAME\Object\Bullet\Bullet.h" />
+    <ClInclude Include="GAME\scenes\Scene1.h" />
+    <ClInclude Include="GAME\scenes\sceneLose.h" />
+    <ClInclude Include="GAME\scenes\SceneTest.h" />
+    <ClInclude Include="GAME\scenes\SceneTitle.h" />
+    <ClInclude Include="GAME\scenes\SceneWin.h" />
+    <ClInclude Include="GAME\Object\Sight\Sight.h" />
+    <ClInclude Include="GAME\Object\Enemy\Enemy.h" />
     <ClInclude Include="kEngine\Math\LinearAlgebra\Gauss.h" />
     <ClInclude Include="kEngine\Data\Render\CPUData\RenderCommand.h" />
     <ClInclude Include="kEngine\Data\Render\GPUData\BlurDataGPU.h" />
     <ClInclude Include="kEngine\Data\Render\GPUData\RenderCommandGPU.h" />
     <ClInclude Include="kEngine\Renderer\Mesh\CylinderMesh.h" />
+    <ClInclude Include="kEngine\Tool\CollisionManager\CollisionManager.h" />
     <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\EmitterLink.h" />
     <ClInclude Include="kEngine\Data\Render\Types\PostProcessType.h" />
     <ClInclude Include="kEngine\Renderer\DescriptorManager\DsvManager\DsvManager.h" />
@@ -608,7 +626,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="externals\nlohmann\json.hpp" />
     <ClInclude Include="externals\nlohmann\json_fwd.hpp" />
-    <ClInclude Include="GAME\scenes\scene1.h" />
     <ClInclude Include="GAME\Object\DetailButton\DetailButton.h" />
     <ClInclude Include="kEngine\GameObject\CountdownTimer\CountdownTimer.h" />
     <ClInclude Include="kEngine\Renderer\Lighting\AeraLight.h" />
@@ -678,7 +695,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Tool\TimeManager\TimeManager.h" />
     <ClInclude Include="kEngine\GameObject\Object\Object.h" />
     <ClInclude Include="kEngine\Tool\DebugTool\Logger.h" />
-    <ClInclude Include="kEngine\GameObject\Player\Player.h" />
+    <ClInclude Include="GAME\Object\Player\Player.h" />
     <ClInclude Include="kEngine\Data\Render\CPUData\ObjectData.h" />
     <ClInclude Include="kEngine\GameObject\Particle\Particle.h" />
     <ClInclude Include="kEngine\Data\Game\MapChip\MapChipData.h" />
@@ -735,7 +752,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Math\Geometry\SegmentUtility.h" />
     <ClInclude Include="kEngine\Math\Geometry\VectorUtility.h" />
     <ClInclude Include="kEngine\Data\Physics\Spring.h" />
-    <ClInclude Include="kEngine\Physics\SpringUtility.h" />
     <ClInclude Include="kEngine\Data\Animation\Skeleton.h" />
     <ClInclude Include="kEngine\Data\Geometry\ModelStructure\SkinData.h" />
     <ClInclude Include="kEngine\Data\Geometry\ModelStructure\VertexWeightData.h" />

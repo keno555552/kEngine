@@ -5,8 +5,8 @@ SceneTest::SceneTest(kEngine* system) {
 	system_ = system;
 	debugCamera_ = system_->CreateDebugCamera();
 	camera_ = system_->CreateCamera();
-	camera_->Move(Vector3(0.0f, 1.5f, -10.0f));
-	usingCamera_ = camera_;
+	camera_.lock()->Move(Vector3(0.0f, 1.5f, -10.0f));
+	usingCamera_ = camera_.lock();
 	system_->SetCamera(usingCamera_);
 
 	/// =========== リソースロード ============///
@@ -117,16 +117,16 @@ void SceneTest::Update() {
 	CameraPart();
 
 	/// Skydome更新
-	skydome_->Update(usingCamera_);
+	skydome_->Update();
 
 	/// underGround_BG更新
-	underGround_BG_->Update(usingCamera_);
+	underGround_BG_->Update();
 
 	/// player更新
-	player_->Update(usingCamera_);
+	player_->Update(nullptr);
 
 	/// targeter更新
-	sight_->Update(usingCamera_);
+	sight_->Update(nullptr);
 
 	/// Bullet更新
 	if (system_->GetMouseIsPush(0)) {
@@ -136,7 +136,7 @@ void SceneTest::Update() {
 	/// Enemy更新
 	if (!enemyList_.empty()) {
 		for (int i = 0; i < enemyList_.size();) {
-			enemyList_[i]->Update(usingCamera_);
+			enemyList_[i]->Update(nullptr);
 
 			/// 死亡判定
 			if (!enemyList_[i]->IsAlive()) {
@@ -151,7 +151,7 @@ void SceneTest::Update() {
 	/// bullet更新
 	if (!bulletList_.empty()) {
 		for (int i = 0; i < bulletList_.size();) {
-			bulletList_[i]->Update(usingCamera_);
+			bulletList_[i]->Update(nullptr);
 
 			/// 死亡判定
 			if (!bulletList_[i]->IsAlive()) {
@@ -173,7 +173,7 @@ void SceneTest::Update() {
 	for (auto& row : blockObjectList_) {
 		for (auto& block : row) {
 			if (block) {
-				block->Update(usingCamera_);
+				block->Update(nullptr);
 			}
 		}
 	}
@@ -219,7 +219,7 @@ void SceneTest::Draw() {
 	}
 
 	/// ブロック描画
-	Vector3 camPos = usingCamera_->GetTransform().translate;
+	Vector3 camPos = usingCamera_.lock()->GetTransform().translate;
 	const float kBlockDrawRadius = 20.0f; // adjust as needed
 	const float kBlockDrawRadiusSq = kBlockDrawRadius * kBlockDrawRadius;
 	for (auto& row : blockObjectList_) {
@@ -238,7 +238,7 @@ void SceneTest::Draw() {
 void SceneTest::CameraPart() {
 	if (useDebugCamera) {
 		usingCamera_ = debugCamera_;
-		debugCamera_->MouseControlUpdate();
+		debugCamera_.lock()->MouseControlUpdate();
 	} else {
 		//Transform cameraTransform = CreateDefaultTransform();
 		//cameraTransform.translate.x = player_->mainPosition.transform.translate.x;

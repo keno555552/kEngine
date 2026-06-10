@@ -1,4 +1,5 @@
 #pragma once
+#include "tool/TimeManager/TimeManager.h"
 #include "Object/Object.h"
 
 /// アニメーション速度
