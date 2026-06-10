@@ -483,9 +483,6 @@
     <ClCompile Include="kEngine\Scenes\SceneFactory.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="GAME\scenes\scene1.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="kEngine\Math\LinearAlgebra\Matrix3x3Math.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -724,6 +721,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Renderer\PSOManager\PSORecorder.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="GAME\scenes\MapMakingEditor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1301,9 +1301,6 @@
     <ClInclude Include="kEngine\Scenes\SceneFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="GAME\scenes\scene1.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="kEngine\Math\LinearAlgebra\Matrix3x3Math.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -1575,6 +1572,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Renderer\PSOManager\PSORecorder.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="GAME\scenes\MapMakingEditor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

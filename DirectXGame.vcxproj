@@ -320,7 +320,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imgui\imgui_stdlib.cpp" />
     <ClCompile Include="externals\imgui\imgui_tables.cpp" />
     <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="GAME\scenes\scene1.cpp" />
     <ClCompile Include="GAME\Object\DetailButton\DetailButton.cpp" />
     <ClCompile Include="kEngine\GameObject\CountdownTimer\CountdownTimer.cpp" />
     <ClCompile Include="kEngine\Renderer\Lighting\AeraLight.cpp" />
@@ -429,6 +428,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Data\Render\Types\PSOType\RenderTargetFormat.cpp" />
     <ClCompile Include="kEngine\Renderer\PostProcessRunner\PostProcessRunner.cpp" />
     <ClCompile Include="kEngine\Renderer\PSOManager\PSORecorder.cpp" />
+    <ClCompile Include="GAME\scenes\MapMakingEditor.cpp" />
     <ClCompile Include="ResourceLoader.cpp" />
     <ClCompile Include="kEngine\Scenes\BaseSceneFactory.cpp" />
     <ClCompile Include="kEngine\GameObject\Object\Sprite.cpp" />
@@ -608,7 +608,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="externals\nlohmann\json.hpp" />
     <ClInclude Include="externals\nlohmann\json_fwd.hpp" />
-    <ClInclude Include="GAME\scenes\scene1.h" />
     <ClInclude Include="GAME\Object\DetailButton\DetailButton.h" />
     <ClInclude Include="kEngine\GameObject\CountdownTimer\CountdownTimer.h" />
     <ClInclude Include="kEngine\Renderer\Lighting\AeraLight.h" />
@@ -719,6 +718,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Data\Render\Types\PSOType\RenderTargetFormat.h" />
     <ClInclude Include="kEngine\Renderer\PostProcessRunner\PostProcessRunner.h" />
     <ClInclude Include="kEngine\Renderer\PSOManager\PSORecorder.h" />
+    <ClInclude Include="GAME\scenes\MapMakingEditor.h" />
     <ClInclude Include="ResourceLoader.h" />
     <ClInclude Include="kEngine\Scenes\BaseSceneFactory.h" />
     <ClInclude Include="kEngine\GameObject\Object\Sprite.h" />
