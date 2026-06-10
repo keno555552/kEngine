@@ -65,10 +65,8 @@ void DirectXController::StartFrame() {
 
 void DirectXController::EndFrame() {
 
-#ifdef _DEBUG
 #ifdef USE_IMGUI
 	ImGuiManager::EndFrame(commandList.Get());
-#endif
 #endif
 
 	UINT backBufferIndex = SwapChain->GetCurrentBackBufferIndex();
