@@ -8,20 +8,22 @@
 #include "GameObject\button\button.h"
 #include "Tool\DefaultMenu\DefaultMenu.h"
 
-class MapMakingEditor: public BaseScene
+class MapMakingEditor : public BaseScene
 {
 public:
-    MapMakingEditor(kEngine* system);
-    ~MapMakingEditor();
+	MapMakingEditor(kEngine* system);
+	~MapMakingEditor();
 
-    void Update() override;
-    void Draw() override;
+	void Update() override;
+	void Draw() override;
 
 private:
-    
 
 
 
+
+private:
+	void ImGuiPart();
 
 };
 
