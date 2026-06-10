@@ -15,18 +15,20 @@
 
 #include "config.h"
 
+/// FeatureFlagの個数 !!!!(フラグの数を増やしたらここも変えるのを忘れないで)!!!!
+inline static int featureFlagsCount = 1;	
+
 enum FeatureFlags : uint64_t {
 	None = 0,
 	EnvReflection = 1 << 0,
-	Shadow = 1 << 1,
-	NormalMap = 1 << 2,
-	Instancing = 1 << 3,
-	IBL = 1 << 4,
-	// ...
+	//Shadow = 1 << 1,
+	//NormalMap = 1 << 2,
+	//Instancing = 1 << 3,
+	//IBL = 1 << 4,
 };
 
-/// PSOKeyの要素数（FeatureFlagsは別で管理するため）!!!!(エレメントの数を増やしたらここも変えるのを忘れないで)!!!!
-static int keyElementCount = 7;	
+/// PSOKeyの要素数（FeatureFlagsは別で管理する）!!!!(エレメントの数を増やしたらここも変えるのを忘れないで)!!!!
+inline static int keyElementCount = 7;	
 
 struct PSOKey {
 

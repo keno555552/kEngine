@@ -40,20 +40,3 @@ PixelShaderOutput main(VertexShaderOutput input)
     output.color = float4(tinted, 1.0);
     return output;
 }
-
-
-//PixelShaderOutput main(VertexShaderOutput input)
-//{
-//    PixelShaderOutput output;
-//    output.color = gTexture.Sample(gSampler, input.texcoord);
-//    
-//    float2 correct = input.texcoord * float2(1.0f - input.texcoord.yx);
-//    
-//    float vignette = correct.x * correct.y * 16.0f;
-//    
-//    vignette = saturate(pow(vignette, 0.8f));
-//    
-//    output.color.rgb *= vignette;
-//    
-//    return output;
-//}

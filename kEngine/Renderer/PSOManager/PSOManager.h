@@ -8,6 +8,7 @@
 #include <memory>
 #include "PSOManager/PSOFactory/PSOFactory.h"
 #include "PSOManager/PSOKeys.h"
+#include "PSOManager/PSORecorder.h"
 
 #include <fstream>
 #include "externals/nlohmann/json.hpp"
@@ -35,7 +36,7 @@ private:
 	/// system
 	DirectXCore* directXDriver_{};					/*依存*/
 	ID3D12GraphicsCommandList* commandList_{};		/*依存*/
-
+	PSORecorder psoRecorder_;
 
 	/// 現在のPSO
 	int currentPSOHandle_ = -1;
@@ -55,11 +56,7 @@ private:
 
 	/// 記録されたPSOKeyからPSOを作成する
 	void LasyCreatePSO();
-	void CreateDefaultPSOcacheJson(std::string fullPath);
-	void AppendPSOKeyRecord(const PSOKey& key);
-	std::string FormatPSOJson(const nlohmann::json& file);
 	
-
 	/// 全部のPSOを作成する。もはやバガのやり方(現時点でもう20000くらいのPSOがある
 	void CreateAllPSO();
 	int GetPSOHandle(PSOKey keys);
