@@ -9,7 +9,7 @@ public:
 	DebugObject(kEngine* kEngine);
 	~DebugObject();
 
-	void Update(Camera* camera) override;
+	void Update(Camera* camera = 0) override;
 	void Draw() override;
 
 	void SetFollowObject(ObjectPart* followObject);
@@ -50,8 +50,8 @@ private:
 
 
 	/// ============= デバッグ用パーツ ============= ///
-	SimpleSprite* centerPoint_ = nullptr;
-	SimpleSprite* centerNumberSprite_ = nullptr;
+	std::unique_ptr<SimpleSprite> centerPoint_ = nullptr;
+	std::unique_ptr<SimpleSprite> centerNumberSprite_ = nullptr;
 
 	/// ============= フラグ ============= ///
 	bool isShowCenterPoint_ = false;

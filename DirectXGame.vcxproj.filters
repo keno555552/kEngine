@@ -138,55 +138,55 @@
     <ClCompile Include="main.cpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\Model.cpp">
+    <ClCompile Include="kEngine\Renderer\Mesh\Model.cpp">
       <Filter>ソース ファイル\kEngine\DrawEngine\ResourceManager\ObjectResource</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\ModelGroup.cpp">
+    <ClCompile Include="kEngine\Renderer\Mesh\ModelGroup.cpp">
       <Filter>ソース ファイル\kEngine\DrawEngine\ResourceManager\ObjectResource</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\GameObject\Particle\Particle.cpp">
       <Filter>ソース ファイル\kEngine\DrawEngine\ResourceManager\ObjectResource</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\BasicResource.cpp">
+    <ClCompile Include="kEngine\Renderer\Resource\BasicResource.cpp">
       <Filter>ソース ファイル\kEngine\DrawEngine\ResourceManager</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ResourceManager.cpp">
+    <ClCompile Include="kEngine\Renderer\Resource\ResourceManager.cpp">
       <Filter>ソース ファイル\kEngine\DrawEngine\ResourceManager</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\VertexResource.cpp">
+    <ClCompile Include="kEngine\Renderer\Mesh\VertexResource.cpp">
       <Filter>ソース ファイル\kEngine\DrawEngine\ResourceManager</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\VertexData.cpp">
+    <ClCompile Include="kEngine\Data\Render\CPUData\VertexData.cpp">
       <Filter>ソース ファイル\kEngine\DrawEngine\ResourceManager</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\drawEngine.cpp">
+    <ClCompile Include="kEngine\Renderer\drawEngine\drawEngine.cpp">
       <Filter>ソース ファイル\kEngine\DrawEngine</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\driver\config.cpp">
+    <ClCompile Include="kEngine\core\config.cpp">
       <Filter>ソース ファイル\kEngine\core\driver</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\driver\DirectXCore.cpp">
+    <ClCompile Include="kEngine\core\DirectXCore.cpp">
       <Filter>ソース ファイル\kEngine\core\driver</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\driver\DirectXController.cpp">
+    <ClCompile Include="kEngine\core\DirectXController.cpp">
       <Filter>ソース ファイル\kEngine\core\driver</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\Input\inputManager.cpp">
+    <ClCompile Include="kEngine\core\inputCore.cpp">
       <Filter>ソース ファイル\kEngine\core\Input</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\pso\PSO.cpp">
+    <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\PSOFactory.cpp">
       <Filter>ソース ファイル\kEngine\core\pso</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Data\LightModelType.cpp">
+    <ClCompile Include="kEngine\Data\Render\Types\PSOType\LightModelType.cpp">
       <Filter>ソース ファイル\kEngine\Lighting</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Data\Render\Data\DirectionalLightGPU.cpp">
+    <ClCompile Include="kEngine\Data\Render\GPUData\DirectionalLightGPU.cpp">
       <Filter>ソース ファイル\kEngine\Lighting</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\material\MaterialConfig.cpp">
+    <ClCompile Include="kEngine\Data\Render\CPUData\MaterialConfig.cpp">
       <Filter>ソース ファイル\kEngine\material</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\material\Material.cpp">
+    <ClCompile Include="kEngine\Data\Render\GPUData\MaterialForGPU.cpp">
       <Filter>ソース ファイル\kEngine\material</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Sound\soundUnit.cpp">
@@ -195,208 +195,154 @@
     <ClCompile Include="kEngine\Sound\soundManager.cpp">
       <Filter>ソース ファイル\kEngine\Sound</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\Camera\DebugCamera.cpp">
+    <ClCompile Include="kEngine\GameObject\Camera\DebugCamera.cpp">
       <Filter>ソース ファイル\kEngine\tool</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\mathsUnit\Matrix3x3.cpp">
+    <ClCompile Include="kEngine\Math\LinearAlgebra\Matrix3x3.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\mathsUnit\Matrix4x4.cpp">
+    <ClCompile Include="kEngine\Math\LinearAlgebra\Matrix4x4.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\mathsUnit\Transform.cpp">
+    <ClCompile Include="kEngine\Math\LinearAlgebra\Transform.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\mathsUnit\Vector2.cpp">
+    <ClCompile Include="kEngine\Math\LinearAlgebra\Vector2.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\mathsUnit\Vector3.cpp">
+    <ClCompile Include="kEngine\Math\LinearAlgebra\Vector3.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\mathsUnit\TransformationMatrix.cpp">
+    <ClCompile Include="kEngine\Math\LinearAlgebra\TransformationMatrix.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\StageManager\BaseScene.cpp">
+    <ClCompile Include="kEngine\Scenes\BaseScene.cpp">
       <Filter>ソース ファイル\kEngine\tool\StageManager</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\StageManager\SceneManager.cpp">
+    <ClCompile Include="kEngine\Scenes\SceneManager.cpp">
       <Filter>ソース ファイル\kEngine\tool\StageManager</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\TimeManager\TimeManager.cpp">
+    <ClCompile Include="kEngine\Tool\TimeManager\TimeManager.cpp">
       <Filter>ソース ファイル\kEngine\tool</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\kEngine.cpp">
+    <ClCompile Include="kEngine\core\kEngine.cpp">
       <Filter>ソース ファイル\kEngine</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\PerlinNoise\PerlinNoise.cpp">
+    <ClCompile Include="kEngine\Math\PerlinNoise\PerlinNoise.cpp">
       <Filter>ソース ファイル\Effect</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\mathsUnit\MathsIncluder.cpp">
+    <ClCompile Include="kEngine\Math\MathsIncluder.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\mathsUnit\randomMaker.cpp">
+    <ClCompile Include="kEngine\Utility\randomMaker.cpp">
       <Filter>ソース ファイル\kEngine\tool\mathsUnit</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\StringManage\ConvertString.cpp">
+    <ClCompile Include="kEngine\Utility\StringManage\ConvertString.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\pso\shader_compile.cpp">
+    <ClCompile Include="kEngine\Renderer\ShaderManager\shader_compile.cpp">
       <Filter>ソース ファイル\Shader</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\GameObject\Button\button.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\InstanceManager\InstanceManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\InstanceManager\SpriteInstance.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\InstanceManager\ModelInstance.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\WVPResource.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\tool\Camera\Camera.cpp">
+    <ClCompile Include="kEngine\GameObject\Camera\Camera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\GameObject\Object\Object.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\DebugTool\Logger.cpp">
+    <ClCompile Include="kEngine\Tool\DebugTool\Logger.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\driver\WinAPI.cpp">
+    <ClCompile Include="kEngine\core\WinAPI.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\driver\FrameRateLimiter.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="scenes\SceneTest.cpp">
+    <ClCompile Include="kEngine\Utility\FrameRateLimiter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\GameObject\Player\Player.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\MapChip\MapChipField.cpp">
+    <ClCompile Include="kEngine\Data\Game\MapChip\MapChipField.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_tables.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_widgets.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_impl_win32.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_impl_dx12.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_draw.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_demo.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\DrawData\ObjectData.cpp">
+    <ClCompile Include="kEngine\Data\Render\CPUData\ObjectData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\GameObject\Object\Sprite.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\DrawData\SpriteData.cpp">
+    <ClCompile Include="kEngine\Data\Render\CPUData\SpriteData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\SimpleSpriteMesh.cpp">
+    <ClCompile Include="kEngine\Renderer\Mesh\SimpleSpriteMesh.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\TextureManager\TextureManager.cpp">
+    <ClCompile Include="kEngine\Renderer\Resource\TextureManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\DrawData\CornerData.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="scenes\CG4_HK_1\Effect1.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="scenes\SceneTest2.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="scenes\CG4_HK_1\Effect2.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="scenes\CG4_HK_1\menu.cpp">
+    <ClCompile Include="kEngine\Data\Render\CPUData\CornerData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="ResourceLoader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\GameObject\Object\Corner.cpp">
+    <ClCompile Include="kEngine\Data\Geometry\Corner\Corner.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\MapChip\MapChipData.cpp">
+    <ClCompile Include="kEngine\Data\Game\MapChip\MapChipData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\AnimationSystem\AnimationSystem.cpp">
+    <ClCompile Include="kEngine\Tool\AnimationSystem\AnimationManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\AnimationSystem\AnimationUnit.cpp">
+    <ClCompile Include="kEngine\Tool\AnimationSystem\AnimationUnit.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_stdlib.cpp">
+    <ClCompile Include="kEngine\Tool\AnimationSystem\AnimationEditor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\AnimationSystem\AnimationEditor.cpp">
+    <ClCompile Include="kEngine\Renderer\Mesh\SphereMesh.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\SphereMesh.cpp">
+    <ClCompile Include="kEngine\Renderer\Mesh\Sprite2DMesh.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\Sprite2DMesh.cpp">
+    <ClCompile Include="kEngine\Renderer\Mesh\TriangleMesh.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\TriangleMesh.cpp">
+    <ClCompile Include="kEngine\Renderer\Mesh\CubeMesh.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\ResourceManager\ObjectResource\CubeMesh.cpp">
+    <ClCompile Include="kEngine\Data\Geometry\Shape\crashIncluder.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\crashDecision\crashData.cpp">
+    <ClCompile Include="kEngine\Math\Geometry\Collision\crashDecision.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\crashDecision\crashDecision.cpp">
+    <ClCompile Include="kEngine\Tool\DefaultMenu\DefaultMenu.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\DefaultMenu\DefaultMenu.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\tool\StageManager\SceneElement.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="scenes\Scene1.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="scenes\SceneResult.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="scenes\SceneTitle.cpp">
+    <ClCompile Include="kEngine\Scenes\SceneElement.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\GameObject\Particle\P_Ball\P_Ball.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\driver\SrvManager.cpp">
+    <ClCompile Include="kEngine\Renderer\DescriptorManager\SrvManager\SrvManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\driver\ImGuiManager.cpp">
+    <ClCompile Include="kEngine\Tool\ImGuiManager\ImGuiManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\core\driver\IDManager.cpp">
+    <ClCompile Include="kEngine\Utility\IDManager\IDManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Render\GPUData\CameraForGPU.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Render\CPUData\CameraData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Collector\DrawData\DrawDataCollector.cpp">
@@ -405,82 +351,37 @@
     <ClCompile Include="kEngine\Data\Render\Queue\RenderData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Data\PSOType.cpp">
+    <ClCompile Include="kEngine\Renderer\CameraManager\CameraManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Manager\CameraManager\CameraManager.cpp">
+    <ClCompile Include="kEngine\Tool\DebugTool\DebugObject.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="scenes\CG3_HK_2\SceneCGHK2.cpp">
+    <ClCompile Include="kEngine\Renderer\LightManager\LightManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Data\BlendModeType.cpp">
+    <ClCompile Include="kEngine\Renderer\Lighting\DirectionalLight.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\tool\DebugTool\DebugObject.cpp">
+    <ClCompile Include="kEngine\Renderer\Lighting\Light.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Manager\LightManager\LightManager.cpp">
+    <ClCompile Include="kEngine\Data\Render\GPUData\LightGPU.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Lighting\DirectionalLight.cpp">
+    <ClCompile Include="kEngine\Data\Render\Types\LightingType.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Lighting\Light.cpp">
+    <ClCompile Include="kEngine\Renderer\Lighting\SpotLight.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Data\Render\Data\LightGPU.cpp">
+    <ClCompile Include="kEngine\Renderer\Lighting\PointLight.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Data\LightingType.cpp">
+    <ClCompile Include="kEngine\Renderer\Lighting\AeraLight.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Lighting\SpotLight.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\Lighting\PointLight.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\Lighting\AeraLight.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\tool\StageManager\BaseSceneFactory.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="scenes\SceneFactory.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\DrawData\CameraData.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\drawEngine\DrawData\CameraForGPU.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="scenes\SceneWin.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="scenes\sceneLose.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\GameObject\Bullet\Bullet.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\GameObject\BackPoint\BackPoint.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\GameObject\Enemy\Enemy.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\GameObject\HPBar\HPBar.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\GameObject\Sight\Sight.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\tool\CollisionManager\CollisionManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\tool\mathsUnit\Vector4.cpp">
+    <ClCompile Include="kEngine\Scenes\BaseSceneFactory.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\GameObject\CountdownTimer\CountdownTimer.cpp">
@@ -489,99 +390,411 @@
     <ClCompile Include="kEngine\GameObject\StartTimer\StartTimer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="kEngine\Math\LinearAlgebra\Vector4.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\BC.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\BC4BC5.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\BC6HBC7.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\BCDirectCompute.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexCompress.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexCompressGPU.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexConvert.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexD3D11.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexD3D12.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexDDS.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexFlipRotate.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexHDR.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexImage.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexMipmaps.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexMisc.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexNormalMaps.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexPMAlpha.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexResize.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexTGA.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexUtil.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexWIC.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_demo.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_draw.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_impl_dx12.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_impl_win32.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_stdlib.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_tables.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_widgets.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Scenes\SceneFactory.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="GAME\scenes\scene1.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Math\LinearAlgebra\Matrix3x3Math.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="GAME\scenes\UITest.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="GAME\Object\DetailButton\DetailButton.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Geometry\Shape\Line\Ray.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Geometry\Shape\Line\Segment.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Geometry\Shape\Circle\Sphere.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Geometry\Shape\Quad\OldHitBox.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Geometry\Shape\Quad\AABB.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Geometry\Shape\Quad\OBB.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Geometry\Shape\Line\Capsule.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\DebugTool\DebugDraw.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Render\GPUData\DebugLineGPU.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Render\CPUData\DebugLine.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="GAME\Object\Panel\Panel.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Math\Geometry\Curve.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Math\Geometry\Interpolation.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Geometry\Shape\Plane\Plane.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Geometry\Shape\Triangle\Triangle.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Math\Geometry\SegmentUtility.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Utility\Bit.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Geometry\Shape\Line\Line.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Math\Geometry\VectorUtility.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Math\Kinematics\CircularMation.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Kinematics\Types\CircleMotionPlane.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Math\LinearAlgebra\Quaternion.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Physics\PhysicalObject.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Physics\Spring.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Physics\PhysicalBall.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Physics\SpringUtility.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Animation\Keyframe.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Animation\Animation.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Animation\AnimationNodeData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Scenes\CG4_HK_1\menu.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Scenes\CG3_HK_2\SceneCGHK2.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Scenes\CG4_HK_1\Effect1.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Scenes\CG4_HK_1\Effect2.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Animation\Joint.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Animation\Skeleton.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\Importer\Reader\GLTFReader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Render\CPUData\MaterialData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Render\CPUData\ModelData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Geometry\ModelStructure\NodeData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Geometry\ModelStructure\SkinData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Render\CPUData\MeshData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\Importer\Loader\LoadModel.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\Importer\Reader\ObjReader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\Importer\Reader\AssimpReader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Geometry\ModelStructure\VertexWeightData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Geometry\ModelStructure\JointWeightData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Render\CPUData\SkinClusterData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Render\CPUData\VertexInfluence.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Render\GPUData\WellForGPU.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Renderer\Resource\InstanceBuffer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Renderer\Mesh\SkyCube.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Renderer\PSOManager\PSOManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Renderer\PSOManager\PSOKeys.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\ShaderFactory.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\InputLayoutFactory.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\BlendStateFactory.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\RasterizerModeFactory.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\DepthStencilFactory.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\RootSignatureFactory.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Renderer\PSOManager\RootSlot.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\GameObject\Particle\P_Primitive\P_HitSpark.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Renderer\Mesh\PlaneMesh.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\EffectSystem\EffectManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\EffectSystem\ParticleSystem\ParticleManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\EffectSystem\ParticleSystem\ParticleEmitter.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Render\Types\PSOType\RenderTargetFormat.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Renderer\DescriptorManager\RtvManager\RtvManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Renderer\DescriptorManager\DsvManager\DsvManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Renderer\PostProcessRunner\PostProcessRunner.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Renderer\Mesh\RingMesh.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\EffectSystem\ParticleSystem\EmitterLink.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\EffectSystem\ParticleSystem\ParticlePrototype.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\EffectSystem\ParticleEditor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Renderer\Mesh\CylinderMesh.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Math\LinearAlgebra\Gauss.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Data\Render\CPUData\RenderCommand.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Renderer\PSOManager\PSORecorder.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="kEngine\tool\mathsUnit\Vector2.h">
+    <ClInclude Include="kEngine\Math\LinearAlgebra\Vector2.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\mathsUnit\Vector3.h">
+    <ClInclude Include="kEngine\Math\LinearAlgebra\Vector3.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\mathsUnit\Matrix3x3.h">
+    <ClInclude Include="kEngine\Math\LinearAlgebra\Matrix3x3.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\mathsUnit\Matrix4x4.h">
+    <ClInclude Include="kEngine\Math\LinearAlgebra\Matrix4x4.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\mathsUnit\Transform.h">
+    <ClInclude Include="kEngine\Math\LinearAlgebra\Transform.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
-    <ClInclude Include="externals\imgui\imconfig.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\imgui\imgui.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\imgui\imgui_impl_dx12.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\imgui\imgui_impl_win32.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\imgui\imgui_internal.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\imgui\imstb_rectpack.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\imgui\imstb_textedit.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\imgui\imstb_truetype.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\Model.h">
+    <ClInclude Include="kEngine\Renderer\Mesh\Model.h">
       <Filter>ヘッダー ファイル\kEngine\DrawEngine\ResourceManager\ObjectResource</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\ModelGroup.h">
+    <ClInclude Include="kEngine\Renderer\Mesh\ModelGroup.h">
       <Filter>ヘッダー ファイル\kEngine\DrawEngine\ResourceManager\ObjectResource</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\GameObject\Particle\Particle.h">
       <Filter>ヘッダー ファイル\kEngine\DrawEngine\ResourceManager\ObjectResource</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\VertexIndex.h">
+    <ClInclude Include="kEngine\Renderer\Mesh\VertexIndex.h">
       <Filter>ヘッダー ファイル\kEngine\DrawEngine\ResourceManager\ObjectResource</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\BasicResource.h">
+    <ClInclude Include="kEngine\Renderer\Resource\BasicResource.h">
       <Filter>ヘッダー ファイル\kEngine\DrawEngine\ResourceManager</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ResourceManager.h">
+    <ClInclude Include="kEngine\Renderer\Resource\ResourceManager.h">
       <Filter>ヘッダー ファイル\kEngine\DrawEngine\ResourceManager</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\VertexResource.h">
+    <ClInclude Include="kEngine\Renderer\Mesh\VertexResource.h">
       <Filter>ヘッダー ファイル\kEngine\DrawEngine\ResourceManager</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\VertexData.h">
+    <ClInclude Include="kEngine\Data\Render\CPUData\VertexData.h">
       <Filter>ヘッダー ファイル\kEngine\DrawEngine\ResourceManager</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\drawEngine.h">
+    <ClInclude Include="kEngine\Renderer\drawEngine\drawEngine.h">
       <Filter>ヘッダー ファイル\kEngine\DrawEngine</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\Input\inputManager.h">
+    <ClInclude Include="kEngine\core\inputCore.h">
       <Filter>ヘッダー ファイル\kEngine\core\Input</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\driver\DirectXCore.h">
+    <ClInclude Include="kEngine\core\DirectXCore.h">
       <Filter>ヘッダー ファイル\kEngine\core\driver</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\driver\DirectXController.h">
+    <ClInclude Include="kEngine\core\DirectXController.h">
       <Filter>ヘッダー ファイル\kEngine\core\driver</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\driver\config.h">
+    <ClInclude Include="kEngine\core\config.h">
       <Filter>ヘッダー ファイル\kEngine\core\driver</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\pso\PSO.h">
+    <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\PSOFactory.h">
       <Filter>ヘッダー ファイル\kEngine\core\pso</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Data\Render\Data\DirectionalLightGPU.h">
+    <ClInclude Include="kEngine\Data\Render\GPUData\DirectionalLightGPU.h">
       <Filter>ヘッダー ファイル\kEngine\Lighting</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Data\LightModelType.h">
+    <ClInclude Include="kEngine\Data\Render\Types\PSOType\LightModelType.h">
       <Filter>ヘッダー ファイル\kEngine\Lighting</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\material\Material.h">
+    <ClInclude Include="kEngine\Data\Render\GPUData\MaterialForGPU.h">
       <Filter>ヘッダー ファイル\kEngine\material</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\material\MaterialConfig.h">
+    <ClInclude Include="kEngine\Data\Render\CPUData\MaterialConfig.h">
       <Filter>ヘッダー ファイル\kEngine\material</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Sound\soundManager.h">
@@ -590,178 +803,139 @@
     <ClInclude Include="kEngine\Sound\soundUnit.h">
       <Filter>ヘッダー ファイル\kEngine\Sound</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\Camera\DebugCamera.h">
+    <ClInclude Include="kEngine\GameObject\Camera\DebugCamera.h">
       <Filter>ヘッダー ファイル\kEngine\tool</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\StageManager\SceneManager.h">
+    <ClInclude Include="kEngine\Scenes\SceneManager.h">
       <Filter>ヘッダー ファイル\kEngine\tool\StageManager</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\StageManager\BaseScene.h">
+    <ClInclude Include="kEngine\Scenes\BaseScene.h">
       <Filter>ヘッダー ファイル\kEngine\tool\StageManager</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\TimeManager\TimeManager.h">
+    <ClInclude Include="kEngine\Tool\TimeManager\TimeManager.h">
       <Filter>ヘッダー ファイル\kEngine\tool</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\kEngine.h">
+    <ClInclude Include="kEngine\core\kEngine.h">
       <Filter>ヘッダー ファイル\kEngine</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\PerlinNoise\PerlinNoise.h">
+    <ClInclude Include="kEngine\Math\PerlinNoise\PerlinNoise.h">
       <Filter>ヘッダー ファイル\Effect</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\mathsUnit\MathsIncluder.h">
+    <ClInclude Include="kEngine\Math\MathsIncluder.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\mathsUnit\randomMaker.h">
+    <ClInclude Include="kEngine\Utility\randomMaker.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\mathsUnit\TransformationMatrix.h">
+    <ClInclude Include="kEngine\Math\LinearAlgebra\TransformationMatrix.h">
       <Filter>ヘッダー ファイル\kEngine\tool\mathsUnit</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\StringManage\ConvertString.h">
+    <ClInclude Include="kEngine\Utility\StringManage\ConvertString.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\pso\shader_compile.h">
+    <ClInclude Include="kEngine\Renderer\ShaderManager\shader_compile.h">
       <Filter>ヘッダー ファイル\Shader</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\GameObject\Button\button.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\InstanceManager\InstanceManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\InstanceManager\SpriteInstance.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\InstanceManager\ModelInstance.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\WVPResource.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\tool\Camera\Camera.h">
+    <ClInclude Include="kEngine\GameObject\Camera\Camera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\GameObject\Object\Object.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\DebugTool\Logger.h">
+    <ClInclude Include="kEngine\Tool\DebugTool\Logger.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\driver\WinAPI.h">
+    <ClInclude Include="kEngine\core\WinAPI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\driver\FrameRateLimiter.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="scenes\SceneTest.h">
+    <ClInclude Include="kEngine\Utility\FrameRateLimiter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\GameObject\Player\Player.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\MapChip\MapChipField.h">
+    <ClInclude Include="kEngine\Data\Game\MapChip\MapChipField.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\DrawData\ObjectData.h">
+    <ClInclude Include="kEngine\Data\Render\CPUData\ObjectData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\GameObject\Object\Sprite.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\DrawData\SpriteData.h">
+    <ClInclude Include="kEngine\Data\Render\CPUData\SpriteData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\SimpleSpriteMesh.h">
+    <ClInclude Include="kEngine\Renderer\Mesh\SimpleSpriteMesh.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\TextureManager\TextureManager.h">
+    <ClInclude Include="kEngine\Renderer\Resource\TextureManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\DrawData\CornerData.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="scenes\CG4_HK_1\Effect1.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="scenes\SceneTest2.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="scenes\CG4_HK_1\Effect2.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="scenes\CG4_HK_1\menu.h">
+    <ClInclude Include="kEngine\Data\Render\CPUData\CornerData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="ResourceLoader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\GameObject\Object\Corner.h">
+    <ClInclude Include="kEngine\Data\Geometry\Corner\Corner.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\MapChip\MapChipData.h">
+    <ClInclude Include="kEngine\Data\Game\MapChip\MapChipData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\AnimationSystem\AnimationEditor.h">
+    <ClInclude Include="kEngine\Tool\AnimationSystem\AnimationEditor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\AnimationSystem\AnimationSystem.h">
+    <ClInclude Include="kEngine\Tool\AnimationSystem\AnimationManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\AnimationSystem\AnimationUnit.h">
+    <ClInclude Include="kEngine\Tool\AnimationSystem\AnimationUnit.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="externals\nlohmann\json.hpp">
+    <ClInclude Include="kEngine\Renderer\Mesh\SphereMesh.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="externals\nlohmann\json_fwd.hpp">
+    <ClInclude Include="kEngine\Renderer\Mesh\Sprite2DMesh.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="externals\imgui\imgui_stdlib.h">
+    <ClInclude Include="kEngine\Renderer\Mesh\TriangleMesh.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\SphereMesh.h">
+    <ClInclude Include="kEngine\Renderer\Mesh\CubeMesh.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\Sprite2DMesh.h">
+    <ClInclude Include="kEngine\Data\Geometry\Shape\crashIncluder.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\TriangleMesh.h">
+    <ClInclude Include="kEngine\Math\Geometry\Collision\crashDecision.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\ResourceManager\ObjectResource\CubeMesh.h">
+    <ClInclude Include="kEngine\Tool\DefaultMenu\DefaultMenu.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\crashDecision\crashData.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\tool\crashDecision\crashDecision.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\tool\DefaultMenu\DefaultMenu.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\tool\StageManager\SceneElement.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="scenes\Scene1.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="scenes\SceneResult.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="scenes\SceneTitle.h">
+    <ClInclude Include="kEngine\Scenes\SceneElement.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\GameObject\Particle\P_Ball\P_Ball.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\driver\SrvManager.h">
+    <ClInclude Include="kEngine\Renderer\DescriptorManager\SrvManager\SrvManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\driver\ImGuiManager.h">
+    <ClInclude Include="kEngine\Tool\ImGuiManager\ImGuiManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\core\driver\IDManager.h">
+    <ClInclude Include="kEngine\Utility\IDManager\IDManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\GPUData\CameraForGPU.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\CPUData\CameraData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Collector\DrawData\DrawDataCollector.h">
@@ -770,82 +944,637 @@
     <ClInclude Include="kEngine\Data\Render\Queue\RenderData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Data\PSOType.h">
+    <ClInclude Include="kEngine\Data\Render\Types\PSOType\PSOType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Manager\CameraManager\CameraManager.h">
+    <ClInclude Include="kEngine\Renderer\CameraManager\CameraManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="scenes\CG3_HK_2\SceneCGHK2.h">
+    <ClInclude Include="kEngine\Data\Render\Types\PSOType\BlendModeType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Data\BlendModeType.h">
+    <ClInclude Include="kEngine\Tool\DebugTool\DebugObject.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\DebugTool\DebugObject.h">
+    <ClInclude Include="kEngine\Renderer\LightManager\LightManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Manager\LightManager\LightManager.h">
+    <ClInclude Include="kEngine\Renderer\Lighting\DirectionalLight.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Lighting\DirectionalLight.h">
+    <ClInclude Include="kEngine\Renderer\Lighting\Light.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Lighting\Light.h">
+    <ClInclude Include="kEngine\Data\Render\GPUData\LightGPU.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Data\Render\Data\LightGPU.h">
+    <ClInclude Include="kEngine\Data\Render\Types\LightingType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Data\LightingType.h">
+    <ClInclude Include="kEngine\Renderer\Lighting\SpotLight.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Lighting\SpotLight.h">
+    <ClInclude Include="kEngine\Renderer\Lighting\PointLight.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Lighting\PointLight.h">
+    <ClInclude Include="kEngine\Renderer\Lighting\AeraLight.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Lighting\AeraLight.h">
+    <ClInclude Include="kEngine\Scenes\BaseSceneFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\StageManager\BaseSceneFactory.h">
+    <ClInclude Include="kEngine\GameObject\CountdownTimer\CountdownTimer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="scenes\SceneFactory.h">
+    <ClInclude Include="kEngine\GameObject\StartTimer\StartTimer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\DrawData\CameraData.h">
+    <ClInclude Include="kEngine\Math\LinearAlgebra\Vector4.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\drawEngine\DrawData\CameraForGPU.h">
+    <ClInclude Include="externals\DirectXTex\BC.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="scenes\SceneWin.h">
+    <ClInclude Include="externals\DirectXTex\BCDirectCompute.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="scenes\sceneLose.h">
+    <ClInclude Include="externals\DirectXTex\d3dx12.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\GameObject\Bullet\Bullet.h">
+    <ClInclude Include="externals\DirectXTex\DDS.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\GameObject\BackPoint\BackPoint.h">
+    <ClInclude Include="externals\DirectXTex\DirectXTex.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\GameObject\Enemy\Enemy.h">
+    <ClInclude Include="externals\DirectXTex\DirectXTexP.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\GameObject\HPBar\HPBar.h">
+    <ClInclude Include="externals\DirectXTex\filters.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\GameObject\Sight\Sight.h">
+    <ClInclude Include="externals\DirectXTex\scoped.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\CollisionManager\CollisionManager.h">
+    <ClInclude Include="externals\imgui\imconfig.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\tool\mathsUnit\Vector4.h">
+    <ClInclude Include="externals\imgui\imgui.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imgui_impl_dx12.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imgui_impl_win32.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imgui_internal.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imgui_stdlib.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imstb_rectpack.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imstb_textedit.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imstb_truetype.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\nlohmann\json.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\nlohmann\json_fwd.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Compiler\poppack1.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Compiler\pstdint.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Compiler\pushpack1.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\port\AndroidJNI\AndroidJNIIOSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\port\AndroidJNI\BundledAssetIOSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\aabb.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\ai_assert.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\anim.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\AssertHandler.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Base64.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\BaseImporter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Bitmap.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\BlobIOSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\ByteSwapper.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\camera.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\cexport.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\cfileio.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\cimport.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\ColladaMetaData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\color4.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\commonMetaData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\config.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\CreateAnimMesh.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\DefaultIOStream.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\DefaultIOSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\DefaultLogger.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\defs.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Exceptional.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Exporter.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\fast_atof.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\GenericProperty.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\GltfMaterial.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Hash.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Importer.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\importerdesc.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\IOStream.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\IOStreamBuffer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\IOSystem.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\light.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\LineSplitter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\LogAux.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Logger.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\LogStream.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\material.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\MathFunctions.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\matrix3x3.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\matrix4x4.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\MemoryIOWrapper.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\mesh.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\metadata.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\NullLogger.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\ObjMaterial.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\ParsingUtils.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\pbrmaterial.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\postprocess.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Profiler.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\ProgressHandler.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\qnan.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\quaternion.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\RemoveComments.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\scene.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\SceneCombiner.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\SGSpatialSort.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\SkeletonMeshBuilder.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\SmallVector.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\SmoothingGroups.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\SpatialSort.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\StandardShapes.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\StreamReader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\StreamWriter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\StringComparison.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\StringUtils.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Subdivision.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\texture.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\TinyFormatter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\types.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\vector2.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\vector3.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\version.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Vertex.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\XmlParser.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\XMLTools.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\ZipArchiveIOSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Scenes\SceneFactory.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="GAME\scenes\scene1.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Math\LinearAlgebra\Matrix3x3Math.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="GAME\scenes\UITest.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="GAME\Object\DetailButton\DetailButton.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Geometry\Shape\Line\Ray.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Geometry\Shape\Line\Segment.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Geometry\Shape\Circle\Sphere.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Geometry\Shape\Quad\OldHitBox.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Geometry\Shape\Quad\AABB.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Geometry\Shape\Quad\OBB.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Geometry\Shape\Line\Capsule.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\DebugTool\DebugDraw.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\GPUData\DebugLineGPU.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\CPUData\DebugLine.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="GAME\Object\Panel\Panel.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Math\Geometry\Curve.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Math\Geometry\Interpolation.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Geometry\Shape\Plane\Plane.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Geometry\Shape\Triangle\Triangle.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Math\Geometry\SegmentUtility.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Utility\Bit.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Geometry\Shape\Line\Line.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Math\Geometry\VectorUtility.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Math\Kinematics\CircularMation.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Kinematics\Types\CircleMotionPlane.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Math\LinearAlgebra\Quaternion.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Physics\PhysicalObject.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Physics\Spring.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Physics\PhysicalBall.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Physics\SpringUtility.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Animation\Keyframe.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Animation\Animation.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Animation\AnimationNodeData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Scenes\CG4_HK_1\menu.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Scenes\CG3_HK_2\SceneCGHK2.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Scenes\CG4_HK_1\Effect1.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Scenes\CG4_HK_1\Effect2.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Animation\Joint.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Animation\Skeleton.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\Importer\Reader\GLTFReader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\CPUData\MaterialData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\CPUData\ModelData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Geometry\ModelStructure\NodeData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Geometry\ModelStructure\SkinData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\CPUData\MeshData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\Importer\Loader\LoadModel.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\Importer\Reader\ObjReader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\Importer\Reader\AssimpReader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Geometry\ModelStructure\VertexWeightData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Geometry\ModelStructure\JointWeightData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\CPUData\SkinClusterData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\CPUData\VertexInfluence.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\GPUData\WellForGPU.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Renderer\Resource\InstanceBuffer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Renderer\Mesh\SkyCube.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Renderer\PSOManager\PSOManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Renderer\PSOManager\PSOKeys.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\Types\PSOType\RenderModelType.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\Types\PSOType\RasterizerMode.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\ShaderFactory.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\InputLayoutFactory.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\BlendStateFactory.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\RasterizerModeFactory.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\DepthStencilFactory.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\Types\PSOType\DepthStencilType.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\Types\PSOType\PrimitiveType.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\RootSignatureFactory.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Renderer\PSOManager\RootSlot.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\GameObject\Particle\P_Primitive\P_HitSpark.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Renderer\Mesh\PlaneMesh.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\EffectSystem\EffectManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\ParticleManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\ParticleEmitter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\ParticlePrototype.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\ParticleInstance.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\Queue\ParticleInstanceForDDC.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\EngineAssets\Particle\HitSpark.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\Types\PSOType\RenderTargetFormat.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Renderer\DescriptorManager\RtvManager\RtvManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\CPUData\RenderTexture.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Renderer\DescriptorManager\DsvManager\DsvManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Renderer\PostProcessRunner\PostProcessRunner.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\Types\PostProcessType.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Renderer\Mesh\RingMesh.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\EmitterLink.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\EffectSystem\ParticleEditor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Renderer\Mesh\CylinderMesh.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\GPUData\RenderCommandGPU.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\CPUData\RenderCommand.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\GPUData\BlurDataGPU.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Math\LinearAlgebra\Gauss.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Renderer\PSOManager\PSORecorder.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\GameObject\CountdownTimer\CountdownTimer.h">
@@ -875,14 +1604,8 @@
     <FxCompile Include="resources\Shader\FlameNeonGlow.VS.hlsl" />
     <FxCompile Include="resources\Shader\GlowSphere.PS.hlsl" />
     <FxCompile Include="resources\Shader\GlowSphere.VS.hlsl" />
-    <FxCompile Include="resources\Shader\Particle.PS.hlsl" />
-    <FxCompile Include="resources\Shader\Particle.VS.hlsl" />
-    <FxCompile Include="resources\Shader\FlameNeonGlow.PS.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="externals\imgui\LICENSE.txt">
-      <Filter>imgui</Filter>
-    </Text>
+    <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl" />
+    <FxCompile Include="externals\DirectXTex\Shaders\BC7Encode.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -899,6 +1622,34 @@
       <Filter>リソース ファイル\Map</Filter>
     </None>
     <None Include="resources\Shader\Tile2D.hlsli" />
+    <None Include="externals\DirectXTex\DirectXTex.inl">
+      <Filter>ヘッダー ファイル</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\color4.inl">
+      <Filter>ヘッダー ファイル</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\material.inl">
+      <Filter>ヘッダー ファイル</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\matrix3x3.inl">
+      <Filter>ヘッダー ファイル</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\matrix4x4.inl">
+      <Filter>ヘッダー ファイル</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\quaternion.inl">
+      <Filter>ヘッダー ファイル</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\SmoothingGroups.inl">
+      <Filter>ヘッダー ファイル</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\vector2.inl">
+      <Filter>ヘッダー ファイル</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\vector3.inl">
+      <Filter>ヘッダー ファイル</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\CompileShaders.cmd" />
     <None Include="externals\DirectXTex\Shaders\Compiled\BC6HEncode_EncodeBlockCS.inc">
       <Filter>ヘッダー ファイル</Filter>
     </None>
@@ -941,8 +1692,8 @@
     <None Include="externals\DirectXTex\Shaders\Compiled\BC7Encode_TryMode456CS_cs40.inc">
       <Filter>ヘッダー ファイル</Filter>
     </None>
-    <None Include="externals\DirectXTex\DirectXTex.inl">
-      <Filter>ヘッダー ファイル</Filter>
-    </None>
+    <None Include=".github\copilot-instructions.md" />
+    <None Include="kEngine\EngineAssets\Shader\PostProcess\ColorGuard.hlsli" />
+    <None Include="kEngine\EngineAssets\Shader\PostProcess\Vignette.hlsli" />
   </ItemGroup>
 </Project>

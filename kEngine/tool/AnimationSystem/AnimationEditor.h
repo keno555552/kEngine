@@ -1,13 +1,13 @@
 #pragma once
 #include "externals/nlohmann/json.hpp"
-#include "../StageManager/BaseScene.h"
+#include "BaseScene.h"
 #include "config.h"
+#include "Data/Animation/Keyframe.h"
 #include "Object/Sprite.h"
 #include "Object/Object.h"
-#include "tool/crashDecision/crashDecision.h"
-#include "DebugCamera.h"
-#include "AnimationSystem.h"
-#include "AnimationUnit.h"
+#include "Geometry/Collision/crashDecision.h"
+#include "Camera/DebugCamera.h"
+#include "AnimationManager.h"
 
 class AnimationEditor : public BaseScene
 {
@@ -43,23 +43,23 @@ private:
 	int Skydome_modelHandle_{};
 
 	/// スカイドームオブジェクト
-	Object* skydome_{};	
+	std::unique_ptr <Object> skydome_{};
 
 	/// Time Bar関連スプライト
-	SimpleSprite* mainNeedle_{ new SimpleSprite };
-	SimpleSprite* mainTimeBar_{ new SimpleSprite };
-	SimpleSprite* markerStartEnd_{ new SimpleSprite };
-	SimpleSprite* marker10_{ new SimpleSprite };
-	SimpleSprite* marker02_{ new SimpleSprite };
-	SimpleSprite* ping_{ new SimpleSprite };
+	std::unique_ptr<SimpleSprite> mainNeedle_		= std::make_unique<SimpleSprite>();
+	std::unique_ptr<SimpleSprite> mainTimeBar_		= std::make_unique<SimpleSprite>();
+	std::unique_ptr<SimpleSprite> markerStartEnd_	= std::make_unique<SimpleSprite>();
+	std::unique_ptr<SimpleSprite> marker10_			= std::make_unique<SimpleSprite>();
+	std::unique_ptr<SimpleSprite> marker02_			= std::make_unique<SimpleSprite>();
+	std::unique_ptr<SimpleSprite> ping_				= std::make_unique<SimpleSprite>();
 
 	/// ============= 選んでるモデル =============///
-	Object* instanceModel_{};	/// インスタンスモデル
+	std::unique_ptr <Object> instanceModel_{};	/// インスタンスモデル
 	Object* keyFrameModel_{};	/// キーフレームモデル // 借り
 	Object* choosingModel_{};	/// 選んでるモデル　　 // 借り
 
 	/// ============== カメラ関連 ==============///
-	Camera* camera_{};
+	std::weak_ptr<DebugCamera> camera_{};
 
 	/// ============= バー用定数 ===============///
 
@@ -74,7 +74,7 @@ private:
 	Vector4 saveMarkerColor_{ 0.0f,0.0f,0.0f,1.0f };
 	Vector4 saveMarkerColor2_{ 0.2f,0.2f,0.2f,1.0f };
 	/// ============== タイマー ===============///
-	Timer* mainTimer_{};
+	std::unique_ptr <Timer> mainTimer_{};
 	float saveMaxTime_{};
 
 	/// =============== フラグ ===============///
@@ -87,9 +87,7 @@ private:
 	HitBox mainTimeBarHitBox_{};
 
 	/// ======== アニメーション内部用 ==========///
-	/// キーフレームリスト
-	std::vector<AnimationObjectData> animationList_{};
-	std::vector<KeyFrame> keyFrameList_{};
+	std::vector<int> animationUnitHandle_{ -1 };
 
 	/// 選んでるキーフレーム(by IP)
 	int pickedKeyFrame_{-1};
@@ -108,13 +106,9 @@ private:
 	/// =============== モデル ==============///
 
 	/// 3Dオブジェク
-	Object* targetModel_{};
+	std::unique_ptr<Object> targetModel_{};
 
 	/// ============ アニメーションユニット ==========///
-	AnimationUnit* animationUnit_{};
-
-
-	///////////////// 使うどころ /////////////////
 
 
 	/// ============== テスト用 ==============///
@@ -145,7 +139,7 @@ private:
 
 	/// キーフレーム関連関数
 	void CreateKeyFrame(float time_ = -1);
-	void DeleteKeyFrame(KeyFrame* keyFrame = nullptr);
+	//void DeleteKeyFrame(KeyFrame* keyFrame = nullptr);
 	void SortKeyFrame();
 	void AdjuctKeyFrameTexture();
 
@@ -153,8 +147,11 @@ private:
 	void SetUsingModel(Object* model);
 
 	/// セーブ/ロード関連関数
-	void SaveAnimationData(const AnimationObjectData& animationList, const std::string& filePath);
-	void LoadAnimationData(AnimationObjectData* animationList, const std::string& filePath);
+	void SaveAnimationData(const AnimationNodeData& animationList, const std::string& filePath);
+	void LoadAnimationData(AnimationNodeData* animationList, const std::string& filePath);
+
+	void LoadAnimationDataFromGltf(AnimationNodeData* animationList, const std::string& filePath);
+	void LoadAnimationDataFromJson(AnimationNodeData* animationList, const std::string& filePath);
 
 #ifdef USE_IMGUI
 	void ImguiPart();

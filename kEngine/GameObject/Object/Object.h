@@ -3,18 +3,20 @@
 #include <memory>
 #include "Transform.h"
 #include "TransformationMatrix.h"
-#include "MaterialConfig.h"
+#include "Data/Render/CPUData/MaterialConfig.h"
 #include "MathsIncluder.h"
-#include "kEngine.h"
-#include "Camera.h"
-#include "DrawData/ObjectData.h"
-#include <crashdecision/crashDecision.h>
+#include "Camera/Camera.h"
+#include "Data/Render/CPUData/ObjectData.h"
+#include "Geometry/Collision/crashDecision.h"
 
+class kEngine;
 class Object : public ObjectData {
 public:
+	~Object();
+
 	void IntObject(kEngine* system);
 
-	virtual void Update(Camera* camera);
+	virtual void Update(Camera* camera = 0);
 
 	virtual void Draw();
 

@@ -2,7 +2,7 @@
 #include "Transform.h"			//Transform.h
 #include <cstdint>
 #include <windows.h>
-#include "Data/DirectionalLightGPU.h"
+#include "GPUData/DirectionalLightGPU.h"
 #include <string>
 #include <vector>
 #include "SceneManager.h"
@@ -14,15 +14,14 @@ const int32_t kWindowHeight = 720;
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	CoInitializeEx(0, COINIT_MULTITHREADED);
-	kEngine* system(new kEngine);
+	std::unique_ptr<kEngine> system;
+	system = std::make_unique<kEngine>();
 	system->Initialize(kWindowTitle, kWindowWidth, kWindowHeight);
 
-	//SceneManager* sceneManager = new SceneManager(system);
-	SceneManager::Initialize(system);
+	SceneManager::GetInstance().Initialize(system.get());
 
 	///========================Main処理=====================///
 	while (system->ProcessMessage() && kEngine::GameOn()) {
-
 
 		///====================ゲーム処理====================///
 		SceneManager::GetInstance().Update();
@@ -35,6 +34,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		system->EndFrame();
 
 	}
-	delete system;
+	SceneManager::GetInstance().Finalize();
+	system->Finalize();
 	return 0;
 }

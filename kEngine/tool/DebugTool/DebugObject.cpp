@@ -2,12 +2,12 @@
 
 DebugObject::DebugObject(kEngine* kEngine) {
 	system_ = kEngine;
-	TH_centerPoint = system_->LoadTexture("./resources/TemplateResource/texture/centerPoint.png");
-	TH_number = system_->LoadTexture("./resources/TemplateResource/texture/number/unicode_japaness_number.png");
+	TH_centerPoint = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/centerPoint.png");
+	TH_number = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/number/unicode_japaness_number.png");
 }
 
 DebugObject::~DebugObject() {
-	if (centerPoint_)delete centerPoint_, centerPoint_ = nullptr;
+	centerPoint_.reset();
 }
 
 void DebugObject::Update(Camera* camera) {
@@ -34,7 +34,7 @@ void DebugObject::SetShowCenterPoint(bool isShow) {
 	isShowCenterPoint_ = isShow;
 	if (isShowCenterPoint_) {
 		if (centerPoint_ == nullptr) {
-			centerPoint_ = new SimpleSprite();
+			centerPoint_ = std::make_unique<SimpleSprite>();
 			centerPoint_->IntObject(system_);
 			centerPoint_->CreateDefaultData();
 			centerPoint_->objectParts_[0].anchorPoint = { 15.0f,15.0f };
@@ -42,8 +42,7 @@ void DebugObject::SetShowCenterPoint(bool isShow) {
 		}
 	} else {
 		if (centerPoint_) {
-			delete centerPoint_;
-			centerPoint_ = nullptr;
+			centerPoint_.reset();
 		}
 	}
 }
@@ -52,7 +51,7 @@ void DebugObject::SetShowNumber(bool isShow) {
 	isCenterNumber_ = isShow;
 	if (isCenterNumber_) {
 		if (centerNumberSprite_ == nullptr) {
-			centerNumberSprite_ = new SimpleSprite();
+			centerNumberSprite_ = std::make_unique<SimpleSprite>();
 			centerNumberSprite_->IntObject(system_);
 			centerNumberSprite_->mainPosition.materialConfig = std::make_shared<MaterialConfig>();
 			centerNumberSprite_->mainPosition.materialConfig->lightModelType = LightModelType::Sprite2D;
@@ -61,8 +60,7 @@ void DebugObject::SetShowNumber(bool isShow) {
 		}
 	} else {
 		if (centerNumberSprite_) {
-			delete centerNumberSprite_;
-			centerNumberSprite_ = nullptr;
+			centerNumberSprite_.reset();
 		}
 	}
 }
@@ -146,12 +144,13 @@ void DebugObject::updateCenterNumber() {
 			float scaledSpacing = spacing * pxScale;
 
 			// 整排寬度
-			float totalWidth = scaledCropW * numDigits + scaledSpacing * (numDigits - 1);
+			float totalWidth = spriteW * numDigits + spacing * (numDigits - 1);
 
-			// 初めの数字の位置
-			Vector2 pos = camera_->GetObjectScreenPos(followObject_->transform.translate);
-			float baseX = pos.x - (totalWidth * 0.5f);
-			float baseY = pos.y - (scaledCropH * 0.5f);
+
+			// 左上角基準
+			Vector2 pos = camera_->GetObjectScreenPos(targetPosition_);
+			float baseX = - totalWidth * 0.5f;
+			float baseY = - spriteH * 0.5f;
 
 			for (int i = 0; i < numDigits; i++) {
 
@@ -162,16 +161,17 @@ void DebugObject::updateCenterNumber() {
 				part.cropLT = Vector2(digit * cropW, 0.0f);
 				part.cropSize = Vector2(cropW, cropH);
 
-				// 設定位置
-				float x = baseX + i * (scaledCropW + scaledSpacing);
-
+				// 設定位置（中心點）
+				float x = baseX + i * (spriteW + spacing);
 				part.transform.translate = { x,baseY,0 };
 			}
+
 
 			// 設定縮放
 			float scaleX = scale;
 			float scaleY = scale * 10.0f;
 			centerNumberSprite_->mainPosition.transform.scale = Vector3(scaleX, scaleY, 1.0f);
+			centerNumberSprite_->mainPosition.transform.translate = Vector3(pos.x, pos.y, 0.0f);
 		}
 	}
 }

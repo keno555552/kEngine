@@ -4,33 +4,30 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 	system_ = system;
 
 	/// ============ タイマー初期化 ===========///
-	animationTimer_ = new Timer;
-	buttonTimer_ = new Timer;
+	animationTimer_ = std::make_unique <Timer>();
+	buttonTimer_ = std::make_unique <Timer>();
 	animationTimer_->Init0(animationDefaultTime_, system_->GetTimeManager());
 	buttonTimer_->Init0(buttonAnimationDefaultTime_, system_->GetTimeManager());
 
 	/// =========== リソース読み込み ==========///
 
-	std::string menuPath = "resources/texture/menu/";
+	std::string menuPath = "./GAME/resources/texture/menu/";
 	TH_menuBG_ = system_->LoadTexture(menuPath + "menuBG.png");
 
-	TH_menuPause = system_->LoadTexture(menuPath + "menuPause.png");
-	TH_menuBGM = system_->LoadTexture(menuPath + "menuBGM.png");
-	TH_menuBGM_NL = system_->LoadTexture(menuPath + "menuBGM_NL.png");
-	TH_menuMASTER = system_->LoadTexture(menuPath + "menuMASTER.png");
-	TH_menuMASTER_NL = system_->LoadTexture(menuPath + "menuMASTER_NL.png");
-	TH_menuSE = system_->LoadTexture(menuPath + "menuSE.png");
-	TH_menuSE_NL = system_->LoadTexture(menuPath + "menuSE_NL.png");
+	TH_menuTitle = system_->LoadTexture(menuPath + "Menu.png");
+	TH_menuBGM = system_->LoadTexture(menuPath + "BGM.png");
+	TH_menuMASTER = system_->LoadTexture(menuPath + "Master.png");
+	TH_menuSE = system_->LoadTexture(menuPath + "SE.png");
 
-	TH_menuClose = system_->LoadTexture(menuPath + "menuClose.png");
-	TH_menuClose_NL = system_->LoadTexture(menuPath + "menuClose_NL.png");
-	TH_menuBack = system_->LoadTexture(menuPath + "menuBack.png");
-	TH_menuBack_NL = system_->LoadTexture(menuPath + "menuBack_NL.png");
-	TH_menuRetry = system_->LoadTexture(menuPath + "menuRetry.png");
-	TH_menuRetry_NL = system_->LoadTexture(menuPath + "menuRetry_NL.png");
+	TH_menuClose = system_->LoadTexture(menuPath + "back.png");
+	TH_menuClose_NL = system_->LoadTexture(menuPath + "backnolight.png");
+	TH_menuBack = system_->LoadTexture(menuPath + "title.png");
+	TH_menuBack_NL = system_->LoadTexture(menuPath + "titlenolight.png");
+	TH_menuRetry = system_->LoadTexture(menuPath + "redo.png");
+	TH_menuRetry_NL = system_->LoadTexture(menuPath + "redonolight.png");
 
-	TH_menuButton = system_->LoadTexture(menuPath + "menuButton.png");
-	TH_menuButton_NL = system_->LoadTexture(menuPath + "menuButton_NL.png");
+	TH_menuButton = system_->LoadTexture(menuPath + "Button.png");
+	TH_menuButton_NL = system_->LoadTexture(menuPath + "Buttonnolight.png");
 	TH_menuVolumeBar = system_->LoadTexture(menuPath + "menuVolumeBar.png");
 
 	float middlePointX = (float)config::GetClientWidth() / 2;
@@ -46,81 +43,57 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 
 
 	/// =========== 字スプライト ==========///
-	sMenuPause->IntObject(system_);
-	sMenuPause->CreateDefaultData();
-	sMenuPause->objectParts_[0].materialConfig->textureHandle = TH_menuPause;
-	sMenuPause->mainPosition.transform.translate = { 295.0f, 58.0f,100.0f };
-	sMenuPause->followObject_ = sMenuBG_;
-	sMenuPause->Update(nullptr);
+	sMenuTitle->IntObject(system_);
+	sMenuTitle->CreateDefaultData();
+	sMenuTitle->objectParts_[0].materialConfig->textureHandle = TH_menuTitle;
+	sMenuTitle->mainPosition.transform.translate = { 245.0f, 56.0f,100.0f };
+	sMenuTitle->followObject_ = sMenuBG_.get();
+	sMenuTitle->Update(nullptr);
 
 	sMenuMASTER->IntObject(system_);
 	sMenuMASTER->CreateDefaultData();
 	sMenuMASTER->objectParts_[0].materialConfig->textureHandle = TH_menuMASTER;
 	sMenuMASTER->mainPosition.transform.translate = { 68.0f, 140.0f, 103.0f };
-	sMenuMASTER->followObject_ = sMenuBG_;
-	sMenuMASTER->objectParts_[0].materialConfig->textureColor.w = 0.0f;
+	sMenuMASTER->followObject_ = sMenuBG_.get();
 	sMenuMASTER->Update(nullptr);
-	buttonsOnColor_[(int)ButtonIndex::VolumeMASTER] = &sMenuMASTER->objectParts_[0].materialConfig->textureColor;
-
-	sMenuMASTER_NL->IntObject(system_);
-	sMenuMASTER_NL->CreateDefaultData();
-	sMenuMASTER_NL->objectParts_[0].materialConfig->textureHandle = TH_menuMASTER_NL;
-	sMenuMASTER_NL->mainPosition.transform.translate = { 68.0f, 140.0f, 102.0f };
-	sMenuMASTER_NL->followObject_ = sMenuBG_;
-	sMenuMASTER_NL->Update(nullptr);
+	//buttonsOnColor_[(int)ButtonIndex::VolumeMASTER] = &sMenuMASTER->objectParts_[0].materialConfig->textureColor;
 
 	sMenuBGM->IntObject(system_);
 	sMenuBGM->CreateDefaultData();
 	sMenuBGM->objectParts_[0].materialConfig->textureHandle = TH_menuBGM;
 	sMenuBGM->mainPosition.transform.translate = { 74.0f, 209.0f,105.0f };
-	sMenuBGM->followObject_ = sMenuBG_;
-	sMenuBGM->objectParts_[0].materialConfig->textureColor.w = 0.0f;
+	sMenuBGM->followObject_ = sMenuBG_.get();
 	sMenuBGM->Update(nullptr);
-	buttonsOnColor_[(int)ButtonIndex::VolumeBGM] = &sMenuBGM->objectParts_[0].materialConfig->textureColor;
-
-	sMenuBGM_NL->IntObject(system_);
-	sMenuBGM_NL->CreateDefaultData();
-	sMenuBGM_NL->objectParts_[0].materialConfig->textureHandle = TH_menuBGM_NL;
-	sMenuBGM_NL->mainPosition.transform.translate = { 74.0f, 209.0f,104.0f };
-	sMenuBGM_NL->followObject_ = sMenuBG_;
-	sMenuBGM_NL->Update(nullptr);
+	//buttonsOnColor_[(int)ButtonIndex::VolumeBGM] = &sMenuBGM->objectParts_[0].materialConfig->textureColor;
 
 	sMenuSE->IntObject(system_);
 	sMenuSE->CreateDefaultData();
 	sMenuSE->objectParts_[0].materialConfig->textureHandle = TH_menuSE;
 	sMenuSE->mainPosition.transform.translate = { 98.0f, 275.0f,107.0f };
-	sMenuSE->followObject_ = sMenuBG_;
-	sMenuSE->objectParts_[0].materialConfig->textureColor.w = 0.0f;
+	sMenuSE->followObject_ = sMenuBG_.get();
 	sMenuSE->Update(nullptr);
-	buttonsOnColor_[(int)ButtonIndex::VolumeSE] = &sMenuSE->objectParts_[0].materialConfig->textureColor;
-
-	sMenuSE_NL->IntObject(system_);
-	sMenuSE_NL->CreateDefaultData();
-	sMenuSE_NL->objectParts_[0].materialConfig->textureHandle = TH_menuSE_NL;
-	sMenuSE_NL->mainPosition.transform.translate = { 98.0f, 275.0f,106.0f };
-	sMenuSE_NL->followObject_ = sMenuBG_;
-	sMenuSE_NL->Update(nullptr);
+	//buttonsOnColor_[(int)ButtonIndex::VolumeSE] = &sMenuSE->objectParts_[0].materialConfig->textureColor;
 
 	sMenuClose->IntObject(system_);
 	sMenuClose->CreateDefaultData();
 	sMenuClose->objectParts_[0].materialConfig->textureHandle = TH_menuClose;
-	sMenuClose->mainPosition.transform.translate = { 187.0f, 342.0f, 109.0f };
-	sMenuClose->followObject_ = sMenuBG_;
+	sMenuClose->mainPosition.transform.translate = { 93.0f, 366.0f, 109.0f };
+	sMenuClose->followObject_ = sMenuBG_.get();
 	sMenuClose->Update(nullptr);
 	buttonsOnColor_[(int)ButtonIndex::Close] = &sMenuClose->objectParts_[0].materialConfig->textureColor;
 
 	sMenuClose_NL->IntObject(system_);
 	sMenuClose_NL->CreateDefaultData();
 	sMenuClose_NL->objectParts_[0].materialConfig->textureHandle = TH_menuClose_NL;
-	sMenuClose_NL->mainPosition.transform.translate = { 187.0f, 342.0f, 108.0f };
-	sMenuClose_NL->followObject_ = sMenuBG_;
+	sMenuClose_NL->mainPosition.transform.translate = { 93.0f, 366.0f, 108.0f };
+	sMenuClose_NL->followObject_ = sMenuBG_.get();
 	sMenuClose_NL->Update(nullptr);
 
 	sMenuBack->IntObject(system_);
 	sMenuBack->CreateDefaultData();
 	sMenuBack->objectParts_[0].materialConfig->textureHandle = TH_menuBack;
-	sMenuBack->mainPosition.transform.translate = { 523.0f, 342.0f, 111.0f };
-	sMenuBack->followObject_ = sMenuBG_;
+	sMenuBack->mainPosition.transform.translate = { 538.0f, 365.0f, 111.0f };
+	sMenuBack->followObject_ = sMenuBG_.get();
 	sMenuBack->objectParts_[0].materialConfig->textureColor.w = 0.0f;
 	sMenuBack->Update(nullptr);
 	sMenuBack->objectParts_[0].materialConfig->textureColor.w = 0.0f;
@@ -129,15 +102,15 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 	sMenuBack_NL->IntObject(system_);
 	sMenuBack_NL->CreateDefaultData();
 	sMenuBack_NL->objectParts_[0].materialConfig->textureHandle = TH_menuBack_NL;
-	sMenuBack_NL->mainPosition.transform.translate = { 523.0f, 342.0f, 110.0f };
-	sMenuBack_NL->followObject_ = sMenuBG_;
+	sMenuBack_NL->mainPosition.transform.translate = { 538.0f, 365.0f, 110.0f };
+	sMenuBack_NL->followObject_ = sMenuBG_.get();
 	sMenuBack_NL->Update(nullptr);
 
 	sMenuRetry->IntObject(system_);
 	sMenuRetry->CreateDefaultData();
 	sMenuRetry->objectParts_[0].materialConfig->textureHandle = TH_menuRetry;
-	sMenuRetry->mainPosition.transform.translate = { 355.0f, 342.0f, 113.0f };
-	sMenuRetry->followObject_ = sMenuBG_;
+	sMenuRetry->mainPosition.transform.translate = { 268.0f, 365.0f, 113.0f };
+	sMenuRetry->followObject_ = sMenuBG_.get();
 	sMenuRetry->objectParts_[0].materialConfig->textureColor.w = 0.0f;
 	sMenuRetry->Update(nullptr);
 	sMenuRetry->objectParts_[0].materialConfig->textureColor.w = 0.0f;
@@ -146,16 +119,16 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 	sMenuRetry_NL->IntObject(system_);
 	sMenuRetry_NL->CreateDefaultData();
 	sMenuRetry_NL->objectParts_[0].materialConfig->textureHandle = TH_menuRetry_NL;
-	sMenuRetry_NL->mainPosition.transform.translate = { 355.0f, 342.0f, 112.0f };
-	sMenuRetry_NL->followObject_ = sMenuBG_;
+	sMenuRetry_NL->mainPosition.transform.translate = { 268.0f, 365.0f, 112.0f };
+	sMenuRetry_NL->followObject_ = sMenuBG_.get();
 	sMenuRetry_NL->Update(nullptr);
 
 	sMenuButtonM->IntObject(system_);
 	sMenuButtonM->CreateDefaultData();
 	sMenuButtonM->objectParts_[0].materialConfig->textureHandle = TH_menuButton;
-	sMenuButtonM->mainPosition.transform.translate = { 195.0f, 143.0f, 115.0f };
+	sMenuButtonM->mainPosition.transform.translate = { 195.0f, 142.0f, 115.0f };
 	sMenuButtonM->mainPosition.transform.translate.x = linearity(volumeButton0x_, volumeButton1x_, masterVolume_);
-	sMenuButtonM->followObject_ = sMenuBG_;
+	sMenuButtonM->followObject_ = sMenuBG_.get();
 	sMenuButtonM->objectParts_[0].materialConfig->textureColor.w = 0.0f;
 	sMenuButtonM->Update(nullptr);
 
@@ -164,6 +137,8 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 	sMenuButtonM_NL->objectParts_[0].materialConfig->textureHandle = TH_menuButton_NL;
 	sMenuButtonM_NL->mainPosition.transform.translate = { 0, 0, 116.0f };
 	sMenuButtonM_NL->followObject_ = sMenuButtonM;
+	sMenuButtonM_NL->mainPosition.transform.translate = { 0, 0, -1.0f };
+	sMenuButtonM_NL->followObject_ = sMenuButtonM.get();
 	sMenuButtonM_NL->Update(nullptr);
 
 	sMenuButtonB->IntObject(system_);
@@ -171,7 +146,7 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 	sMenuButtonB->objectParts_[0].materialConfig->textureHandle = TH_menuButton;
 	sMenuButtonB->mainPosition.transform.translate = { 195.0f, 210.0f, 117.0f };
 	sMenuButtonB->mainPosition.transform.translate.x = linearity(volumeButton0x_, volumeButton1x_, BGMVolume_);
-	sMenuButtonB->followObject_ = sMenuBG_;
+	sMenuButtonB->followObject_ = sMenuBG_.get();
 	sMenuButtonB->objectParts_[0].materialConfig->textureColor.w = 0.0f;
 	sMenuButtonB->Update(nullptr);
 
@@ -180,6 +155,8 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 	sMenuButtonB_NL->objectParts_[0].materialConfig->textureHandle = TH_menuButton_NL;
 	sMenuButtonB_NL->mainPosition.transform.translate = { 0, 0, 118.0f };
 	sMenuButtonB_NL->followObject_ = sMenuButtonB;
+	sMenuButtonB_NL->mainPosition.transform.translate = { 0, 0, -1.0f };
+	sMenuButtonB_NL->followObject_ = sMenuButtonB.get();
 	sMenuButtonB_NL->Update(nullptr);
 
 	sMenuButtonS->IntObject(system_);
@@ -187,7 +164,7 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 	sMenuButtonS->objectParts_[0].materialConfig->textureHandle = TH_menuButton;
 	sMenuButtonS->mainPosition.transform.translate = { 195.0f, 277.0f, 119.0f };
 	sMenuButtonS->mainPosition.transform.translate.x = linearity(volumeButton0x_, volumeButton1x_, SEVolume_);
-	sMenuButtonS->followObject_ = sMenuBG_;
+	sMenuButtonS->followObject_ = sMenuBG_.get();
 	sMenuButtonS->objectParts_[0].materialConfig->textureColor.w = 0.0f;
 	sMenuButtonS->Update(nullptr);
 
@@ -196,6 +173,8 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 	sMenuButtonS_NL->objectParts_[0].materialConfig->textureHandle = TH_menuButton_NL;
 	sMenuButtonS_NL->mainPosition.transform.translate = { 0, 0, 120.0f };
 	sMenuButtonS_NL->followObject_ = sMenuButtonS;
+	sMenuButtonS_NL->mainPosition.transform.translate = { 0, 0, -1.0f };
+	sMenuButtonS_NL->followObject_ = sMenuButtonS.get();
 	sMenuButtonS_NL->Update(nullptr);
 
 	sMenuVolumeBarM->IntObject(system_);
@@ -203,6 +182,8 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 	sMenuVolumeBarM->objectParts_[0].materialConfig->textureHandle = TH_menuVolumeBar;
 	sMenuVolumeBarM->mainPosition.transform.translate = { 204.0f, 136.0f, 114.0f };
 	sMenuVolumeBarM->followObject_ = sMenuBG_;
+	sMenuVolumeBarM->mainPosition.transform.translate = { 204.0f, 149.0f, 120.0f };
+	sMenuVolumeBarM->followObject_ = sMenuBG_.get();
 	sMenuVolumeBarM->Update(nullptr);
 
 	sMenuVolumeBarB->IntObject(system_);
@@ -210,6 +191,8 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 	sMenuVolumeBarB->objectParts_[0].materialConfig->textureHandle = TH_menuVolumeBar;
 	sMenuVolumeBarB->mainPosition.transform.translate = { 204.0f, 203.0f, 114.0f };
 	sMenuVolumeBarB->followObject_ = sMenuBG_;
+	sMenuVolumeBarB->mainPosition.transform.translate = { 204.0f, 216.0f, 121.0f };
+	sMenuVolumeBarB->followObject_ = sMenuBG_.get();
 	sMenuVolumeBarB->Update(nullptr);
 
 	sMenuVolumeBarS->IntObject(system_);
@@ -217,7 +200,85 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 	sMenuVolumeBarS->objectParts_[0].materialConfig->textureHandle = TH_menuVolumeBar;
 	sMenuVolumeBarS->mainPosition.transform.translate = { 204.0f, 270.0f, 114.0f };
 	sMenuVolumeBarS->followObject_ = sMenuBG_;
+	sMenuVolumeBarS->mainPosition.transform.translate = { 204.0f, 282.0f, 122.0f };
+	sMenuVolumeBarS->followObject_ = sMenuBG_.get();
 	sMenuVolumeBarS->Update(nullptr);
+
+	Vector4 BGColor = { 140.0f,140.0f,140.0f,255.0f };
+	BGColor.ColorBy1();
+	sMenuBG_->objectParts_[0].materialConfig->textureColor = BGColor;
+
+	Vector4 wordColor = { 103.0f,103.0f,103.0f,255.0f };
+	wordColor.ColorBy1();
+	sMenuTitle->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuBGM->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuMASTER->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuSE->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuClose_NL->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuBack_NL->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuRetry_NL->objectParts_[0].materialConfig->textureColor = wordColor;
+
+	Vector4 buttonColor = { 88.0f,88.0f,88.0f,255.0f };
+	buttonColor.ColorBy1();
+	sMenuButtonM_NL->objectParts_[0].materialConfig->textureColor = buttonColor;
+	sMenuButtonB_NL->objectParts_[0].materialConfig->textureColor = buttonColor;
+	sMenuButtonS_NL->objectParts_[0].materialConfig->textureColor = buttonColor;
+
+	Vector4 volumeBarColor = { 154.0f,154.0f,154.0f,255.0f };
+	volumeBarColor.ColorBy1();
+	sMenuVolumeBarM->objectParts_[0].materialConfig->textureColor = volumeBarColor;
+	sMenuVolumeBarB->objectParts_[0].materialConfig->textureColor = volumeBarColor;
+	sMenuVolumeBarS->objectParts_[0].materialConfig->textureColor = volumeBarColor;
+
+	/// ================== ボタン ==================///
+
+	bMenuClose = std::make_unique<Button>(system_);
+	bMenuClose->Init(
+		{ 70.5f, 23.0f , 0.0f },
+		141.0f, 46.0f,
+		-1, -1, -1, -1,
+		0, 0);
+	bMenuClose->SetFollowObject(sMenuClose.get());
+
+	bMenuRetry = std::make_unique<Button>(system_);
+	bMenuRetry->Init(
+		{ 119.5f, 23.0f , 0.0f },
+		239.0f, 46.0f,
+		-1, -1, -1, -1,
+		0, 0);
+	bMenuRetry->SetFollowObject(sMenuRetry.get());
+
+	bMenuBack = std::make_unique<Button>(system_);
+	bMenuBack->Init(
+		{ 96.5f, 23.5f , 0.0f },
+		193.0f, 47.0f,
+		TH_menuRetry, -1, -1, -1,
+		0, 0);
+	bMenuBack->SetFollowObject(sMenuBack.get());
+
+	bMenuBGM = std::make_unique<Button>(system_);
+	bMenuBGM->Init(
+		{ 16.5f, 16.5f , 0.0f },
+		33.0f, 33.0f,
+		-1, -1, -1, -1,
+		0, 0);
+	bMenuBGM->SetFollowObject(sMenuButtonB.get());
+
+	bMenuMASTER = std::make_unique<Button>(system_);
+	bMenuMASTER->Init(
+		{ 16.5f, 16.5f , 0.0f },
+		33.0f, 33.0f,
+		-1, -1, -1, -1,
+		0, 0);
+	bMenuMASTER->SetFollowObject(sMenuButtonM.get());
+
+	bMenuSE = std::make_unique<Button>(system_);
+	bMenuSE->Init(
+		{ 16.5f, 16.5f , 0.0f },
+		33.0f, 33.0f,
+		-1, -1, -1, -1,
+		0, 0);
+	bMenuSE->SetFollowObject(sMenuButtonS.get());
 
 	/// ================ testSound ================///
 	SH_Select_ = system_->SoundLoadSE("resources/sound/SE/menuSelect.wav");
@@ -230,6 +291,36 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 }
 
 void DefaultMenu::Update() {
+DefaultMenu::~DefaultMenu() {
+	sMenuBG_.reset();;
+
+	sMenuTitle.reset();;
+	sMenuBGM.reset();;
+	sMenuMASTER.reset();;
+	sMenuSE.reset();;
+
+	sMenuClose.reset();;
+	sMenuClose_NL.reset();;
+	sMenuBack.reset();;
+	sMenuBack_NL.reset();;
+	sMenuRetry.reset();;
+	sMenuRetry_NL.reset();;
+
+	sMenuButtonM.reset();;
+	sMenuButtonM_NL.reset();;
+	sMenuButtonB.reset();;
+	sMenuButtonB_NL.reset();;
+	sMenuButtonS.reset();;
+	sMenuButtonS_NL.reset();;
+	sMenuVolumeBarM.reset();;
+	sMenuVolumeBarB.reset();;
+	sMenuVolumeBarS.reset();;
+
+	animationTimer_.reset();
+	buttonTimer_.reset();
+}
+
+void DefaultMenu::Updata() {
 
 	/// ============ メニュー開閉 ============///
 	if (canOpen_ || clickOpenMenu_) {
@@ -278,6 +369,7 @@ void DefaultMenu::Update() {
 
 		CheckClick();
 		ChangeSelect();
+		CheckMouse();
 		WorkChange();
 
 		break;
@@ -310,12 +402,9 @@ void DefaultMenu::Draw() {
 	/// ============ メニュー描画 ============///
 	sMenuBG_->Draw();
 
-	sMenuPause->Draw();
-	sMenuBGM_NL->Draw();
+	sMenuTitle->Draw();
 	sMenuBGM->Draw();
-	sMenuMASTER_NL->Draw();
 	sMenuMASTER->Draw();
-	sMenuSE_NL->Draw();
 	sMenuSE->Draw();
 
 	sMenuClose_NL->Draw();
@@ -336,46 +425,30 @@ void DefaultMenu::Draw() {
 	sMenuButtonS->Draw();
 
 #ifdef USE_IMGUI
-	ImguiPart();
+	//ImguiPart();
 #endif
 }
 
 void DefaultMenu::MenuObjectUpdate() {
 	if (isOpened_) {
-		sMenuBG_->Update(nullptr);
+		bMenuClose->Update();
+		bMenuBack->Update();
+		bMenuRetry->Update();
+		bMenuBGM->Update();
+		bMenuMASTER->Update();
+		bMenuSE->Update();
 
-		sMenuPause->Update(nullptr);
-		sMenuBGM_NL->Update(nullptr);
-		sMenuBGM->Update(nullptr);
-		sMenuMASTER_NL->Update(nullptr);
-		sMenuMASTER->Update(nullptr);
-		sMenuSE_NL->Update(nullptr);
-		sMenuSE->Update(nullptr);
-
-		sMenuClose_NL->Update(nullptr);
-		sMenuClose->Update(nullptr);
-		sMenuBack_NL->Update(nullptr);
-		sMenuBack->Update(nullptr);
-		sMenuRetry_NL->Update(nullptr);
-		sMenuRetry->Update(nullptr);
-
-		sMenuButtonM_NL->Update(nullptr);
-		sMenuButtonM->Update(nullptr);
-		sMenuButtonB_NL->Update(nullptr);
-		sMenuButtonB->Update(nullptr);
-		sMenuButtonS_NL->Update(nullptr);
-		sMenuButtonS->Update(nullptr);
-
-		sMenuVolumeBarM->Update(nullptr);
-		sMenuVolumeBarB->Update(nullptr);
-		sMenuVolumeBarS->Update(nullptr);
-
-
-		//system_->SoundPlayBGM(SH_menuBGM_, BGMVolume_);
 	}
 	//else {
 	//	system_->SoundStop(SH_menuBGM_);
 	//}
+}
+
+float DefaultMenu::BarTuneVolume(Vector2 mousePos, float startX, float endX) {
+	float mouseX = mousePos.x;
+	float clampValue = std::clamp(mouseX, startX, endX);
+	float volume = (clampValue - startX) / (endX - startX);
+	return linearity(0.0f, 1.0f, volume);
 }
 
 bool DefaultMenu::IsRetry() {
@@ -439,6 +512,133 @@ void DefaultMenu::CheckClick() {
 
 	if (clickLeft_ || clickRight_ || clickUp_ || clickDown_)system_->SoundPlaySE(SH_Select_);
 	if (clickDecide_)system_->SoundPlaySE(SH_Decide_);
+
+}
+
+void DefaultMenu::CheckMouse() {
+
+	Vector2 mousePos = system_->GetMousePosVector2();
+	if (mousePos == lastMousePos_) return;
+	lastMousePos_ = mousePos;
+
+	bool isTrickingBar =
+		isSelectedBMenuSE_
+		|| isSelectedBMenuBGM_
+		|| isSelectedBMenuMASTER_;
+
+	if (!isTrickingBar) {
+		if (bMenuClose->GetIsSelect(mousePos, 1.0f, 1.0f)) {
+			if (selectedMenuIndex_ != (int)ButtonIndex::Close) {
+				lastSelectedMenuIndex_ = selectedMenuIndex_;
+				selectedMenuIndex_ = (int)ButtonIndex::Close;
+				buttonTimer_->Reset0();
+			}
+			if (bMenuClose->GetIsClick()) {
+				clickDecide_ = true;
+			}
+		}
+	}
+
+	if (!isTrickingBar) {
+		if (bMenuRetry->GetIsSelect(mousePos, 1.0f, 1.0f)) {
+			if (selectedMenuIndex_ != (int)ButtonIndex::Retry) {
+				lastSelectedMenuIndex_ = selectedMenuIndex_;
+				selectedMenuIndex_ = (int)ButtonIndex::Retry;
+				buttonTimer_->Reset0();
+			}
+			if (bMenuRetry->GetIsClick()) {
+				clickDecide_ = true;
+			}
+		}
+	}
+
+	if (!isTrickingBar) {
+		if (bMenuBack->GetIsSelect(mousePos, 1.0f, 1.0f)) {
+			if (selectedMenuIndex_ != (int)ButtonIndex::Back) {
+				lastSelectedMenuIndex_ = selectedMenuIndex_;
+				selectedMenuIndex_ = (int)ButtonIndex::Back;
+				buttonTimer_->Reset0();
+			}
+			if (bMenuBack->GetIsClick()) {
+				clickDecide_ = true;
+			}
+		}
+	}
+
+	if (!isTrickingBar) {
+		if (bMenuBGM->GetIsSelect(mousePos, 1.0f, 1.0f)) {
+			if (selectedMenuIndex_ != (int)ButtonIndex::VolumeBGM) {
+				lastSelectedMenuIndex_ = selectedMenuIndex_;
+				selectedMenuIndex_ = (int)ButtonIndex::VolumeBGM;
+				buttonTimer_->Reset0();
+			}
+			if (bMenuBGM->GetIsClick()) {
+				isSelectedBMenuBGM_ = true;
+			}
+		}
+	}
+	if (isSelectedBMenuBGM_) {
+		/// ここの計算よくない、真ん中の数字はマテリアルと判定の幅、時間があれば修正したい
+		float TunningVBX = menuStartPos_.x + 11.5f + volumeButton0x_;
+		float TunningVEX = menuStartPos_.x + 11.5f + volumeButton1x_;
+		BGMVolume_ = BarTuneVolume(mousePos, TunningVBX, TunningVEX);
+		system_->SoundSetBGMVolume(BGMVolume_);
+		sMenuButtonB->mainPosition.transform.translate.x = linearity(volumeButton0x_, volumeButton1x_, BGMVolume_);
+
+	}
+
+	if (!isTrickingBar) {
+		if (bMenuMASTER->GetIsSelect(mousePos, 1.0f, 1.0f)) {
+			if (selectedMenuIndex_ != (int)ButtonIndex::VolumeMASTER) {
+				lastSelectedMenuIndex_ = selectedMenuIndex_;
+				selectedMenuIndex_ = (int)ButtonIndex::VolumeMASTER;
+				buttonTimer_->Reset0();
+			}
+			if (bMenuMASTER->GetIsClick()) {
+				isSelectedBMenuMASTER_ = true;
+			}
+		}
+	}
+	if (isSelectedBMenuMASTER_) {
+		/// ここの計算よくない、真ん中の数字はマテリアルと判定の幅、時間があれば修正したい
+		float TunningVBX = menuStartPos_.x + 11.5f + volumeButton0x_;
+		float TunningVEX = menuStartPos_.x + 11.5f + volumeButton1x_;
+		masterVolume_ = BarTuneVolume(mousePos, TunningVBX, TunningVEX);
+		system_->SoundSetMasterVolume(masterVolume_);
+		sMenuButtonM->mainPosition.transform.translate.x = linearity(volumeButton0x_, volumeButton1x_, masterVolume_);
+
+	}
+
+	if (!isTrickingBar) {
+		if (bMenuSE->GetIsSelect(mousePos, 1.0f, 1.0f)) {
+			if (selectedMenuIndex_ != (int)ButtonIndex::VolumeSE) {
+				lastSelectedMenuIndex_ = selectedMenuIndex_;
+				selectedMenuIndex_ = (int)ButtonIndex::VolumeSE;
+				buttonTimer_->Reset0();
+			}
+			if (bMenuSE->GetIsClick()) {
+				isSelectedBMenuSE_ = true;
+			}
+		}
+	}
+	if (isSelectedBMenuSE_) {
+		/// ここの計算よくない、真ん中の数字はマテリアルと判定の幅、時間があれば修正したい
+		float TunningVBX = menuStartPos_.x + 11.5f + volumeButton0x_;
+		float TunningVEX = menuStartPos_.x + 11.5f + volumeButton1x_;
+		SEVolume_ = BarTuneVolume(mousePos, TunningVBX, TunningVEX);
+		system_->SoundSetSEVolume(SEVolume_);
+		sMenuButtonS->mainPosition.transform.translate.x = linearity(volumeButton0x_, volumeButton1x_, SEVolume_);
+	}
+
+	if (bMenuBGM->GetIsRelease()) {
+		isSelectedBMenuBGM_ = false;
+	}
+	if (bMenuMASTER->GetIsRelease()) {
+		isSelectedBMenuMASTER_ = false;
+	}
+	if (bMenuSE->GetIsRelease()) {
+		isSelectedBMenuSE_ = false;
+	}
 
 }
 
@@ -514,7 +714,7 @@ void DefaultMenu::ChangeButtonLight() {
 	float onButtonAlpha = linearity(0.0f, 1.0f, T);
 	float offButtonAlpha = linearity(1.0f, 0.0f, T);
 
-	for (int i = 0; i < 6; i++) {
+	for (int i = 0; i < 3; i++) {
 		if (i == selectedMenuIndex_) {
 			buttonsOnColor_[i]->w = onButtonAlpha;
 		} else if (i == lastSelectedMenuIndex_) {
@@ -524,35 +724,42 @@ void DefaultMenu::ChangeButtonLight() {
 				buttonsOnColor_[i]->w = 0.0f;
 			}
 		}
+	}
 
-		if (selectedMenuIndex_ == (int)ButtonIndex::VolumeMASTER) {
-			sMenuButtonM->objectParts_[0].materialConfig->textureColor.w = onButtonAlpha;
-		} else if (lastSelectedMenuIndex_ == (int)ButtonIndex::VolumeMASTER) {
-			sMenuButtonM->objectParts_[0].materialConfig->textureColor.w = offButtonAlpha;
-		} else {
-			if (sMenuButtonM->objectParts_[0].materialConfig->textureColor.w != 0.0f) {
-				sMenuButtonM->objectParts_[0].materialConfig->textureColor.w = 0.0f;
-			}
+	if (selectedMenuIndex_ == (int)ButtonIndex::VolumeMASTER) {
+		sMenuButtonM->objectParts_[0].materialConfig->textureColor.w = onButtonAlpha;
+	} else if (lastSelectedMenuIndex_ == (int)ButtonIndex::VolumeMASTER) {
+		sMenuButtonM->objectParts_[0].materialConfig->textureColor.w = offButtonAlpha;
+	} else {
+		if (sMenuButtonM->objectParts_[0].materialConfig->textureColor.w != 0.0f) {
+			sMenuButtonM->objectParts_[0].materialConfig->textureColor.w = 0.0f;
 		}
+	}
+	ChangeButtonLightUnit(
+		sMenuButtonB.get(),
+		ButtonIndex::VolumeBGM,
+		onButtonAlpha,
+		offButtonAlpha,
+		selectedMenuIndex_
+	);
 
-		if (selectedMenuIndex_ == (int)ButtonIndex::VolumeBGM) {
-			sMenuButtonB->objectParts_[0].materialConfig->textureColor.w = onButtonAlpha;
-		} else if (lastSelectedMenuIndex_ == (int)ButtonIndex::VolumeBGM) {
-			sMenuButtonB->objectParts_[0].materialConfig->textureColor.w = offButtonAlpha;
-		} else {
-			if (sMenuButtonB->objectParts_[0].materialConfig->textureColor.w != 0.0f) {
-				sMenuButtonB->objectParts_[0].materialConfig->textureColor.w = 0.0f;
-			}
-		}
+	ChangeButtonLightUnit(
+		sMenuButtonS.get(),
+		ButtonIndex::VolumeSE,
+		onButtonAlpha,
+		offButtonAlpha,
+		selectedMenuIndex_
+	);
+}
 
-		if (selectedMenuIndex_ == (int)ButtonIndex::VolumeSE) {
-			sMenuButtonS->objectParts_[0].materialConfig->textureColor.w = onButtonAlpha;
-		} else if (lastSelectedMenuIndex_ == (int)ButtonIndex::VolumeSE) {
-			sMenuButtonS->objectParts_[0].materialConfig->textureColor.w = offButtonAlpha;
-		} else {
-			if (sMenuButtonS->objectParts_[0].materialConfig->textureColor.w != 0.0f) {
-				sMenuButtonS->objectParts_[0].materialConfig->textureColor.w = 0.0f;
-			}
+void DefaultMenu::ChangeButtonLightUnit(SimpleSprite* object, ButtonIndex buttonIndex, float onButtonAlpha, float offButtonAlpha,int selectedMenuIndex) {
+	if (selectedMenuIndex == (int)buttonIndex) {
+		object->objectParts_[0].materialConfig->textureColor.w = onButtonAlpha;
+	} else if (lastSelectedMenuIndex_ == (int)buttonIndex) {
+		object->objectParts_[0].materialConfig->textureColor.w = offButtonAlpha;
+	} else {
+		if (object->objectParts_[0].materialConfig->textureColor.w != 0.0f) {
+			object->objectParts_[0].materialConfig->textureColor.w = 0.0f;
 		}
 	}
 }
@@ -585,7 +792,43 @@ void DefaultMenu::ImguiPart() {
 		ImGui::Text("IsBack: False");
 	}
 
+	ImGui::ColorEdit4("BGColor", &sMenuBG_->objectParts_[0].materialConfig->textureColor.x);
+	Vector4 wordColor = sMenuTitle->objectParts_[0].materialConfig->textureColor;
+	ImGui::ColorEdit4("wordColor", &wordColor.x);
+	sMenuTitle->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuBGM->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuMASTER->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuSE->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuClose_NL->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuBack_NL->objectParts_[0].materialConfig->textureColor = wordColor;
+	sMenuRetry_NL->objectParts_[0].materialConfig->textureColor = wordColor;
 
+	Vector4 lightColor = sMenuClose->objectParts_[0].materialConfig->textureColor;
+	ImGui::ColorEdit4("lightColor", &lightColor.x);
+	sMenuClose->objectParts_[0].materialConfig->textureColor = lightColor;
+	sMenuBack->objectParts_[0].materialConfig->textureColor = lightColor;
+	sMenuRetry->objectParts_[0].materialConfig->textureColor = lightColor;
+
+	Vector4 buttonColor = sMenuButtonM_NL->objectParts_[0].materialConfig->textureColor;
+	ImGui::ColorEdit4("buttonColor", &buttonColor.x);
+	sMenuButtonM_NL->objectParts_[0].materialConfig->textureColor = buttonColor;
+	sMenuButtonB_NL->objectParts_[0].materialConfig->textureColor = buttonColor;
+	sMenuButtonS_NL->objectParts_[0].materialConfig->textureColor = buttonColor;
+
+	Vector4 lightButtonColor = sMenuButtonM->objectParts_[0].materialConfig->textureColor;
+	ImGui::ColorEdit4("lightButtonColor", &lightButtonColor.x);
+	sMenuButtonM->objectParts_[0].materialConfig->textureColor = lightButtonColor;
+	sMenuButtonB->objectParts_[0].materialConfig->textureColor = lightButtonColor;
+	sMenuButtonS->objectParts_[0].materialConfig->textureColor = lightButtonColor;
+
+	Vector4 volumeBarColor = sMenuVolumeBarM->objectParts_[0].materialConfig->textureColor;
+	ImGui::ColorEdit4("volumeBarColor", &volumeBarColor.x);
+	sMenuVolumeBarM->objectParts_[0].materialConfig->textureColor = volumeBarColor;
+	sMenuVolumeBarB->objectParts_[0].materialConfig->textureColor = volumeBarColor;
+	sMenuVolumeBarS->objectParts_[0].materialConfig->textureColor = volumeBarColor;
+
+	Vector4 masterColor = sMenuClose->objectParts_[0].materialConfig->textureColor;
+	ImGui::ColorEdit4("Close", &sMenuClose->objectParts_[0].materialConfig->textureColor.x);
 
 	ImGui::End();
 

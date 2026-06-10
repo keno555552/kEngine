@@ -8,10 +8,10 @@
 class SoundManager
 {
 public:
-	SoundManager();
-	~SoundManager();
+	void Initialize();
+	void Finalize();
 
-	int SoundLoadSE(const char* filename);
+	int SoundLoadFile(const std::string& filename);
 	void SoundPlaySE(int Handle, float volume);
 	void SoundPlayBGM(int Handle, float volume);
 
@@ -62,7 +62,7 @@ private:
 	Microsoft::WRL::ComPtr<IXAudio2> xAudio2 = nullptr;
 	IXAudio2MasteringVoice* masterVoice = nullptr;
 
-	std::vector<SoundUnit*> sounds_;
+	std::vector<std::unique_ptr<SoundUnit>> sounds_;
 	int resourceCounter = 0;
 };
 

@@ -3,17 +3,17 @@
 #include <memory>
 #include "Transform.h"
 #include "TransformationMatrix.h"
-#include "MaterialConfig.h"
+#include "Data/Render/CPUData/MaterialConfig.h"
 #include "MathsIncluder.h"
 #include "kEngine.h"
-#include "Camera.h"
-#include "DrawData/SpriteData.h"
+#include "Camera/Camera.h"
+#include "Data/Render/CPUData/SpriteData.h"
 
 class SimpleSprite : public SimpleSpriteData {
 public:
 	void IntObject(kEngine* system);
 
-	virtual void Update(Camera* camera);
+	virtual void Update(Camera* camera = 0);
 
 	virtual void Draw();
 
@@ -44,6 +44,8 @@ public:
 	/// <param name="layer">Layer</param>
 	/// <returns>float (*0.001 x layer)</returns>
 	float TransLayerDepth(int layer);
+
+	void CopySprite(SimpleSprite* target);
 
 protected:
 	kEngine* system_ = nullptr; /// 借り
