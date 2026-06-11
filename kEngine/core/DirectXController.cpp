@@ -31,7 +31,7 @@ void DirectXController::Finalize() {
 void DirectXController::StartFrame() {
 
 #ifdef USE_IMGUI
-	ImGuiManager::BeginFrame();
+	ImGuiManager::BeginFrame(commandList.Get());
 #endif
 
 	// これから書き込むバックバッファのインデックスを取得
@@ -61,6 +61,7 @@ void DirectXController::StartFrame() {
 	//float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f }; // 黑色。RGBAの順
 	commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 	commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
+
 }
 
 void DirectXController::EndFrame() {

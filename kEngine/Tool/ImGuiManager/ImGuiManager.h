@@ -1,5 +1,6 @@
 #pragma once
 
+#include <wrl/client.h>
 #include <d3d12.h>
 
 #include "externals/imgui/imgui.h"
@@ -15,7 +16,7 @@ class ImGuiManager {
 public:
     static bool HandleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
     static void Initialize(DirectXController* dxComm);
-    static void BeginFrame();
+    static void BeginFrame(ID3D12GraphicsCommandList* commandList);
     static void EndFrame(ID3D12GraphicsCommandList* commandList);
     static void Shutdown();
 };
