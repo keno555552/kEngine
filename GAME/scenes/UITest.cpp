@@ -442,8 +442,9 @@ void UITest::ImGuiPart() {
 
 		ImGui::SliderFloat3("Rotation", &box_->mainPosition.transform.rotate.x, 0.0f, 10.0f);
 		ImGui::SliderFloat3("Position", &box_->mainPosition.transform.translate.x, 0.0f, 10.0f);
-
+		
 		ImGui::SliderFloat3("UVTrans", &box_->objectParts_[0].materialConfig->uvTranslate.x, -20.0f, 20.0f);
+		ImGui::SliderFloat3("Rotation2", &box_->objectParts_[1].transform.rotate.x, 0.0f, 10.0f);
 		ImGui::End();
 	}
 
