@@ -103,3 +103,13 @@ void MaterialConfig::MakePSODebugLine() {
 	depthStencilType = DepthStencilType::Disable;
 
 }
+
+void SetBlendFlameNeonGlow(MaterialConfig* materialConfig){
+
+	materialConfig->lightModelType = LightModelType::FlameNeonGlow;
+	materialConfig->renderModelType = RenderModelType::FlameNeonGlow;
+	materialConfig->blendModeType = BlendModeType::AddBlend;
+	materialConfig->rasterizerMode = RasterizerMode::CullNone;
+	materialConfig->depthStencilType = DepthStencilType::Disable;
+
+}
