@@ -17,7 +17,8 @@ Scene1::Scene1(kEngine* system) {
 	MH_object_ = system_->SetModelObj("GAME/resources/Object/pickaxe/pickaxe.obj");
 	MH_enemy_ = system_->SetModelObj("GAME/resources/Object/enemy/enemy.obj");
 	MH_backPoint_ = system_->SetModelObj("GAME/resources/Object/backSign/backSign.obj");
-
+	
+	TH_ReflectTexture_ = system_->LoadTexture("GAME/resources/texture/skyCube/drachenfels_cellar_2k.dds");
 	TH_box_ = system_->LoadTexture("kEngine/EngineAssets/texture/testBox.png");
 	TH_try_ = system_->LoadTexture("kEngine/EngineAssets/texture/Tryer.png");
 	TH_uv_ = system_->LoadTexture("kEngine/EngineAssets/TemplateResource/texture/uvChecker.png");
@@ -50,7 +51,7 @@ Scene1::Scene1(kEngine* system) {
 	//SH_Select_ = system_->SoundLoadSE("GAME/resources/sound/SE/menuSelect.wav");
 	//SH_Decide_ = system_->SoundLoadSE("GAME/resources/sound/SE/menuChoose.wav");
 
-
+	system_->GetDrawEngine()->SetEnviromentReflectionTexture(TH_ReflectTexture_);
 	//skydome_->CreateDefaultData();
 	skydome_ = new Object;
 	skydome_->IntObject(system_);
@@ -70,6 +71,7 @@ Scene1::Scene1(kEngine* system) {
 	player_->CreateModelData(MH_player_);
 	player_->mainPosition.transform.scale = { 0.5f, 0.5f, 0.5f };
 	player_->InputBulletList(&bulletList_);
+	player_->objectParts_[0].materialConfig->reflectiveStrength = 2.0f;
 
 	//Enemy* enemy = new Enemy(system, { 3.0f, 1.0f, 0 });
 	//enemy->CreateModelData(MH_enemy_);
@@ -355,6 +357,7 @@ void Scene1::ImGuiPart() {
 		ImGui::SliderFloat3("Rotate", &player_->mainPosition.transform.rotate.x, -1.0f, 1.0f);
 		ImGui::SliderFloat3("TargeterRotate", &sight_->mainPosition.transform.rotate.x, 0.0f, 5.0f);
 		ImGui::Text("Player HP = %d", hp);
+		ImGui::SliderFloat("Player ReflectiveStrength", &player_->objectParts_[0].materialConfig->reflectiveStrength, 0.0f, 50.0f);
 		ImGui::End();
 	}
 

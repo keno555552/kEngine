@@ -200,12 +200,10 @@ PixelShaderOutput main(VertexShaderOutput input)
         float3 cameraToPosition = normalize(input.worldPosition - gCamera.position);
         float3 reflectedVector = normalize(reflect(cameraToPosition, normalize(input.normal)));
         float3 environmentColor = gEnvironmentTexture.Sample(gSampler, reflectedVector).rgb;
-
-        // 反射強度（你可以調整）
-        float envStrength = 0.3;
  
         // 混合
         finalColor += environmentColor * gMaterial.reflectiveStrength;
+
 #endif
         
         output.color.rgb = finalColor;

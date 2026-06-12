@@ -55,6 +55,10 @@ private:
 	int TH_hpUI_ = 0;
 	int TH_hpUI_empty_ = 0;
 
+	int TH_ReflectTexture_ = 0;
+
+	/// サウンドハンドル
+
 	int SH_BGM_ = 0;
 	int SE_killEnemy_ = 0;
 

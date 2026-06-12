@@ -41,5 +41,5 @@ Bullet::~Bullet() {
 
 void Bullet::Update(Camera* camera) {
 	float dt = system_->GetDeltaTime();
-	//mainPosition.transform.translate += direction_ * speed_ * dt;
+	mainPosition.transform.translate += direction_ * speed_ * dt;
 }
