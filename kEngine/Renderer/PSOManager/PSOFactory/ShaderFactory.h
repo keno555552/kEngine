@@ -50,9 +50,6 @@ private:
 	/// PSOKeyのRenderModelTypeごとにShaderをコンパイルする関数
 	ShaderPair Compile2DShader(PSOKey& psoKeys);
 	ShaderPair Compile3DShader(PSOKey& psoKeys);
-	ShaderPair CompileDebugLineShader(PSOKey& psoKeys);
-	ShaderPair CompileSkyCubeShader(PSOKey& psoKeys);
-	ShaderPair CompileFlameNeonGlowShader(PSOKey& psoKeys);
 
 	/// PostProcess用のShaderをコンパイルする関数
 	ShaderPair CompileParticleScreenQuad(PSOKey& psoKeys);

@@ -10,9 +10,9 @@ ShaderFactory::ShaderFactory() {
 	shaderRegistry_[RenderModelType::Sprite2D] = [this](PSOKey& key) { return Compile2DShader(key); };
 	shaderRegistry_[RenderModelType::Static] = [this](PSOKey& key) { return Compile3DShader(key); };
 	shaderRegistry_[RenderModelType::Skinned] = [this](PSOKey& key) { return Compile3DShader(key); };
-	shaderRegistry_[RenderModelType::DebugLine] = [this](PSOKey& key) { return CompileDebugLineShader(key); };
-	shaderRegistry_[RenderModelType::Environment] = [this](PSOKey& key) { return CompileSkyCubeShader(key); };
-	shaderRegistry_[RenderModelType::FlameNeonGlow] = [this](PSOKey& key) { return CompileFlameNeonGlowShader(key); };
+	shaderRegistry_[RenderModelType::DebugLine] = [this](PSOKey& key) { return CompileShaderByFileName("DebugLine", key); };
+	shaderRegistry_[RenderModelType::Environment] = [this](PSOKey& key) { return CompileShaderByFileName("SkyCube", key); };
+	shaderRegistry_[RenderModelType::FlameNeonGlow] = [this](PSOKey& key) { return CompileShaderByFileName("FlameNeonGlow", key); };
 
 	/// PostProcess用の描画モデル
 	shaderRegistry_[RenderModelType::FullscreenQuad] = [this](PSOKey& key) { return CompileParticleScreenQuad(key); };
@@ -81,19 +81,6 @@ ShaderPair ShaderFactory::Compile3DShader(PSOKey& key) {
 	checkCompileResult(shaderPair);
 	return shaderPair;
 }
-
-ShaderPair ShaderFactory::CompileDebugLineShader(PSOKey& key) {
-	return CompileShaderByFileName("DebugLine", key);
-}
-
-ShaderPair ShaderFactory::CompileSkyCubeShader(PSOKey& key) {
-	return CompileShaderByFileName("SkyCube", key);
-}
-
-ShaderPair ShaderFactory::CompileFlameNeonGlowShader(PSOKey& key) {
-	return CompileShaderByFileName("FlameNeonGlow", key);
-}
-
 
 /// =============================== Checker =============================== ///
 
