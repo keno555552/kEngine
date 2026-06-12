@@ -5,7 +5,7 @@ SceneTest::SceneTest(kEngine* system) {
 	system_ = system;
 	debugCamera_ = system_->CreateDebugCamera();
 	camera_ = system_->CreateCamera();
-	camera_.lock()->Move(Vector3(0.0f, 1.5f, -10.0f));
+	camera_.lock()->Move({ 0.0f, 1.5f, -10.0f });
 	usingCamera_ = camera_.lock();
 	system_->SetCamera(usingCamera_);
 

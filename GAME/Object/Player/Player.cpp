@@ -186,8 +186,8 @@ void Player::Move() {
 		turnTimer_ = std::max(turnTimer_, 0.0f);
 
 		float destinationRotationYTable[] = {
-			-std::numbers::pi_v<float> / 2.0f,                            // 右
-			std::numbers::pi_v<float> / 2.0f,                             // 左
+			std::numbers::pi_v<float> / 2.0f,                            // 右
+			-std::numbers::pi_v<float> / 2.0f,                             // 左
 			0.0f // なし
 		};
 		// 状態に応じた角度を取得する

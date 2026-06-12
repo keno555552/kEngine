@@ -24,21 +24,21 @@ SceneWin::SceneWin(kEngine* kEngine) {
 	win_ = new SimpleSprite;
 	win_->IntObject(kEngine);
 	win_->CreateDefaultData();
-	win_->mainPosition.transform.translate = Vector3(421.0f, 218.0f, 0.0f);
+	win_->mainPosition.transform.translate = { 421.0f, 218.0f, 0.0f };
 	win_->objectParts_[0].materialConfig->textureHandle = TH_win_;
 	win_->Update(nullptr);
 
 	BG_ = new SimpleSprite;
 	BG_->IntObject(kEngine);
 	BG_->CreateDefaultData();
-	BG_->mainPosition.transform.translate = Vector3(0.0f, 0.0f, 0.0f);
+	BG_->mainPosition.transform.translate = { 0.0f, 0.0f, 0.0f };
 	BG_->objectParts_[0].materialConfig->textureHandle = TH_BG_;
 	BG_->Update(nullptr);
 
 	pressKey_ = new SimpleSprite;
 	pressKey_->IntObject(kEngine);
 	pressKey_->CreateDefaultData();
-	pressKey_->mainPosition.transform.translate = Vector3(248.0f, 444.0f, 0.0f);
+	pressKey_->mainPosition.transform.translate = { 248.0f, 444.0f, 0.0f };
 	pressKey_->objectParts_[0].materialConfig->textureHandle = TH_pressKey_;
 	pressKey_->Update(nullptr);
 

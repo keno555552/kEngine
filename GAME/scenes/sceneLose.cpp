@@ -24,21 +24,21 @@ SceneLose::SceneLose(kEngine* kEngine) {
 	lose_ = new SimpleSprite;
 	lose_->IntObject(kEngine);
 	lose_->CreateDefaultData();
-	lose_->mainPosition.transform.translate = Vector3(395.0f, 128.0f, 0.0f);
+	lose_->mainPosition.transform.translate = { 395.0f, 128.0f, 0.0f };
 	lose_->objectParts_[0].materialConfig->textureHandle = TH_lose_;
 	lose_->Update(nullptr);
 
 	BG_ = new SimpleSprite;
 	BG_->IntObject(kEngine);
 	BG_->CreateDefaultData();
-	BG_->mainPosition.transform.translate = Vector3(0.0f, 0.0f, 0.0f);
+	BG_->mainPosition.transform.translate = { 0.0f, 0.0f, 0.0f };
 	BG_->objectParts_[0].materialConfig->textureHandle = TH_BG_;
 	BG_->Update(nullptr);
 
 	pressKey_ = new SimpleSprite;
 	pressKey_->IntObject(kEngine);
 	pressKey_->CreateDefaultData();
-	pressKey_->mainPosition.transform.translate = Vector3(248.0f, 444.0f, 0.0f);
+	pressKey_->mainPosition.transform.translate = { 248.0f, 444.0f, 0.0f };
 	pressKey_->objectParts_[0].materialConfig->textureHandle = TH_pressKey_;
 	pressKey_->Update(nullptr);
 

@@ -5,8 +5,8 @@ SceneTitle::SceneTitle(kEngine* system) {
 	system_ = system;
 	debugCamera_ = system_->CreateDebugCamera();
 	camera_ = system_->CreateCamera();
-	camera_.lock()->Move(Vector3(0.0f, 0.5f, -15.0f));
-	camera_.lock()->Rotate(Vector3(0.182f, 0, 0));
+	camera_.lock()->Move({ 0.0f, 0.5f, -15.0f });
+	camera_.lock()->Rotate({ 0.182f, 0, 0 });
 
 	/// =========== ���\�[�X���[�h ============///
 
@@ -44,14 +44,14 @@ SceneTitle::SceneTitle(kEngine* system) {
 
 	title_->IntObject(system_);
 	title_->CreateDefaultData();
-	title_->mainPosition.transform.translate = Vector3(395.0f, 64.0f, 0.0f);
+	title_->mainPosition.transform.translate = { 395.0f, 64.0f, 0.0f };
 	title_->objectParts_[0].materialConfig->textureHandle = TH_title;
 	title_->Update(nullptr);
 
 	startButton_->IntObject(system_);
 	startButton_->CreateDefaultData();
 	startButton_->CreateDefaultData();
-	startButton_->mainPosition.transform.translate = Vector3(112.0f, 402.0f, 0.0f);
+	startButton_->mainPosition.transform.translate = { 112.0f, 402.0f, 0.0f };
 	startButton_->objectParts_[1].materialConfig->textureHandle = TH_startButton_;
 	//startButton_->objectParts_[1].transform.translate.z = -1;
 	startButton_->objectParts_[0].materialConfig->textureHandle = TH_buttonBack_Select_;
@@ -59,7 +59,7 @@ SceneTitle::SceneTitle(kEngine* system) {
 	settingButton_->IntObject(system_);
 	settingButton_->CreateDefaultData();
 	settingButton_->CreateDefaultData();
-	settingButton_->mainPosition.transform.translate = Vector3(112.0f, 495.0f, 0.0f);
+	settingButton_->mainPosition.transform.translate = { 112.0f, 495.0f, 0.0f };
 	settingButton_->objectParts_[1].materialConfig->textureHandle = TH_settingButton_;
 	//settingButton_->objectParts_[1].transform.translate.z = -1;
 	settingButton_->objectParts_[0].materialConfig->textureHandle = TH_buttonBack_notSelect_;
@@ -67,7 +67,7 @@ SceneTitle::SceneTitle(kEngine* system) {
 	quitButton_->IntObject(system_);
 	quitButton_->CreateDefaultData();
 	quitButton_->CreateDefaultData();
-	quitButton_->mainPosition.transform.translate = Vector3(112.0f, 597.0f, 0.0f);
+	quitButton_->mainPosition.transform.translate = { 112.0f, 597.0f, 0.0f };
 	quitButton_->objectParts_[1].materialConfig->textureHandle = TH_quitButton_;
 	//quitButton_->objectParts_[1].transform.translate.z = -1;
 	quitButton_->objectParts_[0].materialConfig->textureHandle = TH_buttonBack_notSelect_;

@@ -5,7 +5,7 @@ Scene1::Scene1(kEngine* system) {
 	system_ = system;
 	debugCamera_ = system_->CreateDebugCamera();
 	camera_ = system_->CreateCamera();
-	camera_.lock()->Move(Vector3(0.0f, 0.5f, -10.0f));
+	camera_.lock()->Move({ 0.0f, 0.5f, -10.0f });
 
 	/// =========== リソースロード ============///
 
@@ -83,7 +83,7 @@ Scene1::Scene1(kEngine* system) {
 		hpUI_[i] = new SimpleSprite;
 		hpUI_[i]->IntObject(system);
 		hpUI_[i]->CreateDefaultData();
-		hpUI_[i]->mainPosition.transform.translate = Vector3(40.0f + i * 80.0f + 40.0f, 60.0f, 0.0f);
+		hpUI_[i]->mainPosition.transform.translate = { 40.0f + i * 80.0f + 40.0f, 60.0f, 0.0f };
 		hpUI_[i]->objectParts_[0].materialConfig->textureHandle = TH_hpUI_;
 		hpUI_[i]->Update(nullptr);
 	}

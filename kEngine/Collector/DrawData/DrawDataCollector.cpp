@@ -1,5 +1,5 @@
-#include "Logger.h"
 #include "DrawDataCollector.h"
+#include "Logger.h"
 #include "CameraManager/CameraManager.h"
 #include "LightManager/LightManager.h"
 #include "Resource/ResourceManager.h"
@@ -340,6 +340,7 @@ Matrix4x4 DrawDataCollector::MakeFollowObjectMatrix3D(ObjectData* object) {
 			parent->transform.translate
 		);
 
+		//parentMatrix = local * parentMatrix;
 		parentMatrix = local * parentMatrix;
 		parent = parent->parentPart;
 	}
@@ -367,14 +368,6 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustment3D(ObjectData& object
 	Matrix4x4 viewMatrix = cam->GetViewMatrix();
 	Matrix4x4 projectionMatrix = cam->GetProjectionMatrix();
 
-
-	//if (object.isBillboard_) {
-	//	Vector3 camRot = cam->GetTransform().rotate;
-	//	part.transform.rotate.x = camRot.x;
-	//	part.transform.rotate.y = camRot.y;
-	//	//part.transform.rotate.z = 2;
-	//	DirtyEulerToQuat(part);
-	//}
 	Matrix4x4 localMatrix;
 
 	/// Billboard計算--カメラの回転を打ち消
@@ -444,6 +437,7 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustment3D(ObjectData& object
 	localMatrix;
 
 	Matrix4x4 worldMatrix = localMatrix * animationMatrix * followWorldMatrix;
+	//Matrix4x4 worldMatrix = followWorldMatrix * animationMatrix * localMatrix;
 
 	Matrix4x4 nodeMatrix = Identity();
 
