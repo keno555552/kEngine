@@ -100,3 +100,6 @@ public:
 /// MaterialConfig初期化
 void InitMaterialConfig(MaterialConfig* materialConfig);
 MaterialConfig InitMaterialConfig();
+
+/// BlandMode簡易設定
+void SetBlendFlameNeonGlow(MaterialConfig* materialConfig);
