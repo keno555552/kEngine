@@ -19,7 +19,8 @@ public:
 
 private:
 
-
+	float inspectorWidth_ = 300.0f;
+	float menuBarHeight_ = 0.0f;
 
 
 private:
