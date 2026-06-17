@@ -338,6 +338,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="kEngine\Data\Render\CPUData\RenderCommand.cpp" />
+    <ClCompile Include="kEngine\Data\Render\GPUData\RenderCommandGPU.cpp" />
     <ClCompile Include="kEngine\Math\LinearAlgebra\Gauss.cpp" />
     <ClCompile Include="kEngine\Renderer\Mesh\CylinderMesh.cpp" />
     <ClCompile Include="kEngine\Tool\EffectSystem\ParticleSystem\EmitterLink.cpp" />

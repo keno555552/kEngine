@@ -262,7 +262,7 @@ private:
 
 	/// 描画ロジック
 	std::unique_ptr <DrawEngine> drawEngine{};
-	std::unique_ptr<PostProcessRunner> postProcessRunner_{};
+	std::unique_ptr <PostProcessRunner> postProcessRunner_{};
 
 	/// ============ 入力関連 ============///
 	std::unique_ptr <InputCore> inputManager{};

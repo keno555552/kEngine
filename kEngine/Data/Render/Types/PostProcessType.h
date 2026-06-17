@@ -13,6 +13,8 @@ enum class PostProcessType
 	//EdgeDetection = 8,
 	//ChromaticAberration = 9,
 	Vignette = 10,
+	Outline = 11,
+	OutlinePrewittDepth = 12,
 };
 
 

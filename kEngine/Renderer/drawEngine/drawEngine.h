@@ -157,7 +157,7 @@ private:
 	int instancePCCounter_ = 0;
 
 	/// PostProcess関連
-	std::unique_ptr<InstanceBuffer<BlurDataGPU>> blurDataResource_;
+	std::unique_ptr<InstanceBuffer<KernelDataGPU>> kernelDataResource_;
 	int blurDataResourceCounter_ = 0;
 
 	/// EnviromentReflection関連
@@ -214,6 +214,10 @@ private:
 		RenderTexture& renderTexture,
 		D3D12_RESOURCE_STATES toState
 	);
+	void TransitionDepthStencil(
+		RenderTexture& renderTexture,
+		D3D12_RESOURCE_STATES toState
+	);
 
 	void SetRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE renderTarget);
 
@@ -225,6 +229,8 @@ private:
 	void DrawColorGrading();
 	void DrawVignette();
 	void DrawBlur();
+	void DrawOutline();
+	void DrawOutlinePrewittDepth();
 
 	/// RenderCopy(描画内容をそのまま描画する、最後の処理)
 	void DrawRenderCopy();

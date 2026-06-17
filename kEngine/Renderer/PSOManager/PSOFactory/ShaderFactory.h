@@ -55,10 +55,11 @@ private:
 	ShaderPair CompileFlameNeonGlowShader(PSOKey& psoKeys);
 
 	/// PostProcess用のShaderをコンパイルする関数
-	ShaderPair CompileParticleScreenQuad(PSOKey& psoKeys);
-	ShaderPair CompileParticleColorGuard(PSOKey& key);
-	ShaderPair CompileParticleVignetting(PSOKey& key);
-	ShaderPair CompileParticleBlur(PSOKey& key);
+	ShaderPair CompileScreenQuad(PSOKey& psoKeys);
+	ShaderPair CompileColorGuard(PSOKey& key);
+	ShaderPair CompileVignetting(PSOKey& key);
+	ShaderPair CompileBlur(PSOKey& key);
+	ShaderPair CompileOutline(PSOKey& key);
 
 
 

@@ -14,6 +14,8 @@ enum class RenderModelType {
 	ColorGradient,
 	Vignette,
 	Blur,
+	Outline,
+	OutlinePrewittDepth,
 	FullscreenQuad,
 
 	/// RenderModelの数

@@ -135,10 +135,10 @@ void DrawEngine::Initialize(
 		Vector4{ 0.1f, 0.25f, 0.5f, 1.0f }
 	);
 
-	blurDataResource_ = std::make_unique<InstanceBuffer<BlurDataGPU>>(directXDriver_);
-	BlurDataGPU* instanceListBlurData = blurDataResource_->CreateInstanceBuffer(5);
+	kernelDataResource_ = std::make_unique<InstanceBuffer<KernelDataGPU>>(directXDriver_);
+	KernelDataGPU* instanceListBlurData = kernelDataResource_->CreateInstanceBuffer(5);
 	postProcessRunner_->SetInstanceListBlurData(instanceListBlurData);
-	blurDataResource_->GetResource()->SetName("BlurDataBuffer");
+	kernelDataResource_->GetResource()->SetName("BlurDataBuffer");
 
 
 	/// =========================== カメラバッファの初期化 =========================== ///
@@ -215,17 +215,21 @@ void DrawEngine::PreDraw() {
 
 
 	/// ==================== OffscreenRT関連設定 ==================== ///
-	/// 
+	/// 1. color → RTV
 	TransitionRenderTarget(
 		m_Offscreen_InputRT,
 		D3D12_RESOURCE_STATE_RENDER_TARGET
+	);
+	/// 2. depth → DEPTH_WRITE
+	TransitionDepthStencil(
+		m_Offscreen_InputRT,
+		D3D12_RESOURCE_STATE_DEPTH_WRITE
 	);
 
 	/// RenderTargetをセット
 	auto rtv = m_Offscreen_InputRT.rtvHandleCPU;
 	auto dsv = m_Offscreen_InputRT.dsvHandleCPU;
 	commandList_->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
-
 	commandList_->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 	float clearColor[4] = { 0.1f, 0.25f, 0.5f, 1.0f };
 	commandList_->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
@@ -684,6 +688,25 @@ void DrawEngine::TransitionRenderTarget(
 	renderTexture.currentState = toState;
 }
 
+void DrawEngine::TransitionDepthStencil(
+	RenderTexture& renderTexture,
+	D3D12_RESOURCE_STATES toState
+) {
+
+	if (renderTexture.depthState == toState)
+		return;
+
+	CD3DX12_RESOURCE_BARRIER depthToSRV =
+		CD3DX12_RESOURCE_BARRIER::Transition(
+			renderTexture.depthResource.Get(),
+			renderTexture.depthState,
+			toState,
+			0
+		);
+	commandList_->ResourceBarrier(1, &depthToSRV);
+	renderTexture.depthState = toState;
+}
+
 void DrawEngine::SetRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE renderTarget) {
 	auto dsv = directXDriver_->GetDsvDescriptorHeap()->GetCPUDescriptorHandleForHeapStart();
 	commandList_->OMSetRenderTargets(1, &renderTarget, FALSE, &dsv);
@@ -793,7 +816,7 @@ void DrawEngine::DrawBlur() {
 	postProcessRunner_->SetRenderCommand(this);
 	
 	/// BlurDataを設定
-	SetRootDescriptorTable(2, blurDataResource_->GetGPUDescriptorHandle());
+	SetRootDescriptorTable(2, kernelDataResource_->GetGPUDescriptorHandle());
 
 	/// SRV Heapを設定
 	SetSRVHeap();
@@ -807,6 +830,91 @@ void DrawEngine::DrawBlur() {
 	/// OffscreenRTを入れ替える
 	std::swap(m_Offscreen_InputRT, m_Offscreen_OutputRT);
 
+}
+
+void DrawEngine::DrawOutline() {
+
+	/// RenderTargetを切り替える
+	TransitionRenderTarget(
+		m_Offscreen_InputRT,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+	);
+
+	TransitionRenderTarget(
+		m_Offscreen_OutputRT,
+		D3D12_RESOURCE_STATE_RENDER_TARGET
+	);
+
+	SetRenderTarget(m_Offscreen_OutputRT.rtvHandleCPU);
+
+	/// PSOを設定
+	PSOKey psoKey = CreateOutlinePSOKey();
+	psoManager_->SetPSO(psoKey);
+
+	/// RenderCommandをPostProcessRunnerにセット
+	postProcessRunner_->SetRenderCommand(this);
+
+	/// OutlineDataを設定
+	SetRootDescriptorTable(2, kernelDataResource_->GetGPUDescriptorHandle());
+
+	/// SRV Heapを設定
+	SetSRVHeap();
+
+	/// DescriptorTableを設定
+	SetRootDescriptorTable(0, m_Offscreen_InputRT.srvHandleGPU);
+
+	/// 最終のドロー
+	DrawFullscreenQuad();
+
+	/// OffscreenRTを入れ替える
+	std::swap(m_Offscreen_InputRT, m_Offscreen_OutputRT);
+
+}
+
+void DrawEngine::DrawOutlinePrewittDepth() {
+
+	/// RenderTargetを切り替える
+	TransitionRenderTarget(
+		m_Offscreen_InputRT,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+	);
+
+	TransitionDepthStencil(
+		m_Offscreen_InputRT,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+	);
+
+	TransitionRenderTarget(
+		m_Offscreen_OutputRT,
+		D3D12_RESOURCE_STATE_RENDER_TARGET
+	);
+
+	SetRenderTarget(m_Offscreen_OutputRT.rtvHandleCPU);
+
+	/// PSOを設定
+	PSOKey psoKey = CreateOutlinePrewittDepthPSOKey();
+	psoManager_->SetPSO(psoKey);
+
+	/// RenderCommandをPostProcessRunnerにセット
+	postProcessRunner_->SetRenderCommand(this);
+
+	/// OutlineDataを設定
+	SetRootDescriptorTable(2, kernelDataResource_->GetGPUDescriptorHandle());
+
+	/// SRV Heapを設定
+	SetSRVHeap();
+
+	/// DescriptorTableを設定
+	SetRootDescriptorTable(0, m_Offscreen_InputRT.srvHandleGPU);
+
+	/// DepthSRVを設定
+	SetRootDescriptorTable(3, m_Offscreen_InputRT.depthSrvHandleGPU);
+
+	/// 最終のドロー
+	DrawFullscreenQuad();
+
+	/// OffscreenRTを入れ替える
+	std::swap(m_Offscreen_InputRT, m_Offscreen_OutputRT);
 }
 
 void DrawEngine::DrawRenderCopy() {

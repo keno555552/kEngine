@@ -119,6 +119,8 @@ public:
 
 	void CreateRTV(ID3D12Resource* renderTexture, DXGI_FORMAT format, D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle);
 	void CreateSRV(ID3D12Resource* renderTexture, DXGI_FORMAT format, D3D12_CPU_DESCRIPTOR_HANDLE srvHandle);
+	/// 深度貼圖用SRV(Shader Resource View)を作る関数間違いないように特別に関数を作る
+	void CreateDepthSRV(ID3D12Resource* depthStencil, D3D12_CPU_DESCRIPTOR_HANDLE srvHandle);
 
 
 
