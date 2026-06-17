@@ -69,6 +69,7 @@ UITest::UITest(kEngine* system) {
 	
 	system_->SetPostProcessChain(postProcessList);
 
+
 	/// =========== リソースロード ============///
 	skydomeModelHandle_ = system_->SetModelObj("./kEngine/EngineAssets/TemplateResource/object/skydome/skydome.obj");
 	smallStageHandel_ = system_->SetModelObj("./GAME/resources/Object/smallStage/smallStage.obj");
