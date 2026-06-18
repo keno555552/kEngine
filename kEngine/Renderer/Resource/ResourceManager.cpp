@@ -18,14 +18,14 @@ void ResourceManager::Initialize(DirectXCore* device) {
 	core_ = device;
 	BDevice_ = core_->GetDevice();
 
-	config::default_Plane_MeshBufferHandle_		= CreatePlaneResource();
-	config::default_Sprite2D_MeshBufferHandle_	= CreateSimpleSpriteMeshResource();
-	config::default_Triangle_MeshBufferHandle_	= CreateTriangleResource();
-	config::default_Cube_MeshBufferHandle_		= CreateCubeResource();
-	config::default_Sphere_MeshBufferHandle_	= CreateSphereResource(10);
-	config::default_SkyCube_MeshBufferHandle_	= CreateSkyCubeResource();
-	config::default_Ring_MeshBufferHandle_		= CreateRingResource(32, 1.0f, 0.5f);
-	config::default_Cylinder_MeshBufferHandle_	= CreateCylinderResource(32, 1.0f, 1.0f, 3.0f);
+	config::default_Plane_MeshBufferHandle_ = CreatePlaneResource();
+	config::default_Sprite2D_MeshBufferHandle_ = CreateSimpleSpriteMeshResource();
+	config::default_Triangle_MeshBufferHandle_ = CreateTriangleResource();
+	config::default_Cube_MeshBufferHandle_ = CreateCubeResource();
+	config::default_Sphere_MeshBufferHandle_ = CreateSphereResource(10);
+	config::default_SkyCube_MeshBufferHandle_ = CreateSkyCubeResource();
+	config::default_Ring_MeshBufferHandle_ = CreateRingResource(32, 1.0f, 0.5f);
+	config::default_Cylinder_MeshBufferHandle_ = CreateCylinderResource(32, 1.0f, 1.0f, 3.0f);
 
 }
 
@@ -358,7 +358,7 @@ void ResourceManager::SwapMeshAndModelGroup(std::shared_ptr<Model> model, int mo
 	bool isNewModelGroup = (modelIndex == -1);
 
 	/// modelIndexが正しいか確認
-	if(!isNewModelGroup) {
+	if (!isNewModelGroup) {
 		if (modelIndex < 0 || modelIndex >= (int)modelGroupList_[modelHandle]->GetModelNum()) {
 			Logger::Log("[kEngine] RM : SwapMeshAndModelGroup() Model index %d not found.", modelIndex);
 			return;
@@ -380,7 +380,7 @@ void ResourceManager::SwapMeshAndModelGroup(std::shared_ptr<Model> model, int mo
 	meshBufferList_[meshHandle] = model;
 
 	/// 
-	if(isNewModelGroup){
+	if (isNewModelGroup) {
 		auto modelGroup = std::make_shared<ModelGroup>();
 		modelGroup->PushModel(model);
 		modelGroup->PushMeshHandle(meshHandle);
@@ -575,7 +575,7 @@ int ResourceManager::InputMaterialConfig(std::shared_ptr<MaterialConfig> materia
 
 		// CPUマテリアル更新 
 		samePtrEntry->cpuMaterial->inputMaterialConfig(*material);
-		
+
 		// GPUマテリアル更新
 		MaterialForGPU* gpuPtr = nullptr;
 		samePtrEntry->gpuMaterial->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&gpuPtr));
@@ -696,6 +696,19 @@ void ResourceManager::CreateSRV(ID3D12Resource* renderTexture, DXGI_FORMAT forma
 	BDevice_->CreateShaderResourceView(renderTexture, &renderTargetSRVDesc, srvHandle);
 }
 
+
+void ResourceManager::CreateDepthSRV(ID3D12Resource* depthStencil, D3D12_CPU_DESCRIPTOR_HANDLE srvHandle) {
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC descTextureSrvDesc{};
+	descTextureSrvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS; // D24_UNORM_S8_UINT 的 SRV 格式
+	descTextureSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	descTextureSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	descTextureSrvDesc.Texture2D.MipLevels = 1;
+
+	BDevice_->CreateShaderResourceView(depthStencil, &descTextureSrvDesc, srvHandle);
+}
+
+
 RenderTexture ResourceManager::CreateRenderTexture(
 	uint32_t width,
 	uint32_t height,
@@ -703,7 +716,7 @@ RenderTexture ResourceManager::CreateRenderTexture(
 	const Vector4& clearColor
 ) {
 
-	/// RTVの設定
+	/// RenderTexture用のResourceを生成
 	auto renderTextureResource = CreateRenderTextureResource(
 		width,
 		height,
@@ -711,29 +724,31 @@ RenderTexture ResourceManager::CreateRenderTexture(
 		clearColor
 	);
 
-	/// Alloとり
-	uint32_t rtvIndex = RtvManager::GetInstance()->Allocate();
-
-	/// RTV
-	CreateRTV(renderTextureResource.Get(), format, RtvManager::GetInstance()->GetCPUDescriptorHandle(rtvIndex));
-
-	/// Alloとり
-	uint32_t srvIndex = SrvManager::GetInstance()->Allocate();
-
-	/// SRVの作成
-	CreateSRV(renderTextureResource.Get(), format, SrvManager::GetInstance()->GetCPUDescriptorHandle(srvIndex));
-
-
+	/// RenderTexture構造体を作成
 	RenderTexture renderTexture{};
+
+	/// RTV部分
+	// Alloとり
+	renderTexture.resourceRtvHandle = RtvManager::GetInstance()->Allocate();
+	// RTV
+	CreateRTV(renderTextureResource.Get(), format, RtvManager::GetInstance()->GetCPUDescriptorHandle(renderTexture.resourceRtvHandle));
+
+	/// SRV部分
+	// Alloとり
+	renderTexture.SrvIndex = SrvManager::GetInstance()->Allocate();
+	// SRVの作成
+	CreateSRV(renderTextureResource.Get(), format, SrvManager::GetInstance()->GetCPUDescriptorHandle(renderTexture.SrvIndex));
+
 	renderTexture.resource = renderTextureResource;
-	renderTexture.rtvHandleCPU = RtvManager::GetInstance()->GetCPUDescriptorHandle(rtvIndex);
-	renderTexture.srvHandleCPU = SrvManager::GetInstance()->GetCPUDescriptorHandle(srvIndex);
-	renderTexture.srvHandleGPU = SrvManager::GetInstance()->GetGPUDescriptorHandle(srvIndex);
+	renderTexture.rtvHandleCPU = RtvManager::GetInstance()->GetCPUDescriptorHandle(renderTexture.resourceRtvHandle);
+	renderTexture.srvHandleCPU = SrvManager::GetInstance()->GetCPUDescriptorHandle(renderTexture.SrvIndex);
+	renderTexture.srvHandleGPU = SrvManager::GetInstance()->GetGPUDescriptorHandle(renderTexture.SrvIndex);
 	renderTexture.width = width;
 	renderTexture.height = height;
 	renderTexture.format = format;
 	renderTexture.clearColor = clearColor;
 	renderTexture.currentState = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+	renderTexture.depthState   = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 
 	CreateDepthStencilForRenderTexture(renderTexture);
 
@@ -788,24 +803,28 @@ ID3D12Resource* ResourceManager::CreateDepthStencilTextureResource(ID3D12Device*
 
 
 void ResourceManager::CreateDepthStencilForRenderTexture(RenderTexture& rt) {
+
+	/// 1.DepthStencilを生成する
+	//Resourceの設定
 	D3D12_RESOURCE_DESC desc{};
 	desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	desc.Width = rt.width;
 	desc.Height = rt.height;
 	desc.DepthOrArraySize = 1;
 	desc.MipLevels = 1;
-	desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	desc.Format = DXGI_FORMAT_R24G8_TYPELESS;
 	desc.SampleDesc.Count = 1;
 	desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 
+	// Heapの設定
 	D3D12_HEAP_PROPERTIES heapProperties{};
 	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;// VRAM上に作る
-
+	// Clear最適値の設定
 	D3D12_CLEAR_VALUE clearValue{};
 	clearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	clearValue.DepthStencil.Depth = 1.0f;
 
-
+	// Resourceを生成する
 	HRESULT hr = BDevice_->CreateCommittedResource(
 		&heapProperties,
 		D3D12_HEAP_FLAG_NONE,
@@ -816,12 +835,22 @@ void ResourceManager::CreateDepthStencilForRenderTexture(RenderTexture& rt) {
 	);
 	assert(SUCCEEDED(hr));
 
-	// 建立 DSV
+	/// 2.建立 DSVを作成する
 	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
 	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 
 	uint32_t dsvIndex = DsvManager::GetInstance()->Allocate();
-	rt.dsvHandleCPU = DsvManager::GetInstance()->GetCPUDescriptorHandle(dsvIndex); // 你自己的 DSV heap allocator
+	rt.dsvHandleCPU = DsvManager::GetInstance()->GetCPUDescriptorHandle(dsvIndex);
 	BDevice_->CreateDepthStencilView(rt.depthResource.Get(), &dsvDesc, rt.dsvHandleCPU);
+
+	/// 3.DepthSRVを作成する
+	// Alloとり
+	rt.depthResourceSrvIndex = SrvManager::GetInstance()->Allocate();
+	rt.depthSrvHandleCPU = SrvManager::GetInstance()->GetCPUDescriptorHandle(rt.depthResourceSrvIndex);
+	rt.depthSrvHandleGPU = SrvManager::GetInstance()->GetGPUDescriptorHandle(rt.depthResourceSrvIndex);
+	CreateDepthSRV(rt.depthResource.Get(), SrvManager::GetInstance()->GetCPUDescriptorHandle(rt.depthResourceSrvIndex));
+
+
 }
+

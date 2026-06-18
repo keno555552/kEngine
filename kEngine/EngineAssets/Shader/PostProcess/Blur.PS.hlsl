@@ -18,14 +18,6 @@ static const float2 kIndex3x3[3][3] =
     { float2(-1.0f, 1.0f), float2(0.0f, 1.0f), float2(1.0f, 1.0f) }
 };
 
-//static const float kKernel3x3[3][3] =
-//{
-//    { 1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f },
-//    { 1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f },
-//    { 1.0f / 9.0f, 1.0f / 9.0f, 1.0f / 9.0f }
-//};
-
-
 float3 Convolve(float2 vertexcoord, BlurData cb, int kernelSize)
 {
     
@@ -76,9 +68,10 @@ PixelShaderOutput main(VertexShaderOutput input)
     output.color.rgb = float3(0.0f, 0.0f, 0.0f);
     output.color.a = 1.0f;
 
+    /// ブラーの種類によって畳み込み関数を切り替える
     output.color.rgb += (gRenderCommand.blurType == 0) ?
-    ConvolveBoxBlur(input.texcoord, gRenderCommand.kernelSize) :
-    Convolve(input.texcoord, gBlurData[0], gRenderCommand.kernelSize);
+    ConvolveBoxBlur(input.texcoord, gRenderCommand.blurKernelSize) :
+    Convolve(input.texcoord, gBlurData[0], gRenderCommand.blurKernelSize);
     
     return output;
 }

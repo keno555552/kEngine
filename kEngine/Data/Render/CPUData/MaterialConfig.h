@@ -20,16 +20,24 @@ public:
 	Matrix4x4 uvTransformMatrix{};
 	Vector4 textureColor{ 1.0f,1.0f,1.0f,1.0f };
 
-	/// PSO関連
+	/// ======================== PSO関連 ======================== ///
+	// LightModelType ライティングモデルの種類、今主にParticle.PSの中にライティングを影響している
+	// RenderModelType 使用するshaderに影響する、今はInputLayout, RootSignature, Shaderのfactoryに影響している
+	// BlendModeType Blendの仕方に影響する、今はBlendStateFactoryに影響している
+	// RasterizerMode 描画方法に影響する、特別な描画する時にいじる、今はRasterizerModeFactoryに影響している
+	// DepthStencilType 震度バッファの処理方法に影響する、今はDepthStencilStateFactoryに影響している
+	// PrimitiveTypeは他のPSOデータにより決定されるため、MaterialConfigには含めない
+
     LightModelType lightModelType =       (LightModelType)    config::default_LightModel_;
     RenderModelType renderModelType =     (RenderModelType)   config::default_RenderModelTypes_;
     BlendModeType blendModeType =         (BlendModeType)     config::default_BlendMode_;
     RasterizerMode rasterizerMode =       (RasterizerMode)    config::default_RasterizerMode_;
     DepthStencilType depthStencilType =   (DepthStencilType)  config::default_DepthStenctilState_;
 
+	/// 環境マッピングに使用する、0になると使ってない
 	float reflectiveStrength = 0.0f;
-	//PrimitiveTypeは他のPSOデータにより決定されるため、MaterialConfigには含めない
 
+	/// ライティングの有効無効、今はParticle.PSの中に影響している
 	bool enableLighting = true;
 
 	/// 内部処理用
@@ -100,3 +108,6 @@ public:
 /// MaterialConfig初期化
 void InitMaterialConfig(MaterialConfig* materialConfig);
 MaterialConfig InitMaterialConfig();
+
+/// BlandMode簡易設定
+void SetBlendFlameNeonGlow(MaterialConfig* materialConfig);

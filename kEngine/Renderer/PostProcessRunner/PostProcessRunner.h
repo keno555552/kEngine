@@ -22,9 +22,10 @@ public:
 
 	/// 描画システムを設定用関数
 
-	void SetBlurData(const RenderCommand& renderCommand, int instanceIndex);
-	void SetInstanceListBlurData(BlurDataGPU* instancingListBlurData) { instancingListBlurData_ = instancingListBlurData; }
-	BlurDataGPU* GetInstanceListBlurData() { return instancingListBlurData_; }
+	void SetBlurlData(const RenderCommand& renderCommand, int instanceIndex);
+	void SetOutlinelData(const RenderCommand& renderCommand, int instanceIndex);
+	void SetInstanceListBlurData(KernelDataGPU* instancingListBlurData) { instancingListBlurData_ = instancingListBlurData; }
+	KernelDataGPU* GetInstanceListBlurData() { return instancingListBlurData_; }
 
 private:
 	std::vector<PostProcessType> chain_;
@@ -33,7 +34,7 @@ private:
 	RenderCommand renderCommand_{};
 	std::array<RenderCommandGPU, 5> renderCommandGPUPerLayer_{};
 
-	BlurDataGPU* instancingListBlurData_ = nullptr;
+	KernelDataGPU* instancingListBlurData_ = nullptr;
 	int instanceCounterBlurData_ = 0;
 
 };

@@ -8,16 +8,28 @@
 struct RenderTexture {
 
 	/// RenderTextureのリソースとビューハンドルをまとめた構造体
+	uint32_t resourceRtvHandle{};
 	Microsoft::WRL::ComPtr<ID3D12Resource> resource;
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandleCPU{};
+
+	/// Resourceの現在の状態
+	D3D12_RESOURCE_STATES currentState{};
+
+	/// SRV用のリソースとビューハンドル
+	uint32_t SrvIndex{};
 	D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU{};
 	D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU{};
 
-	D3D12_RESOURCE_STATES currentState{};
-
 	/// DepthStencil用のリソースとビューハンドル
+	uint32_t depthResourceSrvIndex = 0;
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthResource;
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandleCPU{};
+	D3D12_CPU_DESCRIPTOR_HANDLE depthSrvHandleCPU{};
+	D3D12_GPU_DESCRIPTOR_HANDLE depthSrvHandleGPU{};
+
+	/// Resourceの現在の状態
+	D3D12_RESOURCE_STATES depthState{};
+
 
 	/// 描画する大きさ
 	UINT width{};

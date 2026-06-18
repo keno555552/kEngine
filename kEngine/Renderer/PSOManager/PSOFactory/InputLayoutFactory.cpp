@@ -9,12 +9,14 @@ InputLayoutFactory::InputLayoutFactory() {
 	inputLayoutRegistry[RenderModelType::DebugLine] = [this](PSOKey& key) { return MakeInputLayoutDebugLine(); };
 	inputLayoutRegistry[RenderModelType::Environment] = [this](PSOKey& key) { return MakeInputLayoutStatic(); };
 	inputLayoutRegistry[RenderModelType::FlameNeonGlow] = [this](PSOKey& key) { return MakeInputLayoutStatic(); };
-
+	
 	/// PostProcess用の描画モデル
 	inputLayoutRegistry[RenderModelType::FullscreenQuad] = [this](PSOKey& key) { return MakeInputLayoutFullscreenQuad(); };
 	inputLayoutRegistry[RenderModelType::ColorGradient] = [this](PSOKey& key) { return MakeInputLayoutFullscreenQuad(); };
 	inputLayoutRegistry[RenderModelType::Vignette] = [this](PSOKey& key) { return MakeInputLayoutFullscreenQuad(); };
 	inputLayoutRegistry[RenderModelType::Blur] = [this](PSOKey& key) { return MakeInputLayoutFullscreenQuad(); };
+	inputLayoutRegistry[RenderModelType::Outline] = [this](PSOKey& key) { return MakeInputLayoutFullscreenQuad(); };
+	inputLayoutRegistry[RenderModelType::OutlinePrewittDepth] = [this](PSOKey& key) { return MakeInputLayoutFullscreenQuad(); };
 }
 
 D3D12_INPUT_LAYOUT_DESC InputLayoutFactory::Make(PSOKey& key) {

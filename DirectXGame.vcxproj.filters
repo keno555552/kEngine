@@ -723,6 +723,9 @@
     <ClCompile Include="kEngine\Renderer\PSOManager\PSORecorder.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="kEngine\Data\Render\GPUData\RenderCommandGPU.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
     <ClCompile Include="GAME\scenes\MapMakingEditor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>

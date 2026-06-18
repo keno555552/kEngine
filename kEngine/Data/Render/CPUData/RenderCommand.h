@@ -5,19 +5,39 @@
 #include "LinearAlgebra/Gauss.h"
 #include "Logger.h"
 
-/// Blurのカーネルを作る関数
-std::array<std::array<float, 7>, 7> MakeBoxBlur(int kernelSize);
-std::array<std::array<float, 7>, 7> MakeGaussianBlur(int kernelSize, float sigma);
+/// 先行宣言
+struct RenderCommand;
 
-enum class BlurType {
-	Box,
-	Custom,
+#pragma region KernelMaker
+/// Blurのカーネルを作る関数
+void MakeBoxBlur(RenderCommand& cmd, int kernelSize);
+void MakeGaussianBlur(RenderCommand& cmd, int kernelSize, float sigma);
+void MakeOutlineSobel(RenderCommand& cmd);
+void MakeOutlinePrewitt(RenderCommand& cmd);
+void MakeOutlinePrewittDepth(RenderCommand& cmd);
+void MakeOutlineLaplacian(RenderCommand& cmd);
+void MakeOutlineRoberts(RenderCommand& cmd);
+void MakeOutlineThick(RenderCommand& cmd, int kernelSize, float thickness);
+#pragma endregion
+
+enum class KernelType {
+	NONE,
+	BlurBox,
+	BlurCustom,
+	OutLineSobel,
+	OutLinePrewitt,
+	OutLinePrewittDepth,
+	OutLineLaplacian,
+	OutLineRoberts,
+	OutLineThick,
+	//OutLineDepth,
+	//OutLineNormal,
 	NumOfBlur
 };
 
-struct BlurCommand
+struct KernelCommand
 {
-	BlurType blurType = BlurType::Box;
+	KernelType kernelType = KernelType::NONE;
 	int kernelSize = 5;
 	float kernel[7][7]{};	/// 最大7x7のカーネルを想定している
 };
@@ -46,17 +66,31 @@ struct RenderCommand
 	/// ============= Blur用コマンド ============== ///
 	/// ここは毎回BlurをDraw前に、CPUDataを使ってこれを変わるように、使用するBlurCommandを選択すること
 	/// Blurの種類
-	int blurType = static_cast<int>(BlurType::Box);
-	/// カーネルのサイズ（例：3なら3x3のカーネルを使う）
-	int kernelSize = 5;
-	/// カーネルの対応index
-	int kernelIndex = -1;
+	KernelType blurType = KernelType::NONE;
+	/// kernelのサイズ（例：3なら3x3のカーネルを使う）
+	int blurKernelSize = 5;
+	/// kernelの対応index
+	int blurKernelIndex = -1;
 	/// Blurのカーネル
-	std::array<std::array<float, 7>, 7> blurKernelArray = MakeGaussianBlur(5, 13.0f);
+	std::array<std::array<float, 7>, 7> blurKernelArray{};
 
 	/// blurの種類によって、使用するデータが変わる
 	/// もしBoxBlurにすると、後ろのblurKernelは無視されて、GPU側でボックスの数値を計算する
 	/// もしCustomBlurにすると、後ろのblurKernelが使用され、加えてkernelSizeも必要になる(なければ7x7からデータがあるところまでSizeとして使う)
 	///    その上でkernelIndexはPostProcessRunnerがデータのあり所により埋まる
+
+	/// ============ OutLine用コマンド ============== ///
+
+	/// outlineの種類
+	KernelType outlineType = KernelType::NONE;
+	/// outlineKernelのサイズ
+	int outlineKernelSize = 0;
+	/// outlineのkernelの対応index
+	int outlineKernelIndex = 0;
+	/// 深度に関わるoutlineのための閾値
+	float outlineDepthThreshold = 0.0f;
+	/// outlineの色
+	Vector4 outlineColor{ 0.0f, 0.0f, 0.0f, 1.0f };
+	std::array<std::array<float, 7>, 7> outlineKernelArray{};
 
 };
