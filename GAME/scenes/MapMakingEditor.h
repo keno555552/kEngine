@@ -22,9 +22,17 @@ private:
 	float inspectorWidth_ = 300.0f;
 	float menuBarHeight_ = 0.0f;
 
+	bool showLoadWindow_ = false;
+
+	std::string codeingText_;
+
+	std::string loadFilePath_;
+	std::string saveFilePath_;
 
 private:
 	void ImGuiPart();
+	bool InputTextString(const char* label, std::string& str, ImGuiInputTextFlags flags = 0);
+	bool InputBigTextString(const char* label, std::string& str, ImGuiInputTextFlags flags = 0);
 
 };
 
