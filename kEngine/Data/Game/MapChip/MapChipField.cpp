@@ -1,8 +1,10 @@
 #include "MapChipField.h"
+#include "Math/Geometry/Collision/crashDecision.h"
 #include <fstream>
 #include <map>
 #include <sstream>
 #include <string>
+#include <algorithm>
 
 namespace {
 std::map<std::string, MapChipType> mapChipTable = {
@@ -38,8 +40,8 @@ void MapChipField::LoadMapChipCsv(const std::string& filePath) {
 	if (lines.empty()) { return; }
 
 	// 計算尺寸
-	uint32_t newVertical = static_cast<uint32_t>(lines.size());
-	uint32_t newHorizontal = 0;
+	int newVertical = static_cast<int>(lines.size());
+	int newHorizontal = 0;
 	{
 		std::istringstream ls(lines[0]);
 		std::string word;
@@ -53,9 +55,9 @@ void MapChipField::LoadMapChipCsv(const std::string& filePath) {
 	ResetMapChipData();
 
 	// 解析 CSV
-	for (uint32_t i = 0; i < kNumBlockVirtical && i < lines.size(); ++i) {
+	for (int i = 0; i < kNumBlockVirtical && i < static_cast<int>(lines.size()); ++i) {
 		std::istringstream line_stream(lines[i]);
-		for (uint32_t j = 0; j < kNumBlockHorizontal; ++j) {
+		for (int j = 0; j < kNumBlockHorizontal; ++j) {
 			std::string word;
 			getline(line_stream, word, ',');
 			if (mapChipTable.contains(word)) {
@@ -65,47 +67,244 @@ void MapChipField::LoadMapChipCsv(const std::string& filePath) {
 	}
 }
 
-MapChipType MapChipField::GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex) {
-	if ((xIndex < 0) || (kNumBlockHorizontal - 1 < xIndex)) {
+/// マップチップ種類を取得
+MapChipType MapChipField::GetMapChipTypeByMap(MapIndex mapIndex) {
+
+	if ((mapIndex.x < 0) || (kNumBlockHorizontal - 1 < mapIndex.x)) {
 		return MapChipType::kBlank;
 	}
-	if ((yIndex < 0) || (kNumBlockVirtical - 1 < yIndex)) {
+	if ((mapIndex.y < 0) || (kNumBlockVirtical - 1 < mapIndex.y)) {
 		return MapChipType::kBlank;
 	}
-	return mapChipData_.data[yIndex][xIndex];
+	return mapChipData_.data[mapIndex.y][mapIndex.x];
 }
 
-void MapChipField::SetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex, MapChipType type) {
-	if ((xIndex < 0) || (kNumBlockHorizontal - 1 < xIndex)) {
+MapChipType MapChipField::GetMapChipTypeByWorld(WorldIndex worldIndex) {
+	MapIndex mapIndex = ExchangeWorld2MapIndex(worldIndex);
+	return GetMapChipTypeByMap(mapIndex);
+}
+
+/// マップチップ種類を設定
+void MapChipField::SetMapChipTypeByMap(MapIndex mapIndex, MapChipType type) {
+	if ((mapIndex.x < 0) || (kNumBlockHorizontal - 1 < mapIndex.x)) {
 		return;
 	}
-	if ((yIndex < 0) || (kNumBlockVirtical - 1 < yIndex)) {
+	if ((mapIndex.y < 0) || (kNumBlockVirtical - 1 < mapIndex.y)) {
 		return;
 	}
-	mapChipData_.data[yIndex][xIndex] = type;
+	mapChipData_.data[mapIndex.y][mapIndex.x] = type;
 }
 
-Vector3 MapChipField::GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex) { return Vector3(kBlockWidth * xIndex, kBlockHeight * (kNumBlockVirtical - 1 - yIndex), 0); }
-
-MapChipField::IndexSet MapChipField::GetMapChipIndexByPosition(const Vector3& position) {
-	IndexSet indexSet = {};
-	indexSet.xIndex = static_cast<uint32_t>((position.x + kBlockWidth / 2) / kBlockWidth);
-	//float posY = (position.y - kBlockHeight / 2.0f);
-	//float indexY = (posY / kBlockHeight);
-	//indexSet.yIndex = static_cast<uint32_t>(kNumBlockVirtical - 1 - indexY);
-	indexSet.yIndex = static_cast<uint32_t>(kNumBlockVirtical - 1 - ((position.y - kBlockHeight / 2) / kBlockHeight));
-	return indexSet;
+void MapChipField::SetMapChipTypeByWorld(WorldIndex worldIndex, MapChipType type) {
+	MapIndex mapIndex = ExchangeWorld2MapIndex(worldIndex);
+	SetMapChipTypeByMap(mapIndex, type);
 }
 
-MapChipField::Rect MapChipField::GetRectByIndex(int xIndex, int yIndex) { 
-	Vector3 center = GetMapChipPositionByIndex(xIndex, yIndex);
+/// マップチップ座標を取得
+Vector3 MapChipField::GetWorldPosFromMapByMapIndex(MapIndex mapIndex) {
+	Vector3 leftBottom{ kBlockWidth * mapIndex.x,
+						kBlockHeight * (kNumBlockVirtical - 1 - mapIndex.y),
+						0 };
 
-	Rect rect;
-	rect.left = center.x - (kBlockWidth / 2.0f);
-	rect.right = center.x + (kBlockWidth / 2.0f);
-	rect.top = center.y + (kBlockHeight / 2.0f);
-	rect.bottom = center.y - (kBlockHeight / 2.0f);
-	return rect;
+	Vector3 center{ leftBottom.x + kBlockWidth * 0.5f,
+						leftBottom.y + kBlockHeight * 0.5f,
+						0 };
+
+	 return center;
+}
+
+Vector3 MapChipField::GetWorldPosFromMapByWorldIndex(WorldIndex worldIndex) {
+	MapIndex mapIndex = ExchangeWorld2MapIndex(worldIndex);
+	return GetWorldPosFromMapByMapIndex(mapIndex);
+}
+
+/// 座標からマップチップの番号を計算
+MapChipField::WorldIndex MapChipField::GetWorldIndexByPosition(const Vector3& position) {
+	WorldIndex worldIndex = {};
+	worldIndex.x = static_cast<int>(std::floor(position.x / kBlockWidth));
+	worldIndex.y = static_cast<int>(std::floor(position.y / kBlockHeight));
+	return worldIndex;
+}
+
+MapChipField::MapIndex MapChipField::GetMapIndexByPosition(const Vector3& position) {
+	WorldIndex worldIndex = GetWorldIndexByPosition(position);
+	return ExchangeWorld2MapIndex(worldIndex);
+}
+
+Vector3 MapChipField::GetMapCollisionCorrection(const AABB& box, const Vector3& velocity, float deltaTime, bool& landed) {
+	landed = false;
+	Vector3 unConstVelocity = velocity;
+	Vector3 move = unConstVelocity * deltaTime;
+	Vector3 finalMove = move;
+
+	// -------------------------
+	// 1. X 軸先處理
+	// -------------------------
+	if (move.x != 0.0f) {
+		AABB test = box;
+		test.min.x += finalMove.x;
+		test.max.x += finalMove.x;
+
+		auto tiles = GetTilesOverlapping(test);
+
+		for (auto& t : tiles) {
+			if (!t.isWall) continue;
+
+			const AABB& tile = t.aabb;
+
+			float overlapX =
+				std::min(test.max.x, tile.max.x) -
+				std::max(test.min.x, tile.min.x);
+
+			if (overlapX > 0.0f) {
+
+				if (test.min.x < tile.min.x) {
+					// 從左邊撞牆 → 往左推回
+					finalMove.x -= overlapX;
+				} else {
+					// 從右邊撞牆 → 往右推回
+					finalMove.x += overlapX;
+				}
+
+				break;
+			}
+		}
+	}
+
+	// -------------------------
+	// 2. Y 軸再處理
+	// -------------------------
+	if (move.y != 0.0f) {
+		AABB test = box;
+		test.min.y += finalMove.y;
+		test.max.y += finalMove.y;
+
+		auto tiles = GetTilesOverlapping(test);
+
+		for (auto& t : tiles) {
+			if (!t.isWall) continue;
+
+			const AABB& tile = t.aabb;
+
+			float overlapY =
+				std::min(test.max.y, tile.max.y) -
+				std::max(test.min.y, tile.min.y);
+
+			if (overlapY > 0.0f) {
+
+				if (test.min.y < tile.min.y) {
+					// 從下往上撞到天花板 → 往下推
+					finalMove.y -= overlapY;
+				} else {
+					// 從上往下撞地板 → 往上推
+					finalMove.y += overlapY;
+					landed = true;
+				}
+
+				break;
+			}
+		}
+	}
+
+	return finalMove;
+}
+
+
+Vector3 MapChipField::GetMapCollisionCorrection(const AABB& box, const Vector3& velocity, float deltaTime) {
+	bool dummyLanded;
+	return GetMapCollisionCorrection(box, velocity, deltaTime, dummyLanded);
+}
+
+std::vector<MapChipField::TileInfo> MapChipField::GetTilesOverlapping(const AABB& box){
+
+	std::vector<TileInfo> result;
+
+	float eps = 0.001f;
+	WorldIndex minIdx = GetWorldIndexByPosition({ box.min.x, box.min.y, box.min.z });
+	WorldIndex maxIdx = GetWorldIndexByPosition({ box.max.x - eps, box.max.y - eps, box.max.z });
+
+    // 2. clamp 避免越界
+    minIdx.x = std::clamp(minIdx.x, 0, (int)GetNumBlockHorizontal() - 1);
+    maxIdx.x = std::clamp(maxIdx.x, 0, (int)GetNumBlockHorizontal() - 1);
+    minIdx.y = std::clamp(minIdx.y, 0, (int)GetNumBlockVirtical() - 1);
+    maxIdx.y = std::clamp(maxIdx.y, 0, (int)GetNumBlockVirtical() - 1);
+
+    int xBegin = std::min(minIdx.x, maxIdx.x);
+    int xEnd   = std::max(minIdx.x, maxIdx.x);
+    int yBegin = std::min(minIdx.y, maxIdx.y);
+    int yEnd   = std::max(minIdx.y, maxIdx.y);
+
+    // 3. 掃描所有 tile
+    for (int y = yBegin; y <= yEnd; ++y) {
+        for (int x = xBegin; x <= xEnd; ++x) {
+
+			MapChipType type = GetMapChipTypeByWorld({ x, y });
+            bool isWall = (type == MapChipType::kDirt || type == MapChipType::kRock);
+
+            TileInfo info;
+            info.isWall = isWall;
+            info.aabb = GetAABBByWorldIndex({ x, y });
+
+            result.push_back(info);
+        }
+    }
+
+    return result;
+	
+}
+
+//std::vector<MapChipField::TileInfo> MapChipField::GetTilesOverlapping(const AABB& box){
+//
+//    std::vector<TileInfo> result;
+//
+//    float eps = 0.001f;
+//
+//    // 1. 先用 WorldIndex
+//    WorldIndex minW = GetWorldIndexByPosition({ box.min.x, box.min.y, box.min.z });
+//    WorldIndex maxW = GetWorldIndexByPosition({ box.max.x - eps, box.max.y - eps, box.max.z });
+//
+//    // 2. 再轉成 MapIndex（這一步非常重要）
+//    MapIndex minIdx = ExchangeWorld2MapIndex(minW);
+//    MapIndex maxIdx = ExchangeWorld2MapIndex(maxW);
+//
+//    // 3. clamp
+//    minIdx.x = std::clamp(minIdx.x, 0, (int)GetNumBlockHorizontal() - 1);
+//    maxIdx.x = std::clamp(maxIdx.x, 0, (int)GetNumBlockHorizontal() - 1);
+//    minIdx.y = std::clamp(minIdx.y, 0, (int)GetNumBlockVirtical() - 1);
+//    maxIdx.y = std::clamp(maxIdx.y, 0, (int)GetNumBlockVirtical() - 1);
+//
+//    // 4. 掃描 tile（用 MapIndex）
+//    for (int y = minIdx.y; y <= maxIdx.y; ++y) {
+//        for (int x = minIdx.x; x <= maxIdx.x; ++x) {
+//
+//            MapChipType type = GetMapChipTypeByMap({ x, y });
+//            bool isWall = (type == MapChipType::kDirt || type == MapChipType::kRock);
+//
+//            TileInfo info;
+//            info.isWall = isWall;
+//            info.aabb = GetAABBByMapIndex({ x, y });
+//
+//            result.push_back(info);
+//        }
+//    }
+//
+//    return result;
+//}
+
+AABB MapChipField::GetAABBByMapIndex(MapIndex mapIndex) {
+	Vector3 center = GetWorldPosFromMapByMapIndex(mapIndex);
+
+	float halfW = kBlockWidth * 0.5f;
+	float halfH = kBlockHeight * 0.5f;
+
+	AABB aabb;
+	aabb.min = center - Vector3(halfW, halfH, 0);
+	aabb.max = center + Vector3(halfW, halfH, 0);
+	return aabb;
+}
+
+AABB MapChipField::GetAABBByWorldIndex(WorldIndex worldIndex) {
+	return GetAABBByMapIndex(ExchangeWorld2MapIndex(worldIndex));
 }
 
 
@@ -115,6 +314,20 @@ void MapChipField::SetBlockWidth(float width) {
 
 void MapChipField::SetBlockHeight(float height) {
 	kBlockHeight = height;
+}
+
+MapChipField::WorldIndex MapChipField::ExchangeMap2WorldIndex(MapIndex mapSet) {
+	WorldIndex i;
+	i.x = mapSet.x;
+	i.y = (kNumBlockVirtical - 1 - mapSet.y); // 上下翻轉
+	return i;
+}
+
+MapChipField::MapIndex MapChipField::ExchangeWorld2MapIndex(WorldIndex worldIndex) {
+	MapIndex m;
+	m.x = worldIndex.x;
+	m.y = (kNumBlockVirtical - 1 - worldIndex.y); // 上下翻轉
+	return m;
 }
 
 // void GenerateBlocks(std::vector<std::vector<WorldTransform*>>& worldTransformBlocks) {

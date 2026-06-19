@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "MathsIncluder.h"
+#include "Data/Geometry/Shape/Quad/AABB.h"
 #include <string>
 
 enum class MapChipType {
@@ -13,7 +14,14 @@ enum class MapChipType {
 	NumOfTypes,
 };
 
+static std::vector<MapChipType> MapBlockType {
+	MapChipType::kDirt,
+	MapChipType::kRock,
+};
 
+static std::vector<MapChipType> MapEnemyType {
+	MapChipType::kEnemy,
+};
 
 struct MapChipData {
 	std::vector<std::vector<MapChipType>> data;
@@ -21,16 +29,21 @@ struct MapChipData {
 
 class MapChipField {
 public:
-	struct IndexSet {
-		int xIndex;
-		int yIndex;
+	/// マップの計算用の構造体(y軸は上が正、エンジンと一致する)
+	struct WorldIndex {
+		int x;
+		int y;
 	};
 
-	struct Rect {
-		float left;   // 右下
-		float right;  // 左下
-		float bottom; // 右上
-		float top;    // 左上
+	/// マップのデータを指定するための構造体
+	struct MapIndex {
+		int x;
+		int y;
+	};
+
+	struct TileInfo {
+		bool isWall;
+		AABB aabb;
 	};
 
 public:
@@ -42,19 +55,31 @@ public:
 	void LoadMapChipCsv(const std::string& filePath);
 
 	/// マップチップ種類を取得
-	MapChipType GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex);
+	MapChipType GetMapChipTypeByMap(MapIndex mapIndex);
+	MapChipType GetMapChipTypeByWorld(WorldIndex worldIndex);
 
 	/// マップチップ種類を設定
-	void SetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex, MapChipType type);
+	void SetMapChipTypeByMap(MapIndex mapIndex, MapChipType type);
+	void SetMapChipTypeByWorld(WorldIndex worldIndex, MapChipType type);
 
 	/// マップチップ座標を取得
-	Vector3 GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex);
+	Vector3 GetWorldPosFromMapByMapIndex(MapIndex mapIndex);
+	Vector3 GetWorldPosFromMapByWorldIndex(WorldIndex worldIndex);
 
 	/// 座標からマップチップの番号を計算
-	IndexSet GetMapChipIndexByPosition(const Vector3& position);
+	WorldIndex GetWorldIndexByPosition(const Vector3& position);
+	MapIndex GetMapIndexByPosition(const Vector3& position);
+
+	/// 当たり判定の修正量を取得
+	Vector3 GetMapCollisionCorrection(const AABB& box, const Vector3& velocity, float deltaTime, bool& landed);
+	Vector3 GetMapCollisionCorrection(const AABB& box, const Vector3& velocity, float deltaTime);
+
+	/// 当たっているタイルの位置情報を取得
+	std::vector<TileInfo> GetTilesOverlapping(const AABB& box);
 
 	/// ブロックの範囲取得
-	Rect GetRectByIndex(int xIndex, int yIndex);
+	AABB GetAABBByMapIndex(MapIndex mapIndex);
+	AABB GetAABBByWorldIndex(WorldIndex worldIndex);
 
 	/// ブロックサイズ関連
 	void SetBlockWidth(float width);
@@ -62,19 +87,23 @@ public:
 	Vector2 GetBlockSize() { return Vector2(kBlockWidth, kBlockHeight); }
 
 	///　ブロック数取得
-	uint32_t GetNumBlockVirtical() { return kNumBlockVirtical; }
-	uint32_t GetNumBlockHorizontal() { return kNumBlockHorizontal; }
+	int GetNumBlockVirtical() { return kNumBlockVirtical; }
+	int GetNumBlockHorizontal() { return kNumBlockHorizontal; }
 
 	/// マップチップデータ取得
 	MapChipData& GetMapChipData() { return mapChipData_; }
+
+	/// マップリーダー
+	WorldIndex ExchangeMap2WorldIndex(MapIndex mapSet);
+	MapIndex ExchangeWorld2MapIndex(WorldIndex worldIndex);
 
 private:
 	// 1ブロックのサイズ
 	static inline float kBlockWidth = 2.0f;
 	static inline float kBlockHeight = 2.0f;
 	// ブロックの個数
-	static inline uint32_t kNumBlockVirtical = 35;
-	static inline uint32_t kNumBlockHorizontal = 21;
+	static inline int kNumBlockVirtical = 35;
+	static inline int kNumBlockHorizontal = 21;
 
 	MapChipData mapChipData_;
 };

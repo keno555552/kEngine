@@ -68,6 +68,12 @@ private:
 					{SceneOutcome::NEXT,"STAGE_01"},
 			}
 		},
+		{"STAGE_01",
+			{
+					{SceneOutcome::WIN,"WIN"},
+					{SceneOutcome::LOSE,"LOSE"},
+			}
+		},
 		{"WIN",
 			{
 					{SceneOutcome::NEXT,"TITLE"},

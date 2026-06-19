@@ -26,6 +26,7 @@ static inline const float kJumpAcceleration = 7.0f;
 /// キャラクターの当たり判定サイズ
 static inline const float kPlayerWidth = 1.0f;
 static inline const float kPlayerHeight = 1.0f;
+static inline const float kPlayerHitScale = 0.9f;
 /// 着地時の速度減衰率
 static inline const float kAttenuationLanding = 0.00000001f;
 
@@ -55,7 +56,7 @@ public:
 
 	void Update(Camera* camera) override;
 	AABB& GetAABB();
-	AABB& GetMapChipAABB();
+	//AABB& GetMapChipAABB();
 	Vector3 GetVelocity() { return velocity_; }
 	Vector3 GetPosition() { return mainPosition.transform.translate; }
 	void SetVelocity(const Vector3& velocity) { velocity_ = velocity; }
@@ -173,6 +174,7 @@ private:
 
 private:
 	AABB hitBox_{};
+	DebugLine debugLine;
 
 	bool isDamage_ = false;
 	// デスフラグ

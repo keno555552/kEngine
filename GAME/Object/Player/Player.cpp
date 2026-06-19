@@ -38,28 +38,18 @@ void Player::Update(Camera* camera) {
 	Object::Update(camera);
 }
 
+
 AABB& Player::GetAABB() {
 
 	const Vector3& s = mainPosition.transform.scale;
-	float halfWidth = kPlayerWidth * std::abs(s.x) * 0.5f;
-	float halfHeight = kPlayerHeight * std::abs(s.y) * 0.5f;
-	float halfDepth = kPlayerWidth * std::abs(s.z) * 0.5f;
+	float halfWidth = kPlayerWidth   * kPlayerHitScale * 0.5f;
+	float halfHeight = kPlayerHeight * kPlayerHitScale * 0.5f;
+	float halfDepth = kPlayerWidth   * kPlayerHitScale * 0.5f;
 
-	hitBox_.min = mainPosition.transform.translate - Vector3(halfWidth, halfHeight, halfDepth);
-	hitBox_.max = mainPosition.transform.translate + Vector3(halfWidth, halfHeight, halfDepth);
+	Vector3 center = mainPosition.transform.translate;
 
-	return hitBox_;
-}
-
-AABB& Player::GetMapChipAABB() {
-
-	const Vector3& s = mainPosition.transform.scale;
-	float halfWidth = kPlayerWidth * s.x * kPlayerHitBoxScale;
-	float halfHeight = kPlayerHeight * s.y * kPlayerHitBoxScale;
-	float halfDepth = kPlayerWidth * s.z * kPlayerHitBoxScale;
-
-	hitBox_.min = mainPosition.transform.translate - Vector3(halfWidth, halfHeight, halfDepth);
-	hitBox_.max = mainPosition.transform.translate + Vector3(halfWidth, halfHeight, halfDepth);
+	hitBox_.min = center - Vector3(halfWidth, halfHeight, halfDepth);
+	hitBox_.max = center + Vector3(halfWidth, halfHeight, halfDepth);
 
 	return hitBox_;
 }

@@ -18,122 +18,57 @@ void CollisionManager::Update(float deltaTime) {
 	EnemyMapCollision();
 }
 
-void CollisionManager::MapCollisionCircle() {
-
-}
-
 bool CollisionManager::PlayerMapCollision() {
+    if (player_ == nullptr || mapChipField_ == nullptr) {
+        return false;
+    }
 
-	if (player_ == nullptr || mapChipField_ == nullptr) { return false; }
+    AABB box = player_->GetAABB();
+    Vector3 velocity = player_->GetVelocity();
 
-	AABB box = player_->GetMapChipAABB();
-	Vector3 velocity = player_->GetVelocity();
-	Vector3 move = velocity * deltaTime_;
-	AABB predicted = box;
-	predicted.min += move;
-	predicted.max += move;
+    bool landed = false;
 
-	MapChipField::IndexSet minIdx = mapChipField_->GetMapChipIndexByPosition({ box.min.x, box.min.y, box.min.z });
-	MapChipField::IndexSet maxIdx = mapChipField_->GetMapChipIndexByPosition({ box.max.x, box.max.y, box.max.z });
+    // 直接呼叫 MapChipField 的碰撞修正
+    Vector3 correction = mapChipField_->GetMapCollisionCorrection(
+        box,
+        velocity,
+        deltaTime_,
+        landed
+    );
 
-	// 夾到範圍後重新排序，避免 min>max 迴圈不執行
-	minIdx.xIndex = std::clamp(minIdx.xIndex, 0, (int)mapChipField_->GetNumBlockHorizontal() - 1);
-	maxIdx.xIndex = std::clamp(maxIdx.xIndex, 0, (int)mapChipField_->GetNumBlockHorizontal() - 1);
-	minIdx.yIndex = std::clamp(minIdx.yIndex, 0, (int)mapChipField_->GetNumBlockVirtical() - 1);
-	maxIdx.yIndex = std::clamp(maxIdx.yIndex, 0, (int)mapChipField_->GetNumBlockVirtical() - 1);
+    // 如果沒有修正量 → 沒撞到
+	auto originalMove = velocity * deltaTime_;
+	if (fabs(correction.x - originalMove.x) < 0.0001f &&
+		fabs(correction.y - originalMove.y) < 0.0001f)
+    {
+        player_->SetOnGround(false);
+        return false;
+    }
 
-	int xBegin = std::min<int>(minIdx.xIndex, maxIdx.xIndex);
-	int xEnd   = std::max<int>(minIdx.xIndex, maxIdx.xIndex);
-	int yBegin = std::min<int>(minIdx.yIndex, maxIdx.yIndex);
-	int yEnd   = std::max<int>(minIdx.yIndex, maxIdx.yIndex);
+    // 更新位置
+    Vector3 pos = player_->GetPosition();
+    pos += correction;
+    player_->SetPosition(pos);
 
-	Vector3 push{};
-	bool hit = false;
-	bool landed = false;
+    // 如果落地 → Y 速度清零
+    if (landed) {
+        velocity.y = 0.0f;
+    }
 
-	for (int y = yBegin; y <= yEnd; ++y) {
-		for (int x = xBegin; x <= xEnd; ++x) {
-
-			MapChipType checker = mapChipField_->GetMapChipTypeByIndex((uint32_t)x, (uint32_t)y);
-			if (CheckIsNotWall(checker))continue;
-
-			MapChipField::Rect rect = mapChipField_->GetRectByIndex(x, y);
-
-			float overlapX = std::min<float>(box.max.x, rect.right)  - std::max<float>(box.min.x, rect.left);
-			float overlapY = std::min<float>(box.max.y, rect.top)    - std::max<float>(box.min.y, rect.bottom);
-			if (overlapX <= 0.0f || overlapY <= 0.0f) { continue; }
-
-			hit = true;
-
-			if (overlapX < overlapY) {
-				float dirX = (velocity.x != 0.0f)
-					? (velocity.x > 0.0f ? -1.0f : 1.0f)
-					: (((box.min.x + box.max.x) * 0.5f < (rect.left + rect.right) * 0.5f) ? -1.0f : 1.0f);
-				push.x += dirX * overlapX;
-				velocity.x = 0.0f;
-			} else {
-				float dirY = (velocity.y != 0.0f)
-					? (velocity.y > 0.0f ? -1.0f : 1.0f)
-					: (((box.min.y + box.max.y) * 0.5f < (rect.bottom + rect.top) * 0.5f) ? -1.0f : 1.0f);
-				push.y += dirY * overlapY;
-				velocity.y = 0.0f;
-				if (push.y > 0.0f) { landed = true; } // 從上撞到方塊
-			}
-
-			box.min.x += push.x; box.max.x += push.x;
-			box.min.y += push.y; box.max.y += push.y;
-			predicted.min += push; predicted.max += push;
-		}
+	// 2. 往上撞天花板
+	if (correction.y < originalMove.y) {
+		velocity.y = 0.0f;
 	}
 
-	// 4-point check using predicted position to curb tunneling
-	Vector3 corners[4] = {
-		{predicted.min.x, predicted.min.y, predicted.min.z},
-		{predicted.max.x, predicted.min.y, predicted.min.z},
-		{predicted.min.x, predicted.max.y, predicted.min.z},
-		{predicted.max.x, predicted.max.y, predicted.min.z}
-	};
-	for (auto& c : corners) {
-		MapChipField::IndexSet idx = mapChipField_->GetMapChipIndexByPosition(c);
-		if (idx.xIndex < 0 || idx.yIndex < 0 || idx.xIndex >= (int)mapChipField_->GetNumBlockHorizontal() || idx.yIndex >= (int)mapChipField_->GetNumBlockVirtical()) {
-			continue;
-		}
-		MapChipType checker = mapChipField_->GetMapChipTypeByIndex((uint32_t)idx.xIndex, (uint32_t)idx.yIndex);
-		if (CheckIsNotWall(checker)) continue;
-		MapChipField::Rect rect = mapChipField_->GetRectByIndex(idx.xIndex, idx.yIndex);
-		float overlapX = std::min<float>(predicted.max.x, rect.right) - std::max<float>(predicted.min.x, rect.left);
-		float overlapY = std::min<float>(predicted.max.y, rect.top)   - std::max<float>(predicted.min.y, rect.bottom);
-		if (overlapX <= 0.0f || overlapY <= 0.0f) { continue; }
-		hit = true;
-		if (overlapX < overlapY) {
-			float dirX = (move.x != 0.0f)
-				? (move.x > 0.0f ? -1.0f : 1.0f)
-				: (((predicted.min.x + predicted.max.x) * 0.5f < (rect.left + rect.right) * 0.5f) ? -1.0f : 1.0f);
-			push.x += dirX * overlapX;
-			velocity.x = 0.0f;
-		} else {
-			float dirY = (move.y != 0.0f)
-				? (move.y > 0.0f ? -1.0f : 1.0f)
-				: (((predicted.min.y + predicted.max.y) * 0.5f < (rect.bottom + rect.top) * 0.5f) ? -1.0f : 1.0f);
-			push.y += dirY * overlapY;
-			velocity.y = 0.0f;
-			if (push.y > 0.0f) { landed = true; }
-		}
-		box.min += push; box.max += push;
-		predicted.min += push; predicted.max += push;
-	}
+    // X 軸如果撞牆 → X 速度清零
+	if (fabs(correction.x - velocity.x * deltaTime_) > 0.0001f) {
+        velocity.x = 0.0f;
+    }
 
-	if (hit) {
-		Vector3 pos = player_->GetPosition();
-		pos += push;
-		player_->SetPosition(pos);
-		player_->SetVelocity(velocity);
-		player_->SetOnGround(landed);
-		return true;
-	} else {
-		player_->SetOnGround(false);
-		return false;
-	}
+    player_->SetVelocity(velocity);
+    player_->SetOnGround(landed);
+
+    return true;
 }
 
 void CollisionManager::BulletMapCollision() {
@@ -147,16 +82,22 @@ void CollisionManager::BulletMapCollision() {
 		if (bullet == nullptr || !bullet->IsAlive()) { continue; }
 
 		Vector3 pos = bullet->GetPosition();
-		MapChipField::IndexSet idx = mapChipField_->GetMapChipIndexByPosition(pos);
+		MapChipField::WorldIndex idx = mapChipField_->GetWorldIndexByPosition(pos);
 
 		// out of bounds -> delete
-		bool outOfBounds = (idx.xIndex < 0 || idx.yIndex < 0 || idx.xIndex >= (int)maxX || idx.yIndex >= (int)maxY);
+		bool outOfBounds = (
+			idx.x < 0 ||
+			idx.y < 0 ||
+			idx.x >= (int)maxX ||
+			idx.y >= (int)maxY
+			);
+
 		if (outOfBounds) {
 			bullet->SetAlive(false);
 			continue;
 		}
 
-		MapChipType tile = mapChipField_->GetMapChipTypeByIndex((uint32_t)idx.xIndex, (uint32_t)idx.yIndex);
+		MapChipType tile = mapChipField_->GetMapChipTypeByWorld({ idx.x, idx.y });
 		if (!CheckIsNotWall(tile)) {
 			bullet->SetAlive(false);
 		}
@@ -272,19 +213,19 @@ void CollisionManager::EnemyMapCollision() {
 		Vector3 probe = pos;
 		probe.x += e->IsFaceRight() ? (blockSize.x * 0.5f) : -(blockSize.x * 0.5f);
 
-		MapChipField::IndexSet idx = mapChipField_->GetMapChipIndexByPosition(probe);
-		bool out = (idx.xIndex < 0 || idx.yIndex < 0 || idx.xIndex >= (int)mapChipField_->GetNumBlockHorizontal() || idx.yIndex >= (int)mapChipField_->GetNumBlockVirtical());
+		MapChipField::WorldIndex idx = mapChipField_->GetWorldIndexByPosition(probe);
+		bool out = (idx.x < 0 || idx.y < 0 || idx.x >= (int)mapChipField_->GetNumBlockHorizontal() || idx.y >= (int)mapChipField_->GetNumBlockVirtical());
 		if (out) { return; }
 
-		MapChipType frontTile = mapChipField_->GetMapChipTypeByIndex((uint32_t)idx.xIndex, (uint32_t)idx.yIndex);
+		MapChipType frontTile = mapChipField_->GetMapChipTypeByWorld({idx.x, idx.y});
 		// check ground one block below the front probe
 		Vector3 probeDown = probe;
 		probeDown.y -= blockSize.y;
-		MapChipField::IndexSet idxDown = mapChipField_->GetMapChipIndexByPosition(probeDown);
-		bool outDown = (idxDown.xIndex < 0 || idxDown.yIndex < 0 || idxDown.xIndex >= (int)mapChipField_->GetNumBlockHorizontal() || idxDown.yIndex >= (int)mapChipField_->GetNumBlockVirtical());
+		MapChipField::WorldIndex idxDown = mapChipField_->GetWorldIndexByPosition(probeDown);
+		bool outDown = (idxDown.x < 0 || idxDown.y < 0 || idxDown.x >= (int)mapChipField_->GetNumBlockHorizontal() || idxDown.y >= (int)mapChipField_->GetNumBlockVirtical());
 		bool cliffAhead = outDown;
 		if (!cliffAhead) {
-			MapChipType belowTile = mapChipField_->GetMapChipTypeByIndex((uint32_t)idxDown.xIndex, (uint32_t)idxDown.yIndex);
+			MapChipType belowTile = mapChipField_->GetMapChipTypeByWorld({idxDown.x, idxDown.y});
 			cliffAhead = CheckIsNotWall(belowTile); // no ground means cliff
 		}
 

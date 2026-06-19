@@ -297,22 +297,22 @@ void SceneTest::ImGuiPart() {
 void SceneTest::GenerateMap() {
 	/// ボックス生成
 	// 要素数
-	uint32_t kNumBlockVertical = mapChipField_->GetNumBlockVirtical();
-	uint32_t kNumBlockHorizontal = mapChipField_->GetNumBlockHorizontal();
+	int kNumBlockVertical = mapChipField_->GetNumBlockVirtical();
+	int kNumBlockHorizontal = mapChipField_->GetNumBlockHorizontal();
 
 	// 要素数を変更する
 	// 列数を設定(縦方向のブロック数)
 	blockObjectList_.resize(kNumBlockVertical);
-	for (uint32_t i = 0; i < kNumBlockVertical; i++) {
+	for (int i = 0; i < kNumBlockVertical; i++) {
 		// 列数を設定(横方向のブロック数)
 		blockObjectList_[i].resize(kNumBlockHorizontal);
 	}
 	// いざボックス生成
-	for (uint32_t i = 0; i < kNumBlockVertical; i++) {
-		for (uint32_t j = 0; j < kNumBlockHorizontal; j++) {
-			MapChipType mapChipType = mapChipField_->GetMapChipTypeByIndex(j, i);
+	for (int i = 0; i < kNumBlockVertical; i++) {
+		for (int j = 0; j < kNumBlockHorizontal; j++) {
+			MapChipType mapChipType = mapChipField_->GetMapChipTypeByMap({j, i});
 			if (mapChipType == MapChipType::kEnemy) {
-				Enemy* enemy = new Enemy(system_, mapChipField_->GetMapChipPositionByIndex(j, i) /*+ Vector3{ 0.0f,1.0f,0.0f }*/);
+				Enemy* enemy = new Enemy(system_, mapChipField_->GetWorldPosFromMapByMapIndex({ j, i }) /*+ Vector3{ 0.0f,1.0f,0.0f }*/);
 				enemy->CreateModelData(MH_enemy_);
 				enemy->mainPosition.transform.scale = { 0.5f,0.5f,0.5f };
 				enemy->objectParts_[0].transform.translate.y = -1.0f;
@@ -321,7 +321,7 @@ void SceneTest::GenerateMap() {
 			}
 
 			if (mapChipType == MapChipType::kPlayer) {
-				player_->mainPosition.transform.translate = mapChipField_->GetMapChipPositionByIndex(j, i) + Vector3{ 0.0f,1.0f,0.0f };
+				player_->mainPosition.transform.translate = mapChipField_->GetWorldPosFromMapByMapIndex({ j, i }) + Vector3{ 0.0f,1.0f,0.0f };
 				continue; 
 			}
 
@@ -331,7 +331,7 @@ void SceneTest::GenerateMap() {
 				blockObjectList_[i][j]->CreateDefaultData();
 				blockObjectList_[i][j]->modelHandle_ = config::default_Cube_MeshBufferHandle_;
 				blockObjectList_[i][j]->objectParts_[0].materialConfig->useModelTexture = false;
-				blockObjectList_[i][j]->mainPosition.transform.translate = mapChipField_->GetMapChipPositionByIndex(j, i);
+				blockObjectList_[i][j]->mainPosition.transform.translate = mapChipField_->GetWorldPosFromMapByMapIndex({ j, i });
 				if (mapChipType == MapChipType::kDirt) {
 					blockObjectList_[i][j]->objectParts_[0].materialConfig->textureHandle = TH_dirt_;
 				} else if (mapChipType == MapChipType::kRock) {

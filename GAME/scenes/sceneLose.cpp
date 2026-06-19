@@ -5,19 +5,11 @@ SceneLose::SceneLose(kEngine* kEngine) {
 
 	/// =========== リソースハンドル ============///
 	/// リソースハンドル
-	std::string basePath = "resources/";
-	std::string texturePath = "texture/";
-	std::string resultPath = "Result/";
+	TH_lose_ = kEngine->LoadTexture("kEngine/EngineAssets/texture/Result/Result_Lose.png");
+	TH_BG_ = kEngine->LoadTexture("kEngine/EngineAssets/texture/Result/Result_BG.png");
+	TH_pressKey_ = kEngine->LoadTexture("kEngine/EngineAssets/texture/Result/Result_BackToTitle.png");
 
-	std::string soundPath = "sound/";
-	std::string BGMPath = "BGM/";
-	std::string SEPath = "SE/";
-
-	TH_lose_ = kEngine->LoadTexture((basePath + texturePath + resultPath + "Result_Lose.png").c_str());
-	TH_BG_ = kEngine->LoadTexture((basePath + texturePath + resultPath + "Result_BG.png").c_str());
-	TH_pressKey_ = kEngine->LoadTexture((basePath + texturePath + resultPath + "Result_BackToTitle.png").c_str());
-
-	SH_BGM_ = kEngine->SoundLoadSE((basePath + soundPath + BGMPath + "Lose.wav").c_str());
+	SH_BGM_ = kEngine->SoundLoadSE("GAME/resources/sound/BGM/Lose.wav");
 
 	/// =========== ゲームオブジェクト ==========///
 
