@@ -23,6 +23,7 @@ private:
 	float menuBarHeight_ = 0.0f;
 
 	bool showLoadWindow_ = false;
+	bool showSaveWindow_ = false;
 
 	std::string codeingText_;
 
@@ -31,6 +32,8 @@ private:
 
 private:
 	void ImGuiPart();
+	void ImGuiLoadWindow();
+	void ImGuiSaveWindow();
 	bool InputTextString(const char* label, std::string& str, ImGuiInputTextFlags flags = 0);
 	bool InputBigTextString(const char* label, std::string& str, ImGuiInputTextFlags flags = 0);
 

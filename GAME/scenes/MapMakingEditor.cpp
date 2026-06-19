@@ -40,6 +40,7 @@ void MapMakingEditor::ImGuiPart()
 			}
 			if (ImGui::MenuItem("Save"))
 			{
+				showSaveWindow_ = true;
 			}
 			if (ImGui::MenuItem("Exit"))
 			{
@@ -122,8 +123,12 @@ void MapMakingEditor::ImGuiPart()
 	}
 
 	/// Popup Window
-	if (showLoadWindow_)
-	{
+	ImGuiLoadWindow();
+	ImGuiSaveWindow();
+}
+
+void MapMakingEditor::ImGuiLoadWindow() {
+	if (showLoadWindow_) {
 		float lineHeight = ImGui::GetTextLineHeightWithSpacing();
 		float padding = ImGui::GetStyle().WindowPadding.y * 2;
 		float titleBar = ImGui::GetFrameHeight();
@@ -135,18 +140,42 @@ void MapMakingEditor::ImGuiPart()
 		InputTextString("Load File Path", loadFilePath_);
 
 		bool isButtonClicked = false;
-		if (ImGui::Button("Load"))
-		{
+		if (ImGui::Button("Load")) {
 			isButtonClicked = true;
 		}
 		ImGui::SameLine();
-		if (ImGui::Button("Close"))
-		{
+		if (ImGui::Button("Close")) {
 			isButtonClicked = true;
 		}
-		if (isButtonClicked)
-		{
+		if (isButtonClicked) {
 			showLoadWindow_ = false;
+		}
+		ImGui::End();
+	}
+}
+
+void MapMakingEditor::ImGuiSaveWindow() {
+	if (showSaveWindow_) {
+		float lineHeight = ImGui::GetTextLineHeightWithSpacing();
+		float padding = ImGui::GetStyle().WindowPadding.y * 2;
+		float titleBar = ImGui::GetFrameHeight();
+		float fixedHeight = lineHeight * 3 + padding + titleBar;
+		ImGui::SetNextWindowSize(ImVec2(0, fixedHeight));
+		ImGui::SetNextWindowFocus();
+		ImGui::Begin("Save Window", &showSaveWindow_, ImGuiWindowFlags_NoResize);
+
+		InputTextString("Save File Path", saveFilePath_);
+
+		bool isButtonClicked = false;
+		if (ImGui::Button("Save")) {
+			isButtonClicked = true;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Close")) {
+			isButtonClicked = true;
+		}
+		if (isButtonClicked) {
+			showSaveWindow_ = false;
 		}
 		ImGui::End();
 	}
@@ -199,6 +228,13 @@ bool MapMakingEditor::InputBigTextString(const char *label, std::string &str, Im
 	// 取得視窗內容區域大小（扣掉 Text 的高度）
     ImVec2 avail = ImGui::GetContentRegionAvail();
 
+	// 下方 padding
+	avail.y -= ImGui::GetTextLineHeight();
+
+	// 字一個分の左右 padding を追加
+	float padX = ImGui::GetFontSize();  
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(padX, ImGui::GetStyle().FramePadding.y));
+
 	bool result = ImGui::InputTextMultiline(
 		newLabel.c_str(),
 		const_cast<char *>(str.c_str()),
@@ -207,6 +243,8 @@ bool MapMakingEditor::InputBigTextString(const char *label, std::string &str, Im
 		flags,
 		InputTextCallback,
 		&str);
+
+	ImGui::PopStyleVar();
 
 	// 下方 padding
 	ImGui::Dummy(ImVec2(0, ImGui::GetTextLineHeight()));
