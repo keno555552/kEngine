@@ -15,10 +15,12 @@ ShaderFactory::ShaderFactory() {
 	shaderRegistry_[RenderModelType::FlameNeonGlow] = [this](PSOKey& key) { return CompileShaderByFileName("FlameNeonGlow", key); };
 
 	/// PostProcess用の描画モデル
-	shaderRegistry_[RenderModelType::FullscreenQuad] = [this](PSOKey& key) { return CompileParticleScreenQuad(key); };
-	shaderRegistry_[RenderModelType::ColorGradient] = [this](PSOKey& key) { return CompileParticleColorGuard(key); };
-	shaderRegistry_[RenderModelType::Vignette] = [this](PSOKey& key) { return CompileParticleVignetting(key); };
-	shaderRegistry_[RenderModelType::Blur] = [this](PSOKey& key) { return CompileParticleBlur(key); };
+	shaderRegistry_[RenderModelType::FullscreenQuad] = [this](PSOKey& key) { return CompileScreenQuad(key); };
+	shaderRegistry_[RenderModelType::ColorGradient] = [this](PSOKey& key) { return CompileColorGuard(key); };
+	shaderRegistry_[RenderModelType::Vignette] = [this](PSOKey& key) { return CompileVignetting(key); };
+	shaderRegistry_[RenderModelType::Blur] = [this](PSOKey& key) { return CompileBlur(key); };
+	shaderRegistry_[RenderModelType::Outline] = [this](PSOKey& key) { return CompileOutline(key); };
+	shaderRegistry_[RenderModelType::OutlinePrewittDepth] = [this](PSOKey& key) { return CompilePostProcessShader("OutlinePrewittDepth", key); };
 }
 
 ShaderPair ShaderFactory::MakeShaderBlob(PSOKey& key) {
@@ -84,23 +86,26 @@ ShaderPair ShaderFactory::Compile3DShader(PSOKey& key) {
 
 /// =============================== Checker =============================== ///
 
-ShaderPair ShaderFactory::CompileParticleScreenQuad(PSOKey& key) {
+ShaderPair ShaderFactory::CompileScreenQuad(PSOKey& key) {
 	return CompilePostProcessShader("CopyImage", key);
 }
 
-ShaderPair ShaderFactory::CompileParticleColorGuard(PSOKey& key) {
+ShaderPair ShaderFactory::CompileColorGuard(PSOKey& key) {
 	return CompilePostProcessShader("ColorGuard", key);
 }
 
-ShaderPair ShaderFactory::CompileParticleVignetting(PSOKey& key) {
+ShaderPair ShaderFactory::CompileVignetting(PSOKey& key) {
 	return CompilePostProcessShader("Vignette", key);
 }
 
-ShaderPair ShaderFactory::CompileParticleBlur(PSOKey& key) {
+ShaderPair ShaderFactory::CompileBlur(PSOKey& key) {
 	return CompilePostProcessShader("Blur", key);
 }
 
-
+ShaderPair ShaderFactory::CompileOutline(PSOKey& key) {
+	return CompilePostProcessShader("Outline", key);
+}
+	
 /// =============================== Checker =============================== ///
 
 void ShaderFactory::checkCompileResult(ShaderPair shaderPair) {

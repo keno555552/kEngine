@@ -1,10 +1,10 @@
 #include "RenderCommand.h"
 
-std::array<std::array<float, 7>, 7> MakeBoxBlur(int kernelSize) {
+void MakeBoxBlur(RenderCommand& cmd, int kernelSize) {
 	std::array<std::array<float, 7>, 7> kernel{};
 	if (kernelSize < 3 || kernelSize > 7) {
 		Logger::Log("[kEngine] MakeBoxBlur() kernelSize must be at least 3 and Less than 7");
-		return kernel;
+		return;
 	}
 
 	// 強制奇數
@@ -20,15 +20,16 @@ std::array<std::array<float, 7>, 7> MakeBoxBlur(int kernelSize) {
 			kernel[y][x] = 1.0f / count;
 		}
 	}
-
-	return kernel;
+	cmd.blurType = KernelType::BlurBox;
+	cmd.blurKernelSize = usingSize;
+	cmd.blurKernelArray = kernel;
 }
 
-std::array<std::array<float, 7>, 7> MakeGaussianBlur(int kernelSize, float sigma) {
+void MakeGaussianBlur(RenderCommand& cmd, int kernelSize, float sigma) {
 	std::array<std::array<float, 7>, 7> kernel{};
 	if (kernelSize < 3 || kernelSize > 7) {
 		Logger::Log("[kEngine] MakeGaussianBlur() kernelSize must be at least 3 and Less than 7");
-		return kernel;
+		return;
 	}
 
 	// 強制奇數
@@ -56,5 +57,80 @@ std::array<std::array<float, 7>, 7> MakeGaussianBlur(int kernelSize, float sigma
 		}
 	}
 
-	return kernel;
+	cmd.blurType = KernelType::BlurCustom;
+	cmd.blurKernelSize = usingSize;
+	cmd.blurKernelArray = kernel;
+}
+
+void MakeOutlineSobel(RenderCommand& cmd) {
+	std::array<std::array<float, 7>, 7> k{};
+	k[0][0] = -1; k[0][1] = 0; k[0][2] = 1;
+	k[1][0] = -2; k[1][1] = 0; k[1][2] = 2;
+	k[2][0] = -1; k[2][1] = 0; k[2][2] = 1;
+	cmd.outlineType = KernelType::OutLineSobel;
+	cmd.outlineKernelSize = 3;
+	cmd.outlineKernelArray = k;
+}
+
+void MakeOutlinePrewitt(RenderCommand& cmd) {
+	cmd.outlineType = KernelType::OutLinePrewitt;
+	cmd.outlineDepthThreshold = 0.01f;
+	cmd.outlineKernelSize = 0;
+}
+
+void MakeOutlinePrewittDepth(RenderCommand& cmd) {
+	cmd.outlineType = KernelType::OutLinePrewittDepth;
+	cmd.outlineDepthThreshold = 0.01f;
+	cmd.outlineKernelSize = 0;	
+}
+
+void MakeOutlineLaplacian(RenderCommand& cmd) {
+	std::array<std::array<float, 7>, 7> k{};
+	k[0][0] =  0; k[0][1] = -1; k[0][2] =  0;
+	k[1][0] = -1; k[1][1] =  4; k[1][2] = -1;
+	k[2][0] =  0; k[2][1] = -1; k[2][2] =  0;
+	cmd.outlineType = KernelType::OutLineLaplacian;
+	cmd.outlineKernelSize = 3;
+	cmd.outlineKernelArray = k;
+}
+
+void MakeOutlineRoberts(RenderCommand& cmd) {
+	std::array<std::array<float, 7>, 7> k{};
+	k[0][0] = 0; k[0][1] = 1;
+	k[1][0] = -1; k[1][1] = 0;
+	cmd.outlineType = KernelType::OutLineRoberts;
+	cmd.outlineKernelSize = 2;
+	cmd.outlineKernelArray = k;
+}
+
+void MakeOutlineThick(RenderCommand& cmd,int kernelSize, float thickness) {
+	std::array<std::array<float, 7>, 7> k{};
+	if (kernelSize < 3 || kernelSize > 7) {
+		Logger::Log("[kEngine] MakeGaussianBlur() kernelSize must be at least 3 and Less than 7");
+		return;
+	}
+
+	// 強制奇數
+	int usingSize = (kernelSize % 2 == 0) ? (kernelSize + 1) : kernelSize;
+	int half = usingSize / 2;
+
+	float sigma = thickness;
+
+	float sum = 0.0f;
+	for (int y = -half; y <= half; y++) {
+		for (int x = -half; x <= half; x++) {
+			float v = exp(-(x * x + y * y) / (2 * sigma * sigma));
+			k[y + half][x + half] = v;
+			sum += v;
+		}
+	}
+
+	// normalize
+	for (int y = 0; y < usingSize; y++)
+		for (int x = 0; x < usingSize; x++)
+			k[y][x] /= sum;
+
+	cmd.outlineType = KernelType::OutLineThick;
+	cmd.outlineKernelSize = usingSize;
+	cmd.outlineKernelArray = k;
 }

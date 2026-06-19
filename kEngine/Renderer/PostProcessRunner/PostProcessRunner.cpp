@@ -33,30 +33,44 @@ void PostProcessRunner::RunPass(DrawEngine* drawEngine, PostProcessType type) {
 	case PostProcessType::Blur:
 		drawEngine->DrawBlur();
 		break;
+	case PostProcessType::Outline:
+		drawEngine->DrawOutline();
+		break;
+	case PostProcessType::OutlinePrewittDepth:
+		drawEngine->DrawOutlinePrewittDepth();
+		break;
 	}
 }
 
 void PostProcessRunner::ChangeRenderCommand(const RenderCommand& command) {
 	renderCommand_ = command;
 	ConvertRenderCommandToGPU(renderCommand_, renderCommandGPUPerLayer_[0]);
-	SetBlurData(command, 0);
-
+	SetBlurlData(command, 0);
+	SetOutlinelData(command, 1);
 }
 
 void PostProcessRunner::SetRenderCommand(DrawEngine* drawEngine) {
-	
+
 	drawEngine->commandList_->SetGraphicsRoot32BitConstants(
 		1,  // RootParameter index（b0,slot[1]）
 		sizeof(RenderCommandGPU) / sizeof(uint32_t),
 		&renderCommandGPUPerLayer_[0],
-		0 
+		0
 	);
 }
 
-void PostProcessRunner::SetBlurData(const RenderCommand& renderCommand, int instanceIndex) {
+void PostProcessRunner::SetBlurlData(const RenderCommand& renderCommand, int instanceIndex) {
 	if (instanceIndex >= 5) {
-		Logger::Log("[kEngine]PostProcessRunner::SetBlurData() instanceIndex is out of range");
+		Logger::Log("[kEngine]PostProcessRunner::SetBlurlData() instanceIndex is out of limited");
 		return;
 	}
 	instancingListBlurData_[instanceIndex].ConvertBlurCommand(renderCommand);
+}
+
+void PostProcessRunner::SetOutlinelData(const RenderCommand& renderCommand, int instanceIndex) {
+	if (instanceIndex >= 5) {
+		Logger::Log("[kEngine]PostProcessRunner::SetOutlinelData() instanceIndex is out of limited");
+		return;
+	}
+	instancingListBlurData_[instanceIndex].ConvertOutlineCommand(renderCommand);
 }

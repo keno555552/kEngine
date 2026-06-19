@@ -37,60 +37,28 @@ struct RenderCommandGPU
 	/// Blurの種類
 	int blurType;
 	/// カーネルのサイズ（例：3なら3x3のカーネルを使う）
-	int kernelSize;
+	int blurKernelSize;
 	/// カーネルの対応index
-	int kernelIndex;
+	int blurKernelIndex;
+
+	/// =========== OutLine用コマンド ============= ///
+	/// oulineの種類
+	int outlineType;
+	// ------ padding counter line-------
+	/// oulineのサイズ
+	int outlineKernelSize;
+	/// oulineの対応index
+	int outlineKernelIndex;
+	/// 深度に関わるoutlineのための閾値
+	float outlineDepthThreshold = 0.0f;
+	float padding2{};
+	// ------ padding counter line-------
+	/// outlineの色
+	Vector4 outlineColor{ 0.0f, 0.0f, 0.0f, 1.0f };
+	// ------ padding counter line-------
 
 };
 
-inline void ConvertRenderCommandToGPU(const RenderCommand& cpu, RenderCommandGPU& gpu) {
-
-	/// ========== ColorGuard =========== ///
-	if (gpu.guardColor[0] != cpu.guardColor[0]) gpu.guardColor[0] = cpu.guardColor[0];
-	if (gpu.guardColor[1] != cpu.guardColor[1]) gpu.guardColor[1] = cpu.guardColor[1];
-	if (gpu.guardColor[2] != cpu.guardColor[2]) gpu.guardColor[2] = cpu.guardColor[2];
-	if (gpu.guardAmount != cpu.guardAmount)	gpu.guardAmount = cpu.guardAmount;
-
-	/// ========== Vignette =========== ///
-	if (gpu.vignetteCenter[0] != cpu.vignetteCenter.x) gpu.vignetteCenter[0] = cpu.vignetteCenter.x;
-	if (gpu.vignetteCenter[1] != cpu.vignetteCenter.y) gpu.vignetteCenter[1] = cpu.vignetteCenter.y;
-	if (gpu.vignetteRadius != cpu.vignetteRadius) gpu.vignetteRadius = cpu.vignetteRadius;
-	if (gpu.vignetteSoftness != cpu.vignetteSoftness) gpu.vignetteSoftness = cpu.vignetteSoftness;
-	if (gpu.vignetteIntensity != cpu.vignetteIntensity) gpu.vignetteIntensity = cpu.vignetteIntensity;
-	if (gpu.vignetteColor[0] != cpu.vignetteColor.x) gpu.vignetteColor[0] = cpu.vignetteColor.x;
-	if (gpu.vignetteColor[1] != cpu.vignetteColor.y) gpu.vignetteColor[1] = cpu.vignetteColor.y;
-	if (gpu.vignetteColor[2] != cpu.vignetteColor.z) gpu.vignetteColor[2] = cpu.vignetteColor.z;
-	if (gpu.vignetteColor[3] != cpu.vignetteColor.w) gpu.vignetteColor[3] = cpu.vignetteColor.w;
-
-	/// ========== Blur =========== ///
-	int newType = static_cast<int>(cpu.blurType);
-
-	if (gpu.blurType != newType) gpu.blurType = newType;
-	if (newType == static_cast<int>(BlurType::Box)) {
-		if (gpu.kernelSize != cpu.kernelSize) gpu.kernelSize = cpu.kernelSize;
-		gpu.kernelIndex = -1;
-	} else if (newType == static_cast<int>(BlurType::Custom)) {
-		/// kernelSizeを計算する
-
-		int maxIndex = -1;
-		for (int y = 6; y >= 0; --y) {
-			bool isData = false;
-			for (int x = 6; x >= 0; --x) {
-				if (cpu.blurKernelArray[y][x] != 0.0f) {
-					maxIndex = std::max(x, y);
-					isData = true;
-				}
-			}
-			if (isData) break;
-		}
-
-		// snap 成 3/5/7
-		int size = 3;
-		if (maxIndex >= 6) size = 7;
-		else if (maxIndex >= 4) size = 5;
-		else if (maxIndex < 0) size = -1; // データなし
-
-		// 更新 GPU
-		if (gpu.kernelSize != size) gpu.kernelSize = size;
-	}
-}
+void ConvertRenderCommandToGPU(const RenderCommand& cpu, RenderCommandGPU& gpu);
+bool IsBlurCheck(const RenderCommand& cpu);
+bool IsOutlineCheck(const RenderCommand& cpu);

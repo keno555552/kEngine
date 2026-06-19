@@ -62,9 +62,11 @@ UITest::UITest(kEngine* system) {
 
 	/// PostEffectを設定
 	std::vector<PostProcessType> postProcessList = {
-		//PostProcessType::ColorGrading,
+		PostProcessType::OutlinePrewittDepth,
 	};
 
+	MakeOutlinePrewittDepth(renderCommand_);
+	
 	system_->SetPostProcessChain(postProcessList);
 
 	/// =========== リソースロード ============///
@@ -396,9 +398,12 @@ void UITest::ImGuiPart() {
 		int currentBlurType = static_cast<int>(renderCommand_.blurType);
 		// 選択肢
 		if (ImGui::Combo("BlurType", &currentBlurType, blurType, IM_ARRAYSIZE(blurType))) {
-			renderCommand_.blurType = currentBlurType;
+			renderCommand_.blurType = static_cast<KernelType>(currentBlurType);
 		}
-		ImGui::SliderInt("Kernel Size", &renderCommand_.kernelSize, 1, 7);
+		ImGui::SliderInt("Kernel Size", &renderCommand_.blurKernelSize, 1, 7);
+		ImGui::Text("Outline");
+		ImGui::SliderFloat("Outline Depth Threshold", &renderCommand_.outlineDepthThreshold, 0.01f, 0.1f);
+		ImGui::ColorEdit4("Outline Color", &renderCommand_.outlineColor.x);
 		ImGui::End();
 	}
 

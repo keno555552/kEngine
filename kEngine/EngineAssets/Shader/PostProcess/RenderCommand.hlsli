@@ -13,8 +13,17 @@ struct RenderCommand
     
     // blur
     int blurType;
-    int kernelSize;
-    int kernelIndex;
+    int blurKernelSize;
+    int blurKernelIndex;
+    
+    // outline
+    int outlineType;
+    int outlineKernelSize;
+    int outlineKernelIndex;
+    float depthThreshold;
+    
+    float4 outlineColor;
+    
 };
 
 /// BlurType:(手動更新:260602)

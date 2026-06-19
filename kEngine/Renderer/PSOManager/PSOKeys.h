@@ -191,3 +191,15 @@ inline PSOKey CreateBlurPSOKey() {
 	blurKey.renderModelType = RenderModelType::Blur;
 	return blurKey;
 }
+
+inline PSOKey CreateOutlinePSOKey() {
+	PSOKey outlineKey = CreateFullscreenPSOKey();
+	outlineKey.renderModelType = RenderModelType::Outline;
+	return outlineKey;
+}
+
+inline PSOKey CreateOutlinePrewittDepthPSOKey() {
+	PSOKey outlinePrewittDepthKey = CreateFullscreenPSOKey();
+	outlinePrewittDepthKey.renderModelType = RenderModelType::OutlinePrewittDepth;
+	return outlinePrewittDepthKey;
+}

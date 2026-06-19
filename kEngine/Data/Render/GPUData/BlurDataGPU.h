@@ -1,7 +1,7 @@
 #pragma once
 #include "Data/Render/CPUData/RenderCommand.h"
 
-struct BlurDataGPU
+struct KernelDataGPU
 {
 	float kernel[49]{};
 	float padding[3]{};
@@ -10,6 +10,14 @@ struct BlurDataGPU
 		for (int y = 0; y < 7; ++y) {
 			for (int x = 0; x < 7; ++x) {
 				kernel[y * 7 + x] = cpu.blurKernelArray[y][x];
+			}
+		}
+	}
+
+	inline void ConvertOutlineCommand(const RenderCommand& cpu) {
+		for (int y = 0; y < 7; ++y) {
+			for (int x = 0; x < 7; ++x) {
+				kernel[y * 7 + x] = cpu.outlineKernelArray[y][x];
 			}
 		}
 	}

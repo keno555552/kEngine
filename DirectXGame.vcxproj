@@ -345,6 +345,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="GAME\scenes\SceneTitle.cpp" />
     <ClCompile Include="GAME\scenes\SceneWin.cpp" />
     <ClCompile Include="kEngine\Data\Render\CPUData\RenderCommand.cpp" />
+    <ClCompile Include="kEngine\Data\Render\GPUData\RenderCommandGPU.cpp" />
     <ClCompile Include="GAME\Object\Sight\Sight.cpp" />
     <ClCompile Include="GAME\Object\Enemy\Enemy.cpp" />
     <ClCompile Include="kEngine\Math\LinearAlgebra\Gauss.cpp" />
