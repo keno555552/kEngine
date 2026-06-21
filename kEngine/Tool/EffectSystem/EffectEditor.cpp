@@ -142,9 +142,30 @@ void EffectEditor::Draw()
 	ground_->Draw();
 	centerAnchor_->Draw();
 
+#ifdef USE_IMGUI
 	ImGuiPart();
+#endif
 }
 
+void EffectEditor::CameraPart() {
+	if (useDebugCamera) {
+		usingCamera_ = debugCamera_;
+		if (auto sp = debugCamera_.lock()) {
+			sp->MouseControlUpdate();
+		}
+	} else {
+		//Transform cameraTransform = CreateDefaultTransform();
+		//cameraTransform.translate.x = player_->mainPosition.transform.translate.x;
+		//cameraTransform.translate.y = player_->mainPosition.transform.translate.y + 0.5f;
+		//cameraTransform.translate.z = player_->mainPosition.transform.translate.z - 15.0f;
+		//camera_->SetCamera(cameraTransform);
+		usingCamera_ = camera_;
+	}
+	//usingCamera_->Update();
+	system_->SetCamera(usingCamera_);
+}
+
+#ifdef USE_IMGUI
 void EffectEditor::ImGuiPart()
 {
 
@@ -183,23 +204,6 @@ void EffectEditor::ImGuiPart()
 	ImGuiSaveWindow();
 }
 
-void EffectEditor::CameraPart() {
-	if (useDebugCamera) {
-		usingCamera_ = debugCamera_;
-		if (auto sp = debugCamera_.lock()) {
-			sp->MouseControlUpdate();
-		}
-	} else {
-		//Transform cameraTransform = CreateDefaultTransform();
-		//cameraTransform.translate.x = player_->mainPosition.transform.translate.x;
-		//cameraTransform.translate.y = player_->mainPosition.transform.translate.y + 0.5f;
-		//cameraTransform.translate.z = player_->mainPosition.transform.translate.z - 15.0f;
-		//camera_->SetCamera(cameraTransform);
-		usingCamera_ = camera_;
-	}
-	//usingCamera_->Update();
-	system_->SetCamera(usingCamera_);
-}
 
 void EffectEditor::ImGuiLeftMenuBar() {
 	ImGuiIO& io = ImGui::GetIO();
@@ -503,6 +507,7 @@ bool EffectEditor::InputBigTextString(const char *label, std::string &str, ImGui
 
 	return result;
 }
+#endif
 
 /// ImDrawList* draw = ImGui::GetWindowDrawList();
 /// ImVec2 p = ImGui::GetCursorScreenPos();
