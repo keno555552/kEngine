@@ -1,6 +1,5 @@
 #pragma once
-#include "Tool/EffectSystem/ParticleSystem/ParticlePrototype.h"
-#include "Tool/EffectSystem/ParticleSystem/EmitterLink.h"
+#include "Tool/EffectSystem/ParticleSystem/EffectData.h"
 
 struct HitSpark : ParticlePrototype
 {
@@ -88,4 +87,15 @@ struct HitSpackImpactLink : EmitterLink
 		linkFollow = LinkFollow::Emitter;
 		emitterTiming = EmitterTiming::SourceEmit;
 	}
+};
+
+class Effect_HitSpark : public EffectData
+{
+public:
+	Effect_HitSpark() {
+		prototypes.push_back(HitSpark());
+
+		prototypes.push_back(HitImpact());
+		links.push_back(HitSpackImpactLink());
+	};
 };
