@@ -298,8 +298,8 @@ AABB MapChipField::GetAABBByMapIndex(MapIndex mapIndex) {
 	float halfH = kBlockHeight * 0.5f;
 
 	AABB aabb;
-	aabb.min = center - Vector3(halfW, halfH, 0);
-	aabb.max = center + Vector3(halfW, halfH, 0);
+	aabb.min = center - Vector3{halfW, halfH, 0};
+	aabb.max = center + Vector3{halfW, halfH, 0};
 	return aabb;
 }
 

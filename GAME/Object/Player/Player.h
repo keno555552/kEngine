@@ -102,6 +102,7 @@ private:
 	void MapCollisionDecideDown(CollisionMapInfo& info);
 	void MovePlayerByResult(const CollisionMapInfo& info);
 
+	void BitMapBugCheck();
 	void ShootUpdate();
 	void NearAttackUpdate();
 
@@ -130,6 +131,10 @@ private:
 	float dushCD_ = 1.0f; ///(秒)
 	float dushCDParameter_ = dushCD_ * 60.0f;
 
+	/// NearAttack
+	float nearAttackCD_ = 1.0f; ///(秒)
+	float nearAttackParameter_ = nearAttackCD_ * 60.0f;
+
 	/// Bullet
 	float kBulletCD_ = 0.25; ///(秒)
 	float kBulletParameter_ = kBulletCD_ * 60.0f;
@@ -140,12 +145,23 @@ private:
 
 	/// State
 	enum class PlayerState {
-		kNormal,
-		kAttark,
-		kDush,
-		kDamage,
+
+		kNone = 0,
+		kNormal = 1 << 0,
+		kDamage = 1 << 1,
+		kShoot = 1 << 2,
+		kNearAttack = 1 << 3,
+		kDush = 1 << 4,
+
+		numStates = 5,///<<< numStatesの値の更新を忘れなく
 	};
 	PlayerState playerState_ = PlayerState::kNormal;
+
+	// 行動可能フラグ
+	int canShoot = static_cast<int>(PlayerState::kNormal) |
+				   static_cast<int>(PlayerState::kDush);
+
+	Timer checkTimer_;
 
 private:
 

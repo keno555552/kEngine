@@ -27,12 +27,16 @@ Player::Player(kEngine* system, const Vector3& position) {
 
 	nearAttackChangeTimer_.InitM(kNearAttackChangeTime, system_->GetTimeManager());
 	nearAttackEffectTimer_.InitM(kNearAttackEffectTime, system_->GetTimeManager());
+
+	/// bugCheck
+	checkTimer_.Init0(1.0f, system_->GetTimeManager());
 }
 
 void Player::Update(Camera* camera) {
 	deltaTime_ = system_->GetDeltaTime();
-	BehaviorRootUpdate();
 
+	BitMapBugCheck();
+	BehaviorRootUpdate();
 	DamageAndEffectPart();
 
 	Object::Update(camera);
@@ -66,9 +70,12 @@ void Player::GetDamage(float damage) {
 void Player::Shoot(Vector3 mousePos) {
 
 	/// 出来ない条件に該当したら終了
+	// 弾のリストがセットされてない
 	if (bulletList_ == nullptr)return;
-	if (playerState_ == PlayerState::kAttark || playerState_ == PlayerState::kDamage) return;
+	// 射撃CD中
 	if (shootCD_.parameter_ != shootCD_.maxTime_)return;
+	// 状態が射撃可能でない
+	if (!(static_cast<int>(playerState_) & canShoot)) return;
 
 	/// 弾の生成
 	Vector3 shootDirection = mousePos - mainPosition.transform.translate;
@@ -242,6 +249,35 @@ void Player::MovePlayerByResult(const CollisionMapInfo& info) {
 	mainPosition.transform.translate.z += info.moveVector.z * deltaTime_;
 }
 
+void Player::BitMapBugCheck() {
+	checkTimer_.ToMix();
+	if (!checkTimer_.GetIsMax()) {
+		return;
+	}
+	checkTimer_.Reset0();
+
+	{
+		std::vector<int> bugChecksList = {
+			{ static_cast<int>(PlayerState::kDamage) | static_cast<int>(PlayerState::kNormal) },
+			{ static_cast<int>(PlayerState::kDamage) | static_cast<int>(PlayerState::kShoot) },
+			{ static_cast<int>(PlayerState::kDamage) | static_cast<int>(PlayerState::kNearAttack) },
+			{ static_cast<int>(PlayerState::kDamage) | static_cast<int>(PlayerState::kDush) },
+		};
+
+		for (auto& bugCheck : bugChecksList) {
+			if ((static_cast<int>(playerState_) & bugCheck) == bugCheck) {
+				Logger::Log("Player:: PlayerState Bug Detected:");
+				// 状態をビットごとに出力
+				for (int i = 0; i < static_cast<int>(PlayerState::numStates); i++) {
+					if (static_cast<int>(playerState_) & (1 << i)) {
+						Logger::Log("%d,", (1 << i));
+					}
+				}
+			}
+		}
+	}
+}
+
 void Player::ShootUpdate() {
 
 	if (shootCD_.parameter_ != shootCD_.maxTime_) shootCD_.ToMix();
@@ -258,9 +294,7 @@ void Player::NearAttackUpdate() {
 
 		}
 	}
-
-
-
+	///<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< 未完成
 }
 
 void Player::DamageAndEffectPart() {

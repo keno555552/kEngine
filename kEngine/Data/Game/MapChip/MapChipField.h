@@ -84,7 +84,7 @@ public:
 	/// ブロックサイズ関連
 	void SetBlockWidth(float width);
 	void SetBlockHeight(float height);
-	Vector2 GetBlockSize() { return Vector2(kBlockWidth, kBlockHeight); }
+	Vector2 GetBlockSize() { return {kBlockWidth, kBlockHeight}; }
 
 	///　ブロック数取得
 	int GetNumBlockVirtical() { return kNumBlockVirtical; }

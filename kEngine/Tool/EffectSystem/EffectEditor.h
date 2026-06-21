@@ -79,6 +79,7 @@ private:
 	/// ======== カメラ関連 ========= ///
 	void CameraPart();
 
+#ifdef USE_IMGUI
 	/// ========== UI関連 ========== ///
 	void ImGuiPart();
 	void ImGuiLeftMenuBar();
@@ -87,4 +88,5 @@ private:
 	void ImGuiSaveWindow();
 	bool InputTextString(const char *label, std::string &str, ImGuiInputTextFlags flags = 0);
 	bool InputBigTextString(const char *label, std::string &str, ImGuiInputTextFlags flags = 0);
+#endif // USE_IMGUI
 };
