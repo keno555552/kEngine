@@ -18,6 +18,9 @@ public:
 	void Update();
 	void Draw();
 
+	/// --- Effect管理 ---///
+	
+
 	/// --- エフェクトマネージャーをとる --- ///
 	ParticleManager* GetParticleManager() { return particleManager_.get(); }
 

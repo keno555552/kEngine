@@ -11,6 +11,7 @@
 #include "GAME/scenes/Scene1.h"
 #include "GAME/scenes/SceneWin.h"
 #include "GAME/scenes/SceneLose.h"
+#include "Tool/EffectSystem/EffectEditor.h"
 
 
 SceneFactory::SceneFactory(kEngine* system)
@@ -26,6 +27,7 @@ SceneFactory::SceneFactory(kEngine* system)
     sceneRegistry_["WIN"] = [this]() { return std::make_unique<SceneWin>(system_); };
     sceneRegistry_["LOSE"] = [this]() { return std::make_unique<SceneLose>(system_); };
 
+    sceneRegistry_["EffectEditor"] = [this]() { return std::make_unique<EffectEditor>(system_); };
 }
 
 std::unique_ptr<BaseScene> SceneFactory::CreateScene(const std::string& sceneName) {
