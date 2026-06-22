@@ -4,6 +4,7 @@
 #include <array>
 #include "LinearAlgebra/Gauss.h"
 #include "Logger.h"
+#include "Config.h"
 
 /// 先行宣言
 struct RenderCommand;
@@ -23,6 +24,7 @@ void MakeOutlineThick(RenderCommand& cmd, int kernelSize, float thickness);
 enum class KernelType {
 	NONE,
 	BlurBox,
+	BlurRadial,
 	BlurCustom,
 	OutLineSobel,
 	OutLinePrewitt,
@@ -74,6 +76,15 @@ struct RenderCommand
 	/// Blurのカーネル
 	std::array<std::array<float, 7>, 7> blurKernelArray{};
 
+	/// RadialBlur用
+	/// センター座標(スグリント座標)(転換はGPU側の仕事)
+	Vector2 radialCenter{ (config::GetClientWidth()  / 2.0f) ,
+						  (config::GetClientHeight() / 2.0f) };
+	/// 強さ(0.0～1.0の範囲で、どれくらいぼやけるか)
+	float radialStrength = 0.05f;
+	/// サンプルサイズ(px,4-64までギリギリ安全,主にshaderの演算速度に影響する)
+	int radialSampleSize = 8;
+
 	/// blurの種類によって、使用するデータが変わる
 	/// もしBoxBlurにすると、後ろのblurKernelは無視されて、GPU側でボックスの数値を計算する
 	/// もしCustomBlurにすると、後ろのblurKernelが使用され、加えてkernelSizeも必要になる(なければ7x7からデータがあるところまでSizeとして使う)
@@ -94,3 +105,10 @@ struct RenderCommand
 	std::array<std::array<float, 7>, 7> outlineKernelArray{};
 
 };
+
+
+///NOTE:
+/// RenderCommandはCPU側、RenderCommandGPUはGPU側の資料
+/// 転換、コピーのデータはRenderCommandGPUに格納される
+/// RenderCommandGPUはRenderCommand.hlslと対応するので
+/// データの順番、形、padding等々を注意してください<<<<<<<<<<<<<<<重要!!!
