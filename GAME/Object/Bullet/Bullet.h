@@ -15,6 +15,8 @@ public:
 	bool IsAlive() const { return isAlive_; }
 	void SetAlive(bool isAlive) { isAlive_ = isAlive; }
 
+	void HitRockEffect();
+
 private:
 	Vector3 direction_{};
 	float speed_ = 20.0f;
@@ -23,5 +25,10 @@ private:
 
 private:
 	int MH_bullet_{};
+
+	int clicleTextureHandle_{};
+	int effectTextureHandle_{};	
+	int whiteTextureHandle_{};
+	int particleHandle_{};
 };
 

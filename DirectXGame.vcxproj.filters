@@ -1643,6 +1643,12 @@
     <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\EffectData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="kEngine\EngineAssets\Particle\HitSpark2.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\EngineAssets\Particle\HitSparkWithFellRock.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\LightingLambert\HalfLambert.hlsl">

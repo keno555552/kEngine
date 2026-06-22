@@ -567,6 +567,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="GAME\scenes\SceneWin.h" />
     <ClInclude Include="GAME\Object\Sight\Sight.h" />
     <ClInclude Include="GAME\Object\Enemy\Enemy.h" />
+    <ClInclude Include="kEngine\EngineAssets\Particle\HitSparkWithFellRock.h" />
+    <ClInclude Include="kEngine\EngineAssets\Particle\HitSpark2.h" />
     <ClInclude Include="kEngine\Math\LinearAlgebra\Gauss.h" />
     <ClInclude Include="kEngine\Data\Render\CPUData\RenderCommand.h" />
     <ClInclude Include="kEngine\Data\Render\GPUData\BlurDataGPU.h" />

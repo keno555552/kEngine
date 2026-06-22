@@ -1,6 +1,8 @@
 #include "UITest.h"
 #include "DebugDraw.h"
 #include "EngineAssets/Particle/HitSpark.h"
+#include "EngineAssets/Particle/HitSpark2.h"
+#include "EngineAssets/Particle/HitSparkWithFellRock.h"
 
 UITest::UITest(kEngine* system) {
 	/// =========== システム初期化 ============///
@@ -61,13 +63,13 @@ UITest::UITest(kEngine* system) {
 	system_->SetCamera(usingCamera_);
 
 	/// PostEffectを設定
-	std::vector<PostProcessType> postProcessList = {
-		PostProcessType::OutlinePrewittDepth,
-	};
-
-	MakeOutlinePrewittDepth(renderCommand_);
-	
-	system_->SetPostProcessChain(postProcessList);
+	//std::vector<PostProcessType> postProcessList = {
+	//	PostProcessType::OutlinePrewittDepth,
+	//};
+//
+	//MakeOutlinePrewittDepth(renderCommand_);
+	//
+	//system_->SetPostProcessChain(postProcessList);
 
 	/// =========== リソースロード ============///
 	skydomeModelHandle_ = system_->SetModelObj("./kEngine/EngineAssets/TemplateResource/object/skydome/skydome.obj");
@@ -157,20 +159,30 @@ UITest::UITest(kEngine* system) {
 
 	/// =========== パーティクル作る ============///
 
-	HitSpark hitSpark;
+	HitSpark3 hitSpark;
 	hitSpark.startPosition = { 0.0f, 0.0f, 0.0f };
 	hitSpark.objectList[0].objectParts_[0].materialConfig->textureHandle = clicleTextureHandle_;
 	particleHandle_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitSpark, 0);
 
-	HitImpact hitImpact;
+	HitImpact3 hitImpact;
 	hitImpact.startPosition = { 0.0f, 0.0f, 0.0f };
 	hitImpact.objectList[0].objectParts_[0].materialConfig->textureHandle = effectTextureHandle_;
 	particleHandle2_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitImpact, 1);
 
-	HitSpackImpactLink linkData;
+	HitRock hitRock;
+	hitRock.startPosition = { 0.0f, 0.0f, 0.0f };
+	hitRock.objectList[0].objectParts_[0].materialConfig->textureHandle = whiteTextureHandle_;
+	particleHandle3_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitRock, 0);
+
+	HitSpackImpactLink3 linkData;
 	linkData.sourceId = particleHandle_;
 	linkData.targetId = particleHandle2_;
 	system_->GetEffectManager()->GetParticleManager()->LinkEmitterToEmitter(linkData);
+
+	HitSpackImpactLink3_2 linkData2;
+	linkData2.sourceId = particleHandle_;
+	linkData2.targetId = particleHandle3_;
+	system_->GetEffectManager()->GetParticleManager()->LinkEmitterToEmitter(linkData2);
 
 }
 
@@ -313,7 +325,7 @@ void UITest::Draw() {
 	//skydome_->Draw();
 	skybox_->Draw();
 	ground_->Draw();
-	box_->Draw();
+	//box_->Draw();
 	detailButton_->Render();
 	button_->Render();
 	//panel_->Render();

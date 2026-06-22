@@ -5,8 +5,8 @@ std::unique_ptr <SceneManager> SceneManager::sceneManager_ = nullptr;
 void SceneManager::Initialize(kEngine* system) {
 	system_ = system;
 	sceneFactory_ = std::make_unique<SceneFactory>(system);
-	//sceneUsingNameHandle_ = "CGHK2";
 	sceneUsingNameHandle_ = "TITLE";
+	//sceneUsingNameHandle_ = "CGHK2";
 	//sceneUsingNameHandle_ = "STAGE_01";
 	//sceneUsingNameHandle_ = "UITest";
 	//sceneUsingNameHandle_ = "ParticleEditor";

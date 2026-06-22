@@ -94,14 +94,14 @@ void ParticleManager::UpdateEmitterLinks() {
 		std::vector<ParticleInstance> emittingData;
 		if (linkData.emitterTiming != EmitterTiming::SourceEnd) {
 			emittingData = sourceEmitter->GetEmittingData();
-			if (emittingData.size() != 0) {
-				Logger::Log("[kInfo] ParticleManager::UpdateEmitterLinks() Found " + std::to_string(emittingData.size()) + " emitting particles in source emitter ID: " + std::to_string(linkData.sourceId));
-			}
+			//if (emittingData.size() != 0) {
+			//	Logger::Log("[kInfo] ParticleManager::UpdateEmitterLinks() Found " + std::to_string(emittingData.size()) + " emitting particles in source emitter ID: " + std::to_string(linkData.sourceId));
+			//}
 		} else {
-			emittingData = sourceEmitter->GetDexpiredData();
-			if (emittingData.size() != 0) {
-				Logger::Log("[kInfo] ParticleManager::UpdateEmitterLinks() Found " + std::to_string(emittingData.size()) + " Dexpired particles in source emitter ID: " + std::to_string(linkData.sourceId));
-			}
+			//emittingData = sourceEmitter->GetDexpiredData();
+			//if (emittingData.size() != 0) {
+			//	Logger::Log("[kInfo] ParticleManager::UpdateEmitterLinks() Found " + std::to_string(emittingData.size()) + " Dexpired particles in source emitter ID: " + std::to_string(linkData.sourceId));
+			//}
 		}
 
 

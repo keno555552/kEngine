@@ -99,6 +99,7 @@ void CollisionManager::BulletMapCollision() {
 
 		MapChipType tile = mapChipField_->GetMapChipTypeByWorld({ idx.x, idx.y });
 		if (!CheckIsNotWall(tile)) {
+			bullet->HitRockEffect();
 			bullet->SetAlive(false);
 		}
 	}

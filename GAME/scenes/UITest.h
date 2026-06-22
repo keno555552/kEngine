@@ -56,6 +56,7 @@ private:
 	/// パーティクルハンドル
 	int particleHandle_ = 0;
 	int particleHandle2_ = 0;
+	int particleHandle3_ = 0;
 
 	int ddsTest = 0;
 
