@@ -62,12 +62,10 @@ UITest::UITest(kEngine* system) {
 
 	/// PostEffectを設定
 	std::vector<PostProcessType> postProcessList = {
-		PostProcessType::Blur
+		PostProcessType::Dissolve
 	};
 
-	renderCommand_.blurType = KernelType::BlurRadial;
-	renderCommand_.blurRadialSampleSize = 32;
-	
+	renderCommand_.dissolveTextureIndex = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/noise0.png");
 	system_->SetPostProcessChain(postProcessList);
 
 	/// =========== リソースロード ============///
@@ -408,6 +406,9 @@ void UITest::ImGuiPart() {
 		ImGui::SliderFloat("Radial CenterY", &renderCommand_.blurRadialCenter.y, 0.0f, 720.0f);
 		ImGui::SliderInt("Radial Sample Size", &renderCommand_.blurRadialSampleSize, 1, 64);
 		ImGui::SliderFloat("Radial Strength", &renderCommand_.blurRadialStrength, 0.0f, 1.0f);
+		ImGui::SliderFloat("Dissolve Threshold", &renderCommand_.dissolveThreshold, 0.0f, 1.0f);
+		ImGui::SliderFloat("Dissolve Edge Width", &renderCommand_.dissolveEdgeWidth, 0.0f, 1.0f);
+		ImGui::ColorEdit3("Dissolve Edge Color", &renderCommand_.dissolveEdgeColor.x);
 
 		ImGui::End();
 	}

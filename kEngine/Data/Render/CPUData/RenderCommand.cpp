@@ -141,3 +141,10 @@ void MakeOutlineThick(RenderCommand& cmd,int kernelSize, float thickness) {
 	cmd.outlineKernelSize = usingSize;
 	cmd.outlineKernelArray = k;
 }
+
+void MakeDissolve(RenderCommand& cmd, int textureIndex, float threshold, float edgeWidth, Vector3 edgeColor) {
+	cmd.dissolveTextureIndex = textureIndex;
+	cmd.dissolveThreshold = threshold;
+	cmd.dissolveEdgeWidth = edgeWidth;
+	cmd.dissolveEdgeColor = edgeColor;
+}

@@ -28,6 +28,11 @@ struct RenderCommand
     
     float4 outlineColor;
     
+    // dissolve
+    float3 dissolveEdgeColor;
+    float dissolveThreshold;
+    
+    float dissolveEdgeWidth;
 };
 
 /// BlurType:(手動更新:260623)

@@ -54,17 +54,26 @@ struct RenderCommandGPU
 	// ------ padding counter line-------
 	/// =========== OutLine用コマンド ============= ///
 	/// oulineの種類
-	int outlineType;
+	int outlineType{};
 	/// oulineのサイズ
-	int outlineKernelSize;
+	int outlineKernelSize{};
 	/// oulineの対応index
-	int outlineKernelIndex;
+	int outlineKernelIndex{};
 	/// 深度に関わるoutlineのための閾値
-	float outlineDepthThreshold = 0.0f;
+	float outlineDepthThreshold{};
 	// ------ padding counter line-------
 	/// outlineの色
-	Vector4 outlineColor{ 0.0f, 0.0f, 0.0f, 1.0f };
+	Vector4 outlineColor{};
 	// ------ padding counter line-------
+
+	/// ============ Dissolve用コマンド ============== ///
+	/// Dissolveのエッジカラー
+	Vector3 dissolveEdgeColor{};
+	/// Dissolveの閾値(0.0～1.0の範囲で、どのくらいの明度で溶解するか)
+	float dissolveThreshold{};
+	// ------ padding counter line-------
+	/// Dissolveのエッジ幅(0.0～1.0の範囲が一番いい、エッジの幅を制御)
+	float dissolveEdgeWidth{};
 
 };
 

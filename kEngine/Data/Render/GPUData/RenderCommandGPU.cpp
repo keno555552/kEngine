@@ -28,9 +28,11 @@ void ConvertRenderCommandToGPU(const RenderCommand& cpu, RenderCommandGPU& gpu) 
 	} else if (cpu.blurType == KernelType::BlurRadial) {
 
 		if (gpu.blurType != cpuBlurType) gpu.blurType = cpuBlurType;
-		if (gpu.blurRadialCenter != cpu.blurRadialCenter) {
-			gpu.blurRadialCenter.x = cpu.blurRadialCenter.x / static_cast<float>(config::GetClientWidth());
-			gpu.blurRadialCenter.y = cpu.blurRadialCenter.y / static_cast<float>(config::GetClientHeight());
+		Vector2 cpuRadialCenterNormalized = { cpu.blurRadialCenter.x / static_cast<float>(config::GetClientWidth()),
+											  cpu.blurRadialCenter.y / static_cast<float>(config::GetClientHeight()) };
+		if (gpu.blurRadialCenter != cpuRadialCenterNormalized) {
+			gpu.blurRadialCenter.x = cpuRadialCenterNormalized.x;
+			gpu.blurRadialCenter.y = cpuRadialCenterNormalized.y;
 		}
 		if (gpu.blurRadialStrength != cpu.blurRadialStrength) gpu.blurRadialStrength = cpu.blurRadialStrength;
 		if (gpu.blurRadialSampleSize != cpu.blurRadialSampleSize) gpu.blurRadialSampleSize = cpu.blurRadialSampleSize;
@@ -68,6 +70,11 @@ void ConvertRenderCommandToGPU(const RenderCommand& cpu, RenderCommandGPU& gpu) 
 		if (gpu.outlineDepthThreshold != cpu.outlineDepthThreshold) gpu.outlineDepthThreshold = cpu.outlineDepthThreshold;
 		if (gpu.outlineColor != cpu.outlineColor) gpu.outlineColor = cpu.outlineColor;
 	}
+
+	/// ============ Dissolve用コマンド ============== ///
+	if (gpu.dissolveEdgeColor != cpu.dissolveEdgeColor) gpu.dissolveEdgeColor = cpu.dissolveEdgeColor;
+	if (gpu.dissolveThreshold != cpu.dissolveThreshold) gpu.dissolveThreshold = cpu.dissolveThreshold;
+	if (gpu.dissolveEdgeWidth != cpu.dissolveEdgeWidth) gpu.dissolveEdgeWidth = cpu.dissolveEdgeWidth;
 }
 
 bool IsBlurCheck(const RenderCommand& cpu) {
