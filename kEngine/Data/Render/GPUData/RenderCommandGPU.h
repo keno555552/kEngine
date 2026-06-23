@@ -35,23 +35,32 @@ struct RenderCommandGPU
 	/// ============= Blur用コマンド ============== ///
 	/// ここは毎回BlurをDraw前に、CPUDataを使ってこれを変わるように、使用するBlurCommandを選択すること
 	/// Blurの種類
-	int blurType;
+	int blurType{};
 	/// カーネルのサイズ（例：3なら3x3のカーネルを使う）
-	int blurKernelSize;
+	int blurKernelSize{};
 	/// カーネルの対応index
-	int blurKernelIndex;
+	int blurKernelIndex{};
+	float padding2{};
+	// ------ padding counter line-------
 
+	/// RadialBlur用
+	/// センター座標(スグリント座標)(転換はGPU側の仕事)
+	Vector2 blurRadialCenter{};
+	/// 強さ(0.0～1.0の範囲で、どれくらいぼやけるか)
+	float blurRadialStrength{};
+	/// サンプルサイズ(px,4-64までギリギリ安全,主にshaderの演算速度に影響する)
+	int blurRadialSampleSize{};
+
+	// ------ padding counter line-------
 	/// =========== OutLine用コマンド ============= ///
 	/// oulineの種類
 	int outlineType;
-	// ------ padding counter line-------
 	/// oulineのサイズ
 	int outlineKernelSize;
 	/// oulineの対応index
 	int outlineKernelIndex;
 	/// 深度に関わるoutlineのための閾値
 	float outlineDepthThreshold = 0.0f;
-	float padding2{};
 	// ------ padding counter line-------
 	/// outlineの色
 	Vector4 outlineColor{ 0.0f, 0.0f, 0.0f, 1.0f };

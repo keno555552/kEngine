@@ -1,4 +1,5 @@
 #include "RenderCommandGPU.h"
+#include "Config.h"
 
 void ConvertRenderCommandToGPU(const RenderCommand& cpu, RenderCommandGPU& gpu) {
 
@@ -24,6 +25,16 @@ void ConvertRenderCommandToGPU(const RenderCommand& cpu, RenderCommandGPU& gpu) 
 	if (cpu.blurType == KernelType::BlurBox) {
 		if (gpu.blurType != cpuBlurType) gpu.blurType = cpuBlurType;
 		if (gpu.blurKernelSize != cpu.blurKernelSize) gpu.blurKernelSize = cpu.blurKernelSize;
+	} else if (cpu.blurType == KernelType::BlurRadial) {
+
+		if (gpu.blurType != cpuBlurType) gpu.blurType = cpuBlurType;
+		if (gpu.blurRadialCenter != cpu.blurRadialCenter) {
+			gpu.blurRadialCenter.x = cpu.blurRadialCenter.x / static_cast<float>(config::GetClientWidth());
+			gpu.blurRadialCenter.y = cpu.blurRadialCenter.y / static_cast<float>(config::GetClientHeight());
+		}
+		if (gpu.blurRadialStrength != cpu.blurRadialStrength) gpu.blurRadialStrength = cpu.blurRadialStrength;
+		if (gpu.blurRadialSampleSize != cpu.blurRadialSampleSize) gpu.blurRadialSampleSize = cpu.blurRadialSampleSize;
+
 	} else if (cpu.blurType == KernelType::BlurCustom) {
 		/// kernelSizeを計算する
 		int maxIndex = -1;
@@ -62,6 +73,7 @@ void ConvertRenderCommandToGPU(const RenderCommand& cpu, RenderCommandGPU& gpu) 
 bool IsBlurCheck(const RenderCommand& cpu) {
 	bool isBlur = false;
 	if (cpu.blurType == KernelType::BlurBox ||
+		cpu.blurType == KernelType::BlurRadial ||
 		cpu.blurType == KernelType::BlurCustom
 		) {
 		isBlur = true;
@@ -71,11 +83,11 @@ bool IsBlurCheck(const RenderCommand& cpu) {
 
 bool IsOutlineCheck(const RenderCommand& cpu) {
 	bool isOutline = false;
-	if (cpu.outlineType == KernelType::OutLineLaplacian		||
-		cpu.outlineType == KernelType::OutLinePrewitt		||
-		cpu.outlineType == KernelType::OutLinePrewittDepth	||
-		cpu.outlineType == KernelType::OutLineRoberts		||
-		cpu.outlineType == KernelType::OutLineSobel			||
+	if (cpu.outlineType == KernelType::OutLineLaplacian ||
+		cpu.outlineType == KernelType::OutLinePrewitt ||
+		cpu.outlineType == KernelType::OutLinePrewittDepth ||
+		cpu.outlineType == KernelType::OutLineRoberts ||
+		cpu.outlineType == KernelType::OutLineSobel ||
 		cpu.outlineType == KernelType::OutLineThick) {
 		isOutline = true;
 	}

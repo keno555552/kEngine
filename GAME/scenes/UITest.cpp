@@ -62,10 +62,11 @@ UITest::UITest(kEngine* system) {
 
 	/// PostEffectを設定
 	std::vector<PostProcessType> postProcessList = {
-		PostProcessType::OutlinePrewittDepth,
+		PostProcessType::Blur
 	};
 
-	MakeOutlinePrewittDepth(renderCommand_);
+	renderCommand_.blurType = KernelType::BlurRadial;
+	renderCommand_.blurRadialSampleSize = 32;
 	
 	system_->SetPostProcessChain(postProcessList);
 
@@ -388,7 +389,6 @@ void UITest::ImGuiPart() {
 		ImGui::SliderFloat("Vignette Intensity", &renderCommand_.vignetteIntensity, 0, 100);
 		ImGui::ColorEdit4("Vignette Color", &renderCommand_.vignetteColor.x);
 		ImGui::Text("Blur");
-
 		// BlurType 対応する文字列の配列
 		static const char* blurType[] = {
 		"Box",
@@ -404,6 +404,11 @@ void UITest::ImGuiPart() {
 		ImGui::Text("Outline");
 		ImGui::SliderFloat("Outline Depth Threshold", &renderCommand_.outlineDepthThreshold, 0.01f, 0.1f);
 		ImGui::ColorEdit4("Outline Color", &renderCommand_.outlineColor.x);
+		ImGui::SliderFloat("Radial CenterX", &renderCommand_.blurRadialCenter.x, 0.0f, 1280.0f);
+		ImGui::SliderFloat("Radial CenterY", &renderCommand_.blurRadialCenter.y, 0.0f, 720.0f);
+		ImGui::SliderInt("Radial Sample Size", &renderCommand_.blurRadialSampleSize, 1, 64);
+		ImGui::SliderFloat("Radial Strength", &renderCommand_.blurRadialStrength, 0.0f, 1.0f);
+
 		ImGui::End();
 	}
 

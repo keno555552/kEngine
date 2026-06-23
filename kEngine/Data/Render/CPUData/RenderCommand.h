@@ -12,6 +12,7 @@ struct RenderCommand;
 #pragma region KernelMaker
 /// Blurのカーネルを作る関数
 void MakeBoxBlur(RenderCommand& cmd, int kernelSize);
+void MakeRadialBlur(RenderCommand& cmd, Vector2 center,float strength, int kernelSize);
 void MakeGaussianBlur(RenderCommand& cmd, int kernelSize, float sigma);
 void MakeOutlineSobel(RenderCommand& cmd);
 void MakeOutlinePrewitt(RenderCommand& cmd);
@@ -78,12 +79,12 @@ struct RenderCommand
 
 	/// RadialBlur用
 	/// センター座標(スグリント座標)(転換はGPU側の仕事)
-	Vector2 radialCenter{ (config::GetClientWidth()  / 2.0f) ,
+	Vector2 blurRadialCenter{ (config::GetClientWidth()  / 2.0f) ,
 						  (config::GetClientHeight() / 2.0f) };
 	/// 強さ(0.0～1.0の範囲で、どれくらいぼやけるか)
-	float radialStrength = 0.05f;
+	float blurRadialStrength = 0.05f;
 	/// サンプルサイズ(px,4-64までギリギリ安全,主にshaderの演算速度に影響する)
-	int radialSampleSize = 8;
+	int blurRadialSampleSize = 8;
 
 	/// blurの種類によって、使用するデータが変わる
 	/// もしBoxBlurにすると、後ろのblurKernelは無視されて、GPU側でボックスの数値を計算する

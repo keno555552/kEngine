@@ -16,6 +16,10 @@ struct RenderCommand
     int blurKernelSize;
     int blurKernelIndex;
     
+    float2 blurRadialCenter;
+    float blurRadialStrength;
+    int blurRadialSampleSize;
+
     // outline
     int outlineType;
     int outlineKernelSize;
@@ -26,9 +30,10 @@ struct RenderCommand
     
 };
 
-/// BlurType:(手動更新:260602)
-/// Box,
-/// Custom,
+/// BlurType:(手動更新:260623)
+/// Box,        (1)
+/// Radial,     (2)
+/// Custom,     (3)
 /// NumOfBlur
 
 

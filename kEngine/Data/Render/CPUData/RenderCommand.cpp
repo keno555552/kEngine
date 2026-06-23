@@ -25,6 +25,13 @@ void MakeBoxBlur(RenderCommand& cmd, int kernelSize) {
 	cmd.blurKernelArray = kernel;
 }
 
+void MakeRadialBlur(RenderCommand& cmd, Vector2 center, float strength, int kernelSize) {
+	cmd.blurType = KernelType::BlurRadial;
+	cmd.blurRadialCenter = center;
+	cmd.blurRadialStrength = strength;
+	cmd.blurRadialSampleSize = kernelSize;
+}
+
 void MakeGaussianBlur(RenderCommand& cmd, int kernelSize, float sigma) {
 	std::array<std::array<float, 7>, 7> kernel{};
 	if (kernelSize < 3 || kernelSize > 7) {
