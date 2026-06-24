@@ -1,4 +1,5 @@
 #include "RenderCommandGPU.h"
+#include "Config.h"
 
 void ConvertRenderCommandToGPU(const RenderCommand& cpu, RenderCommandGPU& gpu) {
 
@@ -24,6 +25,18 @@ void ConvertRenderCommandToGPU(const RenderCommand& cpu, RenderCommandGPU& gpu) 
 	if (cpu.blurType == KernelType::BlurBox) {
 		if (gpu.blurType != cpuBlurType) gpu.blurType = cpuBlurType;
 		if (gpu.blurKernelSize != cpu.blurKernelSize) gpu.blurKernelSize = cpu.blurKernelSize;
+	} else if (cpu.blurType == KernelType::BlurRadial) {
+
+		if (gpu.blurType != cpuBlurType) gpu.blurType = cpuBlurType;
+		Vector2 cpuRadialCenterNormalized = { cpu.blurRadialCenter.x / static_cast<float>(config::GetClientWidth()),
+											  cpu.blurRadialCenter.y / static_cast<float>(config::GetClientHeight()) };
+		if (gpu.blurRadialCenter != cpuRadialCenterNormalized) {
+			gpu.blurRadialCenter.x = cpuRadialCenterNormalized.x;
+			gpu.blurRadialCenter.y = cpuRadialCenterNormalized.y;
+		}
+		if (gpu.blurRadialStrength != cpu.blurRadialStrength) gpu.blurRadialStrength = cpu.blurRadialStrength;
+		if (gpu.blurRadialSampleSize != cpu.blurRadialSampleSize) gpu.blurRadialSampleSize = cpu.blurRadialSampleSize;
+
 	} else if (cpu.blurType == KernelType::BlurCustom) {
 		/// kernelSizeを計算する
 		int maxIndex = -1;
@@ -57,11 +70,17 @@ void ConvertRenderCommandToGPU(const RenderCommand& cpu, RenderCommandGPU& gpu) 
 		if (gpu.outlineDepthThreshold != cpu.outlineDepthThreshold) gpu.outlineDepthThreshold = cpu.outlineDepthThreshold;
 		if (gpu.outlineColor != cpu.outlineColor) gpu.outlineColor = cpu.outlineColor;
 	}
+
+	/// ============ Dissolve用コマンド ============== ///
+	if (gpu.dissolveEdgeColor != cpu.dissolveEdgeColor) gpu.dissolveEdgeColor = cpu.dissolveEdgeColor;
+	if (gpu.dissolveThreshold != cpu.dissolveThreshold) gpu.dissolveThreshold = cpu.dissolveThreshold;
+	if (gpu.dissolveEdgeWidth != cpu.dissolveEdgeWidth) gpu.dissolveEdgeWidth = cpu.dissolveEdgeWidth;
 }
 
 bool IsBlurCheck(const RenderCommand& cpu) {
 	bool isBlur = false;
 	if (cpu.blurType == KernelType::BlurBox ||
+		cpu.blurType == KernelType::BlurRadial ||
 		cpu.blurType == KernelType::BlurCustom
 		) {
 		isBlur = true;
@@ -71,11 +90,11 @@ bool IsBlurCheck(const RenderCommand& cpu) {
 
 bool IsOutlineCheck(const RenderCommand& cpu) {
 	bool isOutline = false;
-	if (cpu.outlineType == KernelType::OutLineLaplacian		||
-		cpu.outlineType == KernelType::OutLinePrewitt		||
-		cpu.outlineType == KernelType::OutLinePrewittDepth	||
-		cpu.outlineType == KernelType::OutLineRoberts		||
-		cpu.outlineType == KernelType::OutLineSobel			||
+	if (cpu.outlineType == KernelType::OutLineLaplacian ||
+		cpu.outlineType == KernelType::OutLinePrewitt ||
+		cpu.outlineType == KernelType::OutLinePrewittDepth ||
+		cpu.outlineType == KernelType::OutLineRoberts ||
+		cpu.outlineType == KernelType::OutLineSobel ||
 		cpu.outlineType == KernelType::OutLineThick) {
 		isOutline = true;
 	}

@@ -25,6 +25,13 @@ void MakeBoxBlur(RenderCommand& cmd, int kernelSize) {
 	cmd.blurKernelArray = kernel;
 }
 
+void MakeRadialBlur(RenderCommand& cmd, Vector2 center, float strength, int kernelSize) {
+	cmd.blurType = KernelType::BlurRadial;
+	cmd.blurRadialCenter = center;
+	cmd.blurRadialStrength = strength;
+	cmd.blurRadialSampleSize = kernelSize;
+}
+
 void MakeGaussianBlur(RenderCommand& cmd, int kernelSize, float sigma) {
 	std::array<std::array<float, 7>, 7> kernel{};
 	if (kernelSize < 3 || kernelSize > 7) {
@@ -133,4 +140,11 @@ void MakeOutlineThick(RenderCommand& cmd,int kernelSize, float thickness) {
 	cmd.outlineType = KernelType::OutLineThick;
 	cmd.outlineKernelSize = usingSize;
 	cmd.outlineKernelArray = k;
+}
+
+void MakeDissolve(RenderCommand& cmd, int textureIndex, float threshold, float edgeWidth, Vector3 edgeColor) {
+	cmd.dissolveTextureIndex = textureIndex;
+	cmd.dissolveThreshold = threshold;
+	cmd.dissolveEdgeWidth = edgeWidth;
+	cmd.dissolveEdgeColor = edgeColor;
 }

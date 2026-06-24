@@ -20,6 +20,7 @@ RootSignatureFactory::RootSignatureFactory() {
 	rootSignatureRegistry[RenderModelType::Blur] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticFullscreenQuad(directXDriver_, key); };
 	rootSignatureRegistry[RenderModelType::Outline] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticFullscreenQuad(directXDriver_, key); };
 	rootSignatureRegistry[RenderModelType::OutlinePrewittDepth] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticFullscreenQuad(directXDriver_, key); };
+	rootSignatureRegistry[RenderModelType::Dissolve] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticFullscreenQuad(directXDriver_, key); };
 }
 
 Microsoft::WRL::ComPtr <ID3D12RootSignature> RootSignatureFactory::Make(PSOKey& key, DirectXCore* directXDriver_) {
@@ -342,6 +343,7 @@ Microsoft::WRL::ComPtr<ID3D12RootSignature> RootSignatureFactory::MakeStaticFull
 	/// t2:DepthTexture			(PS)
 	/// b0:RenderCommand		(PS)
 	/// t1:KernelData			(PS)
+	/// t3:MaskTexture用 		(PS)
 
 	///RootSignature作成
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
@@ -373,7 +375,7 @@ Microsoft::WRL::ComPtr<ID3D12RootSignature> RootSignatureFactory::MakeStaticFull
 
 	/// RootParameter作成。PixelShaderのMaterialとVertexShaderのTransform
 	/// ------------------------------- Descriptor Range (t0) ------------------------------- ///
-	D3D12_ROOT_PARAMETER rootParameters[4] = {};
+	D3D12_ROOT_PARAMETER rootParameters[5] = {};
 
 	// SourceTexture用descriptor
 	static D3D12_DESCRIPTOR_RANGE descriptorRangeForInstancing[1]{};
@@ -416,6 +418,18 @@ Microsoft::WRL::ComPtr<ID3D12RootSignature> RootSignatureFactory::MakeStaticFull
 	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	rootParameters[3].DescriptorTable.pDescriptorRanges = descriptorRangeForDepthTexture;
 	rootParameters[3].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeForDepthTexture);
+
+	// MaskTexture用 (t3, PS)
+	D3D12_DESCRIPTOR_RANGE maskRange{};
+	maskRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	maskRange.NumDescriptors = 1;
+	maskRange.BaseShaderRegister = 3; // t3
+	maskRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[4].DescriptorTable.pDescriptorRanges = &maskRange;
+	rootParameters[4].DescriptorTable.NumDescriptorRanges = 1;
 
 	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameters);  // 配列の長さ

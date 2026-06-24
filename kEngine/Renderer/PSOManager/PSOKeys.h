@@ -203,3 +203,9 @@ inline PSOKey CreateOutlinePrewittDepthPSOKey() {
 	outlinePrewittDepthKey.renderModelType = RenderModelType::OutlinePrewittDepth;
 	return outlinePrewittDepthKey;
 }
+
+inline PSOKey CreateDissolvePSOKey() {
+	PSOKey dissolveKey = CreateFullscreenPSOKey();
+	dissolveKey.renderModelType = RenderModelType::Dissolve;
+	return dissolveKey;
+}

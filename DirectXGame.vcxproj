@@ -341,6 +341,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Data\Render\GPUData\RenderCommandGPU.cpp" />
     <ClCompile Include="kEngine\Math\LinearAlgebra\Gauss.cpp" />
     <ClCompile Include="kEngine\Renderer\Mesh\CylinderMesh.cpp" />
+    <ClCompile Include="kEngine\Tool\EffectSystem\EffectEditor.cpp" />
     <ClCompile Include="kEngine\Tool\EffectSystem\ParticleSystem\EmitterLink.cpp" />
     <ClCompile Include="kEngine\Renderer\DescriptorManager\DsvManager\DsvManager.cpp" />
     <ClCompile Include="kEngine\Tool\EffectSystem\EffectManager.cpp" />
@@ -554,6 +555,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Data\Render\GPUData\BlurDataGPU.h" />
     <ClInclude Include="kEngine\Data\Render\GPUData\RenderCommandGPU.h" />
     <ClInclude Include="kEngine\Renderer\Mesh\CylinderMesh.h" />
+    <ClInclude Include="kEngine\Tool\EffectSystem\EffectEditor.h" />
+    <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\EffectData.h" />
     <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\EmitterLink.h" />
     <ClInclude Include="kEngine\Data\Render\Types\PostProcessType.h" />
     <ClInclude Include="kEngine\Renderer\DescriptorManager\DsvManager\DsvManager.h" />

@@ -7,6 +7,7 @@
 #include <CG4_HK_1/Effect2.h>
 #include "GAME/scenes/UITest.h"
 #include "Tool/EffectSystem/ParticleEditor.h"
+#include "Tool/EffectSystem/EffectEditor.h"
 #include "GAME/scenes/MapMakingEditor.h"
 
 SceneFactory::SceneFactory(kEngine* system)
@@ -17,6 +18,7 @@ SceneFactory::SceneFactory(kEngine* system)
     sceneRegistry_["CGHK2"] = [this]() { return std::make_unique<SceneCGHK2>(system_); };
     sceneRegistry_["UITest"] = [this]() { return std::make_unique<UITest>(system_); };
 	sceneRegistry_["ParticleEditor"] = [this]() { return std::make_unique<ParticleEditor>(system_); };
+    sceneRegistry_["EffectEditor"] = [this]() { return std::make_unique<EffectEditor>(system_); };
 	sceneRegistry_["MapMakingEditor"] = [this]() { return std::make_unique<MapMakingEditor>(system_); };
 }
 
