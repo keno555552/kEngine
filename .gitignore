@@ -365,6 +365,8 @@ FodyWeavers.xsd
 # Imgui
 imgui.ini
 
+PSOCache.json
+
 # --- Allow assimp libs ---
 !externals/assimp/lib/
 !externals/assimp/lib/Debug/
