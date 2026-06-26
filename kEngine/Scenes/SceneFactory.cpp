@@ -8,7 +8,7 @@
 #include "GAME/scenes/UITest.h"
 #include "Tool/EffectSystem/ParticleEditor.h"
 #include "Tool/EffectSystem/EffectEditor.h"
-#include "GAME/scenes/MapMakingEditor.h"
+#include "Tool/MapMakingEditor/MapMakingEditor.h"
 
 SceneFactory::SceneFactory(kEngine* system)
     : system_(system)

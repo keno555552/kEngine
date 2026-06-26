@@ -1,6 +1,7 @@
 #include "PerlinNoise.h"
 #include "tool/TimeManager/TimeManager.h"
 #include "Vector3.h"
+#include <random>
 
 PerlinNoise::PerlinNoise() {
 	for (int x = 0; x < (sizeof(p) / sizeof(p[0])); x++) {
@@ -9,11 +10,24 @@ PerlinNoise::PerlinNoise() {
 }
 
 void PerlinNoise::SetSeed(int seed) {
-	seed_ = seed;
-	for (int x = 0; x < (sizeof(p) / sizeof(p[0])); x++) {
-		p[x] = permutation[(x * seed_) % (sizeof(permutation) / sizeof(permutation[0]))];
+	//seed_ = seed;
+	//for (int x = 0; x < (sizeof(p) / sizeof(p[0])); x++) {
+	//	p[x] = permutation[(x * seed_) % (sizeof(permutation) / sizeof(permutation[0]))];
+	//
+	//}
 
-	}
+	/// shuffle形式に改善する
+	seed_ = seed;
+
+	std::vector<int> perm;
+	for (int i = 0; i < sizeof(permutation) / sizeof(permutation[0]); i++)
+		perm.push_back(permutation[i]);
+
+	std::mt19937 rng(seed_);
+	std::shuffle(perm.begin(), perm.end(), rng);
+
+	for (int i = 0; i < 256; i++)
+		p[i] = perm[i];
 }
 
 int PerlinNoise::inc(int num) {
@@ -161,7 +175,7 @@ float PerlinNoise::fBm(Vector3 pos, int octaves, float persistence, float amplit
 	float frequency_ = frequency;
 
 	for (int i = 0; i < octaves; i++) { // 疊加 4 層噪聲
-		total += perlin({ pos *  frequency_ }) * amplitude_;
+		total += perlin({ pos * frequency_ }) * amplitude_;
 
 		maxValue += amplitude_;
 		amplitude_ *= persistence;

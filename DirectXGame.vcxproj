@@ -365,6 +365,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Scenes\CG4_HK_1\Effect1.cpp" />
     <ClCompile Include="kEngine\Scenes\CG4_HK_1\Effect2.cpp" />
     <ClCompile Include="kEngine\Scenes\CG4_HK_1\menu.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\DungeonCell.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\DungeonData.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\GBPDungeonGenerater.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\MapBulider.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\OreSpawner.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\TileMap.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\TileRunner.cpp" />
     <ClCompile Include="kEngine\Utility\Bit.cpp" />
     <ClCompile Include="kEngine\Math\Geometry\Interpolation.cpp" />
     <ClCompile Include="kEngine\Math\Geometry\Curve.cpp" />
@@ -518,7 +525,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Data\Render\Types\PSOType\RenderTargetFormat.cpp" />
     <ClCompile Include="kEngine\Renderer\PostProcessRunner\PostProcessRunner.cpp" />
     <ClCompile Include="kEngine\Renderer\PSOManager\PSORecorder.cpp" />
-    <ClCompile Include="GAME\scenes\MapMakingEditor.cpp" />
+    <ClCompile Include="kEngine\Tool\MapMakingEditor\MapMakingEditor.cpp" />
     <ClCompile Include="ResourceLoader.cpp" />
     <ClCompile Include="kEngine\Scenes\BaseSceneFactory.cpp" />
     <ClCompile Include="kEngine\GameObject\Object\Sprite.cpp" />
@@ -585,6 +592,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Scenes\CG4_HK_1\Effect1.h" />
     <ClInclude Include="kEngine\Scenes\CG4_HK_1\Effect2.h" />
     <ClInclude Include="kEngine\Scenes\CG4_HK_1\menu.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\DungeonCell.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\DungeonData.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\GBPDungeonGenerater.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\MapBulider.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\OreSpawner.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\TileMap.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\TileRunner.h" />
     <ClInclude Include="kEngine\Utility\Bit.h" />
     <ClInclude Include="kEngine\Math\Geometry\Interpolation.h" />
     <ClInclude Include="kEngine\Math\Geometry\Curve.h" />
@@ -812,7 +826,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Data\Render\Types\PSOType\RenderTargetFormat.h" />
     <ClInclude Include="kEngine\Renderer\PostProcessRunner\PostProcessRunner.h" />
     <ClInclude Include="kEngine\Renderer\PSOManager\PSORecorder.h" />
-    <ClInclude Include="GAME\scenes\MapMakingEditor.h" />
+    <ClInclude Include="kEngine\Tool\MapMakingEditor\MapMakingEditor.h" />
     <ClInclude Include="ResourceLoader.h" />
     <ClInclude Include="kEngine\Scenes\BaseSceneFactory.h" />
     <ClInclude Include="kEngine\GameObject\Object\Sprite.h" />

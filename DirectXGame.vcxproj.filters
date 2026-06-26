@@ -729,7 +729,28 @@
     <ClCompile Include="kEngine\Tool\EffectSystem\EffectEditor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="GAME\scenes\MapMakingEditor.cpp">
+    <ClCompile Include="kEngine\Tool\MapMakingEditor\MapMakingEditor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\MapBulider\DungeonData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\MapBulider\GBPDungeonGenerater.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\MapBulider\MapBulider.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\MapBulider\OreSpawner.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\MapBulider\TileRunner.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\MapBulider\DungeonCell.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\MapBulider\TileMap.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1586,7 +1607,28 @@
     <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\EffectData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="GAME\scenes\MapMakingEditor.h">
+    <ClInclude Include="kEngine\Tool\MapMakingEditor\MapMakingEditor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\MapBulider\GBPDungeonGenerater.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\MapBulider\MapBulider.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\MapBulider\OreSpawner.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\MapBulider\TileRunner.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\MapBulider\DungeonData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\MapBulider\DungeonCell.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\MapBulider\TileMap.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
