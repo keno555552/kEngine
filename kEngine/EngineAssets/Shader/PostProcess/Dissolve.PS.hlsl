@@ -16,7 +16,8 @@ PixelShaderOutput main(VertexShaderOutput input)
 {
 	PixelShaderOutput output;
     float mask = gMaskTexture.Sample(gSampler, input.texcoord).r;
-    float edge = 1.0f - smoothstep(gRenderCommand.dissolveThreshold, gRenderCommand.dissolveThreshold + gRenderCommand.dissolveEdgeWidth, mask);
+    float dissolveThresholdBigNumber = gRenderCommand.dissolveThreshold + gRenderCommand.dissolveEdgeWidth;
+    float edge = 1.0f - smoothstep(gRenderCommand.dissolveThreshold, dissolveThresholdBigNumber, mask);
 
 	/// DissolveThresholdより小さい場合はピクセルを破棄する
 	if (mask < gRenderCommand.dissolveThreshold){
