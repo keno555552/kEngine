@@ -365,6 +365,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Scenes\CG4_HK_1\Effect1.cpp" />
     <ClCompile Include="kEngine\Scenes\CG4_HK_1\Effect2.cpp" />
     <ClCompile Include="kEngine\Scenes\CG4_HK_1\menu.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\Data\GeneratorVariable.cpp" />
     <ClCompile Include="kEngine\Tool\MapBulider\DungeonCell.cpp" />
     <ClCompile Include="kEngine\Tool\MapBulider\DungeonData.cpp" />
     <ClCompile Include="kEngine\Tool\MapBulider\GBPDungeonGenerater.cpp" />
@@ -592,6 +593,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Scenes\CG4_HK_1\Effect1.h" />
     <ClInclude Include="kEngine\Scenes\CG4_HK_1\Effect2.h" />
     <ClInclude Include="kEngine\Scenes\CG4_HK_1\menu.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\Data\GeneratorVariable.h" />
     <ClInclude Include="kEngine\Tool\MapBulider\DungeonCell.h" />
     <ClInclude Include="kEngine\Tool\MapBulider\DungeonData.h" />
     <ClInclude Include="kEngine\Tool\MapBulider\GBPDungeonGenerater.h" />
