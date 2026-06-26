@@ -376,3 +376,4 @@ PSOCache.json
 !externals/assimp/lib/Debug/*.pdb
 !externals/assimp/lib/Release/*.lib
 kEngine/EngineAssets/Shader/PSOCache.json
+kEngine/EngineAssets/Shader/PSOCache.json
