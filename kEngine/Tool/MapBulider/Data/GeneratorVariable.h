@@ -12,9 +12,9 @@ enum class VarType {
     Float,
     Double,
     String,
-    Vec2,
-    Vec3,
-    Vec4
+    Vector2,
+    Vector3,
+    Vector4
 };
 
 struct Variable {

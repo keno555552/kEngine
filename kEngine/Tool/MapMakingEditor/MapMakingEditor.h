@@ -12,6 +12,7 @@
 #include "Tool\DefaultMenu\DefaultMenu.h"
 
 #include "Tool\MapBulider\TileMap.h"
+#include "Tool\MapBulider\Data\GeneratorVariable.h"
 
 class MapMakingEditor : public BaseScene
 {
@@ -30,9 +31,17 @@ private:
 		std::string savePath;
 		bool isSaved;
 	};
-	std::vector<std::unique_ptr<MapInfo>> mapData_{};
+	std::vector<MapInfo> mapData_{};
 	int selectedMap_ = -1;
-	int newCounter_ = 0;
+	int newMapCounter_ = 0;
+
+
+	int selectedGenerator_ = 0;
+
+	std::vector<GeneratorVariable> generatorVariables_;
+	std::pair<int, int> selectedVariable_;
+	int variableType_ = 0;
+	int newVariableCounter_ = 0;
 
 
 
@@ -45,6 +54,7 @@ private:
 	bool isMapWindowOpen_ = true;
 	bool isGenratorWindowOpen_ = true;
 	bool isVariablesWindowOpen_ = true;
+	bool showNewVariablesWindow_ = false;
 
 	/// ============= 真ん中ウィンドウ
 	bool isMTWindowOpen_ = true;
@@ -67,16 +77,22 @@ private:
 	
 	/// NewMapData
 	int newMapSize_[2];
-	std::string newMapName_;
+
+	/// DebugData
+	std::string debugText_;
+
+	/// 共用
+	std::string newName_;
 
 private:
 	void ImGuiPart();
 	void ImGuiLeftMenuBar();
 	void ImGuiRightMenuBar();
 	void ImGuiMidWindow();
-	void ImGuiLoadWindow();
-	void ImGuiSaveWindow();
-	void ImGuiNewWindow();
+	void ImGuiMapLoadWindow();
+	void ImGuiMapSaveWindow();
+	void ImGuiMapNewWindow();
+	void ImGuiNewVariablesWindow();
 	bool InputTextString(const char* label, std::string& str, ImGuiInputTextFlags flags = 0);
 	bool InputBigTextString(const char* label, std::string& str, ImGuiInputTextFlags flags = 0);
 
