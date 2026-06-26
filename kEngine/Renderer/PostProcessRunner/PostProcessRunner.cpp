@@ -39,6 +39,9 @@ void PostProcessRunner::RunPass(DrawEngine* drawEngine, PostProcessType type) {
 	case PostProcessType::OutlinePrewittDepth:
 		drawEngine->DrawOutlinePrewittDepth();
 		break;
+	case PostProcessType::Dissolve:
+		drawEngine->DrawDissolve();
+		break;
 	}
 }
 

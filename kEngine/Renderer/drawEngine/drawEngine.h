@@ -231,6 +231,7 @@ private:
 	void DrawBlur();
 	void DrawOutline();
 	void DrawOutlinePrewittDepth();
+	void DrawDissolve();
 
 	/// RenderCopy(描画内容をそのまま描画する、最後の処理)
 	void DrawRenderCopy();

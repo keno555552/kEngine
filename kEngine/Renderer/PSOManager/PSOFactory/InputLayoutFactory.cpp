@@ -17,6 +17,7 @@ InputLayoutFactory::InputLayoutFactory() {
 	inputLayoutRegistry[RenderModelType::Blur] = [this](PSOKey& key) { return MakeInputLayoutFullscreenQuad(); };
 	inputLayoutRegistry[RenderModelType::Outline] = [this](PSOKey& key) { return MakeInputLayoutFullscreenQuad(); };
 	inputLayoutRegistry[RenderModelType::OutlinePrewittDepth] = [this](PSOKey& key) { return MakeInputLayoutFullscreenQuad(); };
+	inputLayoutRegistry[RenderModelType::Dissolve] = [this](PSOKey& key) { return MakeInputLayoutFullscreenQuad(); };
 }
 
 D3D12_INPUT_LAYOUT_DESC InputLayoutFactory::Make(PSOKey& key) {

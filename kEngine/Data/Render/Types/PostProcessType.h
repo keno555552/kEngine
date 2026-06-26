@@ -15,6 +15,7 @@ enum class PostProcessType
 	Vignette = 10,
 	Outline = 11,
 	OutlinePrewittDepth = 12,
+	Dissolve = 13,
 };
 
 

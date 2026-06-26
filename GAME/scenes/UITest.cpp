@@ -63,13 +63,12 @@ UITest::UITest(kEngine* system) {
 	system_->SetCamera(usingCamera_);
 
 	/// PostEffectを設定
-	//std::vector<PostProcessType> postProcessList = {
-	//	PostProcessType::OutlinePrewittDepth,
-	//};
-//
-	//MakeOutlinePrewittDepth(renderCommand_);
-	//
-	//system_->SetPostProcessChain(postProcessList);
+	std::vector<PostProcessType> postProcessList = {
+		PostProcessType::Dissolve
+	};
+
+	renderCommand_.dissolveTextureIndex = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/noise0.png");
+	system_->SetPostProcessChain(postProcessList);
 
 	/// =========== リソースロード ============///
 	skydomeModelHandle_ = system_->SetModelObj("./kEngine/EngineAssets/TemplateResource/object/skydome/skydome.obj");
@@ -400,7 +399,6 @@ void UITest::ImGuiPart() {
 		ImGui::SliderFloat("Vignette Intensity", &renderCommand_.vignetteIntensity, 0, 100);
 		ImGui::ColorEdit4("Vignette Color", &renderCommand_.vignetteColor.x);
 		ImGui::Text("Blur");
-
 		// BlurType 対応する文字列の配列
 		static const char* blurType[] = {
 		"Box",
@@ -416,6 +414,14 @@ void UITest::ImGuiPart() {
 		ImGui::Text("Outline");
 		ImGui::SliderFloat("Outline Depth Threshold", &renderCommand_.outlineDepthThreshold, 0.01f, 0.1f);
 		ImGui::ColorEdit4("Outline Color", &renderCommand_.outlineColor.x);
+		ImGui::SliderFloat("Radial CenterX", &renderCommand_.blurRadialCenter.x, 0.0f, 1280.0f);
+		ImGui::SliderFloat("Radial CenterY", &renderCommand_.blurRadialCenter.y, 0.0f, 720.0f);
+		ImGui::SliderInt("Radial Sample Size", &renderCommand_.blurRadialSampleSize, 1, 64);
+		ImGui::SliderFloat("Radial Strength", &renderCommand_.blurRadialStrength, 0.0f, 1.0f);
+		ImGui::SliderFloat("Dissolve Threshold", &renderCommand_.dissolveThreshold, 0.0f, 1.0f);
+		ImGui::SliderFloat("Dissolve Edge Width", &renderCommand_.dissolveEdgeWidth, 0.0f, 1.0f);
+		ImGui::ColorEdit3("Dissolve Edge Color", &renderCommand_.dissolveEdgeColor.x);
+
 		ImGui::End();
 	}
 

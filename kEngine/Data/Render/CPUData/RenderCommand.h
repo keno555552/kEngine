@@ -1,9 +1,11 @@
 #pragma once
 #include "Vector2.h"
+#include "Vector3.h"
 #include "Vector4.h"
 #include <array>
 #include "LinearAlgebra/Gauss.h"
 #include "Logger.h"
+#include "Config.h"
 
 /// 先行宣言
 struct RenderCommand;
@@ -11,6 +13,7 @@ struct RenderCommand;
 #pragma region KernelMaker
 /// Blurのカーネルを作る関数
 void MakeBoxBlur(RenderCommand& cmd, int kernelSize);
+void MakeRadialBlur(RenderCommand& cmd, Vector2 center,float strength, int kernelSize);
 void MakeGaussianBlur(RenderCommand& cmd, int kernelSize, float sigma);
 void MakeOutlineSobel(RenderCommand& cmd);
 void MakeOutlinePrewitt(RenderCommand& cmd);
@@ -18,11 +21,13 @@ void MakeOutlinePrewittDepth(RenderCommand& cmd);
 void MakeOutlineLaplacian(RenderCommand& cmd);
 void MakeOutlineRoberts(RenderCommand& cmd);
 void MakeOutlineThick(RenderCommand& cmd, int kernelSize, float thickness);
+void MakeDissolve(RenderCommand& cmd, int textureIndex, float threshold, float edgeWidth, Vector3 edgeColor);
 #pragma endregion
 
 enum class KernelType {
 	NONE,
 	BlurBox,
+	BlurRadial,
 	BlurCustom,
 	OutLineSobel,
 	OutLinePrewitt,
@@ -74,10 +79,19 @@ struct RenderCommand
 	/// Blurのカーネル
 	std::array<std::array<float, 7>, 7> blurKernelArray{};
 
+	/// RadialBlur用
+	/// センター座標(スグリント座標)(転換はGPU側の仕事)
+	Vector2 blurRadialCenter{ (config::GetClientWidth()  / 2.0f) ,
+						  (config::GetClientHeight() / 2.0f) };
+	/// 強さ(-1.0～1.0の範囲で、どれくらいぼやけるか、-は発散、+は収束)
+	float blurRadialStrength = 0.05f;
+	/// サンプルサイズ(px,4-64までギリギリ安全,主にshaderの演算速度に影響する)
+	int blurRadialSampleSize = 8;
+
 	/// blurの種類によって、使用するデータが変わる
 	/// もしBoxBlurにすると、後ろのblurKernelは無視されて、GPU側でボックスの数値を計算する
 	/// もしCustomBlurにすると、後ろのblurKernelが使用され、加えてkernelSizeも必要になる(なければ7x7からデータがあるところまでSizeとして使う)
-	///    その上でkernelIndexはPostProcessRunnerがデータのあり所により埋まる
+	/// その上でkernelIndexはPostProcessRunnerがデータのあり所により埋まる
 
 	/// ============ OutLine用コマンド ============== ///
 
@@ -93,4 +107,21 @@ struct RenderCommand
 	Vector4 outlineColor{ 0.0f, 0.0f, 0.0f, 1.0f };
 	std::array<std::array<float, 7>, 7> outlineKernelArray{};
 
+	/// ============ Dissolve用コマンド ============== ///
+	/// Dissolveのテクスチャの対応index
+	int dissolveTextureIndex = -1;
+	/// Dissolveの閾値(0.0～1.0の範囲で、どのくらいの明度で溶解するか)
+	float dissolveThreshold = 0.5f;
+	/// Dissolveのエッジ幅(0.0～1.0の範囲が一番いい、エッジの幅を制御)(個人的に0.01が綺麗たと思う)
+	float dissolveEdgeWidth = 0.01f;
+	/// Dissolveのエッジカラー
+	Vector3 dissolveEdgeColor{ 1.0f, 1.0f, 1.0f };
+
 };
+
+
+///NOTE:
+/// RenderCommandはCPU側、RenderCommandGPUはGPU側の資料
+/// 転換、コピーのデータはRenderCommandGPUに格納される
+/// RenderCommandGPUはRenderCommand.hlslと対応するので
+/// データの順番、形、padding等々を注意してください<<<<<<<<<<<<<<<重要!!!
