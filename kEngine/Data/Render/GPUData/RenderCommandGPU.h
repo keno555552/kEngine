@@ -69,11 +69,21 @@ struct RenderCommandGPU
 	/// ============ Dissolve用コマンド ============== ///
 	/// Dissolveのエッジカラー
 	Vector3 dissolveEdgeColor{};
+	//hlsl自動生成padding
+	// ------ padding counter line-------
 	/// Dissolveの閾値(0.0～1.0の範囲で、どのくらいの明度で溶解するか)
 	float dissolveThreshold{};
-	// ------ padding counter line-------
 	/// Dissolveのエッジ幅(0.0～1.0の範囲が一番いい、エッジの幅を制御)
 	float dissolveEdgeWidth{};
+
+	/// =========== RandomNoise用コマンド ============= ///
+	/// RandomNoiseの種類
+	int randomNoiseType{};
+	/// RandomNoiseの強さ
+	float randomNoiseAmount{};
+	// ------ padding counter line-------
+	/// RandomNoiseの時間
+	float randomNoiseTime{};
 
 };
 

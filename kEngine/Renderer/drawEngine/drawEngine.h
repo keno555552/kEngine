@@ -232,6 +232,7 @@ private:
 	void DrawOutline();
 	void DrawOutlinePrewittDepth();
 	void DrawDissolve();
+	void DrawNoise();
 
 	/// RenderCopy(描画内容をそのまま描画する、最後の処理)
 	void DrawRenderCopy();

@@ -42,6 +42,8 @@ void PostProcessRunner::RunPass(DrawEngine* drawEngine, PostProcessType type) {
 	case PostProcessType::Dissolve:
 		drawEngine->DrawDissolve();
 		break;
+		case PostProcessType::Noise:
+		drawEngine->DrawNoise();
 	}
 }
 

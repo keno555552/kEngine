@@ -62,10 +62,9 @@ UITest::UITest(kEngine* system) {
 
 	/// PostEffectを設定
 	std::vector<PostProcessType> postProcessList = {
-		PostProcessType::Dissolve
+		PostProcessType::Noise
 	};
 
-	renderCommand_.dissolveTextureIndex = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/noise0.png");
 	system_->SetPostProcessChain(postProcessList);
 
 	/// =========== リソースロード ============///
@@ -409,6 +408,9 @@ void UITest::ImGuiPart() {
 		ImGui::SliderFloat("Dissolve Threshold", &renderCommand_.dissolveThreshold, 0.0f, 1.0f);
 		ImGui::SliderFloat("Dissolve Edge Width", &renderCommand_.dissolveEdgeWidth, 0.0f, 1.0f);
 		ImGui::ColorEdit3("Dissolve Edge Color", &renderCommand_.dissolveEdgeColor.x);
+		ImGui::Combo("Random Noise Type", reinterpret_cast<int*>(&renderCommand_.randomNoiseType), "None\0WhiteNoise\0");
+		ImGui::SliderFloat("Random Noise Amount", &renderCommand_.randomNoiseAmount, 0.0f, 1.0f);
+		ImGui::SliderFloat("Random Noise Time", &renderCommand_.randomNoiseTime, 0.0f, 100.0f);
 
 		ImGui::End();
 	}

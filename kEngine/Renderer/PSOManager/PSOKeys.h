@@ -209,3 +209,9 @@ inline PSOKey CreateDissolvePSOKey() {
 	dissolveKey.renderModelType = RenderModelType::Dissolve;
 	return dissolveKey;
 }
+
+inline PSOKey CreateNoisePSOKey() {
+	PSOKey noiseKey = CreateFullscreenPSOKey();
+	noiseKey.renderModelType = RenderModelType::Noise;
+	return noiseKey	;
+}

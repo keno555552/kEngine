@@ -17,6 +17,7 @@ enum class RenderModelType {
 	Outline,
 	OutlinePrewittDepth,
 	Dissolve,
+	Noise,
 	FullscreenQuad,
 
 	/// RenderModelの数

@@ -148,3 +148,9 @@ void MakeDissolve(RenderCommand& cmd, int textureIndex, float threshold, float e
 	cmd.dissolveEdgeWidth = edgeWidth;
 	cmd.dissolveEdgeColor = edgeColor;
 }
+
+void MakeNoise(RenderCommand& cmd, RandomNoiseType type, float intensity, float scale) {
+	cmd.randomNoiseType = type;
+	cmd.randomNoiseAmount = intensity;
+	cmd.randomNoiseTime = scale;
+}

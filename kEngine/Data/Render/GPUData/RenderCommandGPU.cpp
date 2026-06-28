@@ -75,6 +75,15 @@ void ConvertRenderCommandToGPU(const RenderCommand& cpu, RenderCommandGPU& gpu) 
 	if (gpu.dissolveEdgeColor != cpu.dissolveEdgeColor) gpu.dissolveEdgeColor = cpu.dissolveEdgeColor;
 	if (gpu.dissolveThreshold != cpu.dissolveThreshold) gpu.dissolveThreshold = cpu.dissolveThreshold;
 	if (gpu.dissolveEdgeWidth != cpu.dissolveEdgeWidth) gpu.dissolveEdgeWidth = cpu.dissolveEdgeWidth;
+
+	/// =========== RandomNoise用コマンド ============= ///
+	if(cpu.randomNoiseType != RandomNoiseType::NONE)
+	{
+		if (gpu.randomNoiseType != static_cast<int>(cpu.randomNoiseType))
+			gpu.randomNoiseType = static_cast<int>(cpu.randomNoiseType);
+		if (gpu.randomNoiseAmount != cpu.randomNoiseAmount) gpu.randomNoiseAmount = cpu.randomNoiseAmount;
+		if (gpu.randomNoiseTime != cpu.randomNoiseTime) gpu.randomNoiseTime = cpu.randomNoiseTime;
+	}
 }
 
 bool IsBlurCheck(const RenderCommand& cpu) {

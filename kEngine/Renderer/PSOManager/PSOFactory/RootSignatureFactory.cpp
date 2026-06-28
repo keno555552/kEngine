@@ -21,6 +21,7 @@ RootSignatureFactory::RootSignatureFactory() {
 	rootSignatureRegistry[RenderModelType::Outline] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticFullscreenQuad(directXDriver_, key); };
 	rootSignatureRegistry[RenderModelType::OutlinePrewittDepth] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticFullscreenQuad(directXDriver_, key); };
 	rootSignatureRegistry[RenderModelType::Dissolve] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticFullscreenQuad(directXDriver_, key); };
+	rootSignatureRegistry[RenderModelType::Noise] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticFullscreenQuad(directXDriver_, key); };
 }
 
 Microsoft::WRL::ComPtr <ID3D12RootSignature> RootSignatureFactory::Make(PSOKey& key, DirectXCore* directXDriver_) {

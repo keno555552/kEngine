@@ -22,6 +22,7 @@ ShaderFactory::ShaderFactory() {
 	shaderRegistry_[RenderModelType::Outline] = [this](PSOKey& key) { return CompileOutline(key); };
 	shaderRegistry_[RenderModelType::OutlinePrewittDepth] = [this](PSOKey& key) { return CompilePostProcessShader("OutlinePrewittDepth", key); };
 	shaderRegistry_[RenderModelType::Dissolve] = [this](PSOKey& key) { return CompilePostProcessShader("Dissolve", key); };
+	shaderRegistry_[RenderModelType::Noise] = [this](PSOKey& key) { return CompilePostProcessShader("NoiseShader", key); };
 }
 
 ShaderPair ShaderFactory::MakeShaderBlob(PSOKey& key) {
