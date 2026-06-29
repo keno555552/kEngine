@@ -732,6 +732,9 @@
     <ClCompile Include="kEngine\Tool\EffectSystem\EffectEditor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="kEngine\Renderer\PostProcessRunner\PostProcessPass.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kEngine\Math\LinearAlgebra\Vector2.h">
@@ -1587,6 +1590,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\EffectData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Renderer\PostProcessRunner\PostProcessPass.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

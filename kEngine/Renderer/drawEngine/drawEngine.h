@@ -36,6 +36,7 @@ class DrawEngine
 public:
 
 	friend class PostProcessRunner;
+	friend class PostProcessPass;
 
 
 	void Initialize(
