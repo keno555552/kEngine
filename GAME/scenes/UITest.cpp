@@ -61,11 +61,11 @@ UITest::UITest(kEngine* system) {
 	system_->SetCamera(usingCamera_);
 
 	/// PostEffectを設定
-	std::vector<PostProcessType> postProcessList = {
-		PostProcessType::Noise
-	};
-
-	system_->SetPostProcessChain(postProcessList);
+	//std::vector<PostProcessType> postProcessList = {
+	//	PostProcessType::Noise
+	//};
+	//
+	//system_->SetPostProcessChain(postProcessList);
 
 	/// =========== リソースロード ============///
 	skydomeModelHandle_ = system_->SetModelObj("./kEngine/EngineAssets/TemplateResource/object/skydome/skydome.obj");
@@ -191,7 +191,7 @@ UITest::~UITest() {
 
 void UITest::Update() {
 
-	system_->ChangeRenderCommand(renderCommand_);
+	//system_->ChangeRenderCommand(renderCommand_);
 
 	CameraPart();
 

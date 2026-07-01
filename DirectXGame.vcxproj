@@ -338,6 +338,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="kEngine\Data\Render\CPUData\RenderCommand.cpp" />
+    <ClCompile Include="kEngine\Data\Render\CPUData\RenderTexture.cpp" />
     <ClCompile Include="kEngine\Data\Render\GPUData\RenderCommandGPU.cpp" />
     <ClCompile Include="kEngine\Math\LinearAlgebra\Gauss.cpp" />
     <ClCompile Include="kEngine\Renderer\Mesh\CylinderMesh.cpp" />
@@ -520,6 +521,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Renderer\PostProcessRunner\PostProcessRunner.cpp" />
     <ClCompile Include="kEngine\Renderer\PSOManager\PSORecorder.cpp" />
     <ClCompile Include="kEngine\Renderer\PostProcessRunner\PostProcessPass.cpp" />
+    <ClCompile Include="kEngine\Renderer\PostProcessRunner\PostProcessLayer.cpp" />
     <ClCompile Include="ResourceLoader.cpp" />
     <ClCompile Include="kEngine\Scenes\BaseSceneFactory.cpp" />
     <ClCompile Include="kEngine\GameObject\Object\Sprite.cpp" />
@@ -815,6 +817,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Renderer\PostProcessRunner\PostProcessRunner.h" />
     <ClInclude Include="kEngine\Renderer\PSOManager\PSORecorder.h" />
     <ClInclude Include="kEngine\Renderer\PostProcessRunner\PostProcessPass.h" />
+    <ClInclude Include="kEngine\Renderer\PostProcessRunner\PostProcessLayer.h" />
     <ClInclude Include="ResourceLoader.h" />
     <ClInclude Include="kEngine\Scenes\BaseSceneFactory.h" />
     <ClInclude Include="kEngine\GameObject\Object\Sprite.h" />

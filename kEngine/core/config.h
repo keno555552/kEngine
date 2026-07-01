@@ -25,6 +25,9 @@ private:
 	/// 最大ライト数設定
 	static const int kMaxLightNum_ = 50;              /// 最大ライト数
 
+	/// 後処理のレイヤー数設定
+	static const int kPostProcessLayer = 5;
+
 private:
 
 	/// ============================= mesh関連 ============================= ///
@@ -55,6 +58,7 @@ public:
 	static int GetMaxMaterialNum() { return kMaxMaterialNum_; }
 	static int GetMaxSRVNum() { return kMaxSRVNum_; }
 	static int GetMaxLightNum() { return kMaxLightNum_; }
+	static int GetPostProcessLayer() { return kPostProcessLayer; }
 
 	static int GetDefaultSphereDivideNum() { return kDefaultSphereDivideNum_; }
 

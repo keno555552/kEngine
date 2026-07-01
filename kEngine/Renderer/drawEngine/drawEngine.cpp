@@ -12,7 +12,7 @@ void DrawEngine::Initialize(
 	DirectXCore* directXDriver,
 	DrawDataCollector* drawDataCollector,
 	PostProcessRunner* postProcessRunner
-){
+) {
 	directXDriver_ = directXDriver;
 	commandList_ = directXDriver_->GetCommandList();
 	srvManager_ = SrvManager::GetInstance();
@@ -121,20 +121,6 @@ void DrawEngine::Initialize(
 
 	/// =========================== OffscreenRT初期化 =========================== ///
 
-	m_Offscreen_InputRT = resourceManager_->CreateRenderTexture(
-		kClientWidth_,
-		kClientHeight_,
-		GetDXGIFormat(RenderTargetFormatType::BackBuffer),
-		Vector4{ 0.1f, 0.25f, 0.5f, 1.0f }
-	);
-
-	m_Offscreen_OutputRT = resourceManager_->CreateRenderTexture(
-		kClientWidth_,
-		kClientHeight_,
-		GetDXGIFormat(RenderTargetFormatType::BackBuffer),
-		Vector4{ 0.1f, 0.25f, 0.5f, 1.0f }
-	);
-
 	kernelDataResource_ = std::make_unique<InstanceBuffer<KernelDataGPU>>(directXDriver_);
 	KernelDataGPU* instanceListBlurData = kernelDataResource_->CreateInstanceBuffer(5);
 	postProcessRunner_->SetInstanceListBlurData(instanceListBlurData);
@@ -215,24 +201,7 @@ void DrawEngine::PreDraw() {
 
 
 	/// ==================== OffscreenRT関連設定 ==================== ///
-	/// 1. color → RTV
-	TransitionRenderTarget(
-		m_Offscreen_InputRT,
-		D3D12_RESOURCE_STATE_RENDER_TARGET
-	);
-	/// 2. depth → DEPTH_WRITE
-	TransitionDepthStencil(
-		m_Offscreen_InputRT,
-		D3D12_RESOURCE_STATE_DEPTH_WRITE
-	);
-
-	/// RenderTargetをセット
-	auto rtv = m_Offscreen_InputRT.rtvHandleCPU;
-	auto dsv = m_Offscreen_InputRT.dsvHandleCPU;
-	commandList_->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
-	commandList_->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-	float clearColor[4] = { 0.1f, 0.25f, 0.5f, 1.0f };
-	commandList_->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
+	postProcessRunner_->SetPreDraw(this);
 }
 
 void DrawEngine::CommitDraw() {
@@ -674,7 +643,7 @@ void DrawEngine::DrawCall() {
 void DrawEngine::TransitionRenderTarget(
 	RenderTexture& renderTexture,
 	D3D12_RESOURCE_STATES toState
-){
+) {
 	if (renderTexture.currentState == toState)
 		return;
 
@@ -721,100 +690,76 @@ void DrawEngine::SetRootDescriptorTable(UINT rootParameterIndex, D3D12_GPU_DESCR
 	commandList_->SetGraphicsRootDescriptorTable(rootParameterIndex, descriptorHandle);
 }
 
-void DrawEngine::DrawColorGrading() {
+void DrawEngine::DrawColorGrading(RenderCommandGPU& renderCommandGPU) {
 
 	/// RenderTargetを切り替える
-	TransitionRenderTarget(
-		m_Offscreen_InputRT,
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-	);
+	postProcessRunner_->SetRenderTargetsForDraw(this);
 
-	TransitionRenderTarget(
-		m_Offscreen_OutputRT,
-		D3D12_RESOURCE_STATE_RENDER_TARGET
-	);
-
-	SetRenderTarget(m_Offscreen_OutputRT.rtvHandleCPU);
+	SetRenderTarget(postProcessRunner_->GetRenderTarget().outputRT.rtvHandleCPU);
 
 	/// PSOを設定
 	PSOKey psoKey = CreateColorGradingPSOKey();
 	psoManager_->SetPSO(psoKey);
 
 	/// RenderCommandをPostProcessRunnerにセット
-	postProcessRunner_->SetRenderCommand(this);
+	postProcessRunner_->SetRenderCommand(this, renderCommandGPU);
 
 	/// SRV Heapを設定
 	SetSRVHeap();
 
 	/// DescriptorTableを設定
-	SetRootDescriptorTable(0, m_Offscreen_InputRT.srvHandleGPU);
+	SetRootDescriptorTable(0, postProcessRunner_->GetRenderTarget().inputRT.srvHandleGPU);
 
 	/// 最終のドロー
 	DrawFullscreenQuad();
 
 	/// OffscreenRTを入れ替える
-	std::swap(m_Offscreen_InputRT, m_Offscreen_OutputRT);
+	std::swap(postProcessRunner_->GetRenderTarget().inputRT, postProcessRunner_->GetRenderTarget().outputRT);
 
 }
 
-void DrawEngine::DrawVignette() {
+void DrawEngine::DrawVignette(RenderCommandGPU& renderCommandGPU) {
 
 	/// RenderTargetを切り替える
-	TransitionRenderTarget(
-		m_Offscreen_InputRT,
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-	);
+	postProcessRunner_->SetRenderTargetsForDraw(this);
 
-	TransitionRenderTarget(
-		m_Offscreen_OutputRT,
-		D3D12_RESOURCE_STATE_RENDER_TARGET
-	);
-
-	SetRenderTarget(m_Offscreen_OutputRT.rtvHandleCPU);
+	SetRenderTarget(postProcessRunner_->GetRenderTarget().outputRT.rtvHandleCPU);
 
 	/// PSOを設定
 	PSOKey psoKey = CreateVignettePSOKey();
 	psoManager_->SetPSO(psoKey);
 
 	/// RenderCommandをPostProcessRunnerにセット
-	postProcessRunner_->SetRenderCommand(this);
+	postProcessRunner_->SetRenderCommand(this, renderCommandGPU);
 
 	/// SRV Heapを設定
 	SetSRVHeap();
 
 	/// DescriptorTableを設定
-	SetRootDescriptorTable(0, m_Offscreen_InputRT.srvHandleGPU);
+	SetRootDescriptorTable(0, postProcessRunner_->GetRenderTarget().inputRT.srvHandleGPU);
 
 	/// 最終のドロー
 	DrawFullscreenQuad();
 
 	/// OffscreenRTを入れ替える
-	std::swap(m_Offscreen_InputRT, m_Offscreen_OutputRT);
+	std::swap(postProcessRunner_->GetRenderTarget().inputRT, postProcessRunner_->GetRenderTarget().outputRT);
 
 }
 
-void DrawEngine::DrawBlur() {
+void DrawEngine::DrawBlur(RenderCommandGPU& renderCommandGPU) {
 
 	/// RenderTargetを切り替える
-	TransitionRenderTarget(
-		m_Offscreen_InputRT,
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-	);
+	postProcessRunner_->SetRenderTargetsForDraw(this);
 
-	TransitionRenderTarget(
-		m_Offscreen_OutputRT,
-		D3D12_RESOURCE_STATE_RENDER_TARGET
-	);
-
-	SetRenderTarget(m_Offscreen_OutputRT.rtvHandleCPU);
+	SetRenderTarget(postProcessRunner_->GetRenderTarget().outputRT.rtvHandleCPU);
 
 	/// PSOを設定
 	PSOKey psoKey = CreateBlurPSOKey();
 	psoManager_->SetPSO(psoKey);
 
 	/// RenderCommandをPostProcessRunnerにセット
-	postProcessRunner_->SetRenderCommand(this);
-	
+	postProcessRunner_->SetRenderCommand(this, renderCommandGPU);
+
 	/// BlurDataを設定
 	SetRootDescriptorTable(2, kernelDataResource_->GetGPUDescriptorHandle());
 
@@ -822,37 +767,29 @@ void DrawEngine::DrawBlur() {
 	SetSRVHeap();
 
 	/// DescriptorTableを設定
-	SetRootDescriptorTable(0, m_Offscreen_InputRT.srvHandleGPU);
+	SetRootDescriptorTable(0, postProcessRunner_->GetRenderTarget().inputRT.srvHandleGPU);
 
 	/// 最終のドロー
 	DrawFullscreenQuad();
 
 	/// OffscreenRTを入れ替える
-	std::swap(m_Offscreen_InputRT, m_Offscreen_OutputRT);
+	std::swap(postProcessRunner_->GetRenderTarget().inputRT, postProcessRunner_->GetRenderTarget().outputRT);
 
 }
 
-void DrawEngine::DrawOutline() {
+void DrawEngine::DrawOutline(RenderCommandGPU& renderCommandGPU) {
 
 	/// RenderTargetを切り替える
-	TransitionRenderTarget(
-		m_Offscreen_InputRT,
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-	);
+	postProcessRunner_->SetRenderTargetsForDraw(this);
 
-	TransitionRenderTarget(
-		m_Offscreen_OutputRT,
-		D3D12_RESOURCE_STATE_RENDER_TARGET
-	);
-
-	SetRenderTarget(m_Offscreen_OutputRT.rtvHandleCPU);
+	SetRenderTarget(postProcessRunner_->GetRenderTarget().outputRT.rtvHandleCPU);
 
 	/// PSOを設定
 	PSOKey psoKey = CreateOutlinePSOKey();
 	psoManager_->SetPSO(psoKey);
 
 	/// RenderCommandをPostProcessRunnerにセット
-	postProcessRunner_->SetRenderCommand(this);
+	postProcessRunner_->SetRenderCommand(this, renderCommandGPU);
 
 	/// OutlineDataを設定
 	SetRootDescriptorTable(2, kernelDataResource_->GetGPUDescriptorHandle());
@@ -861,42 +798,35 @@ void DrawEngine::DrawOutline() {
 	SetSRVHeap();
 
 	/// DescriptorTableを設定
-	SetRootDescriptorTable(0, m_Offscreen_InputRT.srvHandleGPU);
+	SetRootDescriptorTable(0, postProcessRunner_->GetRenderTarget().inputRT.srvHandleGPU);
 
 	/// 最終のドロー
 	DrawFullscreenQuad();
 
 	/// OffscreenRTを入れ替える
-	std::swap(m_Offscreen_InputRT, m_Offscreen_OutputRT);
+	std::swap(postProcessRunner_->GetRenderTarget().inputRT, postProcessRunner_->GetRenderTarget().outputRT);
 
 }
 
-void DrawEngine::DrawOutlinePrewittDepth() {
+void DrawEngine::DrawOutlinePrewittDepth(RenderCommandGPU& renderCommandGPU) {
 
 	/// RenderTargetを切り替える
-	TransitionRenderTarget(
-		m_Offscreen_InputRT,
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-	);
+	postProcessRunner_->SetRenderTargetsForDraw(this);
 
+	/// DepthStencilを切り替える
 	TransitionDepthStencil(
-		m_Offscreen_InputRT,
+		postProcessRunner_->GetRenderTarget().inputRT,
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
 	);
 
-	TransitionRenderTarget(
-		m_Offscreen_OutputRT,
-		D3D12_RESOURCE_STATE_RENDER_TARGET
-	);
-
-	SetRenderTarget(m_Offscreen_OutputRT.rtvHandleCPU);
+	SetRenderTarget(postProcessRunner_->GetRenderTarget().outputRT.rtvHandleCPU);
 
 	/// PSOを設定
 	PSOKey psoKey = CreateOutlinePrewittDepthPSOKey();
 	psoManager_->SetPSO(psoKey);
 
 	/// RenderCommandをPostProcessRunnerにセット
-	postProcessRunner_->SetRenderCommand(this);
+	postProcessRunner_->SetRenderCommand(this, renderCommandGPU);
 
 	/// OutlineDataを設定
 	SetRootDescriptorTable(2, kernelDataResource_->GetGPUDescriptorHandle());
@@ -905,36 +835,28 @@ void DrawEngine::DrawOutlinePrewittDepth() {
 	SetSRVHeap();
 
 	/// DescriptorTableを設定
-	SetRootDescriptorTable(0, m_Offscreen_InputRT.srvHandleGPU);
+	SetRootDescriptorTable(0, postProcessRunner_->GetRenderTarget().inputRT.srvHandleGPU);
 
 	/// DepthSRVを設定
-	SetRootDescriptorTable(3, m_Offscreen_InputRT.depthSrvHandleGPU);
+	SetRootDescriptorTable(3, postProcessRunner_->GetRenderTarget().inputRT.depthSrvHandleGPU);
 
 	/// 最終のドロー
 	DrawFullscreenQuad();
 
 	/// OffscreenRTを入れ替える
-	std::swap(m_Offscreen_InputRT, m_Offscreen_OutputRT);
+	std::swap(postProcessRunner_->GetRenderTarget().inputRT, postProcessRunner_->GetRenderTarget().outputRT);
 }
 
-void DrawEngine::DrawDissolve() {
+void DrawEngine::DrawDissolve(RenderCommandGPU& renderCommandGPU, int dissolveTextureIndex) {
 
 	/// RenderTargetを切り替える
-	TransitionRenderTarget(
-		m_Offscreen_InputRT,
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-	);
+	postProcessRunner_->SetRenderTargetsForDraw(this);
 
-	TransitionRenderTarget(
-		m_Offscreen_OutputRT,
-		D3D12_RESOURCE_STATE_RENDER_TARGET
-	);
-
-	SetRenderTarget(m_Offscreen_OutputRT.rtvHandleCPU);
+	SetRenderTarget(postProcessRunner_->GetRenderTarget().outputRT.rtvHandleCPU);
 
 	// ⭐ 加這一行：清除 OutputRT
 	float clearColor[4] = { 0.1f, 0.25f, 0.5f, 1.0f };
-	commandList_->ClearRenderTargetView(m_Offscreen_OutputRT.rtvHandleCPU, clearColor, 0, nullptr);
+	commandList_->ClearRenderTargetView(postProcessRunner_->GetRenderTarget().outputRT.rtvHandleCPU, clearColor, 0, nullptr);
 
 
 	/// PSOを設定
@@ -942,61 +864,53 @@ void DrawEngine::DrawDissolve() {
 	psoManager_->SetPSO(psoKey);
 
 	/// RenderCommandをPostProcessRunnerにセット
-	postProcessRunner_->SetRenderCommand(this);
+	postProcessRunner_->SetRenderCommand(this, renderCommandGPU);
 
 	/// SRV Heapを設定
 	SetSRVHeap();
 
 	/// MaskTextureを設定
-	int maskTextureHandleFormRenderCommand = postProcessRunner_->GetRenderCommand().dissolveTextureIndex;
+	int maskTextureHandleFormRenderCommand = dissolveTextureIndex;
 	int dissolveTextureHandle = (maskTextureHandleFormRenderCommand == -1) ?
 		defaultTextureHandle_ :
 		maskTextureHandleFormRenderCommand;
 	SetRootDescriptorTable(4, resourceManager_->GetTextureGPUDescriptorHandle(dissolveTextureHandle));
 
 	/// DescriptorTableを設定
-	SetRootDescriptorTable(0, m_Offscreen_InputRT.srvHandleGPU);
+	SetRootDescriptorTable(0, postProcessRunner_->GetRenderTarget().inputRT.srvHandleGPU);
 
 	/// 最終のドロー
 	DrawFullscreenQuad();
 
 	/// OffscreenRTを入れ替える
-	std::swap(m_Offscreen_InputRT, m_Offscreen_OutputRT);
+	std::swap(postProcessRunner_->GetRenderTarget().inputRT, postProcessRunner_->GetRenderTarget().outputRT);
 }
 
-void DrawEngine::DrawNoise(){
+void DrawEngine::DrawNoise(RenderCommandGPU& renderCommandGPU) {
 
 	/// RenderTargetを切り替える
-	TransitionRenderTarget(
-		m_Offscreen_InputRT,
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-	);
+	postProcessRunner_->SetRenderTargetsForDraw(this);
 
-	TransitionRenderTarget(
-		m_Offscreen_OutputRT,
-		D3D12_RESOURCE_STATE_RENDER_TARGET
-	);
-
-	SetRenderTarget(m_Offscreen_OutputRT.rtvHandleCPU);
+	SetRenderTarget(postProcessRunner_->GetRenderTarget().outputRT.rtvHandleCPU);
 
 	/// PSOを設定
 	PSOKey psoKey = CreateNoisePSOKey();
 	psoManager_->SetPSO(psoKey);
 
 	/// RenderCommandをPostProcessRunnerにセット
-	postProcessRunner_->SetRenderCommand(this);
+	postProcessRunner_->SetRenderCommand(this, renderCommandGPU);
 
 	/// SRV Heapを設定
 	SetSRVHeap();
 
 	/// DescriptorTableを設定
-	SetRootDescriptorTable(0, m_Offscreen_InputRT.srvHandleGPU);
+	SetRootDescriptorTable(0, postProcessRunner_->GetRenderTarget().inputRT.srvHandleGPU);
 
 	/// 最終のドロー
 	DrawFullscreenQuad();
 
 	/// OffscreenRTを入れ替える
-	std::swap(m_Offscreen_InputRT, m_Offscreen_OutputRT);
+	std::swap(postProcessRunner_->GetRenderTarget().inputRT, postProcessRunner_->GetRenderTarget().outputRT);
 
 }
 
@@ -1004,7 +918,7 @@ void DrawEngine::DrawRenderCopy() {
 
 	/// RenderTargetを切り替える
 	TransitionRenderTarget(
-		m_Offscreen_InputRT,
+		postProcessRunner_->GetRenderTarget().inputRT,
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
 	);
 
@@ -1020,7 +934,7 @@ void DrawEngine::DrawRenderCopy() {
 	SetSRVHeap();
 
 	/// DescriptorTableを設定
-	SetRootDescriptorTable(0, m_Offscreen_InputRT.srvHandleGPU);
+	SetRootDescriptorTable(0, postProcessRunner_->GetRenderTarget().inputRT.srvHandleGPU);
 
 	/// 最終のドロー
 	DrawFullscreenQuad();
@@ -1043,6 +957,8 @@ void DrawEngine::DrawFullscreenQuad() {
 void DrawEngine::SetEnviromentReflectionTexture(int textureHandle) {
 	enviromentReflectionTextureHandle_ = textureHandle;
 }
+
+/// ------------------------------------- Skinning関連 --------------------------------------- ///
 
 void DrawEngine::CreateSkinningBuffer(ObjectData* objectData) {
 

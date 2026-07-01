@@ -392,9 +392,9 @@ Microsoft::WRL::ComPtr<ID3D12RootSignature> RootSignatureFactory::MakeStaticFull
 	rootParameters[0].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeForInstancing);		/// Tableで利用する数
 
 	// RenderCommand（b0, PixelShader）
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;						/// 32ビット定数を使う
-	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;									/// PixelShaderで使う
-	rootParameters[1].Constants.Num32BitValues = sizeof(RenderCommandGPU) / sizeof(uint32_t);			/// 定数の数
+	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[1].Descriptor.ShaderRegister = 0; // b0
+	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	// kernelDataList 用 (t1, PS)
 	static D3D12_DESCRIPTOR_RANGE kernelDataListRange[1]{};
