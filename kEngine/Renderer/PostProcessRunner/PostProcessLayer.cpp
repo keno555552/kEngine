@@ -2,8 +2,10 @@
 #include "drawEngine/drawEngine.h"
 #include <utility>
 
-void PostProcessLayer::AddPass(std::unique_ptr<PostProcessPass> pass) {
+int PostProcessLayer::AddPass(std::unique_ptr<PostProcessPass> pass) {
+	int handle = static_cast<int>(passList_.size());
 	passList_.push_back(std::move(pass));
+	return handle;
 }
 
 void PostProcessLayer::ClearPass(int passIndex) {
@@ -35,4 +37,12 @@ void PostProcessLayer::Execute(DrawEngine* drawEngine) {
 	}
 }
 
+void PostProcessLayer::SetPassCommandGPU(int passIndex, RenderCommandGPU commandGPU) {
+	if (passIndex < 0 || passIndex >= passList_.size()) return;
+	passList_[passIndex]->SetCommandGPU(commandGPU);
+}
 
+void PostProcessLayer::SetPassKernelGPU(int passIndex, KernelDataGPU kernelData) {
+	if (passIndex < 0 || passIndex >= passList_.size()) return;
+	passList_[passIndex]->SetKernel(kernelData);
+}

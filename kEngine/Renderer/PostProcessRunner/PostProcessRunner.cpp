@@ -11,31 +11,132 @@ PostProcessRunner::PostProcessRunner() {
 
 /// ==================== SetPass ==================== ///
 
-void PostProcessRunner::SetPassCopy(int layer, RenderCommand command) {
+int PostProcessRunner::SetPassCopy(int layer, RenderCommand command) {
 	/// layerが範囲外の場合、エラーを出す
-	if (!LayerCheck(layer)) {
-		return;
-	}
+	if (LayerCheck(layer)) return -1;
+
 	/// CopyPassを追加する
 	RenderCommandGPU commandGPU;
 	ConvertRenderCommandToGPU(command, commandGPU);
-	layerList_[layer]->AddPass(std::make_unique<CopyPass>(commandGPU));
+	return layerList_[layer]->AddPass(std::make_unique<CopyPass>(commandGPU));
 }
 
-void PostProcessRunner::SetPassColorGrading(int layer, RenderCommand command) {
+int PostProcessRunner::SetPassColorGrading(int layer, RenderCommand command) {
 	/// layerが範囲外の場合、エラーを出す
-	if (!LayerCheck(layer)) {
-		return;
-	}
+	if (LayerCheck(layer)) return -1;
+
 	/// CopyPassを追加する
 	RenderCommandGPU commandGPU;
 	ConvertRenderCommandToGPU(command, commandGPU);
-	layerList_[layer]->AddPass(std::make_unique<CopyPass>(commandGPU));
+	return layerList_[layer]->AddPass(std::make_unique<ColorGradingPass>(commandGPU));
+}
+
+int PostProcessRunner::SetPassVignette(int layer, RenderCommand command) {
+	/// layerが範囲外の場合、エラーを出す
+	if (LayerCheck(layer)) return -1;
+
+	/// CopyPassを追加する
+	RenderCommandGPU commandGPU;
+	ConvertRenderCommandToGPU(command, commandGPU);
+	return layerList_[layer]->AddPass(std::make_unique<VignettePass>(commandGPU));
+}
+
+int PostProcessRunner::SetPassBlur(int layer, RenderCommand command) {
+	/// layerが範囲外の場合、エラーを出す
+	if (LayerCheck(layer)) return -1;
+
+	/// CopyPassを追加する
+	RenderCommandGPU commandGPU;
+	ConvertRenderCommandToGPU(command, commandGPU);
+	commandGPU.blurKernelIndex = 0;
+	int handle =  layerList_[layer]->AddPass(std::make_unique<BlurPass>(commandGPU));
+
+	/// kernelをGPU形成に転換し設定する
+	if (command.blurType != KernelType::NONE) {
+		KernelDataGPU kernelData;
+		kernelData.ConvertOutlineCommand(command);
+		layerList_[layer]->SetPassKernelGPU(handle, kernelData);
+	}
+
+	return handle;
+}
+
+int PostProcessRunner::SetPassOutline(int layer, RenderCommand command) {
+	/// layerが範囲外の場合、エラーを出す
+	if (LayerCheck(layer)) return -1;
+
+	/// CopyPassを追加する
+	RenderCommandGPU commandGPU;
+	ConvertRenderCommandToGPU(command, commandGPU);
+	commandGPU.outlineKernelIndex = 0;
+	int handle = layerList_[layer]->AddPass(std::make_unique<OutlinePass>(commandGPU));
+
+	/// kernelをGPU形成に転換し設定する
+	if (command.outlineType != KernelType::NONE) {
+		KernelDataGPU kernelData;
+		kernelData.ConvertOutlineCommand(command);
+		layerList_[layer]->SetPassKernelGPU(handle, kernelData);
+	}
+
+	return handle;
+}
+
+int PostProcessRunner::SetPassOutlinePrewittDepth(int layer, RenderCommand command) {
+	/// layerが範囲外の場合、エラーを出す
+	if (LayerCheck(layer)) return -1;
+
+	/// CopyPassを追加する
+	RenderCommandGPU commandGPU;
+	ConvertRenderCommandToGPU(command, commandGPU);
+	return layerList_[layer]->AddPass(std::make_unique<OutlinePrewittDepthPass>(commandGPU));
+}
+
+int PostProcessRunner::SetPassDissolve(int layer, RenderCommand command) {
+	/// layerが範囲外の場合、エラーを出す
+	if (LayerCheck(layer)) return -1;
+
+	/// CopyPassを追加する
+	RenderCommandGPU commandGPU;
+	ConvertRenderCommandToGPU(command, commandGPU);
+	return layerList_[layer]->AddPass(std::make_unique<DissolvePass>(commandGPU, command.dissolveTextureIndex));
+}
+
+int PostProcessRunner::SetPassNoise(int layer, RenderCommand command) {
+	/// layerが範囲外の場合、エラーを出す
+	if (LayerCheck(layer)) return -1;
+
+	/// CopyPassを追加する
+	RenderCommandGPU commandGPU;
+	ConvertRenderCommandToGPU(command, commandGPU);
+	return layerList_[layer]->AddPass(std::make_unique<NoisePass>(commandGPU));
+
+}
+
+void PostProcessRunner::SetPassCommand(int layer, int passIndex, RenderCommand command) {
+	/// layerとpassIndexが範囲外の場合、エラーを出す
+	PassCheck(layer, passIndex);
+
+	/// GPUCommandに転換
+	RenderCommandGPU commandGPU;
+	ConvertRenderCommandToGPU(command, commandGPU);
+
+	/// layerが指定されている場合、該当layerのpassのGPUコマンドを設定する
+	layerList_[layer]->SetPassCommandGPU(passIndex, commandGPU);
+
+	/// kernelがある場合、GPUCommandに転換して設定する
+	bool needKernel = false;
+	if (command.blurType != KernelType::NONE) needKernel = true;
+	if (command.outlineType != KernelType::NONE) needKernel = true;
+	if (needKernel) {
+		KernelDataGPU kernelData;
+		kernelData.ConvertOutlineCommand(command);
+		layerList_[layer]->SetPassKernelGPU(passIndex, kernelData);
+	}
 }
 
 void PostProcessRunner::ClearLayer(int layer) {
 	/// layerが範囲外の場合、エラーを出す
-	if (!LayerCheck(layer)) {
+	if (LayerCheck(layer)) {
 		return;
 	}
 	/// layerが-1の場合、全てのlayerのpassを消す
@@ -52,7 +153,7 @@ void PostProcessRunner::ClearLayer(int layer) {
 /// ==================== PassListに関係する他の関数 ==================== ///
 void PostProcessRunner::ClearPass(int layer, int passIndex) {
 	/// layerとpassIndexが範囲外の場合、エラーを出す
-	if (!PassCheck(layer, passIndex)) {
+	if (PassCheck(layer, passIndex)) {
 		return;
 	}
 
@@ -67,7 +168,7 @@ void PostProcessRunner::ClearPass(int layer, int passIndex) {
 
 std::string PostProcessRunner::GetPassName(int layer, int passIndex) {
 	/// layerとpassIndexが範囲外の場合、エラーを出す
-	if (!PassCheck(layer, passIndex)) {
+	if (PassCheck(layer, passIndex)) {
 		return "";
 	}
 	/// layerが指定されている場合、該当layerのpassの名前を取得する
@@ -92,7 +193,6 @@ void PostProcessRunner::SetPreDraw(DrawEngine* drawEngine) {
 	/// layerのPreDrawを呼び出す
 	ResetRenderTargets(drawEngine);
 	ClearRenderTargets(drawEngine);
-	
 }
 
 void PostProcessRunner::SetRenderTargetsForDraw(DrawEngine* drawEngine) {
@@ -119,26 +219,13 @@ void PostProcessRunner::SetRenderCommand(DrawEngine* drawEngine, const RenderCom
 
 	drawEngine->commandList_->SetGraphicsRoot32BitConstants(
 		1, // RootParameter index（b0,slot[1]）
-		sizeof(RenderCommandGPU) / sizeof(uint32_t),
-		&renderCommandGPU_,
+		sizeof(command) / sizeof(uint32_t),
+		&command,
 		0);
 }
 
-void PostProcessRunner::SetBlurlData(const RenderCommand& renderCommand, int instanceIndex) {
-	if (instanceIndex >= 5) {
-		Logger::Log("[kEngine]PostProcessRunner::SetBlurlData() instanceIndex is out of limited");
-		return;
-	}
-	instancingListBlurData_[instanceIndex].ConvertBlurCommand(renderCommand);
-}
-
-
-void PostProcessRunner::SetOutlinelData(const RenderCommand& renderCommand, int instanceIndex) {
-	if (instanceIndex >= 5) {
-		Logger::Log("[kEngine]PostProcessRunner::SetOutlinelData() instanceIndex is out of limited");
-		return;
-	}
-	instancingListBlurData_[instanceIndex].ConvertOutlineCommand(renderCommand);
+void PostProcessRunner::SetKernelData(const KernelDataGPU& kernelData) {
+	instancingListBlurData_[0] = kernelData;
 }
 
 PPRenderTexture& PostProcessRunner::GetRenderTarget() {

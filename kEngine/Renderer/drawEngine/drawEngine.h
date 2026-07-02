@@ -213,7 +213,7 @@ private:
 	/// PostProcess群
 	void DrawColorGrading		( RenderCommandGPU& renderCommandGPU);
 	void DrawVignette			( RenderCommandGPU& renderCommandGPU);
-	void DrawBlur				( RenderCommandGPU& renderCommandGPU);
+	void DrawBlur				( RenderCommandGPU& renderCommandGPU, KernelDataGPU& kernelData);
 	void DrawOutline			( RenderCommandGPU& renderCommandGPU);
 	void DrawOutlinePrewittDepth( RenderCommandGPU& renderCommandGPU);
 	void DrawDissolve			( RenderCommandGPU& renderCommandGPU, int dissolveTextureIndex);

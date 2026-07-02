@@ -587,6 +587,10 @@ DrawEngine* kEngine::GetDrawEngine() const {
 	return drawEngine.get();
 }
 
+PostProcessRunner* kEngine::GetPostProcessRunner() const {
+	return postProcessRunner_.get();
+}
+
 SoundManager* kEngine::GetSoundManager() const {
 	return soundManager.get();
 }

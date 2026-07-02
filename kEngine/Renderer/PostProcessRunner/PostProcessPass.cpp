@@ -20,8 +20,8 @@ void PostProcessPass::RunVignette(DrawEngine* engine, RenderCommandGPU command) 
 	engine->DrawVignette(command);
 }
 
-void PostProcessPass::RunBlur(DrawEngine* engine, RenderCommandGPU command) {
-	engine->DrawBlur(command);
+void PostProcessPass::RunBlur(DrawEngine* engine, RenderCommandGPU command, KernelDataGPU kernelData) {
+	engine->DrawBlur(command, kernelData);
 }
 
 void PostProcessPass::RunOutline(DrawEngine* engine, RenderCommandGPU command) {
@@ -46,66 +46,61 @@ void PostProcessPass::RunNoise(DrawEngine* engine, RenderCommandGPU command) {
 /// CopyPass
 CopyPass::CopyPass(RenderCommandGPU commandGPU)
 { passName_ = "CopyPass"; }
-void CopyPass::Run(DrawEngine* engine) {
-	RunCopy(engine);
-}
+void CopyPass::Run(DrawEngine* engine) { RunCopy(engine); }
 
-/// ColorGradingPass
+/// ====================  ColorGradingPass
 ColorGradingPass::ColorGradingPass(RenderCommandGPU commandGPU):
 	commandGPU_(commandGPU) 
 { passName_ = "ColorGradingPass"; }
-void ColorGradingPass::Run(DrawEngine* engine) {
-	RunColorGrading(engine, commandGPU_);
-}
+void ColorGradingPass::Run(DrawEngine* engine) { RunColorGrading(engine, commandGPU_); }
+void ColorGradingPass::SetCommandGPU(RenderCommandGPU commandGPU) { commandGPU_ = commandGPU; }
 
-/// BlurPass
-BlurPass::BlurPass(RenderCommandGPU commandGPU):
-	commandGPU_(commandGPU) 
-{ passName_ = "BlurPass"; }
-void BlurPass::Run(DrawEngine* engine) {
-	RunBlur(engine, commandGPU_);
-}
-
-/// VignettePass
+/// ====================  VignettePass
 VignettePass::VignettePass(RenderCommandGPU commandGPU):
 	commandGPU_(commandGPU) 
 { passName_ = "VignettePass"; }
-void VignettePass::Run(DrawEngine* engine) {
-	RunVignette(engine, commandGPU_);
-}
+void VignettePass::Run(DrawEngine* engine) { RunVignette(engine, commandGPU_); }
+void VignettePass::SetCommandGPU(RenderCommandGPU commandGPU) { commandGPU_ = commandGPU; }
 
-/// OutlinePass
+/// ====================  BlurPass
+BlurPass::BlurPass(RenderCommandGPU commandGPU):
+	commandGPU_(commandGPU) 
+{ passName_ = "BlurPass"; }
+void BlurPass::Run(DrawEngine* engine) { RunBlur(engine, commandGPU_, kernelData_); }
+void BlurPass::SetCommandGPU(RenderCommandGPU commandGPU) { commandGPU_ = commandGPU; }
+void BlurPass::SetKernel(KernelDataGPU kernelData)		  { kernelData_ = kernelData; }
+
+/// ====================  OutlinePass
 OutlinePass::OutlinePass(RenderCommandGPU commandGPU) :
 	commandGPU_(commandGPU) 
 { passName_ = "OutlinePass"; }
-void OutlinePass::Run(DrawEngine* engine) {
-	RunOutline(engine, commandGPU_);
-}
+void OutlinePass::Run(DrawEngine* engine) { RunOutline(engine, commandGPU_); }
+void OutlinePass::SetCommandGPU(RenderCommandGPU commandGPU) { commandGPU_ = commandGPU; }
+void OutlinePass::SetKernel(KernelDataGPU kernelData)        { kernelData_ = kernelData; }
 
-/// OutlinePrewittDepthPass
+
+/// ====================  OutlinePrewittDepthPass
 OutlinePrewittDepthPass::OutlinePrewittDepthPass(RenderCommandGPU commandGPU) :
 	commandGPU_(commandGPU) 
 { passName_ = "OutlinePrewittDepthPass"; }
-void OutlinePrewittDepthPass::Run(DrawEngine* engine) {
-	RunOutlinePrewittDepth(engine, commandGPU_);
-}
+void OutlinePrewittDepthPass::Run(DrawEngine* engine) { RunOutlinePrewittDepth(engine, commandGPU_); }
+void OutlinePrewittDepthPass::SetCommandGPU(RenderCommandGPU commandGPU) { commandGPU_ = commandGPU; }
 
-/// DissolvePass
+/// ====================  DissolvePass
 DissolvePass::DissolvePass(RenderCommandGPU commandGPU, int dissolveTextureIndex) :
 	commandGPU_(commandGPU)	, 
 	dissolveTextureIndex_(dissolveTextureIndex)
 { passName_ = "DissolvePass"; }
-void DissolvePass::Run(DrawEngine* engine) {
-	RunDissolve(engine, commandGPU_, dissolveTextureIndex_);
-}
+void DissolvePass::Run(DrawEngine* engine) { RunDissolve(engine, commandGPU_, dissolveTextureIndex_); }
+void DissolvePass::SetCommandGPU(RenderCommandGPU commandGPU) { commandGPU_ = commandGPU; }
 
-/// NoisePass
+/// ====================  NoisePass
 NoisePass::NoisePass(RenderCommandGPU commandGPU) :
 	commandGPU_(commandGPU) 
 { passName_ = "NoisePass"; }
-void NoisePass::Run(DrawEngine* engine) {
-	RunNoise(engine, commandGPU_);
-}
+void NoisePass::Run(DrawEngine* engine) { RunNoise(engine, commandGPU_); }
+void NoisePass::SetCommandGPU(RenderCommandGPU commandGPU) { commandGPU_ = commandGPU; }
+
 
 
 

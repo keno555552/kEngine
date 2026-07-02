@@ -14,7 +14,7 @@ float whiteNoise(float2 texcoord, float time)
 float getNoise(float noiseType, float2 texcoord, float noiseTime)
 {
     if (noiseType == 1)
-        return whiteNoise(texcoord, noiseTime);
+        return whiteNoise(texcoord, noiseTime == 0 ? 10 : noiseTime);
     //if (noiseType == 1)
     //    return hashNoise(uv);
     //if (noiseType == 2)

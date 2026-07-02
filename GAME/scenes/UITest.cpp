@@ -66,6 +66,7 @@ UITest::UITest(kEngine* system) {
 	//};
 	//
 	//system_->SetPostProcessChain(postProcessList);
+	system_->GetPostProcessRunner()->SetPassNoise(0, renderCommand_);
 
 	/// =========== リソースロード ============///
 	skydomeModelHandle_ = system_->SetModelObj("./kEngine/EngineAssets/TemplateResource/object/skydome/skydome.obj");
@@ -191,7 +192,7 @@ UITest::~UITest() {
 
 void UITest::Update() {
 
-	//system_->ChangeRenderCommand(renderCommand_);
+	system_->GetPostProcessRunner()->SetPassCommand(0, 0, renderCommand_);
 
 	CameraPart();
 
@@ -377,7 +378,7 @@ void UITest::ImGuiPart() {
 
 		ImGui::Begin("RenderCommand");
 		ImGui::Text("ColorGuard");
-		ImGui::SliderFloat3("Guard Color", &renderCommand_.guardColor[0], 0, 1);
+		ImGui::SliderFloat3("Guard Color", &renderCommand_.guardColor.x, 0, 1);
 		ImGui::SliderFloat("Guard Amount", &renderCommand_.guardAmount, 0, 1);
 		ImGui::Text("Vignette");
 		ImGui::SliderFloat2("Vignette Center", &renderCommand_.vignetteCenter.x, 0, 1);

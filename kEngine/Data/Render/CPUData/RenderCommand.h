@@ -58,7 +58,7 @@ struct RenderCommand
 	/// ない
 	/// ========== ColorGuard用コマンド =========== ///
 	/// この色の明度を元に色を変わる
-	float guardColor[3]{ 0.2125f, 0.7154f, 0.0721f };
+	Vector3 guardColor { 0.2125f, 0.7154f, 0.0721f };
 	/// guardingのAlphaみだいなもの
 	float guardAmount = 1.0f;
 	/// =========== Vignette用コマンド ============ ///

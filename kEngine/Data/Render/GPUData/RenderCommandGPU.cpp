@@ -4,9 +4,9 @@
 void ConvertRenderCommandToGPU(const RenderCommand& cpu, RenderCommandGPU& gpu) {
 
 	/// ========== ColorGuard =========== ///
-	if (gpu.guardColor[0] != cpu.guardColor[0]) gpu.guardColor[0] = cpu.guardColor[0];
-	if (gpu.guardColor[1] != cpu.guardColor[1]) gpu.guardColor[1] = cpu.guardColor[1];
-	if (gpu.guardColor[2] != cpu.guardColor[2]) gpu.guardColor[2] = cpu.guardColor[2];
+	if (gpu.guardColor[0] != cpu.guardColor.x) gpu.guardColor[0] = cpu.guardColor.x;
+	if (gpu.guardColor[1] != cpu.guardColor.y) gpu.guardColor[1] = cpu.guardColor.y;
+	if (gpu.guardColor[2] != cpu.guardColor.z) gpu.guardColor[2] = cpu.guardColor.z;
 	if (gpu.guardAmount != cpu.guardAmount)	gpu.guardAmount = cpu.guardAmount;
 
 	/// ========== Vignette =========== ///

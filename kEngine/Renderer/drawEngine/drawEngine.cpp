@@ -746,7 +746,7 @@ void DrawEngine::DrawVignette(RenderCommandGPU& renderCommandGPU) {
 
 }
 
-void DrawEngine::DrawBlur(RenderCommandGPU& renderCommandGPU) {
+void DrawEngine::DrawBlur(RenderCommandGPU& renderCommandGPU, KernelDataGPU& kernelData) {
 
 	/// RenderTargetを切り替える
 	postProcessRunner_->SetRenderTargetsForDraw(this);
@@ -761,6 +761,7 @@ void DrawEngine::DrawBlur(RenderCommandGPU& renderCommandGPU) {
 	postProcessRunner_->SetRenderCommand(this, renderCommandGPU);
 
 	/// BlurDataを設定
+	postProcessRunner_->SetKernelData(kernelData);
 	SetRootDescriptorTable(2, kernelDataResource_->GetGPUDescriptorHandle());
 
 	/// SRV Heapを設定

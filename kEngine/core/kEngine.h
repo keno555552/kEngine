@@ -36,6 +36,7 @@
 #include "GPUData/DirectionalLightGPU.h"
 #include "Camera/Camera.h"
 #include <CPUData/RenderCommand.h>
+#include <PostProcessRunner/PostProcessRunner.h>
 
 
 class kEngine
@@ -228,6 +229,7 @@ public:
 	AnimationManager* GetAnimationManager() const;
 	DrawDataCollector* GetDrawDataCollector() const;
 	DrawEngine* GetDrawEngine() const;
+	PostProcessRunner* GetPostProcessRunner() const;
 
 	SoundManager* GetSoundManager() const;
 	InputCore* GetInputManager() const;
