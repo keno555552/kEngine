@@ -109,5 +109,5 @@ public:
 void InitMaterialConfig(MaterialConfig* materialConfig);
 MaterialConfig InitMaterialConfig();
 
-/// BlandMode簡易設定
+/// BlendMode簡易設定
 void SetBlendFlameNeonGlow(MaterialConfig* materialConfig);

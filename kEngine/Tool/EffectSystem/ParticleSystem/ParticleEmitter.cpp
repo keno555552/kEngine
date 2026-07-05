@@ -67,10 +67,6 @@ void ParticleEmitter::Update() {
 
 		/// 顏色插值
 		p.nowColor = {
-			//Lerp(p.startColor.x, p.endColor.x, p.life.parameter_, p.life.maxTime_),
-			//Lerp(p.startColor.y, p.endColor.y, p.life.parameter_, p.life.maxTime_),
-			//Lerp(p.startColor.z, p.endColor.z, p.life.parameter_, p.life.maxTime_),
-			//Lerp(p.startColor.w, p.endColor.w, p.life.parameter_, p.life.maxTime_)
 			std::clamp(Lerp(p.startColor.x, p.endColor.x, p.life.parameter_, p.life.maxTime_),0.0f,1.0f),
 			std::clamp(Lerp(p.startColor.y, p.endColor.y, p.life.parameter_, p.life.maxTime_),0.0f,1.0f),
 			std::clamp(Lerp(p.startColor.z, p.endColor.z, p.life.parameter_, p.life.maxTime_),0.0f,1.0f),
@@ -105,6 +101,7 @@ void ParticleEmitter::Update() {
 			particles_.pop_back();
 		}
 	}
+	if (particles_.empty()) isFinished_ = true;
 }
 
 void ParticleEmitter::Emit(int count, ParticlePrototypeOverride* prototype) {
@@ -236,6 +233,8 @@ void ParticleEmitter::Emit(int count, ParticlePrototypeOverride* prototype) {
 			emittingData_.push_back(p);
 		}
 	}
+
+	if (isFinished_ == true) isFinished_ = false;
 }
 
 void ParticleEmitter::SwitchEmitter(bool isEmitting) {

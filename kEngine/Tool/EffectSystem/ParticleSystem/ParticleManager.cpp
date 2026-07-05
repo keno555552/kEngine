@@ -7,16 +7,29 @@ ParticleManager::ParticleManager(kEngine* system) :
 ParticleManager::~ParticleManager() {}
 
 void ParticleManager::Update() {
+	/// ポーズ中は更新しない
+	if (isPaused_)return;
 
+	/// Emitterの更新
 	for (auto& [id, emitter] : emitterList_) {
 		emitter->Update();
 	}
 
+	/// Emitter同士のリンクを更新
 	UpdateEmitterLinks();
+	
+	/// Emitterの寿命が終わったら削除する
+	for (auto it = emitterList_.begin(); it != emitterList_.end(); ) {
+		auto& emitter = it->second;
 
-	for (auto& [id, emitter] : emitterList_) {
 		emitter->ClearEmittingData();
-		emitter->ClearDexpiredData();
+		emitter->ClearDexpiredData();;
+
+		if (emitter->GetIsEnd() && emitter->GetIsFinished()) {
+			it = emitterList_.erase(it);
+		} else {
+			++it;
+		}
 	}
 }
 
@@ -69,6 +82,44 @@ void ParticleManager::LinkEmitterToEmitter(EmitterLink& linkData) {
 
 	/// リンクデータをリストに追加
 	emitterLinks_.push_back(emitterLinks);
+}
+
+void ParticleManager::SetEmitterEnd(int emitterId, bool isEnd) {
+
+	/// EmitterIdが存在するか確認
+	if (EmitterIDCheckMiss(emitterId)) { 
+		Logger::Log("[kEngine] ParticleManager::SetEmitterEnd() Emitter ID not found: " + std::to_string(emitterId));
+		return;
+	}
+
+}
+
+void ParticleManager::SetEmitterDead(int emitterId) {
+
+	/// EmitterIdが存在するか確認
+	if (EmitterIDCheckMiss(emitterId)) {
+		Logger::Log("[kEngine] ParticleManager::SetEmitterEnd() Emitter ID not found: " + std::to_string(emitterId));
+		return;
+	}
+
+}
+
+int ParticleManager::GetEmitterParticleCount(int emitterId) {
+
+	/// EmitterIdが存在するか確認
+	if (EmitterIDCheckMiss(emitterId)) { return -1; }
+
+	/// 存在する場合、Emitterの粒子数を返す
+	return emitterList_[emitterId]->GetParticleCount();
+}
+
+int ParticleManager::GetAllParticleCount() {
+	int totalCount = 0;
+	for (const auto& [id, emitter] : emitterList_) {
+		totalCount += emitter->GetParticleCount();
+	}
+	return totalCount;
+
 }
 
 void ParticleManager::UpdateEmitterLinks() {
@@ -184,7 +235,7 @@ void ParticleManager::UpdateEmitterLinks() {
 
 		ParticlePrototypeOverride protoOverride{};
 		protoOverride.hasStartPosition = true;
-		if(linkData.followScale)protoOverride.hasStartScale = true;
+		if (linkData.followScale)protoOverride.hasStartScale = true;
 		if (linkData.followRotation)protoOverride.hasStartRotation = true;
 
 		auto particle = sourceEmitter->FindParticleById(delayData.particleId);
@@ -201,7 +252,7 @@ void ParticleManager::UpdateEmitterLinks() {
 				protoOverride.startScale = particle->nowScale :
 				protoOverride.startScale = delayData.scaleOffset;
 		} else {
-				protoOverride.startScale = delayData.scaleOffset;
+			protoOverride.startScale = delayData.scaleOffset;
 		}
 		if (linkData.followRotation) {
 			protoOverride.startRotation = (particle) ?
@@ -223,5 +274,14 @@ void ParticleManager::UpdateEmitterLinks() {
 			delayDataList_.pop_back();
 		}
 	}
+}
+
+bool ParticleManager::EmitterIDCheckMiss(int emitterId) {
+
+	if (emitterList_.find(emitterId) == emitterList_.end()) {
+		return false;
+	}
+	Logger::Log("[EffectManager] ParticleManager::EmitterIDCheckMiss Invalid emitter ID: " + std::to_string(emitterId));
+	return true;
 }
 

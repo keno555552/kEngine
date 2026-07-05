@@ -33,6 +33,9 @@ public:
 	void Update();
 	void Draw();
 
+	/// --- タイマー --- ///
+	void Pause(bool pause) { isPaused_ = pause; }
+
 	/// --- エミッタ管理 --- ///
 	int CreateEmitter(const ParticlePrototype& proto, int maxParticles);
 	void ClearEmitter(int emitterId);
@@ -44,6 +47,15 @@ public:
 	/// リングパーティクル関連
 	//void LinkParticleToObject(int emitterId, Object* object); //まだ準備できてない
 	void LinkEmitterToEmitter(EmitterLink& linkData);
+
+	/// データセット
+	void SetEmitterEnd(int emitterId, bool isEnd);
+	void SetEmitterDead(int emitterId);
+
+	/// データ取得
+	int GetEmitterCount() const { return static_cast<int>(emitterList_.size()); }
+	int GetEmitterParticleCount(int emitterId) ;
+	int GetAllParticleCount();
 
 private:
 
@@ -58,9 +70,13 @@ private:
 	std::vector<EmitterLink> emitterLinks_;
 	std::vector<delayData> delayDataList_;
 
+	/// ポーズ用
+	bool isPaused_ = false;
+
 private:
 	/// --- 内部関数 --- ///
 	void UpdateEmitterLinks();
 
-
+	///Checker,見つからなければtrueを返す
+	bool EmitterIDCheckMiss(int emitterId);
 };

@@ -7,6 +7,7 @@
 #include "GAME\Object\DetailButton\DetailButton.h"
 #include "GameObject\button\button.h"
 #include "Tool\DefaultMenu\DefaultMenu.h"
+#include "EngineAssets\Particle\HitSpark.h"
 
 class EffectEditor : public BaseScene
 {
@@ -58,11 +59,23 @@ private:
 	std::unique_ptr<Object> ground_ = nullptr;
 	std::unique_ptr<Object> centerAnchor_ = nullptr;
 
+	/// ========= テスト用追加するオブジェクト ==========///
+
 	/// ========== UI関連 ========== ///
 
 	float leftInspectorWidth_ = 300.0f;
+	bool isEffectWindowOpen_ = true;
+	bool isParticleWindowOpen_ = true;
+	bool isLinkerWindowOpen_ = true;
+
+
 	float rightInspectorWidth_ = 300.0f;
 	float menuBarHeight_ = 0.0f;
+	bool isShootNonStop_ = false;
+	Timer shootTime;
+
+	bool isMBLWindowOpen_ = false;
+	bool isMBRWindowOpen_ = false;
 
 	bool showLoadWindow_ = false;
 	bool showSaveWindow_ = false;
@@ -72,8 +85,15 @@ private:
 	std::string loadFilePath_;
 	std::string saveFilePath_;
 
-	/// =============== フラグ ================///
+	/// Camera関連
 	bool useDebugCamera = false;
+
+	/// DebugData
+	std::string debugText_;
+
+	/// 共用
+	std::string newName_;
+	bool isPause_ = false;
 
 private:
 	/// ======== カメラ関連 ========= ///
@@ -84,6 +104,7 @@ private:
 	void ImGuiPart();
 	void ImGuiLeftMenuBar();
 	void ImGuiRightMenuBar();
+	void ImGuiMidWindow();
 	void ImGuiLoadWindow();
 	void ImGuiSaveWindow();
 	bool InputTextString(const char *label, std::string &str, ImGuiInputTextFlags flags = 0);

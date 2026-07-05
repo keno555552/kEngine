@@ -27,6 +27,8 @@ public:
 	Vector3 GetRotation() const { return emitterRotation; }
 	Vector3 GetScale() const { return emitterScale; }
 
+	int GetParticleCount() const { return static_cast<int>(particles_.size()); }
+
 	/// --- 基本行為 --- ///
 	void Update();
 	void Emit(int count = 1, ParticlePrototypeOverride* prototype = {}); // 手動発射
@@ -42,7 +44,11 @@ public:
 	void ClearEmittingData();	// 発射記録のクリア
 	void ClearDexpiredData();	// 死亡記録のクリア
 
-
+	/// --- 生命周期 --- ///
+	bool GetIsEnd() const { return isEnd_; }
+	bool GetIsFinished() const { return isFinished_; }
+	void SetIsEnd(bool isEnd) { isEnd_ = isEnd; }
+	void SetIsDead() { isFinished_ = true; isEnd_ = true; }
 
 private:
 
@@ -66,7 +72,7 @@ private:
 	Vector3 emitterScale = { 1,1,1 };
 	Vector3 emitterRotation = { 0,0,0 };
 
-	/// 発射記録(1frameだけ記録する)
+	/// 発射記録(1frameだけ記録する)(削除と死んだあと発射するパーティクル用)
 	std::vector<ParticleInstance> emittingData_{};
 	std::vector<ParticleInstance> dexpiredData_{};
 
@@ -79,5 +85,9 @@ private:
 	/// 粒子のスウィッチ
 	bool isEmitting_ = true;
 	bool isPaused_ = false;
+
+	/// --- 生命周期 --- ///
+	bool isEnd_ = false;
+	bool isFinished_ = true;
 
 };

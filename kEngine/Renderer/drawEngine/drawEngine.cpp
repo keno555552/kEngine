@@ -576,9 +576,7 @@ void DrawEngine::DrawParticle() {
 
 			SetLightingGPU();
 
-
 			/// 不透明ものの描画
-
 			for (auto& [materialID, TransformMatirx] : RenderDataGroup) {
 
 				SetMaterial(materialID);

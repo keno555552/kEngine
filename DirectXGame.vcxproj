@@ -560,6 +560,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Renderer\Mesh\CylinderMesh.h" />
     <ClInclude Include="kEngine\Tool\EffectSystem\EffectEditor.h" />
     <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\EffectData.h" />
+    <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\EffectInstance.h" />
     <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\EmitterLink.h" />
     <ClInclude Include="kEngine\Data\Render\Types\PostProcessType.h" />
     <ClInclude Include="kEngine\Renderer\DescriptorManager\DsvManager\DsvManager.h" />
@@ -781,7 +782,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Data\Game\MapChip\MapChipData.h" />
     <ClInclude Include="kEngine\GameObject\Particle\P_Ball\P_Ball.h" />
     <ClInclude Include="kEngine\Data\Render\Queue\RenderData.h" />
-    <ClInclude Include="kEngine\Data\Render\Types\PSOType\PSOType.h" />
     <ClInclude Include="kEngine\Renderer\LightManager\LightManager.h" />
     <ClInclude Include="kEngine\Renderer\Lighting\Light.h" />
     <ClInclude Include="kEngine\Data\Render\GPUData\LightGPU.h" />
