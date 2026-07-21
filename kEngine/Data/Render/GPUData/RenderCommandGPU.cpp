@@ -4,9 +4,9 @@
 void ConvertRenderCommandToGPU(const RenderCommand& cpu, RenderCommandGPU& gpu) {
 
 	/// ========== ColorGuard =========== ///
-	if (gpu.guardColor[0] != cpu.guardColor[0]) gpu.guardColor[0] = cpu.guardColor[0];
-	if (gpu.guardColor[1] != cpu.guardColor[1]) gpu.guardColor[1] = cpu.guardColor[1];
-	if (gpu.guardColor[2] != cpu.guardColor[2]) gpu.guardColor[2] = cpu.guardColor[2];
+	if (gpu.guardColor[0] != cpu.guardColor.x) gpu.guardColor[0] = cpu.guardColor.x;
+	if (gpu.guardColor[1] != cpu.guardColor.y) gpu.guardColor[1] = cpu.guardColor.y;
+	if (gpu.guardColor[2] != cpu.guardColor.z) gpu.guardColor[2] = cpu.guardColor.z;
 	if (gpu.guardAmount != cpu.guardAmount)	gpu.guardAmount = cpu.guardAmount;
 
 	/// ========== Vignette =========== ///
@@ -75,6 +75,15 @@ void ConvertRenderCommandToGPU(const RenderCommand& cpu, RenderCommandGPU& gpu) 
 	if (gpu.dissolveEdgeColor != cpu.dissolveEdgeColor) gpu.dissolveEdgeColor = cpu.dissolveEdgeColor;
 	if (gpu.dissolveThreshold != cpu.dissolveThreshold) gpu.dissolveThreshold = cpu.dissolveThreshold;
 	if (gpu.dissolveEdgeWidth != cpu.dissolveEdgeWidth) gpu.dissolveEdgeWidth = cpu.dissolveEdgeWidth;
+
+	/// =========== RandomNoise用コマンド ============= ///
+	if(cpu.randomNoiseType != RandomNoiseType::NONE)
+	{
+		if (gpu.randomNoiseType != static_cast<int>(cpu.randomNoiseType))
+			gpu.randomNoiseType = static_cast<int>(cpu.randomNoiseType);
+		if (gpu.randomNoiseAmount != cpu.randomNoiseAmount) gpu.randomNoiseAmount = cpu.randomNoiseAmount;
+		if (gpu.randomNoiseTime != cpu.randomNoiseTime) gpu.randomNoiseTime = cpu.randomNoiseTime;
+	}
 }
 
 bool IsBlurCheck(const RenderCommand& cpu) {

@@ -1,29 +1,21 @@
+#include "CommonTypes.hlsli"
 
 // ==============================
 // Constant Buffers
 // ==============================
-struct TransformationMatrix
-{
-    float4x4 WVP;
-    float4x4 world;
-    float4x4 worldInversTranspose;
-};
-StructuredBuffer<TransformationMatrix> gTransformationMatrices : register(t0);
 
-cbuffer InstanceOffset : register(b1)
+StructuredBuffer<TransformationMatrix> gTransformationMatrices : register(t0);
+StructuredBuffer<uint> gMaterialIndexList : register(t1);
+
+cbuffer OffSetGroup : register(b0)
 {
-    uint instanceOffset;
-}
+    uint gWVPOffset;
+    uint gMaterialIndexListOffset;
+};
 
 // ==============================
 // Vertex Input / Output
 // ==============================
-struct VertexShaderInput
-{
-    float4 position : POSITION0;
-    float2 texcoord : TEXCOORD0;
-    float3 normal   : NORMAL0;
-};
 
 // ネオン用：PSに「ローカルY」を渡す
 struct FlameVertexShaderOutput
@@ -32,21 +24,21 @@ struct FlameVertexShaderOutput
     float3 normal : NORMAL0;
     float3 worldPosition : POSITION0;
     float  localY   : TEXCOORD0;
+    nointerpolation int materialId : TEXCOORD1;
 };
 
 FlameVertexShaderOutput main(VertexShaderInput input, uint instanceId : SV_InstanceID)
 {
-    uint actualIndex = instanceId + instanceOffset;
-    TransformationMatrix transform = gTransformationMatrices[actualIndex];
+    TransformationMatrix transform = gTransformationMatrices[gWVPOffset + instanceId];
     
     // Unity版は「ローカル座標のY」を使ってグラデーションしているので同じにする
     FlameVertexShaderOutput output;
     output.position = mul(input.position, transform.WVP);
     //output.texcoord = input.texcoord;
-    output.normal = normalize(mul(input.normal, (float3x3) transform.worldInversTranspose));
+    output.normal = normalize(mul(input.normal, (float3x3) transform.worldInverseTranspose));
     output.worldPosition = mul(input.position, transform.world).xyz;
     output.localY = input.position.y;
-
+    output.materialId = gMaterialIndexList[gMaterialIndexListOffset + instanceId];
 
     return output;
 }

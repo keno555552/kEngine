@@ -21,6 +21,7 @@ RootSignatureFactory::RootSignatureFactory() {
 	rootSignatureRegistry[RenderModelType::Outline] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticFullscreenQuad(directXDriver_, key); };
 	rootSignatureRegistry[RenderModelType::OutlinePrewittDepth] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticFullscreenQuad(directXDriver_, key); };
 	rootSignatureRegistry[RenderModelType::Dissolve] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticFullscreenQuad(directXDriver_, key); };
+	rootSignatureRegistry[RenderModelType::Noise] = [this](DirectXCore* directXDriver_, PSOKey& key) { return MakeStaticFullscreenQuad(directXDriver_, key); };
 }
 
 Microsoft::WRL::ComPtr <ID3D12RootSignature> RootSignatureFactory::Make(PSOKey& key, DirectXCore* directXDriver_) {
@@ -48,14 +49,19 @@ Microsoft::WRL::ComPtr <ID3D12RootSignature> RootSignatureFactory::Make(PSOKey& 
 
 Microsoft::WRL::ComPtr <ID3D12RootSignature> RootSignatureFactory::MakeStatic(DirectXCore* directXDriver_, PSOKey& key) {
 
-	/// b0:TransformMatrices		(VS)
-	/// b1:InstanceOffset			(VS)
-	
-	/// b1:Camera					(PS)
-	/// b2:LightingCount			(PS)
+	/// b0:InstanceOffset			(VS)
+	/// t0:TransformMatrices		(VS)
+	/// t1:MaterialIndexList		(VS)
+	///=================================
+	/// b0:Camera					(PS)
+	/// b1:LightingCount			(PS)
+	///---------------------------------
 	/// t0:Texture					(PS)
-	/// t1:LightList				(PS)
-	/// t2:ENVIRONMENT REFLECTION	(PS)
+	/// t1:MaterialList				(PS)
+	/// t2:LightList				(PS)
+	/// t3:ENVIRONMENT REFLECTION	(PS)
+	///---------------------------------
+	/// s0:Sampler					(PS)
 
 	///RootSignature作成
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
@@ -80,30 +86,38 @@ Microsoft::WRL::ComPtr <ID3D12RootSignature> RootSignatureFactory::MakeStatic(Di
 	descriptionRootSignature.pStaticSamplers = staticSampler;
 	descriptionRootSignature.NumStaticSamplers = _countof(staticSampler);
 
+	/// ============================================ RootParameter作成 =========================================== ///
+	D3D12_ROOT_PARAMETER rootParameters[9] = {};
 
-	/// RootParameter作成。
+	///// Material用 (大改，最後改)
+	//rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;									/// CBV を使う
+	//rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;									/// PixelShader で使う
+	//rootParameters[0].Descriptor.ShaderRegister = 0;													/// レジスタ番号 0 とバインド
 
-	/// ============================================ 常駐スロット =========================================== ///
-	D3D12_ROOT_PARAMETER rootParameters[8] = {};
+	// MaterialList 用 (StructuredBuffer<MaterialGroup> gMaterialList : t1)
+	static D3D12_DESCRIPTOR_RANGE materialListRange[1]{};
+	materialListRange[0].BaseShaderRegister = 1;														/// t1
+	materialListRange[0].NumDescriptors = 1;
+	materialListRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	materialListRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	// Material用
-	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;                                // CBV を使う
-	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;                             // PixelShader で使う
-	rootParameters[0].Descriptor.ShaderRegister = 0;                                                // レジスタ番号 0 とバインド
+	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[0].DescriptorTable.pDescriptorRanges = materialListRange;
+	rootParameters[0].DescriptorTable.NumDescriptorRanges = _countof(materialListRange);
 
-	// Transform用
+
+	// TransformMatrices（t0, VertexShader）
 	static D3D12_DESCRIPTOR_RANGE descriptorRangeForInstancing[1]{};
-	descriptorRangeForInstancing[0].BaseShaderRegister = 0;
+	descriptorRangeForInstancing[0].BaseShaderRegister = 0;												/// t0
 	descriptorRangeForInstancing[0].NumDescriptors = 1;
 	descriptorRangeForInstancing[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	descriptorRangeForInstancing[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	// TransformMatrices（b0, VertexShader）
 	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;						/// DescriptorTableを使う
 	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;								/// VertexShaderで使う
 	rootParameters[1].DescriptorTable.pDescriptorRanges = descriptorRangeForInstancing;					/// Tableの中身の配列を指定
 	rootParameters[1].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeForInstancing);		/// Tableで利用する数
-
 
 	// Texture用 (t0)
 	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;						/// DescriptorTableを使う
@@ -111,25 +125,25 @@ Microsoft::WRL::ComPtr <ID3D12RootSignature> RootSignatureFactory::MakeStatic(Di
 	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;								/// Tableの中身の配列を指定
 	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);					/// Tableで利用する数
 
-	// LightingCount (b2, GlowSphereに使える)
+	// LightingCount (b1, GlowSphereに使える)
 	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	rootParameters[3].Constants.Num32BitValues = 1;
 	rootParameters[3].Constants.RegisterSpace = 0;
-	rootParameters[3].Constants.ShaderRegister = 2; // b2
+	rootParameters[3].Constants.ShaderRegister = 1;														/// b1
 
-	// slot 4: InstanceOffset (b1, VertexShader)
+	// slot 4: InstanceOffset (b0, VertexShader)
 	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-	rootParameters[4].Descriptor.ShaderRegister = 1;
+	rootParameters[4].Descriptor.ShaderRegister = 0;													/// b0
 
-	// Camera 用 (b1)
+	// Camera 用 (b0)
 	rootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;									/// 或 ALL
-	rootParameters[5].Descriptor.ShaderRegister = 1;													/// b1
+	rootParameters[5].Descriptor.ShaderRegister = 0;													/// b0
 
-	// LightList 用 (StructuredBuffer<LightGPU> gLights : t1)
+	// LightList 用 (StructuredBuffer<LightGPU> gLights : t2)
 	static D3D12_DESCRIPTOR_RANGE lightListRange[1]{};
-	lightListRange[0].BaseShaderRegister = 1; // t1
+	lightListRange[0].BaseShaderRegister = 2;															/// t2
 	lightListRange[0].NumDescriptors = 1;
 	lightListRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	lightListRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -139,22 +153,29 @@ Microsoft::WRL::ComPtr <ID3D12RootSignature> RootSignatureFactory::MakeStatic(Di
 	rootParameters[6].DescriptorTable.pDescriptorRanges = lightListRange;
 	rootParameters[6].DescriptorTable.NumDescriptorRanges = _countof(lightListRange);
 
-	// EnvironmentReflection 用 (t2)
+	// EnvironmentReflection 用 (t3)
 	static D3D12_DESCRIPTOR_RANGE environmentReflectionRange[1]{};
-	environmentReflectionRange[0].BaseShaderRegister = 2; // t2
+	environmentReflectionRange[0].BaseShaderRegister = 3;												/// t3
 	environmentReflectionRange[0].NumDescriptors = 1;
 	environmentReflectionRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	environmentReflectionRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	rootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	rootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[7].DescriptorTable.pDescriptorRanges = environmentReflectionRange;
 	rootParameters[7].DescriptorTable.NumDescriptorRanges = _countof(environmentReflectionRange);
+	rootParameters[7].DescriptorTable.pDescriptorRanges = environmentReflectionRange;
 
+	// MaterialIndexList（t1, VertexShader）
+	static D3D12_DESCRIPTOR_RANGE descriptorRangeForMaterialIndex[1]{};
+	descriptorRangeForMaterialIndex[0].BaseShaderRegister = 1;											/// t1
+	descriptorRangeForMaterialIndex[0].NumDescriptors = 1;
+	descriptorRangeForMaterialIndex[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	descriptorRangeForMaterialIndex[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	/// =========================================== 非常駐スロット ========================================== ///
-
-
+	rootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;						/// DescriptorTableを使う
+	rootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;								/// VertexShaderで使う
+	rootParameters[8].DescriptorTable.pDescriptorRanges = descriptorRangeForMaterialIndex;					/// Tableの中身の配列を指定
+	rootParameters[8].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeForMaterialIndex);		/// Tableで利用する数
 
 
 	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ
@@ -187,19 +208,33 @@ Microsoft::WRL::ComPtr <ID3D12RootSignature> RootSignatureFactory::MakeStatic(Di
 
 Microsoft::WRL::ComPtr <ID3D12RootSignature> RootSignatureFactory::MakeStaticSkinning(DirectXCore* directXDriver_, PSOKey& key) {
 
-	/// t0:TransformMatrices	(VS)
-	/// b1:InstanceOffset		(VS)
-	/// t1:Well(skeletonSpace)	(VS)
-
-	/// b1:Camera				(PS)
-	/// b2:LightingCount		(PS)
-	/// t0:Texture				(PS)
-	/// t1:LightList			(PS)
+	/// b0:InstanceOffset			(VS)
+	/// t0:TransformMatrices		(VS)
+	/// t1:MaterialIndexList		(VS)
+	///---------------------------------
+	/// t1:BoneMatrices				(VS)
+	///=================================
+	/// b0:Camera					(PS)
+	/// b1:LightingCount			(PS)
+	///---------------------------------
+	/// t0:Texture					(PS)
+	/// t1:MaterialList				(PS)
+	/// t2:LightList				(PS)
+	/// t3:ENVIRONMENT REFLECTION	(PS)
+	///---------------------------------
+	/// s0:Sampler					(PS)
 
 
 	///RootSignature作成
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
 	descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+	/// DescriptorRange作成。SRVを使う
+	D3D12_DESCRIPTOR_RANGE descriptorRange[1]{};
+	descriptorRange[0].BaseShaderRegister = 0; // 0から始まる
+	descriptorRange[0].NumDescriptors = 1; // 数は1つ
+	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // SRVを使う
+	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // 連続している
 
 	D3D12_STATIC_SAMPLER_DESC staticSampler[1]{};
 	staticSampler[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;          //バイリニアフィルタ
@@ -213,60 +248,64 @@ Microsoft::WRL::ComPtr <ID3D12RootSignature> RootSignatureFactory::MakeStaticSki
 	descriptionRootSignature.pStaticSamplers = staticSampler;
 	descriptionRootSignature.NumStaticSamplers = _countof(staticSampler);
 
-	/// RootParameter作成。PixelShaderのMaterialとVertexShaderのTransform
-	/// ============================================ 常駐スロット ========================================== ///
-	D3D12_ROOT_PARAMETER rootParameters[9] = {};
+	/// ============================================ RootParameter作成 =========================================== ///
+	D3D12_ROOT_PARAMETER rootParameters[10] = {};
 
-	// Material用
-	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;                                // CBV を使う
-	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;                             // PixelShader で使う
-	rootParameters[0].Descriptor.ShaderRegister = 0;                                                // レジスタ番号 0 とバインド
+	///// Material用 (大改，最後改)
+	//rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;									/// CBV を使う
+	//rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;									/// PixelShader で使う
+	//rootParameters[0].Descriptor.ShaderRegister = 0;													/// レジスタ番号 0 とバインド
 
-	// Transform用
+	// MaterialList 用 (StructuredBuffer<MaterialGroup> gMaterialList : t1)
+	static D3D12_DESCRIPTOR_RANGE materialListRange[1]{};
+	materialListRange[0].BaseShaderRegister = 1;														/// t1
+	materialListRange[0].NumDescriptors = 1;
+	materialListRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	materialListRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[0].DescriptorTable.pDescriptorRanges = materialListRange;
+	rootParameters[0].DescriptorTable.NumDescriptorRanges = _countof(materialListRange);
+
+
+	// TransformMatrices（t0, VertexShader）
 	static D3D12_DESCRIPTOR_RANGE descriptorRangeForInstancing[1]{};
-	descriptorRangeForInstancing[0].BaseShaderRegister = 0;
+	descriptorRangeForInstancing[0].BaseShaderRegister = 0;												/// t0
 	descriptorRangeForInstancing[0].NumDescriptors = 1;
 	descriptorRangeForInstancing[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	descriptorRangeForInstancing[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	// TransformMatrices（b0, VS）
 	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;						/// DescriptorTableを使う
 	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;								/// VertexShaderで使う
 	rootParameters[1].DescriptorTable.pDescriptorRanges = descriptorRangeForInstancing;					/// Tableの中身の配列を指定
 	rootParameters[1].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeForInstancing);		/// Tableで利用する数
 
-	// DescriptorRange作成。SRVを使う
-	D3D12_DESCRIPTOR_RANGE descriptorRange[1]{};
-	descriptorRange[0].BaseShaderRegister = 0; // 0から始まる
-	descriptorRange[0].NumDescriptors = 1; // 数は1つ
-	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // SRVを使う
-	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // 連続している
-
-	// Texture用 (t0, PS）
+	// Texture用 (t0)
 	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;						/// DescriptorTableを使う
 	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;									/// PixelShaderで使う
 	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;								/// Tableの中身の配列を指定
 	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);					/// Tableで利用する数
 
-	// LightingCount (b2, PS)
-	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS; // b
+	// LightingCount (b1, GlowSphereに使える)
+	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	rootParameters[3].Constants.Num32BitValues = 1;
 	rootParameters[3].Constants.RegisterSpace = 0;
-	rootParameters[3].Constants.ShaderRegister = 2;								 // 2
+	rootParameters[3].Constants.ShaderRegister = 1;														/// b1
 
-	// InstanceOffset (b1, VS)
+	// slot 4: InstanceOffset (b0, VertexShader)
 	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-	rootParameters[4].Descriptor.ShaderRegister = 1;
+	rootParameters[4].Descriptor.ShaderRegister = 0;
 
-	// Camera 用 (b1, PS)
+	// Camera 用 (b0)
 	rootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;									/// 或 ALL
-	rootParameters[5].Descriptor.ShaderRegister = 1;													/// b1
+	rootParameters[5].Descriptor.ShaderRegister = 0;													/// b0
 
-	// LightList 用 (t1, PS)
+	// LightList 用 (StructuredBuffer<LightGPU> gLights : t2)
 	static D3D12_DESCRIPTOR_RANGE lightListRange[1]{};
-	lightListRange[0].BaseShaderRegister = 1; // t1
+	lightListRange[0].BaseShaderRegister = 2;															/// t2
 	lightListRange[0].NumDescriptors = 1;
 	lightListRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	lightListRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -276,9 +315,9 @@ Microsoft::WRL::ComPtr <ID3D12RootSignature> RootSignatureFactory::MakeStaticSki
 	rootParameters[6].DescriptorTable.pDescriptorRanges = lightListRange;
 	rootParameters[6].DescriptorTable.NumDescriptorRanges = _countof(lightListRange);
 
-	// EnvironmentReflection 用 (t2)
+	// EnvironmentReflection 用 (t3)
 	static D3D12_DESCRIPTOR_RANGE environmentReflectionRange[1]{};
-	environmentReflectionRange[0].BaseShaderRegister = 2; // t2
+	environmentReflectionRange[0].BaseShaderRegister = 3;												/// t3
 	environmentReflectionRange[0].NumDescriptors = 1;
 	environmentReflectionRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	environmentReflectionRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -288,22 +327,31 @@ Microsoft::WRL::ComPtr <ID3D12RootSignature> RootSignatureFactory::MakeStaticSki
 	rootParameters[7].DescriptorTable.pDescriptorRanges = environmentReflectionRange;
 	rootParameters[7].DescriptorTable.NumDescriptorRanges = _countof(environmentReflectionRange);
 
-	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ
-	descriptionRootSignature.NumParameters = _countof(rootParameters);  // 配列の長さ
+	// MaterialIndexList（t1, VertexShader）
+	static D3D12_DESCRIPTOR_RANGE descriptorRangeForMaterialIndex[1]{};
+	descriptorRangeForMaterialIndex[0].BaseShaderRegister = 1;											/// t1
+	descriptorRangeForMaterialIndex[0].NumDescriptors = 1;
+	descriptorRangeForMaterialIndex[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	descriptorRangeForMaterialIndex[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	/// =========================================== 非常駐スロット ========================================== ///
+	rootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;						/// DescriptorTableを使う
+	rootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;								/// VertexShaderで使う
+	rootParameters[8].DescriptorTable.pDescriptorRanges = descriptorRangeForMaterialIndex;					/// Tableの中身の配列を指定
+	rootParameters[8].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeForMaterialIndex);		/// Tableで利用する数
 
-	// SkinningのWell (t1, VS)
+	/// =========================================== skinning専用スロット ========================================== ///
+
+	// SkinningのWell (t2, VS)
 	static D3D12_DESCRIPTOR_RANGE wellRange[1]{};
-	wellRange[0].BaseShaderRegister = 1; // t1
+	wellRange[0].BaseShaderRegister = 2;																/// t2
 	wellRange[0].NumDescriptors = 1;
 	wellRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	wellRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	rootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	rootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-	rootParameters[8].DescriptorTable.pDescriptorRanges = wellRange;
-	rootParameters[8].DescriptorTable.NumDescriptorRanges = _countof(wellRange);
+	rootParameters[9].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[9].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParameters[9].DescriptorTable.pDescriptorRanges = wellRange;
+	rootParameters[9].DescriptorTable.NumDescriptorRanges = _countof(wellRange);
 
 
 	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ
@@ -343,7 +391,7 @@ Microsoft::WRL::ComPtr<ID3D12RootSignature> RootSignatureFactory::MakeStaticFull
 	/// t2:DepthTexture			(PS)
 	/// b0:RenderCommand		(PS)
 	/// t1:KernelData			(PS)
-	/// t3:MaskTexture用 		(PS)
+	/// t3:Texture2用 			(PS)
 
 	///RootSignature作成
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
@@ -391,9 +439,11 @@ Microsoft::WRL::ComPtr<ID3D12RootSignature> RootSignatureFactory::MakeStaticFull
 	rootParameters[0].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeForInstancing);		/// Tableで利用する数
 
 	// RenderCommand（b0, PixelShader）
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;						/// 32ビット定数を使う
-	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;									/// PixelShaderで使う
-	rootParameters[1].Constants.Num32BitValues = sizeof(RenderCommandGPU) / sizeof(uint32_t);			/// 定数の数
+	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	//rootParameters[1].Constants.Num32BitValues = 64 / 4; // 最大 64 bytes
+	rootParameters[1].Constants.Num32BitValues = 160 / 4; // 最大 64 bytes
+	rootParameters[1].Constants.ShaderRegister = 0; // b0
+	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	// kernelDataList 用 (t1, PS)
 	static D3D12_DESCRIPTOR_RANGE kernelDataListRange[1]{};
@@ -419,16 +469,16 @@ Microsoft::WRL::ComPtr<ID3D12RootSignature> RootSignatureFactory::MakeStaticFull
 	rootParameters[3].DescriptorTable.pDescriptorRanges = descriptorRangeForDepthTexture;
 	rootParameters[3].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeForDepthTexture);
 
-	// MaskTexture用 (t3, PS)
-	D3D12_DESCRIPTOR_RANGE maskRange{};
-	maskRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	maskRange.NumDescriptors = 1;
-	maskRange.BaseShaderRegister = 3; // t3
-	maskRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	// Texture2用 (t3, PS)
+	D3D12_DESCRIPTOR_RANGE texture2Range{};
+	texture2Range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	texture2Range.NumDescriptors = 1;
+	texture2Range.BaseShaderRegister = 3; // t3
+	texture2Range.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[4].DescriptorTable.pDescriptorRanges = &maskRange;
+	rootParameters[4].DescriptorTable.pDescriptorRanges = &texture2Range;
 	rootParameters[4].DescriptorTable.NumDescriptorRanges = 1;
 
 	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ

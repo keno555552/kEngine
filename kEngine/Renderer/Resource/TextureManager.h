@@ -56,6 +56,8 @@ public:
 	/// <returns></returns>
 	DirectX::TexMetadata GetTextureMetadata(int textureHandle);
 
+	std::string GetTextureFilePath(int textureHandle);
+
 	int GetCommonTextureHandle(int textureHandle);
 
 	int GetModelTextureHandle(int textureHandle);

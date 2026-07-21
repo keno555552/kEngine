@@ -14,10 +14,14 @@ private:
 	static const int kDebugLineNumInstance_ = 5000;   /// DebugLineの最大インスタンス数
 	static const int k2DTileNumInstance_ = 50000;     /// Tileの最大インスタンス数
 	static const int k3DTileNumInstance_ = 10000;     /// Tileの最大インスタンス数
-	static const int kParticleNumInstance_ = 100000;  /// Particleの最大インスタンス数
+	static const int kParticleCPUNumInstance_ = 50000;  /// Particleの最大インスタンス数
 
 	/// 最大マテリアル数設定
-	static const int kMaxMaterialNum_ = 10000;        /// 最大マテリアル数
+	static const int kMaxMaterialNum_ = 100000;        /// 最大マテリアル数
+	static const int kMaxMaterialLayerNum_ = 3;       /// 最大マテリアルレイヤー数(MaterialForGPUには手動更新)
+
+	/// 最大Offset数設定
+	static const int kMaxOffsetNum_ = 10000;           /// 最大Offset数
 
 	/// 最大SRV数(最大テキスチャ枚数)
 	static const int kMaxSRVNum_ = 512;               /// 最大SRV数(最大テキスチャ枚数)
@@ -25,13 +29,14 @@ private:
 	/// 最大ライト数設定
 	static const int kMaxLightNum_ = 50;              /// 最大ライト数
 
+	/// 後処理のレイヤー数設定
+	static const int kPostProcessLayer = 5;
+
 private:
 
 	/// ============================= mesh関連 ============================= ///
 	/// Sphereの分割数
 	static const int kDefaultSphereDivideNum_ = 18;			/// Sphereの分割数
-
-
 
 private:
 	static std::string clientTitle_;
@@ -51,10 +56,13 @@ public:
 	static int GetDebugLineNumInstance() { return kDebugLineNumInstance_; }
 	static int Get2DTileNumInstance() { return k2DTileNumInstance_; }
 	static int Get3DTileNumInstance() { return k3DTileNumInstance_; }
-	static int GetParticleNumInstance() { return kParticleNumInstance_; }
+	static int GetParticleCPUNumInstance() { return kParticleCPUNumInstance_; }
 	static int GetMaxMaterialNum() { return kMaxMaterialNum_; }
+	static int GetMaxMaterialLayerNum() { return kMaxMaterialLayerNum_; }
+	static int GetMaxOffsetNum() { return kMaxOffsetNum_; }
 	static int GetMaxSRVNum() { return kMaxSRVNum_; }
 	static int GetMaxLightNum() { return kMaxLightNum_; }
+	static int GetPostProcessLayer() { return kPostProcessLayer; }
 
 	static int GetDefaultSphereDivideNum() { return kDefaultSphereDivideNum_; }
 

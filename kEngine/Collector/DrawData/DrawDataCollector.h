@@ -64,11 +64,11 @@ public:
 
 	void Collect2D(SpriteData* sprite);
 
-	std::unordered_map <PSOKey,
-		std::unordered_map <MaterialID,
-		std::unordered_map <ModelID,
-		std::vector<RenderData>>>
-		>& GetOpaqueBuckets2D() { return opaqueBucket2D_; }
+	std::unordered_map < PSOKey,
+		std::unordered_map < MeshBuffer*,
+		std::unordered_map < TextureHandle,
+		std::vector<RenderData>
+	>>>& GetOpaqueBuckets2D() { return opaqueBucket2D_; }
 
 	std::vector<RenderData>& GetTransparentObjectParts2D() { return transparentBucket2D_; }
 
@@ -76,10 +76,11 @@ public:
 
 	void Collect3D(ObjectData* object);
 
-	std::unordered_map <PSOKey,
-		std::unordered_map <MaterialID,
-		std::vector<RenderData>>
-		>& GetOpaqueBuckets3D() { return opaqueBucket3D_; }
+	std::unordered_map < PSOKey,
+		std::unordered_map < MeshBuffer*,
+		std::unordered_map < TextureHandle,
+		std::vector<RenderData>
+	>>>& GetOpaqueBuckets3D() { return opaqueBucket3D_; }
 
 	std::vector<RenderData>& GetTransparentObjectParts3D() { return transparentBucket3D_; }
 
@@ -88,11 +89,11 @@ public:
 
 	void CollectParticle(std::vector<ObjectData>& objectList, std::vector<ParticleInstance>& instance);
 
-	std::unordered_map<MeshBuffer*,
-		std::unordered_map<PSOKey,
-		std::unordered_map<MaterialID,
-		std::vector<TransformationMatrix>>>
-		>& GetParticleBucket() { return bucketParticleC_; }
+	std::unordered_map<PSOKey,
+		std::unordered_map<MeshBuffer*,
+		std::unordered_map <TextureHandle,
+		std::vector<std::pair<MaterialID, TransformationMatrix>>
+	>>>& GetParticleBucket() { return bucketParticleC_; }
 
 	/// ================= skinning関連 ===================///
 
@@ -104,7 +105,11 @@ public:
 	std::span<WellForGPU> GetMappedPalette(int index) { return skinningDataList_[index].mappedPalette; }
 
 	/// =========== Instance関連 ============///
+	/// =========== Material関連
+	void SetInstanceListMaterial(MaterialForGPU* instancingListMaterialGPU) { instancingListMaterialGPU_ = instancingListMaterialGPU; }
+	MaterialForGPU* GetInstanceListMaterial() { return instancingListMaterialGPU_; }
 
+	/// =========== WVP関連
 	void SetInstanceListDL(TransformationMatrix* instancingListDL) { instancingListDL_ = instancingListDL; }
 	void SetInstanceList2D(TransformationMatrix* instancingList2D) { instancingList2D_ = instancingList2D; }
 	void SetInstanceList3D(TransformationMatrix* instancingList3D) { instancingList3D_ = instancingList3D; }
@@ -116,6 +121,7 @@ public:
 	void BuildInstanceList2D();
 	void BuildInstanceList3D();
 	void BuildInstanceListParticle();
+
 
 	/// ============ Light関連 ==============///
 
@@ -142,10 +148,9 @@ private:
 
 	/// ==================== 2Dデータ ====================///
 	/// 不透明オブジェクトバケット
-	std::unordered_map <
-		PSOKey,
-		std::unordered_map <MaterialID,
-		std::unordered_map <ModelID,
+	std::unordered_map <PSOKey,
+		std::unordered_map < MeshBuffer*,
+		std::unordered_map < TextureHandle,
 		std::vector<RenderData>
 		>>> opaqueBucket2D_;
 
@@ -159,11 +164,11 @@ private:
 
 	/// ==================== 3Dデータ ====================///
 	/// 不透明オブジェクトバケット
-	std::unordered_map <
-		PSOKey,
-		std::unordered_map <MaterialID,
+	std::unordered_map < PSOKey,
+		std::unordered_map < MeshBuffer*,
+		std::unordered_map < TextureHandle,
 		std::vector<RenderData>
-		>> opaqueBucket3D_;
+		>>> opaqueBucket3D_;
 
 	/// 透明オブジェクトバケット
 	std::vector<RenderData> transparentBucket3D_;
@@ -171,11 +176,10 @@ private:
 	/// ========== パーティクル関連 ===========///
 
 	/// パーティクルバケット
-	std::unordered_map<
-		MeshBuffer*,
-		std::unordered_map<PSOKey,
-		std::unordered_map<MaterialID,
-		std::vector<TransformationMatrix>
+	std::unordered_map<PSOKey,
+		std::unordered_map<MeshBuffer*,
+		std::unordered_map <TextureHandle,
+		std::vector<std::pair<MaterialID, TransformationMatrix>>
 		>>> bucketParticleC_;
 
 	/// ================= skinning関連 ====================///
@@ -189,12 +193,13 @@ private:
 	std::vector<SkinningData> skinningDataList_;
 
 	/// ================ インスタンスデータ =================///
-
+	MaterialForGPU* instancingListMaterialGPU_ = nullptr;
 	TransformationMatrix* instancingListDL_ = nullptr;
 	TransformationMatrix* instancingList2D_ = nullptr;
 	TransformationMatrix* instancingList3D_ = nullptr;
 	TransformationMatrix* instancingListParticleC_ = nullptr;
 
+	int instanceCounterMaterial_ = 0;
 	int instanceCounterDL_ = 0;
 	int instanceCounter2D_ = 0;
 	int instanceCounter3D_ = 0;
@@ -214,7 +219,7 @@ private:
 	/// WVP調整
 	TransformationMatrix SpriteWVPAdjustment2D(SpriteData& sprite, SpritePart& part);
 	/// バケット追加
-	void AddSpriteToBucket2D(RenderData& renderData, int meshID);
+	void AddSpriteToBucket2D(RenderData& renderData);
 
 	/// =============== 3D関連 ================///
 	/// フォローマトリックス作成 
@@ -224,12 +229,12 @@ private:
 	/// WVP調整
 	TransformationMatrix ObjectWVPAdjustment3D(ObjectData& object, ObjectPart& part, ModelData* modelData, int modelCounter);
 	/// バケット追加
-	void AddObjectToBucket3D(RenderData& renderData, int meshID);
+	void AddObjectToBucket3D(RenderData& renderData);
 	/// rotateのダーティフラグを確認して、必要ならば回転行列を作成する
 	void DirtyEulerToQuat(ObjectPart& part);
 	void DirtyEulerToQuat(ObjectData& part);
 
-	/// ================= skinning関連 ===================///
+	/// ================= skinning関連 =================== ///
 
 	/// ============ パーティクル関連 ============///
 	/// フォローマトリックス作成 

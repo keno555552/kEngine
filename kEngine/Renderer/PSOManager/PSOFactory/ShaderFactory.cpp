@@ -22,6 +22,7 @@ ShaderFactory::ShaderFactory() {
 	shaderRegistry_[RenderModelType::Outline] = [this](PSOKey& key) { return CompileOutline(key); };
 	shaderRegistry_[RenderModelType::OutlinePrewittDepth] = [this](PSOKey& key) { return CompilePostProcessShader("OutlinePrewittDepth", key); };
 	shaderRegistry_[RenderModelType::Dissolve] = [this](PSOKey& key) { return CompilePostProcessShader("Dissolve", key); };
+	shaderRegistry_[RenderModelType::Noise] = [this](PSOKey& key) { return CompilePostProcessShader("NoiseShader", key); };
 }
 
 ShaderPair ShaderFactory::MakeShaderBlob(PSOKey& key) {
@@ -72,14 +73,14 @@ ShaderPair ShaderFactory::Compile3DShader(PSOKey& key) {
 	if (key.renderModelType == RenderModelType::Skinned) {
 		shaderPair.vs = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + "SkinningObject3D.VS.hlsl"), L"vs_6_0", key);
 	} else {
-		shaderPair.vs = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + "Particle.VS.hlsl"), L"vs_6_0",key);
+		shaderPair.vs = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + "Object3D.VS.hlsl"), L"vs_6_0",key);
 	}
 
 	/// FeatureFlagsを摘出
 	bool environmentReflectionFlag = (key.featureMask & (uint64_t)FeatureFlags::EnvReflection) != 0;
 
 	/// 3DモデルのShaderは、LightModelTypeによって分ける
-	shaderPair.ps = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + "Particle.PS.hlsl"), L"ps_6_0", key);
+	shaderPair.ps = shader_compile_->CompileShader(ConvertString::SwitchStdStringWstring(shaderFolder_ + "Object3D.PS.hlsl"), L"ps_6_0", key);
 
 	checkCompileResult(shaderPair);
 	return shaderPair;

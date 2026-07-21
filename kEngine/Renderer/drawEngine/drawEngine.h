@@ -29,20 +29,20 @@
 #include "Renderer/Resource/InstanceBuffer.h"
 
 #include "Renderer/PostProcessRunner/PostProcessRunner.h"
+#include "Data/Render/CPUData/RenderTexture.h"
 #include "Data/Render/GPUData/BlurDataGPU.h"
 
 class DrawEngine
 {
 public:
-
 	friend class PostProcessRunner;
-
+	friend class PostProcessPass;
+	friend class PostProcessLayer;
 
 	void Initialize(
 		DirectXCore* directXDirver,
 		DrawDataCollector* drawDataCollector,
-		PostProcessRunner* postProcessRunner
-	);
+		PostProcessRunner* postProcessRunner);
 
 	void Finalize();
 
@@ -50,7 +50,6 @@ public:
 	void PreDraw();
 	void CommitDraw();
 	void EndDraw();
-
 
 	/// ======== 全部描く関数 ======== ///
 	/// DebugLinee描画関数
@@ -87,19 +86,15 @@ public:
 
 	int LoadModelTexture(const std::string& filePath);
 
-
 private:
-
-
 	std::unique_ptr<PSOManager> psoManager_{};
-	PostProcessRunner* postProcessRunner_{};		/*依存*/
-	ResourceManager* resourceManager_{};			/*依存*/
-	DirectXCore* directXDriver_{};					/*依存*/
-	ID3D12GraphicsCommandList* commandList_{};		/*依存*/
+	PostProcessRunner* postProcessRunner_{};   /*依存*/
+	ResourceManager* resourceManager_{};	   /*依存*/
+	DirectXCore* directXDriver_{};			   /*依存*/
+	ID3D12GraphicsCommandList* commandList_{}; /*依存*/
 
-
-	SrvManager* srvManager_{};						/*依存*/
-	DrawDataCollector* drawDataCollector_{};		/*依存*/
+	SrvManager* srvManager_{};				 /*依存*/
+	DrawDataCollector* drawDataCollector_{}; /*依存*/
 
 	int kClientWidth_ = 0;
 	int kClientHeight_ = 0;
@@ -108,7 +103,6 @@ private:
 	int kSubdivision_ = 0;
 
 private:
-
 private:
 	/// PSO関連
 
@@ -120,37 +114,53 @@ private:
 
 	/// Texture関連
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
-	uint32_t descriptorIndex_ = 1;						// 0はImGui用に予約
+	uint32_t descriptorIndex_ = 1; // 0はImGui用に予約
 	std::vector<int> commonTextureSRVMap_;
 	std::vector<int> modelTextureSRVMap_;
-	int defaultTextureHandle_ = 0;						// white5x5
+	int defaultTextureHandle_ = 0; // white5x5
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilResource = nullptr;
-	//ID3D12Resource* depthStencilResource = nullptr;			// ResourceManagerで作るから、ここではポインタだけもらう
+	// ID3D12Resource* depthStencilResource = nullptr;			// ResourceManagerで作るから、ここではポインタだけもらう
 
+	/// Lighting関連
+	// D3D12_GPU_DESCRIPTOR_HANDLE lightListSrvHandleGPU_{};
+	// std::unique_ptr <BasicResource> lightBuffer_;
 
-	///Lighting関連
-	//D3D12_GPU_DESCRIPTOR_HANDLE lightListSrvHandleGPU_{};
-	//std::unique_ptr <BasicResource> lightBuffer_;
-
-	std::unique_ptr<InstanceBuffer<LightGPU>>lightBuffer_;
-	LightGPU* lightListData_ = nullptr;                  // 受け皿
+	std::unique_ptr<InstanceBuffer<LightGPU>> lightBuffer_;
+	LightGPU* lightListData_ = nullptr; // 受け皿
 
 	uint32_t lightCount_ = 0;
 
 	/// カメラ関連
-	CameraForGPU* cameraPtr_ = nullptr;                  // 受け皿
-	std::unique_ptr <BasicResource> cameraBuffer_;
+	CameraForGPU* cameraPtr_ = nullptr; // 受け皿
+	std::unique_ptr<BasicResource> cameraBuffer_;
 
 	/// DebugLine描画関連
 	Microsoft::WRL::ComPtr<ID3D12Resource> debugLineVB_;
 	D3D12_VERTEX_BUFFER_VIEW debugLineVBView_{};
 	size_t debugLineVertexBufferSize_ = 0;
 
+	/// GPUにMaterialを探す用のリスト
+	int* materialIndexList_ = nullptr;
+
+	/// Instance資料指定用のOffsetData構造体とリスト
+	struct OffsetData
+	{
+		UINT Offset_WVP{};
+		UINT Offset_MaterialIndexList{};
+	};
+	std::vector<std::unique_ptr<BasicResource>> offsetResource_;
+	std::vector<OffsetData*> instanceOffsetData_;
+	int offsetDataCounter_{};
+
 	/// Instance-GPU交換用容器
+	std::unique_ptr<InstanceBuffer<MaterialForGPU>> materialResource_;
+	std::unique_ptr<InstanceBuffer<int>> materialIndexListResource_;
 	std::unique_ptr<InstanceBuffer<TransformationMatrix>> debugLineResource_;
 	std::unique_ptr<InstanceBuffer<TransformationMatrix>> tile2DWVPResource_;
 	std::unique_ptr<InstanceBuffer<TransformationMatrix>> tile3DWVPResource_;
 	std::unique_ptr<InstanceBuffer<TransformationMatrix>> tilePCWVPResource_;
+	int instanceMaterialCounter_ = 0;
+	int instanceMaterialIndexCounter_ = 0;
 	int instanceDLCounter_ = 0;
 	int instance2DCounter_ = 0;
 	int instance3DCounter_ = 0;
@@ -161,7 +171,7 @@ private:
 	int blurDataResourceCounter_ = 0;
 
 	/// EnviromentReflection関連
-	std::unique_ptr <BasicResource> enviromentReflectionTexture_;
+	std::unique_ptr<BasicResource> enviromentReflectionTexture_;
 	int enviromentReflectionTextureHandle_ = -1;
 
 	/// Skinning関連
@@ -169,25 +179,8 @@ private:
 	// DDCにのSkinningDataのハンドルと、実際のWellForGPUのマップ
 	std::map<int, int> skinningDatDDC2DEaMap_;
 	std::vector<int> skinningBufferFreeList_;
-	//int skinningCounter_ = 0;
+	// int skinningCounter_ = 0;
 
-private:
-
-	/// Instance資料指定用のOffsetData構造体とリスト
-	struct OffsetData {
-		std::unique_ptr <BasicResource> instanceOffsetResource;
-		UINT* instanceOffset{};
-		int state = 0;// 0:未使用 1:使用中
-	};
-
-	std::vector<OffsetData> instanceOffsetData_;
-	int offsetDataCounter_{};
-
-private:
-
-	/// PingPong用のRenderTexture
-	RenderTexture m_Offscreen_InputRT{};
-	RenderTexture m_Offscreen_OutputRT{};
 
 private:
 	/// 内部関数
@@ -197,7 +190,7 @@ private:
 	void IntializeInstanceTMBuffer(TransformationMatrix* bufferPointer, size_t count);
 
 	void SetMaterial(int materialID);
-	void SetTexture(int materialID);
+	void SetTexture(int textureHandle);
 	void SetCameraForGPU();
 	void UpdateLighting();
 	void SetLightingGPU();
@@ -212,12 +205,10 @@ private:
 
 	void TransitionRenderTarget(
 		RenderTexture& renderTexture,
-		D3D12_RESOURCE_STATES toState
-	);
+		D3D12_RESOURCE_STATES toState);
 	void TransitionDepthStencil(
 		RenderTexture& renderTexture,
-		D3D12_RESOURCE_STATES toState
-	);
+		D3D12_RESOURCE_STATES toState);
 
 	void SetRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE renderTarget);
 
@@ -226,21 +217,19 @@ private:
 	void SetRootDescriptorTable(UINT rootParameterIndex, D3D12_GPU_DESCRIPTOR_HANDLE descriptorHandle);
 
 	/// PostProcess群
-	void DrawColorGrading();
-	void DrawVignette();
-	void DrawBlur();
-	void DrawOutline();
-	void DrawOutlinePrewittDepth();
-	void DrawDissolve();
-
+	void DrawColorGrading(RenderCommandGPU& renderCommandGPU);
+	void DrawVignette(RenderCommandGPU& renderCommandGPU);
+	void DrawBlur(RenderCommandGPU& renderCommandGPU, KernelDataGPU& kernelData);
+	void DrawOutline(RenderCommandGPU& renderCommandGPU);
+	void DrawOutlinePrewittDepth(RenderCommandGPU& renderCommandGPU);
+	void DrawDissolve(RenderCommandGPU& renderCommandGPU, int dissolveTextureIndex);
+	void DrawNoise(RenderCommandGPU& renderCommandGPU);
 	/// RenderCopy(描画内容をそのまま描画する、最後の処理)
 	void DrawRenderCopy();
-
 	/// Offscreen描画関数
 	void DrawFullscreenQuad();
 
 private:
-
 	/// <summary>
 	/// InstanceBufferを作成する関数
 	/// </summary>
@@ -248,15 +237,14 @@ private:
 	/// <param name="resource"></param>
 	/// <param name="count"></param>
 	/// <returns></returns>
-	template<typename T>
+	template <typename T>
 	T* CreateInstanceBuffer(std::unique_ptr<BasicResource>& resource, size_t count) {
 		T* cpuPtr = nullptr;
 
 		resource = std::make_unique<BasicResource>();
 		resource->CreateResourceClass_(
 			directXDriver_->GetDevice(),
-			sizeof(T) * count
-		);
+			sizeof(T) * count);
 
 		resource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&cpuPtr));
 		return cpuPtr;
@@ -266,7 +254,7 @@ private:
 	bool isFinish = false;
 };
 
-//TODO: DrawEngineは移動したが、それに関わる対応がしてない
-// 今のは本当のInstance描きではない
-// 本当のInstance描きはmeshを融合しないと呼べない
-// 今はただ分類して描いてるだけ
+// TODO: DrawEngineは移動したが、それに関わる対応がしてない
+//  今のは本当のInstance描きではない
+//  本当のInstance描きはmeshを融合しないと呼べない
+//  今はただ分類して描いてるだけ

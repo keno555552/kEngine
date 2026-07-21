@@ -62,7 +62,7 @@ ParticleEditor::ParticleEditor(kEngine* system) {
 
 	/// =========== リソースロード ============///
 	skydomeModelHandle_ = system_->SetModelObj("./kEngine/EngineAssets/TemplateResource/object/skydome/skydome.obj");
-	smallStageHandel_ = system_->SetModelObj("./GAME/Object/smallStage/smallStage.obj");
+	smallStageHandel_ = system_->SetModelObj("./GAME/resources/Object/smallStage/smallStage.obj");
 
 	whiteTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/white5x5.png");
 	clicleTextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/circle_withAlpha.png");
@@ -142,8 +142,8 @@ ParticleEditor::ParticleEditor(kEngine* system) {
 	particleHandle2_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitImpact, 1);
 
 	HitSpackImpactLink linkData;
-	linkData.sourceId = particleHandle_;
-	linkData.targetId = particleHandle2_;
+	linkData.sourceName = particleHandle_;
+	linkData.targetName = particleHandle2_;
 	system_->GetEffectManager()->GetParticleManager()->LinkEmitterToEmitter(linkData);
 
 }

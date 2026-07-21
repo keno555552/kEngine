@@ -9,21 +9,6 @@
 
 /// 先行宣言
 struct RenderCommand;
-
-#pragma region KernelMaker
-/// Blurのカーネルを作る関数
-void MakeBoxBlur(RenderCommand& cmd, int kernelSize);
-void MakeRadialBlur(RenderCommand& cmd, Vector2 center,float strength, int kernelSize);
-void MakeGaussianBlur(RenderCommand& cmd, int kernelSize, float sigma);
-void MakeOutlineSobel(RenderCommand& cmd);
-void MakeOutlinePrewitt(RenderCommand& cmd);
-void MakeOutlinePrewittDepth(RenderCommand& cmd);
-void MakeOutlineLaplacian(RenderCommand& cmd);
-void MakeOutlineRoberts(RenderCommand& cmd);
-void MakeOutlineThick(RenderCommand& cmd, int kernelSize, float thickness);
-void MakeDissolve(RenderCommand& cmd, int textureIndex, float threshold, float edgeWidth, Vector3 edgeColor);
-#pragma endregion
-
 enum class KernelType {
 	NONE,
 	BlurBox,
@@ -40,6 +25,11 @@ enum class KernelType {
 	NumOfBlur
 };
 
+enum class RandomNoiseType {
+	NONE,
+	WhiteNoise,
+};
+
 struct KernelCommand
 {
 	KernelType kernelType = KernelType::NONE;
@@ -47,13 +37,28 @@ struct KernelCommand
 	float kernel[7][7]{};	/// 最大7x7のカーネルを想定している
 };
 
+#pragma region KernelMaker
+/// Blurのカーネルを作る関数
+void MakeBoxBlur(RenderCommand& cmd, int kernelSize);
+void MakeRadialBlur(RenderCommand& cmd, Vector2 center,float strength, int kernelSize);
+void MakeGaussianBlur(RenderCommand& cmd, int kernelSize, float sigma);
+void MakeOutlineSobel(RenderCommand& cmd);
+void MakeOutlinePrewitt(RenderCommand& cmd);
+void MakeOutlinePrewittDepth(RenderCommand& cmd);
+void MakeOutlineLaplacian(RenderCommand& cmd);
+void MakeOutlineRoberts(RenderCommand& cmd);
+void MakeOutlineThick(RenderCommand& cmd, int kernelSize, float thickness);
+void MakeDissolve(RenderCommand& cmd, int textureIndex, float threshold, float edgeWidth, Vector3 edgeColor);
+void MakeNoise(RenderCommand& cmd, RandomNoiseType type, float intensity, float scale);
+#pragma endregion
+
 struct RenderCommand
 {
 	/// =========== CopyImage用コマンド =========== ///
 	/// ない
 	/// ========== ColorGuard用コマンド =========== ///
 	/// この色の明度を元に色を変わる
-	float guardColor[3]{ 0.2125f, 0.7154f, 0.0721f };
+	Vector3 guardColor { 0.2125f, 0.7154f, 0.0721f };
 	/// guardingのAlphaみだいなもの
 	float guardAmount = 1.0f;
 	/// =========== Vignette用コマンド ============ ///
@@ -116,6 +121,15 @@ struct RenderCommand
 	float dissolveEdgeWidth = 0.01f;
 	/// Dissolveのエッジカラー
 	Vector3 dissolveEdgeColor{ 1.0f, 1.0f, 1.0f };
+
+
+	/// =========== RandomNoise用コマンド ============= ///
+	/// RandomNoiseの種類
+	RandomNoiseType randomNoiseType = RandomNoiseType::NONE;
+	/// RandomNoiseの強さ
+	float randomNoiseAmount = 0.5f;
+	/// RandomNoiseの時間
+	float randomNoiseTime = 0.0f;
 
 };
 

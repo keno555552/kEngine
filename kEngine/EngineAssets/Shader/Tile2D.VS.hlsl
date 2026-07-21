@@ -1,43 +1,23 @@
-#include "Tile2D.hlsli"
-
-struct TransformationMatrix
-{
-    float4x4 WVP;
-    float4x4 world;
-    float4x4 worldInversTranspose;
-};
+#include "CommonTypes.hlsli"
 
 StructuredBuffer<TransformationMatrix> gTransformationMatrices : register(t0);
+StructuredBuffer<uint> gMaterialIndexList : register(t1);
 
-cbuffer InstanceOffset : register(b1)
+cbuffer OffSetGroup : register(b0)
 {
-    uint instanceOffset;
-}
-
-struct VertexShaderInput
-{
-    float4 position : POSITION0;
-    float2 texcoord : TEXCOORD0;
-    float3 normal : NORMAL0;
+    uint gWVPOffset;
+    uint gMaterialIndexListOffset;
 };
 
-VertexShaderOutput main(VertexShaderInput input, uint instanceId:SV_InstanceID)
+
+VertexShaderOutput main(VertexShaderInput input, uint instanceId : SV_InstanceID)
 {
-    uint actualIndex = instanceId + instanceOffset;
-    TransformationMatrix transform = gTransformationMatrices[actualIndex];
+    TransformationMatrix transform = gTransformationMatrices[gWVPOffset + instanceId];
     
     VertexShaderOutput output;
     output.position = mul(input.position, transform.WVP);
     output.texcoord = input.texcoord;
+    output.materialId = gMaterialIndexList[gMaterialIndexListOffset + instanceId];
     return output;
 }
-
-
-//VertexShaderOutput main(VertexShaderInput input, uint instanceId : SV_InstanceID)
-//{
-//    VertexShaderOutput output;
-//    output.position = float4(0.0f, 0.0f, -0.5f, 1.0f); // 螢幕正中央
-//    output.texcoord = float2(0.0f, 0.0f);
-//    return output;
-//}
 

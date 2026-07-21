@@ -243,13 +243,13 @@ void kEngine::RemoveLight(Light* light) {
 	lightManager->RemoveLight(light);
 }
 
-void kEngine::SetPostProcessChain(const std::vector<PostProcessType>& chain) {
-	postProcessRunner_->SetChain(chain);
-}
-
-void kEngine::ChangeRenderCommand(RenderCommand& renderCommand) {
-	postProcessRunner_->ChangeRenderCommand(renderCommand);
-}
+//void kEngine::AddPostProcessPass(const std::vector<PostProcessType>& chain) {
+//	postProcessRunner_->Set(chain);
+//}
+//
+//void kEngine::ChangeRenderCommand(RenderCommand& renderCommand) {
+//	postProcessRunner_->ChangeRenderCommand(renderCommand);
+//}
 
 std::weak_ptr <DebugCamera> kEngine::CreateDebugCamera() {
 	return cameraManager->CreateDebugCamera(this);
@@ -585,6 +585,10 @@ DrawDataCollector* kEngine::GetDrawDataCollector() const {
 
 DrawEngine* kEngine::GetDrawEngine() const {
 	return drawEngine.get();
+}
+
+PostProcessRunner* kEngine::GetPostProcessRunner() const {
+	return postProcessRunner_.get();
 }
 
 SoundManager* kEngine::GetSoundManager() const {

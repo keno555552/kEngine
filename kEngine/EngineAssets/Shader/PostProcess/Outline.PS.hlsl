@@ -42,7 +42,8 @@ PixelShaderOutput main(VertexShaderOutput input)
     //float3 outlineColor = gRenderCommand.outlineColor;
 
     // Outline 專用：使用 gKernelData[1] 的 kernel
-    float3 edgeColor = Convolve(input.texcoord, gKernelData[1], gRenderCommand.outlineKernelSize);
+    int outlineKernelIndex = gRenderCommand.outlineKernelIndex;
+    float3 edgeColor = Convolve(input.texcoord, gKernelData[outlineKernelIndex], gRenderCommand.outlineKernelSize);
     output.color.rgb = baseColor + edgeColor  /* gRenderCommand.outlineColor*/;
 
     return output;
