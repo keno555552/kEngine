@@ -16,6 +16,7 @@ enum class ParticleRenderType
 
 struct ParticlePrototype
 {
+	std::string name = "";
     // --- 基本生命サイクル ---
     float lifetime = 1.0f;           // 粒子の最大寿命（秒）
     float lifetimeRandomness = 0.0f; // 壽命ランダム比率（0~1）
@@ -66,6 +67,11 @@ struct ParticlePrototype
     // --- マテリアルのロケーション（以降のJSON用） ---
     std::string modelPath;
     std::string texturePath;
+
+
+
+    // Editor用のデータ
+    bool isSaved = false; // 保存済みかどうか
 
 };
 

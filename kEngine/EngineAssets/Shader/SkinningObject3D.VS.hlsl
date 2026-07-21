@@ -1,4 +1,4 @@
-#include "Particle.hlsli"
+#include "CommonTypes.hlsli"
 
 /// ################### Readme ################### ///
 /// このシェーダーは、PSとhlsliが付いてなく、普段のシェーダーと一緒に使う
@@ -7,22 +7,19 @@
 /// 2.PS: Particle.PS.hlsl
 
 /// ==================== Transformation Instance Buffer ==================== ///
-struct TransformationMatrix
-{
-    float4x4 WVP;
-    float4x4 world;
-    float4x4 worldInverseTranspose;
-};
-StructuredBuffer<TransformationMatrix> gTransformationMatrices : register(t0);
 
-cbuffer InstanceOffset : register(b1)
+StructuredBuffer<TransformationMatrix> gTransformationMatrices : register(t0);
+StructuredBuffer<uint> gMaterialIndexList : register(t1);
+
+cbuffer OffSetGroup : register(b0)
 {
-    uint instanceOffset;
-}
+    uint gWVPOffset;
+    uint gMaterialIndexListOffset;
+};
 
 /// ============================ Vertex Input ============================== ///
 
-struct VertexShaderInput
+struct SkinningVSInput
 {
     float4 position : POSITION0;
     float2 texcoord : TEXCOORD0;
@@ -39,7 +36,7 @@ struct Well
     float4x4 skeletonSpaceMatrixInverseTranspose;
 };
 
-StructuredBuffer<Well> gMatrixPalette : register(t1);
+StructuredBuffer<Well> gMatrixPalette : register(t2);
 
 /// ============================= Skinning関連 ============================== ///
 
@@ -49,7 +46,7 @@ struct Skinned
     float3 normal;
 };
 
-Skinned Skinning(VertexShaderInput input)
+Skinned Skinning(SkinningVSInput input)
 {
     Skinned skinned;
     
@@ -70,17 +67,17 @@ Skinned Skinning(VertexShaderInput input)
 }
 
 
-VertexShaderOutput main(VertexShaderInput input, uint instanceId : SV_InstanceID)
+VertexShaderOutput main(SkinningVSInput input, uint instanceId : SV_InstanceID)
 {
-    uint actualIndex = instanceId + instanceOffset;
     Skinned skinned = Skinning(input); // スキニング処理を適用
     
-    TransformationMatrix transform = gTransformationMatrices[actualIndex];
+    TransformationMatrix transform = gTransformationMatrices[gWVPOffset + instanceId];
     
     VertexShaderOutput output;
     output.position = mul(skinned.position, transform.WVP);
     output.normal = normalize(mul(skinned.normal, (float3x3) transform.worldInverseTranspose));
     output.texcoord = input.texcoord;
     output.worldPosition = mul(skinned.position, transform.world).xyz;
+    output.materialId = gMaterialIndexList[gMaterialIndexListOffset + instanceId];
     return output;
 }

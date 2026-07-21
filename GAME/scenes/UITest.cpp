@@ -167,8 +167,8 @@ UITest::UITest(kEngine* system) {
 	particleHandle2_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitImpact, 1);
 
 	HitSpackImpactLink linkData;
-	linkData.sourceId = particleHandle_;
-	linkData.targetId = particleHandle2_;
+	linkData.sourceName = particleHandle_;
+	linkData.targetName = particleHandle2_;
 	system_->GetEffectManager()->GetParticleManager()->LinkEmitterToEmitter(linkData);
 
 }

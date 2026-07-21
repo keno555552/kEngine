@@ -20,7 +20,7 @@ public:
 	int SetPassOutline				(int layer, RenderCommand command);///未完
 	int SetPassOutlinePrewittDepth	(int layer, RenderCommand command);
 	int SetPassDissolve				(int layer, RenderCommand command);
-	int SetPassNoise					(int layer, RenderCommand command);
+	int SetPassNoise				(int layer, RenderCommand command);
 
 	void SetPassCommand(int layer, int passIndex, RenderCommand command);
 	/// リスト内の指定したパスを消去する、layerがdefault(-1)の場合、全layer消す。

@@ -26,6 +26,7 @@ public:
 	Vector3 GetPosition() const { return emitterPosition; }
 	Vector3 GetRotation() const { return emitterRotation; }
 	Vector3 GetScale() const { return emitterScale; }
+	ParticlePrototype GetPrototype() const { return prototype_; }
 
 	int GetParticleCount() const { return static_cast<int>(particles_.size()); }
 

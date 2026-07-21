@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <string>
 
 enum class LinkMode {
 	PerBurst,
@@ -18,8 +19,9 @@ enum class EmitterTiming {
 };
 
 struct EmitterLink {
-	int sourceId{ -1 };											// A
-	int targetId{ -1 };	
+	std::string name = "";
+	std::string sourceName = "";									// A
+	std::string targetName = "";
 	int emitCount{ 1 };											// B
 	float delayTime{};											// 遅延時間
 	bool followPosition{ true };
@@ -29,4 +31,7 @@ struct EmitterLink {
 	LinkMode linkMode{ LinkMode::PerBurst };					// リンクの更新頻度
 	LinkFollow linkFollow{ LinkFollow::Emitter };				// 追従対象
 	EmitterTiming emitterTiming{ EmitterTiming::SourceEmit };	// 連動するタイミング
+
+	// Editor用のデータ
+	bool isSaved = false; // 保存済みかどうか
 };

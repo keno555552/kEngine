@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <map>
+#include <string>
 #include "config.h"
 #include "DirectXCore.h"
 #include "ParticleEmitter.h"
@@ -12,8 +13,8 @@ struct delayData {
 	bool followParticle{ false };
 	int emittyCount{ 1 };
 	int emitterLinkIndex{ -1 };
-	int sourceEmitterId{ -1 };
-	int targetEmitterId{ -1 };
+	std::string sourceEmitterName{};
+	std::string targetEmitterName{};
 	int particleId{ -1 };
 	Vector3 positionOffset{};
 	Vector3 rotationOffset{};
@@ -55,6 +56,7 @@ public:
 	/// データ取得
 	int GetEmitterCount() const { return static_cast<int>(emitterList_.size()); }
 	int GetEmitterParticleCount(int emitterId) ;
+	int GetEmitterIdByName(const std::string& name) const;
 	int GetAllParticleCount();
 
 private:
@@ -64,6 +66,7 @@ private:
 
 	/// 粒子生成器
 	std::map<int, std::unique_ptr<ParticleEmitter>> emitterList_;
+	std::map<std::string, int> emitterNameToId_;
 	int nextEmitterId_ = 0;
 
 	/// Emitter同士のリンク管理

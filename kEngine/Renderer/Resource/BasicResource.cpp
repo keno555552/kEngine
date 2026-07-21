@@ -32,23 +32,10 @@ ID3D12Resource* CreateResource(ID3D12Device* device, size_t sizeInBytes) {
 	); 
 	assert(SUCCEEDED(hr));
 
-
-	//char buffer[128];
-	//sprintf_s(buffer, "Create resource at %p\n", vertexResource);
-	//OutputDebugStringA(buffer);
-
 	return vertexResource;
 }
 
 BasicResource::~BasicResource() {
-	//for (int i = 0; i < resource_.size(); ++i) {
-	//	if (i == 18) {
-	//		int a = 1;
-	//	}
-	//	auto ptr = resource_[i].Get();
-	//	sprintf_s(buffer, "Releasing resource[%d] at %p\n", i, ptr);
-	//	OutputDebugStringA(buffer);
-	//}
 	ClearResource();
 
 }
@@ -57,9 +44,6 @@ Microsoft::WRL::ComPtr<ID3D12Resource> BasicResource::CreateResourceClass_(ID3D1
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> res;
 	res.Attach(CreateResource(device, sizeInBytes));
-
-	//sprintf_s(buffer, "receive resource at %p\n", res.Get());
-	//OutputDebugStringA(buffer);
 
 	resource_.push_back(res);
 	resourceCounter++;
@@ -74,9 +58,6 @@ Microsoft::WRL::ComPtr<ID3D12Resource> BasicResource::SaveResource_(Microsoft::W
 			return r; // 已存在，不要再 push
 		}
 	}
-
-	//sprintf_s(buffer, "Saving resource at %p\n", resource.Get());
-	//OutputDebugStringA(buffer);
 
 	resource_.push_back(resource);
 	resourceCounter++;

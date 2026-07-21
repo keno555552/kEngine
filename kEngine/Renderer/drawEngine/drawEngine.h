@@ -40,9 +40,9 @@ public:
 	friend class PostProcessLayer;
 
 	void Initialize(
-		DirectXCore *directXDirver,
-		DrawDataCollector *drawDataCollector,
-		PostProcessRunner *postProcessRunner);
+		DirectXCore* directXDirver,
+		DrawDataCollector* drawDataCollector,
+		PostProcessRunner* postProcessRunner);
 
 	void Finalize();
 
@@ -75,8 +75,8 @@ public:
 	void SetEnviromentReflectionTexture(int textureHandle);
 
 	/// Skinning関連関数
-	void CreateSkinningBuffer(ObjectData *objectData);
-	void ClearSkinningBuffer(ObjectData *objectData);
+	void CreateSkinningBuffer(ObjectData* objectData);
+	void ClearSkinningBuffer(ObjectData* objectData);
 
 	/// リソースローディング
 	int GetModelTextureHandle(int modelHandle, int part);
@@ -84,17 +84,17 @@ public:
 	int readModelTextureHandle(int Handle);
 	int readCommonTextureHandle(int Handle);
 
-	int LoadModelTexture(const std::string &filePath);
+	int LoadModelTexture(const std::string& filePath);
 
 private:
 	std::unique_ptr<PSOManager> psoManager_{};
-	PostProcessRunner *postProcessRunner_{};   /*依存*/
-	ResourceManager *resourceManager_{};	   /*依存*/
-	DirectXCore *directXDriver_{};			   /*依存*/
-	ID3D12GraphicsCommandList *commandList_{}; /*依存*/
+	PostProcessRunner* postProcessRunner_{};   /*依存*/
+	ResourceManager* resourceManager_{};	   /*依存*/
+	DirectXCore* directXDriver_{};			   /*依存*/
+	ID3D12GraphicsCommandList* commandList_{}; /*依存*/
 
-	SrvManager *srvManager_{};				 /*依存*/
-	DrawDataCollector *drawDataCollector_{}; /*依存*/
+	SrvManager* srvManager_{};				 /*依存*/
+	DrawDataCollector* drawDataCollector_{}; /*依存*/
 
 	int kClientWidth_ = 0;
 	int kClientHeight_ = 0;
@@ -126,12 +126,12 @@ private:
 	// std::unique_ptr <BasicResource> lightBuffer_;
 
 	std::unique_ptr<InstanceBuffer<LightGPU>> lightBuffer_;
-	LightGPU *lightListData_ = nullptr; // 受け皿
+	LightGPU* lightListData_ = nullptr; // 受け皿
 
 	uint32_t lightCount_ = 0;
 
 	/// カメラ関連
-	CameraForGPU *cameraPtr_ = nullptr; // 受け皿
+	CameraForGPU* cameraPtr_ = nullptr; // 受け皿
 	std::unique_ptr<BasicResource> cameraBuffer_;
 
 	/// DebugLine描画関連
@@ -139,11 +139,28 @@ private:
 	D3D12_VERTEX_BUFFER_VIEW debugLineVBView_{};
 	size_t debugLineVertexBufferSize_ = 0;
 
+	/// GPUにMaterialを探す用のリスト
+	int* materialIndexList_ = nullptr;
+
+	/// Instance資料指定用のOffsetData構造体とリスト
+	struct OffsetData
+	{
+		UINT Offset_WVP{};
+		UINT Offset_MaterialIndexList{};
+	};
+	std::vector<std::unique_ptr<BasicResource>> offsetResource_;
+	std::vector<OffsetData*> instanceOffsetData_;
+	int offsetDataCounter_{};
+
 	/// Instance-GPU交換用容器
+	std::unique_ptr<InstanceBuffer<MaterialForGPU>> materialResource_;
+	std::unique_ptr<InstanceBuffer<int>> materialIndexListResource_;
 	std::unique_ptr<InstanceBuffer<TransformationMatrix>> debugLineResource_;
 	std::unique_ptr<InstanceBuffer<TransformationMatrix>> tile2DWVPResource_;
 	std::unique_ptr<InstanceBuffer<TransformationMatrix>> tile3DWVPResource_;
 	std::unique_ptr<InstanceBuffer<TransformationMatrix>> tilePCWVPResource_;
+	int instanceMaterialCounter_ = 0;
+	int instanceMaterialIndexCounter_ = 0;
 	int instanceDLCounter_ = 0;
 	int instance2DCounter_ = 0;
 	int instance3DCounter_ = 0;
@@ -164,44 +181,33 @@ private:
 	std::vector<int> skinningBufferFreeList_;
 	// int skinningCounter_ = 0;
 
-private:
-	/// Instance資料指定用のOffsetData構造体とリスト
-	struct OffsetData
-	{
-		std::unique_ptr<BasicResource> instanceOffsetResource;
-		UINT *instanceOffset{};
-		int state = 0; // 0:未使用 1:使用中
-	};
-
-	std::vector<OffsetData> instanceOffsetData_;
-	int offsetDataCounter_{};
 
 private:
 	/// 内部関数
 	D3D12_VIEWPORT createViewport(int kClientWidth, int kClientHeight);
 	D3D12_RECT createScissorRect(int kClientWidth, int kClientHeight);
 
-	void IntializeInstanceTMBuffer(TransformationMatrix *bufferPointer, size_t count);
+	void IntializeInstanceTMBuffer(TransformationMatrix* bufferPointer, size_t count);
 
 	void SetMaterial(int materialID);
-	void SetTexture(int materialID);
+	void SetTexture(int textureHandle);
 	void SetCameraForGPU();
 	void UpdateLighting();
 	void SetLightingGPU();
 	void SetEnviromentReflectionGPU();
 
-	void PSODecision(PSOKey &psoKey);
+	void PSODecision(PSOKey& psoKey);
 	void MakeDepthStencilView();
 
-	void UpdateDebugLineVertexBuffer(const std::vector<DebugLineVertexGPU> &vertices);
+	void UpdateDebugLineVertexBuffer(const std::vector<DebugLineVertexGPU>& vertices);
 
 	/// ===== PostProcess描画関数
 
 	void TransitionRenderTarget(
-		RenderTexture &renderTexture,
+		RenderTexture& renderTexture,
 		D3D12_RESOURCE_STATES toState);
 	void TransitionDepthStencil(
-		RenderTexture &renderTexture,
+		RenderTexture& renderTexture,
 		D3D12_RESOURCE_STATES toState);
 
 	void SetRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE renderTarget);
@@ -211,17 +217,17 @@ private:
 	void SetRootDescriptorTable(UINT rootParameterIndex, D3D12_GPU_DESCRIPTOR_HANDLE descriptorHandle);
 
 	/// PostProcess群
-	void DrawColorGrading		( RenderCommandGPU& renderCommandGPU);
-	void DrawVignette			( RenderCommandGPU& renderCommandGPU);
-	void DrawBlur				( RenderCommandGPU& renderCommandGPU, KernelDataGPU& kernelData);
-	void DrawOutline			( RenderCommandGPU& renderCommandGPU);
-	void DrawOutlinePrewittDepth( RenderCommandGPU& renderCommandGPU);
-	void DrawDissolve			( RenderCommandGPU& renderCommandGPU, int dissolveTextureIndex);
-	void DrawNoise				( RenderCommandGPU& renderCommandGPU);
+	void DrawColorGrading(RenderCommandGPU& renderCommandGPU);
+	void DrawVignette(RenderCommandGPU& renderCommandGPU);
+	void DrawBlur(RenderCommandGPU& renderCommandGPU, KernelDataGPU& kernelData);
+	void DrawOutline(RenderCommandGPU& renderCommandGPU);
+	void DrawOutlinePrewittDepth(RenderCommandGPU& renderCommandGPU);
+	void DrawDissolve(RenderCommandGPU& renderCommandGPU, int dissolveTextureIndex);
+	void DrawNoise(RenderCommandGPU& renderCommandGPU);
 	/// RenderCopy(描画内容をそのまま描画する、最後の処理)
-	void DrawRenderCopy			();
+	void DrawRenderCopy();
 	/// Offscreen描画関数
-	void DrawFullscreenQuad		();
+	void DrawFullscreenQuad();
 
 private:
 	/// <summary>
@@ -232,16 +238,15 @@ private:
 	/// <param name="count"></param>
 	/// <returns></returns>
 	template <typename T>
-	T *CreateInstanceBuffer(std::unique_ptr<BasicResource> &resource, size_t count)
-	{
-		T *cpuPtr = nullptr;
+	T* CreateInstanceBuffer(std::unique_ptr<BasicResource>& resource, size_t count) {
+		T* cpuPtr = nullptr;
 
 		resource = std::make_unique<BasicResource>();
 		resource->CreateResourceClass_(
 			directXDriver_->GetDevice(),
 			sizeof(T) * count);
 
-		resource->GetResource()->Map(0, nullptr, reinterpret_cast<void **>(&cpuPtr));
+		resource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&cpuPtr));
 		return cpuPtr;
 	}
 

@@ -14,24 +14,12 @@
 #include "DescriptorManager/SrvManager/SrvManager.h"
 #include "DescriptorManager/RtvManager/RtvManager.h"
 #include "DescriptorManager/DsvManager/DsvManager.h"
+#include "Utility/ItemStateCountingSystem.h"
 #include <memory>
 using MaterialID = int;
 
 class ResourceManager
 {
-public:
-	//struct TextureInfo {
-	//	Microsoft::WRL::ComPtr<ID3D12Resource> texture;
-	//	int width;
-	//	int height;
-	//	Vector4 uvOffset;
-	//};
-
-#pragma region Instance管理
-
-
-#pragma endregion
-
 public:
 
 	/// シングルトン取得
@@ -51,13 +39,6 @@ public:
 	void Finalize();
 
 	static void Destroy();
-
-
-	/// ランクこと作成するResource
-	void CreateTurnResource();
-
-	/// ランクこと解放するResource
-	void ClearTurnResource();
 
 public:
 	//////////////////////////////命令
@@ -140,7 +121,6 @@ public:
 	void ResizeSimpleSpriteMeshList(int spriteNumber);
 	void DeleteExtraSpriteMesh(int spriteNumber);
 
-	int InputMaterialConfig(std::shared_ptr<MaterialConfig> material);
 
 public:
 
@@ -151,31 +131,14 @@ public:
 	DirectXCore* core_ = nullptr;
 	ID3D12Device* BDevice_ = nullptr;
 
-	//////////////////////////////ModelDataList
+	/// ///////////////////////////ModelDataList
 
 	std::unordered_map<std::string, std::shared_ptr<ModelData>> modelDataList_;	/// ModelDataを収納するリスト
 	std::unordered_map<int, std::string> modelDataHandleMap_; /// ModelDataのハンドルを管理するマップ
 	int modelDataCounter_{}; /// ModelDataのハンドルカウンター
 
-	//////////////////////////////Texture関係
 
-	/// Material関係
-	std::vector<std::unique_ptr<BasicResource>> materialResourceList_;
-
-	struct MaterialEntry {
-		MaterialID materialID{};
-		std::weak_ptr<MaterialConfig> config{};
-		std::unique_ptr<MaterialForGPU> cpuMaterial;
-		BasicResource* gpuMaterial{};
-		int textureHandle{};
-		int isUsed{}; // 0:未使用 1:使用中 2:解放予定
-	};
-
-	std::vector<MaterialEntry> materialList_;
-	std::unordered_map<MaterialID, int> idToIndex_;
-	int materialCounter_{};
-
-	//////////////////////////////Vertex\Index関係
+	/// ///////////////////////////Vertex\Index関係
 
 	// 1.モデルハンドルはModelGroupのIndex。
 	// 2.DDCにモデルの取り方はModelGroupから直接とること
@@ -184,14 +147,10 @@ public:
 
 	/// 図形関係
 	std::vector<std::shared_ptr<MeshBuffer>> meshBufferList_;				/// すべでのモデルを収納するどころ		これを使って解放する
-	std::vector<std::shared_ptr<ModelGroup>> modelGroupList_;				/// モデルグループを	収納する		解放に使えない
+	std::vector<std::shared_ptr<ModelGroup>> modelGroupList_;				/// モデルグループを	収納する			解放に使えない
 	std::vector<std::shared_ptr<Sprite2DMesh>> spriteMeshHandles_;			/// スブライドのハンドルを収納する		解放に使えない
 	std::vector<std::shared_ptr<SimpleSpriteMesh>> simpleSpriteMeshList_;	/// デフォルトのスプライトメッシュ
 	std::vector<int> deleteMeshHandleList_;
-
-	/// ModelHandle
-	int modelHandleCounter_ = 0;
-
 
 private:
 
@@ -206,7 +165,7 @@ private:
 	int CreateCubeResource();
 	int CreateSphereResource(int sudivision);
 	int CreateSkyCubeResource();
-	int CreateRingResource(int subdivision,float OuterRadius, float InnerRadius);
+	int CreateRingResource(int subdivision, float OuterRadius, float InnerRadius);
 	int CreateCylinderResource(int division, float topRadius, float bottomRadius, float height);
 
 	int CreateModelResource(std::string Path);
@@ -217,39 +176,5 @@ private:
 	/// リソース切り替え
 	void SwapMeshAndModelGroup(std::shared_ptr<Model> model, int modelHandle, int modelIndex = -1);
 
-private:
-	////////////////////////////// 関数テンプレート
-
-	/// ポインタ解放テンプレート
-	//template<typename T>
-	//void ClearPointer(std::vector< T* >& list) {
-	//	for (auto& ptr : list) {
-	//		delete ptr;
-	//		ptr = nullptr;
-	//	}
-	//	list.clear();
-	//}
-	//
-	//template<typename T>
-	//bool CheckInstance(std::vector< T* >& list, T target, bool useCustomCheck) {
-	//
-	//	auto checker = std::find_if(list.begin(),
-	//		list.end(),
-	//		[&](T* ptr) {return *ptr == target; });
-	//
-	//	return checker == list.end();
-	//}
-
 
 };
-
-
-//TODO: MeshBufferを管理するクラスを作る
-//TODO: MaterialEntryをInstanceとPSOし、管理する
-
-// 像現在一樣，製作一個MaterialEntry和MaterialInstance
-// MaterialEntry用作收藏不宜變化的東西，照現在的邏輯去更新
-// 再加上一個一定時間會自動刪除沒在用的單元的邏輯
-// MaterialInstance則是用cbuffer形式儲存，在MaterialEntry處以index形式連接
-// Instance不需比較，直接更新帶入
-// 以做到快速更新

@@ -337,6 +337,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="kEngine\Tool\FileManager\FileManager.cpp" />
+    <ClCompile Include="kEngine\Tool\JsonHelper\JsonHelper.cpp" />
+    <ClCompile Include="kEngine\Tool\EffectSystem\Adapter\EffectAdapter.cpp" />
     <ClCompile Include="kEngine\Data\Render\CPUData\RenderCommand.cpp" />
     <ClCompile Include="kEngine\Data\Render\CPUData\RenderTexture.cpp" />
     <ClCompile Include="kEngine\Data\Render\GPUData\RenderCommandGPU.cpp" />
@@ -548,11 +551,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Renderer\Mesh\SkyCube.cpp" />
     <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\ShaderFactory.cpp" />
     <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\RootSignatureFactory.cpp" />
-    <ClCompile Include="kEngine\Renderer\PSOManager\RootSlot.cpp" />
     <ClCompile Include="kEngine\Renderer\DescriptorManager\RtvManager\RtvManager.cpp" />
     <ClCompile Include="kEngine\Renderer\Mesh\RingMesh.cpp" />
+    <ClCompile Include="kEngine\Utility\ItemStateCountingSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="kEngine\Tool\FileManager\FileManager.h" />
+    <ClInclude Include="kEngine\Tool\JsonHelper\JsonHelper.h" />
+    <ClInclude Include="kEngine\Tool\EffectSystem\Adapter\EffectAdapter.h" />
     <ClInclude Include="kEngine\Math\LinearAlgebra\Gauss.h" />
     <ClInclude Include="kEngine\Data\Render\CPUData\RenderCommand.h" />
     <ClInclude Include="kEngine\Data\Render\GPUData\BlurDataGPU.h" />
@@ -846,6 +852,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\RootSignatureFactory.h" />
     <ClInclude Include="kEngine\Renderer\PSOManager\RootSlot.h" />
     <ClInclude Include="kEngine\Renderer\DescriptorManager\RtvManager\RtvManager.h" />
+    <ClInclude Include="kEngine\Utility\ItemStateCountingSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl">

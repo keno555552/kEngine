@@ -8,6 +8,17 @@
 #include "GameObject\button\button.h"
 #include "Tool\DefaultMenu\DefaultMenu.h"
 #include "EngineAssets\Particle\HitSpark.h"
+#include "EffectSystem/Adapter/EffectAdapter.h"
+#include <LinearAlgebra/Vector4.h>
+#include <functional>
+
+enum class SelectMode {
+	None,
+	Effect,
+	Particle,
+	Linker
+};
+
 
 class EffectEditor : public BaseScene
 {
@@ -19,6 +30,10 @@ public:
 	void Draw() override;
 
 private:
+
+	/// ============= システム関連 ==============///
+	EffectAdapter effectAdapter_{system_};
+
 	/// ============= ライト関連 ==============///
 	std::unique_ptr<Light> light1_ = nullptr;
 	std::unique_ptr<Light> light2_ = nullptr;
@@ -59,7 +74,22 @@ private:
 	std::unique_ptr<Object> ground_ = nullptr;
 	std::unique_ptr<Object> centerAnchor_ = nullptr;
 
-	/// ========= テスト用追加するオブジェクト ==========///
+	/// ========= オブジェクトリスト ==========///
+	/// EffectData<EffectData, isSaved >
+	std::vector <EffectData> effectDataList_;
+
+	/// ======== 選択関連 ========== ///
+	bool isEffectSelected_ = false;
+	SelectMode selectMode_ = SelectMode::None;
+	int currentEffectIndex_ = -1;
+	int currentParticleIndex_ = -1;
+	int currentLinkIndex_ = -1;
+
+	/// ======== newCounter ========== ///
+	int newEffectCounter_ = 0;
+	int newParticleCounter_ = 0;
+	int newLinkCounter_ = 0;
+
 
 	/// ========== UI関連 ========== ///
 
@@ -67,7 +97,6 @@ private:
 	bool isEffectWindowOpen_ = true;
 	bool isParticleWindowOpen_ = true;
 	bool isLinkerWindowOpen_ = true;
-
 
 	float rightInspectorWidth_ = 300.0f;
 	float menuBarHeight_ = 0.0f;
@@ -94,20 +123,63 @@ private:
 	/// 共用
 	std::string newName_;
 	bool isPause_ = false;
+	bool doubleCheck_ = false;
+
+	SelectMode saveLoadMode_ = SelectMode::None;
+	bool isSave_ = false;
+	bool isLoad_ = false;
+	bool isDelete_ = false;
 
 private:
 	/// ======== カメラ関連 ========= ///
 	void CameraPart();
 
-#ifdef USE_IMGUI
+
 	/// ========== UI関連 ========== ///
+	/// SaveLoad関連
+	void SaveLoadPart();
+	void SavePart();
+	void LoadPart();
+
+	/// Delete関連
+	void DeletePart();
+
+	void SetNullSavePathToDesktop();
+	void SetNullLoadPathToDesktop();
+
+#ifdef USE_IMGUI
 	void ImGuiPart();
+
 	void ImGuiLeftMenuBar();
 	void ImGuiRightMenuBar();
 	void ImGuiMidWindow();
+
 	void ImGuiLoadWindow();
 	void ImGuiSaveWindow();
+	void ImGuiDoubleCheckWindow();
+
+	void ImGuiEffectShowing();
+	void ImGuiParticleShowing(ParticlePrototype& particle);
+	void ImGuiLinkerShowing(EmitterLink& linker);
+
 	bool InputTextString(const char *label, std::string &str, ImGuiInputTextFlags flags = 0);
 	bool InputBigTextString(const char *label, std::string &str, ImGuiInputTextFlags flags = 0);
+	void InputInt(const char* label, int& value);
+	void InputFloat(const char* label, float& value);
+	void InputVector3(const char* label, Vector3& vec);
+	void InputVector4(const char* label, Vector4& vec);
+
+	template <typename EnumType>
+	bool EnumCombo(const char* label, EnumType& value, const char* const items[], int itemCount) {
+		ImGui::Text("%s", label);
+		ImGui::SameLine();
+		int current = static_cast<int>(value);
+		if (ImGui::Combo(("##" + std::string(label)).c_str(), &current, items, itemCount)) {
+			value = static_cast<EnumType>(current);
+			return true;
+		}
+		return false;
+	}
+
 #endif // USE_IMGUI
 };
