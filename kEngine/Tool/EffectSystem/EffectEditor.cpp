@@ -471,7 +471,7 @@ void EffectEditor::ImGuiLeftMenuBar() {
 		ImGuiWindowFlags_NoMove |
 		ImGuiWindowFlags_NoResize);
 
-	float full2W = leftInspectorWidth_ - 20;   // 你原本的按鈕寬度邏輯
+	float full2W = leftInspectorWidth_ - 20;
 	float buttonSize2 = full2W / 5.0f;
 	float add2W = buttonSize2;
 	float dou2W = buttonSize2;

@@ -2,16 +2,17 @@
 #include "DebugDraw.h"
 #include "ImguiManager.h"
 
+
 MapMakingEditor::MapMakingEditor(kEngine* system) {
 	system_ = system;
-	generatorVariables_.push_back(GeneratorVariable());
 	debugText_ = "";
+	auto& roomMap = currentMapInfo_.tileMapData;
 }
 
 MapMakingEditor::~MapMakingEditor() {}
 
 void MapMakingEditor::Update() {
-	// Implementation for update logic
+	DeletePart();
 }
 
 void MapMakingEditor::Draw() {
@@ -23,6 +24,8 @@ void MapMakingEditor::ImGuiPart() {
 
 	ImGuiIO& io = ImGui::GetIO();
 	menuBarHeight_ = ImGui::GetFrameHeight();
+
+	//ImGui::ShowDemoWindow();
 
 	/// ============== メニューバー =============== ///
 	if (ImGui::BeginMainMenuBar()) {
@@ -53,17 +56,68 @@ void MapMakingEditor::ImGuiPart() {
 	ImGuiMidWindow();
 
 	/// ============ Popup Window ============= ///
-	ImGuiMapLoadWindow();
-	ImGuiMapSaveWindow();
+	ImGuiLoadWindow();
+	ImGuiSaveWindow();
+	ImGuiDoubleCheckWindow();
 	ImGuiMapNewWindow();
 	ImGuiNewVariablesWindow();
 }
 
-void MapMakingEditor::ImGuiLeftMenuBar() {
-	ImGuiIO& io = ImGui::GetIO();
 
-	ImVec2 w1Pos{};
-	ImVec2 w1Size{};
+void MapMakingEditor::DeletePart() {
+	if (!isDelete_) return;
+	switch (selectMode_) {
+	case SelectModeForMME::TileMap:
+		// Handle tile map deletion
+		break;
+	case SelectModeForMME::MapMaker:
+		if (currentMakerIndex_ >= 0 && currentMakerIndex_ < static_cast<int>(mapMakerlist_.size())) {
+			mapMakerlist_.erase(mapMakerlist_.begin() + currentMakerIndex_);
+		} else {
+			debugText_ += "Error: Invalid currentMakerIndex_ for delete.\n";
+		}
+		break;
+	case SelectModeForMME::Variable:
+	{
+		// MapMaker index 安全檢查
+		if (currentMakerIndex_ < 0 || currentMakerIndex_ >= mapMakerlist_.size()) {
+			debugText_ += "Error: Invalid currentMakerIndex_ for variable delete.\n";
+			break;
+		}
+		auto& list = mapMakerlist_[currentMakerIndex_].GetGeneratorVariables().variableList;
+		// Variable index 安全檢查
+		if (currentVariableIndex_ < 0 || currentVariableIndex_ >= list.size()) {
+			debugText_ += "Error: Invalid currentVariableIndex_ for delete.\n";
+			break;
+		}
+		// 執行刪除
+		list.erase(list.begin() + currentVariableIndex_);
+		// 刪除後修正 index
+		if (currentVariableIndex_ >= list.size())
+			currentVariableIndex_ = (int)list.size() - 1;
+
+		if (list.empty())
+			currentVariableIndex_ = -1;
+		break;
+	}
+
+	default:
+		debugText_ += "Error: No Selection for delete.\n";
+		break;
+	}
+	isDelete_ = false;
+}
+
+void MapMakingEditor::MapInfoLoadJson() {
+	if (currentMakerIndex_ >= 0 && currentMakerIndex_ < mapMakerlist_.size()) {
+		auto& maker = mapMakerlist_[currentMakerIndex_];
+		currentMapInfo_.jsonData = maker.GetMapMakerJson();
+	}
+}
+
+void MapMakingEditor::ImGuiLeftMenuBar() {
+
+	ImGuiIO& io = ImGui::GetIO();
 
 	float selectorH = menuBarHeight_;
 	float lineH = ImGui::GetTextLineHeightWithSpacing();
@@ -75,9 +129,12 @@ void MapMakingEditor::ImGuiLeftMenuBar() {
 	float selectorPosY = menuBarHeight_;
 	float templatePosY = io.DisplaySize.y - templateH;
 
-	// =========================
-	// 1. Top Selector
-	// =========================
+	ImVec2 w1Pos{};
+	ImVec2 w1Size{};
+
+	/// =========================
+	/// 1. Mode Selector
+	/// =========================
 	ImGui::SetNextWindowPos(ImVec2(0, selectorPosY));
 	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, selectorH));
 
@@ -88,118 +145,84 @@ void MapMakingEditor::ImGuiLeftMenuBar() {
 		ImGuiWindowFlags_NoResize |
 		ImGuiWindowFlags_NoCollapse);
 
-	if (ImGui::Selectable("Terrain", modeEditing_ == 0, 0, ImVec2(80, selectorH - 4)))
+	if (ImGui::Selectable("MakerEditor", modeEditing_ == 0, 0, ImVec2(80, selectorH - 4)))
 		modeEditing_ = 0;
 	ImGui::SameLine();
-	if (ImGui::Selectable("Room", modeEditing_ == 1, 0, ImVec2(80, selectorH - 4)))
+	if (ImGui::Selectable("RoomEditor", modeEditing_ == 1, 0, ImVec2(80, selectorH - 4)))
 		modeEditing_ = 1;
 	ImGui::SameLine();
-	ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Testing");
+	if (ImGui::Selectable("MapGenerator", modeEditing_ == 2, 0, ImVec2(80, selectorH - 4)))
+		modeEditing_ = 2;
+	ImGui::SameLine();
 
 	w1Pos = ImGui::GetWindowPos();
 	w1Size = ImGui::GetWindowSize();
 
 	ImGui::End();
 
-	// ======== pos計算 =========
-	float MapH =
-		lineH * 7 +
-		ImGui::GetFrameHeight() +
-		10.0f +
-		titleH;
-
-	float colimenH = (io.DisplaySize.y - w1Size.y - selectorH - templateH - titleH * 2) / 3;
-	float window2H = 1;
-	float window3H = 1;
-	float window4H = titleH;
-
-	enum {
-		Map = 1 << 0,
-		Generator = 1 << 1,
-		Variables = 1 << 2,
-	};
-
-	int nowState = {
-		(isMapWindowOpen_ ? Map : 0) |
-		(isGenratorWindowOpen_ ? Generator : 0) |
-		(isVariablesWindowOpen_ ? Variables : 0)
-	};
-
-	int maxMidWindowCount = 3;
-	int windowCount = 0;
-	if (nowState & Map)			windowCount++;
-	if (nowState & Generator)	windowCount++;
-	if (nowState & Variables)	windowCount++;
-	int windowLeft = windowCount;
-
-	if (nowState & Map) {
-		window2H = colimenH;
-		windowLeft--;
-		if (windowLeft == 0) window2H += colimenH * (maxMidWindowCount - windowCount);
-	}
-	if (nowState & Generator) {
-		window3H = colimenH;
-		if (nowState & Map) window3H += titleH;
-		windowLeft--;
-		if (windowLeft == 0) window3H += colimenH * (maxMidWindowCount - windowCount);
-	}
-	if (nowState & Variables) {
-		window4H = colimenH;
-		if (nowState & Map)				window4H += titleH;
-		else if (nowState & Generator)	window4H += titleH;
-		windowLeft--;
-		if (windowLeft == 0) window4H += colimenH * (maxMidWindowCount - windowCount);
-	}
-
-	// =========================
-	// 2. Maps（獨立視窗）
-	// =========================
+	/// =========================
+	/// 2. Combo MapData \ MapMaker（補償用選擇器）
+	/// =========================
 	float window2Y = w1Pos.y + w1Size.y;
 	ImVec2 w2Pos;
 	ImVec2 w2Size;
 
 	ImGui::SetNextWindowPos(ImVec2(0, window2Y));
-	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, window2H));
+	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, 0)); // AutoResize
 
-	//ImGui::SetNextWindowCollapsed(false, ImGuiCond_FirstUseEver);
-	isMapWindowOpen_ = ImGui::Begin("Maps",
+	isMapDataWindowOpen_ = ImGui::Begin("##LeftDataSelector",
 		nullptr,
+		ImGuiWindowFlags_NoTitleBar |
 		ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_NoResize);
+		ImGuiWindowFlags_NoResize |
+		ImGuiWindowFlags_AlwaysAutoResize);
 
-	float fullW = leftInspectorWidth_ - 20;   // 你原本的按鈕寬度邏輯
-	float addW = fullW * 0.7f;
-	float delW = fullW * 0.3f;
+	ImGui::SetNextItemWidth(leftInspectorWidth_ - 20);
 
-	if (ImGui::Button("Add Map", ImVec2(addW, 20))) {
-		showNewWindow_ = true;
-	}
+	/// ------------------------------------------------------------
+	/// 如果 Tag 選的是 MapData → 這裡顯示 MapMaker 的 list
+	/// ------------------------------------------------------------
+	if (selectModeForLeftData_ == SelectModeForLeftData::MapData) {
+		// 目前選擇的 MapMaker 名稱
+		const char* preview = "None";
+		if (currentMakerIndex_ >= 0 && currentMakerIndex_ < mapMakerlist_.size())
+			preview = mapMakerlist_[currentMakerIndex_].GetMapName().c_str();
 
-	ImGui::SameLine();
+		if (ImGui::BeginCombo("##MakerSelector", preview)) {
+			for (int i = 0; i < mapMakerlist_.size(); i++) {
+				auto& maker = mapMakerlist_[i];
+				bool selected = (currentMakerIndex_ == i);
 
-	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.60f, 0.20f, 0.20f, 1.0f));
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.80f, 0.30f, 0.30f, 1.0f));
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.40f, 0.10f, 0.10f, 1.0f));
-
-	if (ImGui::Button("Delete", ImVec2(delW, 20))) {
-		if (selectedMap_ >= 0 && selectedMap_ < mapData_.size()) {
-			mapData_.erase(mapData_.begin() + selectedMap_);
-			selectedMap_ = -1;
+				if (ImGui::Selectable(maker.GetMapName().c_str(), selected)) {
+					currentMakerIndex_ = i;
+				}
+			}
+			ImGui::EndCombo();
 		}
 	}
 
-	ImGui::PopStyleColor(3);
+	/// ------------------------------------------------------------
+	/// 如果 Tag 選的是 MapMaker → 這裡顯示 MapData 的 list
+	/// ------------------------------------------------------------
+	else if (selectModeForLeftData_ == SelectModeForLeftData::MapMaker) {
+		const char* preview = "None";
+		if (currentMapDataIndex_ >= 0 && currentMapDataIndex_ < mapDataList_.size())
+			preview = mapDataList_[currentMapDataIndex_].dataName.c_str();
 
-	ImGui::BeginChild("MapList", ImVec2(0, window2H - titleH - ImGui::GetFrameHeight() - 20), true);
-	for (int i = 0; i < mapData_.size(); i++) {
-		auto& m = mapData_[i];
-		std::string label = m.tileMapData.name + (m.isSaved ? "" : " *");
+		if (ImGui::BeginCombo("##DataSelector", preview)) {
+			for (int i = 0; i < mapDataList_.size(); i++) {
+				auto& data = mapDataList_[i];
+				bool selected = (currentMapDataIndex_ == i);
 
-		if (ImGui::Selectable(label.c_str(), selectedMap_ == i)) {
-			selectedMap_ = i;
+				if (ImGui::Selectable(data.dataName.c_str(), selected)) {
+					currentMapDataIndex_ = i;
+					// 同樣不改 selectModeForLeftData_
+					// 因為 Tag 決定下方視窗顯示 MapMaker
+				}
+			}
+			ImGui::EndCombo();
 		}
 	}
-	ImGui::EndChild();
 
 	w2Pos = ImGui::GetWindowPos();
 	w2Size = ImGui::GetWindowSize();
@@ -207,157 +230,66 @@ void MapMakingEditor::ImGuiLeftMenuBar() {
 	ImGui::End();
 
 
-	// =========================
-	// 3. Generator List（獨立視窗）
-	// =========================
+	/// =========================
+	/// Tag 控制視窗（無標題）
+	/// =========================
 
-	float window3Y = w2Pos.y + w2Size.y;
-	ImVec2 w3Pos;
-	ImVec2 w3Size;
+	ImVec2 wTPos;
+	ImVec2 wTSize;
 
-	ImGui::SetNextWindowPos(ImVec2(0, window3Y));
-	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, window3H));
+	ImGui::SetNextWindowPos(ImVec2(0, w2Pos.y + w2Size.y));   // 放在 Mode Selector 下方
+	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, 0));
 
-	isGenratorWindowOpen_ = ImGui::Begin("Generator List",
+	ImGui::Begin("##TagController",
 		nullptr,
+		ImGuiWindowFlags_NoTitleBar |
 		ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_NoResize);
+		ImGuiWindowFlags_AlwaysAutoResize |
+		ImGuiWindowFlags_NoCollapse);
 
-	float full2W = leftInspectorWidth_ - 20;   // 你原本的按鈕寬度邏輯
-	float add2W = full2W * 0.7f;
-	float del2W = full2W * 0.3f;
-
-	if (ImGui::Button("Add Generator", ImVec2(add2W, 20))) {
+	if (ImGui::BeginTabBar("LeftTagBar")) {
+		if (ImGui::BeginTabItem("MapMaker")) {
+			selectModeForLeftData_ = SelectModeForLeftData::MapMaker;
+			ImGui::EndTabItem();
+		}
+		if (ImGui::BeginTabItem("MapData")) {
+			selectModeForLeftData_ = SelectModeForLeftData::MapData;
+			ImGui::EndTabItem();
+		}
+		ImGui::EndTabBar();
 	}
 
-	ImGui::SameLine();
-
-	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.60f, 0.20f, 0.20f, 1.0f));
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.80f, 0.30f, 0.30f, 1.0f));
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.40f, 0.10f, 0.10f, 1.0f));
-
-	if (ImGui::Button("Delete", ImVec2(del2W, 20))) {
-	}
-
-	ImGui::PopStyleColor(3);
-
-	ImGui::BeginChild("GeneratorList", ImVec2(0, window3H - titleH - ImGui::GetFrameHeight() - 20), true);
-	for (int i = 0; i < 10; i++) 
-		ImGui::Selectable(("Generator " + std::to_string(i)).c_str());
-	ImGui::EndChild();
-
-	w3Pos = ImGui::GetWindowPos();
-	w3Size = ImGui::GetWindowSize();
+	wTPos = ImGui::GetWindowPos();
+	wTSize = ImGui::GetWindowSize();
 
 	ImGui::End();
 
 
-	// =========================
-	// 4. Variable List（獨立視窗）
-	// =========================
-
-	float window4Y = w3Pos.y + w3Size.y;
 	ImVec2 w4Pos;
 	ImVec2 w4Size;
 
-	ImGui::SetNextWindowPos(ImVec2(0, window4Y));
-	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, window4H));
+	//float colimenH = (io.DisplaySize.y - wTSize.y - selectorH - templateH - titleH * 2);
+	float colimenH = (io.DisplaySize.y - templateH - wTPos.y - wTSize.y);
 
-	isVariablesWindowOpen_ = ImGui::Begin("Variables List",
-		nullptr,
-		ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_NoResize);
-
-	float full3W = leftInspectorWidth_ - 20;   // 你原本的按鈕寬度邏輯
-	float add3W = full3W * 0.7f;
-	float del3W = full3W * 0.3f;
-
-	if (ImGui::Button("Add Variables", ImVec2(add3W, 20))) {
-		showNewVariablesWindow_ = true;
+	if (selectModeForLeftData_ == SelectModeForLeftData::MapData) {
+		ImGuiMapDataWindow(wTPos, &w4Pos, wTSize, &w4Size, colimenH);
+	} else if (selectModeForLeftData_ == SelectModeForLeftData::MapMaker) {
+		ImGuiMapMakerWindow(wTPos, &w4Pos, wTSize, &w4Size, colimenH);
 	}
-
-	ImGui::SameLine();
-
-	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.60f, 0.20f, 0.20f, 1.0f));
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.80f, 0.30f, 0.30f, 1.0f));
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.40f, 0.10f, 0.10f, 1.0f));
-
-	if (ImGui::Button("Delete", ImVec2(del3W, 20))) {
-		//if (selectedGenerator_ == -1) {
-		//	debugText_ += "No generator selected.\n";
-		//	return;
-		//}
-		//
-		//int typeIndex = selectedVariable_.first;
-		//int varIndex = selectedVariable_.second;
-		//
-		//// 防呆：類型 index 是否有效
-		//if (typeIndex < 0 || typeIndex >= generatorVariables_[selectedGenerator_].unitLists.size()) {
-		//	debugText_ += "Invalid variable type index.\n";
-		//	return;
-		//}
-		//
-		//auto& units = generatorVariables_[selectedGenerator_].unitLists[typeIndex].units;
-		//
-		//// 防呆：變數 index 是否有效
-		//if (varIndex < 0 || varIndex >= units.size()) {
-		//	debugText_ += "No variable selected to delete.\n";
-		//	return;
-		//}
-		//// 真正刪除
-		//units.erase(units.begin() + varIndex);
-		//debugText_ += "Variable deleted.\n";
-		//// 刪除後重置選擇
-		//selectedVariable_ = { -1, -1 };
-	}
-
-	ImGui::PopStyleColor(3);
-
-	ImGui::BeginChild("VariableList", ImVec2(0, window4H - titleH - ImGui::GetFrameHeight() - 20), true);
-	int index[2] = { 0, 0 };
-
-	///選択したgeneratorの変数リストを表示する
-	int unitIndex = 0;
-	for (auto& variableUnit : generatorVariables_[selectedGenerator_].unitLists) {
-
-		int varIndex = 0;
-		for (auto& variable : variableUnit.units) {
-
-			std::string typeName = "[" + variableUnit.unitName + "]";
-			std::string label = typeName + variable.name;
-
-			bool isSelected =
-				selectedVariable_.first == unitIndex &&
-				selectedVariable_.second == varIndex;
-
-			if (ImGui::Selectable(label.c_str(), isSelected)) {
-				selectedVariable_ = { unitIndex, varIndex };
-			}
-
-			varIndex++;
-		}
-		unitIndex++;
-	}
-	ImGui::EndChild();
-
-	w4Pos = ImGui::GetWindowPos();
-	w4Size = ImGui::GetWindowSize();
-
-	ImGui::End();
 
 
 	// =========================
 	// 4. Template Info（獨立視窗）
 	// =========================
 
-	if (nowState == 0) {
+	if (isMapDataSelected_ == 0 && isMakerSelected_ == 0 && isVariableSelected_ == 0) {
 		templatePosY = w4Pos.y + w4Size.y;
 		templateH = io.DisplaySize.y - templatePosY;
 	}
 	ImGui::SetNextWindowPos(ImVec2(0, templatePosY));
 	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, templateH));
 
-	ImGui::Begin("Template Info",
+	ImGui::Begin("Engine Info",
 		nullptr,
 		ImGuiWindowFlags_NoMove |
 		ImGuiWindowFlags_NoResize |
@@ -367,6 +299,552 @@ void MapMakingEditor::ImGuiLeftMenuBar() {
 
 	ImGui::End();
 }
+
+
+void MapMakingEditor::ImGuiMapDataWindow(ImVec2 size, ImVec2* outputSize, ImVec2 pos, ImVec2* outputPos, float colimenH) {
+
+	float windowY = size.y + pos.y;
+	ImVec2 wSize;
+	ImVec2 wPos;
+
+	float oneColimenH = colimenH / 3;
+
+	float titleH = ImGui::GetFrameHeight();
+
+	ImGui::SetNextWindowPos(ImVec2(0, windowY));
+	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, oneColimenH));
+
+	isMapMakerWindowOpen_ = ImGui::Begin("MapData List",
+		nullptr,
+		ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoResize);
+
+
+	float full2W = leftInspectorWidth_ - 20;
+	float buttonSize2 = full2W / 5.0f;
+	float add2W = buttonSize2;
+	float dou2W = buttonSize2;
+	float sav2W = buttonSize2;
+	float del2W = buttonSize2;
+
+
+	if (ImGui::Button("New", ImVec2(add2W, 20))) {
+		MapMaker newMapMakerData;
+		std::string newName = "new_MapMakerData";
+		if (newMapMakerDataCounter_ != 0) newName += "_" + std::to_string(newMapMakerDataCounter_);
+		newMapMakerData.SetMapName(newName);
+		newMapMakerDataCounter_++;
+		mapMakerlist_.push_back(newMapMakerData);
+	}
+
+	ImGui::SameLine();
+
+	/// Double
+	if (ImGui::Button("Double", ImVec2(dou2W, 20))) {
+		if (isMakerSelected_) {
+			MapMaker newMapMakerData = mapMakerlist_[currentMakerIndex_];
+			newMapMakerData.SetMapName(newMapMakerData.GetMapName() + "_copy");
+			mapMakerlist_.push_back(newMapMakerData);
+		} else {
+			debugText_ += "Error: No generator selected for doubling.\n";
+		}
+	}
+
+	ImGui::SameLine();
+
+	/// Save
+	if (ImGui::Button("Save", ImVec2(sav2W, 20))) {
+		if (isMakerSelected_) {
+
+			auto& maker = mapMakerlist_[currentMakerIndex_];
+
+			maker.SetCodingText(codeingText_);
+			maker.LoadScript(codeingText_);
+
+			maker.Compile();
+
+			maker.BuildJson();
+
+			if (maker.ExportMapMakerToJson(maker.GetProjectPath())) {
+				maker.SetSaved(true);
+				debugText_ += "Save: MapBuilder.json exported.\n";
+			} else {
+				debugText_ += "Save Error: Cannot write MapBuilder.json.\n";
+				debugText_ += maker.GetDebugText();
+			}
+		} else {
+			debugText_ += "Error: No generator selected for save.\n";
+		}
+	}
+
+	ImGui::SameLine();
+
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.60f, 0.20f, 0.20f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.80f, 0.30f, 0.30f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.40f, 0.10f, 0.10f, 1.0f));
+
+	if (ImGui::Button("Delete", ImVec2(del2W, 20))) {
+		doubleCheck_ = true;
+		selectMode_ = SelectModeForMME::MapMaker;
+	}
+
+	ImGui::PopStyleColor(3);
+
+	ImGui::BeginChild("GeneratorList", ImVec2(0, ImGui::GetContentRegionAvail().y), true);
+	for (int i = 0; i < mapMakerlist_.size(); i++) {
+		auto& Data = mapMakerlist_[i]; // Assuming each MapMakerData has at least one prototype
+		std::string label = Data.GetMapName() + (Data.isSaved() ? "" : " *");
+
+		if (ImGui::Selectable(label.c_str(), currentMakerIndex_ == i)) {
+
+			if (currentMakerIndex_ >= 0 && currentMakerIndex_ < mapMakerlist_.size()) {
+				mapMakerlist_[currentMakerIndex_].SetCodingText(codeingText_);
+			}
+
+			currentMakerIndex_ = i;
+			selectMode_ = SelectModeForMME::MapMaker;
+
+			// 今回選択されたGeneratorのCodingTextを取得
+			codeingText_ = mapMakerlist_[i].GetCodingText();
+		}
+	}
+	ImGui::EndChild();
+
+	if (currentMakerIndex_ >= 0 && currentMakerIndex_ < mapMakerlist_.size()) isMakerSelected_ = true;
+	else isMakerSelected_ = false;
+
+	wPos = ImGui::GetWindowPos();
+	wSize = ImGui::GetWindowSize();
+
+	ImGui::End();
+
+
+	// =========================
+	// 4. Variable List（獨立視窗）
+	// =========================
+
+	float window2Y = wPos.y + wSize.y;
+
+	ImGui::SetNextWindowPos(ImVec2(0, window2Y));
+	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, oneColimenH * 2));
+
+	isVariablesWindowOpen_ = ImGui::Begin("Variables List",
+		nullptr,
+		ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoResize);
+
+	float full3W = leftInspectorWidth_ - 20;   // 你原本的按鈕寬度邏輯
+	float buttonSize3 = full3W / 5.0f;
+	float add3W = buttonSize3;
+	float dou3W = buttonSize3;
+	float sav3W = buttonSize3;
+	float del3W = buttonSize3;
+
+
+	if (ImGui::Button("New", ImVec2(add3W, 20))) {
+		if (isMakerSelected_) {
+			showNewVariablesWindow_ = true;
+		} else {
+			debugText_ += "Error: No generator selected for adding new variable.\n";
+		}
+	}
+
+	ImGui::SameLine();
+
+	/// Double
+	if (ImGui::Button("Double", ImVec2(dou3W, 20))) {
+		if (isMakerSelected_) {
+			MapMaker newMapMakerData = mapMakerlist_[currentMakerIndex_];
+			newMapMakerData.SetMapName(newMapMakerData.GetMapName() + "_copy");
+			mapMakerlist_.push_back(newMapMakerData);
+		} else {
+			debugText_ += "Error: No generator selected for doubling.\n";
+		}
+	}
+
+	ImGui::SameLine();
+
+	/// Save
+	if (ImGui::Button("Save", ImVec2(sav3W, 20))) {
+		if (isMakerSelected_) {
+
+			auto& maker = mapMakerlist_[currentMakerIndex_];
+
+			maker.SetCodingText(codeingText_);
+			maker.LoadScript(codeingText_);
+
+			maker.Compile();
+
+			maker.BuildJson();
+
+			if (maker.ExportMapMakerToJson(maker.GetProjectPath())) {
+				maker.SetSaved(true);
+				debugText_ += "Save: MapBuilder.json exported.\n";
+			} else {
+				debugText_ += "Save Error: Cannot write MapBuilder.json.\n";
+				debugText_ += maker.GetDebugText();
+			}
+		} else {
+			debugText_ += "Error: No generator selected for save.\n";
+		}
+	}
+
+	ImGui::SameLine();
+
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.60f, 0.20f, 0.20f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.80f, 0.30f, 0.30f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.40f, 0.10f, 0.10f, 1.0f));
+
+	if (ImGui::Button("Delete", ImVec2(del3W, 20))) {
+		doubleCheck_ = true;
+		selectMode_ = SelectModeForMME::Variable;
+	}
+
+	ImGui::PopStyleColor(3);
+
+	ImGui::BeginChild("VariableList", ImVec2(0, titleH + ImGui::GetFrameHeight() + 20), true);
+	int index[2] = { 0, 0 };
+
+	ImGui::EndChild();
+
+
+	*outputPos = ImGui::GetWindowPos();
+	*outputSize = ImGui::GetWindowSize();
+
+	ImGui::End();
+}
+
+void MapMakingEditor::ImGuiMapMakerWindow(ImVec2 size, ImVec2* outputSize, ImVec2 pos, ImVec2* outputPos, float colimenH) {
+
+	float windowY = size.y + pos.y;
+	ImVec2 wSize;
+	ImVec2 wPos;
+
+	float oneColimenH = colimenH / 3;
+
+	float titleH = ImGui::GetFrameHeight();
+
+	ImGui::SetNextWindowPos(ImVec2(0, windowY));
+	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, oneColimenH));
+
+	isMapMakerWindowOpen_ = ImGui::Begin("MapMaker List",
+		nullptr,
+		ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoResize);
+
+
+	float fullW = leftInspectorWidth_ - 20;
+	float buttonSize = fullW / 5.0f;
+	float addW = buttonSize;
+	float douW = buttonSize;
+	float savW = buttonSize;
+	float delW = buttonSize;
+
+
+	if (ImGui::Button("New", ImVec2(addW, 20))) {
+		MapMaker newMapMakerData;
+		std::string newName = "new_MapMakerData";
+		if (newMapMakerDataCounter_ != 0) newName += "_" + std::to_string(newMapMakerDataCounter_);
+		newMapMakerData.SetMapName(newName);
+		newMapMakerDataCounter_++;
+		mapMakerlist_.push_back(newMapMakerData);
+	}
+
+	ImGui::SameLine();
+
+	/// Double
+	if (ImGui::Button("Double", ImVec2(douW, 20))) {
+		if (isMakerSelected_) {
+			MapMaker newMapMakerData = mapMakerlist_[currentMakerIndex_];
+			newMapMakerData.SetMapName(newMapMakerData.GetMapName() + "_copy");
+			mapMakerlist_.push_back(newMapMakerData);
+		} else {
+			debugText_ += "Error: No generator selected for doubling.\n";
+		}
+	}
+
+	ImGui::SameLine();
+
+	/// Save
+	if (ImGui::Button("Save", ImVec2(savW, 20))) {
+		if (isMakerSelected_) {
+
+			auto& maker = mapMakerlist_[currentMakerIndex_];
+
+			maker.SetCodingText(codeingText_);
+			maker.LoadScript(codeingText_);
+
+			maker.Compile();
+
+			maker.BuildJson();
+
+			if (maker.ExportMapMakerToJson(maker.GetProjectPath())) {
+				maker.SetSaved(true);
+				debugText_ += "Save: MapBuilder.json exported.\n";
+			} else {
+				debugText_ += "Save Error: Cannot write MapBuilder.json.\n";
+				debugText_ += maker.GetDebugText();
+			}
+		} else {
+			debugText_ += "Error: No generator selected for save.\n";
+		}
+	}
+
+	ImGui::SameLine();
+
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.60f, 0.20f, 0.20f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.80f, 0.30f, 0.30f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.40f, 0.10f, 0.10f, 1.0f));
+
+	if (ImGui::Button("Delete", ImVec2(delW, 20))) {
+		doubleCheck_ = true;
+		selectMode_ = SelectModeForMME::MapMaker;
+	}
+
+	ImGui::PopStyleColor(3);
+
+	ImGui::BeginChild("GeneratorList", ImVec2(0, ImGui::GetContentRegionAvail().y), true);
+	for (int i = 0; i < mapMakerlist_.size(); i++) {
+		auto& Data = mapMakerlist_[i]; // Assuming each MapMakerData has at least one prototype
+		std::string label = Data.GetMapName() + (Data.isSaved() ? "" : " *");
+
+		if (ImGui::Selectable(label.c_str(), currentMakerIndex_ == i)) {
+
+			if (currentMakerIndex_ >= 0 && currentMakerIndex_ < mapMakerlist_.size()) {
+				mapMakerlist_[currentMakerIndex_].SetCodingText(codeingText_);
+			}
+
+			currentMakerIndex_ = i;
+			selectMode_ = SelectModeForMME::MapMaker;
+
+			// 今回選択されたGeneratorのCodingTextを取得
+			codeingText_ = mapMakerlist_[i].GetCodingText();
+		}
+	}
+	ImGui::EndChild();
+
+	if (currentMakerIndex_ >= 0 && currentMakerIndex_ < mapMakerlist_.size()) isMakerSelected_ = true;
+	else isMakerSelected_ = false;
+
+	wPos = ImGui::GetWindowPos();
+	wSize = ImGui::GetWindowSize();
+
+	ImGui::End();
+
+
+	// =========================
+	// Variable List
+	// =========================
+
+	float window2Y = wPos.y + wSize.y;
+
+	ImGui::SetNextWindowPos(ImVec2(0, window2Y));
+	if (isMapMakerWindowOpen_) {
+		ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, oneColimenH * 2));
+	} else {
+		ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, oneColimenH * 3));
+	}
+
+	isVariablesWindowOpen_ = ImGui::Begin("Variables List",
+		nullptr,
+		ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoResize);
+
+	float full2W = leftInspectorWidth_ - 20;   // 你原本的按鈕寬度邏輯
+	float buttonSize2 = full2W / 5.0f;
+	float add2W = buttonSize2;
+	float dou2W = buttonSize2;
+	float sav2W = buttonSize2;
+	float del2W = buttonSize2;
+
+
+	if (ImGui::Button("New", ImVec2(add2W, 20))) {
+		if (isMakerSelected_) {
+			showNewVariablesWindow_ = true;
+		} else {
+			debugText_ += "Error: No generator selected for adding new variable.\n";
+		}
+	}
+
+	ImGui::SameLine();
+
+	/// Double (Duplicate Variable)
+	if (ImGui::Button("Double", ImVec2(dou2W, 20))) {
+
+		if (currentMakerIndex_ >= 0 && currentMakerIndex_ < mapMakerlist_.size()) {
+
+			auto& list = mapMakerlist_[currentMakerIndex_].GetGeneratorVariables().variableList;
+
+			if (currentVariableIndex_ >= 0 && currentVariableIndex_ < list.size()) {
+
+				Variable newVar = list[currentVariableIndex_];
+				newVar.name += "_copy";
+
+				list.push_back(newVar);
+
+				debugText_ += "Variable duplicated.\n";
+
+			} else {
+				debugText_ += "Error: No variable selected for duplication.\n";
+			}
+
+		} else {
+			debugText_ += "Error: No MapMaker selected for variable duplication.\n";
+		}
+	}
+
+	ImGui::SameLine();
+
+	/// Save (Apply changes to variable)
+	if (ImGui::Button("Save", ImVec2(sav2W, 20))) {
+		   
+		//if (currentMakerIndex_ >= 0 && currentMakerIndex_ < mapMakerlist_.size()) {
+		//
+		//	auto& list = mapMakerlist_[currentMakerIndex_].GetGeneratorVariables().variableList;
+		//
+		//	if (currentVariableIndex_ >= 0 && currentVariableIndex_ < list.size()) {
+		//
+		//		// 你現在的 UI 已經直接修改 list[currentVariableIndex_] 的內容
+		//		// 所以 Save 其實不需要做任何事，只需要提示
+		//		debugText_ += "Variable saved.\n";
+		//
+		//	} else {
+		//		debugText_ += "Error: No variable selected for save.\n";
+		//	}
+		//
+		//} else {
+		//	debugText_ += "Error: No MapMaker selected for variable save.\n";
+		//}
+	}
+
+
+
+	ImGui::SameLine();
+
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.60f, 0.20f, 0.20f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.80f, 0.30f, 0.30f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.40f, 0.10f, 0.10f, 1.0f));
+
+	if (ImGui::Button("Delete", ImVec2(del2W, 20))) {
+		doubleCheck_ = true;
+		selectMode_ = SelectModeForMME::Variable;
+	}
+
+	ImGui::PopStyleColor(3);
+
+	bool skipVariableList = false;
+
+	ImGui::BeginChild("VariableList", ImVec2(0, ImGui::GetContentRegionAvail().y), true);
+
+	// =========================
+	// MapMaker 安全檢查
+	// =========================
+	if (mapMakerlist_.empty()) {
+		ImGui::Text("No MapMaker available.");
+		skipVariableList = true;
+	}
+
+	if (!skipVariableList) {
+
+		// =========================
+		// currentMakerIndex_ 安全管理
+		// =========================
+		if (currentMakerIndex_ < 0) currentMakerIndex_ = 0;
+		if (currentMakerIndex_ >= mapMakerlist_.size())
+			currentMakerIndex_ = (int)mapMakerlist_.size() - 1;
+
+		auto& list = mapMakerlist_[currentMakerIndex_].GetGeneratorVariables().variableList;
+
+		// =========================
+		// 顯示變數列表
+		// =========================
+		for (int i = 0; i < list.size(); i++) {
+
+			auto& v = list[i];
+			ImGui::PushID(i);
+
+			// -------------------------
+			// Type（左側）
+			// -------------------------
+			ImGui::Text("Type: %s", VarTypeToString(v.type).c_str());
+
+			// -------------------------
+			// 選擇用 checkbox（右側）
+			// -------------------------
+			ImGui::SameLine(ImGui::GetContentRegionAvail().x - 20); // 靠右
+			bool selected = (currentVariableIndex_ == i);
+			if (ImGui::Checkbox("##select", &selected)) {
+				currentVariableIndex_ = selected ? i : -1;
+			}
+
+			// -------------------------
+			// Name
+			// -------------------------
+			InputTextString("Name", v.name);
+
+			// -------------------------
+			// Value
+			// -------------------------
+			switch (v.type) {
+			case VarType::Bool:
+				if (auto val = std::get_if<bool>(&v.value))
+					InputCheckbox("Value", *val);
+				break;
+
+			case VarType::Int:
+				if (auto val = std::get_if<int>(&v.value))
+					InputInt("Value", *val);
+				break;
+
+			case VarType::Float:
+				if (auto val = std::get_if<float>(&v.value))
+					InputFloat("Value", *val);
+				break;
+
+			case VarType::Double:
+				if (auto val = std::get_if<double>(&v.value))
+					InputDouble("Value", *val);
+				break;
+
+			case VarType::String:
+				if (auto val = std::get_if<std::string>(&v.value))
+					InputTextString("Value", *val);
+				break;
+
+			case VarType::Vector2:
+				if (auto val = std::get_if<Vector2>(&v.value))
+					InputVector2("Value", *val);
+				break;
+
+			case VarType::Vector3:
+				if (auto val = std::get_if<Vector3>(&v.value))
+					InputVector3("Value", *val);
+				break;
+
+			case VarType::Vector4:
+				if (auto val = std::get_if<Vector4>(&v.value))
+					InputVector4("Value", *val);
+				break;
+			}
+
+			ImGui::Separator();
+			ImGui::PopID();
+		}
+	}
+
+	ImGui::EndChild();
+
+	*outputPos = ImGui::GetWindowPos();
+	*outputSize = ImGui::GetWindowSize();
+
+	ImGui::End();
+}
+
+
+
+
+
+
 
 void MapMakingEditor::ImGuiRightMenuBar() {
 	ImGuiIO& io = ImGui::GetIO();
@@ -410,32 +888,45 @@ void MapMakingEditor::ImGuiRightMenuBar() {
 	ImVec2 w2Size;
 
 	ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - rightInspectorWidth_, window2Y));
-	if (selectedMap_ != -1) {
-		ImGui::SetNextWindowSize(ImVec2(rightInspectorWidth_, 0));
-		ImGui::Begin("Map Generator Info",
+	ImGui::SetNextWindowSize(ImVec2(rightInspectorWidth_, 0));
+
+	if (isMapDataSelected_) {
+		ImGui::Begin("MapData Info",
 			nullptr,
 			ImGuiWindowFlags_NoMove |
 			ImGuiWindowFlags_AlwaysAutoResize);
 
-		if (selectedMap_ != -1) {
-			MapInfo& selectedMapInfo = mapData_[selectedMap_];
-			ImGui::Text("Selected Map: %s", selectedMapInfo.tileMapData.name.c_str());
-			int sizeX = (selectedMapInfo.tileMapData.Row.empty()) ? 0 : (int)selectedMapInfo.tileMapData.Row[0].size();
-			int sizeY = (selectedMapInfo.tileMapData.Row.empty()) ? 0 : (int)selectedMapInfo.tileMapData.Row.size();
-			ImGui::Text("Map Size: %d x %d", sizeX, sizeY);
+		if (currentMapDataIndex_ >= 0 && currentMapDataIndex_ < (int)mapDataList_.size()) {
+			MapData& data = mapDataList_[currentMapDataIndex_];
+			ImGuiMapDataShowing(data);
 		}
 
 		w2Pos = ImGui::GetWindowPos();
 		w2Size = ImGui::GetWindowSize();
-	} else {
-		ImGui::SetNextWindowSize(ImVec2(rightInspectorWidth_, 0));
-		ImGui::Begin("Map Generator Info",
+	} else if (isMakerSelected_) {
+
+		ImGui::Begin("Map Maker Info",
 			nullptr,
-			ImGuiWindowFlags_NoMove);
+			ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_AlwaysAutoResize);
+
+		if (currentMakerIndex_ >= 0 && currentMakerIndex_ < (int)mapMakerlist_.size()) {
+			MapMaker& selectedMakerInfo = mapMakerlist_[currentMakerIndex_];
+			ImGuiMapMakerShowing(selectedMakerInfo);
+		}
 
 		w2Pos = ImGui::GetWindowPos();
 		w2Size = ImGui::GetWindowSize();
+
+	} else {
+		ImGui::SetNextWindowSize(ImVec2(rightInspectorWidth_, 0));
+		ImGui::Begin("Info",
+			nullptr,
+			ImGuiWindowFlags_NoMove);
 	}
+
+	w2Pos = ImGui::GetWindowPos();
+	w2Size = ImGui::GetWindowSize();
 
 	ImGui::End();
 
@@ -456,7 +947,47 @@ void MapMakingEditor::ImGuiRightMenuBar() {
 	w3Pos = ImGui::GetWindowPos();
 	w3Size = ImGui::GetWindowSize();
 
-	ImGui::Text("Dummy");
+	if (isMakerSelected_) {
+		auto& dataBase = mapMakerlist_[currentMakerIndex_].GetGeneratorVariables().variableList;
+
+		for (int i = 0; i < dataBase.size(); i++) {
+
+			Variable* v = &dataBase[i];
+
+			ImGui::SetNextItemWidth(120.0f);
+			ImGui::InputText(("##Name%s" + std::to_string(i)).c_str(), &v->name);
+
+			ImGui::SameLine();
+
+			ImGui::SetNextItemWidth(150.0f);
+			switch (v->type) {
+			case VarType::Bool:
+				ImGui::Checkbox(("##Bool%s" + std::to_string(i)).c_str(), &GetValueRef<bool>(*v));
+				break;
+			case VarType::Int:
+				ImGui::InputInt(("##Int%s" + std::to_string(i)).c_str(), &GetValueRef<int>(*v));
+				break;
+			case VarType::Float:
+				ImGui::InputFloat(("##Float%s" + std::to_string(i)).c_str(), &GetValueRef<float>(*v));
+				break;
+			case VarType::Double:
+				ImGui::InputDouble(("##Double%s" + std::to_string(i)).c_str(), &GetValueRef<double>(*v));
+				break;
+			case VarType::String:
+				ImGui::InputText(("##String%s" + std::to_string(i)).c_str(), &GetValueRef<std::string>(*v));
+				break;
+			case VarType::Vector2:
+				ImGui::InputFloat2(("##Vector2%s" + std::to_string(i)).c_str(), &GetValueRef<Vector2>(*v).x);
+				break;
+			case VarType::Vector3:
+				ImGui::InputFloat3(("##Vector3%s" + std::to_string(i)).c_str(), &GetValueRef<Vector3>(*v).x);
+				break;
+			case VarType::Vector4:
+				ImGui::InputFloat4(("##Vector4%s" + std::to_string(i)).c_str(), &GetValueRef<Vector4>(*v).x);
+				break;
+			}
+		}
+	}
 
 	ImGui::End();
 
@@ -479,11 +1010,8 @@ void MapMakingEditor::ImGuiRightMenuBar() {
 	ImGui::SameLine();
 	if (ImGui::Button("Clear")) {
 		debugText_ = "";
-	}	
-	ImGui::SameLine();
-	if (ImGui::Button("AddDummy")) {
-		debugText_ += "Dummy debug message\n";
 	}
+
 	ImGui::Text("%s", debugText_.c_str());
 
 	ImGui::End();
@@ -530,8 +1058,28 @@ void MapMakingEditor::ImGuiMidWindow() {
 		ImGuiWindowFlags_NoMove |
 		ImGuiWindowFlags_NoResize);
 
+	if (ImGui::BeginTabBar("##MapTabs")) {
+
+		if (ImGui::BeginTabItem("Map")) {
+			if (!currentMapInfo_.tileMapData.Row.empty()) {
+				ImGui::Text("%s", currentMapInfo_.tileMapData.TileMapDataToString().c_str());
+			}
+			ImGui::EndTabItem();
+		}
+
+		if (ImGui::BeginTabItem("Compile")) {
+			ImGui::Text("Compile Result:");
+
+			ImGui::Text("%s", currentMapInfo_.jsonData.c_str());
+
+			ImGui::EndTabItem();
+		}
+
+		ImGui::EndTabBar();
+	}
 
 	ImGui::End();
+
 
 	// ===== Bottom Window =====
 	ImGui::SetNextWindowPos(ImVec2(centerPosX, bottomWindowY));
@@ -543,12 +1091,47 @@ void MapMakingEditor::ImGuiMidWindow() {
 		ImGuiWindowFlags_NoResize);
 
 	InputBigTextString("Codeing Text", codeingText_);
-	ImGui::Button("Apply");
+
+	if (ImGui::Button("Save")) {
+		if (currentMakerIndex_ >= 0 && currentMakerIndex_ < mapMakerlist_.size()) {
+
+			auto& maker = mapMakerlist_[currentMakerIndex_];
+			maker.SetCodingText(codeingText_);
+			maker.LoadScript(codeingText_);
+
+			maker.Compile();
+			maker.BuildJson();
+			maker.SetSaved(false);
+		}
+	}
+
+	ImGui::SameLine();
+
+	if (ImGui::Button("Apply")) {
+		if (currentMakerIndex_ >= 0 && currentMakerIndex_ < mapMakerlist_.size()) {
+
+			auto& maker = mapMakerlist_[currentMakerIndex_];
+			maker.SetCodingText(codeingText_);
+			maker.LoadScript(codeingText_);
+
+			maker.Compile();
+			maker.BuildJson();
+			MapInfoLoadJson();
+			maker.SetSaved(false);
+
+			debugText_ += "Apply: Script updated and recompiled.\n";
+		} else {
+			debugText_ += "Error: No valid map maker selected.\n";
+		}
+	}
+
+	ImGui::SameLine();
+	ImGui::Text("Result = result[y][x]");	
 
 	ImGui::End();
 }
 
-void MapMakingEditor::ImGuiMapLoadWindow() {
+void MapMakingEditor::ImGuiLoadWindow() {
 	if (showLoadWindow_) {
 		float lineHeight = ImGui::GetTextLineHeightWithSpacing();
 		float padding = ImGui::GetStyle().WindowPadding.y * 2;
@@ -576,7 +1159,7 @@ void MapMakingEditor::ImGuiMapLoadWindow() {
 }
 
 
-void MapMakingEditor::ImGuiMapSaveWindow() {
+void MapMakingEditor::ImGuiSaveWindow() {
 	if (showSaveWindow_) {
 		float lineHeight = ImGui::GetTextLineHeightWithSpacing();
 		float padding = ImGui::GetStyle().WindowPadding.y * 2;
@@ -591,13 +1174,44 @@ void MapMakingEditor::ImGuiMapSaveWindow() {
 		bool isButtonClicked = false;
 		if (ImGui::Button("Save")) {
 			isButtonClicked = true;
+			isSave_ = true;
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Close")) {
 			isButtonClicked = true;
+			selectMode_ = SelectModeForMME::None;
 		}
 		if (isButtonClicked) {
 			showSaveWindow_ = false;
+		}
+		ImGui::End();
+	}
+}
+
+void MapMakingEditor::ImGuiDoubleCheckWindow() {
+	if (doubleCheck_) {
+		float lineHeight = ImGui::GetTextLineHeightWithSpacing();
+		float padding = ImGui::GetStyle().WindowPadding.y * 2;
+		float titleBar = ImGui::GetFrameHeight();
+		float fixedHeight = lineHeight * 3 + padding + titleBar;
+		ImGui::SetNextWindowSize(ImVec2(0, fixedHeight));
+		ImGui::SetNextWindowFocus();
+		ImGui::Begin("Double Check Window", &doubleCheck_, ImGuiWindowFlags_NoResize);
+
+		ImGui::Text("Are you sure you want to delete this item?");
+
+		bool isButtonClicked = false;
+		if (ImGui::Button("Delete")) {
+			isButtonClicked = true;
+			isDelete_ = true;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Close")) {
+			isButtonClicked = true;
+			selectMode_ = SelectModeForMME::None;
+		}
+		if (isButtonClicked) {
+			doubleCheck_ = false;
 		}
 		ImGui::End();
 	}
@@ -654,7 +1268,7 @@ void MapMakingEditor::ImGuiMapNewWindow() {
 
 			newMap.isSaved = false;
 			newMap.savePath = saveFilePath_;
-			mapData_.push_back(newMap);
+			mapList_.push_back(newMap);
 
 
 			std::string newNumber = std::to_string(newVariableCounter_);
@@ -674,6 +1288,33 @@ void MapMakingEditor::ImGuiMapNewWindow() {
 		}
 		ImGui::EndPopup();
 	}
+}
+
+void MapMakingEditor::ImGuiMapDataShowing(MapData& data) {
+
+	ImGui::Text("Selected Map: %s", data.dataName.c_str());
+	InputTextString("Map Name", data.dataName);
+	InputInt("Max Size X", data.xSize);
+	InputInt("Max Size Y", data.ySize);
+
+	ImGui::Button("Add Unit", ImVec2(-1, 0));
+	for (const auto& unit : data.unitLists) {
+
+	}
+
+}
+
+void MapMakingEditor::ImGuiMapMakerShowing(MapMaker& maker) {
+
+	std::string name = maker.GetMapName();
+	InputTextString("Map Name", name);
+	maker.SetMapName(name);
+
+	std::string savePath = maker.GetProjectPath();
+	InputTextString("Save Path", savePath);
+	maker.SetProjectPath(savePath);
+	ImGui::Text("VariablesNumber:%d", static_cast<int>(maker.GetGeneratorVariables().variableList.size()));
+
 }
 
 void MapMakingEditor::ImGuiNewVariablesWindow() {
@@ -713,30 +1354,55 @@ void MapMakingEditor::ImGuiNewVariablesWindow() {
 		ImGui::Combo("##VariableType", &variableType_, types, IM_ARRAYSIZE(types));
 
 
+		switch (variableType_) {
+		case (int)VarType::Bool:
+			InputCheckbox("Bool Value", newBoolValue_);
+			break;
+		case (int)VarType::Int:
+			InputInt("Int Value", newIntValue_);
+			break;
+		case (int)VarType::Float:
+			InputFloat("Float Value", newFloatValue_);
+			break;
+		case (int)VarType::Double:
+			InputDouble("Double Value", newDoubleValue_);
+			break;
+		case (int)VarType::String:
+			InputTextString("String Value", newStringValue_);
+			break;
+		case (int)VarType::Vector2:
+			InputVector2("Vector2 Value", newVector2Value_);
+			break;
+		case (int)VarType::Vector3:
+			InputVector3("Vector3 Value", newVector3Value_);
+			break;
+		case (int)VarType::Vector4:
+			InputVector4("Vector4 Value", newVector4Value_);
+			break;
+		}
+
+
 		bool isButtonClicked = false;
 		if (ImGui::Button("New")) {
 
-			if (selectedGenerator_ != -1) {
+			if (currentMakerIndex_ != -1) {
 				// Add VariableUnit 動作
 				Variable newVariable{};
 
-				newVariable.name = newName_;
-				newVariable.type = static_cast<VarType>(variableType_);
-
 				// 初始化 value
-				switch (newVariable.type) {
-				case VarType::Bool: newVariable.boolValue = false; break;
-				case VarType::Int: newVariable.intValue = 0; break;
-				case VarType::Float: newVariable.floatValue = 0.0f; break;
-				case VarType::Double: newVariable.doubleValue = 0.0; break;
-				case VarType::String: newVariable.stringValue = ""; break;
-				case VarType::Vector2: newVariable.v2Value = { 0,0 }; break;
-				case VarType::Vector3: newVariable.v3Value = { 0,0,0 }; break;
-				case VarType::Vector4: newVariable.v4Value = { 0,0,0,0 }; break;
+				switch ((VarType)variableType_) {
+				case VarType::Bool: newVariable = CreateVariable(newName_, newBoolValue_);			break;
+				case VarType::Int: newVariable = CreateVariable(newName_, newIntValue_);			break;
+				case VarType::Float: newVariable = CreateVariable(newName_, newFloatValue_);			break;
+				case VarType::Double: newVariable = CreateVariable(newName_, newDoubleValue_);		break;
+				case VarType::String: newVariable = CreateVariable(newName_, newStringValue_);		break;
+				case VarType::Vector2: newVariable = CreateVariable(newName_, newVector2Value_);		break;
+				case VarType::Vector3: newVariable = CreateVariable(newName_, newVector3Value_);		break;
+				case VarType::Vector4: newVariable = CreateVariable(newName_, newVector4Value_);		break;
 				}
 
 				/// [選択したGenerator][変数の種類]に新しい変数を追加する
-				generatorVariables_[selectedGenerator_].unitLists[variableType_].units.push_back(newVariable);
+				mapMakerlist_[currentMakerIndex_].GetGeneratorVariables().variableList.push_back(newVariable);
 
 				std::string newNumber = std::to_string(newVariableCounter_);
 				if (newVariableCounter_ == 0)newNumber = "";
@@ -830,6 +1496,59 @@ bool MapMakingEditor::InputBigTextString(const char* label, std::string& str, Im
 
 	return result;
 }
+
+void MapMakingEditor::InputCheckbox(const char* label, bool& value) {
+	ImGui::Text("%s:", label);
+	ImGui::SameLine();
+	std::string newLabel = std::string("##") + label;
+	ImGui::Checkbox(newLabel.c_str(), &value);
+}
+
+void MapMakingEditor::InputInt(const char* label, int& value) {
+	ImGui::Text("%s:", label);
+	ImGui::SameLine();
+	std::string newLabel = std::string("##") + label;
+	ImGui::InputInt(newLabel.c_str(), &value);
+}
+
+void MapMakingEditor::InputFloat(const char* label, float& value) {
+	ImGui::Text("%s:", label);
+	ImGui::SameLine();
+	std::string newLabel = std::string("##") + label;
+	ImGui::InputFloat(newLabel.c_str(), &value);
+}
+
+void MapMakingEditor::InputDouble(const char* label, double& value) {
+	ImGui::Text("%s:", label);
+	ImGui::SameLine();
+	std::string newLabel = std::string("##") + label;
+	ImGui::InputDouble(newLabel.c_str(), &value);
+}
+
+void MapMakingEditor::InputVector2(const char* label, Vector2& vec) {
+
+	ImGui::Text("%s:", label);
+	ImGui::SameLine();
+	std::string newLabel = std::string("##") + label;
+	ImGui::InputFloat2(newLabel.c_str(), &vec.x);
+}
+
+void MapMakingEditor::InputVector3(const char* label, Vector3& vec) {
+
+	ImGui::Text("%s:", label);
+	ImGui::SameLine();
+	std::string newLabel = std::string("##") + label;
+	ImGui::InputFloat3(newLabel.c_str(), &vec.x);
+}
+
+void MapMakingEditor::InputVector4(const char* label, Vector4& vec) {
+
+	ImGui::Text("%s:", label);
+	ImGui::SameLine();
+	std::string newLabel = std::string("##") + label;
+	ImGui::InputFloat4(newLabel.c_str(), &vec.x);
+}
+
 #endif
 
 /// ImDrawList* draw = ImGui::GetWindowDrawList();

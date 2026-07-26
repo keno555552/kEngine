@@ -15,6 +15,20 @@ void TileMapData::ColumnPush() {
 	}
 }
 
+std::string TileMapData::TileMapDataToString() {
+	std::string out;
+
+	for (const auto& row : Row) {
+		for (int i = 0; i < row.size(); ++i) {
+			out += std::to_string(row[i]);
+			if (i + 1 < row.size()) out += " ";
+		}
+		out += "\n";
+	}
+
+	return out;
+}
+
 TextureMatcher::TextureMatcher() {
 	textureStruct = {};
 	LTpos_ = {};

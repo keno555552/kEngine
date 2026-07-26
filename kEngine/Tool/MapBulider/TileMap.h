@@ -37,8 +37,8 @@ typedef struct TileMapData {
 	std::vector<int> Column;
 	std::vector<std::vector<int>> Row;
 	void ColumnPush();
+	std::string TileMapDataToString();
 }TileMapData;
-
 class TextureMatcher
 {
 public:
@@ -165,8 +165,8 @@ public:
 		0xE0E0E0FF, //IRON
 		0xFFD700FF, //GOLD
 		0x8080C0FF, //DIAMOND
-	    0xff00ffFF, //MONSTERSPAWNER,
-	    0xff00ffFF  //DONGEONDOOR,
+		0xff00ffFF, //MONSTERSPAWNER,
+		0xff00ffFF  //DONGEONDOOR,
 	};
 
 

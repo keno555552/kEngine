@@ -337,6 +337,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="kEngine\Tool\MapBulider\Adapter\InstructionCompiler.cpp" />
     <ClCompile Include="kEngine\Tool\FileManager\FileManager.cpp" />
     <ClCompile Include="kEngine\Tool\JsonHelper\JsonHelper.cpp" />
     <ClCompile Include="kEngine\Tool\EffectSystem\Adapter\EffectAdapter.cpp" />
@@ -533,6 +534,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Renderer\PostProcessRunner\PostProcessPass.cpp" />
     <ClCompile Include="kEngine\Renderer\PostProcessRunner\PostProcessLayer.cpp" />
     <ClCompile Include="kEngine\Tool\MapMakingEditor\MapMakingEditor.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\Adapter\ProgramAdapter.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\Data\MapMakerData.cpp" />
     <ClCompile Include="ResourceLoader.cpp" />
     <ClCompile Include="kEngine\Scenes\BaseSceneFactory.cpp" />
     <ClCompile Include="kEngine\GameObject\Object\Sprite.cpp" />
@@ -564,6 +567,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Utility\ItemStateCountingSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="kEngine\Tool\MapBulider\Adapter\InstructionCompiler.h" />
     <ClInclude Include="kEngine\Tool\FileManager\FileManager.h" />
     <ClInclude Include="kEngine\Tool\JsonHelper\JsonHelper.h" />
     <ClInclude Include="kEngine\Tool\EffectSystem\Adapter\EffectAdapter.h" />
@@ -840,6 +844,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Renderer\PostProcessRunner\PostProcessPass.h" />
     <ClInclude Include="kEngine\Renderer\PostProcessRunner\PostProcessLayer.h" />
     <ClInclude Include="kEngine\Tool\MapMakingEditor\MapMakingEditor.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\Adapter\ProgramAdapter.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\Data\MapMakerData.h" />
     <ClInclude Include="ResourceLoader.h" />
     <ClInclude Include="kEngine\Scenes\BaseSceneFactory.h" />
     <ClInclude Include="kEngine\GameObject\Object\Sprite.h" />
