@@ -39,7 +39,7 @@ public:
 		const std::string& name = "");
 
 	/// ==================== TileMap相關 ==================== ///
-	static TileMapData LoadTileMap(const std::string& filePath);
+	static TileMapData LoadMapBulider(const std::string& filePath);
 	static TileMapData RunMapBulider(const std::string& filePath, GeneratorVariable* generatorVariables_);
 
 

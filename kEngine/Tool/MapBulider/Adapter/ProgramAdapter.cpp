@@ -103,7 +103,7 @@ void MapProgramAdapter::SaveCompile(const std::string& code,
 	out << file.dump(4);
 }
 
-TileMapData MapProgramAdapter::LoadTileMap(const std::string& filePath) {
+TileMapData MapProgramAdapter::LoadMapBulider(const std::string& filePath) {
 	return TileMapData();
 }
 

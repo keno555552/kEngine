@@ -69,6 +69,8 @@ public:
 
 	bool isBillboard_ = false;
 
+	bool isControlledByAnimation_ = false;
+
 	Object* ownerObject = nullptr;	// ObjectDataをObject(皮)のポインタを持つと色々便利になるからやる
 
 	ObjectPart* followObject_ = nullptr;
