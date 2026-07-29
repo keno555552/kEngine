@@ -339,6 +339,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClCompile Include="GAME\Object\BackPoint\BackPoint.cpp" />
     <ClCompile Include="GAME\Object\Bullet\Bullet.cpp" />
+    <ClCompile Include="GAME\resources\PostProcessPreset\PPP_GlitchScreen.cpp" />
     <ClCompile Include="GAME\scenes\Scene1.cpp" />
     <ClCompile Include="GAME\scenes\sceneLose.cpp" />
     <ClCompile Include="GAME\scenes\SceneTest.cpp" />
@@ -566,6 +567,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClInclude Include="GAME\Object\BackPoint\BackPoint.h" />
     <ClInclude Include="GAME\Object\Bullet\Bullet.h" />
+    <ClInclude Include="GAME\resources\PostProcessPreset\PPP_GlitchScreen.h" />
     <ClInclude Include="GAME\scenes\Scene1.h" />
     <ClInclude Include="GAME\scenes\sceneLose.h" />
     <ClInclude Include="GAME\scenes\SceneTest.h" />

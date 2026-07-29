@@ -7,6 +7,14 @@ Scene1::Scene1(kEngine* system) {
 	camera_ = system_->CreateCamera();
 	camera_.lock()->Move({ 0.0f, 0.5f, -10.0f });
 
+	/// =========== 後処理初期化 ==============///
+
+	ppp_GlitchScreen_ = new PPP_GlitchScreen(system_);
+	noiseCommand_ = ppp_GlitchScreen_->GetNoiseCommand();
+	ColorGradingCommand_ = ppp_GlitchScreen_->GetColorGradingCommand();
+	BlurCommand_ = ppp_GlitchScreen_->GetBlurCommand();
+	VignetteCommand_ = ppp_GlitchScreen_->GetVignetteCommand();
+
 	/// =========== リソースロード ============///
 
 	MH_skydome_ = system_->SetModelObj("kEngine/EngineAssets/TemplateResource/object/skydome/skydome.obj");
@@ -68,7 +76,7 @@ Scene1::Scene1(kEngine* system) {
 	underGround_BG_->objectParts_[0].materialConfig->textureColor = { 0.3f,0.3f,0.3f,1.0f };
 	underGround_BG_->mainPosition.transform.translate.z = +0.5f;
 
-	player_ = new Player(system, { 0.0f, 0.5f, 0 });
+	player_ = new Player(system, { 0.0f, -3.5f, 0 });
 	player_->CreateModelData(MH_player_);
 	player_->mainPosition.transform.scale = { 0.5f, 0.5f, 0.5f };
 	player_->InputBulletList(&bulletList_);
@@ -104,7 +112,6 @@ Scene1::Scene1(kEngine* system) {
 	backSign_->CreateModelData(MH_backPoint_);
 	backSign_->mainPosition.transform.scale = { 0.5f,0.5f,0.5f };
 	backSign_->objectParts_[0].materialConfig->textureColor = { 1.0f,1.0f,1.0f,0.999f };
-
 
 
 	/// マップチップの生成
@@ -162,9 +169,16 @@ Scene1::~Scene1() {
 			}
 		}
 	}
+
+	ppp_GlitchScreen_->OffAllPass();
+	delete ppp_GlitchScreen_;
 }
 
 void Scene1::Update() {
+
+	/// 後処理更新
+	ppp_GlitchScreen_->Update();
+
 	/// カメラ処理
 	CameraPart();
 
@@ -368,6 +382,70 @@ void Scene1::ImGuiPart() {
 		ImGui::SliderFloat3("uvScale", &underGround_BG_->objectParts_[0].materialConfig->uvScale.x, -50.0f, 50.0f);
 		ImGui::ColorEdit4("textureColor", &backSign_->objectParts_[0].materialConfig->textureColor.x);
 		ImGui::End();
+	}
+
+	{
+		{
+
+			ImGui::Begin("RenderCommand");
+			ImGui::Text("ColorGuard");
+
+			ImGui::Combo("Guard Type", &currentGuardType, "noiseCommand_\0ColorGradingCommand_\0BlurCommand_\0VignetteCommand_\0");
+
+			RenderCommand* renderCommand = nullptr;
+			switch (currentGuardType) {
+			case 0:
+				renderCommand = noiseCommand_;
+				break;
+			case 1:
+				renderCommand = ColorGradingCommand_;
+				break;
+			case 2:
+				renderCommand = BlurCommand_;
+				break;
+			case 3:
+				renderCommand = VignetteCommand_;
+				break;
+			}
+
+
+			ImGui::SliderFloat3("Guard Color", &renderCommand->guardColor.x, 0, 1);
+			ImGui::SliderFloat("Guard Amount", &renderCommand->guardAmount, 0, 1);
+			ImGui::Text("Vignette");
+			ImGui::SliderFloat2("Vignette Center", &renderCommand->vignetteCenter.x, 0, 1);
+			ImGui::SliderFloat("Vignette Radius", &renderCommand->vignetteRadius, 0, 1);
+			ImGui::SliderFloat("Vignette Softness", &renderCommand->vignetteSoftness, 0, 1);
+			ImGui::SliderFloat("Vignette Intensity", &renderCommand->vignetteIntensity, 0, 100);
+			ImGui::ColorEdit4("Vignette Color", &renderCommand->vignetteColor.x);
+			ImGui::Text("Blur");
+			// BlurType 対応する文字列の配列
+			static const char* blurType[] = {
+			"Box",
+			"Custom"
+			};
+			// 今の BlendModeTypeをとる
+			int currentBlurType = static_cast<int>(renderCommand->blurType);
+			// 選択肢
+			if (ImGui::Combo("BlurType", &currentBlurType, blurType, IM_ARRAYSIZE(blurType))) {
+				renderCommand->blurType = static_cast<KernelType>(currentBlurType);
+			}
+			ImGui::SliderInt("Kernel Size", &renderCommand->blurKernelSize, 1, 7);
+			ImGui::Text("Outline");
+			ImGui::SliderFloat("Outline Depth Threshold", &renderCommand->outlineDepthThreshold, 0.01f, 0.1f);
+			ImGui::ColorEdit4("Outline Color", &renderCommand->outlineColor.x);
+			ImGui::SliderFloat("Radial CenterX", &renderCommand->blurRadialCenter.x, 0.0f, 1280.0f);
+			ImGui::SliderFloat("Radial CenterY", &renderCommand->blurRadialCenter.y, 0.0f, 720.0f);
+			ImGui::SliderInt("Radial Sample Size", &renderCommand->blurRadialSampleSize, 1, 64);
+			ImGui::SliderFloat("Radial Strength", &renderCommand->blurRadialStrength, 0.0f, 1.0f);
+			ImGui::SliderFloat("Dissolve Threshold", &renderCommand->dissolveThreshold, 0.0f, 1.0f);
+			ImGui::SliderFloat("Dissolve Edge Width", &renderCommand->dissolveEdgeWidth, 0.0f, 1.0f);
+			ImGui::ColorEdit3("Dissolve Edge Color", &renderCommand->dissolveEdgeColor.x);
+			ImGui::Combo("Random Noise Type", reinterpret_cast<int*>(&renderCommand->randomNoiseType), "None\0WhiteNoise\0");
+			ImGui::SliderFloat("Random Noise Amount", &renderCommand->randomNoiseAmount, 0.0f, 1.0f);
+			ImGui::SliderFloat("Random Noise Time", &renderCommand->randomNoiseTime, 0.0f, 100.0f);
+
+			ImGui::End();
+		}
 	}
 }
 #endif

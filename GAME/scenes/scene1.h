@@ -9,6 +9,7 @@
 #include "GAME\Object\BackPoint\BackPoint.h"
 #include "Data\Game\MapChip\MapChipField.h"
 #include "tool\CollisionManager\CollisionManager.h"
+#include "GAME\resources\PostProcessPreset\PPP_GlitchScreen.h"
 
 
 class Scene1 :public BaseScene
@@ -22,6 +23,15 @@ public:
 
 private:
 	kEngine* system_ = nullptr;				// �؂�
+
+	/// ============== 後処理関連 ==============///
+
+	PPP_GlitchScreen* ppp_GlitchScreen_ = nullptr;
+	RenderCommand* noiseCommand_;
+	RenderCommand* ColorGradingCommand_;
+	RenderCommand* BlurCommand_;
+	RenderCommand* VignetteCommand_;
+	int currentGuardType = 0;
 
 	/// ============== カメラ関連 ==============///
 	/// メーンカメラ
