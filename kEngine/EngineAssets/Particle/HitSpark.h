@@ -4,11 +4,11 @@
 struct HitSpark : ParticlePrototype
 {
 	HitSpark() {
+		/// 名前
+		name = "HitSpark";
 		/// 生存時間
 		lifetime = 1.0f;
-
 		/// 移動しないから設定要らない
-
 		/// スケール設定、その後変わらない
 		startScale = { 0.05f, 1.0f, 1.0f };
 		endScale = { 0.05f, 1.0f, 1.0f };
@@ -29,7 +29,7 @@ struct HitSpark : ParticlePrototype
 		/// 見た目設定
 		ObjectData obj;
 		obj.isBillboard_ = true;
-		obj.modelHandle_ = config::config::default_Plane_MeshBufferHandle_;
+		obj.modelHandle_ = config::default_Plane_MeshBufferHandle_;
 
 		ObjectPart newObjectPart;
 		newObjectPart.name = "HitSpark";
@@ -47,6 +47,8 @@ struct HitSpark : ParticlePrototype
 struct HitImpact : ParticlePrototype
 {
 	HitImpact() {
+		/// 名前
+		name = "HitImpact";
 		/// 生存時間
 		lifetime = 0.5f;
 		/// 移動しないから設定要らない
@@ -65,7 +67,7 @@ struct HitImpact : ParticlePrototype
 		/// 見た目設定
 		ObjectData obj;
 		obj.isBillboard_ = true;
-		obj.modelHandle_ = config::config::default_Ring_MeshBufferHandle_;
+		obj.modelHandle_ = config::default_Ring_MeshBufferHandle_;
 		ObjectPart newObjectPart;
 		newObjectPart.name = "HitImpact";
 		newObjectPart.materialConfig = std::make_shared<MaterialConfig>();
@@ -81,6 +83,9 @@ struct HitImpact : ParticlePrototype
 struct HitSpackImpactLink : EmitterLink
 {
 	HitSpackImpactLink() {
+		name = "HitSparkToHitImpact";
+		sourceName = "HitSpark";
+		targetName = "HitImpact";
 		emitCount = 1;
 		delayTime = 0.0f;
 		linkMode = LinkMode::PerBurst;
@@ -93,8 +98,8 @@ class Effect_HitSpark : public EffectData
 {
 public:
 	Effect_HitSpark() {
+		name = "HitSpark";
 		prototypes.push_back(HitSpark());
-
 		prototypes.push_back(HitImpact());
 		links.push_back(HitSpackImpactLink());
 	};

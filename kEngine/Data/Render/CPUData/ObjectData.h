@@ -44,6 +44,8 @@ public:
 
 	/// ========== エンジン側用データ =========== ///
 
+	int GetWellHandle() const { return wellHandle; }
+
 private:
 	/// 描画のときに、DrawDataCollectorのどこにこskinningMatrixを入れるどころのハンドル
 	int wellHandle = -1;
@@ -68,6 +70,8 @@ public:
 	bool isDelete_ = false;
 
 	bool isBillboard_ = false;
+
+	bool isControlledByAnimation_ = false;
 
 	Object* ownerObject = nullptr;	// ObjectDataをObject(皮)のポインタを持つと色々便利になるからやる
 

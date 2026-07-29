@@ -7,6 +7,7 @@
 
 #include "Data/Render/CPUData/ModelData.h"
 #include "Data/Render/CPUData/SkinClusterData.h"
+#include "Data/Render/GPUData/SkinningExtraVertexData.h"
 
 class Model :public MeshBuffer
 {
@@ -15,6 +16,7 @@ public:
 	MeshData& GetMeshData() { return modelData_.lock()->meshDataList[meshIndex_]; }
 	void SetModelData(std::shared_ptr<ModelData> modelData, uint32_t meshIndex);
 	ID3D12Resource* CreateVertexResource_(ID3D12Device* device)override;
+	ID3D12Resource* CreateSkinningVertexResource(ID3D12Device* device);
 	ID3D12Resource* CreateIndexResource_(ID3D12Device* device)override;
 	//ID3D12Resource* CreateVertexResourceG_(ID3D12Device* device);
 	std::string GetTexturePatch();
@@ -33,6 +35,9 @@ private:
 
 	/// SkinClusterDataを保存する
 	SkinClusterData skinClusterData_;
+
+	D3D12_VERTEX_BUFFER_VIEW skinningVertexBufferView{};
+	std::unique_ptr<BasicResource> skinningVertexResource_ = std::make_unique<BasicResource>();
 
 	/// ResourceManagerからもらうハンドルを保存する
 	int textureHandle_ = -1;

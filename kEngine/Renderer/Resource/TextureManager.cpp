@@ -64,6 +64,11 @@ DirectX::TexMetadata TextureManager::GetTextureMetadata(int textureHandle) {
 	return textureDatas[textureHandle].metadata;
 }
 
+std::string TextureManager::GetTextureFilePath(int textureHandle) {
+	assert(textureDatas.contains(textureHandle));
+	return textureDatas[textureHandle].filePath;
+}
+
 int TextureManager::GetCommonTextureHandle(int textureHandle) {
 	assert(commonTextureSRVMap_.contains(textureHandle));
 	return commonTextureSRVMap_[textureHandle];

@@ -68,32 +68,29 @@ ModelData ReadAssimp(const std::string& filePath) {
 		meshData.name = mesh->mName.C_Str();
 
 		/// Meshの頂点データを保存
+		meshData.vertices.resize(mesh->mNumVertices);
+		for (uint32_t vertexIndex = 0; vertexIndex < mesh->mNumVertices; vertexIndex++) {
+			aiVector3D& position = mesh->mVertices[vertexIndex];
+			aiVector3D& normal = mesh->mNormals[vertexIndex];
+			aiVector3D& texcoord = mesh->mTextureCoords[0][vertexIndex];
+
+			meshData.vertices[vertexIndex].position = { position.x, position.y, position.z, 1.0f };
+			meshData.vertices[vertexIndex].normal = { normal.x, normal.y, normal.z };
+			meshData.vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
+		}
+		/// Meshの頂点データを保存
 		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; faceIndex++) {
 			aiFace face = mesh->mFaces[faceIndex];
 			//assert(face.mNumIndices == 3); // 三角形以外は非対応
-			// 面の頂点インデックスを逆順に格納して、左右手座標系変換を行う
+			/// 面の頂点インデックスを逆順に格納して、左右手座標系変換を行う
 			for (uint32_t element = 0; element < face.mNumIndices; element++) {
-				uint32_t vertexIndex = face.mIndices[element];
-				//uint32_t vertexIndex = face.mIndices[element];
-				aiVector3D aiPosition = mesh->mVertices[vertexIndex];
-				aiVector3D aiNormal = mesh->mNormals[vertexIndex];
-				aiVector3D aiTexCoord = mesh->mTextureCoords[0][vertexIndex];
-				VertexData vertex{};
-				// 位置
-				vertex.position = { aiPosition.x, aiPosition.y, aiPosition.z, 1.0f };
-				// 法線
-				vertex.normal = { aiNormal.x, aiNormal.y, aiNormal.z };
-				// テクスチャ座標
-				vertex.texcoord = { aiTexCoord.x, aiTexCoord.y };
+				uint32_t vertexIndex2 = face.mIndices[element];
 
-				// push index
-				meshData.indices.push_back((uint32_t)meshData.vertices.size());
-				//meshData.indices.push_back((uint32_t)vertexIndex);
-
-				// push vertex
-				meshData.vertices.push_back(vertex);
+				/// push index
+				meshData.indices.push_back((uint32_t)vertexIndex2);
 			}
 		}
+
 
 		/// マテリアルのインデックスを格納
 		meshData.materialIndex = min(
@@ -238,7 +235,10 @@ ModelData ReadAssimp(const std::string& filePath) {
 		}
 
 		/// skinningの資料があるMeshが一つでもあれば、ModelData全体のフラグを立てる
-		if (!result.haveSkinning)result.haveSkinning = true;
+		if (!result.haveSkinning) { 
+			result.meshDataList[meshIndex].skinIndex = meshIndex;
+			result.haveSkinning = true; 
+		}
 	}
 
 	return result;

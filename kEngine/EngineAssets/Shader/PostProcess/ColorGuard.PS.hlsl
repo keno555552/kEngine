@@ -22,6 +22,5 @@ PixelShaderOutput main(VertexShaderOutput input)
     float3 tintedGray = value * gRenderCommand.guardColor;
     
     output.color.rgb = lerp(output.color.rgb, tintedGray, gRenderCommand.guardAmount);
-    
     return output;
 }

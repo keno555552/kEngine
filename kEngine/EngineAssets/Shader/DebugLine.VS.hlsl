@@ -1,11 +1,6 @@
+#include "CommonTypes.hlsli"
 #include "DebugLine.hlsli"
 
-struct TransformationMatrix
-{
-    float4x4 WVP;
-    float4x4 world;
-    float4x4 worldInverseTranspose;
-};
 StructuredBuffer<TransformationMatrix> gTransformationMatrices : register(t0);
 
 struct VSInput
@@ -14,9 +9,9 @@ struct VSInput
     float4 color : COLOR;
 };
 
-VertexShaderOutput main(VSInput input, uint instanceID : SV_InstanceID)
+DebugLineVSOutput main(VSInput input, uint instanceID : SV_InstanceID)
 {
-    VertexShaderOutput o;
+    DebugLineVSOutput o;
     
     TransformationMatrix m = gTransformationMatrices[instanceID];
     

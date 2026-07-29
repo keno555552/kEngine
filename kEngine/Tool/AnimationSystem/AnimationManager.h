@@ -5,6 +5,8 @@
 #include <unordered_map>
 #include "Object/Object.h"
 #include "AnimationUnit.h"
+#include "Renderer/Resource/InstanceBuffer.h"
+#include "Data/Render/GPUData/WellForGPU.h"
 
 class kEngine;
 class AnimationManager
@@ -14,12 +16,16 @@ public:
 	AnimationManager(kEngine* system);
 	~AnimationManager();
 
+	void SetWellList(std::vector<std::unique_ptr<InstanceBuffer<WellForGPU>>>* wellList) { wellList_ = wellList; }
+	void SetSkinningToPaletteIndexMap(std::map<int, int>* skinningToPaletteIndexMap) { skinningDataToPaletteIndexMap_ = skinningToPaletteIndexMap; }
+
 	/// ====================== アニメーションシステムの基本的な流れ ========================///
 	std::vector<int> LoadAnimation(const std::string& filePath);
 
 	/// 時間を調整する
 	void UnitSetTime(int unitHandle, float time);
 
+	void ApplySkinning();
 
 	/// ======================= 操作関連 ========================///
 
@@ -52,12 +58,11 @@ private:
 	std::unordered_map<ObjectData*, int> objectToUnitHandleList_{};
 	int unitHandleCounter_{};
 
+	// Skinning Wellの資料リスト
+	std::vector<std::unique_ptr<InstanceBuffer<WellForGPU>>>* wellList_{};
+	std::map<int, int>* skinningDataToPaletteIndexMap_{};
+
 private:
-	
-	/// 残るのはやり直しのために,Jsonの記録と読み込みはまだ支援しない
-	static Animation LoadAnimationDataFromJson(const std::string& filePath);
-
-
 	/// Unitのハンドルが存在するか確認する,存在しないならばエラーを出してfalseを返す
 	bool CheckHaveHandle(int animHandle);
 };

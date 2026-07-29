@@ -26,11 +26,13 @@ public:
 	/// ======================= 操作関連 ========================///
 
 	void TakeControlObject(Object* object);
+	void ReleaseControlObject(Object* object);
 	void SetHaveSkeleton(bool have) { haveSkeleton_ = have; }
 	bool GetHaveSkeleton() const { return haveSkeleton_; }
 
 	Object* GetInstanceObject() const { return instanceObject_.get(); }
-
+	Skeleton* GetInstanceSkeleton() const { return instanceSkeleton_.get(); }
+	std::weak_ptr<ModelData> GetModelData() const { return modelData_; }
 	void Update();
 
 public:

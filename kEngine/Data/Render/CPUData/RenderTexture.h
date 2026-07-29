@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 #include <wrl/client.h>      // Microsoft::WRL::ComPtr
 #include <d3d12.h>           // ID3D12Resource, descriptor handles
 #include <dxgiformat.h>      // DXGI_FORMAT
@@ -40,4 +41,14 @@ struct RenderTexture {
 
 	/// クリアカラー
 	Vector4 clearColor;
+};
+
+/// PingPong用のRenderTexture
+struct PPRenderTexture {
+	RenderTexture inputRT{};
+	RenderTexture outputRT{};
+
+	void Init();
+	void Init(int width, int height, DXGI_FORMAT format, Vector4 clearColor);
+	void Swap();
 };

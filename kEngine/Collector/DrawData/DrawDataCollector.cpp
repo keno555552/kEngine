@@ -19,10 +19,8 @@ void DrawDataCollector::Finalize() {
 	transparentBucket3D_.clear();
 	bucketParticleC_.clear();
 
-	instanceCounter2D_ = 0;
-	instanceCounter3D_ = 0;
-	instanceCounterParticleC_ = 0;
-
+	instancingListMaterialGPU_ = nullptr;
+	instancingListDL_ = nullptr;
 	instancingList2D_ = nullptr;
 	instancingList3D_ = nullptr;
 	instancingListParticleC_ = nullptr;
@@ -48,6 +46,7 @@ void DrawDataCollector::PreCollect() {
 	skinningDataList_ = {};
 
 	/// インスタンスリストクリア
+	instanceCounterMaterial_ = 0;
 	instanceCounterDL_ = 0;
 	instanceCounter2D_ = 0;
 	instanceCounter3D_ = 0;
@@ -137,25 +136,35 @@ void DrawDataCollector::Collect2D(SpriteData* sprite) {
 		/// RenderData作成
 		RenderData renderData;
 
+		/// ===== バケツ分け用資料
 		/// メッシュ設定
 		renderData.mesh = ResourceManager::GetInstance()->simpleSpriteMeshList_[simpleSpriteCounter_].get();
 
+		/// TextureHandle設定
+		renderData.textureHandle = object.materialConfig->textureHandle;
+
+		/// PSOKey設定
+		renderData.psoKey = PSODecision(*object.materialConfig);
+
+		/// ===== 実際データ
 		/// マテリアル設定
 		object.materialConfig->MakeUVMatrix();
-		renderData.materialID = ResourceManager::GetInstance()->InputMaterialConfig(object.materialConfig);
+		MaterialForGPU newData;
+		newData.inputMaterialConfig(*object.materialConfig);
+		instancingListMaterialGPU_[instanceCounterMaterial_] = newData;
+		/// MaterialID設定
+		renderData.materialID = instanceCounterMaterial_++;
 
 
 		/// 変換行列設定
 		renderData.transformData = SpriteWVPAdjustment2D(*sprite, object);
 
-		/// PSO設定
-		renderData.psoKey = PSODecision(*object.materialConfig);
-
+		/// ===== まだ使えない
 		/// サブメッシュインデックス設定
 		renderData.subMeshIndex = 0;
 
 		/// ========================================  バケット振り分け  ========================================///
-		AddSpriteToBucket2D(renderData, simpleSpriteCounter_);
+		AddSpriteToBucket2D(renderData);
 
 		/// スプライトカウンターインクリメント
 		simpleSpriteCounter_++;
@@ -244,20 +253,27 @@ TransformationMatrix DrawDataCollector::SpriteWVPAdjustment2D(SpriteData& sprite
 	return result;
 }
 
-void DrawDataCollector::AddSpriteToBucket2D(RenderData& renderData, int meshID) {
+void DrawDataCollector::AddSpriteToBucket2D(RenderData& renderData) {
 
-	auto checker = ResourceManager::GetInstance()->idToIndex_.find(renderData.materialID);
+	int materialID = (int)renderData.materialID;
+	MaterialForGPU& material = instancingListMaterialGPU_[materialID];
 
-	if (checker == ResourceManager::GetInstance()->idToIndex_.end()) {
-		Logger::Log("[kError]DDC:MaterialID not found in ResourceManager!");
+	if (materialID < 0 || materialID >= instanceCounterMaterial_) {
+		Logger::Log("[kEngine]DDC::AddObjectToBucket2D()MaterialID Error!");
 		return;
 	} else {
-		MaterialForGPU* material = ResourceManager::GetInstance()->materialList_[checker->second].cpuMaterial.get();
+		/// 透明判定
+		bool isTransparent = false;
+		for (int i = 0; i < material.layerCount; ++i) {
+			if (material.layers[i].color.w < 1.0f) {
+				isTransparent = true;
+				break;
+			}
+		}
 
-		if (material->color.w < 1.0f) {
-
+		if (isTransparent) {
+			///　透明の場合、z値を比較して、z値が大きい方が手前に描画されるようにソートして追加
 			float z = renderData.transformData.WVP.m[3][2];
-
 			auto checker2 = std::find_if(
 				transparentBucket2D_.begin(),
 				transparentBucket2D_.end(),
@@ -273,9 +289,14 @@ void DrawDataCollector::AddSpriteToBucket2D(RenderData& renderData, int meshID) 
 				std::size_t index = std::distance(transparentBucket2D_.begin(), checker2);
 				transparentBucket2D_.insert(transparentBucket2D_.begin() + index, renderData);
 			}
+
 		} else {
 			/// 不透明オブジェクトバケットへ追加
-			opaqueBucket2D_[static_cast<PSOKey>(renderData.psoKey)][renderData.materialID][meshID].emplace_back(renderData);
+			opaqueBucket2D_
+				[renderData.psoKey]
+				[renderData.mesh]
+				[renderData.textureHandle]
+				.emplace_back(renderData);
 		}
 	}
 }
@@ -296,25 +317,39 @@ void DrawDataCollector::Collect3D(ObjectData* object) {
 		/// RenderData作成
 		RenderData renderData;
 
+		/// ===== バケツ分け用資料
 		/// メッシュ設定
 		Model* modelData = ResourceManager::GetInstance()->modelGroupList_[object->modelHandle_]->GetModel(modelCounter);
 		renderData.mesh = modelData;
 
+		/// TextureHandle設定
+		renderData.textureHandle = objectPart.materialConfig->textureHandle;
+
+		/// PSOKey設定
+		renderData.psoKey = PSODecision(*objectPart.materialConfig);
+		//if (objectPart.GetWellHandle() != -1 && renderData.psoKey.renderModelType == RenderModelType::Static)
+		//	renderData.psoKey.renderModelType = RenderModelType::Skinned;
+
+		/// ===== 実際データ
+		/// skinning設定
+		if (objectPart.GetWellHandle() != -1) renderData.skinningPaletteIndex = objectPart.GetWellHandle();
 		/// マテリアル設定
 		objectPart.materialConfig->MakeUVMatrix();
-		renderData.materialID = ResourceManager::GetInstance()->InputMaterialConfig(objectPart.materialConfig);
+		MaterialForGPU newData;
+		newData.inputMaterialConfig(*objectPart.materialConfig);
+		instancingListMaterialGPU_[instanceCounterMaterial_] = newData;
+		/// MaterialID設定
+		renderData.materialID = instanceCounterMaterial_++;
 
 		/// 変換行列設定
 		renderData.transformData = ObjectWVPAdjustment3D(*object, objectPart, modelData->GetModelData().get(), modelCounter);
 
-		/// PSO設定
-		renderData.psoKey = PSODecision(*objectPart.materialConfig);
-
+		/// ===== まだ使えない
 		/// サブメッシュインデックス設定
 		renderData.subMeshIndex = 0;
 
 		/// ========================================  バケット振り分け  ========================================///
-		AddObjectToBucket3D(renderData, object->modelHandle_);
+		AddObjectToBucket3D(renderData);
 
 		modelCounter++;
 	}
@@ -384,10 +419,6 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustment3D(ObjectData& object
 		rot.m[3][0] = rot.m[3][1] = rot.m[3][2] = 0;
 		rot = rot.Inverse();
 
-		/// 
-		//Matrix4x4 roll = MakeRZMatrix4x4(part.transform.rotate.z);
-		//Matrix4x4 finalRot = rot * roll;
-
 		localMatrix = localMatrix * rot;
 	} else {
 
@@ -441,16 +472,16 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustment3D(ObjectData& object
 
 	Matrix4x4 nodeMatrix = Identity();
 
-	if (modelData != nullptr) {
-		if (modelCounter >= 0 && modelCounter < modelData->meshDataList.size()) {
-
-			uint32_t nodeIndex = modelData->meshDataList[modelCounter].nodeIndex;
-
-			if (nodeIndex < modelData->nodeList.size()) {
-				nodeMatrix = modelData->nodeList[nodeIndex].globalMatrix;
-			}
-		}
-	}
+	//if (modelData != nullptr) {
+	//	if (modelCounter >= 0 && modelCounter < modelData->meshDataList.size()) {
+	//
+	//		uint32_t nodeIndex = modelData->meshDataList[modelCounter].nodeIndex;
+	//
+	//		if (nodeIndex < modelData->nodeList.size()) {
+	//			nodeMatrix = modelData->nodeList[nodeIndex].globalMatrix;
+	//		}
+	//	}
+	//}
 	Matrix4x4 finalWorld = nodeMatrix * worldMatrix;
 
 	TransformationMatrix result{};
@@ -460,32 +491,40 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustment3D(ObjectData& object
 	return result;
 }
 
-void DrawDataCollector::AddObjectToBucket3D(RenderData& renderData, int meshID) {
+void DrawDataCollector::AddObjectToBucket3D(RenderData& renderData) {
 
-	auto checker = ResourceManager::GetInstance()->idToIndex_.find(renderData.materialID);
+	int materialID = (int)renderData.materialID;
+	MaterialForGPU& material = instancingListMaterialGPU_[materialID];
 
-	if (checker == ResourceManager::GetInstance()->idToIndex_.end()) {
-		Logger::Log("[kError]DDC:MaterialID not found in ResourceManager!");
+	if (materialID < 0 || materialID >= instanceCounterMaterial_) {
+		Logger::Log("[kEngine]DDC::AddObjectToBucket3D() MaterialID Error!");
 		return;
 	} else {
-		MaterialForGPU* material = ResourceManager::GetInstance()->materialList_[checker->second].cpuMaterial.get();
+		bool isTransparent = false;
+		for (int i = 0; i < material.layerCount; ++i) {
+			if (material.layers[i].color.w < 1.0f) {
+				isTransparent = true;
+				break;
+			}
+		}
 
-		if (material->color.w < 1.0f) {
+		if (isTransparent) {
 
-			// 1. 取得物件世界座標
+			/// 半透明のものは、カメラとの距離を計算して、遠い順にソートして追加する
+			// ワールド座標を取得
 			Vector3 pos{
 				renderData.transformData.world.m[3][0],
 				renderData.transformData.world.m[3][1],
 				renderData.transformData.world.m[3][2]
 			};
 
-			// 2. 取得相機位置
+			// カメラの位置を取得
 			Vector3 camPos = GetCameraPosition();
 
-			// 3. 計算距離平方（不用開根號）
+			// カメラとの距離を計算
 			float dist = Length(pos - camPos);
 
-			// 4. Back-to-Front 排序：遠的先畫
+			// 遠い順にソートして追加するためのラムダ関数を使用して、挿入位置を見つける
 			auto it = std::find_if(
 				transparentBucket3D_.begin(),
 				transparentBucket3D_.end(),
@@ -510,7 +549,11 @@ void DrawDataCollector::AddObjectToBucket3D(RenderData& renderData, int meshID) 
 			}
 		} else {
 			/// 不透明オブジェクトバケットへ追加
-			opaqueBucket3D_[static_cast<PSOKey>(renderData.psoKey)][renderData.materialID].emplace_back(renderData);
+			opaqueBucket3D_
+				[static_cast<PSOKey>(renderData.psoKey)]
+				[renderData.mesh]
+				[renderData.textureHandle]
+				.emplace_back(renderData);
 		}
 	}
 }
@@ -578,7 +621,7 @@ int DrawDataCollector::SetSkinningData(WellForGPU* mappedPalette, int mappedNum,
 
 void DrawDataCollector::ClearSkinningData(int index) {
 
-	skinningDataList_[index] = SkinningData{};
+	//skinningDataList_[index] = SkinningData{};
 
 }
 
@@ -622,9 +665,13 @@ void DrawDataCollector::CollectParticle(std::vector<ObjectData>& objectList, std
 			MaterialConfig materialConfig = *targetObject.objectParts_[i].materialConfig;
 			materialConfig.textureColor = inst.nowColor;
 			materialConfig.MakeUVMatrix();
+			MaterialForGPU newData;
+			newData.inputMaterialConfig(materialConfig);
+			instancingListMaterialGPU_[instanceCounterMaterial_] = newData;
+			data.materialID = instanceCounterMaterial_++;
 
-			auto matPtr = std::make_shared<MaterialConfig>(materialConfig);
-			data.materialID = ResourceManager::GetInstance()->InputMaterialConfig(matPtr);
+			/// TextureHandle設定
+			data.textureHandle = materialConfig.textureHandle;
 
 			/// PSO制作
 			data.psoKey = PSODecision(materialConfig);
@@ -692,7 +739,7 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustmentPC(ObjectData& object
 void DrawDataCollector::AddObjectToBucketPC(ParticleInstanceForDDC& renderData) {
 
 	/// 分類収納
-	bucketParticleC_[renderData.mesh][renderData.psoKey][renderData.materialID].emplace_back(renderData.transMatrix);
+	bucketParticleC_[renderData.psoKey][renderData.mesh][renderData.textureHandle].emplace_back(renderData.materialID, renderData.transMatrix);
 }
 
 #pragma endregion
@@ -704,15 +751,18 @@ void DrawDataCollector::BuildInstanceList2D() {
 	if (opaqueBucket2D_.empty() && transparentBucket2D_.empty())return;
 
 	/// 不透明物件
-	for (auto& [psoID, materialBuckets] : opaqueBucket2D_) {
-		for (auto& [materialID, RenderDataGroup] : materialBuckets) {
-			if (RenderDataGroup.empty()) continue;
-			for (auto& [meshBuffer, RenderData] : RenderDataGroup) {
-				/// WVP計算
-				for (auto& object : RenderData) {
-					instancingList2D_[instanceCounter2D_].WVP = object.transformData.WVP;;
-					instancingList2D_[instanceCounter2D_].world = object.transformData.world;
-					instancingList2D_[instanceCounter2D_].WorldInverseTranspose = object.transformData.WorldInverseTranspose;
+	// PSOKey -> MeshBuffer -> TextureHandle -> RenderData循環
+	for (auto& [psoKey, modelBuckets] : opaqueBucket2D_) {
+		if (modelBuckets.empty()) continue;
+		for (auto& [meshBuffer, TextureHandleGroup] : modelBuckets) {
+			if (TextureHandleGroup.empty()) continue;
+			for (auto& [TextureHandle, RenderDataGroup] : TextureHandleGroup) {
+				if (RenderDataGroup.empty()) continue;
+				for (auto& RenderData : RenderDataGroup) {
+					/// WVP計算
+					instancingList2D_[instanceCounter2D_].WVP = RenderData.transformData.WVP;;
+					instancingList2D_[instanceCounter2D_].world = RenderData.transformData.world;
+					instancingList2D_[instanceCounter2D_].WorldInverseTranspose = RenderData.transformData.WorldInverseTranspose;
 					instanceCounter2D_++;
 				}
 			}
@@ -732,15 +782,19 @@ void DrawDataCollector::BuildInstanceList3D() {
 	if (opaqueBucket3D_.empty() && transparentBucket3D_.empty())return;
 
 	/// 不透明物件
-	for (auto& [psoID, materialBuckets] : opaqueBucket3D_) {
-		for (auto& [materialID, RenderDataGroup] : materialBuckets) {
-			if (RenderDataGroup.empty()) continue;
-			for (auto& RenderData : RenderDataGroup) {
-				/// WVP計算
-				instancingList3D_[instanceCounter3D_].WVP = RenderData.transformData.WVP;;
-				instancingList3D_[instanceCounter3D_].world = RenderData.transformData.world;
-				instancingList3D_[instanceCounter3D_].WorldInverseTranspose = RenderData.transformData.WorldInverseTranspose;
-				instanceCounter3D_++;
+	for (auto& [psoKey, modelBuckets] : opaqueBucket3D_) {
+		if (modelBuckets.empty()) continue;
+		for (auto& [meshBuffer, TextureHandleGroup] : modelBuckets) {
+			if (TextureHandleGroup.empty()) continue;
+			for (auto& [TextureHandle, RenderDataGroup] : TextureHandleGroup) {
+				if (RenderDataGroup.empty()) continue;
+				for (auto& RenderData : RenderDataGroup) {
+					/// WVP計算
+					instancingList3D_[instanceCounter3D_].WVP = RenderData.transformData.WVP;;
+					instancingList3D_[instanceCounter3D_].world = RenderData.transformData.world;
+					instancingList3D_[instanceCounter3D_].WorldInverseTranspose = RenderData.transformData.WorldInverseTranspose;
+					instanceCounter3D_++;
+				}
 			}
 		}
 	}
@@ -755,13 +809,13 @@ void DrawDataCollector::BuildInstanceList3D() {
 }
 
 void DrawDataCollector::BuildInstanceListParticle() {
-	for (auto& [mesh, psoBuckets] : bucketParticleC_) {
-		for (auto& [psoKey, materialBuckets] : psoBuckets) {
-			for (auto& [materialID, instanceDataList] : materialBuckets) {
-				for (const auto& instanceData : instanceDataList) {
-					instancingListParticleC_[instanceCounterParticleC_].WVP = instanceData.WVP;;
-					instancingListParticleC_[instanceCounterParticleC_].world = instanceData.world;
-					instancingListParticleC_[instanceCounterParticleC_].WorldInverseTranspose = instanceData.WorldInverseTranspose;
+	for (auto& [PSOData, MeshBuckets] : bucketParticleC_) {
+		for (auto& [mesh, InstanceBuckets] : MeshBuckets) {
+			for (auto& [TextureHandle, instanceData] : InstanceBuckets) {
+				for (auto& [materialID, transformMatrix] : instanceData) {
+					instancingListParticleC_[instanceCounterParticleC_].WVP = transformMatrix.WVP;;
+					instancingListParticleC_[instanceCounterParticleC_].world = transformMatrix.world;
+					instancingListParticleC_[instanceCounterParticleC_].WorldInverseTranspose = transformMatrix.WorldInverseTranspose;
 					instanceCounterParticleC_++;
 				}
 			}

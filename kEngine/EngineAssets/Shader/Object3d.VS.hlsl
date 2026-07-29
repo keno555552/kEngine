@@ -1,37 +1,23 @@
-#include "object3d.hlsli"
+#include "CommonTypes.hlsli"
 
-//float4 main( float4 pos : POSITION ) : SV_POSITION
-//{
-//	return pos;
-//}
-
-struct TransformationMatrix
-{
-    float4x4 WVP;
-    float4x4 world;
-    float4x4 worldInverseTranspose;
-};
 StructuredBuffer<TransformationMatrix> gTransformationMatrices : register(t0);
+StructuredBuffer<uint> gMaterialIndexList : register(t1);
 
-cbuffer InstanceOffset : register(b1)
+cbuffer OffSetGroup : register(b0)
 {
-    uint instanceOffset;
-}
-
-struct VertexShaderInput
-{
-    float4 position : POSITION0;
-    float2 texcoord : TEXCOORD0;
-    float3 normal : NORMAL0;
+    uint gWVPOffset;
+    uint gMaterialIndexListOffset;
 };
 
-VertexShaderOutput main(VertexShaderInput input)
+VertexShaderOutput main(VertexShaderInput input, uint instanceId : SV_InstanceID)
 {
+    TransformationMatrix transform = gTransformationMatrices[gWVPOffset + instanceId];
+    
     VertexShaderOutput output;
-    //output.position = mul(input.position, gTransformationMatrices.WVP);
+    output.position = mul(input.position, transform.WVP);
     output.texcoord = input.texcoord;
-    //output.normal = normalize(mul(input.normal, (float3x3) gTransformationMatrices.world));
+    output.normal = normalize(mul(input.normal, (float3x3) transform.worldInverseTranspose));
+    output.worldPosition = mul(input.position, transform.world).xyz;
+    output.materialId = gMaterialIndexList[gMaterialIndexListOffset + instanceId];
     return output;
 }
-
-

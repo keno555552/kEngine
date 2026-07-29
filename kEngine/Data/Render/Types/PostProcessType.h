@@ -16,6 +16,7 @@ enum class PostProcessType
 	Outline = 11,
 	OutlinePrewittDepth = 12,
 	Dissolve = 13,
+	Noise = 14,
 };
 
 

@@ -77,6 +77,8 @@ public:
 
 	BasicResource* GetResource() const { return tileResource_.get(); }
 
+	T* GetInstanceBufferPtr() const { return instanceBufferPtr_; }
+
 	bool IsNull() { return isNull_; }
 
 private:

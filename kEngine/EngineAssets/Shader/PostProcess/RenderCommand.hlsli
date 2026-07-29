@@ -30,9 +30,15 @@ struct RenderCommand
     
     // dissolve
     float3 dissolveEdgeColor;
-    float dissolveThreshold;
     
+    float dissolveThreshold;
     float dissolveEdgeWidth;
+    // noise
+    int randomNoiseType;
+    float randomNoiseAmount;
+    
+    float randomNoiseTime;
+    
 };
 
 /// BlurType:(手動更新:260623)

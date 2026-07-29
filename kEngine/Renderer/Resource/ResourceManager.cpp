@@ -8,7 +8,6 @@ std::unique_ptr <ResourceManager> ResourceManager::instance_ = nullptr;
 ResourceManager* ResourceManager::GetInstance() {
 	if (instance_ == nullptr) {
 		instance_ = std::make_unique<ResourceManager>(ConstructorKey{});
-		//instance_.reset(new ResourceManager);
 	}
 	return instance_.get();
 }
@@ -31,16 +30,10 @@ void ResourceManager::Initialize(DirectXCore* device) {
 
 void ResourceManager::Finalize() {
 
-	materialResourceList_.clear();
-
 	meshBufferList_.clear();
 	spriteMeshHandles_.clear();
 	modelGroupList_.clear();
 	simpleSpriteMeshList_.clear();
-
-	materialList_.clear();
-	idToIndex_.clear();
-	materialCounter_ = 0;
 
 	modelGroupList_.clear();
 	meshBufferList_.clear();
@@ -50,12 +43,7 @@ void ResourceManager::Destroy() {
 	instance_.reset();
 }
 
-void ResourceManager::CreateTurnResource() {}
-
-
-void ResourceManager::ClearTurnResource() {
-	TextureManager::GetInstance()->EndUploadingTexture();
-}
+/// ====================================== エンジン内のモデルを生成する ======================================== ///
 
 int ResourceManager::CreateSimpleSpriteMeshResource() {
 
@@ -84,6 +72,12 @@ int ResourceManager::CreateTriangleResource() {
 	modelGroup->PushMeshHandle((int)meshBufferList_.size() - 1);
 	modelGroupList_.push_back(modelGroup);
 
+	std::shared_ptr <ModelData> modelData = std::make_shared<ModelData>();
+	modelData->filePath = "EnginePath_Triangle";
+	modelDataHandleMap_[modelDataCounter_] = modelData->filePath;
+	modelDataList_[modelData->filePath] = modelData;
+	modelDataCounter_++;
+
 	return (int)modelGroupList_.size() - 1;
 }
 
@@ -100,6 +94,12 @@ int ResourceManager::CreatePlaneResource() {
 	modelGroup->PushModel(newPlane);
 	modelGroup->PushMeshHandle((int)meshBufferList_.size() - 1);
 	modelGroupList_.push_back(modelGroup);
+
+	std::shared_ptr <ModelData> modelData = std::make_shared<ModelData>();
+	modelData->filePath = "EnginePath_Plane";
+	modelDataHandleMap_[modelDataCounter_] = modelData->filePath;
+	modelDataList_[modelData->filePath] = modelData;
+	modelDataCounter_++;
 
 	return (int)modelGroupList_.size() - 1;
 }
@@ -119,6 +119,12 @@ int ResourceManager::CreateCubeResource() {
 	modelGroup->PushMeshHandle((int)meshBufferList_.size() - 1);
 	modelGroupList_.push_back(modelGroup);
 
+	std::shared_ptr <ModelData> modelData = std::make_shared<ModelData>();
+	modelData->filePath = "EnginePath_Cube";
+	modelDataHandleMap_[modelDataCounter_] = modelData->filePath;
+	modelDataList_[modelData->filePath] = modelData;
+	modelDataCounter_++;
+
 	return (int)modelGroupList_.size() - 1;
 }
 
@@ -135,6 +141,12 @@ int ResourceManager::CreateSphereResource(int sudivision) {
 	modelGroup->PushModel(newSphere);
 	modelGroup->PushMeshHandle((int)meshBufferList_.size() - 1);
 	modelGroupList_.push_back(modelGroup);
+
+	std::shared_ptr <ModelData> modelData = std::make_shared<ModelData>();
+	modelData->filePath = "EnginePath_Sphere";
+	modelDataHandleMap_[modelDataCounter_] = modelData->filePath;
+	modelDataList_[modelData->filePath] = modelData;
+	modelDataCounter_++;
 
 	return (int)modelGroupList_.size() - 1;
 
@@ -153,8 +165,13 @@ int ResourceManager::CreateSkyCubeResource() {
 	modelGroup->PushMeshHandle((int)meshBufferList_.size() - 1);
 	modelGroupList_.push_back(modelGroup);
 
-	return (int)modelGroupList_.size() - 1;
+	std::shared_ptr <ModelData> modelData = std::make_shared<ModelData>();
+	modelData->filePath = "EnginePath_SkyCube";
+	modelDataHandleMap_[modelDataCounter_] = modelData->filePath;
+	modelDataList_[modelData->filePath] = modelData;
+	modelDataCounter_++;
 
+	return (int)modelGroupList_.size() - 1;
 }
 
 int ResourceManager::CreateRingResource(int subdivision, float OuterRadius, float InnerRadius) {
@@ -172,6 +189,12 @@ int ResourceManager::CreateRingResource(int subdivision, float OuterRadius, floa
 	modelGroup->PushModel(newRing);
 	modelGroup->PushMeshHandle((int)meshBufferList_.size() - 1);
 	modelGroupList_.push_back(modelGroup);
+
+	std::shared_ptr <ModelData> modelData = std::make_shared<ModelData>();
+	modelData->filePath = "EnginePath_Ring";
+	modelDataHandleMap_[modelDataCounter_] = modelData->filePath;
+	modelDataList_[modelData->filePath] = modelData;
+	modelDataCounter_++;
 
 	return (int)modelGroupList_.size() - 1;
 }
@@ -192,6 +215,12 @@ int ResourceManager::CreateCylinderResource(int division, float topRadius, float
 	modelGroup->PushModel(cylinderMesh);
 	modelGroup->PushMeshHandle((int)meshBufferList_.size() - 1);
 	modelGroupList_.push_back(modelGroup);
+
+	std::shared_ptr <ModelData> modelData = std::make_shared<ModelData>();
+	modelData->filePath = "EnginePath_Cylinder";
+	modelDataHandleMap_[modelDataCounter_] = modelData->filePath;
+	modelDataList_[modelData->filePath] = modelData;
+	modelDataCounter_++;
 
 	return (int)modelGroupList_.size() - 1;
 }
@@ -216,6 +245,12 @@ int ResourceManager::CreateEngineModel(RingBuildMaterial& buildMaterial) {
 	modelGroup->PushMeshHandle((int)meshBufferList_.size() - 1);
 	modelGroupList_.push_back(modelGroup);
 
+	std::shared_ptr <ModelData> modelData = std::make_shared<ModelData>();
+	modelData->filePath = "EnginePath_Ring";
+	modelDataHandleMap_[modelDataCounter_] = modelData->filePath;
+	modelDataList_[modelData->filePath] = modelData;
+	modelDataCounter_++;
+
 	return (int)modelGroupList_.size() - 1;
 }
 
@@ -236,6 +271,12 @@ int ResourceManager::CreateEngineModel(SphereBuildMaterial& buildMaterial) {
 	modelGroup->PushModel(newSphere);
 	modelGroup->PushMeshHandle((int)meshBufferList_.size() - 1);
 	modelGroupList_.push_back(modelGroup);
+
+	std::shared_ptr <ModelData> modelData = std::make_shared<ModelData>();
+	modelData->filePath = "EnginePath_Sphere";
+	modelDataHandleMap_[modelDataCounter_] = modelData->filePath;
+	modelDataList_[modelData->filePath] = modelData;
+	modelDataCounter_++;
 
 	return (int)modelGroupList_.size() - 1;
 }
@@ -259,6 +300,12 @@ int ResourceManager::CreateEngineModel(CylinderBuildMaterial& buildMaterial) {
 	modelGroup->PushModel(newCylinder);
 	modelGroup->PushMeshHandle((int)meshBufferList_.size() - 1);
 	modelGroupList_.push_back(modelGroup);
+
+	std::shared_ptr <ModelData> modelData = std::make_shared<ModelData>();
+	modelData->filePath = "EnginePath_Cylinder";
+	modelDataHandleMap_[modelDataCounter_] = modelData->filePath;
+	modelDataList_[modelData->filePath] = modelData;
+	modelDataCounter_++;
 
 	return (int)modelGroupList_.size() - 1;
 }
@@ -306,6 +353,8 @@ int ResourceManager::CreateModelResource(std::string Path) {
 	return (int)modelGroupList_.size() - 1;
 }
 
+/// ====================================== エンジン内のモデルを更新する ======================================== ///
+
 void ResourceManager::UpdateEngineModel(RingBuildMaterial& buildMaterial, int modelHandle, int meshHandle) {}
 
 void ResourceManager::UpdateEngineModel(SphereBuildMaterial& buildMaterial, int modelHandle, int meshHandle) {
@@ -341,6 +390,7 @@ void ResourceManager::UpdateEngineModel(CylinderBuildMaterial& buildMaterial, in
 	SwapMeshAndModelGroup(newCylinder, modelHandle, meshHandle);
 }
 
+/// ======================================= 読み取ったモデルを更新する ========================================= ///
 
 void ResourceManager::SwapMeshAndModelGroup(std::shared_ptr<Model> model, int modelHandle, int modelIndex) {
 
@@ -390,6 +440,8 @@ void ResourceManager::SwapMeshAndModelGroup(std::shared_ptr<Model> model, int mo
 		modelGroup->SwapModel(modelIndex, model, meshHandle);
 	}
 };
+
+/// ======================================== モデルを読み取る更新する ========================================== ///
 
 int ResourceManager::LoadModel(std::string Path) {
 	/// Resourceに同じものがあるがどうか捜索
@@ -548,82 +600,6 @@ void ResourceManager::DeleteExtraSpriteMesh(int spriteNumber) {
 	}
 }
 
-int ResourceManager::InputMaterialConfig(std::shared_ptr<MaterialConfig> material) {
-
-	/// ================================= 既にあるか確認 =================================== ///
-	MaterialEntry* samePtrEntry = nullptr;
-	MaterialEntry* sameValueEntry = nullptr;
-
-	for (auto& entry : materialList_) {
-
-		auto locked = entry.config.lock();
-		if (!locked) continue;
-
-		// pointerが一緒なら更新してIDを返す
-		if (locked.get() == material.get()) {
-			samePtrEntry = &entry;
-			break;
-		}
-
-		// pointerが違っても値が一緒ならIDを返す
-		if (*locked == *material) {
-			sameValueEntry = &entry;
-		}
-	}
-	/// =========================== 既にある場合、更新してIDを返す =========================== ///
-	if (samePtrEntry) {
-
-		// CPUマテリアル更新 
-		samePtrEntry->cpuMaterial->inputMaterialConfig(*material);
-
-		// GPUマテリアル更新
-		MaterialForGPU* gpuPtr = nullptr;
-		samePtrEntry->gpuMaterial->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&gpuPtr));
-		*gpuPtr = *samePtrEntry->cpuMaterial;
-		samePtrEntry->gpuMaterial->GetResource()->Unmap(0, nullptr);
-
-		return samePtrEntry->materialID;
-	}
-
-	/// =========================== ない場合、まず完全一致なマテリアルを探す =========================== ///
-	if (sameValueEntry) {
-		return sameValueEntry->materialID;
-	}
-
-	/// ======================== それでもない場合、新しいMaterialEntryを作成 ======================== ///
-	MaterialEntry entry;
-
-	/// MaterialIDを設定
-	entry.materialID = materialCounter_;
-	materialCounter_++;
-
-	/// MaterialConfigのweak_ptrを保存
-	entry.config = material;
-	entry.textureHandle = material->textureHandle;
-
-	/// 新しいResourceを追加
-	auto newResource = std::make_unique<BasicResource>();
-	entry.gpuMaterial = newResource.get();
-	entry.gpuMaterial->CreateResourceClass_(BDevice_, sizeof(MaterialForGPU));
-
-	/// MaterialとMapする
-	entry.cpuMaterial = std::make_unique<MaterialForGPU>();
-	entry.cpuMaterial->inputMaterialConfig(*material);
-
-	MaterialForGPU* gpuPtr = nullptr;
-	newResource->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&gpuPtr));
-	*gpuPtr = *entry.cpuMaterial;
-	newResource->GetResource()->Unmap(0, nullptr);
-
-	newResource->SetName("MaterialResource" + std::to_string(entry.materialID));
-
-	materialResourceList_.push_back(std::move(newResource));
-	materialList_.push_back(std::move(entry));
-	idToIndex_.emplace(materialList_.back().materialID, (int)materialList_.size() - 1);
-
-	return materialList_.back().materialID;
-}
-
 /// ================================ RenderTexture制作用 ================================ ///
 
 Microsoft::WRL::ComPtr<ID3D12Resource> ResourceManager::CreateRenderTextureResource(
@@ -748,7 +724,7 @@ RenderTexture ResourceManager::CreateRenderTexture(
 	renderTexture.format = format;
 	renderTexture.clearColor = clearColor;
 	renderTexture.currentState = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-	renderTexture.depthState   = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+	renderTexture.depthState = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 
 	CreateDepthStencilForRenderTexture(renderTexture);
 

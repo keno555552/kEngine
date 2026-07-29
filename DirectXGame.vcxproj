@@ -344,7 +344,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="GAME\scenes\SceneTest.cpp" />
     <ClCompile Include="GAME\scenes\SceneTitle.cpp" />
     <ClCompile Include="GAME\scenes\SceneWin.cpp" />
+    <ClCompile Include="kEngine\Tool\FileManager\FileManager.cpp" />
+    <ClCompile Include="kEngine\Tool\JsonHelper\JsonHelper.cpp" />
+    <ClCompile Include="kEngine\Tool\EffectSystem\Adapter\EffectAdapter.cpp" />
     <ClCompile Include="kEngine\Data\Render\CPUData\RenderCommand.cpp" />
+    <ClCompile Include="kEngine\Data\Render\CPUData\RenderTexture.cpp" />
     <ClCompile Include="kEngine\Data\Render\GPUData\RenderCommandGPU.cpp" />
     <ClCompile Include="GAME\Object\Sight\Sight.cpp" />
     <ClCompile Include="GAME\Object\Enemy\Enemy.cpp" />
@@ -528,6 +532,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Data\Render\Types\PSOType\RenderTargetFormat.cpp" />
     <ClCompile Include="kEngine\Renderer\PostProcessRunner\PostProcessRunner.cpp" />
     <ClCompile Include="kEngine\Renderer\PSOManager\PSORecorder.cpp" />
+    <ClCompile Include="kEngine\Renderer\PostProcessRunner\PostProcessPass.cpp" />
+    <ClCompile Include="kEngine\Renderer\PostProcessRunner\PostProcessLayer.cpp" />
     <ClCompile Include="ResourceLoader.cpp" />
     <ClCompile Include="kEngine\Scenes\BaseSceneFactory.cpp" />
     <ClCompile Include="kEngine\GameObject\Object\Sprite.cpp" />
@@ -553,9 +559,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Renderer\Mesh\SkyCube.cpp" />
     <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\ShaderFactory.cpp" />
     <ClCompile Include="kEngine\Renderer\PSOManager\PSOFactory\RootSignatureFactory.cpp" />
-    <ClCompile Include="kEngine\Renderer\PSOManager\RootSlot.cpp" />
     <ClCompile Include="kEngine\Renderer\DescriptorManager\RtvManager\RtvManager.cpp" />
     <ClCompile Include="kEngine\Renderer\Mesh\RingMesh.cpp" />
+    <ClCompile Include="kEngine\Utility\ItemStateCountingSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GAME\Object\BackPoint\BackPoint.h" />
@@ -569,6 +575,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="GAME\Object\Enemy\Enemy.h" />
     <ClInclude Include="kEngine\EngineAssets\Particle\HitSparkWithFellRock.h" />
     <ClInclude Include="kEngine\EngineAssets\Particle\HitSpark2.h" />
+    <ClInclude Include="kEngine\Tool\FileManager\FileManager.h" />
+    <ClInclude Include="kEngine\Tool\JsonHelper\JsonHelper.h" />
+    <ClInclude Include="kEngine\Tool\EffectSystem\Adapter\EffectAdapter.h" />
     <ClInclude Include="kEngine\Math\LinearAlgebra\Gauss.h" />
     <ClInclude Include="kEngine\Data\Render\CPUData\RenderCommand.h" />
     <ClInclude Include="kEngine\Data\Render\GPUData\BlurDataGPU.h" />
@@ -577,6 +586,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Tool\EffectSystem\EffectEditor.h" />
     <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\EffectData.h" />
     <ClInclude Include="kEngine\Tool\CollisionManager\CollisionManager.h" />
+    <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\EffectInstance.h" />
     <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\EmitterLink.h" />
     <ClInclude Include="kEngine\Data\Render\Types\PostProcessType.h" />
     <ClInclude Include="kEngine\Renderer\DescriptorManager\DsvManager\DsvManager.h" />
@@ -797,7 +807,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Data\Game\MapChip\MapChipData.h" />
     <ClInclude Include="kEngine\GameObject\Particle\P_Ball\P_Ball.h" />
     <ClInclude Include="kEngine\Data\Render\Queue\RenderData.h" />
-    <ClInclude Include="kEngine\Data\Render\Types\PSOType\PSOType.h" />
     <ClInclude Include="kEngine\Renderer\LightManager\LightManager.h" />
     <ClInclude Include="kEngine\Renderer\Lighting\Light.h" />
     <ClInclude Include="kEngine\Data\Render\GPUData\LightGPU.h" />
@@ -832,6 +841,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Data\Render\Types\PSOType\RenderTargetFormat.h" />
     <ClInclude Include="kEngine\Renderer\PostProcessRunner\PostProcessRunner.h" />
     <ClInclude Include="kEngine\Renderer\PSOManager\PSORecorder.h" />
+    <ClInclude Include="kEngine\Renderer\PostProcessRunner\PostProcessPass.h" />
+    <ClInclude Include="kEngine\Renderer\PostProcessRunner\PostProcessLayer.h" />
     <ClInclude Include="ResourceLoader.h" />
     <ClInclude Include="kEngine\Scenes\BaseSceneFactory.h" />
     <ClInclude Include="kEngine\GameObject\Object\Sprite.h" />
@@ -859,6 +870,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Renderer\PSOManager\PSOFactory\RootSignatureFactory.h" />
     <ClInclude Include="kEngine\Renderer\PSOManager\RootSlot.h" />
     <ClInclude Include="kEngine\Renderer\DescriptorManager\RtvManager\RtvManager.h" />
+    <ClInclude Include="kEngine\Utility\ItemStateCountingSystem.h" />
+    <ClInclude Include="kEngine\Data\Render\GPUData\SkinningExtraVertexData.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl">
