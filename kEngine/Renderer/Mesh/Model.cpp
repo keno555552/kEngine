@@ -46,15 +46,15 @@ ID3D12Resource* Model::CreateSkinningVertexResource(ID3D12Device* device) {
 	skinningVertexResource_->GetResource()->Map(0, nullptr,
 		reinterpret_cast<void**>(&skinningData));
 
-	for (size_t i = 0; i < vertexCount; ++i) {
-		// 權重（假設你有 modelData.vertexWeights）
-		skinningData[i].weights = modelData.vertexWeights[i];
-
-		// 骨骼索引（假設你有 modelData.vertexJoints[i][0..3]）
-		for (int j = 0; j < 4; ++j) {
-			skinningData[i].index[j] = modelData.vertexJoints[i][j];
-		}
-	}
+	//for (size_t i = 0; i < vertexCount; ++i) {
+	//	// 權重（假設你有 modelData.vertexWeights）
+	//	skinningData[i].weights = modelData.vertexWeights[i];
+	//
+	//	// 骨骼索引（假設你有 modelData.vertexJoints[i][0..3]）
+	//	for (int j = 0; j < 4; ++j) {
+	//		skinningData[i].index[j] = modelData.vertexJoints[i][j];
+	//	}
+	//}
 	skinningVertexResource_->GetResource()->Unmap(0, nullptr);
 
 	// スキニングデータがある場合、SkinClusterDataを準備する

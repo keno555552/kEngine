@@ -329,8 +329,8 @@ void DrawDataCollector::Collect3D(ObjectData* object) {
 
 		/// PSOKey設定
 		renderData.psoKey = PSODecision(*objectPart.materialConfig);
-		if (objectPart.GetWellHandle() != -1 && renderData.psoKey.renderModelType == RenderModelType::Static)
-			renderData.psoKey.renderModelType = RenderModelType::Skinned;
+		//if (objectPart.GetWellHandle() != -1 && renderData.psoKey.renderModelType == RenderModelType::Static)
+		//	renderData.psoKey.renderModelType = RenderModelType::Skinned;
 
 		/// ===== 実際データ
 		/// skinning設定
@@ -621,7 +621,7 @@ int DrawDataCollector::SetSkinningData(WellForGPU* mappedPalette, int mappedNum,
 
 void DrawDataCollector::ClearSkinningData(int index) {
 
-	skinningDataList_[index] = SkinningData{};
+	//skinningDataList_[index] = SkinningData{};
 
 }
 

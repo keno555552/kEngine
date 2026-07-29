@@ -487,9 +487,9 @@ void DrawEngine::Draw3DTransparent() {
 				auto gpuHandle =
 					skinningWFGResourceList_[paletteIndex]->GetGPUDescriptorHandle();
 
-				commandList_->SetGraphicsRootDescriptorTable(
-					static_cast<UINT>(RootSlotSkinning::SkinningWell_SB),
-					gpuHandle);
+				//commandList_->SetGraphicsRootDescriptorTable(
+				//	static_cast<UINT>(RootSlotSkinning::SkinningWell_SB),
+				//	gpuHandle);
 			}
 		}
 
@@ -595,9 +595,9 @@ void DrawEngine::Draw3DOpaque() {
 
 							auto gpuHandle = skinningWFGResourceList_[paletteIndex]->GetGPUDescriptorHandle();
 
-							commandList_->SetGraphicsRootDescriptorTable(
-								static_cast<UINT>(RootSlotSkinning::SkinningWell_SB),
-								gpuHandle);
+							//commandList_->SetGraphicsRootDescriptorTable(
+							//	static_cast<UINT>(RootSlotSkinning::SkinningWell_SB),
+							//	gpuHandle);
 						}
 					}
 
