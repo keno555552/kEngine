@@ -159,28 +159,32 @@ UITest::UITest(kEngine* system) {
 	/// =========== パーティクル作る ============///
 
 	HitSpark3 hitSpark;
+	hitSpark.name = "HitSpark";
 	hitSpark.startPosition = { 0.0f, 0.0f, 0.0f };
 	hitSpark.objectList[0].objectParts_[0].materialConfig->textureHandle = clicleTextureHandle_;
 	particleHandle_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitSpark, 0);
 
 	HitImpact3 hitImpact;
+	hitImpact.name = "HitImpact";
 	hitImpact.startPosition = { 0.0f, 0.0f, 0.0f };
 	hitImpact.objectList[0].objectParts_[0].materialConfig->textureHandle = effectTextureHandle_;
 	particleHandle2_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitImpact, 1);
 
 	HitRock hitRock;
+	hitRock.name = "HitRock";
 	hitRock.startPosition = { 0.0f, 0.0f, 0.0f };
 	hitRock.objectList[0].objectParts_[0].materialConfig->textureHandle = whiteTextureHandle_;
 	particleHandle3_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitRock, 0);
 
 	HitSpackImpactLink3 linkData;
-	linkData.sourceId = particleHandle_;
-	linkData.targetId = particleHandle2_;
+	linkData.sourceName = "HitSpark";
+	linkData.targetName = "HitImpact";
 	system_->GetEffectManager()->GetParticleManager()->LinkEmitterToEmitter(linkData);
 
 	HitSpackImpactLink3_2 linkData2;
-	linkData2.sourceId = particleHandle_;
-	linkData2.targetId = particleHandle3_;
+	linkData2.sourceName = "HitSpark";
+	linkData2.targetName = "HitRock";
+	system_->GetEffectManager()->GetParticleManager()->LinkEmitterToEmitter(linkData2);
 	system_->GetEffectManager()->GetParticleManager()->LinkEmitterToEmitter(linkData2);
 
 }

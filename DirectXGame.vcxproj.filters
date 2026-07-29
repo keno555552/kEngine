@@ -1714,6 +1714,34 @@
     <FxCompile Include="resources\Shader\FlameNeonGlow.PS.hlsl" />
     <FxCompile Include="resources\Shader\Particle.PS.hlsl" />
     <FxCompile Include="resources\Shader\Particle.VS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\DebugLine.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\DebugLine.VS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\FlameNeonGlow.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\FlameNeonGlow.VS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\GlowSphere.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\GlowSphere.VS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\Object3d.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\Object3d.VS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\SkinningObject3D.VS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\SkyCube.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\SkyCube.VS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\Tile2D.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\Tile2D.VS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\Blur.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\ColorGuard.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\CopyImage.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\Dissolve.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\FullScreenQuad.VS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\NoiseShader.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\Outline.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\OutlineDepth.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\OutlinePrewittDepth.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\Smoothing.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\Vignette.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\LightingLambert\PhongReflection.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\LightingLambert\BlinnPhongReflection.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\LightingLambert\HalfLambert.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\LightingLambert\Lambert.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -1803,5 +1831,12 @@
     <None Include=".github\copilot-instructions.md" />
     <None Include="kEngine\EngineAssets\Shader\PostProcess\ColorGuard.hlsli" />
     <None Include="kEngine\EngineAssets\Shader\PostProcess\Vignette.hlsli" />
+    <None Include="kEngine\EngineAssets\Shader\CommonTypes.hlsli" />
+    <None Include="kEngine\EngineAssets\Shader\DebugLine.hlsli" />
+    <None Include="kEngine\EngineAssets\Shader\SkyCube.hlsli" />
+    <None Include="kEngine\EngineAssets\Shader\PostProcess\whiteNoise.hlsli" />
+    <None Include="kEngine\EngineAssets\Shader\PostProcess\FullScreenQuadVSO.hlsli" />
+    <None Include="kEngine\EngineAssets\Shader\PostProcess\RandomTool.hlsli" />
+    <None Include="kEngine\EngineAssets\Shader\PostProcess\RenderCommand.hlsli" />
   </ItemGroup>
 </Project>

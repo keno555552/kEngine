@@ -226,9 +226,9 @@ void kEngine::CreateModelRoot(ObjectData* objectData) {
 	
 	int handleNum = -1;
 
-	if (!modelGroup->skinListList.empty()) {
-		drawEngine->CreateSkinningBuffer(objectData);
-	}
+	//if (!modelGroup->skinListList.empty()) {
+	//	drawEngine->CreateSkinningBuffer(objectData);
+	//}
 }
 
 void kEngine::ClearModelRoot(ObjectData* objectData) {

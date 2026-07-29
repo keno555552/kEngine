@@ -54,16 +54,19 @@ void Bullet::HitRockEffect() {
 
 	// エフェクトの準備
 	HitSpark3 hitSpark;
+	hitSpark.name = "HitSpark";
 	hitSpark.startPosition = mainPosition.transform.translate;
 	hitSpark.objectList[0].objectParts_[0].materialConfig->textureHandle = clicleTextureHandle_;
 	particleHandle_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitSpark, 0);
 
 	HitImpact3 hitImpact;
+	hitImpact.name = "HitImpact";
 	hitImpact.startPosition = mainPosition.transform.translate;
 	hitImpact.objectList[0].objectParts_[0].materialConfig->textureHandle = effectTextureHandle_;
 	int particleHandle2_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitImpact, 1);
 
 	HitRock hitRock;
+	hitRock.name = "HitRock";
 	hitRock.startPosition = mainPosition.transform.translate;
 	float velocityScale = 2.0f;
 	hitRock.startVelocity = {-direction_.x * velocityScale,
@@ -73,13 +76,13 @@ void Bullet::HitRockEffect() {
 	int particleHandle3_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitRock, 0);
 
 	HitSpackImpactLink3 linkData;
-	linkData.sourceId = particleHandle_;
-	linkData.targetId = particleHandle2_;
+	linkData.sourceName = "HitSpark";
+	linkData.targetName = "HitImpact";
 	system_->GetEffectManager()->GetParticleManager()->LinkEmitterToEmitter(linkData);
 
 	HitSpackImpactLink3_2 linkData2;
-	linkData2.sourceId = particleHandle_;
-	linkData2.targetId = particleHandle3_;
+	linkData2.sourceName = "HitSpark";
+	linkData2.targetName = "HitRock";
 	system_->GetEffectManager()->GetParticleManager()->LinkEmitterToEmitter(linkData2);
 
 	system_->GetEffectManager()->GetParticleManager()->ShootEmitter(particleHandle_, 1);
