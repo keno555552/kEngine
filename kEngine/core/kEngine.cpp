@@ -37,7 +37,10 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 
 	postProcessRunner_ = std::make_unique<PostProcessRunner>();
 	drawEngine = std::make_unique<DrawEngine>();
-	drawEngine->Initialize(dxComm.get(), drawDataCollector.get(), postProcessRunner_.get());
+	drawEngine->Initialize(dxComm.get(),
+		drawDataCollector.get(),
+		postProcessRunner_.get(),
+		animationManager.get());
 
 	soundManager = std::make_unique<SoundManager>();
 	soundManager->Initialize();
@@ -218,21 +221,18 @@ void kEngine::ChangeEngineModel(CylinderBuildMaterial& buildMaterial, int modelH
 
 void kEngine::CreateModelRoot(ObjectData* objectData) {
 	int modelHandle = objectData->modelHandle_;
-	ModelGroup* modelGroup = ResourceManager::GetInstance()->modelGroupList_[modelHandle].get();
+	auto& modelPath = ResourceManager::GetInstance()->modelDataHandleMap_[modelHandle];
+	auto modelGroup = ResourceManager::GetInstance()->modelDataList_[modelPath];
 	
 	int handleNum = -1;
 
-	if (modelGroup->HasSkinClusterData()) {
+	if (!modelGroup->skinListList.empty()) {
 		drawEngine->CreateSkinningBuffer(objectData);
 	}
 }
 
 void kEngine::ClearModelRoot(ObjectData* objectData) {
-
-	int modelHandle = objectData->modelHandle_;
 	drawEngine->ClearSkinningBuffer(objectData);
-
-
 }
 
 void kEngine::AddLight(Light* light) {

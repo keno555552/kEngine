@@ -1625,6 +1625,9 @@
     <ClInclude Include="kEngine\Tool\FileManager\FileManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\GPUData\SkinningExtraVertexData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Shader\LightingLambert\HalfLambert.hlsl">

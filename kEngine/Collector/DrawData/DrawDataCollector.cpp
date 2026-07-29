@@ -329,8 +329,12 @@ void DrawDataCollector::Collect3D(ObjectData* object) {
 
 		/// PSOKey設定
 		renderData.psoKey = PSODecision(*objectPart.materialConfig);
+		if (objectPart.GetWellHandle() != -1 && renderData.psoKey.renderModelType == RenderModelType::Static)
+			renderData.psoKey.renderModelType = RenderModelType::Skinned;
 
 		/// ===== 実際データ
+		/// skinning設定
+		if (objectPart.GetWellHandle() != -1) renderData.skinningPaletteIndex = objectPart.GetWellHandle();
 		/// マテリアル設定
 		objectPart.materialConfig->MakeUVMatrix();
 		MaterialForGPU newData;
@@ -400,14 +404,6 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustment3D(ObjectData& object
 	Matrix4x4 viewMatrix = cam->GetViewMatrix();
 	Matrix4x4 projectionMatrix = cam->GetProjectionMatrix();
 
-
-	//if (object.isBillboard_) {
-	//	Vector3 camRot = cam->GetTransform().rotate;
-	//	part.transform.rotate.x = camRot.x;
-	//	part.transform.rotate.y = camRot.y;
-	//	//part.transform.rotate.z = 2;
-	//	DirtyEulerToQuat(part);
-	//}
 	Matrix4x4 localMatrix;
 
 	/// Billboard計算--カメラの回転を打ち消
@@ -423,10 +419,6 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustment3D(ObjectData& object
 		Matrix4x4 rot = viewMatrix;
 		rot.m[3][0] = rot.m[3][1] = rot.m[3][2] = 0;
 		rot = rot.Inverse();
-
-		/// 
-		//Matrix4x4 roll = MakeRZMatrix4x4(part.transform.rotate.z);
-		//Matrix4x4 finalRot = rot * roll;
 
 		localMatrix = localMatrix * rot;
 	} else {
@@ -480,16 +472,16 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustment3D(ObjectData& object
 
 	Matrix4x4 nodeMatrix = Identity();
 
-	if (modelData != nullptr) {
-		if (modelCounter >= 0 && modelCounter < modelData->meshDataList.size()) {
-
-			uint32_t nodeIndex = modelData->meshDataList[modelCounter].nodeIndex;
-
-			if (nodeIndex < modelData->nodeList.size()) {
-				nodeMatrix = modelData->nodeList[nodeIndex].globalMatrix;
-			}
-		}
-	}
+	//if (modelData != nullptr) {
+	//	if (modelCounter >= 0 && modelCounter < modelData->meshDataList.size()) {
+	//
+	//		uint32_t nodeIndex = modelData->meshDataList[modelCounter].nodeIndex;
+	//
+	//		if (nodeIndex < modelData->nodeList.size()) {
+	//			nodeMatrix = modelData->nodeList[nodeIndex].globalMatrix;
+	//		}
+	//	}
+	//}
 	Matrix4x4 finalWorld = nodeMatrix * worldMatrix;
 
 	TransformationMatrix result{};

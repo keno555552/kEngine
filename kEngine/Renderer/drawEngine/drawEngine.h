@@ -32,6 +32,9 @@
 #include "Data/Render/CPUData/RenderTexture.h"
 #include "Data/Render/GPUData/BlurDataGPU.h"
 
+#include "Tool/AnimationSystem/AnimationManager.h"
+#include "Data/Render/GPUData/WellForGPU.h"
+
 class DrawEngine
 {
 public:
@@ -42,7 +45,8 @@ public:
 	void Initialize(
 		DirectXCore* directXDirver,
 		DrawDataCollector* drawDataCollector,
-		PostProcessRunner* postProcessRunner);
+		PostProcessRunner* postProcessRunner,
+		AnimationManager* animationManager);
 
 	void Finalize();
 
@@ -90,6 +94,7 @@ private:
 	std::unique_ptr<PSOManager> psoManager_{};
 	PostProcessRunner* postProcessRunner_{};   /*依存*/
 	ResourceManager* resourceManager_{};	   /*依存*/
+	AnimationManager* animationManager_{};		   /*依存*/
 	DirectXCore* directXDriver_{};			   /*依存*/
 	ID3D12GraphicsCommandList* commandList_{}; /*依存*/
 
@@ -177,9 +182,8 @@ private:
 	/// Skinning関連
 	std::vector<std::unique_ptr<InstanceBuffer<WellForGPU>>> skinningWFGResourceList_;
 	// DDCにのSkinningDataのハンドルと、実際のWellForGPUのマップ
-	std::map<int, int> skinningDatDDC2DEaMap_;
+	std::map<int, int> skinningDataToPaletteIndexMap_;
 	std::vector<int> skinningBufferFreeList_;
-	// int skinningCounter_ = 0;
 
 
 private:

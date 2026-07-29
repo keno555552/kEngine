@@ -12,7 +12,8 @@
 void DrawEngine::Initialize(
 	DirectXCore* directXDriver,
 	DrawDataCollector* drawDataCollector,
-	PostProcessRunner* postProcessRunner
+	PostProcessRunner* postProcessRunner,
+	AnimationManager* animationManager
 ) {
 	directXDriver_ = directXDriver;
 	commandList_ = directXDriver_->GetCommandList();
@@ -20,6 +21,7 @@ void DrawEngine::Initialize(
 	resourceManager_ = ResourceManager::GetInstance();
 	drawDataCollector_ = drawDataCollector;
 	postProcessRunner_ = postProcessRunner;
+	animationManager_ = animationManager;
 
 	///
 	kClientWidth_ = config::GetClientWidth();
@@ -157,9 +159,12 @@ void DrawEngine::Initialize(
 	cameraBuffer_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&cameraPtr_));
 	cameraBuffer_->SetName("CameraBuffer");
 
+	/// ================== AnimationManagerとWellForGPUリンク ==================== ///
+	animationManager_->SetWellList(&skinningWFGResourceList_);
+	animationManager_->SetSkinningToPaletteIndexMap(&skinningDataToPaletteIndexMap_);
+
 	/// ========================== デフォルトのモデルを設定 ========================== ///
 	defaultTextureHandle_ = resourceManager_->LoadModelTexture("./kEngine/EngineAssets/TemplateResource/texture/white5x5.png");
-
 }
 
 void DrawEngine::Finalize() {
@@ -469,6 +474,25 @@ void DrawEngine::Draw3DTransparent() {
 		/// MeshIndex 數量
 		int meshIndexCount = object.mesh->GetIndexNum();
 
+		/// skinning palette 設定
+		if (object.skinningPaletteIndex != -1) {
+
+			int wellHandle = object.skinningPaletteIndex;
+
+			auto it = skinningDataToPaletteIndexMap_.find(wellHandle);
+			if (it != skinningDataToPaletteIndexMap_.end()) {
+
+				int paletteIndex = it->second;
+
+				auto gpuHandle =
+					skinningWFGResourceList_[paletteIndex]->GetGPUDescriptorHandle();
+
+				commandList_->SetGraphicsRootDescriptorTable(
+					static_cast<UINT>(RootSlotSkinning::SkinningWell_SB),
+					gpuHandle);
+			}
+		}
+
 		/// MaterialIndexList 設定
 		if (instanceMaterialIndexCounter_ >= config::GetMaxMaterialNum())assert(false);
 		int materialIndex = instanceMaterialIndexCounter_;
@@ -558,6 +582,24 @@ void DrawEngine::Draw3DOpaque() {
 				int meshIndexCount = meshBuffer->GetIndexNum();
 
 				for (auto& RenderData : RenderDataGroup) {
+
+					/// skinning palette 設定
+					if (RenderData.skinningPaletteIndex != -1) {
+
+						int wellHandle = RenderData.skinningPaletteIndex;
+
+						auto it = skinningDataToPaletteIndexMap_.find(wellHandle);
+						if (it != skinningDataToPaletteIndexMap_.end()) {
+
+							int paletteIndex = it->second;
+
+							auto gpuHandle = skinningWFGResourceList_[paletteIndex]->GetGPUDescriptorHandle();
+
+							commandList_->SetGraphicsRootDescriptorTable(
+								static_cast<UINT>(RootSlotSkinning::SkinningWell_SB),
+								gpuHandle);
+						}
+					}
 
 					/// MaterialIndexList 設定
 					if (instanceMaterialIndexCounter_ >= config::GetMaxMaterialNum())assert(false);
@@ -897,7 +939,7 @@ void DrawEngine::DrawDissolve(RenderCommandGPU& renderCommandGPU, int dissolveTe
 
 	SetRenderTarget(postProcessRunner_->GetRenderTarget().outputRT.rtvHandleCPU);
 
-	// ⭐ 加這一行：清除 OutputRT
+	// 加這一行：清除 OutputRT
 	float clearColor[4] = { 0.1f, 0.25f, 0.5f, 1.0f };
 	commandList_->ClearRenderTargetView(postProcessRunner_->GetRenderTarget().outputRT.rtvHandleCPU, clearColor, 0, nullptr);
 
@@ -1038,7 +1080,7 @@ void DrawEngine::CreateSkinningBuffer(ObjectData* objectData) {
 		int handle = drawDataCollector_->SetSkinningData(instanceListPtrDL, skeletonJointNum, instanceListPtrVI, vertexInfluenceNum);
 
 		/// HandleをModelに保存する
-		skinningDatDDC2DEaMap_[handle] = bufferIndex;
+		skinningDataToPaletteIndexMap_[handle] = bufferIndex;
 		objectData->objectParts_[i].wellHandle = handle;
 	}
 }
@@ -1051,8 +1093,8 @@ void DrawEngine::ClearSkinningBuffer(ObjectData* objectData) {
 		if (ddcHandle < 0) continue;
 
 		// 1. 找到 DrawEngine buffer index
-		auto it = skinningDatDDC2DEaMap_.find(ddcHandle);
-		if (it != skinningDatDDC2DEaMap_.end()) {
+		auto it = skinningDataToPaletteIndexMap_.find(ddcHandle);
+		if (it != skinningDataToPaletteIndexMap_.end()) {
 
 			int bufferIndex = it->second;
 
@@ -1063,7 +1105,7 @@ void DrawEngine::ClearSkinningBuffer(ObjectData* objectData) {
 			skinningBufferFreeList_.push_back(bufferIndex);
 
 			// 4. 移除 mapping
-			skinningDatDDC2DEaMap_.erase(it);
+			skinningDataToPaletteIndexMap_.erase(it);
 		} else {
 			continue;
 		}
@@ -1123,28 +1165,8 @@ void DrawEngine::IntializeInstanceTMBuffer(TransformationMatrix* bufferPointer, 
 	}
 }
 
-//void DrawEngine::SetMaterial(int materialID) {
-//
-//	auto checker = resourceManager_->idToIndex_.find(materialID);
-//
-//	if (checker == resourceManager_->idToIndex_.end()) {
-//		Logger::Log("[kError]DE:MaterialID not found in ResourceManager!");
-//		return;
-//	}
-//
-//	//commandList_->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::MaterialList_SB), resourceManager_->materialList_[checker->second].gpuMaterial->GetResource()->GetGPUVirtualAddress());
-//}
-
 void DrawEngine::SetTexture(int textureHandle) {
 
-	//auto checker = resourceManager_->idToIndex_.find(materialID);
-	//
-	//if (checker == resourceManager_->idToIndex_.end()) {
-	//	Logger::Log("[kError]DE:SetTexture not found in ResourceManager!");
-	//	return;
-	//}
-	//
-	//int textureHandle = resourceManager_->materialList_[checker->second].textureHandle;
 	textureSrvHandleGPU_ = TextureManager::GetInstance()->GetTextureGPUDescriptorHandle(textureHandle);
 	commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::Texture_SRV), textureSrvHandleGPU_);
 }

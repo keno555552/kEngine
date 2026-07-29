@@ -853,6 +853,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Renderer\PSOManager\RootSlot.h" />
     <ClInclude Include="kEngine\Renderer\DescriptorManager\RtvManager\RtvManager.h" />
     <ClInclude Include="kEngine\Utility\ItemStateCountingSystem.h" />
+    <ClInclude Include="kEngine\Data\Render\GPUData\SkinningExtraVertexData.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl">
