@@ -17,10 +17,12 @@ public:
 	void CreateResourceClass(ID3D12Device* device);
 	void SetVertexInfluences();
 
+	void UpdatePalette(const Skeleton& skeleton);
+
 	/// SkinningDataのセッターとゲッター
 	Microsoft::WRL::ComPtr<ID3D12Resource> GetSkinClusterResource() { return skinClusterResource_; }
 	D3D12_VERTEX_BUFFER_VIEW GetInfluenceBufferView() { return influenceBufferView; }
-	std::span<VertexInfluence> GetVertexInfluences() { return vertexInfluences; }
+	std::span<VertexInfluence> GetVertexInfluences() { return mappedInfluences; }
 
 	std::string GetFilePath() { return modelData_.lock()->filePath; }
 	std::string GetTexturePatch();
@@ -39,12 +41,18 @@ protected:
 	int modelIndex_ = -1;
 
 	/// Joint
+	int jointCount_ = 0;
 	std::vector<Matrix4x4> inverseBindPoseMatrices;
 
 	/// SkinClusterDataを保存するどころ
 	Microsoft::WRL::ComPtr<ID3D12Resource> skinClusterResource_;
 	D3D12_VERTEX_BUFFER_VIEW influenceBufferView{};
-	std::span<VertexInfluence> vertexInfluences;
+	std::span<VertexInfluence> mappedInfluences;
+
+	/// MatrixPaletteを保存するどころ
+	Microsoft::WRL::ComPtr<ID3D12Resource> paletteInfluences;
+	std::span<WellForGPU> mappedPalette{};
+	std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE> paletteSrvHandles_;
 
 	/// SrvAllocate
 	uint32_t paletteSrvIndex_ = -1;

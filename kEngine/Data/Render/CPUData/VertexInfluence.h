@@ -3,7 +3,7 @@
 #include <array>
 #include <vector>
 
-const uint32_t kNumMaxInflunce = 15;
+const uint32_t kNumMaxInflunce = 4;
 struct VertexInfluence
 {
 	std::array<float, kNumMaxInflunce> weights;

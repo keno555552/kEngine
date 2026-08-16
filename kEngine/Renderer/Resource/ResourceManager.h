@@ -121,6 +121,9 @@ public:
 	void ResizeSimpleSpriteMeshList(int spriteNumber);
 	void DeleteExtraSpriteMesh(int spriteNumber);
 
+	/// =================== SkinnedMesh関連 ===================== ///
+
+	void CreateModelResource(ObjectData* objectData);
 
 public:
 

@@ -25,19 +25,11 @@ public:
 	UINT GetVertexNum() { return VertexNum_; }
 	void SetVertexNum(int num);
 
-	void SetSkinClusterData(SkinClusterData skinClusterData) { skinClusterData_ = skinClusterData; }
-	SkinClusterData& GetSkinClusterData() { return skinClusterData_; }
 
 private:
 	/// ModelDataを保存する
 	std::weak_ptr<ModelData> modelData_ = {};
 	uint32_t meshIndex_ = -1;
-
-	/// SkinClusterDataを保存する
-	SkinClusterData skinClusterData_;
-
-	D3D12_VERTEX_BUFFER_VIEW skinningVertexBufferView{};
-	std::unique_ptr<BasicResource> skinningVertexResource_ = std::make_unique<BasicResource>();
 
 	/// ResourceManagerからもらうハンドルを保存する
 	int textureHandle_ = -1;

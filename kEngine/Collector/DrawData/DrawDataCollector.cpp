@@ -609,19 +609,22 @@ int DrawDataCollector::SetSkinningData(WellForGPU* mappedPalette, int mappedNum,
 		std::span<WellForGPU>(mappedPalette, mappedNum)
 	);
 
-	/// mappedPaletteすべての行列をIdentityで埋める
-	std::generate(
-		skinningDataList_.back().mappedPalette.begin(),
-		skinningDataList_.back().mappedPalette.end(),
-		[]() {return WellForGPU{ Identity(),Identity() }; }
-	);
+	///// mappedPaletteすべての行列をIdentityで埋める
+	//std::generate(
+	//	skinningDataList_.back().mappedPalette.begin(),
+	//	skinningDataList_.back().mappedPalette.end(),
+	//	[]() {return WellForGPU{ Identity(),Identity() }; }
+	//);
 
 	return int(skinningDataList_.size() - 1);
 }
 
 void DrawDataCollector::ClearSkinningData(int index) {
 
-	//skinningDataList_[index] = SkinningData{};
+	if (index < 0 || index >= static_cast<int>(skinningDataList_.size())) return;
+
+
+	skinningDataList_[index] = SkinningData{};
 
 }
 

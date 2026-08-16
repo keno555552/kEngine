@@ -22,7 +22,7 @@ void SkinClusterData::CreateResourceClass(ID3D12Device* device) {
 	VertexInfluence* newInfluence = nullptr;
 	skinClusterResource_->Map(0, nullptr, reinterpret_cast<void**>(&newInfluence));
 	std::memset(newInfluence, 0, resourceSize);
-	vertexInfluences = { newInfluence , (size_t)vertexNum_ };
+	mappedInfluences = { newInfluence , (size_t)vertexNum_ };
 
 	/// VertexInfluenceのspanを作る
 	influenceBufferView = CreateVertexBufferView(skinClusterResource_.Get(), resourceSize);
@@ -30,6 +30,38 @@ void SkinClusterData::CreateResourceClass(ID3D12Device* device) {
 	/// InverseBindPoseMatrixを格納する場所を作る、単位行列で埋める
 	inverseBindPoseMatrices.resize(modelData_.lock()->skeleton.jointList.size(), Identity());
 	//inverseBindPoseMatrices.resize(modelData_.lock()->skeleton.jointList.size());
+
+
+
+	jointCount_ = (int)modelData_.lock()->skeleton.jointList.size();
+	int paletteSize = sizeof(WellForGPU) * jointCount_;
+
+	/// 建立 GPU buffer
+	paletteInfluences = CreateResource(device, paletteSize);
+
+	/// Map 出 CPU span
+	WellForGPU* newPalette = nullptr;
+	paletteInfluences->Map(0, nullptr, reinterpret_cast<void**>(&newPalette));
+	mappedPalette = { newPalette, (size_t)jointCount_ };
+	// mappedPaletteを単位行列で埋める
+	for (int i = 0; i < jointCount_; ++i) {
+		mappedPalette[i].skeletonSpaceMatrix = Identity();
+		mappedPalette[i].skeletonSpaceInverseTransposeMatrix = Identity();
+	}
+
+	// 建立 SRV
+	paletteSrvIndex_ = SrvManager::GetInstance()->Allocate();
+	paletteSrvHandles_.first = SrvManager::GetInstance()->GetCPUDescriptorHandle(paletteSrvIndex_);
+	paletteSrvHandles_.second = SrvManager::GetInstance()->GetGPUDescriptorHandle(paletteSrvIndex_);
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC desc{};
+	desc.Format = DXGI_FORMAT_UNKNOWN;
+	desc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+	desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	desc.Buffer.NumElements = jointCount_;
+	desc.Buffer.StructureByteStride = sizeof(WellForGPU);
+
+	device->CreateShaderResourceView(paletteInfluences.Get(), &desc, paletteSrvHandles_.first);
 }
 
 void SkinClusterData::SetVertexInfluences() {
@@ -55,9 +87,9 @@ void SkinClusterData::SetVertexInfluences() {
 		}
 		/// skinDataのvertexWeightsを見て、vertexInfluencesに入れていく
 		for (const auto& vertexWeight : skinData.skinClusterData[jointIndex].vertexWeights) {
-			if (vertexWeight.vertexIndex >= vertexInfluences.size())
+			if (vertexWeight.vertexIndex >= mappedInfluences.size())
 				continue;
-			auto& currectInfluence = vertexInfluences[vertexWeight.vertexIndex];
+			auto& currectInfluence = mappedInfluences[vertexWeight.vertexIndex];
 			for (uint32_t i = 0; i < kNumMaxInflunce; ++i) {
 				if(currectInfluence.weights[i] == 0.0f) {
 					currectInfluence.weights[i] = vertexWeight.weight;
@@ -69,6 +101,16 @@ void SkinClusterData::SetVertexInfluences() {
 	}
 }
 
+void SkinClusterData::UpdatePalette(const Skeleton& skeleton) {
+	
+	for (int joint = 0; joint < jointCount_; ++joint) {
+		mappedPalette[joint].skeletonSpaceMatrix =
+			inverseBindPoseMatrices[joint] * skeleton.jointList[joint].skeletonSpaceMatrix;
+
+		mappedPalette[joint].skeletonSpaceInverseTransposeMatrix =
+			Transpose(Inverse(mappedPalette[joint].skeletonSpaceMatrix));
+	}
+}
 
 std::string SkinClusterData::GetTexturePatch() {
 	return std::string();

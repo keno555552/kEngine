@@ -650,10 +650,6 @@ void DrawEngine::DrawParticle() {
 			/// Meshを呼び出す
 			auto mesh = MeshBuffer;
 
-			if (enviromentReflectionTextureHandle_ != -1) {
-				SetEnviromentReflectionGPU();
-			}
-
 			if (TextureHandleGroup.empty()) continue;
 
 			SetLightingGPU();

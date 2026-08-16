@@ -193,7 +193,6 @@ private:
 
 	void IntializeInstanceTMBuffer(TransformationMatrix* bufferPointer, size_t count);
 
-	void SetMaterial(int materialID);
 	void SetTexture(int textureHandle);
 	void SetCameraForGPU();
 	void UpdateLighting();

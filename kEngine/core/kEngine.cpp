@@ -231,6 +231,34 @@ void kEngine::CreateModelRoot(ObjectData* objectData) {
 	}
 }
 
+void kEngine::CreateModelRoot(ObjectData* objectData) {
+	int modelHandle = objectData->modelHandle_;
+	auto& modelPath = ResourceManager::GetInstance()->modelDataHandleMap_[modelHandle];
+	auto modelGroup = ResourceManager::GetInstance()->modelDataList_[modelPath];
+
+	// 如果模型有 skinning
+	if (!modelGroup->skinListList.empty()) {
+		// 取得 SkinClusterData
+		auto& skinCluster = modelGroup->skinClusterDataList;
+
+		// 建立 GPU buffer（SkinClusterData 自己做）
+		skinCluster->CreateResourceClass(directXDriver_->GetDevice());
+		skinCluster->SetVertexInfluences();
+
+		// 把資料交給 DDC（DDC 給你一個 handle）
+		int handle = drawDataCollector_->SetSkinningData(
+			skinCluster->GetMappedPalette().data(),
+			(int)skinCluster->GetMappedPalette().size(),
+			skinCluster->GetVertexInfluences().data(),
+			skinCluster->GetVertexNum()
+		);
+
+		// 把 handle 塞進 ObjectPart
+		for (auto& part : objectData->objectParts_)
+			part.wellHandle = handle;
+	}
+}
+
 void kEngine::ClearModelRoot(ObjectData* objectData) {
 	drawEngine->ClearSkinningBuffer(objectData);
 }
