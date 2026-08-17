@@ -182,7 +182,7 @@ float DrawDataCollector::SpriteLayerManagement(float zBuffer) {
 		unlayeredSpriteCounter_++;
 		return z;
 	} else {
-		float z = -layeredSpriteDepth_ + zBuffer * -layerDepth_Sprite;
+		float z = -layeredSpriteDepth_ + (zBuffer * -layerDepth_Sprite);
 		if (z < -1.0f) {
 			Logger::Log("[kWarning]DDC:layered Sprite meet max number!");
 			return -1.0f;
@@ -193,9 +193,7 @@ float DrawDataCollector::SpriteLayerManagement(float zBuffer) {
 	return 0.0f;
 }
 
-Matrix4x4 DrawDataCollector::MakeFollowObjectMatrix2D(SpriteData* sprite) {
-
-	float zBuffer = SpriteLayerManagement(sprite->mainPosition.transform.translate.z);
+Matrix4x4 DrawDataCollector::MakeFollowObjectMatrix2D(SpriteData* sprite, SpritePart* part) {
 
 	Matrix4x4 objectMainMatrix = MakeAffineMatrix(
 		sprite->mainPosition.transform.scale,
@@ -218,13 +216,13 @@ Matrix4x4 DrawDataCollector::MakeFollowObjectMatrix2D(SpriteData* sprite) {
 	}
 
 	Matrix4x4 resultMatrix = objectMainMatrix * parentMatrix;
-	resultMatrix.m[3][2] = zBuffer;
 
 	return resultMatrix;
 }
 
 TransformationMatrix DrawDataCollector::SpriteWVPAdjustment2D(SpriteData& sprite, SpritePart& part) {
 
+	float zBuffer = SpriteLayerManagement(part.transform.translate.z);
 	// 2D UI 用：View 取單位矩陣，Projection 用螢幕尺寸的正交矩陣（左上原點，Y 向下）
 	Matrix4x4 viewMatrix = Identity();
 	Matrix4x4 projectionMatrix = MakeOrthographicMatrix(
@@ -236,7 +234,7 @@ TransformationMatrix DrawDataCollector::SpriteWVPAdjustment2D(SpriteData& sprite
 		1.0f                                      // farZ
 	);
 
-	Matrix4x4 followWorldMatrix = MakeFollowObjectMatrix2D(&sprite);
+	Matrix4x4 followWorldMatrix = MakeFollowObjectMatrix2D(&sprite, &part);
 
 	Matrix4x4 localMatrix = MakeAffineMatrix(
 		part.transform.scale,
@@ -245,11 +243,13 @@ TransformationMatrix DrawDataCollector::SpriteWVPAdjustment2D(SpriteData& sprite
 	);
 
 	Matrix4x4 worldMatrix = localMatrix * followWorldMatrix;
+	worldMatrix.m[3][2] = zBuffer;
 
 	TransformationMatrix result{};
 	result.world = worldMatrix;
 	result.WVP = worldMatrix * viewMatrix * projectionMatrix;
 	result.WorldInverseTranspose = worldMatrix.Inverse().Transpose();
+	//result.WorldInverseTranspose.m[3][2] = zBuffer;
 	return result;
 }
 
@@ -273,13 +273,12 @@ void DrawDataCollector::AddSpriteToBucket2D(RenderData& renderData) {
 
 		if (isTransparent) {
 			///　透明の場合、z値を比較して、z値が大きい方が手前に描画されるようにソートして追加
-			float z = renderData.transformData.WVP.m[3][2];
+			float z = renderData.transformData.world.m[3][2];
 			auto checker2 = std::find_if(
 				transparentBucket2D_.begin(),
 				transparentBucket2D_.end(),
 				[z](const RenderData& data) {
-					float dataZ = data.transformData.WVP.m[3][2];
-					return z > dataZ;
+					return z > data.transformData.world.m[3][2];
 				}
 			);
 

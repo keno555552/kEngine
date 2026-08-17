@@ -1,4 +1,8 @@
 #include "MaterialForGPU.h"
+#include "externals\DirectXTex\DirectXTex.h"
+#include "Resource\ResourceManager.h"
+#include "Resource\TextureManager.h"
+
 
 /// NOTE: 今はまだ1レイヤーしか使ってないから、layers[0]のデータを使う
 
@@ -38,6 +42,8 @@ void MaterialForGPU::inputMaterialConfig(MaterialConfig target) {
 	if(target.enableLighting) layers[0].enableLighting = 1;
 	else layers[0].enableLighting = 0;
 
+
+
 	/// layer[0]にデイタをcopyする
 	layers[0].color = target.textureColor;
 	layers[0].color2 = target.textureColor2;
@@ -49,6 +55,21 @@ void MaterialForGPU::inputMaterialConfig(MaterialConfig target) {
 	layers[0].heightScale = target.heightScale;
 	layers[0].reflectiveStrength = target.reflectiveStrength;
 }
+
+float MaterialForGPU::CheckAlpha(MaterialConfig& target) {
+
+	//bool hasAlpha = TextureManager::GetInstance()->GetTextureData(target.textureHandle).hasAlpha;
+	//
+	//if (hasAlpha) {
+	//	for (int i = 0; i < layerCount; ++i) {
+	//		if (layers[i].color.w >= 1.0f) {
+	//			return layers[i].color.w = 0.999f;
+	//		}		
+	//	}
+	//}
+	return 1.0f;
+}
+
 
 //bool MaterialForGPU::operator==(const MaterialForGPU target) {
 //

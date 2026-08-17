@@ -53,33 +53,42 @@ SceneTitle::SceneTitle(kEngine* system) {
 	startButton_->CreateDefaultData();
 	startButton_->mainPosition.transform.translate = { 112.0f, 402.0f, 0.0f };
 	startButton_->objectParts_[1].materialConfig->textureHandle = TH_startButton_;
-	//startButton_->objectParts_[1].transform.translate.z = -1;
+	startButton_->objectParts_[1].materialConfig->textureColor.w = 0.99f;
+	startButton_->objectParts_[1].transform.translate = { 0.0f, 0.0f, 2.0f };
 	startButton_->objectParts_[0].materialConfig->textureHandle = TH_buttonBack_Select_;
+	startButton_->objectParts_[0].transform.translate = { 0.0f, 0.0f, 1.0f };
+	startButton_->objectParts_[0].materialConfig->textureColor.w = 0.99f;
 
 	settingButton_->IntObject(system_);
 	settingButton_->CreateDefaultData();
 	settingButton_->CreateDefaultData();
 	settingButton_->mainPosition.transform.translate = { 112.0f, 495.0f, 0.0f };
 	settingButton_->objectParts_[1].materialConfig->textureHandle = TH_settingButton_;
-	//settingButton_->objectParts_[1].transform.translate.z = -1;
+	settingButton_->objectParts_[1].materialConfig->textureColor.w = 0.99f;
+	settingButton_->objectParts_[1].transform.translate = { 0.0f, 0.0f, 4.0f };
 	settingButton_->objectParts_[0].materialConfig->textureHandle = TH_buttonBack_notSelect_;
+	settingButton_->objectParts_[0].materialConfig->textureColor.w = 0.99f;
+	settingButton_->objectParts_[0].transform.translate = { 0.0f, 0.0f, 3.0f };
 
 	quitButton_->IntObject(system_);
 	quitButton_->CreateDefaultData();
 	quitButton_->CreateDefaultData();
 	quitButton_->mainPosition.transform.translate = { 112.0f, 597.0f, 0.0f };
 	quitButton_->objectParts_[1].materialConfig->textureHandle = TH_quitButton_;
-	//quitButton_->objectParts_[1].transform.translate.z = -1;
+	quitButton_->objectParts_[1].materialConfig->textureColor.w = 0.99f;
+	quitButton_->objectParts_[1].transform.translate = { 0.0f, 0.0f, 6.0f };
 	quitButton_->objectParts_[0].materialConfig->textureHandle = TH_buttonBack_notSelect_;
+	quitButton_->objectParts_[0].materialConfig->textureColor.w = 0.99f;
+	quitButton_->objectParts_[0].transform.translate = { 0.0f, 0.0f, 5.0f };
 
 	menuRun[0] = [this]() {this->SelectStart(); };
 	menuRun[1] = [this]() {this->SelectSetting(); };
 	menuRun[2] = [this]() {this->SelectQuit(); };
 
-	/// BGM�Đ�
-	if (!system_->SoundIsPlaying(SH_BGM_)) {
-		system_->SoundPlayBGM(SH_BGM_, 0.4f);
-	}
+	/// BGM
+	//if (!system_->SoundIsPlaying(SH_BGM_)) {
+	//	system_->SoundPlayBGM(SH_BGM_, 0.4f);
+	//}
 }
 
 SceneTitle::~SceneTitle() {
@@ -174,12 +183,6 @@ void SceneTitle::UpdateSelect() {
 	startButton_->objectParts_[0].materialConfig->textureHandle = (selectedButtonhandle == START) ? TH_buttonBack_Select_ : TH_buttonBack_notSelect_;
 	settingButton_->objectParts_[0].materialConfig->textureHandle = (selectedButtonhandle == SETTING) ? TH_buttonBack_Select_ : TH_buttonBack_notSelect_;
 	quitButton_->objectParts_[0].materialConfig->textureHandle = (selectedButtonhandle == QUIT) ? TH_buttonBack_Select_ : TH_buttonBack_notSelect_;
-	//startButton_->objectParts_[1].materialConfig->textureHandle = (selectedButtonhandle == START) ? TH_buttonBack_notSelect_ : TH_buttonBack_Select_;
-	//settingButton_->objectParts_[1].materialConfig->textureHandle = (selectedButtonhandle == SETTING) ? TH_buttonBack_notSelect_ : TH_buttonBack_Select_;
-	//quitButton_->objectParts_[1].materialConfig->textureHandle = (selectedButtonhandle == QUIT) ? TH_buttonBack_notSelect_ : TH_buttonBack_Select_;
-	//if(selectedButtonhandle == START )startButton_->objectParts_[0].materialConfig->textureHandle = TH_title;
-	//if(selectedButtonhandle == SETTING)startButton_->objectParts_[0].materialConfig->textureHandle = TH_buttonBack_Select_;
-	//if(selectedButtonhandle == QUIT)startButton_->objectParts_[0].materialConfig->textureHandle = TH_buttonBack_notSelect_;
 	
 	if (isSelect) {
 		if (selectedButtonhandle != SETTING) {

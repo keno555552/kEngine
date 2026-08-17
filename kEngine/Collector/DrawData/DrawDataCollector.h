@@ -24,7 +24,7 @@
 #include "Data/Render/CPUData/VertexInfluence.h"
 using ModelID = int;
 
-inline const float layerDepth_Sprite = 0.0001f;
+inline const float layerDepth_Sprite = 0.00001f;
 inline const float layeredSpriteDepth_ = 0.4f;
 
 /// 2D = sprite
@@ -212,10 +212,10 @@ private:
 	TransformationMatrix DLWVPAdjustment(DebugLine* debugLine);
 
 	/// ============ スプライト関連 ==============///
-	/// ｚバッファ調整
+	/// ｚバッファ調整	
 	float SpriteLayerManagement(float zBuffer);
 	/// フォローマトリックス作成
-	Matrix4x4 MakeFollowObjectMatrix2D(SpriteData* sprite);
+	Matrix4x4 MakeFollowObjectMatrix2D(SpriteData* sprite, SpritePart* part);
 	/// WVP調整
 	TransformationMatrix SpriteWVPAdjustment2D(SpriteData& sprite, SpritePart& part);
 	/// バケット追加

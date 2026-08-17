@@ -33,8 +33,11 @@ struct MaterialForGPU
 	bool operator==(const MaterialForGPU target);
 	bool operator!=(const MaterialForGPU target);
 	void inputMaterialConfig(MaterialConfig target);
+	float CheckAlpha(MaterialConfig& target);
 
 };
+
+
 
 
 //struct MaterialForGPU

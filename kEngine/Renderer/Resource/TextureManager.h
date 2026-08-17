@@ -94,6 +94,7 @@ private:
 		uint32_t srvIndex{};
 		D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU{};
 		D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU{};
+		bool hasAlpha{false};
 	};
 
 	std::unordered_map <int, TextureData> textureDatas;
