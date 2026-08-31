@@ -6,8 +6,8 @@ void SceneManager::Initialize(kEngine* system) {
 	system_ = system;
 	sceneFactory_ = std::make_unique<SceneFactory>(system);
 	sceneUsingNameHandle_ = "TITLE";
-	//sceneUsingNameHandle_ = "CGHK2";
 	//sceneUsingNameHandle_ = "STAGE_01";
+	//sceneUsingNameHandle_ = "CGHK2";
 	//sceneUsingNameHandle_ = "UITest";
 	//sceneUsingNameHandle_ = "ParticleEditor";
 	//sceneUsingNameHandle_ = "EffectEditor";

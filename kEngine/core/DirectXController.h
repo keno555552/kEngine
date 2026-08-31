@@ -20,6 +20,7 @@ public:
 	void EndFrame();
 private:
 	D3D12_RESOURCE_BARRIER barrier{};
+	FixFPS fixFPS_;
 };
 
 

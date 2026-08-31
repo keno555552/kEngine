@@ -21,7 +21,7 @@ public:
 
 
 private:
-	void MapCollisionCircle();
+	//void MapCollisionCircle();
 	bool PlayerMapCollision();
 	void PlayerEnemyCollision();
 	void PlayerBackPointCollision();

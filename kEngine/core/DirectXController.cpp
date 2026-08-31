@@ -4,22 +4,20 @@
 #include <cassert>
 
 DirectXController::DirectXController() {
-	//static FixFPS fixFPS;
-	//fixFPS.Initialize();
-	//
-	//timeBeginPeriod(1);
+	fixFPS_.Initialize();
+	
+	timeBeginPeriod(1);
 }
 
 DirectXController::~DirectXController() {
 
-	//timeEndPeriod(1);
-	//Finalize();
+	timeEndPeriod(1);
+	Finalize();
 }
 
 void DirectXController::InitializeDrive(const char* kClientTitle, int kClientWidth, int kClientHeight) {
 	DirectXCore::InitializeDrive(kClientTitle, kClientWidth, kClientHeight);
-	static FixFPS fixFPS;
-	fixFPS.Initialize();
+	fixFPS_.Initialize();
 	timeBeginPeriod(1);
 }
 
@@ -93,6 +91,7 @@ void DirectXController::EndFrame() {
 
 	//static FixFPS fixFPS;
 	//fixFPS.Update();
+	fixFPS_.Update();
 
 
 	// Fenceの値を更新

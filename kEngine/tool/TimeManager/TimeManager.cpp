@@ -8,6 +8,7 @@ void TimeManager::Update() {
 
 	/// deltaTime_に経過時間をセット
 	deltaTime_ = elapsed.count();
+	deltaTime_ = std::min(deltaTime_, 0.033f);
 
 	/// scaleがある時間の計算
 	scaledDeltaTime_ = deltaTime_ * timeScale_;

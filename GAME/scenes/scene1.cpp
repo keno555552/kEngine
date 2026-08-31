@@ -76,7 +76,7 @@ Scene1::Scene1(kEngine* system) {
 	underGround_BG_->objectParts_[0].materialConfig->textureColor = { 0.3f,0.3f,0.3f,1.0f };
 	underGround_BG_->mainPosition.transform.translate.z = +0.5f;
 
-	player_ = new Player(system, { 0.0f, -3.5f, 0 });
+	player_ = new Player(system, { 0.0f, 5.5f, 0 });
 	player_->CreateModelData(MH_player_);
 	player_->mainPosition.transform.scale = { 0.5f, 0.5f, 0.5f };
 	player_->InputBulletList(&bulletList_);
@@ -131,7 +131,7 @@ Scene1::Scene1(kEngine* system) {
 	collisionManager_.InputBackPoint(backPoint_);
 
 	/// BGM再生
-	system_->SoundPlayBGM(SH_BGM_, 0.7f);
+	//system_->SoundPlayBGM(SH_BGM_, 0.7f);
 }
 
 Scene1::~Scene1() {
@@ -177,7 +177,7 @@ Scene1::~Scene1() {
 void Scene1::Update() {
 
 	/// 後処理更新
-	ppp_GlitchScreen_->Update();
+	//ppp_GlitchScreen_->Update();
 
 	/// カメラ処理
 	CameraPart();
@@ -478,7 +478,7 @@ void Scene1::GenerateMap() {
 			}
 
 			if (mapChipType == MapChipType::kPlayer) {
-				player_->mainPosition.transform.translate = mapChipField_->GetWorldPosFromMapByMapIndex({ j, i }) + Vector3{ 0.0f,1.0f,0.0f };
+				player_->mainPosition.transform.translate = mapChipField_->GetWorldPosFromMapByMapIndex({ j, i }) /* + Vector3{0.0f,0.0f,0.0f} */ ;
 				continue;
 			}
 

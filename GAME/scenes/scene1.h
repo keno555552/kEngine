@@ -22,7 +22,7 @@ public:
 
 
 private:
-	kEngine* system_ = nullptr;				// �؂�
+	kEngine* system_ = nullptr;				// 借り
 
 	/// ============== 後処理関連 ==============///
 
@@ -39,7 +39,7 @@ private:
 	/// デバックカメラ
 	std::weak_ptr<DebugCamera> debugCamera_;
 	/// 今使っているカメラ
-	std::weak_ptr<Camera> usingCamera_;			// �؂�p
+	std::weak_ptr<Camera> usingCamera_;			// 借り
 
 	/// =========== テキスチャハンドル ============///
 	/// モデルハンドル
