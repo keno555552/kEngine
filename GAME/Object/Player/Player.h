@@ -10,9 +10,9 @@
 
 
 /// 移動速度
-static inline const float kAcceleration = 3.0f;
+static inline const float kAcceleration = 10.0f;
 /// 移動減衰
-static inline const float kAttenuation = 8.0f;
+static inline const float kAttenuation = 12.0f;
 /// 回転速度
 static inline const float kTimeTurn = 0.15f;
 /// 移動限界速度
@@ -52,8 +52,21 @@ class Bullet;
 class Player :public Object
 {
 public:
+	/// コンストラクタ
 	Player(kEngine* system, const Vector3& position = Vector3{ 0,0,0 });
 
+	/// ムーブメント
+	void MoveLeft() { moveLeft_ = true; }
+	void MoveRight() { moveRight_ = true; }
+	void MoveJump() { moveJump_ = true; }
+
+	void StopLeft() { moveLeft_ = false; }
+	void StopRight() { moveRight_ = false; }
+	void StopJump() { moveJump_ = false; }
+
+	void Attack(Vector3 mousePos);
+
+	/// ステージ用
 	void Update(Camera* camera) override;
 	AABB& GetAABB();
 	//AABB& GetMapChipAABB();
@@ -73,7 +86,6 @@ public:
 
 	bool IsDisableDamage() const { return disableDamage_; }
 
-	void Shoot(Vector3 mousePos);
 
 private:
 
@@ -98,6 +110,7 @@ private:
 	void BehaviorRootUpdate();
 	Vector3 CornerPosition(const Vector3& center, Corner4 corner);
 	void Move();
+	void ResetMove();
 	void OnGroundChanger(const CollisionMapInfo& info);
 	void MapCollisionDecideDown(CollisionMapInfo& info);
 	void MovePlayerByResult(const CollisionMapInfo& info);
@@ -206,6 +219,12 @@ private:
 	Timer shootCD_;
 
 private:
+	/// move
+	bool moveLeft_ = false;
+	bool moveRight_ = false;
+	bool moveJump_ = false;
+	bool moveDush_ = false;
+
 	bool isNearAttack_ = false;
 	bool isNearAttackEffect_ = false;
 

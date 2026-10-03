@@ -189,6 +189,9 @@ void Scene1::Update() {
 	underGround_BG_->Update(usingCamera_.lock().get());
 
 	/// player更新
+	if (system_->GetIsPush(DIK_A)) player_->MoveLeft();
+	if (system_->GetIsPush(DIK_D)) player_->MoveRight();
+	if (system_->GetIsPush(DIK_W)) player_->MoveJump();
 	player_->Update(usingCamera_.lock().get());
 
 	/// Sight更新
@@ -196,7 +199,7 @@ void Scene1::Update() {
 
 	/// Bullet更新
 	if (system_->GetMouseIsPush(0)) {
-		player_->Shoot(sight_->GetAngleSightToTarget());
+		player_->Attack(sight_->GetAngleSightToTarget());
 	}
 
 	/// Enemy更新
@@ -444,6 +447,10 @@ void Scene1::ImGuiPart() {
 			ImGui::SliderFloat("Random Noise Amount", &renderCommand->randomNoiseAmount, 0.0f, 1.0f);
 			ImGui::SliderFloat("Random Noise Time", &renderCommand->randomNoiseTime, 0.0f, 100.0f);
 
+
+			ImGui::End();
+			ImGui::Begin("Effect");
+			ImGui::Text("Particle num: %d", system_->GetEffectManager()->GetParticleManager()->GetAllParticleCount());
 			ImGui::End();
 		}
 	}

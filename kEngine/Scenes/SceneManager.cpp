@@ -5,8 +5,8 @@ std::unique_ptr <SceneManager> SceneManager::sceneManager_ = nullptr;
 void SceneManager::Initialize(kEngine* system) {
 	system_ = system;
 	sceneFactory_ = std::make_unique<SceneFactory>(system);
-	sceneUsingNameHandle_ = "TITLE";
-	//sceneUsingNameHandle_ = "STAGE_01";
+	//sceneUsingNameHandle_ = "TITLE";
+	sceneUsingNameHandle_ = "STAGE_01";
 	//sceneUsingNameHandle_ = "CGHK2";
 	//sceneUsingNameHandle_ = "UITest";
 	//sceneUsingNameHandle_ = "ParticleEditor";
@@ -125,7 +125,7 @@ void SceneManager::Render() {
 	//defaultMenu_->Draw();
 
 #ifdef USE_IMGUI
-	ImGuiPart();
+	//ImGuiPart();
 #endif
 }
 
@@ -139,35 +139,35 @@ void SceneManager::ClearStage() {
 #ifdef USE_IMGUI
 void SceneManager::ImGuiPart() {
 	{
-		//float fps = system_->GetFPS();
-		//float fps1s = system_->GetFPSPerSecond();
-		//float deltaTime = system_->GetDeltaTime();
-		//ImGui::Begin("FPS");
-		//ImGui::InputFloat("FPS", &fps);
-		//ImGui::InputFloat("FPS_1s", &fps1s);
-		//ImGui::InputFloat("deltaTime", &deltaTime);
-		//ImGui::End();
+		float fps = system_->GetFPS();
+		float fps1s = system_->GetFPSPerSecond();
+		float deltaTime = system_->GetDeltaTime();
+		ImGui::Begin("FPS");
+		ImGui::InputFloat("FPS", &fps);
+		ImGui::InputFloat("FPS_1s", &fps1s);
+		ImGui::InputFloat("deltaTime", &deltaTime);
+		ImGui::End();
 	}
 	{
-		//ImGui::Begin("MenuTest");
-		//if (defaultMenu_->isClicked()) {
-		//	ImGui::Text("IsClicked: True");
-		//} else {
-		//	ImGui::Text("IsClicked: False");
-		//}
-		//
-		//if (defaultMenu_->IsRetry()) {
-		//	ImGui::Text("IsRetry: True");
-		//} else {
-		//	ImGui::Text("IsRetry: False");
-		//}
-		//
-		//if (defaultMenu_->IsBack()) {
-		//	ImGui::Text("IsBack: True");
-		//} else {
-		//	ImGui::Text("IsBack: False");
-		//}
-		//ImGui::End();
+		ImGui::Begin("MenuTest");
+		if (defaultMenu_->isClicked()) {
+			ImGui::Text("IsClicked: True");
+		} else {
+			ImGui::Text("IsClicked: False");
+		}
+		
+		if (defaultMenu_->IsRetry()) {
+			ImGui::Text("IsRetry: True");
+		} else {
+			ImGui::Text("IsRetry: False");
+		}
+		
+		if (defaultMenu_->IsBack()) {
+			ImGui::Text("IsBack: True");
+		} else {
+			ImGui::Text("IsBack: False");
+		}
+		ImGui::End();
 	}
 }
 #endif

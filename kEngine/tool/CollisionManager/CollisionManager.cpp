@@ -19,56 +19,34 @@ void CollisionManager::Update(float deltaTime) {
 }
 
 bool CollisionManager::PlayerMapCollision() {
-    if (player_ == nullptr || mapChipField_ == nullptr) {
-        return false;
-    }
 
-    AABB box = player_->GetAABB();
-    Vector3 velocity = player_->GetVelocity();
+	if (!player_ || !mapChipField_) return false;
 
-    bool landed = false;
+	AABB box = player_->GetAABB();
+	Vector3 velocity = player_->GetVelocity();
 
-    // 直接呼叫 MapChipField 的碰撞修正
-    Vector3 correction = mapChipField_->GetMapCollisionCorrection(
-        box,
-        velocity,
-        deltaTime_,
-        landed
-    );
+	// MapChipField内での当たり判定を計算
+	CollisionResult result = mapChipField_->GetMapCollisionCorrection(
+		box,
+		velocity,
+		deltaTime_
+	);
 
-    // 如果沒有修正量 → 沒撞到
-	auto originalMove = velocity * deltaTime_;
-	if (fabs(correction.x - originalMove.x) < 0.0001f &&
-		fabs(correction.y - originalMove.y) < 0.0001f)
-    {
-        player_->SetOnGround(false);
-        return false;
-    }
-
-    // 更新位置
-    Vector3 pos = player_->GetPosition();
-    pos += correction;
-    player_->SetPosition(pos);
-
-    // 如果落地 → Y 速度清零
-    if (landed) {
-        velocity.y = 0.0f;
-    }
-
-	// 2. 往上撞天花板
-	if (correction.y < originalMove.y) {
+	// 当たると速度を0にする
+	if (result.xIsMainAxis) {
+		velocity.x = 0.0f;
+	}
+	if (result.yIsMainAxis) {
 		velocity.y = 0.0f;
 	}
 
-    // X 軸如果撞牆 → X 速度清零
-	if (fabs(correction.x - velocity.x * deltaTime_) > 0.0001f) {
-        velocity.x = 0.0f;
-    }
+	player_->SetVelocity(velocity);
+	player_->SetOnGround(result.landed);
 
-    player_->SetVelocity(velocity);
-    player_->SetOnGround(landed);
+	Vector3 velAfter = player_->GetVelocity();
+	// Logger::Log("PlayerVelocity: (%f, %f, %f)", velAfter.x, velAfter.y, velAfter.z);
 
-    return true;
+	return true;
 }
 
 void CollisionManager::BulletMapCollision() {

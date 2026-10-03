@@ -16,6 +16,7 @@ public:
 	/// --- コンストラクタ・デストラクタ --- ///
 	ParticleEmitter(kEngine* system,
 					const ParticlePrototype particlePrototype,
+					int* particleIdIP,
 					int maxParticles = 1000);
 	~ParticleEmitter();
 
@@ -62,7 +63,7 @@ private:
 
 	/// 発射された粒子のインスタンス
 	std::vector<ParticleInstance> particles_;
-	int counter_ = 0; // 発射された粒子の総数（ID生成用）
+	int* particleIdIP_;
 
 	/// 発射するもののタイプ
 	ParticleRenderType isObjectType_ = ParticleRenderType::Object; // true = Object, false = Sprite

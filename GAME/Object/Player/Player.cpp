@@ -67,7 +67,7 @@ void Player::GetDamage(float damage) {
 	system_->SoundPlaySE(SH_DAMAGE_);
 }
 
-void Player::Shoot(Vector3 mousePos) {
+void Player::Attack(Vector3 mousePos) {
 
 	/// 出来ない条件に該当したら終了
 	// 弾のリストがセットされてない
@@ -95,9 +95,9 @@ void Player::BehaviorRootUpdate() {
 
 	/// 移動関連
 	Move();
-	MapCollisionDecideDown(collisionMapInfo);
-	MovePlayerByResult(collisionMapInfo);
+	//MapCollisionDecideDown(collisionMapInfo);
 	OnGroundChanger(collisionMapInfo);
+	MovePlayerByResult(collisionMapInfo);
 
 	///射撃CD更新
 	ShootUpdate();
@@ -124,46 +124,46 @@ Vector3 Player::CornerPosition(const Vector3& center, Corner4 corner) {
 void Player::Move() {
 	/// 移動
 	// 左右移動捜索
-	if (system_->GetIsPush(DIK_D) || system_->GetIsPush(DIK_A)) {
-		Vector3 acceleration = {};
-		if (system_->GetIsPush(DIK_D)) {
-			if (velocity_.x < 0.0f) {
-				// 速度と逆方向に入力中に急ブレーキ
-				velocity_.x *= (1.0f - kAttenuation);
-			}
-			acceleration.x += kAcceleration;
+	if (moveLeft_ || moveRight_) {
+
+		Vector3 acceleration{};
+
+		// 方向が変わったら、旋回タイマーをリセットする
+		if (moveRight_ && !moveLeft_) {
 
 			if (lrDirection_ != LRDirection::kRight) {
 				lrDirection_ = LRDirection::kRight;
 				turnFirstRotationY_ = mainPosition.transform.rotate.y;
 				turnTimer_ = kTimeTurn;
 			}
-		}
-		if (system_->GetIsPush(DIK_A)) {
-			if (velocity_.x > 0.0f) {
-				// 速度と逆方向に入力中に急ブレーキ
-				velocity_.x *= (1.0f - kAttenuation);
-			}
-			acceleration.x -= kAcceleration;
+
+			acceleration.x = +kAcceleration;
+		} else if (moveLeft_ && !moveRight_) {
+
 			if (lrDirection_ != LRDirection::kLeft) {
 				lrDirection_ = LRDirection::kLeft;
 				turnFirstRotationY_ = mainPosition.transform.rotate.y;
 				turnTimer_ = kTimeTurn;
 			}
+
+			acceleration.x = -kAcceleration;
 		}
 
-		if (system_->GetIsPush(DIK_A) && system_->GetIsPush(DIK_D)) {
-			if (lrDirection_ != LRDirection::None) {
-				lrDirection_ = LRDirection::None;
-				turnFirstRotationY_ = mainPosition.transform.rotate.y;
-				turnTimer_ = kTimeTurn;
+		// 計算しだした加速度を速度に加える
+		velocity_.x += acceleration.x * deltaTime_;
+
+		// 入力がない場合速度を減衰をかける
+		if (!moveRight_ && !moveLeft_) {
+			velocity_.x *= std::exp(-kAttenuation * deltaTime_);
+			if (std::abs(velocity_.x) < 0.01f) {
+				velocity_.x = 0.0f;
 			}
 		}
 
-		// 加速/減速
-		velocity_.x += acceleration.x * deltaTime_;
-
+		// 速度上限
 		velocity_.x = std::clamp(velocity_.x, -kLimitRunSpeed, kLimitRunSpeed);
+
+
 	} else {
 		// 非入力時は移動減衰をかける
 		velocity_.x *= std::exp(-kAttenuation * deltaTime_);
@@ -183,7 +183,7 @@ void Player::Move() {
 		turnTimer_ = std::max(turnTimer_, 0.0f);
 
 		float destinationRotationYTable[] = {
-			std::numbers::pi_v<float> / 2.0f,                            // 右
+			std::numbers::pi_v<float> / 2.0f,                              // 右
 			-std::numbers::pi_v<float> / 2.0f,                             // 左
 			0.0f // なし
 		};
@@ -196,7 +196,7 @@ void Player::Move() {
 
 	if (onGround_) {
 		// ジャンプ
-		if (system_->GetIsPush(DIK_W)) {
+		if (moveJump_) {
 			// ジャンプ初速を加える
 			velocity_.y += kJumpAcceleration;
 
@@ -209,6 +209,14 @@ void Player::Move() {
 		// 落下速度制限
 		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
 	}
+
+	ResetMove();
+}
+
+void Player::ResetMove() {
+	moveLeft_ = false;
+	moveRight_ = false;
+	moveJump_ = false;
 }
 
 void Player::OnGroundChanger(const CollisionMapInfo& info) {

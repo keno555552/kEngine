@@ -12,8 +12,8 @@ struct HitSpark3 : ParticlePrototype
 		/// 移動しないから設定要らない
 
 		/// スケール設定、その後変わらない
-		startScale = { 0.05f * hitRockScale, 1.0f * hitRockScale, 1.0f * hitRockScale };
-		endScale = { 0.05f * hitRockScale, 1.0f * hitRockScale, 1.0f * hitRockScale };
+		startScale = { 0.1f * hitRockScale, 2.0f * hitRockScale, 1.0f * hitRockScale };
+		endScale = { 0.1f * hitRockScale, 2.0f * hitRockScale, 1.0f * hitRockScale };
 		isConstantScale = true;
 
 		/// 回転はランダム
@@ -21,12 +21,12 @@ struct HitSpark3 : ParticlePrototype
 		isConstantRotation = true;
 
 		/// 色は元の色から透明へ
-		startColor = { 0.3f, 0.3f, 1.0f, 1.0f };
-		endColor = { 0.3f, 0.3f, 1.0f, 0.0f };
+		startColor = { 1.0f, 0.3f, 0.3f, 1.0f };
+		endColor = { 1.0f, 0.3f, 0.3f, 0.0f };
 
 		/// 行為設定
-		burstCount = 5;
-		emitNumRandom = 0.5f;
+		burstCount = 3;
+		emitNumRandom = 0.2f;
 
 		/// 見た目設定
 		ObjectData obj;
@@ -105,7 +105,7 @@ struct HitRock : ParticlePrototype
 		gravity = { 0.0f, -9.8f, 0.0f };
 
 		/// 行為設定
-		burstCount = 5;
+		burstCount = 3;
 		emitNumRandom = 0.3f;
 
 		/// 見た目設定

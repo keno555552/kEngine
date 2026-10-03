@@ -52,18 +52,21 @@ void Bullet::Update(Camera* camera) {
 
 void Bullet::HitRockEffect() {
 
+	// [短縮]パーティクルマネージャーを取得
+	auto ParticleManager = system_->GetEffectManager()->GetParticleManager();
+
 	// エフェクトの準備
 	HitSpark3 hitSpark;
 	hitSpark.name = "HitSpark";
 	hitSpark.startPosition = mainPosition.transform.translate;
 	hitSpark.objectList[0].objectParts_[0].materialConfig->textureHandle = clicleTextureHandle_;
-	particleHandle_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitSpark, 0);
+	int particleHandle2_ = ParticleManager->CreateEmitter(hitSpark, 0);
 
 	HitImpact3 hitImpact;
 	hitImpact.name = "HitImpact";
 	hitImpact.startPosition = mainPosition.transform.translate;
 	hitImpact.objectList[0].objectParts_[0].materialConfig->textureHandle = effectTextureHandle_;
-	int particleHandle2_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitImpact, 1);
+	particleHandle_ = ParticleManager->CreateEmitter(hitImpact, 1);
 
 	HitRock hitRock;
 	hitRock.name = "HitRock";
@@ -73,18 +76,20 @@ void Bullet::HitRockEffect() {
 							 -direction_.y * velocityScale * 1.5f,
 							 -direction_.z * velocityScale};
 	hitRock.objectList[0].objectParts_[0].materialConfig->textureHandle = whiteTextureHandle_;
-	int particleHandle3_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitRock, 0);
+	int particleHandle3_ = ParticleManager->CreateEmitter(hitRock, 0);
 
 	HitSpackImpactLink3 linkData;
-	linkData.sourceName = "HitSpark";
-	linkData.targetName = "HitImpact";
-	system_->GetEffectManager()->GetParticleManager()->LinkEmitterToEmitter(linkData);
+	linkData.name = "HitImpactToSpark";
+	linkData.sourceName = "HitImpact";
+	linkData.targetName = "HitSpark";
+	ParticleManager->LinkEmitterToEmitter(linkData);
 
 	HitSpackImpactLink3_2 linkData2;
-	linkData2.sourceName = "HitSpark";
+	linkData2.name = "HitImpactToRock";
+	linkData2.sourceName = "HitImpact";
 	linkData2.targetName = "HitRock";
-	system_->GetEffectManager()->GetParticleManager()->LinkEmitterToEmitter(linkData2);
+	ParticleManager->LinkEmitterToEmitter(linkData2);
 
-	system_->GetEffectManager()->GetParticleManager()->ShootEmitter(particleHandle_, 1);
+	ParticleManager->ShootEmitter(particleHandle_, 1);
 
 }

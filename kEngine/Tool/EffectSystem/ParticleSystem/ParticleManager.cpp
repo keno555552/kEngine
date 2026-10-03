@@ -1,6 +1,49 @@
 #include "ParticleManager.h"
 #include "kEngine.h"
 
+
+delayData InputLinkData(
+	const EmitterLink& linkData,
+	const ParticleInstance& targetParticle,
+	const ParticleEmitter& sourceEmitter,
+	TimeManager* timeManager,
+	int linkIndex) {
+
+	delayData d;
+	d.emitterLinkIndex = linkIndex;
+	d.sourceEmitterName = linkData.sourceName;
+	d.targetEmitterName = linkData.targetName;
+
+	if (linkData.linkFollow == LinkFollow::Emitter) {
+		d.followParticle = false;
+		d.particleId = -1;
+
+		d.positionOffset = sourceEmitter.GetPosition();
+		d.rotationOffset = sourceEmitter.GetRotation();
+		d.scaleOffset = sourceEmitter.GetScale();
+	} else {
+		d.followParticle = true;
+		d.particleId = targetParticle.particleId;
+		d.positionOffset = targetParticle.nowTranslate;
+		d.rotationOffset = targetParticle.nowRotate;
+		d.scaleOffset = targetParticle.nowScale;
+	}
+
+	if (linkData.emitterTiming == EmitterTiming::SourceEmit ||
+		linkData.emitterTiming == EmitterTiming::SourceEnd) {
+		d.activeNow = true;
+		d.timer.Init0(0.0f, timeManager);
+	} else {
+		d.activeNow = false;
+		d.timer.Init0(linkData.delayTime, timeManager);
+	}
+
+	d.emittyCount = linkData.emitCount;
+
+	return d;
+}
+
+
 ParticleManager::ParticleManager(kEngine* system) :
 	system_(system) {}
 
@@ -17,7 +60,7 @@ void ParticleManager::Update() {
 
 	/// Emitter同士のリンクを更新
 	UpdateEmitterLinks();
-	
+
 	/// Emitterの寿命が終わったら削除する
 	for (auto it = emitterList_.begin(); it != emitterList_.end(); ) {
 		auto& emitter = it->second;
@@ -45,14 +88,15 @@ int ParticleManager::CreateEmitter(const ParticlePrototype& proto, int maxPartic
 
 	/// Emitterの名前がすでに存在する場合、既存のEmitterIdを返す
 	if (emitterNameToId_.find(proto.name) != emitterNameToId_.end()) {
-		int id = emitterNameToId_[proto.name];
+		int id = emitterNameToId_[proto.name][0];
+		UpdatePrototype(id, proto, maxParticles);
 		return id;
 	}
 
 	/// 新しいEmitterを作成
 	int id = nextEmitterId_++;
-	emitterList_[id] = std::make_unique<ParticleEmitter>(system_, proto, maxParticles);
-	emitterNameToId_[proto.name] = id;
+	emitterList_[id] = std::make_unique<ParticleEmitter>(system_, proto, &EMParticleID, maxParticles);
+	emitterNameToId_[proto.name].push_back(id);
 	return id;
 }
 
@@ -60,8 +104,11 @@ void ParticleManager::ClearEmitter(int emitterId) {
 
 	auto it = emitterList_.find(emitterId);
 	if (it != emitterList_.end()) {
-		emitterList_.erase(emitterId);
-		emitterNameToId_.erase(it->second->GetPrototype().name);
+		std::string emitterName = it->second->GetPrototype().name;
+		for (auto id : emitterNameToId_[emitterName]) {
+			emitterList_.erase(id);
+		}
+		emitterNameToId_.erase(emitterName);
 	} else {
 		Logger::Log("[kError] ParticleManager::ClearEmitter() Emitter ID not found: " + std::to_string(emitterId));
 	}
@@ -97,7 +144,7 @@ void ParticleManager::LinkEmitterToEmitter(EmitterLink& linkData) {
 void ParticleManager::SetEmitterEnd(int emitterId, bool isEnd) {
 
 	/// EmitterIdが存在するか確認
-	if (EmitterIDCheckMiss(emitterId)) { 
+	if (EmitterIDCheckMiss(emitterId)) {
 		Logger::Log("[kEngine] ParticleManager::SetEmitterEnd() Emitter ID not found: " + std::to_string(emitterId));
 		return;
 	}
@@ -114,6 +161,24 @@ void ParticleManager::SetEmitterDead(int emitterId) {
 
 }
 
+void ParticleManager::UpdatePrototype(int emitterId, const ParticlePrototype& proto, int maxParticles) {
+
+	auto it = emitterList_.find(emitterId);
+	if (it != emitterList_.end()) {
+
+		// 旧Emitterを新しいどころに移動する
+		emitterList_[nextEmitterId_] = std::move(emitterList_[emitterId]);
+		emitterNameToId_[proto.name].push_back(nextEmitterId_);
+
+		// 新しいParticlePrototypeでEmitterを作る
+		emitterList_[emitterId] = std::make_unique<ParticleEmitter>(system_, proto, &EMParticleID, maxParticles);
+
+		nextEmitterId_++;
+	} else {
+		Logger::Log("[kError] ParticleManager::UpdatePrototype() Emitter ID not found: " + std::to_string(emitterId));
+	}
+}
+
 int ParticleManager::GetEmitterParticleCount(int emitterId) {
 
 	/// EmitterIdが存在するか確認
@@ -128,7 +193,7 @@ int ParticleManager::GetEmitterIdByName(const std::string& name) const {
 	/// 名前からEmitterIdを取得
 	auto it = emitterNameToId_.find(name);
 	if (it != emitterNameToId_.end()) {
-		return it->second;
+		return it->second[0];
 	}
 	return -1;
 }
@@ -144,110 +209,52 @@ int ParticleManager::GetAllParticleCount() {
 
 void ParticleManager::UpdateEmitterLinks() {
 
-	for (int i = 0; i < emitterLinks_.size(); i++) {
+	/// EmitterLinkが存在しない場合は処理をスキップ
+	if (emitterLinks_.empty()) return;
+	/// Emitterが存在しない場合は処理をスキップ
+	if (emitterList_.empty()) return;
 
-		auto& linkData = emitterLinks_[i];
+	std::vector < std::pair < std::string, int >> particleIdList; // <emitterID, < linkName, particleId>>
 
-		auto sourceIt = find_if(
-			emitterList_.begin(),
-			emitterList_.end(),
-			[&linkData](const auto& pair) {
-			return pair.second->GetPrototype().name == linkData.sourceName;
-		});
-		auto targetIt = find_if(
-			emitterList_.begin(),
-			emitterList_.end(),
-			[&linkData](const auto& pair) {
-				return pair.second->GetPrototype().name == linkData.targetName;
-			});
+	for (auto& [emitterID, currentEmitter] : emitterList_) {
 
-		if (sourceIt == emitterList_.end()) {
-			Logger::Log("[kError] ParticleMkanager::UpdateEmitterLinks() SourceParticle Name not found: " + linkData.sourceName);
-			continue;
-		}
-		if (targetIt == emitterList_.end()) {
-			Logger::Log("[kError] ParticleManager::UpdateEmitterLinks() TargetParticle Name not found: " + linkData.targetName);
-			continue;
-		}
+		const std::string& currectEmitterName = currentEmitter->GetPrototype().name;
+		
 
-		/// 連動処理
-		ParticleEmitter* sourceEmitter = sourceIt->second.get();
+		for (int linkID = 0; linkID < (int)emitterLinks_.size(); linkID++) {
+			const auto& linkData = emitterLinks_[linkID];
+			std::string currectLinkname = linkData.name;
+			if (linkData.sourceName != currectEmitterName) continue;
 
-		std::vector<ParticleInstance> emittingData;
-		if (linkData.emitterTiming != EmitterTiming::SourceEnd) {
-			emittingData = sourceEmitter->GetEmittingData();
-			if (emittingData.size() != 0) {
-				Logger::Log("[kInfo] ParticleManager::UpdateEmitterLinks() Found " + std::to_string(emittingData.size()) + " emitting particles in source emitter Name: " + linkData.sourceName);
-			}
-		} else {
-			emittingData = sourceEmitter->GetDexpiredData();
-			if (emittingData.size() != 0) {
-				Logger::Log("[kInfo] ParticleManager::UpdateEmitterLinks() Found " + std::to_string(emittingData.size()) + " Dexpired particles in source emitter Name: " + linkData.sourceName);
-			}
-		}
+			const auto& events = (linkData.emitterTiming == EmitterTiming::SourceEnd)
+				? currentEmitter->GetDexpiredData()
+				: currentEmitter->GetEmittingData();
 
-		/// 発射するデータがない場合はスキップ
-		if (emittingData.empty())
-			continue;
+			for (const auto& p : events) {
 
+				// もし既に発動したらスキップする
+				auto finder = std::find_if(
+					particleIdList.begin(),
+					particleIdList.end(),
+					[currectLinkname, p](std::pair<std::string, int>& item) {
+						return (item.first == currectLinkname && item.second == p.particleId);
+					}
+				);
+				if (finder != particleIdList.end()) continue;
 
-		/// 発射したデータがある場合は、delayDataList_に追加する
-		std::vector<const ParticleInstance*> eventUnits;
+				delayData d = InputLinkData(linkData, p, *currentEmitter, system_->GetTimeManager(), linkID);
+				delayDataList_.push_back(d);
 
-		if (linkData.linkMode == LinkMode::PerBurst) {
-			eventUnits.push_back(&emittingData[0]);
-		} else {
-			for (const auto& p : emittingData) {
-				eventUnits.push_back(&p);
+				particleIdList.push_back( std::make_pair( currectLinkname, p.particleId ) );
+
+				Logger::Log("Particle Name: " + currentEmitter->GetPrototype().name + "\n");
+				Logger::Log("LinkerName Name: " + currectLinkname + "\n");
+				Logger::Log("Shot Particle: " + std::to_string(p.particleId) + "\n");
 			}
 		}
-
-		std::vector<delayData> newDelayDataList;
-
-		/// 発射したらデータはあるのでチェック
-		for (auto* p : eventUnits) {
-
-			delayData d;
-			d.emitterLinkIndex = i;
-			d.sourceEmitterName = linkData.sourceName;
-			d.targetEmitterName = linkData.targetName;
-
-			if (linkData.linkFollow == LinkFollow::Emitter) {
-				d.followParticle = false;
-				d.particleId = -1;
-
-				d.positionOffset = sourceEmitter->GetPosition();
-				d.rotationOffset = sourceEmitter->GetRotation();
-				d.scaleOffset = sourceEmitter->GetScale();
-			} else {
-				d.followParticle = true;
-				d.particleId = p->particleId;
-				d.positionOffset = p->nowTranslate;
-				d.rotationOffset = p->nowRotate;
-				d.scaleOffset = p->nowScale;
-			}
-
-			if (linkData.emitterTiming == EmitterTiming::SourceEmit ||
-				linkData.emitterTiming == EmitterTiming::SourceEnd) {
-				d.activeNow = true;
-				d.timer.Init0(0.0f, system_->GetTimeManager());
-			} else {
-				d.activeNow = false;
-				d.timer.Init0(linkData.delayTime, system_->GetTimeManager());
-			}
-
-			d.emittyCount = linkData.emitCount;
-
-			newDelayDataList.push_back(d);
-		}
-
-		// newDelayDataListをdelayDataList_に追加
-		delayDataList_.insert(
-			delayDataList_.end(),
-			newDelayDataList.begin(),
-			newDelayDataList.end()
-		);
 	}
+
+
 
 	/// delayDataList_内のデータにより、Emitterを発射や生成する
 	for (auto& delayData : delayDataList_) {
@@ -309,12 +316,17 @@ void ParticleManager::UpdateEmitterLinks() {
 	}
 
 	/// 無序刪除
-	for (int i = (int)delayDataList_.size() - 1; i >= 0; --i) {
-		if (delayDataList_[i].hasEmitted) {
-			delayDataList_[i] = std::move(delayDataList_.back());
-			delayDataList_.pop_back();
-		}
-	}
+	//for (int i = (int)delayDataList_.size() - 1; i >= 0; --i) {
+	//	if (delayDataList_[i].hasEmitted) {
+	//		delayDataList_[i] = std::move(delayDataList_.back());
+	//		delayDataList_.pop_back();
+	//	}
+	//}
+
+	delayDataList_.erase(
+		std::remove_if(delayDataList_.begin(), delayDataList_.end(),
+			[](const delayData& d) { return d.hasEmitted; }),
+		delayDataList_.end());
 }
 
 bool ParticleManager::EmitterIDCheckMiss(int emitterId) {

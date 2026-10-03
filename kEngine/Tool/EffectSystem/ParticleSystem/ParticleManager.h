@@ -7,6 +7,7 @@
 #include "ParticleEmitter.h"
 #include "EmitterLink.h"
 
+
 struct delayData {
 	bool hasEmitted{ false };
 	bool activeNow{ false };
@@ -20,7 +21,15 @@ struct delayData {
 	Vector3 rotationOffset{};
 	Vector3 scaleOffset{};
 	Timer timer{};
+
 };
+
+delayData InputLinkData(
+	const EmitterLink& linkData,
+	const ParticleInstance& targetParticle,
+	const ParticleEmitter& sourceEmitter,
+	TimeManager* timeManager,
+	int linkIndex);
 
 class kEngine;
 class ParticleManager
@@ -52,10 +61,11 @@ public:
 	/// データセット
 	void SetEmitterEnd(int emitterId, bool isEnd);
 	void SetEmitterDead(int emitterId);
+	void UpdatePrototype(int emitterId, const ParticlePrototype& proto, int maxParticles);
 
 	/// データ取得
 	int GetEmitterCount() const { return static_cast<int>(emitterList_.size()); }
-	int GetEmitterParticleCount(int emitterId) ;
+	int GetEmitterParticleCount(int emitterId);
 	int GetEmitterIdByName(const std::string& name) const;
 	int GetAllParticleCount();
 
@@ -66,8 +76,11 @@ private:
 
 	/// 粒子生成器
 	std::map<int, std::unique_ptr<ParticleEmitter>> emitterList_;
-	std::map<std::string, int> emitterNameToId_;
+	std::map<std::string, std::vector<int>> emitterNameToId_;
 	int nextEmitterId_ = 0;
+
+	/// Emitterの粒子ID生成用
+	int EMParticleID = 0;
 
 	/// Emitter同士のリンク管理
 	std::vector<EmitterLink> emitterLinks_;
