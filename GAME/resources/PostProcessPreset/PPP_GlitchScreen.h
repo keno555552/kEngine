@@ -8,9 +8,9 @@ public:
 	PPP_GlitchScreen(kEngine* engine);
 
 	RenderCommand* GetNoiseCommand() { return &noiseCommand_; }
-	RenderCommand* GetColorGradingCommand() { return &ColorGradingCommand_; }
-	RenderCommand* GetBlurCommand() { return &BlurCommand_; }
-	RenderCommand* GetVignetteCommand() { return &VignetteCommand_; }
+	RenderCommand* GetColorGradingCommand() { return &colorGradingCommand_; }
+	RenderCommand* GetBlurCommand() { return &blurCommand_; }
+	RenderCommand* GetVignetteCommand() { return &vignetteCommand_; }
 
 	void UpdateNoiseCommand(RenderCommand command) { noiseCommand_ = command; }
 	void Update();
@@ -24,9 +24,9 @@ private:
 
 	/// RenderCommandの設定
 	RenderCommand noiseCommand_;
-	RenderCommand ColorGradingCommand_;
-	RenderCommand BlurCommand_;
-	RenderCommand VignetteCommand_;
+	RenderCommand colorGradingCommand_;
+	RenderCommand blurCommand_;
+	RenderCommand vignetteCommand_;
 
 	/// passのHandle
 	int noisePassHandle_ = -1;

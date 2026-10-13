@@ -199,7 +199,7 @@ private:
 
 private:
 	// 計算用
-	float deltaTime_{};
+	float totelDeltaTime_{};
 
 private:
 	AABB hitBox_{};

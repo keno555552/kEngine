@@ -37,7 +37,7 @@ private:
 	std::vector<Bullet*>* bulletList_ = nullptr;
 	std::vector<Enemy*>* enemyList_ = nullptr;
 
-	float deltaTime_ = 0.0f;
+	float totelDeltaTime_ = 0.0f;
 
 private:
 	bool CheckIsWall(MapChipType type);

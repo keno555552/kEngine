@@ -7,6 +7,7 @@
 #include "BaseScene.h"
 #include "Data/Geometry/Corner/Corner.h"
 #include "Math/Geometry/Collision/crashDecision.h"
+#include "Tool/MovementObject/MovementObject.h"
 #include "Utility/randomMaker.h"
 
 
@@ -56,7 +57,6 @@ private:
 
 	void OpenDoor();
 	void CloseDoor();
-	void ShakeMovement();
 	void RunDrill();
 
 private:
@@ -92,20 +92,23 @@ private:
 	/// 接地状態フラグ
 	bool onGround_ = true;
 
+	std::unique_ptr<MovementObject> sharkObject_;
+
 private:
 	// 計算用
-	float deltaTime_{};
+	float totelDeltaTime_{};
 	std::unique_ptr<RandomMaker> randomMaker_;
 
 	float shakingScale_ = 0.005f;
 	bool isShake_ = false;
 
 private:
+	/// 当たり判定
 	AABB hitBox_{};
 	DebugLine debugLine;
 
-
 private:
+	/// Timer
 
 	Timer drillOnOffTimer_;
 

@@ -52,28 +52,54 @@ ParticleManager::~ParticleManager() {}
 void ParticleManager::Update() {
 	/// ポーズ中は更新しない
 	if (isPaused_)return;
-
+	
 	/// Emitterの更新
 	for (auto& [id, emitter] : emitterList_) {
 		emitter->Update();
 	}
-
+	
 	/// Emitter同士のリンクを更新
 	UpdateEmitterLinks();
+	//
+	///// Emitterの寿命が終わったら削除する
+	//for (auto it = emitterList_.begin(); it != emitterList_.end(); ) {
+	//	auto& emitter = it->second;
+	//
+	//	emitter->ClearEmittingData();
+	//	emitter->ClearDexpiredData();;
+	//
+	//	if (emitter->GetIsEnd() && emitter->GetIsFinished()) {
+	//		it = emitterList_.erase(it);
+	//	} else {
+	//		++it;
+	//	}
+	//}
 
-	/// Emitterの寿命が終わったら削除する
-	for (auto it = emitterList_.begin(); it != emitterList_.end(); ) {
-		auto& emitter = it->second;
+
+	/// 先收集要刪的 id，再一起刪（遍歷中不改 map）
+	std::vector<int> removeList;
+	for (auto& [id, emitter] : emitterList_) {
 
 		emitter->ClearEmittingData();
-		emitter->ClearDexpiredData();;
+		emitter->ClearDexpiredData();
 
+		/// 原本的規則：明確結束且粒子死光
 		if (emitter->GetIsEnd() && emitter->GetIsFinished()) {
-			it = emitterList_.erase(it);
-		} else {
-			++it;
+			removeList.push_back(id);
+			continue;
+		}
+
+		/// 新規則：同名、已停止發射、粒子也死光，且不是現行的那一個 → 刪除
+		if (!emitter->GetIsEmitting() && emitter->GetIsFinished()) {
+			auto n = emitterNameToId_.find(emitter->GetName());
+			if (n != emitterNameToId_.end() &&
+				n->second.size() > 1 &&
+				n->second[0] != id) {
+				removeList.push_back(id);
+			}
 		}
 	}
+	for (int id : removeList) RemoveEmitter(id);
 }
 
 void ParticleManager::Draw() {
@@ -141,24 +167,35 @@ void ParticleManager::LinkEmitterToEmitter(EmitterLink& linkData) {
 	emitterLinks_.push_back(emitterLinks);
 }
 
+void ParticleManager::RemoveEmitter(int id) {
+	
+	auto it = emitterList_.find(id);
+	if (it == emitterList_.end()) return;
+
+	const std::string name = it->second->GetName();   // 先複製名字再 erase
+	emitterList_.erase(it);
+
+	auto nameIt = emitterNameToId_.find(name);
+	if (nameIt != emitterNameToId_.end()) {
+		auto& ids = nameIt->second;
+		ids.erase(std::remove(ids.begin(), ids.end(), id), ids.end());
+		if (ids.empty()) emitterNameToId_.erase(nameIt);
+	}
+
+}
+
 void ParticleManager::SetEmitterEnd(int emitterId, bool isEnd) {
 
 	/// EmitterIdが存在するか確認
-	if (EmitterIDCheckMiss(emitterId)) {
-		Logger::Log("[kEngine] ParticleManager::SetEmitterEnd() Emitter ID not found: " + std::to_string(emitterId));
-		return;
-	}
-
+	if (!EmitterIDCheckMiss(emitterId)) return;
+	emitterList_[emitterId]->SetIsEnd(isEnd);
 }
 
 void ParticleManager::SetEmitterDead(int emitterId) {
 
 	/// EmitterIdが存在するか確認
-	if (EmitterIDCheckMiss(emitterId)) {
-		Logger::Log("[kEngine] ParticleManager::SetEmitterEnd() Emitter ID not found: " + std::to_string(emitterId));
-		return;
-	}
-
+	if (!EmitterIDCheckMiss(emitterId)) return;
+	emitterList_[emitterId]->SetIsDead();
 }
 
 void ParticleManager::UpdatePrototype(int emitterId, const ParticlePrototype& proto, int maxParticles) {
@@ -168,6 +205,7 @@ void ParticleManager::UpdatePrototype(int emitterId, const ParticlePrototype& pr
 
 		// 旧Emitterを新しいどころに移動する
 		emitterList_[nextEmitterId_] = std::move(emitterList_[emitterId]);
+		emitterList_[nextEmitterId_]->SwitchEmitter(false);
 		emitterNameToId_[proto.name].push_back(nextEmitterId_);
 
 		// 新しいParticlePrototypeでEmitterを作る
@@ -182,7 +220,7 @@ void ParticleManager::UpdatePrototype(int emitterId, const ParticlePrototype& pr
 int ParticleManager::GetEmitterParticleCount(int emitterId) {
 
 	/// EmitterIdが存在するか確認
-	if (EmitterIDCheckMiss(emitterId)) { return -1; }
+	if (!EmitterIDCheckMiss(emitterId)) { return -1; }
 
 	/// 存在する場合、Emitterの粒子数を返す
 	return emitterList_[emitterId]->GetParticleCount();
@@ -316,13 +354,6 @@ void ParticleManager::UpdateEmitterLinks() {
 	}
 
 	/// 無序刪除
-	//for (int i = (int)delayDataList_.size() - 1; i >= 0; --i) {
-	//	if (delayDataList_[i].hasEmitted) {
-	//		delayDataList_[i] = std::move(delayDataList_.back());
-	//		delayDataList_.pop_back();
-	//	}
-	//}
-
 	delayDataList_.erase(
 		std::remove_if(delayDataList_.begin(), delayDataList_.end(),
 			[](const delayData& d) { return d.hasEmitted; }),
@@ -331,10 +362,8 @@ void ParticleManager::UpdateEmitterLinks() {
 
 bool ParticleManager::EmitterIDCheckMiss(int emitterId) {
 
-	if (emitterList_.find(emitterId) == emitterList_.end()) {
-		return false;
-	}
+	if (emitterList_.find(emitterId) == emitterList_.end()) return true;
 	Logger::Log("[EffectManager] ParticleManager::EmitterIDCheckMiss Invalid emitter ID: " + std::to_string(emitterId));
-	return true;
+	return false;
 }
 

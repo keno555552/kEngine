@@ -58,6 +58,10 @@ private:
 	int SH_Select_{};
 	int SH_Decide_{};
 
+	/// ============== 後処理関連 ==============///
+	RenderCommand colorGradingCommand_;
+	int ColorGradingPassHandle_ = -1;
+
 	/// =========== ゲームオブジェクト ==========///
 	std::unique_ptr<Object> skydome_;
 	std::unique_ptr<Object> ground_;
@@ -75,13 +79,20 @@ private:
 
 	/// =============== フラグ ================///
 	bool useDebugCamera = false;
-
-	int selectedButtonhandle = 0;
-
+	int selectedButtonHandle = 0;
 	float buttonStartX_ = 0.0f;
+	float entryTime_ = 3.0f;
+	float translationTime_ = 3.0f;
+	bool isEndGame_ = false;
 
 	/// ============= メニュー関連 ============///
 	std::function<void()> menuRun[3];
+
+	/// ============= メニュー関連 ============///
+	float entryRate_ = 3.0f;
+	Transform drillerStartPositon_{};
+	Transform drillerHoldPosition_;
+	Transform drillerEndPosition_{};
 
 	/// ============= シーン内命令 =============///
 	void CameraPart();
@@ -90,6 +101,7 @@ private:
 	void ImGuiPart();
 #endif
 
+	void PhaseUpdate();
 	void BackgroundMove();
 	void UpdateSelect();
 	void SelectStart();

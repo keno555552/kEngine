@@ -33,7 +33,7 @@ Player::Player(kEngine* system, const Vector3& position) {
 }
 
 void Player::Update(Camera* camera) {
-	deltaTime_ = system_->GetDeltaTime();
+	totelDeltaTime_ = system_->GetDeltaTime();
 
 	BitMapBugCheck();
 	BehaviorRootUpdate();
@@ -150,11 +150,11 @@ void Player::Move() {
 		}
 
 		// 計算しだした加速度を速度に加える
-		velocity_.x += acceleration.x * deltaTime_;
+		velocity_.x += acceleration.x * totelDeltaTime_;
 
 		// 入力がない場合速度を減衰をかける
 		if (!moveRight_ && !moveLeft_) {
-			velocity_.x *= std::exp(-kAttenuation * deltaTime_);
+			velocity_.x *= std::exp(-kAttenuation * totelDeltaTime_);
 			if (std::abs(velocity_.x) < 0.01f) {
 				velocity_.x = 0.0f;
 			}
@@ -166,7 +166,7 @@ void Player::Move() {
 
 	} else {
 		// 非入力時は移動減衰をかける
-		velocity_.x *= std::exp(-kAttenuation * deltaTime_);
+		velocity_.x *= std::exp(-kAttenuation * totelDeltaTime_);
 		if (velocity_.x < 0.01f && velocity_.x > -0.01f) {
 			velocity_.x = 0.0f;
 		}
@@ -179,7 +179,7 @@ void Player::Move() {
 
 	// 回転制御
 	if (turnTimer_ > 0.0f) {
-		turnTimer_ -= deltaTime_;
+		turnTimer_ -= totelDeltaTime_;
 		turnTimer_ = std::max(turnTimer_, 0.0f);
 
 		float destinationRotationYTable[] = {
@@ -205,7 +205,7 @@ void Player::Move() {
 		}
 	} else {
 		// 落下速度
-		velocity_.y -= kGravityAcceleration * deltaTime_;
+		velocity_.y -= kGravityAcceleration * totelDeltaTime_;
 		// 落下速度制限
 		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
 	}
@@ -240,9 +240,9 @@ void Player::MapCollisionDecideDown(CollisionMapInfo& info) {
 
 	for (uint32_t i = 0; i < positionsNew.size(); i++) {
 		Vector3 translation_ = {};
-		translation_.x = mainPosition.transform.translate.x + info.moveVector.x * deltaTime_;
-		translation_.y = mainPosition.transform.translate.y + info.moveVector.y * deltaTime_;
-		translation_.z = mainPosition.transform.translate.z + info.moveVector.z * deltaTime_;
+		translation_.x = mainPosition.transform.translate.x + info.moveVector.x * totelDeltaTime_;
+		translation_.y = mainPosition.transform.translate.y + info.moveVector.y * totelDeltaTime_;
+		translation_.z = mainPosition.transform.translate.z + info.moveVector.z * totelDeltaTime_;
 		positionsNew[i] = CornerPosition(translation_, static_cast<Corner4>(i));
 	}
 	// 這裡不再做 y<=0 萠地判定，floorHit 由 CollisionManager 決定
@@ -252,9 +252,9 @@ void Player::MapCollisionDecideDown(CollisionMapInfo& info) {
 }
 
 void Player::MovePlayerByResult(const CollisionMapInfo& info) {
-	mainPosition.transform.translate.x += info.moveVector.x * deltaTime_;
-	mainPosition.transform.translate.y += info.moveVector.y * deltaTime_;
-	mainPosition.transform.translate.z += info.moveVector.z * deltaTime_;
+	mainPosition.transform.translate.x += info.moveVector.x * totelDeltaTime_;
+	mainPosition.transform.translate.y += info.moveVector.y * totelDeltaTime_;
+	mainPosition.transform.translate.z += info.moveVector.z * totelDeltaTime_;
 }
 
 void Player::BitMapBugCheck() {

@@ -103,7 +103,9 @@ void ParticleEmitter::Update() {
 			particles_.pop_back();
 		}
 	}
-	if (particles_.empty()) isFinished_ = true;
+	if (particles_.empty()) {
+		isFinished_ = true;
+	}
 }
 
 void ParticleEmitter::Emit(int count, ParticlePrototypeOverride* prototype) {

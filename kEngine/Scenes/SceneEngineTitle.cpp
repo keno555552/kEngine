@@ -14,8 +14,8 @@ SceneEngineTitle::SceneEngineTitle(kEngine* system) {
 	/// ===========Q[IuWFNg ==========///
 	Vector2 windowSize;
 	Vector2 windowCenter;
-	windowSize.x = (int)config::GetClientWidth();
-	windowSize.y = (int)config::GetClientHeight();
+	windowSize.x = (float)config::GetClientWidth();
+	windowSize.y = (float)config::GetClientHeight();
 	windowCenter.x = windowSize.x / 2;
 	windowCenter.y = windowSize.y / 2;
 

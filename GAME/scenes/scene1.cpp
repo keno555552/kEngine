@@ -7,13 +7,23 @@ Scene1::Scene1(kEngine* system) {
 	camera_ = system_->CreateCamera();
 	camera_.lock()->Move({ 0.0f, 0.5f, -10.0f });
 
+	phaseChangeTimer_ = new Timer();
+
 	/// =========== 後処理初期化 ==============///
 
 	ppp_GlitchScreen_ = new PPP_GlitchScreen(system_);
 	noiseCommand_ = ppp_GlitchScreen_->GetNoiseCommand();
-	ColorGradingCommand_ = ppp_GlitchScreen_->GetColorGradingCommand();
-	BlurCommand_ = ppp_GlitchScreen_->GetBlurCommand();
-	VignetteCommand_ = ppp_GlitchScreen_->GetVignetteCommand();
+	colorGradingCommand_ = ppp_GlitchScreen_->GetColorGradingCommand();
+	blurCommand_ = ppp_GlitchScreen_->GetBlurCommand();
+	vignetteCommand_ = ppp_GlitchScreen_->GetVignetteCommand();
+
+	circleCommand_ = new RenderCommand();
+	circleCommand_->vignetteCenter = { 0.5f, 0.5f };
+	circleCommand_->vignetteRadius = circleRadius;
+	circleCommand_->vignetteSoftness = circleSoftness;
+	circleCommand_->vignetteIntensity = circleCloseIntensity;
+
+	circleHandle_ = system_->GetPostProcessRunner()->SetPassVignette(0, *circleCommand_);
 
 	/// =========== リソースロード ============///
 
@@ -177,6 +187,7 @@ Scene1::~Scene1() {
 void Scene1::Update() {
 
 	/// 後処理更新
+	PhaseUpdate();
 	//ppp_GlitchScreen_->Update();
 
 	/// カメラ処理
@@ -243,7 +254,8 @@ void Scene1::Update() {
 
 			if (system_->GetTriggerOn(DIK_SPACE)) {
 				system_->SoundStop(SH_BGM_);
-				outcome_ = SceneOutcome::WIN;
+				isWin_ = true;
+				phase_ = ScenePhase::TRANSITION;
 			}
 		}
 	}
@@ -348,6 +360,51 @@ void Scene1::Draw() {
 #endif
 }
 
+void Scene1::PhaseUpdate() {
+
+	switch (phase_) {
+	case ScenePhase::PREPARE:
+
+		phase_ = ScenePhase::ENTRY;
+
+	case ScenePhase::ENTRY:
+
+		/// タイマー初期化
+		if (phaseChangeTimer_->maxTime_ == 0.0f) {
+			phaseChangeTimer_->Init0(entryTime_, system_->GetTimeManager());
+		}
+		/// 線方補間
+		circleCommand_->vignetteIntensity = phaseChangeTimer_->linearity(circleCloseIntensity, circleOpenIntensity);
+		/// circleに代入
+		system_->GetPostProcessRunner()->SetPassCommand(0, circleHandle_, *circleCommand_);
+
+		/// カンター行動
+		if (phaseChangeTimer_->ToMix()) {
+			phase_ = ScenePhase::PROGRESS;
+		}
+
+		break;
+
+	case ScenePhase::PROGRESS:
+		break;
+	case ScenePhase::TRANSITION:
+		/// タイマー初期化
+		if (phaseChangeTimer_->GetIsMax()) {
+			phaseChangeTimer_->Init0(entryTime_, system_->GetTimeManager());
+		}
+		/// 線方補間
+		circleCommand_->vignetteIntensity = phaseChangeTimer_->linearity(circleOpenIntensity, circleCloseIntensity);
+		/// circleに代入
+		system_->GetPostProcessRunner()->SetPassCommand(0, circleHandle_, *circleCommand_);
+
+		/// カンター行動
+		if (phaseChangeTimer_->ToMix()) {
+			outcome_ = SceneOutcome::WIN;
+		}
+		break;
+	}
+}
+
 void Scene1::CameraPart() {
 	if (useDebugCamera) {
 		usingCamera_ = debugCamera_;
@@ -401,13 +458,13 @@ void Scene1::ImGuiPart() {
 				renderCommand = noiseCommand_;
 				break;
 			case 1:
-				renderCommand = ColorGradingCommand_;
+				renderCommand = colorGradingCommand_;
 				break;
 			case 2:
-				renderCommand = BlurCommand_;
+				renderCommand = blurCommand_;
 				break;
 			case 3:
-				renderCommand = VignetteCommand_;
+				renderCommand = vignetteCommand_;
 				break;
 			}
 
@@ -451,6 +508,14 @@ void Scene1::ImGuiPart() {
 			ImGui::End();
 			ImGui::Begin("Effect");
 			ImGui::Text("Particle num: %d", system_->GetEffectManager()->GetParticleManager()->GetAllParticleCount());
+			ImGui::End();
+
+			ImGui::Begin("Circle");
+			ImGui::SliderFloat2("Circle Center", &circleCommand_->vignetteCenter.x, 0, 1);
+			ImGui::SliderFloat("Circle Radius", &circleCommand_->vignetteRadius, 0, 1);
+			ImGui::SliderFloat("Circle Softness", &circleCommand_->vignetteSoftness, 0, 1);
+			ImGui::SliderFloat("Circle Intensity", &circleCommand_->vignetteIntensity, 0, 100);
+			ImGui::ColorEdit4("Circle Color", &circleCommand_->vignetteColor.x);
 			ImGui::End();
 		}
 	}

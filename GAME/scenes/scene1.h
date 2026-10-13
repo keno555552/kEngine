@@ -28,9 +28,20 @@ private:
 
 	PPP_GlitchScreen* ppp_GlitchScreen_ = nullptr;
 	RenderCommand* noiseCommand_;
-	RenderCommand* ColorGradingCommand_;
-	RenderCommand* BlurCommand_;
-	RenderCommand* VignetteCommand_;
+	RenderCommand* colorGradingCommand_;
+	RenderCommand* blurCommand_;
+	RenderCommand* vignetteCommand_;
+
+	/// =========== シーン切り替え用
+	float entryTime_ = 1.0f;
+
+	float circleRadius = 0.832f;
+	float circleSoftness = 0.081f;
+	float circleOpenIntensity = 0.0f;
+	float circleCloseIntensity = 90.0f;
+	RenderCommand* circleCommand_;
+	int circleHandle_ = -1;
+
 	int currentGuardType = 0;
 
 	/// ============== カメラ関連 ==============///
@@ -96,11 +107,13 @@ private:
 	/// ========== 当たり判定マネージャー =========///
 	CollisionManager collisionManager_;
 
-	/// =============== �t���O ================///
+	/// =============== フラグ ================///
 	bool useDebugCamera = false;
+	bool isWin_ = false;
 
 private:
 	/// ============= �V�[������� =============///
+	void PhaseUpdate();
 	void CameraPart();
 	void ImGuiPart();
 

@@ -1,6 +1,8 @@
 #pragma once
 #include <chrono>
 #include <vector>
+#include <functional>
+#include "MathsIncluder.h"
 
 class TimeManager
 {
@@ -11,7 +13,7 @@ public:
 	void Update();
 
 public:
-	float getDeltaTime() const { return deltaTime_; }
+	float getDeltaTime() const { return totelDeltaTime_; }
 	float getInstantFPS() const { return instantFps_; }
 	float getFPSPerSecond() const { return fpsPerSecond_; }
 
@@ -27,7 +29,7 @@ public:
 
 private:
 	std::chrono::steady_clock::time_point lastUpdateTime;
-	float deltaTime_ = 0.0f;
+	float totelDeltaTime_ = 0.0f;
 	float oneScondCounter_ = 0.0f;
 	std::vector<float>fpsHistory_;
 	float instantFps_ = 0.0f;
@@ -138,7 +140,7 @@ public:
 	/// <param name="t">clockの最大時間</param>
 	/// <param name="r">変動率[1.0f以上]</param>
 	/// <returns>aからbまで今どれくらい進んでる値</returns>
-	float easyIn(int a, int b, float r);
+	float easyIn(float a, float b, float r);
 
 	/// <summary>
 	/// Timerに連れてAからBまで変動、段々遅くなーる
@@ -318,5 +320,10 @@ float easyOutBack(int a, int b, float time, float r);
 float step(float a, float b, float t);
 
 float smootherstep(float t);
+
+#pragma endregion 
+
+#pragma region EaseForBigger
+
 
 #pragma endregion 

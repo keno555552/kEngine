@@ -58,6 +58,9 @@ public:
 	//void LinkParticleToObject(int emitterId, Object* object); //まだ準備できてない
 	void LinkEmitterToEmitter(EmitterLink& linkData);
 
+	/// データ管理
+	void RemoveEmitter(int id);
+
 	/// データセット
 	void SetEmitterEnd(int emitterId, bool isEnd);
 	void SetEmitterDead(int emitterId);

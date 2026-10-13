@@ -39,7 +39,9 @@ public:
 	void Draw();
 
 	/// --- EmitterLinkための --- ///
-	std::vector<ParticleInstance>& GetParticles() { return particles_; }
+	const std::string& GetName() const { return prototype_.name; }
+	const  ParticleRenderType& GetRenderType() const { return isObjectType_; }
+	const std::vector<ParticleInstance>& GetParticles() const { return particles_; }
 	std::vector<ParticleInstance>& GetEmittingData();
 	std::vector<ParticleInstance>& GetDexpiredData();
 	ParticleInstance* FindParticleById(int id);
@@ -47,10 +49,12 @@ public:
 	void ClearDexpiredData();	// 死亡記録のクリア
 
 	/// --- 生命周期 --- ///
+	bool GetIsEmitting() const { return isEmitting_; }
 	bool GetIsEnd() const { return isEnd_; }
 	bool GetIsFinished() const { return isFinished_; }
 	void SetIsEnd(bool isEnd) { isEnd_ = isEnd; }
 	void SetIsDead() { isFinished_ = true; isEnd_ = true; }
+
 
 private:
 

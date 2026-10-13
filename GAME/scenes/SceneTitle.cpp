@@ -9,6 +9,14 @@ SceneTitle::SceneTitle(kEngine* system) {
 	camera_ = system_->CreateCamera();
 	camera_.lock()->SetTranslate({ 0.0f, 0.0f, -8.333f });
 
+	phaseChangeTimer_ = new Timer;
+
+	/// =========== 後処理初期化 ==============///
+
+	colorGradingCommand_.guardColor = { 0.0f,0.0f,0.0f };
+	colorGradingCommand_.guardAmount = 0.0f;
+	ColorGradingPassHandle_ = system_->GetPostProcessRunner()->SetPassColorGrading(0, colorGradingCommand_);
+
 	/// =========== リソースハンドル ============///
 
 	/// モデルハンドル
@@ -63,12 +71,26 @@ SceneTitle::SceneTitle(kEngine* system) {
 	title_->objectParts_[0].materialConfig->textureHandle = TH_title;
 	title_->Update(nullptr);
 
+
+	drillerStartPositon_.translate = { -3.222f, 2.462f, -1.0f };
+	drillerStartPositon_.rotate = { -0.483f, 0.314f, -0.628f };
+	drillerStartPositon_.scale = { 0.7f, 0.7f, 0.7f };
+
+	drillerHoldPosition_.translate = { -1.0f, -0.5f, -1.0f };
+	drillerHoldPosition_.rotate = { -0.483f, 0.314f, -0.628f };
+	drillerHoldPosition_.scale = { 0.7f, 0.7f, 0.7f };
+
+	drillerEndPosition_.translate = { 2.333f, -4.943f, -1.0f };
+	drillerEndPosition_.rotate = { -0.483f, 0.314f, -0.628f };
+	drillerEndPosition_.scale = { 0.7f, 0.7f, 0.7f };
+
+
+
 	driller_ = std::make_unique<Driller>(system_, Vector3{ 0.0f,0.0f,0.0f });
 	driller_->CreateModelData(MH_driller_);
-	driller_->mainPosition.transform.translate = { -1.0f, -0.5f, -1.0f };
-	driller_->mainPosition.transform.rotate = { -0.483f, 0.314f, -0.628f };
-	driller_->mainPosition.transform.scale = { 0.7f, 0.7f, 0.7f };
+	driller_->mainPosition.transform = drillerStartPositon_;
 	driller_->IsTitle(true);
+
 
 	buttonStartX_ = 995.0f;
 	startButton_->IntObject(system_);
@@ -128,9 +150,12 @@ SceneTitle::~SceneTitle() {
 	delete settingButton_;
 	delete quitButton_;
 
+	system_->GetPostProcessRunner()->ClearLayer(0);
 }
 
 void SceneTitle::Update() {
+
+	PhaseUpdate();
 
 	CameraPart();
 
@@ -216,6 +241,88 @@ void SceneTitle::CameraPart() {
 	system_->SetCamera(usingCamera_);
 }
 
+void SceneTitle::PhaseUpdate() {
+
+	Transform drillerNowPositon_{};
+	float rate{};
+	Transform startPos {};
+	Transform endPos {};
+
+	switch (phase_) {
+	case ScenePhase::PREPARE:
+
+		phase_ = ScenePhase::ENTRY;
+
+	case ScenePhase::ENTRY:
+
+		if (phaseChangeTimer_->maxTime_ == 0.0f) {
+			phaseChangeTimer_->Init0(entryTime_, system_->GetTimeManager());
+		}
+
+		rate = phaseChangeTimer_->easyIn(entryRate_);
+		startPos = drillerStartPositon_;
+		endPos = drillerHoldPosition_;
+
+		drillerNowPositon_ = LinearTransform(startPos, endPos, rate);
+
+		driller_->mainPosition.transform = drillerNowPositon_;
+
+		colorGradingCommand_.guardAmount = 1.0f - rate;
+		system_->GetPostProcessRunner()->SetPassCommand(0, ColorGradingPassHandle_, colorGradingCommand_);
+
+		if (phaseChangeTimer_->ToMix()) {
+			phase_ = ScenePhase::PROGRESS;
+		}
+
+		break;
+
+	case ScenePhase::PROGRESS:
+		break;
+	case ScenePhase::TRANSITION:
+		if (phaseChangeTimer_->GetIsMax()) {
+			phaseChangeTimer_->Init0(translationTime_, system_->GetTimeManager());
+		}
+
+		rate = phaseChangeTimer_->easyOut(entryRate_);
+		startPos = drillerHoldPosition_;
+		endPos = drillerEndPosition_;
+
+		drillerNowPositon_ = LinearTransform(startPos, endPos, rate);
+
+		driller_->mainPosition.transform = drillerNowPositon_;
+
+		colorGradingCommand_.guardAmount = rate;
+		system_->GetPostProcessRunner()->SetPassCommand(0, ColorGradingPassHandle_, colorGradingCommand_);
+
+		if (phaseChangeTimer_->ToMix()) {
+			outcome_ = SceneOutcome::NEXT;
+		}
+		break;
+	}
+
+	if (isEndGame_) {
+
+		if (phaseChangeTimer_->GetIsMax()) {
+			phaseChangeTimer_->Init0(translationTime_, system_->GetTimeManager());
+		}
+
+		rate = phaseChangeTimer_->linearity();
+		startPos = drillerHoldPosition_;
+		endPos = drillerStartPositon_;
+
+		drillerNowPositon_ = LinearTransform(startPos, endPos, rate);
+
+		driller_->mainPosition.transform = drillerNowPositon_;
+
+		colorGradingCommand_.guardAmount = rate;
+		system_->GetPostProcessRunner()->SetPassCommand(0, ColorGradingPassHandle_, colorGradingCommand_);
+
+		if (phaseChangeTimer_->ToMix()) {
+			outcome_ = SceneOutcome::EXIT;
+		}
+	}
+}
+
 void SceneTitle::BackgroundMove() {
 
 	background_->objectParts_[0].materialConfig->uvTranslate.x += movingSpeed_;
@@ -230,30 +337,32 @@ void SceneTitle::UpdateSelect() {
 
 	if (!isUp && !isDown && !isSelect)return;
 
-	if (isUp && selectedButtonhandle > START) {
-		selectedButtonhandle--;
+	if (isUp && selectedButtonHandle > START) {
+		selectedButtonHandle--;
 		system_->SoundPlaySE(SH_Select_);
-	} else if (isDown && selectedButtonhandle < QUIT) {
-		selectedButtonhandle++;
+	} else if (isDown && selectedButtonHandle < QUIT) {
+		selectedButtonHandle++;
 		system_->SoundPlaySE(SH_Select_);
 	}
 
-	startButton_->objectParts_[0].materialConfig->textureHandle = (selectedButtonhandle == START) ? TH_buttonBack_Select_ : TH_buttonBack_notSelect_;
-	settingButton_->objectParts_[0].materialConfig->textureHandle = (selectedButtonhandle == SETTING) ? TH_buttonBack_Select_ : TH_buttonBack_notSelect_;
-	quitButton_->objectParts_[0].materialConfig->textureHandle = (selectedButtonhandle == QUIT) ? TH_buttonBack_Select_ : TH_buttonBack_notSelect_;
+	startButton_->objectParts_[0].materialConfig->textureHandle = (selectedButtonHandle == START) ? TH_buttonBack_Select_ : TH_buttonBack_notSelect_;
+	settingButton_->objectParts_[0].materialConfig->textureHandle = (selectedButtonHandle == SETTING) ? TH_buttonBack_Select_ : TH_buttonBack_notSelect_;
+	quitButton_->objectParts_[0].materialConfig->textureHandle = (selectedButtonHandle == QUIT) ? TH_buttonBack_Select_ : TH_buttonBack_notSelect_;
 
 	if (isSelect) {
-		if (selectedButtonhandle != SETTING) {
+		if (selectedButtonHandle != SETTING) {
 			system_->SoundStop(SH_BGM_);
 		}
+		if (selectedButtonHandle == MAX) {
+			assert(0 && "selectedButtonHandle is out of range");
+		}
 		system_->SoundPlaySE(SH_Decide_);
-		menuRun[selectedButtonhandle]();
-
+		menuRun[selectedButtonHandle]();
 	}
 }
 
 void SceneTitle::SelectStart() {
-	outcome_ = SceneOutcome::NEXT;
+	phase_ = ScenePhase::TRANSITION;
 }
 
 void SceneTitle::SelectSetting() {
@@ -263,5 +372,5 @@ void SceneTitle::SelectSetting() {
 }
 
 void SceneTitle::SelectQuit() {
-	outcome_ = SceneOutcome::EXIT;
+	isEndGame_ = true;
 }

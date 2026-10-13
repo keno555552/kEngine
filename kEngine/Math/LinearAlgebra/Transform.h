@@ -34,3 +34,5 @@ private:
 };
 
 Transform CreateDefaultTransform();
+
+Transform LinearTransform(const Transform& a, const Transform& b, float t);

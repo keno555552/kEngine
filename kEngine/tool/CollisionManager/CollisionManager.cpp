@@ -7,7 +7,7 @@
 #include <algorithm>
 
 void CollisionManager::Update(float deltaTime) {
-	deltaTime_ = deltaTime;
+	totelDeltaTime_ = deltaTime;
 
 	PlayerMapCollision();
 	PlayerEnemyCollision();
@@ -29,7 +29,7 @@ bool CollisionManager::PlayerMapCollision() {
 	CollisionResult result = mapChipField_->GetMapCollisionCorrection(
 		box,
 		velocity,
-		deltaTime_
+		totelDeltaTime_
 	);
 
 	// 当たると速度を0にする

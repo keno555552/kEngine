@@ -19,6 +19,9 @@ Driller::Driller(kEngine* system, const Vector3& position) {
 
 	drillOnOffTimer_.InitM(Driller_OnOffTime, system_->GetTimeManager());
 
+	sharkObject_ = std::make_unique<MovementObject>(system_);
+	sharkObject_->SetShake(true, 0.005f);
+
 	/// bugCheck
 	checkTimer_.Init0(1.0f, system_->GetTimeManager());
 
@@ -37,19 +40,17 @@ void Driller::Update(Camera* camera) {
 	if ((drillerState_ & (int)DrillerState::kTitleMovement) == (int)DrillerState::kTitleMovement) {
 		TitleMovement();
 	} else {
+		sharkObject_->ReleaseObject();
 		isShake_ = false;
 	}
 
 	/// 振動処理
 	if (isShake_) {
-		this->followObject_ = &(shakeObject_->mainPosition);
-		ShakeMovement();
-	} else {
-		followObject_ = nullptr;
-		shakeObject_->mainPosition.transform.translate = { 0.0f, 0.0f, 0.0f }; 
+		if (sharkObject_->GetTargetFollow() != this) {
+			sharkObject_->TakeAppartObject(this);
+		}
+		sharkObject_->Update(nullptr);
 	}
-
-
 }
 
 #ifdef USE_IMGUI
@@ -84,17 +85,6 @@ void Driller::ImGuiPart() {
 void Driller::OpenDoor() {}
 
 void Driller::CloseDoor() {}
-
-void Driller::ShakeMovement() {
-	/// シェーク
-
-	Vector3 shakePos{};
-	shakePos.x = randomMaker_->randomFloat(-shakingScale_, shakingScale_);
-	shakePos.y = randomMaker_->randomFloat(-shakingScale_, shakingScale_);
-	shakePos.z = randomMaker_->randomFloat(-shakingScale_, shakingScale_);
-
-	shakeObject_->mainPosition.transform.translate = shakePos;
-}
 
 void Driller::RunDrill() {
 
