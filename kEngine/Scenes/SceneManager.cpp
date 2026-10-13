@@ -5,6 +5,7 @@ std::unique_ptr <SceneManager> SceneManager::sceneManager_ = nullptr;
 void SceneManager::Initialize(kEngine* system) {
 	system_ = system;
 	sceneFactory_ = std::make_unique<SceneFactory>(system);
+	//sceneUsingNameHandle_ = "ENGINE_TITLE";
 	sceneUsingNameHandle_ = "TITLE";
 	//sceneUsingNameHandle_ = "STAGE_01";
 	//sceneUsingNameHandle_ = "CGHK2";
@@ -20,6 +21,8 @@ void SceneManager::Initialize(kEngine* system) {
 	helperSprite_->mainPosition.transform.scale = { 0.5f,0.5f,1.0f };
 	helperSprite_->mainPosition.transform.translate = { 0.0f,550.0f,0.0f };
 	helperSprite_->objectParts_[0].materialConfig->textureHandle = helperTextureHandle_;
+
+	config::default_White5x5_TextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/white5x5.png");
 
 	defaultMenu_ = std::make_unique <DefaultMenu>(system_);
 }

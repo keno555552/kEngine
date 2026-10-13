@@ -8,6 +8,7 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 	config::SaveClientTitle(kClientTitle);
 	config::SaveClientWidth(kClientWidth);
 	config::SaveClientHeight(kClientHeight);
+	config::SetClientWindowMode(config::GetDefaultWindowMode());
 
 	dxComm = std::make_unique<DirectXController>();
 	dxComm->InitializeDrive(kClientTitle, kClientWidth, kClientHeight);
@@ -90,6 +91,33 @@ void kEngine::Finalize() {
 }
 
 void kEngine::StartFrame() {
+
+	auto winAPI = dxComm->GetWinAPI();
+	int w = winAPI->GetPendingWidth();
+	int h = winAPI->GetPendingHeight();
+
+	/// ウィンドウモード切り替え
+	if (hasPendingMode_) {
+		hasPendingMode_ = false;
+		config::SetClientWindowMode(pendingMode_);
+		winAPI->ApplyWindowMode(pendingMode_, config::GetDefaultWidth(), config::GetDefaultHeight());
+		lastWinWidth_ = lastWinHeight_ = 0;		// リサイズ処理を強制的に行うために、前回のウィンドウサイズをリセット
+	}
+
+
+	/// ウィンドウサイズ変更
+	if (winAPI->IsResizeNeeded()) {
+		int w = winAPI->GetPendingWidth(), h = winAPI->GetPendingHeight();
+		winAPI->SetResizeNeeded(false);
+		if (w != lastWinWidth_ || h != lastWinHeight_) {
+			dxComm->ResizeSwapChain(w, h);
+			drawEngine->OnResize(w, h);
+			cameraManager->OnResize(w, h);
+			config::SaveClientWidth(w);
+			config::SaveClientHeight(h);
+		}
+	}
+
 	dxComm->StartFrame();
 	drawEngine->StartFrame();
 	inputManager->KeysUpdata();
@@ -143,7 +171,29 @@ void kEngine::AnimationTakeControlObject(int unitHandle, Object* object) {
 
 #pragma endregion
 
+#pragma region window調整
+
+/// windowサイズの取得
+void kEngine::SetWindowSize(int width, int height) {
+	auto winAPI = dxComm->GetWinAPI();
+
+	if (config::GetClientWindowMode() == FULLSCREEN) return;
+	winAPI->SetClientSize(width, height);
+
+}
+
+
+void kEngine::SetWindowMode(WindowMode mode) {
+
+	if (mode >= Num_Of_Type) return;
+	pendingMode_ = mode; hasPendingMode_ = true;
+
+}
+
+#pragma endregion
+
 #pragma region 描画システム
+
 
 void kEngine::DrawDebugLine(DebugLine* debugLine) {
 

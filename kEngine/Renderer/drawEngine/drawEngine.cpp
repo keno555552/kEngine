@@ -35,7 +35,6 @@ void DrawEngine::Initialize(
 	depthStencilResource = resourceManager_->CreateDepthStencilTextureResource(directXDriver_->GetDevice(), kClientWidth_, kClientHeight_);
 	MakeDepthStencilView();
 
-
 	viewport = createViewport(kClientWidth_, kClientHeight_);
 	scissorRect = createScissorRect(kClientWidth_, kClientHeight_);
 
@@ -188,12 +187,38 @@ void DrawEngine::Finalize() {
 
 }
 
+void DrawEngine::OnResize(int width, int height) {
+
+	kClientWidth_ = width;
+	kClientHeight_ = height;
+
+	/// DepthStencilのリサイズ更新
+	// Reset
+	depthStencilResource.Reset();
+	// Create(Attachによって、過多にAddRefをしない)
+	depthStencilResource.Attach(
+		resourceManager_->CreateDepthStencilTextureResource(
+			directXDriver_->GetDevice(),
+			kClientWidth_,
+			kClientHeight_)
+		);
+	// DSF heapの更新
+	MakeDepthStencilView();
+
+	/// ViewportとScissorのサイズ更新
+	viewport = createViewport(kClientWidth_, kClientHeight_);
+	scissorRect = createScissorRect(kClientWidth_, kClientHeight_);
+
+	/// PostProcessRunnerのリサイズ
+	postProcessRunner_->OnResize(width, height);
+}
+
 void DrawEngine::StartFrame() {
 
 	/// 描画用のDescriptorHeapの設定
 	SetSRVHeap();
 	/// Viewportを設定
-	commandList_->RSSetViewports(1, &viewport); 
+	commandList_->RSSetViewports(1, &viewport);
 	/// Scissorを設定
 	commandList_->RSSetScissorRects(1, &scissorRect);
 
@@ -364,6 +389,8 @@ void DrawEngine::Draw2DOpaque() {
 
 	/// TileSRV
 	commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::TransformMatricesList_SB), tile2DWVPResource_->GetGPUDescriptorHandle());
+	commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialList_SB), materialResource_->GetGPUDescriptorHandle());
+	commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialIndexList_SB), materialIndexListResource_->GetGPUDescriptorHandle());
 
 	for (auto& [psoKey, materialBuckets] : transparentObjectParts2D_) {
 

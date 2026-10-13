@@ -32,6 +32,8 @@ protected:
 protected:
 	kEngine* system_ = nullptr;
 
+	Timer* phaseChangeTimer_ = nullptr;
+
 	SceneOutcome outcome_ = SceneOutcome::NONE;
 	bool isSceneEnd_ = false;
 };

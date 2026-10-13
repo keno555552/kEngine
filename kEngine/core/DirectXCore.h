@@ -55,6 +55,15 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentBackBufferRTV();
 	ID3D12Resource* GetCurrentBackBufferResource();
 
+	/// windowSize関連
+	void ResizeSwapChain(int newLengthX, int newHeightY);
+
+	int GetWindowLengthX() { return lengthX_; }
+	int GetWindowHeightY() { return heightY_; }
+	bool GetIsChangeSize() { return isChangeSize_; }
+	// WinAPI関連
+	WinAPI* GetWinAPI() { return winAPI_.get(); }
+
 	/// Command関連
 	ID3D12GraphicsCommandList* GetCommandList() { return commandList.Get(); }
 	ID3D12CommandQueue* GetCommandQueue() { return commandQueue.Get(); }
@@ -107,6 +116,11 @@ protected:
 	uint64_t fenceValue = 0;
 	HANDLE fenceEvent = nullptr;
 	std::unique_ptr<WinAPI> winAPI_{};
+
+	/// windowsサイズ関連
+	int lengthX_ = 0;
+	int heightY_ = 0;
+	bool isChangeSize_ = false;
 
 	/// DirectInput
 	Microsoft::WRL::ComPtr<IDirectInput8> directInput{};

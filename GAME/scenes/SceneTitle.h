@@ -3,7 +3,8 @@
 #include "BaseScene.h"
 #include "Object\Sprite.h"
 #include "GameObject\Camera\DebugCamera.h"
-#include "DefaultMenu/DefaultMenu.h"
+#include "DefaultMenu\DefaultMenu.h"
+#include "GAME\Object\Driller\Driller.h"
 
 class SceneTitle :public BaseScene
 {
@@ -39,6 +40,7 @@ private:
 	/// モデルハンドル
 	int MH_skydome_{};
 	int MH_ground_{};
+	int MH_driller_{};
 
 	/// テキスチャーハンドル
 	int TH_buleSkySkydome_{};
@@ -49,7 +51,9 @@ private:
 	int TH_quitButton_{};
 	int TH_buttonBack_notSelect_{};
 	int TH_buttonBack_Select_{};
+	int TH_background_{};
 
+	/// サウンドハンドル
 	int SH_BGM_{};
 	int SH_Select_{};
 	int SH_Decide_{};
@@ -57,6 +61,8 @@ private:
 	/// =========== ゲームオブジェクト ==========///
 	std::unique_ptr<Object> skydome_;
 	std::unique_ptr<Object> ground_;
+	std::unique_ptr<Object> background_;
+	std::unique_ptr<Driller> driller_;
 
 	SimpleSprite* title_ = new SimpleSprite;
 
@@ -64,10 +70,15 @@ private:
 	SimpleSprite* settingButton_ = new SimpleSprite;
 	SimpleSprite* quitButton_ = new SimpleSprite;
 
+	/// =========== background関連 ============///
+	float movingSpeed_ = 0.03f;
+
 	/// =============== フラグ ================///
 	bool useDebugCamera = false;
 
 	int selectedButtonhandle = 0;
+
+	float buttonStartX_ = 0.0f;
 
 	/// ============= メニュー関連 ============///
 	std::function<void()> menuRun[3];
@@ -79,6 +90,7 @@ private:
 	void ImGuiPart();
 #endif
 
+	void BackgroundMove();
 	void UpdateSelect();
 	void SelectStart();
 	void SelectSetting();

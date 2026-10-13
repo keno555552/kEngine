@@ -50,9 +50,13 @@ public:
 
 	void Finalize();
 
+	void OnResize(int width, int height);
+
 	void StartFrame();
+
 	void PreDraw();
 	void CommitDraw();
+
 	void EndDraw();
 
 	/// ======== 全部描く関数 ======== ///

@@ -63,6 +63,11 @@ private:
 		//		{SceneOutcome::WIN,"WIN"},
 		//	}
 		//},
+		{"ENGINE_TITLE",
+			{
+				{SceneOutcome::NEXT,"TITLE"},
+			}
+		},
 		{"TITLE",
 			{
 					{SceneOutcome::NEXT,"STAGE_01"},

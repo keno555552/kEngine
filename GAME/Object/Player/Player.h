@@ -168,7 +168,7 @@ private:
 
 		numStates = 5,///<<< numStatesの値の更新を忘れなく
 	};
-	PlayerState playerState_ = PlayerState::kNormal;
+	PlayerState drillerState_ = PlayerState::kNormal;
 
 	// 行動可能フラグ
 	int canShoot = static_cast<int>(PlayerState::kNormal) |

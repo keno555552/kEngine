@@ -12,11 +12,13 @@
 #include "GAME/scenes/SceneWin.h"
 #include "GAME/scenes/SceneLose.h"
 #include "Tool/EffectSystem/EffectEditor.h"
+#include "Scenes/SceneEngineTitle.h"
 
 
 SceneFactory::SceneFactory(kEngine* system)
     : system_(system)
 {
+    sceneRegistry_["ENGINE_TITLE"] = [this]() { return std::make_unique<SceneEngineTitle>(system_); };
     sceneRegistry_["ANIMATIONEDITOR"] = [this]() { return std::make_unique<AnimationEditor>(system_); };
     sceneRegistry_["EFFECT2"] = [this]() { return std::make_unique<Effect2>(system_); };
     sceneRegistry_["CGHK2"] = [this]() { return std::make_unique<SceneCGHK2>(system_); };

@@ -36,6 +36,9 @@ public:
 	/// 描画チェーンを実行する前に実行する関数、PPRenderTextureをReset、Clear、設定する用
 	void SetPreDraw(DrawEngine* drawEngine);
 
+	/// Windowのリサイズ時に実行する関数
+	void OnResize(int width, int height);
+
 	/// drawEngine用、RenderCommandGPUを設定する関数
 	void SetRenderCommand(DrawEngine* drawEngine, const RenderCommandGPU& command);
 	/// drawEngine用、PPRenderCommandを描画用に初期化するための関数

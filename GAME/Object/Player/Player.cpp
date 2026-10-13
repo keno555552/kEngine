@@ -75,7 +75,7 @@ void Player::Attack(Vector3 mousePos) {
 	// 射撃CD中
 	if (shootCD_.parameter_ != shootCD_.maxTime_)return;
 	// 状態が射撃可能でない
-	if (!(static_cast<int>(playerState_) & canShoot)) return;
+	if (!(static_cast<int>(drillerState_) & canShoot)) return;
 
 	/// 弾の生成
 	Vector3 shootDirection = mousePos - mainPosition.transform.translate;
@@ -273,11 +273,11 @@ void Player::BitMapBugCheck() {
 		};
 
 		for (auto& bugCheck : bugChecksList) {
-			if ((static_cast<int>(playerState_) & bugCheck) == bugCheck) {
+			if ((static_cast<int>(drillerState_) & bugCheck) == bugCheck) {
 				Logger::Log("Player:: PlayerState Bug Detected:");
 				// 状態をビットごとに出力
 				for (int i = 0; i < static_cast<int>(PlayerState::numStates); i++) {
-					if (static_cast<int>(playerState_) & (1 << i)) {
+					if (static_cast<int>(drillerState_) & (1 << i)) {
 						Logger::Log("%d,", (1 << i));
 					}
 				}
