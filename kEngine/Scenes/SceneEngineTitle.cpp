@@ -3,6 +3,12 @@
 
 SceneEngineTitle::SceneEngineTitle(kEngine* system) {
 	system_ = system;
+
+	phaseChangeTimer_ = new Timer;
+	colorGradingCommand_.guardColor = { 0.0f,0.0f,0.0f };
+	colorGradingCommand_.guardAmount = 0.0f;
+	ColorGradingPassHandle_ = system_->GetPostProcessRunner()->SetPassColorGrading(0, colorGradingCommand_);
+
 	/// =========== リソースハンドル ============///
 
 	/// テキスチャーハンドル
@@ -51,10 +57,12 @@ SceneEngineTitle::~SceneEngineTitle() {
 	system_->SoundStop(SH_BGM_);
 
 	title_.release();
+
+	system_->GetPostProcessRunner()->ClearLayer(0);
 }
 
 void SceneEngineTitle::Update() {
-
+	PhaseUpdate();
 }
 
 void SceneEngineTitle::Draw() {
@@ -76,4 +84,81 @@ void SceneEngineTitle::ImGuiPart() {
 
 	ImGui::End();
 }
+
+void SceneEngineTitle::PhaseUpdate() {
+
+	float rate{};
+
+	switch (phase_) {
+	case ScenePhase::PREPARE:
+
+		phase_ = ScenePhase::ENTRY;
+
+	case ScenePhase::ENTRY:
+
+		/// タイマー初期化
+		if (phaseChangeTimer_->maxTime_ == 0.0f) {
+			phaseChangeTimer_->Init0(entryTime_, system_->GetTimeManager());
+		}
+		/// 線方補間
+		rate = phaseChangeTimer_->linearity();
+		/// circleに代入
+		colorGradingCommand_.guardAmount = 1.0f - rate;
+		system_->GetPostProcessRunner()->SetPassCommand(0, ColorGradingPassHandle_, colorGradingCommand_);
+
+
+		/// カンター行動
+		if (phaseChangeTimer_->ToMix()) {
+			phase_ = ScenePhase::PROGRESS;
+		}
+
+		break;
+
+	case ScenePhase::PROGRESS:
+
+		/// タイマー初期化
+		if (phaseChangeTimer_->GetIsMax()) {
+			phaseChangeTimer_->Init0(showTime_, system_->GetTimeManager());
+		}
+
+		/// カンター行動
+		if (phaseChangeTimer_->ToMix()) {
+			phase_ = ScenePhase::TRANSITION;
+		}
+
+		break;
+	case ScenePhase::TRANSITION:
+		/// タイマー初期化
+		if (phaseChangeTimer_->GetIsMax()) {
+			phaseChangeTimer_->Init0(entryTime_, system_->GetTimeManager());
+		}
+		/// 線方補間
+		rate = phaseChangeTimer_->linearity();
+		/// circleに代入
+		colorGradingCommand_.guardAmount = rate;
+		system_->GetPostProcessRunner()->SetPassCommand(0, ColorGradingPassHandle_, colorGradingCommand_);
+
+		/// カンター行動
+		if (phaseChangeTimer_->ToMix()) {
+			outcome_ = SceneOutcome::NEXT;
+		}
+		break;
+	}
+
+	bool isMousePush = system_->GetMouseIsPush(0) || system_->GetMouseIsPush(1) || system_->GetMouseIsPush(2);
+	bool isKeysPush =
+		system_->GetIsPush(DIK_RETURN) || 
+		system_->GetIsPush(DIK_ESCAPE) ||
+		system_->GetIsPush(DIK_SPACE) || 
+		system_->GetIsPush(DIK_A) ||
+		system_->GetIsPush(DIK_S) ||
+		system_->GetIsPush(DIK_D) || 
+		system_->GetIsPush(DIK_F) ||
+		system_->GetIsPush(DIK_R);
+
+	if (isKeysPush || isMousePush) {
+		outcome_ = SceneOutcome::NEXT;
+	}
+}
+
 #endif
