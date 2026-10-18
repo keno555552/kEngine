@@ -12,6 +12,10 @@
 #include "CG4_HK_1/Effect2.h"
 #include "CG3_HK_2/SceneCGHK2.h"
 
+#ifdef _DEBUG
+#include "CheatEngine/CheatEngine.h"
+#endif
+
 class SceneManager {
 public:
 
@@ -109,6 +113,11 @@ private:
 	std::unique_ptr <SceneFactory> sceneFactory_ = nullptr;
 
 	std::unique_ptr <DefaultMenu> defaultMenu_ = nullptr;
+
+#ifdef _DEBUG
+	/// チートエンジン
+	std::unique_ptr<CheatEngine> cheatEngine_ = nullptr;
+#endif
 
 	/// ========= リソースハンドル ========= ///
 

@@ -88,6 +88,10 @@ void DirectXController::EndFrame() {
 	ID3D12CommandList* commandLists[] = { commandList.Get() };
 	commandQueue->ExecuteCommandLists(1, commandLists);
 
+#ifdef USE_IMGUI
+	ImGuiManager::RenderPlatformWindows();
+#endif
+
 	// GPUとOSに画面の交換を行うよう通知する
 	SwapChain->Present(1, 0);
 

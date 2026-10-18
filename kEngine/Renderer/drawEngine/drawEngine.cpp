@@ -164,9 +164,23 @@ void DrawEngine::Initialize(
 
 	/// ========================== デフォルトのモデルを設定 ========================== ///
 	defaultTextureHandle_ = resourceManager_->LoadModelTexture("./kEngine/EngineAssets/TemplateResource/texture/white5x5.png");
+
+	/// ========================= ImGui用のPreviewRTを作成 ========================== ///
+#ifdef USE_IMGUI
+	previewRT_ = ResourceManager::GetInstance()->CreateRenderTexture(
+		512, 384, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, Vector4{ 0.10f, 0.12f, 0.16f, 1.0f });
+	previewCameraBuffer_ = std::make_unique<BasicResource>();
+	previewCameraBuffer_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(CameraForGPU));
+	previewCameraBuffer_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&previewCameraPtr_));
+	previewCameraBuffer_->SetName("PreviewCameraBuffer");
+#endif
 }
 
 void DrawEngine::Finalize() {
+
+#ifdef USE_IMGUI
+	previewCameraBuffer_.reset();
+#endif
 
 	psoManager_->Finalize();
 	psoManager_.reset();
@@ -261,6 +275,63 @@ void DrawEngine::EndDraw() {
 
 	postProcessRunner_->Execute(this);
 }
+
+#ifdef USE_IMGUI
+void DrawEngine::RenderPreview() {
+	/// ObjectEditorがついてない場合スキップ
+	if (!previewRequest_.active) return;
+
+	TransitionRenderTarget(previewRT_, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+	commandList_->OMSetRenderTargets(1, &previewRT_.rtvHandleCPU, FALSE, &previewRT_.dsvHandleCPU);
+	const float clear[4] = { previewRT_.clearColor.x, previewRT_.clearColor.y, previewRT_.clearColor.z, previewRT_.clearColor.w };
+	commandList_->ClearRenderTargetView(previewRT_.rtvHandleCPU, clear, 0, nullptr);
+	commandList_->ClearDepthStencilView(previewRT_.dsvHandleCPU, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+
+	D3D12_VIEWPORT vp{};
+	vp.TopLeftX = 0.0f;
+	vp.TopLeftY = 0.0f;
+	vp.Width = (float)previewRT_.width;
+	vp.Height = (float)previewRT_.height;
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+
+	D3D12_RECT sc{};
+	sc.left = 0;
+	sc.top = 0;
+	sc.right = (LONG)previewRT_.width;
+	sc.bottom = (LONG)previewRT_.height;
+
+	commandList_->RSSetViewports(1, &vp);
+	commandList_->RSSetScissorRects(1, &sc);
+
+	if (previewRequest_.object) {                 // ← 取代 "第二步的繪製放這裡"
+		SetSRVHeap();
+		psoManager_->SetPSOStrong(CreateDefaultPSOKey());
+		commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		*previewCameraPtr_ = *cameraPtr_;
+		previewCameraPtr_->worldPosition = previewRequest_.view.position;
+		commandList_->SetGraphicsRootConstantBufferView(
+			static_cast<UINT>(RootSlot::Camera_CB),
+			previewCameraBuffer_->GetResource()->GetGPUVirtualAddress());
+
+		drawDataCollector_->BeginPreview(previewRequest_.object, previewRequest_.partIndex, previewRequest_.view);
+		Draw3D();
+		drawDataCollector_->EndPreview();
+	}
+
+	TransitionRenderTarget(previewRT_, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+	/// ImGui は「今バインドされているRT」に描くので、バックバッファに戻す
+	SetRenderTarget(directXDriver_->GetCurrentBackBufferRTV());
+
+	commandList_->RSSetViewports(1, &viewport);
+	commandList_->RSSetScissorRects(1, &scissorRect);
+
+	previewRequest_.active = false;
+}
+#endif
 
 void DrawEngine::PSODecision(PSOKey& psoKey) {
 
@@ -1191,6 +1262,7 @@ void DrawEngine::IntializeInstanceTMBuffer(TransformationMatrix* bufferPointer, 
 		bufferPointer[index].WorldInverseTranspose = Identity();
 	}
 }
+
 
 void DrawEngine::SetTexture(int textureHandle) {
 

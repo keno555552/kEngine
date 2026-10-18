@@ -32,6 +32,7 @@ Driller::Driller(kEngine* system, const Vector3& position) {
 void Driller::TitleMovement() {
 	isShake_ = true;
 	RunDrill();
+	MoveTrack(0.01f);
 }
 
 void Driller::Update(Camera* camera) {
@@ -88,8 +89,39 @@ void Driller::CloseDoor() {}
 
 void Driller::RunDrill() {
 
+	/// ドリルのパーツを取得
+	ObjectPart* drillPart = nullptr;
+	if (!this->objectParts_.empty()) drillPart = this->FindPartByName("drill.001");
+
 	/// ドリル回転
-	this->objectParts_[3].transform.rotate.y += 0.05f;
+	if (drillPart) {
+		drillPart->transform.rotate.y += 0.05f;
+	}
+
+}
+
+void Driller::MoveTrack(float UVTransform) {
+
+	/// トラックのパーツを取得
+	ObjectPart* trackPart = nullptr;
+
+	int trackNo = 1;
+	int trackNo_No = 1;
+	for(auto& part: this->objectParts_){
+
+		std::string name = "track" + std::to_string(trackNo) + '_' + std::to_string(trackNo_No) + ".001";
+		if (!this->objectParts_.empty()) trackPart = this->FindPartByName(name);
+
+		/// ドリル回転
+		if (trackPart) {
+			trackPart->materialConfig->uvTranslate.y += UVTransform;
+
+			trackNo_No = (trackNo_No > 1) ? 1 : 2;
+			if(trackNo_No == 1)trackNo++;
+		}
+		if (trackNo > 5)return;
+	}
+
 
 }
 

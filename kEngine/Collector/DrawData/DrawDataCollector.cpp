@@ -71,6 +71,12 @@ void DrawDataCollector::EndCollect() {
 
 }
 
+#ifdef USE_IMGUI
+void DrawDataCollector::SetSoloTarget(const ObjectData* object, int partIndex) {
+	soloObject_ = object;
+	soloPartIndex_ = object ? partIndex : -1;
+}
+#endif
 
 #pragma region /// ================================== DebugLine関連 ================================= ///
 
@@ -308,8 +314,20 @@ void DrawDataCollector::Collect3D(ObjectData* object) {
 	/// nullチェック
 	if (!object)return;
 
+#ifdef USE_IMGUI
+	if (soloObject_ && object != soloObject_) return;
+#endif
+
 	int modelCounter = 0;
 	for (auto& objectPart : object->objectParts_) {
+
+
+#ifdef USE_IMGUI
+		if (soloObject_ && soloPartIndex_ >= 0 && modelCounter != soloPartIndex_) {
+			modelCounter++;      // 網格索引一定要照樣前進
+			continue;
+		}
+#endif
 
 		/// ========================================  RenderData作成  ========================================///
 
@@ -399,8 +417,13 @@ Matrix4x4 DrawDataCollector::MakeAnimationMatrix(ObjectPart& part) {
 
 TransformationMatrix DrawDataCollector::ObjectWVPAdjustment3D(ObjectData& object, ObjectPart& part, ModelData* modelData, int modelCounter) {
 	Camera* cam = cameraManager_->GetActiveCamera();
+#ifdef USE_IMGUI
+	Matrix4x4 viewMatrix = usePreviewView_ ? previewView_.view : cam->GetViewMatrix();
+	Matrix4x4 projectionMatrix = usePreviewView_ ? previewView_.proj : cam->GetProjectionMatrix();
+#else
 	Matrix4x4 viewMatrix = cam->GetViewMatrix();
 	Matrix4x4 projectionMatrix = cam->GetProjectionMatrix();
+#endif
 
 	Matrix4x4 localMatrix;
 
@@ -826,7 +849,11 @@ void DrawDataCollector::BuildInstanceListParticle() {
 
 #pragma region /// ========================== カメラ/マテリアル/ライティング関連 ========================= ///
 
+
 Vector3 DrawDataCollector::GetCameraPosition() const {
+#ifdef USE_IMGUI
+	if (usePreviewView_) return previewView_.position;
+#endif
 	return cameraManager_->GetActiveCamera()->GetTransform().translate;
 }
 
@@ -867,7 +894,6 @@ PSOKey DrawDataCollector::PSODecision(MaterialConfig& material) {
 	return key;
 }
 
-
 void DrawDataCollector::UpdateLightData() {
 	if (lightManager_)lightManager_->TurnDataToGPUData();
 }
@@ -879,5 +905,36 @@ std::vector<LightGPU> DrawDataCollector::GetLightGPUBuffer() {
 uint32_t DrawDataCollector::GetLightCount() {
 	return (uint32_t)lightManager_->GetLightCount();
 }
-
 #pragma endregion
+
+
+#ifdef USE_IMGUI
+#pragma region /// ================================= debug関連 ==================================== ///
+void DrawDataCollector::BeginPreview(ObjectData* object, int partIndex, const PreviewView& view) {
+
+	savedOpaqueBucket3D_.swap(opaqueBucket3D_);
+	savedTransparentBucket3D_.swap(transparentBucket3D_);
+
+	usePreviewView_ = true;
+	previewView_ = view;
+
+	const ObjectData* prevObject = soloObject_;
+	int prevPart = soloPartIndex_;
+	soloObject_ = object;
+	soloPartIndex_ = partIndex;
+	Collect3D(object);
+	soloObject_ = prevObject;
+	soloPartIndex_ = prevPart;
+
+	BuildInstanceList3D();
+}
+
+void DrawDataCollector::EndPreview() {
+	usePreviewView_ = false;
+	opaqueBucket3D_.clear();
+	transparentBucket3D_.clear();
+	opaqueBucket3D_.swap(savedOpaqueBucket3D_);
+	transparentBucket3D_.swap(savedTransparentBucket3D_);
+}
+#pragma endregion
+#endif

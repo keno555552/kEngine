@@ -22,6 +22,8 @@ public:
 
 	int GetPartIndex()const { return (int)objectParts_.size(); }
 
+	ObjectPart* FindPartByName(const std::string& name);
+
 	void CreateDefaultData();
 	void CreateModelData(int modelHandle);
 

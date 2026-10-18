@@ -84,6 +84,7 @@ void SceneEngineTitle::ImGuiPart() {
 
 	ImGui::End();
 }
+#endif
 
 void SceneEngineTitle::PhaseUpdate() {
 
@@ -161,4 +162,3 @@ void SceneEngineTitle::PhaseUpdate() {
 	}
 }
 
-#endif

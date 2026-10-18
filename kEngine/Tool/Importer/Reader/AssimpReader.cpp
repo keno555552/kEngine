@@ -289,6 +289,7 @@ uint32_t ReadNode(aiNode* node, ModelData& model, uint32_t parentIndex) {
 	int meshIndex = (int)result.meshIndex;
 	if (meshIndex >= 0) {
 		model.meshDataList[meshIndex].nodeIndex = thisIndex;
+		model.meshDataList[meshIndex].name = result.name;
 	}
 
 	for (uint32_t i = 0; i < node->mNumChildren; i++) {

@@ -144,6 +144,9 @@ void kEngine::EndFrame() {
 	/// AAA　それ以前はロジック処理、集めとかの前処理 AAA
 	drawEngine->CommitDraw();
 	drawEngine->EndDraw();
+#ifdef USE_IMGUI
+	drawEngine->RenderPreview();
+#endif
 	dxComm->EndFrame();
 
 }

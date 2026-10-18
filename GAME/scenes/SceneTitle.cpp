@@ -224,8 +224,6 @@ void SceneTitle::ImGuiPart() {
 
 	ImGui::End();
 
-	driller_->ImGuiPart();
-
 	debugCamera_.lock()->SetCamera(debugCamTran);
 	camera_.lock()->SetCamera(camTran);
 }

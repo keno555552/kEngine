@@ -893,7 +893,8 @@ static void ImGui_ImplDX12_CreateWindow(ImGuiViewport* viewport)
     sd1.BufferCount = bd->numFramesInFlight;
     sd1.Width = (UINT)viewport->Size.x;
     sd1.Height = (UINT)viewport->Size.y;
-    sd1.Format = bd->RTVFormat;
+    //sd1.Format = bd->RTVFormat;
+    sd1.Format = DXGI_FORMAT_R8G8B8A8_UNORM; /// flipモードに_SRGBが使えない
     sd1.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     sd1.SampleDesc.Count = 1;
     sd1.SampleDesc.Quality = 0;
@@ -942,7 +943,13 @@ static void ImGui_ImplDX12_CreateWindow(ImGuiViewport* viewport)
         {
             IM_ASSERT(vd->FrameCtx[i].RenderTarget == nullptr);
             vd->SwapChain->GetBuffer(i, IID_PPV_ARGS(&back_buffer));
-            bd->pd3dDevice->CreateRenderTargetView(back_buffer, nullptr, vd->FrameCtx[i].RenderTargetCpuDescriptors);
+            //bd->pd3dDevice->CreateRenderTargetView(back_buffer, nullptr, vd->FrameCtx[i].RenderTargetCpuDescriptors);
+
+			/// flipモードに_SRGBが使えないので、RTVのフォーマットをDXGI_FORMAT_R8G8B8A8_UNORMにする
+            D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+            rtvDesc.Format = bd->RTVFormat;                       
+            rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+            bd->pd3dDevice->CreateRenderTargetView(back_buffer, &rtvDesc, vd->FrameCtx[i].RenderTargetCpuDescriptors); 
             vd->FrameCtx[i].RenderTarget = back_buffer;
         }
     }
@@ -1009,7 +1016,13 @@ static void ImGui_ImplDX12_SetWindowSize(ImGuiViewport* viewport, ImVec2 size)
         for (UINT i = 0; i < bd->numFramesInFlight; i++)
         {
             vd->SwapChain->GetBuffer(i, IID_PPV_ARGS(&back_buffer));
-            bd->pd3dDevice->CreateRenderTargetView(back_buffer, nullptr, vd->FrameCtx[i].RenderTargetCpuDescriptors);
+            //bd->pd3dDevice->CreateRenderTargetView(back_buffer, nullptr, vd->FrameCtx[i].RenderTargetCpuDescriptors);
+
+			/// flipモードに_SRGBが使えないので、RTVのフォーマットをDXGI_FORMAT_R8G8B8A8_UNORMにする
+            D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+            rtvDesc.Format = bd->RTVFormat;                       // SRGB，跟 PSO 的格式一致
+            rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+            bd->pd3dDevice->CreateRenderTargetView(back_buffer, &rtvDesc, vd->FrameCtx[i].RenderTargetCpuDescriptors);
             vd->FrameCtx[i].RenderTarget = back_buffer;
         }
     }

@@ -58,6 +58,7 @@ private:
 	void OpenDoor();
 	void CloseDoor();
 	void RunDrill();
+	void MoveTrack(float UVTransform);
 
 private:
 
