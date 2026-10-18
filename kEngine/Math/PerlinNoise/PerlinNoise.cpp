@@ -26,8 +26,10 @@ void PerlinNoise::SetSeed(int seed) {
 	std::mt19937 rng(seed_);
 	std::shuffle(perm.begin(), perm.end(), rng);
 
-	for (int i = 0; i < 256; i++)
+	for (int i = 0; i < 256; i++) {
 		p[i] = perm[i];
+		p[i + 256] = perm[i];	// 2周目（範囲外アクセス防止）
+	}
 }
 
 int PerlinNoise::inc(int num) {

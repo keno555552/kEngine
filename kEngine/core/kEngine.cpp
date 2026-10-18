@@ -8,6 +8,7 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 	config::SaveClientTitle(kClientTitle);
 	config::SaveClientWidth(kClientWidth);
 	config::SaveClientHeight(kClientHeight);
+	config::SetClientWindowMode(config::GetDefaultWindowMode());
 
 	dxComm = std::make_unique<DirectXController>();
 	dxComm->InitializeDrive(kClientTitle, kClientWidth, kClientHeight);
@@ -37,7 +38,10 @@ void kEngine::Initialize(const char* kClientTitle, int kClientWidth, int kClient
 
 	postProcessRunner_ = std::make_unique<PostProcessRunner>();
 	drawEngine = std::make_unique<DrawEngine>();
-	drawEngine->Initialize(dxComm.get(), drawDataCollector.get(), postProcessRunner_.get());
+	drawEngine->Initialize(dxComm.get(),
+		drawDataCollector.get(),
+		postProcessRunner_.get(),
+		animationManager.get());
 
 	soundManager = std::make_unique<SoundManager>();
 	soundManager->Initialize();
@@ -87,6 +91,33 @@ void kEngine::Finalize() {
 }
 
 void kEngine::StartFrame() {
+
+	auto winAPI = dxComm->GetWinAPI();
+	int w = winAPI->GetPendingWidth();
+	int h = winAPI->GetPendingHeight();
+
+	/// ウィンドウモード切り替え
+	if (hasPendingMode_) {
+		hasPendingMode_ = false;
+		config::SetClientWindowMode(pendingMode_);
+		winAPI->ApplyWindowMode(pendingMode_, config::GetDefaultWidth(), config::GetDefaultHeight());
+		lastWinWidth_ = lastWinHeight_ = 0;		// リサイズ処理を強制的に行うために、前回のウィンドウサイズをリセット
+	}
+
+
+	/// ウィンドウサイズ変更
+	if (winAPI->IsResizeNeeded()) {
+		int w = winAPI->GetPendingWidth(), h = winAPI->GetPendingHeight();
+		winAPI->SetResizeNeeded(false);
+		if (w != lastWinWidth_ || h != lastWinHeight_) {
+			dxComm->ResizeSwapChain(w, h);
+			drawEngine->OnResize(w, h);
+			cameraManager->OnResize(w, h);
+			config::SaveClientWidth(w);
+			config::SaveClientHeight(h);
+		}
+	}
+
 	dxComm->StartFrame();
 	drawEngine->StartFrame();
 	inputManager->KeysUpdata();
@@ -113,6 +144,9 @@ void kEngine::EndFrame() {
 	/// AAA　それ以前はロジック処理、集めとかの前処理 AAA
 	drawEngine->CommitDraw();
 	drawEngine->EndDraw();
+#ifdef USE_IMGUI
+	drawEngine->RenderPreview();
+#endif
 	dxComm->EndFrame();
 
 }
@@ -140,7 +174,29 @@ void kEngine::AnimationTakeControlObject(int unitHandle, Object* object) {
 
 #pragma endregion
 
+#pragma region window調整
+
+/// windowサイズの取得
+void kEngine::SetWindowSize(int width, int height) {
+	auto winAPI = dxComm->GetWinAPI();
+
+	if (config::GetClientWindowMode() == FULLSCREEN) return;
+	winAPI->SetClientSize(width, height);
+
+}
+
+
+void kEngine::SetWindowMode(WindowMode mode) {
+
+	if (mode >= Num_Of_Type) return;
+	pendingMode_ = mode; hasPendingMode_ = true;
+
+}
+
+#pragma endregion
+
 #pragma region 描画システム
+
 
 void kEngine::DrawDebugLine(DebugLine* debugLine) {
 
@@ -218,21 +274,18 @@ void kEngine::ChangeEngineModel(CylinderBuildMaterial& buildMaterial, int modelH
 
 void kEngine::CreateModelRoot(ObjectData* objectData) {
 	int modelHandle = objectData->modelHandle_;
-	ModelGroup* modelGroup = ResourceManager::GetInstance()->modelGroupList_[modelHandle].get();
+	auto& modelPath = ResourceManager::GetInstance()->modelDataHandleMap_[modelHandle];
+	auto modelGroup = ResourceManager::GetInstance()->modelDataList_[modelPath];
 	
 	int handleNum = -1;
 
-	if (modelGroup->HasSkinClusterData()) {
-		drawEngine->CreateSkinningBuffer(objectData);
-	}
+	//if (!modelGroup->skinListList.empty()) {
+	//	drawEngine->CreateSkinningBuffer(objectData);
+	//}
 }
 
 void kEngine::ClearModelRoot(ObjectData* objectData) {
-
-	int modelHandle = objectData->modelHandle_;
 	drawEngine->ClearSkinningBuffer(objectData);
-
-
 }
 
 void kEngine::AddLight(Light* light) {

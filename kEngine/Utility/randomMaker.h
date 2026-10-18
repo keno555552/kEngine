@@ -35,8 +35,6 @@ class RandomMaker {
 public:
 	RandomMaker(bool useFixedSeed = false, unsigned int fixedSeed = 12345);
 
-
-
 	/// ============= 関数 ==============///
 	/// セッティング
 	void	SetSeed(unsigned int seed);

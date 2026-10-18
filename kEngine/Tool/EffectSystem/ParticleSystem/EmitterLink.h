@@ -20,7 +20,7 @@ enum class EmitterTiming {
 
 struct EmitterLink {
 	std::string name = "";
-	std::string sourceName = "";									// A
+	std::string sourceName = "";								// A
 	std::string targetName = "";
 	int emitCount{ 1 };											// B
 	float delayTime{};											// 遅延時間

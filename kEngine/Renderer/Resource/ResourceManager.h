@@ -103,15 +103,18 @@ public:
 	/// 深度貼圖用SRV(Shader Resource View)を作る関数間違いないように特別に関数を作る
 	void CreateDepthSRV(ID3D12Resource* depthStencil, D3D12_CPU_DESCRIPTOR_HANDLE srvHandle);
 
-
+	/// ==================== RenderTextureリサイズ用 ===================== ///
+	void ResizeRenderTexture(
+		RenderTexture& rt,
+		uint32_t width,
+		uint32_t height);
 
 	/// ===================== DepthStencil関連 ====================== ///
 	/// 普通のDepthStencilを作る関数
 	ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);
 
-	/// RenderTexture専用のDepthStencilを作る関数
+	void CreateDepthResourceForRenderTexture(RenderTexture& rt);
 	void CreateDepthStencilForRenderTexture(RenderTexture& rt);
-
 
 	/// ==================== TextureManager関連 ===================== ///
 

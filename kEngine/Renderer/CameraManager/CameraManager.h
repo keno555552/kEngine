@@ -9,6 +9,11 @@ public:
 	void Initialize();
 	void Finalize();
 
+	/// ================= システム関連 ================= ///
+	/// カメラのリサイズ
+	void OnResize(int width, int height);
+
+	/// ================= カメラの管理 ================= ///
 	/// カメラの生成
 	std::weak_ptr<Camera> CreateCamera();
 

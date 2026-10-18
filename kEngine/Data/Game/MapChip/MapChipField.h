@@ -27,6 +27,13 @@ struct MapChipData {
 	std::vector<std::vector<MapChipType>> data;
 };
 
+struct CollisionResult {
+	Vector3 correction;
+	bool xIsMainAxis;
+	bool yIsMainAxis;
+	bool landed;
+};
+
 class MapChipField {
 public:
 	/// マップの計算用の構造体(y軸は上が正、エンジンと一致する)
@@ -71,8 +78,8 @@ public:
 	MapIndex GetMapIndexByPosition(const Vector3& position);
 
 	/// 当たり判定の修正量を取得
-	Vector3 GetMapCollisionCorrection(const AABB& box, const Vector3& velocity, float deltaTime, bool& landed);
-	Vector3 GetMapCollisionCorrection(const AABB& box, const Vector3& velocity, float deltaTime);
+	CollisionResult GetMapCollisionCorrection(const AABB& box, const Vector3& velocity, float deltaTime, bool& landed);
+	CollisionResult GetMapCollisionCorrection(const AABB& box, const Vector3& velocity, float deltaTime);
 
 	/// 当たっているタイルの位置情報を取得
 	std::vector<TileInfo> GetTilesOverlapping(const AABB& box);
@@ -84,7 +91,7 @@ public:
 	/// ブロックサイズ関連
 	void SetBlockWidth(float width);
 	void SetBlockHeight(float height);
-	Vector2 GetBlockSize() { return Vector2(kBlockWidth, kBlockHeight); }
+	Vector2 GetBlockSize() { return {kBlockWidth, kBlockHeight}; }
 
 	///　ブロック数取得
 	int GetNumBlockVirtical() { return kNumBlockVirtical; }

@@ -36,10 +36,6 @@ bool CheckXInputDeviceConnected() {
 
 #pragma endregion
 
-#pragma region WindowMake
-
-#pragma endregion
-
 #pragma region DirectXCommon
 
 DirectXCore::DirectXCore() {}
@@ -73,6 +69,44 @@ D3D12_CPU_DESCRIPTOR_HANDLE DirectXCore::GetCurrentBackBufferRTV() {
 ID3D12Resource* DirectXCore::GetCurrentBackBufferResource() {
 	UINT index = SwapChain->GetCurrentBackBufferIndex();
 	return swapChainResources[index].Get();
+}
+
+void DirectXCore::ResizeSwapChain(int newLengthX, int newHeightY) {
+	if (!SwapChain) return;
+
+	// 等 GPU 完成目前的工作
+	commandQueue->Signal(fence.Get(), ++fenceValue);
+	fence->SetEventOnCompletion(fenceValue, fenceEvent);
+	WaitForSingleObject(fenceEvent, INFINITE);
+
+	// 釋放舊的 backbuffer
+	for (int i = 0; i < (int)swapChainDesc.BufferCount; i++) {
+		swapChainResources[i].Reset();
+	}
+
+	// Resize swapchain
+	HRESULT hr = SwapChain->ResizeBuffers(
+		swapChainDesc.BufferCount,
+		newLengthX,
+		newHeightY,
+		swapChainDesc.Format,
+		swapChainDesc.Flags
+	);
+
+	if (FAILED(hr)) {
+		Logger::Log(std::format("ResizeBuffers failed: hr=0x{:08X} size={}x{}\n",
+			static_cast<uint32_t>(hr), newLengthX, newHeightY));
+		if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) {
+			Logger::Log(std::format("DeviceRemovedReason=0x{:08X}\n",
+				static_cast<uint32_t>(device->GetDeviceRemovedReason())));
+		}
+	}
+	assert(SUCCEEDED(hr));
+
+	// RTV リビルド
+	CreateRenderTargetViews(SwapChain.Get(), rtvDescriptorHeap.Get());
+	lengthX_ = newLengthX;
+	heightY_ = newHeightY;
 }
 
 bool DirectXCore::isDirectInputCreated() {

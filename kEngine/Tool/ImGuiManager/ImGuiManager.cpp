@@ -15,17 +15,17 @@ void ImGuiManager::Initialize(DirectXController* dxComm) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;      // 啟用 Docking
-    //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;    // 可選：讓視窗可以拖出主視窗
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;      
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;    // 別ウインドウにImGuiを描けるために
 
     io.Fonts->AddFontDefault();   // ★ 新版 ImGui 必須手動加字體
     ImGui::StyleColorsDark();
 
-    //if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-    //    ImGuiStyle& style = ImGui::GetStyle();
-    //    style.WindowRounding = 0.0f;
-    //    style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-    //}
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+        ImGuiStyle& style = ImGui::GetStyle();
+        style.WindowRounding = 0.0f;
+        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+    }
 
     ImGui_ImplWin32_Init(dxComm->GetHWND());
     ImGui_ImplDX12_Init(
@@ -82,4 +82,11 @@ void ImGuiManager::Shutdown() {
     ImGui_ImplDX12_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
+}
+
+void ImGuiManager::RenderPlatformWindows() {
+    if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault(nullptr, nullptr);
+    }
 }

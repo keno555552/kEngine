@@ -13,6 +13,15 @@ void CameraManager::Finalize() {
 	activeCamera_ = nullptr;
 }
 
+void CameraManager::OnResize(int width, int height) {
+    if (width <= 0 || height <= 0) return;
+    float aspect = static_cast<float>(width) / static_cast<float>(height);
+
+    if (defaultCamera_) defaultCamera_->SetAspect(aspect);
+    for (auto& cam : cameraList_)      cam->SetAspect(aspect);
+    for (auto& cam : debugCameraList_) cam->SetAspect(aspect);
+}
+
 std::weak_ptr<Camera> CameraManager::CreateCamera() {
 	cameraList_.push_back(std::make_shared<Camera>(Camera::ConstructorKey()));
     return cameraList_.back();

@@ -11,23 +11,23 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 
 	/// =========== リソース読み込み ==========///
 
-	std::string menuPath = "./GAME/resources/texture/menu/";
+	std::string menuPath = "./kEngine/EngineAssets/texture/menu/";
 	TH_menuBG_ = system_->LoadTexture(menuPath + "menuBG.png");
 
-	TH_menuTitle = system_->LoadTexture(menuPath + "Menu.png");
-	TH_menuBGM = system_->LoadTexture(menuPath + "BGM.png");
-	TH_menuMASTER = system_->LoadTexture(menuPath + "Master.png");
-	TH_menuSE = system_->LoadTexture(menuPath + "SE.png");
+	TH_menuTitle = system_->LoadTexture(menuPath + "menuPause.png");
+	TH_menuBGM = system_->LoadTexture(menuPath + "menuBGM.png");
+	TH_menuMASTER = system_->LoadTexture(menuPath + "menuMASTER.png");
+	TH_menuSE = system_->LoadTexture(menuPath + "menuSE.png");
 
-	TH_menuClose = system_->LoadTexture(menuPath + "back.png");
-	TH_menuClose_NL = system_->LoadTexture(menuPath + "backnolight.png");
-	TH_menuBack = system_->LoadTexture(menuPath + "title.png");
-	TH_menuBack_NL = system_->LoadTexture(menuPath + "titlenolight.png");
-	TH_menuRetry = system_->LoadTexture(menuPath + "redo.png");
-	TH_menuRetry_NL = system_->LoadTexture(menuPath + "redonolight.png");
+	TH_menuClose = system_->LoadTexture(menuPath + "menuClose.png");
+	TH_menuClose_NL = system_->LoadTexture(menuPath + "menuClose_NL.png");
+	TH_menuBack = system_->LoadTexture(menuPath + "menuBack.png");
+	TH_menuBack_NL = system_->LoadTexture(menuPath + "menuBack_NL.png");
+	TH_menuRetry = system_->LoadTexture(menuPath + "menuRetry.png");
+	TH_menuRetry_NL = system_->LoadTexture(menuPath + "menuRetry_NL.png");
 
-	TH_menuButton = system_->LoadTexture(menuPath + "Button.png");
-	TH_menuButton_NL = system_->LoadTexture(menuPath + "Buttonnolight.png");
+	TH_menuButton = system_->LoadTexture(menuPath + "menuButton.png");
+	TH_menuButton_NL = system_->LoadTexture(menuPath + "menuButton_NL.png");
 	TH_menuVolumeBar = system_->LoadTexture(menuPath + "menuVolumeBar.png");
 
 	float middlePointX = (float)config::GetClientWidth() / 2;
@@ -135,7 +135,7 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 	sMenuButtonM_NL->IntObject(system_);
 	sMenuButtonM_NL->CreateDefaultData();
 	sMenuButtonM_NL->objectParts_[0].materialConfig->textureHandle = TH_menuButton_NL;
-	sMenuButtonM_NL->mainPosition.transform.translate = { 0, 0, -1.0f };
+	sMenuButtonM_NL->mainPosition.transform.translate = { 0, 0, 116.0f };
 	sMenuButtonM_NL->followObject_ = sMenuButtonM.get();
 	sMenuButtonM_NL->Update(nullptr);
 
@@ -151,7 +151,7 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 	sMenuButtonB_NL->IntObject(system_);
 	sMenuButtonB_NL->CreateDefaultData();
 	sMenuButtonB_NL->objectParts_[0].materialConfig->textureHandle = TH_menuButton_NL;
-	sMenuButtonB_NL->mainPosition.transform.translate = { 0, 0, -1.0f };
+	sMenuButtonB_NL->mainPosition.transform.translate = { 0, 0, 118.0f };
 	sMenuButtonB_NL->followObject_ = sMenuButtonB.get();
 	sMenuButtonB_NL->Update(nullptr);
 
@@ -167,28 +167,28 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 	sMenuButtonS_NL->IntObject(system_);
 	sMenuButtonS_NL->CreateDefaultData();
 	sMenuButtonS_NL->objectParts_[0].materialConfig->textureHandle = TH_menuButton_NL;
-	sMenuButtonS_NL->mainPosition.transform.translate = { 0, 0, -1.0f };
+	sMenuButtonS_NL->mainPosition.transform.translate = { 0, 0, 120.0f };
 	sMenuButtonS_NL->followObject_ = sMenuButtonS.get();
 	sMenuButtonS_NL->Update(nullptr);
 
 	sMenuVolumeBarM->IntObject(system_);
 	sMenuVolumeBarM->CreateDefaultData();
 	sMenuVolumeBarM->objectParts_[0].materialConfig->textureHandle = TH_menuVolumeBar;
-	sMenuVolumeBarM->mainPosition.transform.translate = { 204.0f, 149.0f, 120.0f };
+	sMenuVolumeBarM->mainPosition.transform.translate = { 204.0f, 136.0f, 114.0f };
 	sMenuVolumeBarM->followObject_ = sMenuBG_.get();
 	sMenuVolumeBarM->Update(nullptr);
 
 	sMenuVolumeBarB->IntObject(system_);
 	sMenuVolumeBarB->CreateDefaultData();
 	sMenuVolumeBarB->objectParts_[0].materialConfig->textureHandle = TH_menuVolumeBar;
-	sMenuVolumeBarB->mainPosition.transform.translate = { 204.0f, 216.0f, 121.0f };
+	sMenuVolumeBarB->mainPosition.transform.translate = { 204.0f, 203.0f, 114.0f };
 	sMenuVolumeBarB->followObject_ = sMenuBG_.get();
 	sMenuVolumeBarB->Update(nullptr);
 
 	sMenuVolumeBarS->IntObject(system_);
 	sMenuVolumeBarS->CreateDefaultData();
 	sMenuVolumeBarS->objectParts_[0].materialConfig->textureHandle = TH_menuVolumeBar;
-	sMenuVolumeBarS->mainPosition.transform.translate = { 204.0f, 282.0f, 122.0f };
+	sMenuVolumeBarS->mainPosition.transform.translate = { 204.0f, 270.0f, 114.0f };
 	sMenuVolumeBarS->followObject_ = sMenuBG_.get();
 	sMenuVolumeBarS->Update(nullptr);
 
@@ -269,12 +269,12 @@ DefaultMenu::DefaultMenu(kEngine* system) {
 	bMenuSE->SetFollowObject(sMenuButtonS.get());
 
 	/// ================ testSound ================///
-	//SH_menuSE_ = system_->SoundLoadSE("resources/TemplateResource/sound/SE/game_start.wav");
-	//SH_menuBGM_ = system_->SoundLoadSE("resources/TemplateResource/sound/BGM/Ordinary_Magic.wav");
-	//
-	//system_->SoundSetMasterVolume(masterVolume_);
-	//system_->SoundSetBGMVolume(masterVolume_);
-	//system_->SoundSetSEVolume(masterVolume_);
+	SH_Select_ = system_->SoundLoadSE("GAME/resources/sound/SE/menuSelect.wav");
+	SH_Decide_ = system_->SoundLoadSE("GAME/resources/sound/SE/menuChoose.wav");
+
+	system_->SoundSetMasterVolume(masterVolume_);
+	system_->SoundSetBGMVolume(masterVolume_);
+	system_->SoundSetSEVolume(masterVolume_);
 
 }
 
@@ -307,11 +307,11 @@ DefaultMenu::~DefaultMenu() {
 	buttonTimer_.reset();
 }
 
-void DefaultMenu::Updata() {
+void DefaultMenu::Update() {
 
 	/// ============ メニュー開閉 ============///
-	if (canOpen_) {
-		if (system_->GetTriggerOn(DIK_ESCAPE)) {
+	if (canOpen_ || clickOpenMenu_) {
+		if (system_->GetTriggerOn(DIK_ESCAPE) || clickOpenMenu_) {
 			animationTimer_->Reset0();
 			if (isOpened_) {
 				phase_ = MenuPhase::TRANSITION;
@@ -325,6 +325,7 @@ void DefaultMenu::Updata() {
 				lastSelectedMenuIndex_ = selectedMenuIndex_;
 				selectedMenuIndex_ = (int)ButtonIndex::Close;
 			}
+			clickOpenMenu_ = false;
 		}
 	}
 
@@ -495,6 +496,10 @@ void DefaultMenu::CheckClick() {
 	clickUp_ = system_->GetTriggerOn(DIK_UP) || system_->GetTriggerOn(DIK_W);
 	clickDown_ = system_->GetTriggerOn(DIK_DOWN) || system_->GetTriggerOn(DIK_S);
 	clickDecide_ = system_->GetTriggerOn(DIK_RETURN) || system_->GetTriggerOn(DIK_SPACE);
+
+	if (clickLeft_ || clickRight_ || clickUp_ || clickDown_)system_->SoundPlaySE(SH_Select_);
+	if (clickDecide_)system_->SoundPlaySE(SH_Decide_);
+
 }
 
 void DefaultMenu::CheckMouse() {
@@ -638,12 +643,12 @@ void DefaultMenu::WorkChange() {
 		break;
 
 	case (int)ButtonIndex::Retry:
-		if (clickDecide_) {
-			isConfirm_ = true;
-			animationTimer_->Reset0();
-			phase_ = MenuPhase::TRANSITION;
-			startTransform_ = sMenuBG_->mainPosition.transform;
-		}
+		//if (clickDecide_ && !isTitle_) {
+		//	isConfirm_ = true;
+		//	animationTimer_->Reset0();
+		//	phase_ = MenuPhase::TRANSITION;
+		//	startTransform_ = sMenuBG_->mainPosition.transform;
+		//}
 		break;
 
 	case (int)ButtonIndex::Back:

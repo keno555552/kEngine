@@ -12,7 +12,8 @@
 void DrawEngine::Initialize(
 	DirectXCore* directXDriver,
 	DrawDataCollector* drawDataCollector,
-	PostProcessRunner* postProcessRunner
+	PostProcessRunner* postProcessRunner,
+	AnimationManager* animationManager
 ) {
 	directXDriver_ = directXDriver;
 	commandList_ = directXDriver_->GetCommandList();
@@ -20,6 +21,7 @@ void DrawEngine::Initialize(
 	resourceManager_ = ResourceManager::GetInstance();
 	drawDataCollector_ = drawDataCollector;
 	postProcessRunner_ = postProcessRunner;
+	animationManager_ = animationManager;
 
 	///
 	kClientWidth_ = config::GetClientWidth();
@@ -32,7 +34,6 @@ void DrawEngine::Initialize(
 
 	depthStencilResource = resourceManager_->CreateDepthStencilTextureResource(directXDriver_->GetDevice(), kClientWidth_, kClientHeight_);
 	MakeDepthStencilView();
-
 
 	viewport = createViewport(kClientWidth_, kClientHeight_);
 	scissorRect = createScissorRect(kClientWidth_, kClientHeight_);
@@ -157,12 +158,29 @@ void DrawEngine::Initialize(
 	cameraBuffer_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&cameraPtr_));
 	cameraBuffer_->SetName("CameraBuffer");
 
+	/// ================== AnimationManagerとWellForGPUリンク ==================== ///
+	animationManager_->SetWellList(&skinningWFGResourceList_);
+	animationManager_->SetSkinningToPaletteIndexMap(&skinningDataToPaletteIndexMap_);
+
 	/// ========================== デフォルトのモデルを設定 ========================== ///
 	defaultTextureHandle_ = resourceManager_->LoadModelTexture("./kEngine/EngineAssets/TemplateResource/texture/white5x5.png");
 
+	/// ========================= ImGui用のPreviewRTを作成 ========================== ///
+#ifdef USE_IMGUI
+	previewRT_ = ResourceManager::GetInstance()->CreateRenderTexture(
+		512, 384, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, Vector4{ 0.10f, 0.12f, 0.16f, 1.0f });
+	previewCameraBuffer_ = std::make_unique<BasicResource>();
+	previewCameraBuffer_->CreateResourceClass_(directXDriver_->GetDevice(), sizeof(CameraForGPU));
+	previewCameraBuffer_->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&previewCameraPtr_));
+	previewCameraBuffer_->SetName("PreviewCameraBuffer");
+#endif
 }
 
 void DrawEngine::Finalize() {
+
+#ifdef USE_IMGUI
+	previewCameraBuffer_.reset();
+#endif
 
 	psoManager_->Finalize();
 	psoManager_.reset();
@@ -183,12 +201,38 @@ void DrawEngine::Finalize() {
 
 }
 
+void DrawEngine::OnResize(int width, int height) {
+
+	kClientWidth_ = width;
+	kClientHeight_ = height;
+
+	/// DepthStencilのリサイズ更新
+	// Reset
+	depthStencilResource.Reset();
+	// Create(Attachによって、過多にAddRefをしない)
+	depthStencilResource.Attach(
+		resourceManager_->CreateDepthStencilTextureResource(
+			directXDriver_->GetDevice(),
+			kClientWidth_,
+			kClientHeight_)
+		);
+	// DSF heapの更新
+	MakeDepthStencilView();
+
+	/// ViewportとScissorのサイズ更新
+	viewport = createViewport(kClientWidth_, kClientHeight_);
+	scissorRect = createScissorRect(kClientWidth_, kClientHeight_);
+
+	/// PostProcessRunnerのリサイズ
+	postProcessRunner_->OnResize(width, height);
+}
+
 void DrawEngine::StartFrame() {
 
 	/// 描画用のDescriptorHeapの設定
 	SetSRVHeap();
 	/// Viewportを設定
-	commandList_->RSSetViewports(1, &viewport); 
+	commandList_->RSSetViewports(1, &viewport);
 	/// Scissorを設定
 	commandList_->RSSetScissorRects(1, &scissorRect);
 
@@ -231,6 +275,63 @@ void DrawEngine::EndDraw() {
 
 	postProcessRunner_->Execute(this);
 }
+
+#ifdef USE_IMGUI
+void DrawEngine::RenderPreview() {
+	/// ObjectEditorがついてない場合スキップ
+	if (!previewRequest_.active) return;
+
+	TransitionRenderTarget(previewRT_, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+	commandList_->OMSetRenderTargets(1, &previewRT_.rtvHandleCPU, FALSE, &previewRT_.dsvHandleCPU);
+	const float clear[4] = { previewRT_.clearColor.x, previewRT_.clearColor.y, previewRT_.clearColor.z, previewRT_.clearColor.w };
+	commandList_->ClearRenderTargetView(previewRT_.rtvHandleCPU, clear, 0, nullptr);
+	commandList_->ClearDepthStencilView(previewRT_.dsvHandleCPU, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+
+	D3D12_VIEWPORT vp{};
+	vp.TopLeftX = 0.0f;
+	vp.TopLeftY = 0.0f;
+	vp.Width = (float)previewRT_.width;
+	vp.Height = (float)previewRT_.height;
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+
+	D3D12_RECT sc{};
+	sc.left = 0;
+	sc.top = 0;
+	sc.right = (LONG)previewRT_.width;
+	sc.bottom = (LONG)previewRT_.height;
+
+	commandList_->RSSetViewports(1, &vp);
+	commandList_->RSSetScissorRects(1, &sc);
+
+	if (previewRequest_.object) {                 // ← 取代 "第二步的繪製放這裡"
+		SetSRVHeap();
+		psoManager_->SetPSOStrong(CreateDefaultPSOKey());
+		commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		*previewCameraPtr_ = *cameraPtr_;
+		previewCameraPtr_->worldPosition = previewRequest_.view.position;
+		commandList_->SetGraphicsRootConstantBufferView(
+			static_cast<UINT>(RootSlot::Camera_CB),
+			previewCameraBuffer_->GetResource()->GetGPUVirtualAddress());
+
+		drawDataCollector_->BeginPreview(previewRequest_.object, previewRequest_.partIndex, previewRequest_.view);
+		Draw3D();
+		drawDataCollector_->EndPreview();
+	}
+
+	TransitionRenderTarget(previewRT_, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+	/// ImGui は「今バインドされているRT」に描くので、バックバッファに戻す
+	SetRenderTarget(directXDriver_->GetCurrentBackBufferRTV());
+
+	commandList_->RSSetViewports(1, &viewport);
+	commandList_->RSSetScissorRects(1, &scissorRect);
+
+	previewRequest_.active = false;
+}
+#endif
 
 void DrawEngine::PSODecision(PSOKey& psoKey) {
 
@@ -359,6 +460,8 @@ void DrawEngine::Draw2DOpaque() {
 
 	/// TileSRV
 	commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::TransformMatricesList_SB), tile2DWVPResource_->GetGPUDescriptorHandle());
+	commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialList_SB), materialResource_->GetGPUDescriptorHandle());
+	commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialIndexList_SB), materialIndexListResource_->GetGPUDescriptorHandle());
 
 	for (auto& [psoKey, materialBuckets] : transparentObjectParts2D_) {
 
@@ -469,6 +572,25 @@ void DrawEngine::Draw3DTransparent() {
 		/// MeshIndex 數量
 		int meshIndexCount = object.mesh->GetIndexNum();
 
+		/// skinning palette 設定
+		if (object.skinningPaletteIndex != -1) {
+
+			int wellHandle = object.skinningPaletteIndex;
+
+			auto it = skinningDataToPaletteIndexMap_.find(wellHandle);
+			if (it != skinningDataToPaletteIndexMap_.end()) {
+
+				int paletteIndex = it->second;
+
+				auto gpuHandle =
+					skinningWFGResourceList_[paletteIndex]->GetGPUDescriptorHandle();
+
+				//commandList_->SetGraphicsRootDescriptorTable(
+				//	static_cast<UINT>(RootSlotSkinning::SkinningWell_SB),
+				//	gpuHandle);
+			}
+		}
+
 		/// MaterialIndexList 設定
 		if (instanceMaterialIndexCounter_ >= config::GetMaxMaterialNum())assert(false);
 		int materialIndex = instanceMaterialIndexCounter_;
@@ -558,6 +680,24 @@ void DrawEngine::Draw3DOpaque() {
 				int meshIndexCount = meshBuffer->GetIndexNum();
 
 				for (auto& RenderData : RenderDataGroup) {
+
+					/// skinning palette 設定
+					if (RenderData.skinningPaletteIndex != -1) {
+
+						int wellHandle = RenderData.skinningPaletteIndex;
+
+						auto it = skinningDataToPaletteIndexMap_.find(wellHandle);
+						if (it != skinningDataToPaletteIndexMap_.end()) {
+
+							int paletteIndex = it->second;
+
+							auto gpuHandle = skinningWFGResourceList_[paletteIndex]->GetGPUDescriptorHandle();
+
+							//commandList_->SetGraphicsRootDescriptorTable(
+							//	static_cast<UINT>(RootSlotSkinning::SkinningWell_SB),
+							//	gpuHandle);
+						}
+					}
 
 					/// MaterialIndexList 設定
 					if (instanceMaterialIndexCounter_ >= config::GetMaxMaterialNum())assert(false);
@@ -897,7 +1037,7 @@ void DrawEngine::DrawDissolve(RenderCommandGPU& renderCommandGPU, int dissolveTe
 
 	SetRenderTarget(postProcessRunner_->GetRenderTarget().outputRT.rtvHandleCPU);
 
-	// ⭐ 加這一行：清除 OutputRT
+	// 加這一行：清除 OutputRT
 	float clearColor[4] = { 0.1f, 0.25f, 0.5f, 1.0f };
 	commandList_->ClearRenderTargetView(postProcessRunner_->GetRenderTarget().outputRT.rtvHandleCPU, clearColor, 0, nullptr);
 
@@ -1038,7 +1178,7 @@ void DrawEngine::CreateSkinningBuffer(ObjectData* objectData) {
 		int handle = drawDataCollector_->SetSkinningData(instanceListPtrDL, skeletonJointNum, instanceListPtrVI, vertexInfluenceNum);
 
 		/// HandleをModelに保存する
-		skinningDatDDC2DEaMap_[handle] = bufferIndex;
+		skinningDataToPaletteIndexMap_[handle] = bufferIndex;
 		objectData->objectParts_[i].wellHandle = handle;
 	}
 }
@@ -1051,8 +1191,8 @@ void DrawEngine::ClearSkinningBuffer(ObjectData* objectData) {
 		if (ddcHandle < 0) continue;
 
 		// 1. 找到 DrawEngine buffer index
-		auto it = skinningDatDDC2DEaMap_.find(ddcHandle);
-		if (it != skinningDatDDC2DEaMap_.end()) {
+		auto it = skinningDataToPaletteIndexMap_.find(ddcHandle);
+		if (it != skinningDataToPaletteIndexMap_.end()) {
 
 			int bufferIndex = it->second;
 
@@ -1063,7 +1203,7 @@ void DrawEngine::ClearSkinningBuffer(ObjectData* objectData) {
 			skinningBufferFreeList_.push_back(bufferIndex);
 
 			// 4. 移除 mapping
-			skinningDatDDC2DEaMap_.erase(it);
+			skinningDataToPaletteIndexMap_.erase(it);
 		} else {
 			continue;
 		}
@@ -1123,28 +1263,9 @@ void DrawEngine::IntializeInstanceTMBuffer(TransformationMatrix* bufferPointer, 
 	}
 }
 
-//void DrawEngine::SetMaterial(int materialID) {
-//
-//	auto checker = resourceManager_->idToIndex_.find(materialID);
-//
-//	if (checker == resourceManager_->idToIndex_.end()) {
-//		Logger::Log("[kError]DE:MaterialID not found in ResourceManager!");
-//		return;
-//	}
-//
-//	//commandList_->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::MaterialList_SB), resourceManager_->materialList_[checker->second].gpuMaterial->GetResource()->GetGPUVirtualAddress());
-//}
 
 void DrawEngine::SetTexture(int textureHandle) {
 
-	//auto checker = resourceManager_->idToIndex_.find(materialID);
-	//
-	//if (checker == resourceManager_->idToIndex_.end()) {
-	//	Logger::Log("[kError]DE:SetTexture not found in ResourceManager!");
-	//	return;
-	//}
-	//
-	//int textureHandle = resourceManager_->materialList_[checker->second].textureHandle;
 	textureSrvHandleGPU_ = TextureManager::GetInstance()->GetTextureGPUDescriptorHandle(textureHandle);
 	commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::Texture_SRV), textureSrvHandleGPU_);
 }

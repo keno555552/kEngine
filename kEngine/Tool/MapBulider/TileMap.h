@@ -5,7 +5,7 @@
 //#define ENABLE_PERLIN
 
 #ifdef ENABLE_PERLIN
-#include "PerlinNoise.cpp"
+#include "PerlinNoise/PerlinNoise.h"
 #endif
 
 ///texture種類のenum

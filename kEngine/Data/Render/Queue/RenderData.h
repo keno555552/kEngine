@@ -9,16 +9,17 @@ using TextureHandle = int;
 struct RenderData
 {
     /// バケツ分け用
-    MeshBuffer* mesh;
-    TextureHandle textureHandle;
-    PSOKey psoKey;
+    MeshBuffer* mesh = nullptr;
+    TextureHandle textureHandle = -1;
+    PSOKey psoKey{};
 
     ///　実際データ
-	MaterialID materialID;
-    TransformationMatrix transformData;
+	int skinningPaletteIndex = -1;
+	MaterialID materialID = -1;
+    TransformationMatrix transformData {};
 
     /// 将来使うかも
-    uint32_t subMeshIndex;
+    uint32_t subMeshIndex = 0;
 
 	bool CheckSame(const RenderData target);
 };

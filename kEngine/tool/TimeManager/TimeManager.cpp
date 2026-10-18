@@ -7,17 +7,18 @@ void TimeManager::Update() {
 	std::chrono::duration<float> elapsed = now - lastUpdateTime;
 
 	/// deltaTime_に経過時間をセット
-	deltaTime_ = elapsed.count();
+	totelDeltaTime_ = elapsed.count();
+	totelDeltaTime_ = std::min(totelDeltaTime_, 0.033f);
 
 	/// scaleがある時間の計算
-	scaledDeltaTime_ = deltaTime_ * timeScale_;
-	timerScaledDeltaTime_ = deltaTime_ * timerTimeScale_;
+	scaledDeltaTime_ = totelDeltaTime_ * timeScale_;
+	timerScaledDeltaTime_ = totelDeltaTime_ * timerTimeScale_;
 
 	/// 更新時間を保存
 	lastUpdateTime = now;
 
 	/// FPS計算
-	oneScondCounter_ += deltaTime_;
+	oneScondCounter_ += totelDeltaTime_;
 
 	/// 1秒ごとFPSの計算
 	if (oneScondCounter_ > 1.0f) {
@@ -29,7 +30,7 @@ void TimeManager::Update() {
 		fpsHistory_.clear();
 		oneScondCounter_ = 0.0f;
 	} else {
-		if (deltaTime_ > 0.0f)instantFps_ = 1.0f / deltaTime_;
+		if (totelDeltaTime_ > 0.0f)instantFps_ = 1.0f / totelDeltaTime_;
 		fpsHistory_.push_back(instantFps_);
 	}
 
@@ -170,7 +171,7 @@ float Timer::linearity() {
 	return std::clamp(parameter_ / maxTime_, 0.0f, 1.0f);
 }
 
-float Timer::easyIn(int a, int b, float r) {
+float Timer::easyIn(float a, float b, float r) {
 	if (parameter_ <= 0.0f)return static_cast<float>(a);
 
 	float T = std::clamp(parameter_ / maxTime_, 0.0f, 1.0f);
@@ -291,7 +292,7 @@ float easyOut(float a, float b, float t, float r) {
 	return (1.0f - easedT) * a + (easedT)*b;
 }
 
-float easyInOut(int a, int b, float time, float r) {
+float easyInOut(float a, float b, float time, float r) {
 	float easedT = {};
 	if (time <= 0.5) {
 		easedT = (1.0f - sqrtf(1.0f - powf(2.0f * time, r))) / 2;
@@ -324,5 +325,6 @@ float step(float a, float b, float t) {
 float smootherstep(float t) {
 	return t * t * t * (t * (t * 6.0f - 15.0f) + 10.0f);
 }
+
 
 #pragma endregion 

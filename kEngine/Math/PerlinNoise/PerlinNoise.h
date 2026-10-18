@@ -45,7 +45,7 @@ public:
 	bool SetRepeat(int repeat);
 
 private:
-	int p[256];
+	int p[512];	// perlin() で p[p[xi] + inc(yi)] が最大 511 まで参照するため2周分必要
 	int repeat_ = 0;
     int seed_ = 0;
 };

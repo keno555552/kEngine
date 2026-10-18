@@ -337,7 +337,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="kEngine\Tool\MapBulider\Adapter\InstructionCompiler.cpp" />
+    <ClCompile Include="kEngine\Tool\CheatEngine\CheatEngine.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GAME\Object\Bullet\Bullet.cpp" />
     <ClCompile Include="kEngine\Tool\FileManager\FileManager.cpp" />
     <ClCompile Include="kEngine\Tool\JsonHelper\JsonHelper.cpp" />
     <ClCompile Include="kEngine\Tool\EffectSystem\Adapter\EffectAdapter.cpp" />
@@ -370,14 +373,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Scenes\CG4_HK_1\Effect1.cpp" />
     <ClCompile Include="kEngine\Scenes\CG4_HK_1\Effect2.cpp" />
     <ClCompile Include="kEngine\Scenes\CG4_HK_1\menu.cpp" />
-    <ClCompile Include="kEngine\Tool\MapBulider\Data\GeneratorVariable.cpp" />
-    <ClCompile Include="kEngine\Tool\MapBulider\DungeonCell.cpp" />
-    <ClCompile Include="kEngine\Tool\MapBulider\DungeonData.cpp" />
-    <ClCompile Include="kEngine\Tool\MapBulider\GBPDungeonGenerater.cpp" />
-    <ClCompile Include="kEngine\Tool\MapBulider\MapBulider.cpp" />
-    <ClCompile Include="kEngine\Tool\MapBulider\OreSpawner.cpp" />
-    <ClCompile Include="kEngine\Tool\MapBulider\TileMap.cpp" />
-    <ClCompile Include="kEngine\Tool\MapBulider\TileRunner.cpp" />
     <ClCompile Include="kEngine\Utility\Bit.cpp" />
     <ClCompile Include="kEngine\Math\Geometry\Interpolation.cpp" />
     <ClCompile Include="kEngine\Math\Geometry\Curve.cpp" />
@@ -503,7 +498,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Renderer\Mesh\VertexResource.cpp" />
     <ClCompile Include="kEngine\Tool\TimeManager\TimeManager.cpp" />
     <ClCompile Include="kEngine\GameObject\Object\Object.cpp" />
-    <ClCompile Include="kEngine\GameObject\Player\Player.cpp" />
+    <ClCompile Include="GAME\Object\Player\Player.cpp" />
     <ClCompile Include="kEngine\Data\Render\CPUData\ObjectData.cpp" />
     <ClCompile Include="kEngine\GameObject\Particle\Particle.cpp" />
     <ClCompile Include="kEngine\Data\Game\MapChip\MapChipData.cpp" />
@@ -533,9 +528,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Renderer\PSOManager\PSORecorder.cpp" />
     <ClCompile Include="kEngine\Renderer\PostProcessRunner\PostProcessPass.cpp" />
     <ClCompile Include="kEngine\Renderer\PostProcessRunner\PostProcessLayer.cpp" />
-    <ClCompile Include="kEngine\Tool\MapMakingEditor\MapMakingEditor.cpp" />
-    <ClCompile Include="kEngine\Tool\MapBulider\Adapter\ProgramAdapter.cpp" />
-    <ClCompile Include="kEngine\Tool\MapBulider\Data\MapMakerData.cpp" />
+    <ClCompile Include="kEngine\Tool\MovementObject\MovementObject.cpp" />
+    <ClCompile Include="kEngine\Tool\CheatEngine\ObjectEditor\ObjectRegistrant.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\CheatEngine\ObjectEditor\ObjectEditor.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="ResourceLoader.cpp" />
     <ClCompile Include="kEngine\Scenes\BaseSceneFactory.cpp" />
     <ClCompile Include="kEngine\GameObject\Object\Sprite.cpp" />
@@ -552,7 +551,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Math\Geometry\SegmentUtility.cpp" />
     <ClCompile Include="kEngine\Math\Geometry\VectorUtility.cpp" />
     <ClCompile Include="kEngine\Data\Physics\Spring.cpp" />
-    <ClCompile Include="kEngine\Physics\SpringUtility.cpp" />
     <ClCompile Include="kEngine\Data\Animation\Skeleton.cpp" />
     <ClCompile Include="kEngine\Data\Geometry\ModelStructure\SkinData.cpp" />
     <ClCompile Include="kEngine\Data\Geometry\ModelStructure\VertexWeightData.cpp" />
@@ -565,9 +563,27 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Renderer\DescriptorManager\RtvManager\RtvManager.cpp" />
     <ClCompile Include="kEngine\Renderer\Mesh\RingMesh.cpp" />
     <ClCompile Include="kEngine\Utility\ItemStateCountingSystem.cpp" />
+    <ClCompile Include="kEngine\Scenes\SceneEngineTitle.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\Adapter\InstructionCompiler.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\Data\GeneratorVariable.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\DungeonCell.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\DungeonData.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\GBPDungeonGenerater.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\MapBulider.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\OreSpawner.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\TileMap.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\TileRunner.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\Adapter\ProgramAdapter.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\Data\MapMakerData.cpp" />
+    <ClCompile Include="kEngine\Tool\MapMakingEditor\MapMakingEditor.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="kEngine\Tool\MapBulider\Adapter\InstructionCompiler.h" />
+    <ClInclude Include="kEngine\Tool\CheatEngine\CheatEngine.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GAME\Object\Bullet\Bullet.h" />
+    <ClInclude Include="kEngine\EngineAssets\Particle\HitSparkWithFellRock.h" />
+    <ClInclude Include="kEngine\EngineAssets\Particle\HitSpark2.h" />
     <ClInclude Include="kEngine\Tool\FileManager\FileManager.h" />
     <ClInclude Include="kEngine\Tool\JsonHelper\JsonHelper.h" />
     <ClInclude Include="kEngine\Tool\EffectSystem\Adapter\EffectAdapter.h" />
@@ -607,14 +623,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Scenes\CG4_HK_1\Effect1.h" />
     <ClInclude Include="kEngine\Scenes\CG4_HK_1\Effect2.h" />
     <ClInclude Include="kEngine\Scenes\CG4_HK_1\menu.h" />
-    <ClInclude Include="kEngine\Tool\MapBulider\Data\GeneratorVariable.h" />
-    <ClInclude Include="kEngine\Tool\MapBulider\DungeonCell.h" />
-    <ClInclude Include="kEngine\Tool\MapBulider\DungeonData.h" />
-    <ClInclude Include="kEngine\Tool\MapBulider\GBPDungeonGenerater.h" />
-    <ClInclude Include="kEngine\Tool\MapBulider\MapBulider.h" />
-    <ClInclude Include="kEngine\Tool\MapBulider\OreSpawner.h" />
-    <ClInclude Include="kEngine\Tool\MapBulider\TileMap.h" />
-    <ClInclude Include="kEngine\Tool\MapBulider\TileRunner.h" />
     <ClInclude Include="kEngine\Utility\Bit.h" />
     <ClInclude Include="kEngine\Math\Geometry\Interpolation.h" />
     <ClInclude Include="kEngine\Math\Geometry\Curve.h" />
@@ -801,7 +809,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Tool\TimeManager\TimeManager.h" />
     <ClInclude Include="kEngine\GameObject\Object\Object.h" />
     <ClInclude Include="kEngine\Tool\DebugTool\Logger.h" />
-    <ClInclude Include="kEngine\GameObject\Player\Player.h" />
+    <ClInclude Include="GAME\Object\Player\Player.h" />
     <ClInclude Include="kEngine\Data\Render\CPUData\ObjectData.h" />
     <ClInclude Include="kEngine\GameObject\Particle\Particle.h" />
     <ClInclude Include="kEngine\Data\Game\MapChip\MapChipData.h" />
@@ -843,9 +851,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Renderer\PSOManager\PSORecorder.h" />
     <ClInclude Include="kEngine\Renderer\PostProcessRunner\PostProcessPass.h" />
     <ClInclude Include="kEngine\Renderer\PostProcessRunner\PostProcessLayer.h" />
-    <ClInclude Include="kEngine\Tool\MapMakingEditor\MapMakingEditor.h" />
-    <ClInclude Include="kEngine\Tool\MapBulider\Adapter\ProgramAdapter.h" />
-    <ClInclude Include="kEngine\Tool\MapBulider\Data\MapMakerData.h" />
+    <ClInclude Include="kEngine\Tool\MovementObject\MovementObject.h" />
+    <ClInclude Include="kEngine\Tool\CheatEngine\ObjectEditor\ObjectRegistrant.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\CheatEngine\ObjectEditor\ObjectEditor.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="ResourceLoader.h" />
     <ClInclude Include="kEngine\Scenes\BaseSceneFactory.h" />
     <ClInclude Include="kEngine\GameObject\Object\Sprite.h" />
@@ -862,7 +874,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Math\Geometry\SegmentUtility.h" />
     <ClInclude Include="kEngine\Math\Geometry\VectorUtility.h" />
     <ClInclude Include="kEngine\Data\Physics\Spring.h" />
-    <ClInclude Include="kEngine\Physics\SpringUtility.h" />
     <ClInclude Include="kEngine\Data\Animation\Skeleton.h" />
     <ClInclude Include="kEngine\Data\Geometry\ModelStructure\SkinData.h" />
     <ClInclude Include="kEngine\Data\Geometry\ModelStructure\VertexWeightData.h" />
@@ -875,6 +886,20 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Renderer\PSOManager\RootSlot.h" />
     <ClInclude Include="kEngine\Renderer\DescriptorManager\RtvManager\RtvManager.h" />
     <ClInclude Include="kEngine\Utility\ItemStateCountingSystem.h" />
+    <ClInclude Include="kEngine\Data\Render\GPUData\SkinningExtraVertexData.h" />
+    <ClInclude Include="kEngine\Scenes\SceneEngineTitle.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\Adapter\InstructionCompiler.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\Data\GeneratorVariable.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\DungeonCell.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\DungeonData.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\GBPDungeonGenerater.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\MapBulider.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\OreSpawner.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\TileMap.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\TileRunner.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\Adapter\ProgramAdapter.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\Data\MapMakerData.h" />
+    <ClInclude Include="kEngine\Tool\MapMakingEditor\MapMakingEditor.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl">
@@ -888,6 +913,174 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\DebugLine.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\DebugLine.VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\FlameNeonGlow.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\FlameNeonGlow.VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\GlowSphere.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\GlowSphere.VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\LightingLambert\BlinnPhongReflection.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\LightingLambert\HalfLambert.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\LightingLambert\Lambert.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\LightingLambert\PhongReflection.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\Object3d.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\Object3d.VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\Blur.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\ColorGuard.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\CopyImage.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\Dissolve.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\FullScreenQuad.VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\NoiseShader.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\Outline.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\OutlineDepth.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\OutlinePrewittDepth.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\Smoothing.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\Vignette.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\SkinningObject3D.VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\SkyCube.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\SkyCube.VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\Tile2D.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="kEngine\EngineAssets\Shader\Tile2D.VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="resources\Shader\FlameNeonGlow.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -1020,6 +1213,16 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="resources\Shader\Particle.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="resources\Shader\Particle.VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="resources\Shader\Tile2D.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -1139,8 +1342,50 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
     </None>
+    <None Include="kEngine\EngineAssets\Shader\CommonTypes.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="kEngine\EngineAssets\Shader\DebugLine.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
     <None Include="kEngine\EngineAssets\Shader\PostProcess\ColorGuard.hlsli" />
+    <None Include="kEngine\EngineAssets\Shader\PostProcess\FullScreenQuadVSO.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="kEngine\EngineAssets\Shader\PostProcess\RandomTool.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="kEngine\EngineAssets\Shader\PostProcess\RenderCommand.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
     <None Include="kEngine\EngineAssets\Shader\PostProcess\Vignette.hlsli" />
+    <None Include="kEngine\EngineAssets\Shader\PostProcess\whiteNoise.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="kEngine\EngineAssets\Shader\SkyCube.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='EditorBuild|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
     <None Include="packages.config" />
     <None Include="resources\map\map.csv" />
     <None Include="resources\map\map1.csv" />

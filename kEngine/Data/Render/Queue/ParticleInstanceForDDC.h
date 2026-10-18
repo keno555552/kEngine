@@ -7,9 +7,9 @@ using TextureHandle = int;
 
 struct ParticleInstanceForDDC
 {
-	MeshBuffer* mesh;
-	PSOKey psoKey;
-	MaterialID materialID;
-	TextureHandle textureHandle;
+	MeshBuffer* mesh{};
+	PSOKey psoKey{};
+	MaterialID materialID{};
+	TextureHandle textureHandle{};
 	TransformationMatrix transMatrix{};
 };

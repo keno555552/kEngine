@@ -55,6 +55,58 @@ void AnimationManager::UnitSetTime(int unitHandle, float time) {
 	unitList_[unitHandle]->SetTime(time);
 }
 
+void AnimationManager::ApplySkinning() {
+
+	if (!wellList_ || !skinningDataToPaletteIndexMap_) {
+		return; // 尚未初始化
+	}
+
+	for (auto& [unitHandle, unit] : unitList_) {
+
+		Object* obj = unit->GetInstanceObject();
+		if (!obj) continue;
+
+		std::weak_ptr<ModelData> objData = unit->GetModelData();
+		if (objData.expired()) continue;
+
+		// 沒有 skeleton 就不用 skinning
+		if (!unit->GetHaveSkeleton()) continue;
+
+		Skeleton* skeleton = unit->GetInstanceSkeleton();
+		if (!skeleton) continue;
+
+		auto& joints = skeleton->jointList;
+		int jointCount = (int)joints.size();
+
+		// 每個 ObjectPart 都有自己的 wellHandle
+		for (auto& part : obj->objectParts_) {
+
+			int handle = part.GetWellHandle();
+			if (handle < 0) continue;
+
+			// 1. 用 handle 找 paletteIndex
+			auto it = skinningDataToPaletteIndexMap_->find(handle);
+			if (it == skinningDataToPaletteIndexMap_->end()) continue;
+
+			int paletteIndex = it->second;
+
+			// 2. 用 paletteIndex 找 WellForGPU
+			WellForGPU* palette = (*wellList_)[paletteIndex]->GetInstanceBufferPtr();
+			if (!palette) continue;
+
+			// 3. 寫入骨骼矩陣（使用 AnimationUnit 的 finalMatrix）
+			for (int j = 0; j < jointCount; ++j) {
+
+				Matrix4x4& finalMat = joints[j].finalMatrix;
+
+				palette[j].skeletonSpaceMatrix = finalMat;
+				palette[j].skeletonSpaceInverseTransposeMatrix =
+					finalMat.Inverse().Transpose();
+			}
+		}
+	}
+}
+
 int AnimationManager::TakeControlObject(int animationHandle, Object* object) {
 
 	/// ハンドルが存在するか確認する
@@ -114,92 +166,9 @@ void AnimationManager::Update() {
 	for (auto& [handle, unit] : unitList_) {
 		unit->Update();
 	}
-}
 
-Animation AnimationManager::LoadAnimationDataFromJson(const std::string& filePath) {
-	//std::ifstream input(filePath);
-	//if (!input.is_open()) {
-	//	throw std::runtime_error("Failed to open file: " + filePath);
-	//}
-	//
-	//nlohmann::json file;
-	//input >> file;  // 讀取並解析 JSON
-	//
-	//// 基本資訊
-	//
-	//Animation result;
-	//result.nodeList[0].animationNodeID = file["AnimationID"].get<int>();
-	//
-	//// KeyFrameList
-	//for (const auto& kfJson : file["KeyFrameList"]) {
-	//	KeyFrame kf;
-	//	kf.index_ = kfJson["Index"].get<int>();
-	//	kf.time_ = kfJson["Time"].get<float>();
-	//	kf.animationType_ = static_cast<AnimationType>(kfJson["AnimationType"].get<int>());
-	//	kf.easeRate_ = kfJson["EaseRate"].get<float>();
-	//
-	//	// MainPosition
-	//	auto mp = kfJson["TransformData"]["MainPosition"];
-	//	kf.transformData.mainPosition.transform.translate.x = mp["TranslateX"].get<float>();
-	//	kf.transformData.mainPosition.transform.translate.y = mp["TranslateY"].get<float>();
-	//	kf.transformData.mainPosition.transform.translate.z = mp["TranslateZ"].get<float>();
-	//	kf.transformData.mainPosition.transform.rotate.x = mp["RotateX"].get<float>();
-	//	kf.transformData.mainPosition.transform.rotate.y = mp["RotateY"].get<float>();
-	//	kf.transformData.mainPosition.transform.rotate.z = mp["RotateZ"].get<float>();
-	//	kf.transformData.mainPosition.transform.scale.x = mp["ScaleX"].get<float>();
-	//	kf.transformData.mainPosition.transform.scale.y = mp["ScaleY"].get<float>();
-	//	kf.transformData.mainPosition.transform.scale.z = mp["ScaleZ"].get<float>();
-	//
-	//	// ObjectParts
-	//	for (const auto& partJson : kfJson["TransformData"]["ObjectPart"]) {
-	//		ObjectPart part;
-	//		part.transform.translate.x = partJson["TranslateX"].get<float>();
-	//		part.transform.translate.y = partJson["TranslateY"].get<float>();
-	//		part.transform.translate.z = partJson["TranslateZ"].get<float>();
-	//		part.transform.rotate.x = partJson["RotateX"].get<float>();
-	//		part.transform.rotate.y = partJson["RotateY"].get<float>();
-	//		part.transform.rotate.z = partJson["RotateZ"].get<float>();
-	//		part.transform.scale.x = partJson["ScaleX"].get<float>();
-	//		part.transform.scale.y = partJson["ScaleY"].get<float>();
-	//		part.transform.scale.z = partJson["ScaleZ"].get<float>();
-	//
-	//		kf.transformData.objectParts_.push_back(part);
-	//	}
-	//
-	//	animationList->keyList.push_back(kf);
-	//}
-	//keyFrameList_.clear();
-	//for (auto& kf : animationList->keyList) {
-	//	KeyFrame newKf;
-	//	newKf.index_ = kf.index_;
-	//	newKf.time_ = kf.time_;
-	//	newKf.animationType_ = kf.animationType_;
-	//	newKf.easeRate_ = kf.easeRate_;
-	//	newKf.transformData = kf.transformData;
-	//	newKf.hitBox_ = {
-	//		{ startPos_.x + ((EndPos_.x - startPos_.x) / mainTimer_->maxTime_) * kf.time_,
-	//		  (float)config::GetClientHeight() - 10.0f + 5.0f },
-	//		10.0f, 10.0f
-	//	};
-	//	keyFrameList_.push_back(newKf);
-	//}
-	//
-	//ping_->objectParts_.clear();
-	//for (const auto& kf : keyFrameList_) {
-	//	ping_->CreateDefaultData();
-	//	float Leight = EndPos_.x - startPos_.x;
-	//	float timeParameter = kf.time_ / mainTimer_->maxTime_;
-	//	ping_->objectParts_.back().materialConfig->textureHandle = pingTH_;
-	//	ping_->objectParts_.back().transform.translate = {
-	//		startPos_.x + Leight * timeParameter,
-	//		(float)config::GetClientHeight() - 10.0f,
-	//		100.0f
-	//	};
-	//	ping_->objectParts_.back().anchorPoint = { 5.0f,0.0f };
-	//}
-	return {};
+	ApplySkinning();
 }
-
 
 bool AnimationManager::CheckHaveHandle(int animHandle) {
 

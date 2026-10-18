@@ -8,18 +8,22 @@
 #include "GAME/scenes/UITest.h"
 #include "Tool/EffectSystem/ParticleEditor.h"
 #include "Tool/EffectSystem/EffectEditor.h"
+#include "Scenes/SceneEngineTitle.h"
 #include "Tool/MapMakingEditor/MapMakingEditor.h"
+
 
 SceneFactory::SceneFactory(kEngine* system)
     : system_(system)
 {
+    sceneRegistry_["ENGINE_TITLE"] = [this]() { return std::make_unique<SceneEngineTitle>(system_); };
     sceneRegistry_["ANIMATIONEDITOR"] = [this]() { return std::make_unique<AnimationEditor>(system_); };
     sceneRegistry_["EFFECT2"] = [this]() { return std::make_unique<Effect2>(system_); };
     sceneRegistry_["CGHK2"] = [this]() { return std::make_unique<SceneCGHK2>(system_); };
     sceneRegistry_["UITest"] = [this]() { return std::make_unique<UITest>(system_); };
 	sceneRegistry_["ParticleEditor"] = [this]() { return std::make_unique<ParticleEditor>(system_); };
+
     sceneRegistry_["EffectEditor"] = [this]() { return std::make_unique<EffectEditor>(system_); };
-	sceneRegistry_["MapMakingEditor"] = [this]() { return std::make_unique<MapMakingEditor>(system_); };
+    sceneRegistry_["MapMakingEditor"] = [this]() { return std::make_unique<MapMakingEditor>(system_); };
 }
 
 std::unique_ptr<BaseScene> SceneFactory::CreateScene(const std::string& sceneName) {

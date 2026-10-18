@@ -44,6 +44,8 @@ public:
 
 	/// ========== エンジン側用データ =========== ///
 
+	int GetWellHandle() const { return wellHandle; }
+
 private:
 	/// 描画のときに、DrawDataCollectorのどこにこskinningMatrixを入れるどころのハンドル
 	int wellHandle = -1;

@@ -4,7 +4,7 @@
 #include "Object\Sprite.h"
 #include "Lighting\Light.h"
 #include "Camera\DebugCamera.h"
-#include "Player\Player.h"
+#include "GAME\Object\Player\Player.h"
 #include "MapChip\MapChipField.h"
 #include "tool\DebugTool\DebugObject.h"
 

@@ -1,15 +1,30 @@
 #pragma once
 #include <string>
 
+enum WindowMode {
+	FULLSCREEN,				// フルスクリーン
+	WINDOWED_Fixed,			// 大小固定、コマンドによって切り替える(要切り替えがいる
+	WINDOWED_Dynamic,		// 切り替え自由
+	WINDOWED_Scale,			// 固定比率で切り替え
+	Num_Of_Type,			// 総数
+};
+
 enum gamepadType {
 	NODEVICE,
 	DIRECTINPUT,
 	XINPUT
 };
 
+
 class config
 {
 private:
+	/// window設定
+	static const int kDefaultClientWidth_ = 1280;   /// デフォルトのクライアント幅
+	static const int kDefaultClientHeight_ = 720;   /// デフォルトのクライアント高さ
+	static const std::string kDefaultClientTitle_;  /// デフォルトのクライアントタイトル
+	static const WindowMode kDefaultWindowMode_ = WINDOWED_Fixed;  /// デフォルトのウィンドウモード
+
 	/// 描画設定
 	static const int kDebugLineNumInstance_ = 5000;   /// DebugLineの最大インスタンス数
 	static const int k2DTileNumInstance_ = 50000;     /// Tileの最大インスタンス数
@@ -39,6 +54,9 @@ private:
 	static const int kDefaultSphereDivideNum_ = 18;			/// Sphereの分割数
 
 private:
+
+	/// ========================= 現在のウィンドウ関連 ========================= ///
+	static WindowMode clientWindowMode_;
 	static std::string clientTitle_;
 	static int clientWidth_;
 	static int clientHeight_;
@@ -53,31 +71,68 @@ private:
 	static int XInputDriverIP_;
 
 public:
+	/// ====================== 各エンジン生成モデルの最大数 ======================== ///
+	// デバッグライン
 	static int GetDebugLineNumInstance() { return kDebugLineNumInstance_; }
+	// 2Dマーシュ
 	static int Get2DTileNumInstance() { return k2DTileNumInstance_; }
+	// 3Dマーシュ
 	static int Get3DTileNumInstance() { return k3DTileNumInstance_; }
+	// パーティクル
 	static int GetParticleCPUNumInstance() { return kParticleCPUNumInstance_; }
+	// マテリアル最大数数
 	static int GetMaxMaterialNum() { return kMaxMaterialNum_; }
+	// 
 	static int GetMaxMaterialLayerNum() { return kMaxMaterialLayerNum_; }
+	//
 	static int GetMaxOffsetNum() { return kMaxOffsetNum_; }
+	//
 	static int GetMaxSRVNum() { return kMaxSRVNum_; }
+	//
 	static int GetMaxLightNum() { return kMaxLightNum_; }
+	//
 	static int GetPostProcessLayer() { return kPostProcessLayer; }
-
+	//
 	static int GetDefaultSphereDivideNum() { return kDefaultSphereDivideNum_; }
 
+
+	/// ============================= Window関連 ============================= ///
+	// ------------------------------- const設定 ------------------------------ //
+	// 画面のモード関連(Set/Getter)
+	static WindowMode GetDefaultWindowMode() { return kDefaultWindowMode_; }
+
+	// タイトル関連(Set/Getter)
+	static const std::string GetDefaultTitle() { return kDefaultClientTitle_; }
+
+	// 画面の横幅(Set/Getter)
+	static int GetDefaultWidth() { return kDefaultClientWidth_; }
+
+	// 画面の縦幅(Set/Getter)
+	static int GetDefaultHeight() { return kDefaultClientHeight_; }
+	// ------------------------------- 現在の設定 ------------------------------ //
+	// 画面のモード関連(Set/Getter)
+	static WindowMode GetClientWindowMode() { return clientWindowMode_; }
+	static void SetClientWindowMode(WindowMode mode);
+
+	// タイトル関連(Set/Getter)
 	static void SaveClientTitle(const std::string& clientTitle) { clientTitle_ = clientTitle; };
 	static const std::string GetClientTitle() { return clientTitle_; }
+
+	// 画面の横幅(Set/Getter)
 	static void SaveClientWidth(int clientWidth) { clientWidth_ = clientWidth; }
 	static int GetClientWidth() { return clientWidth_; }
+
+	// 画面の縦幅(Set/Getter)
 	static void SaveClientHeight(int clientHeight) { clientHeight_ = clientHeight; }
 	static int GetClientHeight() { return clientHeight_; }
 
+	/// ============================== PSO関連 =============================== ///
 	static void SavePsoCacheFolderPath(const std::string& path) { psoCacheFolderPath_ = path; }
 	static std::string GetPsoCacheFolderPath() { return psoCacheFolderPath_; }
 	static void SavePsoCacheFolderName(const std::string& name) { psoCacheFolderName_ = name; }
 	static std::string GetPsoCacheFolderName() { return psoCacheFolderName_; }
 
+	/// ============================= 入力関連 ================================ ///
 	static void SetConnectKeyboard(bool* state) { isConnectKeyboard_ = *state; }
 	static bool GetKeyboardState() { return isConnectKeyboard_; }
 	static void SetConnectMouse(bool* state) { isConnectMouse_ = *state; }
@@ -90,7 +145,10 @@ public:
 	static int GetXInputIp() { return XInputDriverIP_; }
 
 public:
-	/// デフォルトメッシュバッファハンドル
+	static int default_White5x5_TextureHandle_;
+
+public:
+	/// デフォルトエンジン生成メッシュバッファハンドル
 	static int default_Plane_MeshBufferHandle_;
 	static int default_Triangle_MeshBufferHandle_;
 	static int default_Sprite2D_MeshBufferHandle_;
@@ -101,7 +159,7 @@ public:
 	static int default_Cylinder_MeshBufferHandle_;
 
 public:
-	/// デフォルトPSoハンドル
+	/// デフォルトPSOハンドル
 	static int default_LightModel_;
 	static int default_RenderModelTypes_;
 	static int default_RasterizerMode_;
@@ -109,3 +167,4 @@ public:
 	static int default_DepthStenctilState_;
 	static int default_RenderTargetFormatType_;
 };
+

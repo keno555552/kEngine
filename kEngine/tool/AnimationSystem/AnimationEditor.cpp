@@ -14,16 +14,17 @@ AnimationEditor::AnimationEditor(kEngine* system) {
 	SetupAnimationEditor();
 
 	/// =============== モデル設定 ===============///
-	std::string modelPath = "GAME/gltf/";
+	std::string modelPath = "GAME/resources/gltf/";
 	//targetModelHandle_ = system_->SetModelObj(modelPath + "both/AnimatedCube/AnimatedCube.gltf");
+	targetModelHandle_ = system_->SetModelObj(modelPath + "animation/sneakWalk.gltf");
 	//targetModelHandle_ = system_->SetModelObj("kEngine/EngineAssets/Object/charater.obj");
-	targetModelHandle_ = system_->SetModelObj("kEngine/EngineAssets/Object/charater/charater.obj");
+	//targetModelHandle_ = system_->SetModelObj("kEngine/EngineAssets/Object/charater/charater.obj");
 
 	targetModel_ = std::make_unique<Object>();
 	targetModel_->IntObject(system_);
 	targetModel_->CreateModelData(targetModelHandle_);
 	targetModel_->modelHandle_ = targetModelHandle_;
-	//SetUsingModel(targetModel_.get());
+	SetUsingModel(targetModel_.get());
 
 
 	/// ================= Test ================///
@@ -33,6 +34,9 @@ AnimationEditor::AnimationEditor(kEngine* system) {
 	
 	//animationUnitHandle_ = system_->LoadAnimation(modelPath + "both/AnimatedCube/AnimatedCube.gltf");
 	//system_->AnimationTakeControlObject(animationUnitHandle_[0], targetModel_.get());
+	
+	animationUnitHandle_ = system_->LoadAnimation(modelPath + "animation/sneakWalk.gltf");
+	system_->AnimationTakeControlObject(animationUnitHandle_[0], targetModel_.get());
 }
 
 AnimationEditor::~AnimationEditor() {
@@ -55,7 +59,7 @@ void AnimationEditor::Update() {
 
 	/// =============== モデル更新 =================///
 
-	//system_->AnimationUnitSetTime(animationUnitHandle_[0], mainTimer_->parameter_);
+	system_->AnimationUnitSetTime(animationUnitHandle_[0], mainTimer_->parameter_);
 	//targetModel_->Update(camera_);
 	//animationUnit_->ReadAnimationData(animationList_[0]);
 	//animationUnit_->SetTime(mainTimer_->parameter_);
@@ -67,8 +71,6 @@ void AnimationEditor::Draw() {
 	UIDraw();
 
 	targetModel_->Draw();
-
-	//animationUnit_->KariDraw();
 
 #ifdef USE_IMGUI
 	ImguiPart();

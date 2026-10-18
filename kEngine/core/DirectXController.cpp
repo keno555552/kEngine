@@ -4,31 +4,31 @@
 #include <cassert>
 
 DirectXController::DirectXController() {
-	//static FixFPS fixFPS;
-	//fixFPS.Initialize();
-	//
-	//timeBeginPeriod(1);
+	fixFPS_.Initialize();
+
+	timeBeginPeriod(1);
 }
 
 DirectXController::~DirectXController() {
 
-	//timeEndPeriod(1);
-	//Finalize();
+	timeEndPeriod(1);
+	Finalize();
 }
 
 void DirectXController::InitializeDrive(const char* kClientTitle, int kClientWidth, int kClientHeight) {
 	DirectXCore::InitializeDrive(kClientTitle, kClientWidth, kClientHeight);
-	static FixFPS fixFPS;
-	fixFPS.Initialize();
+	fixFPS_.Initialize();
 	timeBeginPeriod(1);
 }
 
 void DirectXController::Finalize() {
 	timeEndPeriod(1);
-	DirectXCore::Finalize();	
+	DirectXCore::Finalize();
 }
 
 void DirectXController::StartFrame() {
+
+	/// ================================ 描画パート開始 =============================== ///
 
 #ifdef USE_IMGUI
 	ImGuiManager::BeginFrame(commandList.Get());
@@ -57,8 +57,8 @@ void DirectXController::StartFrame() {
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);
 	// 指定した色で画面全体をクリアする
-	float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f }; // 青っぽい色。RGBAの順
-	//float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f }; // 黑色。RGBAの順
+	//float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f }; // 青っぽい色。RGBAの順
+	float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f }; // 黑色。RGBAの順
 	commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 	commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
 
@@ -85,14 +85,19 @@ void DirectXController::EndFrame() {
 	assert(SUCCEEDED(hr));
 
 	// GPUにコマンドリストの実行を行わせる
-	ID3D12CommandList* commandLists[] = { commandList.Get()};
+	ID3D12CommandList* commandLists[] = { commandList.Get() };
 	commandQueue->ExecuteCommandLists(1, commandLists);
+
+#ifdef USE_IMGUI
+	ImGuiManager::RenderPlatformWindows();
+#endif
 
 	// GPUとOSに画面の交換を行うよう通知する
 	SwapChain->Present(1, 0);
 
 	//static FixFPS fixFPS;
 	//fixFPS.Update();
+	fixFPS_.Update();
 
 
 	// Fenceの値を更新

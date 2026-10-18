@@ -684,6 +684,31 @@ void ResourceManager::CreateDepthSRV(ID3D12Resource* depthStencil, D3D12_CPU_DES
 	BDevice_->CreateShaderResourceView(depthStencil, &descTextureSrvDesc, srvHandle);
 }
 
+void ResourceManager::ResizeRenderTexture(RenderTexture& rt, uint32_t width, uint32_t height) {
+
+	rt.width = width;
+	rt.height = height;
+
+	// 1. 顏色 resource 重建，View 寫回「原本的」描述符位置
+	rt.resource.Reset();
+	rt.resource = CreateRenderTextureResource(width, height, rt.format, rt.clearColor);
+	CreateRTV(rt.resource.Get(), rt.format, rt.rtvHandleCPU);
+	CreateSRV(rt.resource.Get(), rt.format, rt.srvHandleCPU);
+
+	// 2. 深度 resource 重建，View 也寫回原本的位置
+	CreateDepthResourceForRenderTexture(rt);
+
+	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
+	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+	BDevice_->CreateDepthStencilView(rt.depthResource.Get(), &dsvDesc, rt.dsvHandleCPU);
+	CreateDepthSRV(rt.depthResource.Get(), rt.depthSrvHandleCPU);
+
+	// 3. 狀態要和 CreateRenderTexture 建立時一致
+	rt.currentState = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+	rt.depthState = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+}
+
 
 RenderTexture ResourceManager::CreateRenderTexture(
 	uint32_t width,
@@ -778,8 +803,7 @@ ID3D12Resource* ResourceManager::CreateDepthStencilTextureResource(ID3D12Device*
 }
 
 
-void ResourceManager::CreateDepthStencilForRenderTexture(RenderTexture& rt) {
-
+void ResourceManager::CreateDepthResourceForRenderTexture(RenderTexture& rt) {
 	/// 1.DepthStencilを生成する
 	//Resourceの設定
 	D3D12_RESOURCE_DESC desc{};
@@ -810,6 +834,11 @@ void ResourceManager::CreateDepthStencilForRenderTexture(RenderTexture& rt) {
 		IID_PPV_ARGS(&rt.depthResource)
 	);
 	assert(SUCCEEDED(hr));
+}
+
+void ResourceManager::CreateDepthStencilForRenderTexture(RenderTexture& rt) {
+
+	CreateDepthResourceForRenderTexture(rt);
 
 	/// 2.建立 DSVを作成する
 	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};

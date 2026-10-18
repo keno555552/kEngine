@@ -156,12 +156,15 @@ Vector3 RotateVector(const Vector3& vector, const Quaternion& quaternion) {
 }
 
 Quaternion EulerToQuaternion(const Vector3& euler) {
-	float cx = cosf(euler.x * 0.5f);
-	float sx = sinf(euler.x * 0.5f);
-	float cy = cosf(euler.y * 0.5f);
-	float sy = sinf(euler.y * 0.5f);
-	float cz = cosf(euler.z * 0.5f);
-	float sz = sinf(euler.z * 0.5f);
+
+	Vector3 e = euler;
+
+	float cx = cosf(e.x * 0.5f);
+	float sx = sinf(e.x * 0.5f);
+	float cy = cosf(e.y * 0.5f);
+	float sy = sinf(e.y * 0.5f);
+	float cz = cosf(e.z * 0.5f);
+	float sz = sinf(e.z * 0.5f);
 
 	Quaternion q;
 

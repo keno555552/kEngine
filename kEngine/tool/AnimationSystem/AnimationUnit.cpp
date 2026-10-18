@@ -50,6 +50,15 @@ void AnimationUnit::TakeControlObject(Object* object) {
 	}
 	BindingAnimationNodeToObjectPart();
 
+	object->isControlledByAnimation_ = true;
+
+}
+
+void AnimationUnit::ReleaseControlObject(Object* object) {
+	if (controlledObject_ == object) {
+		object->isControlledByAnimation_ = false;
+		controlledObject_ = nullptr;
+	}
 }
 
 void AnimationUnit::Update() {

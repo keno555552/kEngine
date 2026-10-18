@@ -19,5 +19,6 @@ public:
     static void BeginFrame(ID3D12GraphicsCommandList* commandList);
     static void EndFrame(ID3D12GraphicsCommandList* commandList);
     static void Shutdown();
+    static void RenderPlatformWindows();
 };
 

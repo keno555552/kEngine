@@ -25,3 +25,6 @@ struct Vector4
 
 // Row-vector (v * M) multiplication
 Vector4 Multiply(const Vector4& v, const Matrix4x4& m);
+
+Vector4 ColorTo1(Vector4 colorBy255);
+Vector4 ColorTo255(Vector4 colorBy1);

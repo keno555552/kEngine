@@ -1,6 +1,8 @@
 #include "UITest.h"
 #include "DebugDraw.h"
 #include "EngineAssets/Particle/HitSpark.h"
+#include "EngineAssets/Particle/HitSpark2.h"
+#include "EngineAssets/Particle/HitSparkWithFellRock.h"
 
 UITest::UITest(kEngine* system) {
 	/// =========== システム初期化 ============///
@@ -156,20 +158,34 @@ UITest::UITest(kEngine* system) {
 
 	/// =========== パーティクル作る ============///
 
-	HitSpark hitSpark;
+	HitSpark3 hitSpark;
+	hitSpark.name = "HitSpark";
 	hitSpark.startPosition = { 0.0f, 0.0f, 0.0f };
 	hitSpark.objectList[0].objectParts_[0].materialConfig->textureHandle = clicleTextureHandle_;
 	particleHandle_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitSpark, 0);
 
-	HitImpact hitImpact;
+	HitImpact3 hitImpact;
+	hitImpact.name = "HitImpact";
 	hitImpact.startPosition = { 0.0f, 0.0f, 0.0f };
 	hitImpact.objectList[0].objectParts_[0].materialConfig->textureHandle = effectTextureHandle_;
 	particleHandle2_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitImpact, 1);
 
-	HitSpackImpactLink linkData;
-	linkData.sourceName = particleHandle_;
-	linkData.targetName = particleHandle2_;
+	HitRock hitRock;
+	hitRock.name = "HitRock";
+	hitRock.startPosition = { 0.0f, 0.0f, 0.0f };
+	hitRock.objectList[0].objectParts_[0].materialConfig->textureHandle = whiteTextureHandle_;
+	particleHandle3_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitRock, 0);
+
+	HitSpackImpactLink3 linkData;
+	linkData.sourceName = "HitSpark";
+	linkData.targetName = "HitImpact";
 	system_->GetEffectManager()->GetParticleManager()->LinkEmitterToEmitter(linkData);
+
+	HitSpackImpactLink3_2 linkData2;
+	linkData2.sourceName = "HitSpark";
+	linkData2.targetName = "HitRock";
+	system_->GetEffectManager()->GetParticleManager()->LinkEmitterToEmitter(linkData2);
+	system_->GetEffectManager()->GetParticleManager()->LinkEmitterToEmitter(linkData2);
 
 }
 
@@ -207,7 +223,7 @@ void UITest::Update() {
 
 	panel_->Update();
 
-	defaultMenu_->Updata();
+	defaultMenu_->Update();
 
 	MouseLogic();
 
@@ -312,7 +328,7 @@ void UITest::Draw() {
 	//skydome_->Draw();
 	skybox_->Draw();
 	ground_->Draw();
-	box_->Draw();
+	//box_->Draw();
 	detailButton_->Render();
 	button_->Render();
 	//panel_->Render();

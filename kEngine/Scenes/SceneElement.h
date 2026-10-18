@@ -13,6 +13,7 @@ enum class SceneOutcome{
 	LOSE = -1,
 	NONE,
 	WIN,
+	MENU,
 	NEXT,
 	RETRY,
 	RETURN,

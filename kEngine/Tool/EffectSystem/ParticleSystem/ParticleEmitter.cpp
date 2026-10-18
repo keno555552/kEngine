@@ -3,10 +3,12 @@
 
 ParticleEmitter::ParticleEmitter(kEngine* system,
 	const ParticlePrototype particlePrototype,
+	int* particleIdIP,
 	int maxParticles) :
 	system_(system),
 	prototype_(particlePrototype),
 	maxParticles_(maxParticles),
+	particleIdIP_(particleIdIP),
 	emitterPosition(particlePrototype.startPosition) {
 	isObjectType_ = (particlePrototype.renderType == ParticleRenderType::Object) ?
 		ParticleRenderType::Object :
@@ -101,7 +103,9 @@ void ParticleEmitter::Update() {
 			particles_.pop_back();
 		}
 	}
-	if (particles_.empty()) isFinished_ = true;
+	if (particles_.empty()) {
+		isFinished_ = true;
+	}
 }
 
 void ParticleEmitter::Emit(int count, ParticlePrototypeOverride* prototype) {
@@ -123,7 +127,7 @@ void ParticleEmitter::Emit(int count, ParticlePrototypeOverride* prototype) {
 		for (int s = 0; s < shootTime; s++) {
 			ParticleInstance p;
 
-			p.particleId = counter_++;
+			p.particleId = (*particleIdIP_)++;
 			p.isAlive = true;
 			p.life.parameter_ = 0.0f;
 

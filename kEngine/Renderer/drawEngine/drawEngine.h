@@ -32,6 +32,9 @@
 #include "Data/Render/CPUData/RenderTexture.h"
 #include "Data/Render/GPUData/BlurDataGPU.h"
 
+#include "Tool/AnimationSystem/AnimationManager.h"
+#include "Data/Render/GPUData/WellForGPU.h"
+
 class DrawEngine
 {
 public:
@@ -39,17 +42,41 @@ public:
 	friend class PostProcessPass;
 	friend class PostProcessLayer;
 
+
+#ifdef USE_IMGUI
+public:
+	struct PreviewRequest {
+		bool active = false;
+		ObjectData* object = nullptr;
+		int partIndex = -1;
+		DrawDataCollector::PreviewView view{};
+	};
+#endif
+
 	void Initialize(
 		DirectXCore* directXDirver,
 		DrawDataCollector* drawDataCollector,
-		PostProcessRunner* postProcessRunner);
+		PostProcessRunner* postProcessRunner,
+		AnimationManager* animationManager);
 
 	void Finalize();
 
+	void OnResize(int width, int height);
+
 	void StartFrame();
+
 	void PreDraw();
 	void CommitDraw();
+
 	void EndDraw();
+
+	/// ========= debug用 ========= ///
+
+#ifdef USE_IMGUI
+	void SetPreviewRequest(const PreviewRequest& request) { previewRequest_ = request; }
+	void RenderPreview();
+	void* GetPreviewTextureID() const { return (void*)previewRT_.srvHandleGPU.ptr; }
+#endif
 
 	/// ======== 全部描く関数 ======== ///
 	/// DebugLinee描画関数
@@ -90,6 +117,7 @@ private:
 	std::unique_ptr<PSOManager> psoManager_{};
 	PostProcessRunner* postProcessRunner_{};   /*依存*/
 	ResourceManager* resourceManager_{};	   /*依存*/
+	AnimationManager* animationManager_{};		   /*依存*/
 	DirectXCore* directXDriver_{};			   /*依存*/
 	ID3D12GraphicsCommandList* commandList_{}; /*依存*/
 
@@ -102,7 +130,15 @@ private:
 	int kMaxSubdivision_ = 18;
 	int kSubdivision_ = 0;
 
+
+#ifdef USE_IMGUI
 private:
+	RenderTexture previewRT_{};
+	PreviewRequest previewRequest_{};
+	std::unique_ptr<BasicResource> previewCameraBuffer_;
+	CameraForGPU* previewCameraPtr_ = nullptr;
+#endif
+
 private:
 	/// PSO関連
 
@@ -177,9 +213,8 @@ private:
 	/// Skinning関連
 	std::vector<std::unique_ptr<InstanceBuffer<WellForGPU>>> skinningWFGResourceList_;
 	// DDCにのSkinningDataのハンドルと、実際のWellForGPUのマップ
-	std::map<int, int> skinningDatDDC2DEaMap_;
+	std::map<int, int> skinningDataToPaletteIndexMap_;
 	std::vector<int> skinningBufferFreeList_;
-	// int skinningCounter_ = 0;
 
 
 private:

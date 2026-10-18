@@ -261,7 +261,7 @@
     <ClCompile Include="kEngine\Utility\FrameRateLimiter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\GameObject\Player\Player.cpp">
+    <ClCompile Include="GAME\Object\Player\Player.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Data\Game\MapChip\MapChipField.cpp">
@@ -567,9 +567,6 @@
     <ClCompile Include="kEngine\Data\Physics\PhysicalBall.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Physics\SpringUtility.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="kEngine\Data\Animation\Keyframe.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -720,37 +717,13 @@
     <ClCompile Include="kEngine\Renderer\PSOManager\PSORecorder.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="GAME\Object\Bullet\Bullet.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
     <ClCompile Include="kEngine\Data\Render\GPUData\RenderCommandGPU.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Tool\EffectSystem\EffectEditor.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\Tool\MapMakingEditor\MapMakingEditor.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\Tool\MapBulider\DungeonData.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\Tool\MapBulider\GBPDungeonGenerater.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\Tool\MapBulider\MapBulider.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\Tool\MapBulider\OreSpawner.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\Tool\MapBulider\TileRunner.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\Tool\MapBulider\DungeonCell.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\Tool\MapBulider\TileMap.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="kEngine\Tool\MapBulider\Data\GeneratorVariable.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Renderer\PostProcessRunner\PostProcessPass.cpp">
@@ -774,13 +747,55 @@
     <ClCompile Include="kEngine\Tool\FileManager\FileManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="kEngine\Scenes\SceneEngineTitle.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\MovementObject\MovementObject.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\CheatEngine\CheatEngine.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\CheatEngine\ObjectEditor\ObjectRegistrant.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\CheatEngine\ObjectEditor\ObjectEditor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
     <ClCompile Include="kEngine\Tool\MapBulider\Adapter\InstructionCompiler.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\MapBulider\Data\GeneratorVariable.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\MapBulider\DungeonCell.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\MapBulider\DungeonData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\MapBulider\GBPDungeonGenerater.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\MapBulider\MapBulider.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\MapBulider\OreSpawner.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\MapBulider\TileMap.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\MapBulider\TileRunner.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Tool\MapBulider\Adapter\ProgramAdapter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Tool\MapBulider\Data\MapMakerData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\MapMakingEditor\MapMakingEditor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -911,7 +926,7 @@
     <ClInclude Include="kEngine\Utility\FrameRateLimiter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\GameObject\Player\Player.h">
+    <ClInclude Include="GAME\Object\Player\Player.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Data\Game\MapChip\MapChipField.h">
@@ -1439,9 +1454,6 @@
     <ClInclude Include="kEngine\Data\Physics\PhysicalBall.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Physics\SpringUtility.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="kEngine\Data\Animation\Keyframe.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -1628,13 +1640,76 @@
     <ClInclude Include="kEngine\Renderer\PSOManager\PSORecorder.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="kEngine\GameObject\CountdownTimer\CountdownTimer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\GameObject\StartTimer\StartTimer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="GAME\Object\Bullet\Bullet.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
     <ClInclude Include="kEngine\Tool\EffectSystem\EffectEditor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\EffectData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Tool\MapMakingEditor\MapMakingEditor.h">
+    <ClInclude Include="kEngine\Renderer\PostProcessRunner\PostProcessPass.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Renderer\PostProcessRunner\PostProcessLayer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\EffectInstance.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Utility\ItemStateCountingSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\EffectSystem\Adapter\EffectAdapter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\JsonHelper\JsonHelper.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\FileManager\FileManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Render\GPUData\SkinningExtraVertexData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\EngineAssets\Particle\HitSpark2.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\EngineAssets\Particle\HitSparkWithFellRock.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Scenes\SceneEngineTitle.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\MovementObject\MovementObject.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\CheatEngine\CheatEngine.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\CheatEngine\ObjectEditor\ObjectRegistrant.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\CheatEngine\ObjectEditor\ObjectEditor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\MapBulider\Adapter\InstructionCompiler.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\MapBulider\Data\GeneratorVariable.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\MapBulider\DungeonCell.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\MapBulider\DungeonData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Tool\MapBulider\GBPDungeonGenerater.h">
@@ -1646,49 +1721,19 @@
     <ClInclude Include="kEngine\Tool\MapBulider\OreSpawner.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Tool\MapBulider\TileRunner.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\Tool\MapBulider\DungeonData.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\Tool\MapBulider\DungeonCell.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="kEngine\Tool\MapBulider\TileMap.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Tool\MapBulider\Data\GeneratorVariable.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\Tool\FileManager\FileManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\Tool\JsonHelper\JsonHelper.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\Tool\EffectSystem\Adapter\EffectAdapter.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\Tool\EffectSystem\ParticleSystem\EffectInstance.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\Renderer\PostProcessRunner\PostProcessPass.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\Renderer\PostProcessRunner\PostProcessLayer.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\Utility\ItemStateCountingSystem.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\Tool\MapBulider\Adapter\InstructionCompiler.h">
+    <ClInclude Include="kEngine\Tool\MapBulider\TileRunner.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Tool\MapBulider\Adapter\ProgramAdapter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Tool\MapBulider\Data\MapMakerData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\MapMakingEditor\MapMakingEditor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1709,12 +1754,42 @@
     <FxCompile Include="resources\Shader\Tile2D.VS.hlsl" />
     <FxCompile Include="resources\Shader\LightingLambert\PhongReflection.hlsl" />
     <FxCompile Include="resources\Shader\LightingLambert\BlinnPhongReflection.hlsl" />
-    <FxCompile Include="resources\Shader\FlameNeonGlow.PS.hlsl" />
     <FxCompile Include="resources\Shader\FlameNeonGlow.VS.hlsl" />
     <FxCompile Include="resources\Shader\GlowSphere.PS.hlsl" />
     <FxCompile Include="resources\Shader\GlowSphere.VS.hlsl" />
     <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl" />
     <FxCompile Include="externals\DirectXTex\Shaders\BC7Encode.hlsl" />
+    <FxCompile Include="resources\Shader\FlameNeonGlow.PS.hlsl" />
+    <FxCompile Include="resources\Shader\Particle.PS.hlsl" />
+    <FxCompile Include="resources\Shader\Particle.VS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\DebugLine.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\DebugLine.VS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\FlameNeonGlow.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\FlameNeonGlow.VS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\GlowSphere.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\GlowSphere.VS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\Object3d.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\Object3d.VS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\SkinningObject3D.VS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\SkyCube.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\SkyCube.VS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\Tile2D.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\Tile2D.VS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\Blur.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\ColorGuard.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\CopyImage.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\Dissolve.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\FullScreenQuad.VS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\NoiseShader.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\Outline.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\OutlineDepth.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\OutlinePrewittDepth.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\Smoothing.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\PostProcess\Vignette.PS.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\LightingLambert\PhongReflection.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\LightingLambert\BlinnPhongReflection.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\LightingLambert\HalfLambert.hlsl" />
+    <FxCompile Include="kEngine\EngineAssets\Shader\LightingLambert\Lambert.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -1804,5 +1879,12 @@
     <None Include=".github\copilot-instructions.md" />
     <None Include="kEngine\EngineAssets\Shader\PostProcess\ColorGuard.hlsli" />
     <None Include="kEngine\EngineAssets\Shader\PostProcess\Vignette.hlsli" />
+    <None Include="kEngine\EngineAssets\Shader\CommonTypes.hlsli" />
+    <None Include="kEngine\EngineAssets\Shader\DebugLine.hlsli" />
+    <None Include="kEngine\EngineAssets\Shader\SkyCube.hlsli" />
+    <None Include="kEngine\EngineAssets\Shader\PostProcess\whiteNoise.hlsli" />
+    <None Include="kEngine\EngineAssets\Shader\PostProcess\FullScreenQuadVSO.hlsli" />
+    <None Include="kEngine\EngineAssets\Shader\PostProcess\RandomTool.hlsli" />
+    <None Include="kEngine\EngineAssets\Shader\PostProcess\RenderCommand.hlsli" />
   </ItemGroup>
 </Project>

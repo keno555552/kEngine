@@ -2,6 +2,23 @@
 #include "DebugDraw.h"
 #include "ImguiManager.h"
 
+#ifdef USE_IMGUI
+namespace {
+	/// master側でImGuiのマルチビューポートが有効になったため、ウィンドウ座標はデスクトップ座標になる。
+	/// このエディタのレイアウト計算はメインウィンドウ基準(左上=0,0)なので、ここで変換する。
+	ImVec2 MainViewportOrigin() { return ImGui::GetMainViewport()->Pos; }
+	void SetNextWindowPosLocal(const ImVec2& localPos) {
+		const ImVec2 o = MainViewportOrigin();
+		ImGui::SetNextWindowPos(ImVec2(o.x + localPos.x, o.y + localPos.y));
+	}
+	ImVec2 GetWindowPosLocal() {
+		const ImVec2 o = MainViewportOrigin();
+		const ImVec2 p = ImGui::GetWindowPos();
+		return ImVec2(p.x - o.x, p.y - o.y);
+	}
+}
+#endif
+
 
 MapMakingEditor::MapMakingEditor(kEngine* system) {
 	system_ = system;
@@ -135,7 +152,7 @@ void MapMakingEditor::ImGuiLeftMenuBar() {
 	/// =========================
 	/// 1. Mode Selector
 	/// =========================
-	ImGui::SetNextWindowPos(ImVec2(0, selectorPosY));
+	SetNextWindowPosLocal(ImVec2(0, selectorPosY));
 	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, selectorH));
 
 	ImGui::Begin("##LeftSelector",
@@ -155,7 +172,7 @@ void MapMakingEditor::ImGuiLeftMenuBar() {
 		modeEditing_ = 2;
 	ImGui::SameLine();
 
-	w1Pos = ImGui::GetWindowPos();
+	w1Pos = GetWindowPosLocal();
 	w1Size = ImGui::GetWindowSize();
 
 	ImGui::End();
@@ -167,7 +184,7 @@ void MapMakingEditor::ImGuiLeftMenuBar() {
 	ImVec2 w2Pos;
 	ImVec2 w2Size;
 
-	ImGui::SetNextWindowPos(ImVec2(0, window2Y));
+	SetNextWindowPosLocal(ImVec2(0, window2Y));
 	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, 0)); // AutoResize
 
 	isMapDataWindowOpen_ = ImGui::Begin("##LeftDataSelector",
@@ -224,7 +241,7 @@ void MapMakingEditor::ImGuiLeftMenuBar() {
 		}
 	}
 
-	w2Pos = ImGui::GetWindowPos();
+	w2Pos = GetWindowPosLocal();
 	w2Size = ImGui::GetWindowSize();
 
 	ImGui::End();
@@ -237,7 +254,7 @@ void MapMakingEditor::ImGuiLeftMenuBar() {
 	ImVec2 wTPos;
 	ImVec2 wTSize;
 
-	ImGui::SetNextWindowPos(ImVec2(0, w2Pos.y + w2Size.y));   // 放在 Mode Selector 下方
+	SetNextWindowPosLocal(ImVec2(0, w2Pos.y + w2Size.y));   // 放在 Mode Selector 下方
 	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, 0));
 
 	ImGui::Begin("##TagController",
@@ -259,7 +276,7 @@ void MapMakingEditor::ImGuiLeftMenuBar() {
 		ImGui::EndTabBar();
 	}
 
-	wTPos = ImGui::GetWindowPos();
+	wTPos = GetWindowPosLocal();
 	wTSize = ImGui::GetWindowSize();
 
 	ImGui::End();
@@ -286,7 +303,7 @@ void MapMakingEditor::ImGuiLeftMenuBar() {
 		templatePosY = w4Pos.y + w4Size.y;
 		templateH = io.DisplaySize.y - templatePosY;
 	}
-	ImGui::SetNextWindowPos(ImVec2(0, templatePosY));
+	SetNextWindowPosLocal(ImVec2(0, templatePosY));
 	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, templateH));
 
 	ImGui::Begin("Engine Info",
@@ -311,7 +328,7 @@ void MapMakingEditor::ImGuiMapDataWindow(ImVec2 size, ImVec2* outputSize, ImVec2
 
 	float titleH = ImGui::GetFrameHeight();
 
-	ImGui::SetNextWindowPos(ImVec2(0, windowY));
+	SetNextWindowPosLocal(ImVec2(0, windowY));
 	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, oneColimenH));
 
 	isMapMakerWindowOpen_ = ImGui::Begin("MapData List",
@@ -413,7 +430,7 @@ void MapMakingEditor::ImGuiMapDataWindow(ImVec2 size, ImVec2* outputSize, ImVec2
 	if (currentMakerIndex_ >= 0 && currentMakerIndex_ < mapMakerlist_.size()) isMakerSelected_ = true;
 	else isMakerSelected_ = false;
 
-	wPos = ImGui::GetWindowPos();
+	wPos = GetWindowPosLocal();
 	wSize = ImGui::GetWindowSize();
 
 	ImGui::End();
@@ -425,7 +442,7 @@ void MapMakingEditor::ImGuiMapDataWindow(ImVec2 size, ImVec2* outputSize, ImVec2
 
 	float window2Y = wPos.y + wSize.y;
 
-	ImGui::SetNextWindowPos(ImVec2(0, window2Y));
+	SetNextWindowPosLocal(ImVec2(0, window2Y));
 	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, oneColimenH * 2));
 
 	isVariablesWindowOpen_ = ImGui::Begin("Variables List",
@@ -508,7 +525,7 @@ void MapMakingEditor::ImGuiMapDataWindow(ImVec2 size, ImVec2* outputSize, ImVec2
 	ImGui::EndChild();
 
 
-	*outputPos = ImGui::GetWindowPos();
+	*outputPos = GetWindowPosLocal();
 	*outputSize = ImGui::GetWindowSize();
 
 	ImGui::End();
@@ -524,7 +541,7 @@ void MapMakingEditor::ImGuiMapMakerWindow(ImVec2 size, ImVec2* outputSize, ImVec
 
 	float titleH = ImGui::GetFrameHeight();
 
-	ImGui::SetNextWindowPos(ImVec2(0, windowY));
+	SetNextWindowPosLocal(ImVec2(0, windowY));
 	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, oneColimenH));
 
 	isMapMakerWindowOpen_ = ImGui::Begin("MapMaker List",
@@ -626,7 +643,7 @@ void MapMakingEditor::ImGuiMapMakerWindow(ImVec2 size, ImVec2* outputSize, ImVec
 	if (currentMakerIndex_ >= 0 && currentMakerIndex_ < mapMakerlist_.size()) isMakerSelected_ = true;
 	else isMakerSelected_ = false;
 
-	wPos = ImGui::GetWindowPos();
+	wPos = GetWindowPosLocal();
 	wSize = ImGui::GetWindowSize();
 
 	ImGui::End();
@@ -638,7 +655,7 @@ void MapMakingEditor::ImGuiMapMakerWindow(ImVec2 size, ImVec2* outputSize, ImVec
 
 	float window2Y = wPos.y + wSize.y;
 
-	ImGui::SetNextWindowPos(ImVec2(0, window2Y));
+	SetNextWindowPosLocal(ImVec2(0, window2Y));
 	if (isMapMakerWindowOpen_) {
 		ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, oneColimenH * 2));
 	} else {
@@ -834,7 +851,7 @@ void MapMakingEditor::ImGuiMapMakerWindow(ImVec2 size, ImVec2* outputSize, ImVec
 
 	ImGui::EndChild();
 
-	*outputPos = ImGui::GetWindowPos();
+	*outputPos = GetWindowPosLocal();
 	*outputSize = ImGui::GetWindowSize();
 
 	ImGui::End();
@@ -862,7 +879,7 @@ void MapMakingEditor::ImGuiRightMenuBar() {
 	float debugLogY = io.DisplaySize.y - debugLogH;
 
 	// ===== Camera =====
-	ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - rightInspectorWidth_, menuBarHeight_));
+	SetNextWindowPosLocal(ImVec2(io.DisplaySize.x - rightInspectorWidth_, menuBarHeight_));
 	ImGui::SetNextWindowSize(ImVec2(rightInspectorWidth_, 0));
 	ImGui::Begin("Camera",
 		nullptr,
@@ -877,7 +894,7 @@ void MapMakingEditor::ImGuiRightMenuBar() {
 
 	//ImGui::Checkbox("Use Debug Camera", &useDebugCamera);
 
-	w1Pos = ImGui::GetWindowPos();
+	w1Pos = GetWindowPosLocal();
 	w1Size = ImGui::GetWindowSize();
 
 	ImGui::End();
@@ -887,7 +904,7 @@ void MapMakingEditor::ImGuiRightMenuBar() {
 	ImVec2 w2Pos;
 	ImVec2 w2Size;
 
-	ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - rightInspectorWidth_, window2Y));
+	SetNextWindowPosLocal(ImVec2(io.DisplaySize.x - rightInspectorWidth_, window2Y));
 	ImGui::SetNextWindowSize(ImVec2(rightInspectorWidth_, 0));
 
 	if (isMapDataSelected_) {
@@ -901,7 +918,7 @@ void MapMakingEditor::ImGuiRightMenuBar() {
 			ImGuiMapDataShowing(data);
 		}
 
-		w2Pos = ImGui::GetWindowPos();
+		w2Pos = GetWindowPosLocal();
 		w2Size = ImGui::GetWindowSize();
 	} else if (isMakerSelected_) {
 
@@ -915,7 +932,7 @@ void MapMakingEditor::ImGuiRightMenuBar() {
 			ImGuiMapMakerShowing(selectedMakerInfo);
 		}
 
-		w2Pos = ImGui::GetWindowPos();
+		w2Pos = GetWindowPosLocal();
 		w2Size = ImGui::GetWindowSize();
 
 	} else {
@@ -925,7 +942,7 @@ void MapMakingEditor::ImGuiRightMenuBar() {
 			ImGuiWindowFlags_NoMove);
 	}
 
-	w2Pos = ImGui::GetWindowPos();
+	w2Pos = GetWindowPosLocal();
 	w2Size = ImGui::GetWindowSize();
 
 	ImGui::End();
@@ -937,14 +954,14 @@ void MapMakingEditor::ImGuiRightMenuBar() {
 	w3Size.y = io.DisplaySize.y - window3Y - debugLogH - titleH;
 
 
-	ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - rightInspectorWidth_, window3Y));
+	SetNextWindowPosLocal(ImVec2(io.DisplaySize.x - rightInspectorWidth_, window3Y));
 	ImGui::SetNextWindowSize(ImVec2(rightInspectorWidth_, w3Size.y));
 	ImGui::Begin("Variable Details",
 		nullptr,
 		ImGuiWindowFlags_NoMove |
 		ImGuiWindowFlags_AlwaysAutoResize);
 
-	w3Pos = ImGui::GetWindowPos();
+	w3Pos = GetWindowPosLocal();
 	w3Size = ImGui::GetWindowSize();
 
 	if (isMakerSelected_) {
@@ -998,7 +1015,7 @@ void MapMakingEditor::ImGuiRightMenuBar() {
 	float secondHeight = mainBottomY - window4Y;
 	if (secondHeight < 0) secondHeight = 0;
 
-	ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - rightInspectorWidth_, window4Y));
+	SetNextWindowPosLocal(ImVec2(io.DisplaySize.x - rightInspectorWidth_, window4Y));
 	ImGui::SetNextWindowSize(ImVec2(rightInspectorWidth_, secondHeight));
 	ImGui::Begin("Debug Log",
 		nullptr,
@@ -1050,7 +1067,7 @@ void MapMakingEditor::ImGuiMidWindow() {
 	else centerTotalH = io.DisplaySize.y - menuBarHeight_ - menuBarHeight_;
 
 	// ===== Top Window（跟 Maps / Template Info 一樣的寫法）=====
-	ImGui::SetNextWindowPos(ImVec2(centerPosX, centerPosY));
+	SetNextWindowPosLocal(ImVec2(centerPosX, centerPosY));
 	ImGui::SetNextWindowSize(ImVec2(centerWidth, centerTotalH));
 
 	isMTWindowOpen_ = ImGui::Begin("Map",
@@ -1082,7 +1099,7 @@ void MapMakingEditor::ImGuiMidWindow() {
 
 
 	// ===== Bottom Window =====
-	ImGui::SetNextWindowPos(ImVec2(centerPosX, bottomWindowY));
+	SetNextWindowPosLocal(ImVec2(centerPosX, bottomWindowY));
 	ImGui::SetNextWindowSize(ImVec2(centerWidth, bottomH));
 
 	isMBWindowOpen_ = ImGui::Begin("Inspector Details",

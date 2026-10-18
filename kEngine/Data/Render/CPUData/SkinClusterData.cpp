@@ -5,28 +5,31 @@
 void SkinClusterData::SetModelData(std::shared_ptr<ModelData> modelData,int modelIndex) {
 	modelData_ = modelData;
 	modelIndex_ = modelIndex;
+
 	vertexNum_ = (int)modelData->meshDataList[modelIndex].vertices.size();
 }
 
 void SkinClusterData::CreateResourceClass(ID3D12Device* device) {
-	
+
 	/// まず初期化
 	skinClusterResource_.Reset();
 
 	/// ID3D12Resourceを作成する
-	skinClusterResource_ = CreateResource(device, vertexNum_);
-	
+	int resourceSize = sizeof(VertexInfluence) * vertexNum_;
+	skinClusterResource_ = CreateResource(device, resourceSize);
+
 	/// 新しいVertexInfluenceを作って、spanを作る
 	VertexInfluence* newInfluence = nullptr;
 	skinClusterResource_->Map(0, nullptr, reinterpret_cast<void**>(&newInfluence));
-	std::memset(newInfluence, 0, sizeof(VertexInfluence) * vertexNum_);
+	std::memset(newInfluence, 0, resourceSize);
 	vertexInfluences = { newInfluence , (size_t)vertexNum_ };
 
 	/// VertexInfluenceのspanを作る
-	influenceBufferView = CreateVertexBufferView(skinClusterResource_.Get(), sizeof(VertexInfluence) * vertexNum_);
+	influenceBufferView = CreateVertexBufferView(skinClusterResource_.Get(), resourceSize);
 
 	/// InverseBindPoseMatrixを格納する場所を作る、単位行列で埋める
 	inverseBindPoseMatrices.resize(modelData_.lock()->skeleton.jointList.size(), Identity());
+	//inverseBindPoseMatrices.resize(modelData_.lock()->skeleton.jointList.size());
 }
 
 void SkinClusterData::SetVertexInfluences() {
@@ -47,9 +50,13 @@ void SkinClusterData::SetVertexInfluences() {
 		if (checker == modelData->skeleton.jointMap.end()) continue;
 
 		/// (*it).secondはjointのindexに対応のinverseBindPoseMatrixを入れる
-		inverseBindPoseMatrices[(int)(*checker).second] = skinData.inverseBindPoseMatrices[jointIndex];
+		if (jointIndex < skinData.inverseBindPoseMatrices.size()) {
+			inverseBindPoseMatrices[(int)(*checker).second] = skinData.inverseBindPoseMatrices[jointIndex];
+		}
 		/// skinDataのvertexWeightsを見て、vertexInfluencesに入れていく
 		for (const auto& vertexWeight : skinData.skinClusterData[jointIndex].vertexWeights) {
+			if (vertexWeight.vertexIndex >= vertexInfluences.size())
+				continue;
 			auto& currectInfluence = vertexInfluences[vertexWeight.vertexIndex];
 			for (uint32_t i = 0; i < kNumMaxInflunce; ++i) {
 				if(currectInfluence.weights[i] == 0.0f) {

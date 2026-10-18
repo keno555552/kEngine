@@ -1,5 +1,5 @@
-#include "Logger.h"
 #include "DrawDataCollector.h"
+#include "Logger.h"
 #include "CameraManager/CameraManager.h"
 #include "LightManager/LightManager.h"
 #include "Resource/ResourceManager.h"
@@ -71,6 +71,12 @@ void DrawDataCollector::EndCollect() {
 
 }
 
+#ifdef USE_IMGUI
+void DrawDataCollector::SetSoloTarget(const ObjectData* object, int partIndex) {
+	soloObject_ = object;
+	soloPartIndex_ = object ? partIndex : -1;
+}
+#endif
 
 #pragma region /// ================================== DebugLine関連 ================================= ///
 
@@ -155,6 +161,7 @@ void DrawDataCollector::Collect2D(SpriteData* sprite) {
 		/// MaterialID設定
 		renderData.materialID = instanceCounterMaterial_++;
 
+
 		/// 変換行列設定
 		renderData.transformData = SpriteWVPAdjustment2D(*sprite, object);
 
@@ -181,7 +188,7 @@ float DrawDataCollector::SpriteLayerManagement(float zBuffer) {
 		unlayeredSpriteCounter_++;
 		return z;
 	} else {
-		float z = -layeredSpriteDepth_ + zBuffer * -layerDepth_Sprite;
+		float z = -layeredSpriteDepth_ + (zBuffer * -layerDepth_Sprite);
 		if (z < -1.0f) {
 			Logger::Log("[kWarning]DDC:layered Sprite meet max number!");
 			return -1.0f;
@@ -192,9 +199,7 @@ float DrawDataCollector::SpriteLayerManagement(float zBuffer) {
 	return 0.0f;
 }
 
-Matrix4x4 DrawDataCollector::MakeFollowObjectMatrix2D(SpriteData* sprite) {
-
-	float zBuffer = sprite->mainPosition.transform.translate.z;
+Matrix4x4 DrawDataCollector::MakeFollowObjectMatrix2D(SpriteData* sprite, SpritePart* part) {
 
 	Matrix4x4 objectMainMatrix = MakeAffineMatrix(
 		sprite->mainPosition.transform.scale,
@@ -217,13 +222,13 @@ Matrix4x4 DrawDataCollector::MakeFollowObjectMatrix2D(SpriteData* sprite) {
 	}
 
 	Matrix4x4 resultMatrix = objectMainMatrix * parentMatrix;
-	resultMatrix.m[3][2] = zBuffer;
 
 	return resultMatrix;
 }
 
 TransformationMatrix DrawDataCollector::SpriteWVPAdjustment2D(SpriteData& sprite, SpritePart& part) {
 
+	float zBuffer = SpriteLayerManagement(part.transform.translate.z);
 	// 2D UI 用：View 取單位矩陣，Projection 用螢幕尺寸的正交矩陣（左上原點，Y 向下）
 	Matrix4x4 viewMatrix = Identity();
 	Matrix4x4 projectionMatrix = MakeOrthographicMatrix(
@@ -235,7 +240,7 @@ TransformationMatrix DrawDataCollector::SpriteWVPAdjustment2D(SpriteData& sprite
 		1.0f                                      // farZ
 	);
 
-	Matrix4x4 followWorldMatrix = MakeFollowObjectMatrix2D(&sprite);
+	Matrix4x4 followWorldMatrix = MakeFollowObjectMatrix2D(&sprite, &part);
 
 	Matrix4x4 localMatrix = MakeAffineMatrix(
 		part.transform.scale,
@@ -244,14 +249,13 @@ TransformationMatrix DrawDataCollector::SpriteWVPAdjustment2D(SpriteData& sprite
 	);
 
 	Matrix4x4 worldMatrix = localMatrix * followWorldMatrix;
-
-	float spriteTransform = part.transform.translate.z;
-	worldMatrix.m[3][2] = SpriteLayerManagement(spriteTransform);
+	worldMatrix.m[3][2] = zBuffer;
 
 	TransformationMatrix result{};
 	result.world = worldMatrix;
 	result.WVP = worldMatrix * viewMatrix * projectionMatrix;
 	result.WorldInverseTranspose = worldMatrix.Inverse().Transpose();
+	//result.WorldInverseTranspose.m[3][2] = zBuffer;
 	return result;
 }
 
@@ -275,13 +279,12 @@ void DrawDataCollector::AddSpriteToBucket2D(RenderData& renderData) {
 
 		if (isTransparent) {
 			///　透明の場合、z値を比較して、z値が大きい方が手前に描画されるようにソートして追加
-			float z = renderData.transformData.WVP.m[3][2];
+			float z = renderData.transformData.world.m[3][2];
 			auto checker2 = std::find_if(
 				transparentBucket2D_.begin(),
 				transparentBucket2D_.end(),
 				[z](const RenderData& data) {
-					float dataZ = data.transformData.WVP.m[3][2];
-					return z > dataZ;
+					return z > data.transformData.world.m[3][2];
 				}
 			);
 
@@ -311,8 +314,20 @@ void DrawDataCollector::Collect3D(ObjectData* object) {
 	/// nullチェック
 	if (!object)return;
 
+#ifdef USE_IMGUI
+	if (soloObject_ && object != soloObject_) return;
+#endif
+
 	int modelCounter = 0;
 	for (auto& objectPart : object->objectParts_) {
+
+
+#ifdef USE_IMGUI
+		if (soloObject_ && soloPartIndex_ >= 0 && modelCounter != soloPartIndex_) {
+			modelCounter++;      // 網格索引一定要照樣前進
+			continue;
+		}
+#endif
 
 		/// ========================================  RenderData作成  ========================================///
 
@@ -329,8 +344,12 @@ void DrawDataCollector::Collect3D(ObjectData* object) {
 
 		/// PSOKey設定
 		renderData.psoKey = PSODecision(*objectPart.materialConfig);
+		//if (objectPart.GetWellHandle() != -1 && renderData.psoKey.renderModelType == RenderModelType::Static)
+		//	renderData.psoKey.renderModelType = RenderModelType::Skinned;
 
 		/// ===== 実際データ
+		/// skinning設定
+		if (objectPart.GetWellHandle() != -1) renderData.skinningPaletteIndex = objectPart.GetWellHandle();
 		/// マテリアル設定
 		objectPart.materialConfig->MakeUVMatrix();
 		MaterialForGPU newData;
@@ -373,6 +392,7 @@ Matrix4x4 DrawDataCollector::MakeFollowObjectMatrix3D(ObjectData* object) {
 			parent->transform.translate
 		);
 
+		//parentMatrix = local * parentMatrix;
 		parentMatrix = local * parentMatrix;
 		parent = parent->parentPart;
 	}
@@ -397,17 +417,14 @@ Matrix4x4 DrawDataCollector::MakeAnimationMatrix(ObjectPart& part) {
 
 TransformationMatrix DrawDataCollector::ObjectWVPAdjustment3D(ObjectData& object, ObjectPart& part, ModelData* modelData, int modelCounter) {
 	Camera* cam = cameraManager_->GetActiveCamera();
+#ifdef USE_IMGUI
+	Matrix4x4 viewMatrix = usePreviewView_ ? previewView_.view : cam->GetViewMatrix();
+	Matrix4x4 projectionMatrix = usePreviewView_ ? previewView_.proj : cam->GetProjectionMatrix();
+#else
 	Matrix4x4 viewMatrix = cam->GetViewMatrix();
 	Matrix4x4 projectionMatrix = cam->GetProjectionMatrix();
+#endif
 
-
-	//if (object.isBillboard_) {
-	//	Vector3 camRot = cam->GetTransform().rotate;
-	//	part.transform.rotate.x = camRot.x;
-	//	part.transform.rotate.y = camRot.y;
-	//	//part.transform.rotate.z = 2;
-	//	DirtyEulerToQuat(part);
-	//}
 	Matrix4x4 localMatrix;
 
 	/// Billboard計算--カメラの回転を打ち消
@@ -423,10 +440,6 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustment3D(ObjectData& object
 		Matrix4x4 rot = viewMatrix;
 		rot.m[3][0] = rot.m[3][1] = rot.m[3][2] = 0;
 		rot = rot.Inverse();
-
-		/// 
-		//Matrix4x4 roll = MakeRZMatrix4x4(part.transform.rotate.z);
-		//Matrix4x4 finalRot = rot * roll;
 
 		localMatrix = localMatrix * rot;
 	} else {
@@ -477,19 +490,20 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustment3D(ObjectData& object
 	localMatrix;
 
 	Matrix4x4 worldMatrix = localMatrix * animationMatrix * followWorldMatrix;
+	//Matrix4x4 worldMatrix = followWorldMatrix * animationMatrix * localMatrix;
 
 	Matrix4x4 nodeMatrix = Identity();
 
-	if (modelData != nullptr) {
-		if (modelCounter >= 0 && modelCounter < modelData->meshDataList.size()) {
-
-			uint32_t nodeIndex = modelData->meshDataList[modelCounter].nodeIndex;
-
-			if (nodeIndex < modelData->nodeList.size()) {
-				nodeMatrix = modelData->nodeList[nodeIndex].globalMatrix;
-			}
-		}
-	}
+	//if (modelData != nullptr) {
+	//	if (modelCounter >= 0 && modelCounter < modelData->meshDataList.size()) {
+	//
+	//		uint32_t nodeIndex = modelData->meshDataList[modelCounter].nodeIndex;
+	//
+	//		if (nodeIndex < modelData->nodeList.size()) {
+	//			nodeMatrix = modelData->nodeList[nodeIndex].globalMatrix;
+	//		}
+	//	}
+	//}
 	Matrix4x4 finalWorld = nodeMatrix * worldMatrix;
 
 	TransformationMatrix result{};
@@ -629,7 +643,7 @@ int DrawDataCollector::SetSkinningData(WellForGPU* mappedPalette, int mappedNum,
 
 void DrawDataCollector::ClearSkinningData(int index) {
 
-	skinningDataList_[index] = SkinningData{};
+	//skinningDataList_[index] = SkinningData{};
 
 }
 
@@ -835,7 +849,11 @@ void DrawDataCollector::BuildInstanceListParticle() {
 
 #pragma region /// ========================== カメラ/マテリアル/ライティング関連 ========================= ///
 
+
 Vector3 DrawDataCollector::GetCameraPosition() const {
+#ifdef USE_IMGUI
+	if (usePreviewView_) return previewView_.position;
+#endif
 	return cameraManager_->GetActiveCamera()->GetTransform().translate;
 }
 
@@ -876,7 +894,6 @@ PSOKey DrawDataCollector::PSODecision(MaterialConfig& material) {
 	return key;
 }
 
-
 void DrawDataCollector::UpdateLightData() {
 	if (lightManager_)lightManager_->TurnDataToGPUData();
 }
@@ -888,5 +905,36 @@ std::vector<LightGPU> DrawDataCollector::GetLightGPUBuffer() {
 uint32_t DrawDataCollector::GetLightCount() {
 	return (uint32_t)lightManager_->GetLightCount();
 }
-
 #pragma endregion
+
+
+#ifdef USE_IMGUI
+#pragma region /// ================================= debug関連 ==================================== ///
+void DrawDataCollector::BeginPreview(ObjectData* object, int partIndex, const PreviewView& view) {
+
+	savedOpaqueBucket3D_.swap(opaqueBucket3D_);
+	savedTransparentBucket3D_.swap(transparentBucket3D_);
+
+	usePreviewView_ = true;
+	previewView_ = view;
+
+	const ObjectData* prevObject = soloObject_;
+	int prevPart = soloPartIndex_;
+	soloObject_ = object;
+	soloPartIndex_ = partIndex;
+	Collect3D(object);
+	soloObject_ = prevObject;
+	soloPartIndex_ = prevPart;
+
+	BuildInstanceList3D();
+}
+
+void DrawDataCollector::EndPreview() {
+	usePreviewView_ = false;
+	opaqueBucket3D_.clear();
+	transparentBucket3D_.clear();
+	opaqueBucket3D_.swap(savedOpaqueBucket3D_);
+	transparentBucket3D_.swap(savedTransparentBucket3D_);
+}
+#pragma endregion
+#endif

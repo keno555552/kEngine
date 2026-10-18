@@ -22,15 +22,53 @@ ID3D12Resource* Model::CreateVertexResource_(ID3D12Device* device) {
 
 	// スキニングデータがある場合、SkinClusterDataを準備する
 	if (modelData_.lock()->haveSkinning) {
-		int skinIndex = modelData_.lock()->meshDataList[meshIndex_].skinIndex;
-		skinClusterData_.SetModelData(modelData_.lock(), skinIndex);
-		skinClusterData_.CreateResourceClass(device)	;
+		int skinIndex = modelData.skinIndex;
+		skinClusterData_.SetModelData(modelData_.lock(), meshIndex_);
+		skinClusterData_.CreateResourceClass(device);
 		skinClusterData_.SetVertexInfluences();
 	}
 
 	vertexResource_->SetName("ModelVertexResource:" + modelData.name);
 
 	return vertexResource_->GetResource().Get();
+}
+
+ID3D12Resource* Model::CreateSkinningVertexResource(ID3D12Device* device) {
+
+	MeshData& modelData = modelData_.lock()->meshDataList[meshIndex_];
+	const size_t vertexCount = modelData.vertices.size();
+	const size_t sizeOfSkinningExtraVertexData = sizeof(SkinningExtraVertexData) * vertexCount;
+
+	skinningVertexResource_->CreateResourceClass_(device, sizeOfSkinningExtraVertexData);
+
+	// 填入 weight / index
+	SkinningExtraVertexData* skinningData = nullptr;
+	skinningVertexResource_->GetResource()->Map(0, nullptr,
+		reinterpret_cast<void**>(&skinningData));
+
+	//for (size_t i = 0; i < vertexCount; ++i) {
+	//	// 權重（假設你有 modelData.vertexWeights）
+	//	skinningData[i].weights = modelData.vertexWeights[i];
+	//
+	//	// 骨骼索引（假設你有 modelData.vertexJoints[i][0..3]）
+	//	for (int j = 0; j < 4; ++j) {
+	//		skinningData[i].index[j] = modelData.vertexJoints[i][j];
+	//	}
+	//}
+	skinningVertexResource_->GetResource()->Unmap(0, nullptr);
+
+	// スキニングデータがある場合、SkinClusterDataを準備する
+	if (modelData_.lock()->haveSkinning) {
+		int skinIndex = modelData.skinIndex;
+		skinClusterData_.SetModelData(modelData_.lock(), meshIndex_);
+		skinClusterData_.CreateResourceClass(device);
+		skinClusterData_.SetVertexInfluences();
+	}
+
+	skinningVertexResource_->SetName("SkinningVertexResource:" + modelData.name);
+
+	return skinningVertexResource_->GetResource().Get();
+
 }
 
 ID3D12Resource* Model::CreateIndexResource_(ID3D12Device* device) {

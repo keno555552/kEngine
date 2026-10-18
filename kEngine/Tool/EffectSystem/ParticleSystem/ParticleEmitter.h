@@ -16,6 +16,7 @@ public:
 	/// --- コンストラクタ・デストラクタ --- ///
 	ParticleEmitter(kEngine* system,
 					const ParticlePrototype particlePrototype,
+					int* particleIdIP,
 					int maxParticles = 1000);
 	~ParticleEmitter();
 
@@ -38,7 +39,9 @@ public:
 	void Draw();
 
 	/// --- EmitterLinkための --- ///
-	std::vector<ParticleInstance>& GetParticles() { return particles_; }
+	const std::string& GetName() const { return prototype_.name; }
+	const  ParticleRenderType& GetRenderType() const { return isObjectType_; }
+	const std::vector<ParticleInstance>& GetParticles() const { return particles_; }
 	std::vector<ParticleInstance>& GetEmittingData();
 	std::vector<ParticleInstance>& GetDexpiredData();
 	ParticleInstance* FindParticleById(int id);
@@ -46,10 +49,12 @@ public:
 	void ClearDexpiredData();	// 死亡記録のクリア
 
 	/// --- 生命周期 --- ///
+	bool GetIsEmitting() const { return isEmitting_; }
 	bool GetIsEnd() const { return isEnd_; }
 	bool GetIsFinished() const { return isFinished_; }
 	void SetIsEnd(bool isEnd) { isEnd_ = isEnd; }
 	void SetIsDead() { isFinished_ = true; isEnd_ = true; }
+
 
 private:
 
@@ -62,7 +67,7 @@ private:
 
 	/// 発射された粒子のインスタンス
 	std::vector<ParticleInstance> particles_;
-	int counter_ = 0; // 発射された粒子の総数（ID生成用）
+	int* particleIdIP_;
 
 	/// 発射するもののタイプ
 	ParticleRenderType isObjectType_ = ParticleRenderType::Object; // true = Object, false = Sprite

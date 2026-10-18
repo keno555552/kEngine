@@ -37,6 +37,7 @@
 #include "Camera/Camera.h"
 #include <CPUData/RenderCommand.h>
 #include <PostProcessRunner/PostProcessRunner.h>
+#include "config.h"
 
 
 class kEngine
@@ -64,7 +65,18 @@ public:
 
 #pragma endregion
 
+#pragma region window調整
+
+	/// windowサイズの取得
+	void SetWindowSize(int width, int height);
+	void SetWindowMode(WindowMode mode);
+	//int GetWindowWidth();
+	//int GetWindowHeight();
+
+#pragma endregion
+
 #pragma region 描画システム
+
 
 	/// VVVV====== SpriteData/ObjectData描画,今上使えない ======VVVV///
 	void DrawDebugLine(DebugLine* debugLine);
@@ -278,6 +290,12 @@ private:
 
 	/// ============ Effect関連 ============///
 	std::unique_ptr <EffectManager> effectManager{};
+
+	/// =========== ウインドウ関連 ===========///
+	WindowMode pendingMode_;
+	bool hasPendingMode_;
+	int lastWinWidth_;
+	int lastWinHeight_;
 
 	/// =========== ゲーム継続関連 ===========///
 	static bool isGameOn_;

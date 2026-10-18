@@ -195,6 +195,12 @@ void PostProcessRunner::SetPreDraw(DrawEngine* drawEngine) {
 	ClearRenderTargets(drawEngine);
 }
 
+void PostProcessRunner::OnResize(int width, int height) {
+	auto* rm = ResourceManager::GetInstance();
+	rm->ResizeRenderTexture(renderTarget_.inputRT, width, height);
+	rm->ResizeRenderTexture(renderTarget_.outputRT, width, height);
+}
+
 void PostProcessRunner::SetRenderTargetsForDraw(DrawEngine* drawEngine) {
 
 	/// DrawEngine nullptr Check

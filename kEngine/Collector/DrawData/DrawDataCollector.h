@@ -24,7 +24,7 @@
 #include "Data/Render/CPUData/VertexInfluence.h"
 using ModelID = int;
 
-inline const float layerDepth_Sprite = 0.0001f;
+inline const float layerDepth_Sprite = 0.00001f;
 inline const float layeredSpriteDepth_ = 0.4f;
 
 /// 2D = sprite
@@ -35,10 +35,22 @@ class LightManager;
 class ResourceManager;
 class InstanceManager;
 class CameraManager;
+class ObjectEditor;
 class DrawDataCollector
 {
 public:
 
+	/// ===================== 外に共有する構造体 ===================== ///
+#ifdef USE_IMGUI
+	struct PreviewView {
+		Matrix4x4 view;
+		Matrix4x4 proj;
+		Vector3 position;
+	};
+#endif
+	/// ========================================================= ///
+	
+	/// ======================= クラス関数 ========================= ///
 	void Initialize(
 		CameraManager* cm,
 		LightManager* lm,
@@ -129,6 +141,12 @@ public:
 	std::vector<LightGPU> GetLightGPUBuffer();
 	uint32_t GetLightCount();
 
+	/// ============ debug関連 ==============///
+#ifdef USE_IMGUI
+	void BeginPreview(ObjectData* object, int partIndex, const PreviewView& view);
+	void EndPreview();
+#endif
+
 private:
 	InstanceManager* instanceManager_ = nullptr; /*借り*/
 
@@ -205,6 +223,14 @@ private:
 	int instanceCounter3D_ = 0;
 	int instanceCounterParticleC_ = 0;
 
+
+#ifdef USE_IMGUI
+	bool usePreviewView_ = false;
+	PreviewView previewView_{};
+	decltype(opaqueBucket3D_) savedOpaqueBucket3D_;
+	std::vector<RenderData> savedTransparentBucket3D_;
+#endif
+
 private:
 
 	/// =========== DebugLine 関連 ============///
@@ -212,10 +238,10 @@ private:
 	TransformationMatrix DLWVPAdjustment(DebugLine* debugLine);
 
 	/// ============ スプライト関連 ==============///
-	/// ｚバッファ調整
+	/// ｚバッファ調整	
 	float SpriteLayerManagement(float zBuffer);
 	/// フォローマトリックス作成
-	Matrix4x4 MakeFollowObjectMatrix2D(SpriteData* sprite);
+	Matrix4x4 MakeFollowObjectMatrix2D(SpriteData* sprite, SpritePart* part);
 	/// WVP調整
 	TransformationMatrix SpriteWVPAdjustment2D(SpriteData& sprite, SpritePart& part);
 	/// バケット追加
@@ -249,4 +275,12 @@ private:
 	PSOKey PSODecision(MaterialConfig& material);
 
 
+#ifdef USE_IMGUI
+	/// ===== 開發ツール専用（ObjectEditorのsolo表示）=====///
+	friend class ObjectEditor;
+	void SetSoloTarget(const ObjectData* object, int partIndex = -1);
+	void ClearSoloTarget() { soloObject_ = nullptr; soloPartIndex_ = -1; }
+	const ObjectData* soloObject_ = nullptr;
+	int soloPartIndex_ = -1;
+#endif
 };

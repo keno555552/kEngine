@@ -7,14 +7,14 @@
 #include <algorithm>
 
 namespace {
-std::map<std::string, MapChipType> mapChipTable = {
-    {"0", MapChipType::kBlank},
-    {"1", MapChipType::kDirt},
-	{"2", MapChipType::kRock},
-	{"7", MapChipType::kEnemy},
-	{"8", MapChipType::kPlayer},
-	{"9", MapChipType::kBackPoint},
-};
+	std::map<std::string, MapChipType> mapChipTable = {
+		{"0", MapChipType::kBlank},
+		{"1", MapChipType::kDirt},
+		{"2", MapChipType::kRock},
+		{"7", MapChipType::kEnemy},
+		{"8", MapChipType::kPlayer},
+		{"9", MapChipType::kBackPoint},
+	};
 }
 
 void MapChipField::ResetMapChipData() {
@@ -110,7 +110,7 @@ Vector3 MapChipField::GetWorldPosFromMapByMapIndex(MapIndex mapIndex) {
 						leftBottom.y + kBlockHeight * 0.5f,
 						0 };
 
-	 return center;
+	return center;
 }
 
 Vector3 MapChipField::GetWorldPosFromMapByWorldIndex(WorldIndex worldIndex) {
@@ -131,21 +131,120 @@ MapChipField::MapIndex MapChipField::GetMapIndexByPosition(const Vector3& positi
 	return ExchangeWorld2MapIndex(worldIndex);
 }
 
-Vector3 MapChipField::GetMapCollisionCorrection(const AABB& box, const Vector3& velocity, float deltaTime, bool& landed) {
+//CollisionResult MapChipField::GetMapCollisionCorrection(
+//	const AABB& box, const Vector3& velocity, float deltaTime, bool& landed) {
+//	
+//	landed = false;
+//	Vector3 unConstVelocity = velocity;
+//	Vector3 move = unConstVelocity * deltaTime;
+//	Vector3 finalMove = move;
+//	const float EPS = 0.001f;
+//
+//	AABB current = box;
+//
+//	bool xIsMainAxis = false;
+//	bool yIsMainAxis = false;
+//
+//	for (int step = 0; step < 2; ++step) {
+//
+//		AABB predicted = current;
+//		predicted.min += finalMove;
+//		predicted.max += finalMove;
+//
+//		auto tiles = GetTilesOverlapping(predicted);
+//
+//		float bestOverlapX = FLT_MAX;
+//		float bestOverlapY = FLT_MAX;
+//		float bestDirX = 0.0f;
+//		float bestDirY = 0.0f;
+//
+//		bool hasHit = false;
+//
+//		for (auto& t : tiles) {
+//			if (!t.isWall) continue;
+//
+//			const AABB& tile = t.aabb;
+//
+//			float overlapX =
+//				std::min(predicted.max.x, tile.max.x) -
+//				std::max(predicted.min.x, tile.min.x);
+//
+//			float overlapY =
+//				std::min(predicted.max.y, tile.max.y) -
+//				std::max(predicted.min.y, tile.min.y);
+//
+//			if (overlapX <= 0.0f || overlapY <= 0.0f) continue;
+//
+//			hasHit = true;
+//
+//			if (overlapX < bestOverlapX) {
+//				bestOverlapX = overlapX;
+//				bestDirX = (velocity.x > 0.0f ? -1.0f : 1.0f);
+//			}
+//
+//			if (overlapY < bestOverlapY) {
+//				bestOverlapY = overlapY;
+//				bestDirY = (velocity.y > 0.0f ? -1.0f : 1.0f);
+//			}
+//		}
+//
+//		if (!hasHit) break;
+//
+//		Vector3 push{};
+//		xIsMainAxis = false;
+//		yIsMainAxis = false;
+//
+//		if (bestOverlapX < bestOverlapY) {
+//			push.x = bestDirX * (bestOverlapX + EPS);
+//			xIsMainAxis = true;
+//		} else {
+//			push.y = bestDirY * (bestOverlapY + EPS);
+//			yIsMainAxis = true;
+//			if (bestDirY > 0.0f) landed = true;
+//		}
+//
+//		finalMove += push;
+//		current.min += push;
+//		current.max += push;
+//	}
+//
+//	CollisionResult result;
+//	result.correction = finalMove;
+//	result.xIsMainAxis = xIsMainAxis;
+//	result.yIsMainAxis = yIsMainAxis;
+//	result.landed = landed;
+//	return result;
+//}
+
+CollisionResult MapChipField::GetMapCollisionCorrection(
+	const AABB& box, const Vector3& velocity, float deltaTime, bool& landed) {
+
 	landed = false;
 	Vector3 unConstVelocity = velocity;
 	Vector3 move = unConstVelocity * deltaTime;
 	Vector3 finalMove = move;
+	const float EPS = 0.001f;
 
-	// -------------------------
-	// 1. X 軸先處理
-	// -------------------------
-	if (move.x != 0.0f) {
-		AABB test = box;
-		test.min.x += finalMove.x;
-		test.max.x += finalMove.x;
+	AABB current = box;
 
-		auto tiles = GetTilesOverlapping(test);
+	bool xIsMainAxis = false;
+	bool yIsMainAxis = false;
+
+	// ★★★ 最重要：逐 tile 累積推回，而不是只推一次 ★★★
+	for (int step = 0; step < 2; ++step) {
+
+		AABB predicted = current;
+		predicted.min += finalMove;
+		predicted.max += finalMove;
+
+		auto tiles = GetTilesOverlapping(predicted);
+
+		float bestOverlapX = FLT_MAX;
+		float bestOverlapY = FLT_MAX;
+		float bestDirX = 0.0f;
+		float bestDirY = 0.0f;
+
+		bool hasHit = false;
 
 		for (auto& t : tiles) {
 			if (!t.isWall) continue;
@@ -153,69 +252,85 @@ Vector3 MapChipField::GetMapCollisionCorrection(const AABB& box, const Vector3& 
 			const AABB& tile = t.aabb;
 
 			float overlapX =
-				std::min(test.max.x, tile.max.x) -
-				std::max(test.min.x, tile.min.x);
-
-			if (overlapX > 0.0f) {
-
-				if (test.min.x < tile.min.x) {
-					// 從左邊撞牆 → 往左推回
-					finalMove.x -= overlapX;
-				} else {
-					// 從右邊撞牆 → 往右推回
-					finalMove.x += overlapX;
-				}
-
-				break;
-			}
-		}
-	}
-
-	// -------------------------
-	// 2. Y 軸再處理
-	// -------------------------
-	if (move.y != 0.0f) {
-		AABB test = box;
-		test.min.y += finalMove.y;
-		test.max.y += finalMove.y;
-
-		auto tiles = GetTilesOverlapping(test);
-
-		for (auto& t : tiles) {
-			if (!t.isWall) continue;
-
-			const AABB& tile = t.aabb;
+				std::min(predicted.max.x, tile.max.x) -
+				std::max(predicted.min.x, tile.min.x);
 
 			float overlapY =
-				std::min(test.max.y, tile.max.y) -
-				std::max(test.min.y, tile.min.y);
+				std::min(predicted.max.y, tile.max.y) -
+				std::max(predicted.min.y, tile.min.y);
 
-			if (overlapY > 0.0f) {
+			if (overlapX <= 0.0f || overlapY <= 0.0f) continue;
 
-				if (test.min.y < tile.min.y) {
-					// 從下往上撞到天花板 → 往下推
-					finalMove.y -= overlapY;
-				} else {
-					// 從上往下撞地板 → 往上推
-					finalMove.y += overlapY;
-					landed = true;
+			hasHit = true;
+
+			// X 軸候選
+			if (overlapX < bestOverlapX) {
+				bestOverlapX = overlapX;
+
+				// 用 move.x 判斷方向（比 velocity 更安全）
+				if (move.x > 0.0f) bestDirX = -1.0f;
+				else if (move.x < 0.0f) bestDirX = 1.0f;
+				else {
+					float cx = (current.min.x + current.max.x) * 0.5f;
+					float tx = (tile.min.x + tile.max.x) * 0.5f;
+					bestDirX = (cx < tx ? -1.0f : 1.0f);
 				}
+			}
 
-				break;
+			// Y 軸候選
+			if (overlapY < bestOverlapY) {
+				bestOverlapY = overlapY;
+
+				if (move.y > 0.0f) bestDirY = -1.0f; // 撞頭 → 往下推
+				else if (move.y < 0.0f) bestDirY = 1.0f; // 落地 → 往上推
+				else {
+					float cy = (current.min.y + current.max.y) * 0.5f;
+					float ty = (tile.min.y + tile.max.y) * 0.5f;
+					bestDirY = (cy < ty ? -1.0f : 1.0f);
+				}
 			}
 		}
+
+		if (!hasHit) break;
+
+		Vector3 push{};
+		//xIsMainAxis = false;
+		//yIsMainAxis = false;
+
+		// ★★★ overlap 決定主軸（舊版正確邏輯）★★★
+		if (bestOverlapX < bestOverlapY) {
+			push.x = bestDirX * (bestOverlapX + EPS);
+			xIsMainAxis = true;
+		} else {
+			push.y = bestDirY * (bestOverlapY + EPS);
+			yIsMainAxis = true;
+
+			if (bestDirY > 0.0f) landed = true; // 往下推 → 落地
+		}
+
+		// ★★★ 逐 tile 累積推回（舊版最重要的行為）★★★
+		finalMove += push;
+		current.min += push;
+		current.max += push;
 	}
 
-	return finalMove;
+	CollisionResult result;
+	result.correction = finalMove;
+	result.xIsMainAxis = xIsMainAxis;
+	result.yIsMainAxis = yIsMainAxis;
+	result.landed = landed;
+	return result;
 }
 
 
-Vector3 MapChipField::GetMapCollisionCorrection(const AABB& box, const Vector3& velocity, float deltaTime) {
+
+
+CollisionResult MapChipField::GetMapCollisionCorrection(const AABB& box, const Vector3& velocity, float deltaTime) {
 	bool dummyLanded;
 	return GetMapCollisionCorrection(box, velocity, deltaTime, dummyLanded);
 }
 
-std::vector<MapChipField::TileInfo> MapChipField::GetTilesOverlapping(const AABB& box){
+std::vector<MapChipField::TileInfo> MapChipField::GetTilesOverlapping(const AABB& box) {
 
 	std::vector<TileInfo> result;
 
@@ -223,73 +338,35 @@ std::vector<MapChipField::TileInfo> MapChipField::GetTilesOverlapping(const AABB
 	WorldIndex minIdx = GetWorldIndexByPosition({ box.min.x, box.min.y, box.min.z });
 	WorldIndex maxIdx = GetWorldIndexByPosition({ box.max.x - eps, box.max.y - eps, box.max.z });
 
-    // 2. clamp 避免越界
-    minIdx.x = std::clamp(minIdx.x, 0, (int)GetNumBlockHorizontal() - 1);
-    maxIdx.x = std::clamp(maxIdx.x, 0, (int)GetNumBlockHorizontal() - 1);
-    minIdx.y = std::clamp(minIdx.y, 0, (int)GetNumBlockVirtical() - 1);
-    maxIdx.y = std::clamp(maxIdx.y, 0, (int)GetNumBlockVirtical() - 1);
+	// 2. clamp 避免越界
+	minIdx.x = std::clamp(minIdx.x, 0, (int)GetNumBlockHorizontal() - 1);
+	maxIdx.x = std::clamp(maxIdx.x, 0, (int)GetNumBlockHorizontal() - 1);
+	minIdx.y = std::clamp(minIdx.y, 0, (int)GetNumBlockVirtical() - 1);
+	maxIdx.y = std::clamp(maxIdx.y, 0, (int)GetNumBlockVirtical() - 1);
 
-    int xBegin = std::min(minIdx.x, maxIdx.x);
-    int xEnd   = std::max(minIdx.x, maxIdx.x);
-    int yBegin = std::min(minIdx.y, maxIdx.y);
-    int yEnd   = std::max(minIdx.y, maxIdx.y);
+	int xBegin = std::min(minIdx.x, maxIdx.x);
+	int xEnd = std::max(minIdx.x, maxIdx.x);
+	int yBegin = std::min(minIdx.y, maxIdx.y);
+	int yEnd = std::max(minIdx.y, maxIdx.y);
 
-    // 3. 掃描所有 tile
-    for (int y = yBegin; y <= yEnd; ++y) {
-        for (int x = xBegin; x <= xEnd; ++x) {
+	// 3. 掃描所有 tile
+	for (int y = yBegin; y <= yEnd; ++y) {
+		for (int x = xBegin; x <= xEnd; ++x) {
 
 			MapChipType type = GetMapChipTypeByWorld({ x, y });
-            bool isWall = (type == MapChipType::kDirt || type == MapChipType::kRock);
+			bool isWall = (type == MapChipType::kDirt || type == MapChipType::kRock);
 
-            TileInfo info;
-            info.isWall = isWall;
-            info.aabb = GetAABBByWorldIndex({ x, y });
+			TileInfo info;
+			info.isWall = isWall;
+			info.aabb = GetAABBByWorldIndex({ x, y });
 
-            result.push_back(info);
-        }
-    }
+			result.push_back(info);
+		}
+	}
 
-    return result;
-	
+	return result;
+
 }
-
-//std::vector<MapChipField::TileInfo> MapChipField::GetTilesOverlapping(const AABB& box){
-//
-//    std::vector<TileInfo> result;
-//
-//    float eps = 0.001f;
-//
-//    // 1. 先用 WorldIndex
-//    WorldIndex minW = GetWorldIndexByPosition({ box.min.x, box.min.y, box.min.z });
-//    WorldIndex maxW = GetWorldIndexByPosition({ box.max.x - eps, box.max.y - eps, box.max.z });
-//
-//    // 2. 再轉成 MapIndex（這一步非常重要）
-//    MapIndex minIdx = ExchangeWorld2MapIndex(minW);
-//    MapIndex maxIdx = ExchangeWorld2MapIndex(maxW);
-//
-//    // 3. clamp
-//    minIdx.x = std::clamp(minIdx.x, 0, (int)GetNumBlockHorizontal() - 1);
-//    maxIdx.x = std::clamp(maxIdx.x, 0, (int)GetNumBlockHorizontal() - 1);
-//    minIdx.y = std::clamp(minIdx.y, 0, (int)GetNumBlockVirtical() - 1);
-//    maxIdx.y = std::clamp(maxIdx.y, 0, (int)GetNumBlockVirtical() - 1);
-//
-//    // 4. 掃描 tile（用 MapIndex）
-//    for (int y = minIdx.y; y <= maxIdx.y; ++y) {
-//        for (int x = minIdx.x; x <= maxIdx.x; ++x) {
-//
-//            MapChipType type = GetMapChipTypeByMap({ x, y });
-//            bool isWall = (type == MapChipType::kDirt || type == MapChipType::kRock);
-//
-//            TileInfo info;
-//            info.isWall = isWall;
-//            info.aabb = GetAABBByMapIndex({ x, y });
-//
-//            result.push_back(info);
-//        }
-//    }
-//
-//    return result;
-//}
 
 AABB MapChipField::GetAABBByMapIndex(MapIndex mapIndex) {
 	Vector3 center = GetWorldPosFromMapByMapIndex(mapIndex);
@@ -298,8 +375,8 @@ AABB MapChipField::GetAABBByMapIndex(MapIndex mapIndex) {
 	float halfH = kBlockHeight * 0.5f;
 
 	AABB aabb;
-	aabb.min = center - Vector3(halfW, halfH, 0);
-	aabb.max = center + Vector3(halfW, halfH, 0);
+	aabb.min = center - Vector3{ halfW, halfH, 0 };
+	aabb.max = center + Vector3{ halfW, halfH, 0 };
 	return aabb;
 }
 

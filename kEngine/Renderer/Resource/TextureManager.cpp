@@ -124,6 +124,32 @@ int TextureManager::LoadCommonTexture(const std::string& filePath) {
 
 	assert(SUCCEEDED(hr));
 
+	/// Alphaチャンネルの有無を確認
+	const DirectX::Image* img = mipImages.GetImage(0, 0, 0);
+	bool hasAlpha = false;
+
+	if (img &&
+		(img->format == DXGI_FORMAT_R8G8B8A8_UNORM ||
+			img->format == DXGI_FORMAT_R8G8B8A8_UNORM_SRGB ||
+			img->format == DXGI_FORMAT_B8G8R8A8_UNORM ||
+			img->format == DXGI_FORMAT_B8G8R8A8_UNORM_SRGB)) {
+
+		const uint8_t* pixels = img->pixels;
+		size_t pitch = img->rowPitch;
+
+		for (size_t y = 0; y < img->height && !hasAlpha; ++y) {
+			const uint8_t* row = pixels + y * pitch;
+			for (size_t x = 0; x < img->width; ++x) {
+				uint8_t a = row[x * 4 + 3];
+				if (a < 255) {
+					hasAlpha = true;
+					break;
+				}
+			}
+		}
+	}
+
+
 	/// 追加したテキスチャテータの参照を取得
 	auto& textureData = textureDatas[nextTextureHandle_];									/// 新しいテクスチャデータを追加
 	textureData.metadata = mipImages.GetMetadata();											/// 1.metadata
@@ -139,6 +165,9 @@ int TextureManager::LoadCommonTexture(const std::string& filePath) {
 	/// シェーダーリソースビューのハンドル取得
 	textureData.srvHandleCPU = srvManager_->GetCPUDescriptorHandle(textureData.srvIndex);	/// 5.srvHandleCPU
 	textureData.srvHandleGPU = srvManager_->GetGPUDescriptorHandle(textureData.srvIndex);	/// 6.srvHandleGPU
+
+	/// Alphaチャンネルの有無を保存
+	textureData.hasAlpha = hasAlpha;
 
 	/// テクスチャデータのアップロード
 	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource;
