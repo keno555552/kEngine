@@ -16,6 +16,9 @@ struct MapData {
 	int startY{};
 	std::vector<Object> unitLists{};
 
+	/// マップ本体（Row[y][x] = Type）。サイズは xSize / ySize と同期させる
+	TileMapData tiles{};
+
 	bool isSaved = false;
 };
 

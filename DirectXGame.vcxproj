@@ -576,6 +576,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Tool\MapBulider\Adapter\ProgramAdapter.cpp" />
     <ClCompile Include="kEngine\Tool\MapBulider\Data\MapMakerData.cpp" />
     <ClCompile Include="kEngine\Tool\MapMakingEditor\MapMakingEditor.cpp" />
+    <ClCompile Include="kEngine\Tool\MapMakingEditor\MapDataEditor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kEngine\Tool\CheatEngine\CheatEngine.h">
@@ -900,6 +901,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Tool\MapBulider\Adapter\ProgramAdapter.h" />
     <ClInclude Include="kEngine\Tool\MapBulider\Data\MapMakerData.h" />
     <ClInclude Include="kEngine\Tool\MapMakingEditor\MapMakingEditor.h" />
+    <ClInclude Include="kEngine\Tool\MapMakingEditor\MapDataEditor.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl">

@@ -31,6 +31,11 @@ enum Type {
 /// <returns>=ならtrue</returns>
 bool BCThisFile(int binary, int target);
 
+/// Type <-> 名前（"Rock" など、大文字小文字は区別しない）
+/// 見つからない場合 TileTypeFromName は -1 を返す
+const char* TileTypeToName(int type);
+int TileTypeFromName(const std::string& name);
+
 #pragma region TileMap
 typedef struct TileMapData {
 	std::string name;
@@ -38,6 +43,19 @@ typedef struct TileMapData {
 	std::vector<std::vector<int>> Row;
 	void ColumnPush();
 	std::string TileMapDataToString();
+
+	/// ===== グリッド操作（Row[y][x]） ===== ///
+	int Width() const { return Row.empty() ? 0 : (int)Row[0].size(); }
+	int Height() const { return (int)Row.size(); }
+	bool InBounds(int x, int y) const { return y >= 0 && y < Height() && x >= 0 && x < (int)Row[y].size(); }
+	/// サイズ変更（既存の内容は残す、増えた分は fillType）
+	void Resize(int width, int height, int fillType);
+	/// 全マスを type で埋める
+	void Fill(int type);
+
+	/// ===== CSV（1行 = y、カンマ区切り = x） ===== ///
+	bool ExportCsv(const std::string& path) const;
+	bool ImportCsv(const std::string& path);
 }TileMapData;
 class TextureMatcher
 {

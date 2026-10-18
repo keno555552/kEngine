@@ -15,6 +15,7 @@
 #include "Tool\MapBulider\Data\GeneratorVariable.h"
 #include "Tool\MapBulider\Adapter\ProgramAdapter.h"
 #include "Tool\MapBulider\Data\MapMakerData.h"
+#include "Tool\MapMakingEditor\MapDataEditor.h"
 
 enum class SelectModeForMME {
 	None,
@@ -49,6 +50,10 @@ private:
 	std::vector<MapInfo> mapList_{};
 
 	std::vector<MapData> mapDataList_{};
+
+	/// MapData 調整器（View メニューから開閉）
+	MapDataEditor mapDataEditor_{};
+	bool isMapDataEditorOpen_ = true;
 	std::vector<MapMaker> mapMakerlist_{};
 
 	/// ============ 選択関連 =============///

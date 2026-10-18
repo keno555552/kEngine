@@ -57,6 +57,10 @@ void MapMakingEditor::ImGuiPart() {
 			}
 			ImGui::EndMenu();
 		}
+		if (ImGui::BeginMenu("View")) {
+			ImGui::MenuItem("MapData Editor", nullptr, &isMapDataEditorOpen_);
+			ImGui::EndMenu();
+		}
 		ImGui::EndMainMenuBar();
 	}
 
@@ -71,6 +75,18 @@ void MapMakingEditor::ImGuiPart() {
 	/// ========== 中央のマップウィンドウ ============ ///
 
 	ImGuiMidWindow();
+
+	/// ============ MapData 調整器 ============= ///
+
+	if (isMapDataEditorOpen_) {
+		const ImVec2 o = ImGui::GetMainViewport()->Pos;
+		ImGui::SetNextWindowPos(ImVec2(o.x + 80.0f, o.y + 60.0f), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(1120, 600), ImGuiCond_FirstUseEver);
+		if (ImGui::Begin("MapData Editor", &isMapDataEditorOpen_)) {
+			mapDataEditor_.Draw(mapDataList_, debugText_);
+		}
+		ImGui::End();
+	}
 
 	/// ============ Popup Window ============= ///
 	ImGuiLoadWindow();

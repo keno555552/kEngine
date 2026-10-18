@@ -1,4 +1,33 @@
 #include "TileMap.h"
+#include <algorithm>
+#include <cctype>
+#include <fstream>
+#include <sstream>
+
+namespace {
+	const char* kTileTypeNames[MAX_TYPE] = {
+		"None", "Air", "Grass", "Earth", "Rock",
+		"Iron", "Gold", "Diamond", "MonsterSpawner", "DungeonDoor",
+	};
+
+	std::string ToLower(std::string s) {
+		std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return (char)std::tolower(c); });
+		return s;
+	}
+}
+
+const char* TileTypeToName(int type) {
+	if (type < 0 || type >= MAX_TYPE) return "Unknown";
+	return kTileTypeNames[type];
+}
+
+int TileTypeFromName(const std::string& name) {
+	const std::string key = ToLower(name);
+	for (int i = 0; i < MAX_TYPE; ++i) {
+		if (ToLower(kTileTypeNames[i]) == key) return i;
+	}
+	return -1;
+}
 
 bool BCThisFile(int binary, int target) {
 	if (binary == (target & binary)) {
@@ -27,6 +56,57 @@ std::string TileMapData::TileMapDataToString() {
 	}
 
 	return out;
+}
+
+void TileMapData::Resize(int width, int height, int fillType) {
+	width = (std::max)(0, width);
+	height = (std::max)(0, height);
+	Row.resize(height);
+	for (auto& row : Row) row.resize(width, fillType);
+}
+
+void TileMapData::Fill(int type) {
+	for (auto& row : Row) std::fill(row.begin(), row.end(), type);
+}
+
+bool TileMapData::ExportCsv(const std::string& path) const {
+	std::ofstream out(path);
+	if (!out.is_open()) return false;
+	for (const auto& row : Row) {
+		for (size_t x = 0; x < row.size(); ++x) {
+			out << row[x];
+			if (x + 1 < row.size()) out << ',';
+		}
+		out << '\n';
+	}
+	return true;
+}
+
+bool TileMapData::ImportCsv(const std::string& path) {
+	std::ifstream in(path);
+	if (!in.is_open()) return false;
+
+	std::vector<std::vector<int>> rows;
+	std::string line;
+	size_t maxWidth = 0;
+	while (std::getline(in, line)) {
+		if (!line.empty() && line.back() == '\r') line.pop_back();
+		if (line.empty()) continue;
+
+		std::vector<int> row;
+		std::stringstream ss(line);
+		std::string cell;
+		while (std::getline(ss, cell, ',')) {
+			try { row.push_back(std::stoi(cell)); } catch (...) { row.push_back(AIR); }
+		}
+		maxWidth = (std::max)(maxWidth, row.size());
+		rows.push_back(std::move(row));
+	}
+	for (auto& row : rows) row.resize(maxWidth, AIR);   // 長さが揃っていない行は AIR で埋める
+
+	Row = std::move(rows);
+	Column.clear();
+	return true;
 }
 
 TextureMatcher::TextureMatcher() {
