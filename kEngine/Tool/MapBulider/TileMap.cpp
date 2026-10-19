@@ -69,7 +69,7 @@ void TileMapData::Fill(int type) {
 	for (auto& row : Row) std::fill(row.begin(), row.end(), type);
 }
 
-bool TileMapData::ExportCsv(const std::string& path) const {
+bool TileMapData::ExportCsv(const std::string& path, const std::string& mapDataName) const {
 	std::ofstream out(path);
 	if (!out.is_open()) return false;
 	for (const auto& row : Row) {
@@ -79,10 +79,11 @@ bool TileMapData::ExportCsv(const std::string& path) const {
 		}
 		out << '\n';
 	}
+	if (!mapDataName.empty()) out << "#mapData," << mapDataName << '\n';
 	return true;
 }
 
-bool TileMapData::ImportCsv(const std::string& path) {
+bool TileMapData::ImportCsv(const std::string& path, std::string* outMapDataName) {
 	std::ifstream in(path);
 	if (!in.is_open()) return false;
 
@@ -92,6 +93,15 @@ bool TileMapData::ImportCsv(const std::string& path) {
 	while (std::getline(in, line)) {
 		if (!line.empty() && line.back() == '\r') line.pop_back();
 		if (line.empty()) continue;
+
+		if (line[0] == '#') {                                   // 付加情報の行
+			if (outMapDataName && line.rfind("#mapData,", 0) == 0) {
+				std::string name = line.substr(9);
+				name = name.substr(0, name.find(','));          // Excel で保存し直すと後ろに ",,,," が付くことがある
+				*outMapDataName = name;
+			}
+			continue;
+		}
 
 		std::vector<int> row;
 		std::stringstream ss(line);

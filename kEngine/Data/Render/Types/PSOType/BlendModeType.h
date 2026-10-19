@@ -1,5 +1,5 @@
 #pragma once
-#include <string>
+#include "Utility/EnumNameFinder/EnumNameFinder.h"
 
 enum class BlendModeType
 {
@@ -10,4 +10,14 @@ enum class BlendModeType
 	MultiplyBlend,
 	ScreenBlend,
 	NumOfBlends
+};
+
+template <>
+inline const std::map<BlendModeType, std::string> EnumNameMap<BlendModeType> = {
+	{ BlendModeType::Opaque,			"Opaque" },
+	{ BlendModeType::AlphaBlend,		"AlphaBlend" },
+	{ BlendModeType::AddBlend,			"AddBlend" },
+	{ BlendModeType::SubtractBlend,		"SubtractBlend" },
+	{ BlendModeType::MultiplyBlend,		"MultiplyBlend" },
+	{ BlendModeType::ScreenBlend,		"ScreenBlend" }
 };

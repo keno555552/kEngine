@@ -2,6 +2,22 @@
 #include <fstream>
 #include <iostream>
 
+MapUnit* MapData::FindUnit(const std::string& name) {
+	for (auto& u : units) if (u.name == name) return &u;
+	return nullptr;
+}
+
+MapUnit* MapData::FindUnit(int id) {
+	for (auto& u : units) if (u.id == id) return &u;
+	return nullptr;
+}
+
+int MapData::NextUnitId() const {
+	int maxId = 0;
+	for (const auto& u : units) maxId = (std::max)(maxId, u.id);
+	return maxId + 1;
+}
+
 void MapMaker::Compile() {
 	tokens_ = Tokenize(script_);
 	sentences_ = BuildSentences(tokens_);
@@ -13,6 +29,7 @@ void MapMaker::BuildJson() {
 	nlohmann::json out;
 
 	out["name"] = mapName_;
+	out["code"] = codingText_;
 	out["context"] = {
 		{"maxRow", 128},
 		{"maxCol", 128},
@@ -90,6 +107,54 @@ bool MapMaker::ExportMapDataToJson(const std::string& outPath) {
 	out.close();
 
 	isSave_ = true; // 成功儲存 MapDetail.json
+	return true;
+}
+
+bool MapMaker::ImportMapMakerFromJson(const std::string& filePath) {
+	std::ifstream in(filePath);
+	if (!in.is_open()) {
+		debugText_ = "Import failed: cannot open " + filePath;
+		return false;
+	}
+	nlohmann::json file = nlohmann::json::parse(in, nullptr, false);   // 壊れた JSON でも例外を投げない
+	if (file.is_discarded() || !file.contains("script")) {
+		debugText_ = "Import failed: not a MapMaker json " + filePath;
+		return false;
+	}
+
+	mapName_ = file.value("name", mapName_);
+	codingText_ = file.value("code", std::string());
+	script_ = codingText_;
+
+	/// 変数：BuildJson は variables[ { unitName, units:[...] } ] の形で書いている
+	generatorVariables_.variableList.clear();
+	for (const auto& group : file.value("variables", nlohmann::json::array())) {
+		for (const auto& jv : group.value("units", nlohmann::json::array())) {
+			const std::string name = jv.value("name", std::string());
+			const nlohmann::json& v = jv.contains("value") ? jv["value"] : nlohmann::json();
+
+			VariantValue value;
+			switch (StringToVarType(jv.value("type", std::string("Int")))) {
+			case VarType::Bool:    value = v.is_boolean() ? v.get<bool>() : false; break;
+			case VarType::Int:     value = v.is_number() ? v.get<int>() : 0; break;
+			case VarType::Float:   value = v.is_number() ? v.get<float>() : 0.0f; break;
+			case VarType::Double:  value = v.is_number() ? v.get<double>() : 0.0; break;
+			case VarType::String:  value = v.is_string() ? v.get<std::string>() : std::string(); break;
+			case VarType::Vector2: value = v.size() >= 2 ? Vector2{ v[0].get<float>(), v[1].get<float>() } : Vector2{}; break;
+			case VarType::Vector3: value = v.size() >= 3 ? Vector3{ v[0].get<float>(), v[1].get<float>(), v[2].get<float>() } : Vector3{}; break;
+			case VarType::Vector4: value = v.size() >= 4 ? Vector4{ v[0].get<float>(), v[1].get<float>(), v[2].get<float>(), v[3].get<float>() } : Vector4{}; break;
+			}
+			generatorVariables_.variableList.push_back(CreateVariable(name, value));
+		}
+	}
+
+	if (codingText_.empty()) {
+		debugText_ = "Import warning: no \"code\" in file (old format). Script text cannot be restored.";
+	} else {
+		Compile();         // nodes_ を作り直す
+	}
+	BuildJson();           // mapBuilderJson_ を最新に（Apply / プレビュー用）
+	isSave_ = true;
 	return true;
 }
 

@@ -33,6 +33,7 @@ enum class VarType {
 /// enum翻訳用
 std::string VarTypeToString(VarType type);
 int VarTypeToInt(VarType type);
+VarType StringToVarType(const std::string& name);
 
 /// 実際一つの変数の構造体
 struct Variable {
@@ -43,6 +44,7 @@ struct Variable {
 
 /// 安全のために作るCreate関数
 Variable CreateVariable(const std::string& name, const VariantValue value);
+
 
 /// 便利のためのGet関数、じゃないと毎回std::get<type>を書かなといといけない
 template<typename T>

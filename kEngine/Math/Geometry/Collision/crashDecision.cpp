@@ -186,8 +186,7 @@ bool crashDecision(const Sphere& s1, const Plane& s2) {
 	return false;
 }
 
-
-bool crashDecision(const Segment& segment, const Plane& plane) {
+bool crashDecision(const Segment& segment, const Plane& plane, float* tOut) {
 	/// まずは内積を求める
 	float dot = Dot(plane.normal, segment.diff);
 
@@ -201,6 +200,7 @@ bool crashDecision(const Segment& segment, const Plane& plane) {
 
 	/// tの値と線の種類によって衝突してるかを判断する
 	if (t >= 0 && t <= 1) {
+		if (tOut) *tOut = t;
 		return true;
 	}
 	return false;

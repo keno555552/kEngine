@@ -34,7 +34,7 @@ void MapChipField::LoadMapChipCsv(const std::string& filePath) {
 	std::vector<std::string> lines;
 	std::string line;
 	while (getline(file, line)) {
-		if (!line.empty()) { lines.push_back(line); }
+		if (!line.empty() && line[0] != '#') { lines.push_back(line); }
 	}
 	file.close();
 	if (lines.empty()) { return; }

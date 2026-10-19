@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "Utility/EnumNameFinder/EnumNameFinder.h"
 
 enum WindowMode {
 	FULLSCREEN,				// フルスクリーン
@@ -14,6 +15,41 @@ enum gamepadType {
 	DIRECTINPUT,
 	XINPUT
 };
+
+/// ============ エンジン内部準備したモデル ============ ///
+enum class EngineModelType {
+	None,
+	Plane,
+	Triangle,
+	Cube,
+	Sphere,
+	Ring,
+	Cylinder,
+	NumOfEngineModel
+};
+template <>
+inline const std::map<EngineModelType, std::string> EnumNameMap<EngineModelType> = {
+	{ EngineModelType::Plane,    "Plane" },
+	{ EngineModelType::Triangle, "Triangle" },
+	{ EngineModelType::Cube,     "Cube" },
+	{ EngineModelType::Sphere,   "Sphere" },
+	{ EngineModelType::Ring,     "Ring" },
+	{ EngineModelType::Cylinder, "Cylinder" },
+};
+/// 内蔵モデルを作る時の数値（初期値 = エンジン起動時に作られるデフォルトモデルと同じ）
+struct EngineModelParams {
+	int   sphereLat = 10;
+	int   sphereLong = 10;
+	int   ringDivide = 32;
+	float ringOuter = 1.0f;
+	float ringInner = 0.5f;
+	int   cylinderDivide = 32;
+	float cylinderTop = 1.0f;
+	float cylinderBottom = 1.0f;
+	float cylinderHeight = 3.0f;
+	bool  cylinderReverseY = false;
+};
+/// ============================================= ///
 
 
 class config

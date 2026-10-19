@@ -1,4 +1,5 @@
 #pragma once
+#include "Utility/EnumNameFinder/EnumNameFinder.h"
 
 enum class DepthStencilType{
 
@@ -10,3 +11,10 @@ enum class DepthStencilType{
 
 };
 
+template <>
+inline const std::map<DepthStencilType, std::string> EnumNameMap<DepthStencilType> = {
+	{ DepthStencilType::Default,		"Default" },
+	{ DepthStencilType::ReadOnly,		"ReadOnly" },
+	{ DepthStencilType::Disable,		"Disable" },
+	{ DepthStencilType::Greater,		"Greater" }
+};

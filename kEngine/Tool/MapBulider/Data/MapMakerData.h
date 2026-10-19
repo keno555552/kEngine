@@ -7,6 +7,26 @@
 #include "Tool\MapBulider\TileMap.h"
 #include "Tool\FileManager\FileManager.h"
 #include "Object\Object.h"
+#include "Utility\EnumNameFinder\EnumNameFinder.h"
+
+struct MapUnit {
+	int id = 1;												// 代號：map.csv に書かれる番号（0 は「空き」として予約）
+	std::string name = "NewUnit";							// 腳本から参照する名前（"Rock" など）
+	bool isDirectTile = true;								// true : 置くだけの地圖物品（石塊、磚塊）
+	int modelHandle = -1;									// モデルハンドル（エンジン内部で使用する）
+	Vector4 previewColor = { 1.0f, 1.0f, 1.0f, 1.0f };		// 2D プレビュー用の色
+	EngineModelType engineModel = EngineModelType::None;	
+	EngineModelParams engineParams{};                       // engineModel が None 以外の時だけ意味がある
+
+	Transform transform = CreateDefaultTransform();   // 位置・回転・スケール（size の代わり）
+	MaterialConfig material = InitMaterialConfig();   // 材質
+};
+
+struct MapLayout {
+	TileMapData grid;              // name と ID のグリッド
+	std::string csvPath;           // 最後に保存 / 読み込んだ csv（空 = まだファイルが無い）
+	bool isSaved = false;
+};
 
 struct MapData {
 	std::string dataName{};
@@ -14,13 +34,19 @@ struct MapData {
 	int ySize{};
 	int startX{};
 	int startY{};
-	std::vector<Object> unitLists{};
-
-	/// マップ本体（Row[y][x] = Type）。サイズは xSize / ySize と同期させる
-	TileMapData tiles{};
+	std::vector<MapUnit> units{};
+	std::vector<TileMapData> maps{};
 
 	bool isSaved = false;
+	std::string savePath;
+
+	/// 検索（見つからなければ nullptr）
+	MapUnit* FindUnit(const std::string& name);
+	MapUnit* FindUnit(int id);
+	/// 次に使える代號（今ある最大 + 1）
+	int NextUnitId() const;
 };
+
 
 class MapMaker
 {
@@ -52,6 +78,10 @@ public:
 	bool ExportMapMakerToJson(const std::string& outPath = "");
 	/// MapData.json（視覺細節）を出力 (pathがなければデフォルトパスを使用)
 	bool ExportMapDataToJson(const std::string& outPath = "");
+
+	/// ====================== 読み込み関数　====================== ///
+	/// MapMaker.json を読み込んで中身を復元（BuildJson の逆）
+	bool ImportMapMakerFromJson(const std::string& filePath);
 
 
 	/// ==================== マップ生成関数　====================== ///

@@ -929,6 +929,27 @@ void DrawDataCollector::BeginPreview(ObjectData* object, int partIndex, const Pr
 	BuildInstanceList3D();
 }
 
+void DrawDataCollector::BeginPreview(const std::vector<ObjectData*>& objects, const PreviewView& view) {
+	savedOpaqueBucket3D_.swap(opaqueBucket3D_);
+	savedTransparentBucket3D_.swap(transparentBucket3D_);
+
+	usePreviewView_ = true;
+	previewView_ = view;
+
+	/// Collect3D は soloObject_ 以外を弾くので、1個ずつ solo にして集める
+	const ObjectData* prevObject = soloObject_;
+	int prevPart = soloPartIndex_;
+	for (ObjectData* obj : objects) {
+		soloObject_ = obj;
+		soloPartIndex_ = -1;
+		Collect3D(obj);
+	}
+	soloObject_ = prevObject;
+	soloPartIndex_ = prevPart;
+
+	BuildInstanceList3D();
+}
+
 void DrawDataCollector::EndPreview() {
 	usePreviewView_ = false;
 	opaqueBucket3D_.clear();

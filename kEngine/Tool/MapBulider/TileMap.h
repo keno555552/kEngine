@@ -54,8 +54,8 @@ typedef struct TileMapData {
 	void Fill(int type);
 
 	/// ===== CSV（1行 = y、カンマ区切り = x） ===== ///
-	bool ExportCsv(const std::string& path) const;
-	bool ImportCsv(const std::string& path);
+	bool ExportCsv(const std::string& path, const std::string& mapDataName = "") const;
+	bool ImportCsv(const std::string& path, std::string* outMapDataName = nullptr);
 }TileMapData;
 class TextureMatcher
 {

@@ -305,7 +305,7 @@ void DrawEngine::RenderPreview() {
 	commandList_->RSSetViewports(1, &vp);
 	commandList_->RSSetScissorRects(1, &sc);
 
-	if (previewRequest_.object) {                 // ← 取代 "第二步的繪製放這裡"
+	if (previewRequest_.object || !previewRequest_.objects.empty()) {
 		SetSRVHeap();
 		psoManager_->SetPSOStrong(CreateDefaultPSOKey());
 		commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -316,7 +316,10 @@ void DrawEngine::RenderPreview() {
 			static_cast<UINT>(RootSlot::Camera_CB),
 			previewCameraBuffer_->GetResource()->GetGPUVirtualAddress());
 
-		drawDataCollector_->BeginPreview(previewRequest_.object, previewRequest_.partIndex, previewRequest_.view);
+		if (!previewRequest_.objects.empty())
+			drawDataCollector_->BeginPreview(previewRequest_.objects, previewRequest_.view);
+		else
+			drawDataCollector_->BeginPreview(previewRequest_.object, previewRequest_.partIndex, previewRequest_.view);
 		Draw3D();
 		drawDataCollector_->EndPreview();
 	}

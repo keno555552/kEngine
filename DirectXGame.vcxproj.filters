@@ -798,7 +798,7 @@
     <ClCompile Include="kEngine\Tool\MapMakingEditor\MapMakingEditor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Tool\MapMakingEditor\MapDataEditor.cpp">
+    <ClCompile Include="kEngine\Tool\ImGuiManager\ImGuiWidgets.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1739,7 +1739,10 @@
     <ClInclude Include="kEngine\Tool\MapMakingEditor\MapMakingEditor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Tool\MapMakingEditor\MapDataEditor.h">
+    <ClInclude Include="kEngine\Utility\EnumNameFinder\EnumNameFinder.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\ImGuiManager\ImGuiWidgets.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

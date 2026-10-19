@@ -136,8 +136,9 @@ bool crashDecision(const Sphere& s1, const Plane& s2);
 /// </summary>
 /// <param name="s1">Segment</param>
 /// <param name="s2">Plane</param>
+/// <param name="tOut">t値の受け皿</param>
 /// <returns>isHit</returns>
-bool crashDecision(const Segment& segment, const Plane& plane);
+bool crashDecision(const Segment& segment, const Plane& plane, float* tOut = nullptr);
 
 ///// <summary>
 ///// Segment & Triangle Hit Decision

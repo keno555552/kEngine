@@ -40,7 +40,7 @@ void ObjectEditor::FocusSelected() {
 	camRot_ = Vector3{ atan2f(height, dist), 0.0f, 0.0f };
 }
 
-void ObjectEditor::UpdatePreviewCamera() {
+void ObjectEditor::UpdateFreeCamera() {
 	ImGuiIO& io = ImGui::GetIO();
 	const bool hovered = ImGui::IsItemHovered();
 	const bool active = ImGui::IsItemActive();
@@ -252,7 +252,7 @@ void ObjectEditor::DrawPreviewColumn() {
 		ImGui::SetCursorScreenPos(p);
 		ImGui::InvisibleButton("##previewView", ImVec2(w, h),
 			ImGuiButtonFlags_MouseButtonRight | ImGuiButtonFlags_MouseButtonMiddle);
-		UpdatePreviewCamera();
+		UpdateFreeCamera();
 	} else {
 		// render target がまだつながっていない間のプレースホルダー
 		ImVec2 q(p.x + w, p.y + h);

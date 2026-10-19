@@ -1,4 +1,6 @@
 #pragma once
+#include "Utility/EnumNameFinder/EnumNameFinder.h"
+
 enum class RasterizerMode{
 
     CullBack = 0,           // ノーマルモデル
@@ -9,3 +11,10 @@ enum class RasterizerMode{
     NumRasterizerModes
 };
 
+template <>
+inline const std::map<RasterizerMode, std::string> EnumNameMap<RasterizerMode> = {
+	{ RasterizerMode::CullBack,		"CullBack" },
+	{ RasterizerMode::CullFront,	"CullFront" },
+	{ RasterizerMode::CullNone,		"CullNone" },
+	{ RasterizerMode::Wireframe,	"Wireframe" }
+};

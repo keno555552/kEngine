@@ -144,6 +144,7 @@ public:
 	/// ============ debug関連 ==============///
 #ifdef USE_IMGUI
 	void BeginPreview(ObjectData* object, int partIndex, const PreviewView& view);
+	void BeginPreview(const std::vector<ObjectData*>& objects, const PreviewView& view);
 	void EndPreview();
 #endif
 

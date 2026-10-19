@@ -29,6 +29,13 @@ int VarTypeToInt(VarType type) {
 	}
 }
 
+VarType StringToVarType(const std::string& name) {
+	for (int i = 0; i <= (int)VarType::Vector4; ++i) {
+		if (VarTypeToString((VarType)i) == name) return (VarType)i;
+	}
+	return VarType::Int;
+}
+
 Variable CreateVariable(const std::string& name, const VariantValue value) {
 	Variable v;
 	v.name = name;
@@ -50,7 +57,7 @@ Variable CreateVariable(const std::string& name, const VariantValue value) {
 }
 
 GeneratorVariable::GeneratorVariable() :
-	variableList{} {}
+	variableList{}, generatorName{} {}
 
 Variable* GeneratorVariable::FindVariable(const std::string& name) {
 	for (auto& v : variableList) {
