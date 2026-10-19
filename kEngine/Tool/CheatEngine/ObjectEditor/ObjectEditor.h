@@ -37,7 +37,7 @@ private:
 private:
 	void ApplySolo();
 
-	void UpdatePreviewCamera();     // 入力でカメラを動かす
+	void UpdateFreeCamera();     // 入力でカメラを動かす
 	void FocusSelected();           // 選択中のオブジェクトの正面へ
 	void SubmitPreviewRequest();    // DrawEngineへ描画申請
 

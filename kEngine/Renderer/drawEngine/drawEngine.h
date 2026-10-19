@@ -49,6 +49,7 @@ public:
 		bool active = false;
 		ObjectData* object = nullptr;
 		int partIndex = -1;
+		std::vector<ObjectData*> objects;
 		DrawDataCollector::PreviewView view{};
 	};
 #endif

@@ -337,6 +337,18 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="kEngine\Tool\ImGuiManager\ImGuiWidgets.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\Adapter\InstructionCompiler.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\Data\GeneratorVariable.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\DungeonCell.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\DungeonData.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\GBPDungeonGenerater.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\MapBulider.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\OreSpawner.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\TileMap.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\TileRunner.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\Adapter\ProgramAdapter.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\Data\MapMakerData.cpp" />
     <ClCompile Include="kEngine\Tool\CheatEngine\CheatEngine.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -577,6 +589,19 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Scenes\SceneEngineTitle.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="kEngine\Tool\ImGuiManager\ImGuiWidgets.h" />
+    <ClInclude Include="kEngine\Utility\EnumNameFinder\EnumNameFinder.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\Adapter\InstructionCompiler.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\Data\GeneratorVariable.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\DungeonCell.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\DungeonData.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\GBPDungeonGenerater.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\MapBulider.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\OreSpawner.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\TileMap.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\TileRunner.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\Adapter\ProgramAdapter.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\Data\MapMakerData.h" />
     <ClInclude Include="kEngine\Tool\CheatEngine\CheatEngine.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
