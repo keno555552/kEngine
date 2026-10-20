@@ -12,11 +12,11 @@
 #include "GAME\resources\PostProcessPreset\PPP_GlitchScreen.h"
 
 
-class Scene1 :public BaseScene
+class SceneTutorial :public BaseScene
 {
 public:
-	Scene1(kEngine* system);
-	~Scene1();
+	SceneTutorial(kEngine* system);
+	~SceneTutorial();
 	void Update() override;
 	void Draw() override;
 

@@ -5,103 +5,64 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
+#include "Tool/MapBulider/Reader/MapReader.h"
 
-namespace {
-	std::map<std::string, MapChipType> mapChipTable = {
-		{"0", MapChipType::kBlank},
-		{"1", MapChipType::kDirt},
-		{"2", MapChipType::kRock},
-		{"7", MapChipType::kEnemy},
-		{"8", MapChipType::kPlayer},
-		{"9", MapChipType::kBackPoint},
-	};
-}
-
-void MapChipField::ResetMapChipData() {
-	// マップチップデータをリセット
-	mapChipData_.data.clear();
-	mapChipData_.data.resize(kNumBlockVirtical);
-	for (std::vector<MapChipType>& mapChipDataLine : mapChipData_.data) {
-		mapChipDataLine.resize(kNumBlockHorizontal);
+void MapChipField::Setup(const MapGrid& grid, const MapData* data) {
+	mapData_ = data;
+	ids_ = grid.ids;
+	kNumBlockVirtical = grid.Height();
+	kNumBlockHorizontal = grid.Width();
+	if (data) {
+		kBlockWidth = data->cellSpacing.x;
+		kBlockHeight = data->cellSpacing.y;
 	}
 }
 
 void MapChipField::LoadMapChipCsv(const std::string& filePath) {
-	std::ifstream file(filePath);
-	if (!file.is_open()) { return; }
-
-	// 先讀入所有行以判斷列數/行數
-	std::vector<std::string> lines;
-	std::string line;
-	while (getline(file, line)) {
-		if (!line.empty() && line[0] != '#') { lines.push_back(line); }
-	}
-	file.close();
-	if (lines.empty()) { return; }
-
-	// 計算尺寸
-	int newVertical = static_cast<int>(lines.size());
-	int newHorizontal = 0;
-	{
-		std::istringstream ls(lines[0]);
-		std::string word;
-		while (getline(ls, word, ',')) { ++newHorizontal; }
-	}
-	if (newHorizontal == 0) { return; }
-
-	// 更新尺寸並重置資料
-	kNumBlockVirtical = newVertical;
-	kNumBlockHorizontal = newHorizontal;
-	ResetMapChipData();
-
-	// 解析 CSV
-	for (int i = 0; i < kNumBlockVirtical && i < static_cast<int>(lines.size()); ++i) {
-		std::istringstream line_stream(lines[i]);
-		for (int j = 0; j < kNumBlockHorizontal; ++j) {
-			std::string word;
-			getline(line_stream, word, ',');
-			if (mapChipTable.contains(word)) {
-				mapChipData_.data[i][j] = mapChipTable[word];
-			}
-		}
-	}
+	MapGrid grid;
+	if (!MapReader::ReadMapGrid(filePath, grid)) return;
+	Setup(grid, nullptr);
 }
 
-/// マップチップ種類を取得
-MapChipType MapChipField::GetMapChipTypeByMap(MapIndex mapIndex) {
-
-	if ((mapIndex.x < 0) || (kNumBlockHorizontal - 1 < mapIndex.x)) {
-		return MapChipType::kBlank;
-	}
-	if ((mapIndex.y < 0) || (kNumBlockVirtical - 1 < mapIndex.y)) {
-		return MapChipType::kBlank;
-	}
-	return mapChipData_.data[mapIndex.y][mapIndex.x];
+void MapChipField::ResetMapChipData() {
+	ids_.assign(kNumBlockVirtical, std::vector<int>(kNumBlockHorizontal, GetBlankId()));
 }
 
-MapChipType MapChipField::GetMapChipTypeByWorld(WorldIndex worldIndex) {
-	MapIndex mapIndex = ExchangeWorld2MapIndex(worldIndex);
-	return GetMapChipTypeByMap(mapIndex);
+int MapChipField::GetIdByMap(MapIndex m) const {
+	return InRange(m) ? ids_[m.y][m.x] : GetBlankId();     // 範囲外は空白
+}
+int MapChipField::GetIdByWorld(WorldIndex w) const {
+	return GetIdByMap(ExchangeWorld2MapIndex(w));
 }
 
-/// マップチップ種類を設定
-void MapChipField::SetMapChipTypeByMap(MapIndex mapIndex, MapChipType type) {
-	if ((mapIndex.x < 0) || (kNumBlockHorizontal - 1 < mapIndex.x)) {
-		return;
-	}
-	if ((mapIndex.y < 0) || (kNumBlockVirtical - 1 < mapIndex.y)) {
-		return;
-	}
-	mapChipData_.data[mapIndex.y][mapIndex.x] = type;
+void MapChipField::SetIdByMap(MapIndex m, int id) {
+	if (InRange(m)) ids_[m.y][m.x] = id;
+}
+void MapChipField::SetIdByWorld(WorldIndex w, int id) {
+	SetIdByMap(ExchangeWorld2MapIndex(w), id);
 }
 
-void MapChipField::SetMapChipTypeByWorld(WorldIndex worldIndex, MapChipType type) {
-	MapIndex mapIndex = ExchangeWorld2MapIndex(worldIndex);
-	SetMapChipTypeByMap(mapIndex, type);
+const MapUnit* MapChipField::GetUnitByMap(MapIndex m) const {
+	if (!mapData_) return nullptr;
+	const int id = GetIdByMap(m);
+	return (id == mapData_->blankId) ? nullptr : mapData_->FindUnit(id);
+}
+
+bool MapChipField::IsWallByMap(MapIndex m) const {
+	if (!InRange(m)) return false;
+	if (!mapData_) {                                           // MapData 無し（旧 csv）→ 昔のルール
+		const int id = ids_[m.y][m.x];
+		return id == 1 || id == 2;
+	}
+	const MapUnit* u = GetUnitByMap(m);
+	return u && u->isDirectTile;
+}
+bool MapChipField::IsWallByWorld(WorldIndex w) const {
+	return IsWallByMap(ExchangeWorld2MapIndex(w));
 }
 
 /// マップチップ座標を取得
-Vector3 MapChipField::GetWorldPosFromMapByMapIndex(MapIndex mapIndex) {
+Vector3 MapChipField::GetWorldPosFromMapByMapIndex(MapIndex mapIndex) const{
 	Vector3 leftBottom{ kBlockWidth * mapIndex.x,
 						kBlockHeight * (kNumBlockVirtical - 1 - mapIndex.y),
 						0 };
@@ -113,108 +74,25 @@ Vector3 MapChipField::GetWorldPosFromMapByMapIndex(MapIndex mapIndex) {
 	return center;
 }
 
-Vector3 MapChipField::GetWorldPosFromMapByWorldIndex(WorldIndex worldIndex) {
+Vector3 MapChipField::GetWorldPosFromMapByWorldIndex(WorldIndex worldIndex) const {
 	MapIndex mapIndex = ExchangeWorld2MapIndex(worldIndex);
 	return GetWorldPosFromMapByMapIndex(mapIndex);
 }
 
 /// 座標からマップチップの番号を計算
-MapChipField::WorldIndex MapChipField::GetWorldIndexByPosition(const Vector3& position) {
+MapChipField::WorldIndex MapChipField::GetWorldIndexByPosition(const Vector3& position) const {
 	WorldIndex worldIndex = {};
 	worldIndex.x = static_cast<int>(std::floor(position.x / kBlockWidth));
 	worldIndex.y = static_cast<int>(std::floor(position.y / kBlockHeight));
 	return worldIndex;
 }
 
-MapChipField::MapIndex MapChipField::GetMapIndexByPosition(const Vector3& position) {
+MapChipField::MapIndex MapChipField::GetMapIndexByPosition(const Vector3& position) const {
 	WorldIndex worldIndex = GetWorldIndexByPosition(position);
 	return ExchangeWorld2MapIndex(worldIndex);
 }
 
-//CollisionResult MapChipField::GetMapCollisionCorrection(
-//	const AABB& box, const Vector3& velocity, float deltaTime, bool& landed) {
-//	
-//	landed = false;
-//	Vector3 unConstVelocity = velocity;
-//	Vector3 move = unConstVelocity * deltaTime;
-//	Vector3 finalMove = move;
-//	const float EPS = 0.001f;
-//
-//	AABB current = box;
-//
-//	bool xIsMainAxis = false;
-//	bool yIsMainAxis = false;
-//
-//	for (int step = 0; step < 2; ++step) {
-//
-//		AABB predicted = current;
-//		predicted.min += finalMove;
-//		predicted.max += finalMove;
-//
-//		auto tiles = GetTilesOverlapping(predicted);
-//
-//		float bestOverlapX = FLT_MAX;
-//		float bestOverlapY = FLT_MAX;
-//		float bestDirX = 0.0f;
-//		float bestDirY = 0.0f;
-//
-//		bool hasHit = false;
-//
-//		for (auto& t : tiles) {
-//			if (!t.isWall) continue;
-//
-//			const AABB& tile = t.aabb;
-//
-//			float overlapX =
-//				std::min(predicted.max.x, tile.max.x) -
-//				std::max(predicted.min.x, tile.min.x);
-//
-//			float overlapY =
-//				std::min(predicted.max.y, tile.max.y) -
-//				std::max(predicted.min.y, tile.min.y);
-//
-//			if (overlapX <= 0.0f || overlapY <= 0.0f) continue;
-//
-//			hasHit = true;
-//
-//			if (overlapX < bestOverlapX) {
-//				bestOverlapX = overlapX;
-//				bestDirX = (velocity.x > 0.0f ? -1.0f : 1.0f);
-//			}
-//
-//			if (overlapY < bestOverlapY) {
-//				bestOverlapY = overlapY;
-//				bestDirY = (velocity.y > 0.0f ? -1.0f : 1.0f);
-//			}
-//		}
-//
-//		if (!hasHit) break;
-//
-//		Vector3 push{};
-//		xIsMainAxis = false;
-//		yIsMainAxis = false;
-//
-//		if (bestOverlapX < bestOverlapY) {
-//			push.x = bestDirX * (bestOverlapX + EPS);
-//			xIsMainAxis = true;
-//		} else {
-//			push.y = bestDirY * (bestOverlapY + EPS);
-//			yIsMainAxis = true;
-//			if (bestDirY > 0.0f) landed = true;
-//		}
-//
-//		finalMove += push;
-//		current.min += push;
-//		current.max += push;
-//	}
-//
-//	CollisionResult result;
-//	result.correction = finalMove;
-//	result.xIsMainAxis = xIsMainAxis;
-//	result.yIsMainAxis = yIsMainAxis;
-//	result.landed = landed;
-//	return result;
-//}
+
 
 CollisionResult MapChipField::GetMapCollisionCorrection(
 	const AABB& box, const Vector3& velocity, float deltaTime, bool& landed) {
@@ -357,7 +235,7 @@ std::vector<MapChipField::TileInfo> MapChipField::GetTilesOverlapping(const AABB
 			bool isWall = (type == MapChipType::kDirt || type == MapChipType::kRock);
 
 			TileInfo info;
-			info.isWall = isWall;
+			info.isWall = IsWallByWorld({ x, y });
 			info.aabb = GetAABBByWorldIndex({ x, y });
 
 			result.push_back(info);
@@ -368,7 +246,7 @@ std::vector<MapChipField::TileInfo> MapChipField::GetTilesOverlapping(const AABB
 
 }
 
-AABB MapChipField::GetAABBByMapIndex(MapIndex mapIndex) {
+AABB MapChipField::GetAABBByMapIndex(MapIndex mapIndex) const {
 	Vector3 center = GetWorldPosFromMapByMapIndex(mapIndex);
 
 	float halfW = kBlockWidth * 0.5f;
@@ -380,7 +258,7 @@ AABB MapChipField::GetAABBByMapIndex(MapIndex mapIndex) {
 	return aabb;
 }
 
-AABB MapChipField::GetAABBByWorldIndex(WorldIndex worldIndex) {
+AABB MapChipField::GetAABBByWorldIndex(WorldIndex worldIndex) const {
 	return GetAABBByMapIndex(ExchangeWorld2MapIndex(worldIndex));
 }
 
@@ -393,51 +271,16 @@ void MapChipField::SetBlockHeight(float height) {
 	kBlockHeight = height;
 }
 
-MapChipField::WorldIndex MapChipField::ExchangeMap2WorldIndex(MapIndex mapSet) {
+MapChipField::WorldIndex MapChipField::ExchangeMap2WorldIndex(MapIndex mapSet) const {
 	WorldIndex i;
 	i.x = mapSet.x;
 	i.y = (kNumBlockVirtical - 1 - mapSet.y); // 上下翻轉
 	return i;
 }
 
-MapChipField::MapIndex MapChipField::ExchangeWorld2MapIndex(WorldIndex worldIndex) {
+MapChipField::MapIndex MapChipField::ExchangeWorld2MapIndex(WorldIndex worldIndex) const {
 	MapIndex m;
 	m.x = worldIndex.x;
 	m.y = (kNumBlockVirtical - 1 - worldIndex.y); // 上下翻轉
 	return m;
 }
-
-// void GenerateBlocks(std::vector<std::vector<WorldTransform*>>& worldTransformBlocks) {
-//	/// ボックス生成
-//	// 要素数
-//	const uint32_t kNumBlockVertical = 10;
-//	const uint32_t kNumBlockHorizontal = 20;
-//	// ブロック1個分の横幅
-//	const float kBlockWidth = 2.0f;
-//	const float kBlockHeight = 2.0f;
-//	// 要素数を変更する
-//	// 列数を設定(縦方向のブロック数)
-//	worldTransformBlocks.resize(kNumBlockVertical);
-//	for (int i = 0; i < kNumBlockVertical; i++) {
-//		// 列数を設定(横方向のブロック数)
-//		worldTransformBlocks_[i].resize(kNumBlockHorizontal);
-//	}
-//	// いざボックス生成
-//	for (int i = 0; i < kNumBlockVertical; i++) {
-//		for (int j = 0; j < kNumBlockHorizontal; j++) {
-//			worldTransformBlocks_[i][j] = new WorldTransform();
-//			worldTransformBlocks_[i][j]->Initialize();
-//			worldTransformBlocks_[i][j]->translation_.x = kBlockWidth * j;
-//			worldTransformBlocks_[i][j]->translation_.y = kBlockHeight * i;
-//			if (i % 2 == 0) {
-//				if (j % 2 == 1) {
-//					worldTransformBlocks_[i][j] = nullptr;
-//				}
-//			} else {
-//				if (j % 2 == 0) {
-//					worldTransformBlocks_[i][j] = nullptr;
-//				}
-//			}
-//		}
-//	}
-// }

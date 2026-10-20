@@ -8,7 +8,7 @@
 #include "GAME/scenes/UITest.h"
 #include "Tool/EffectSystem/ParticleEditor.h"
 #include "GAME/scenes/SceneTitle.h"
-#include "GAME/scenes/Scene1.h"
+#include "GAME/scenes/SceneTutorial.h"
 #include "GAME/scenes/SceneWin.h"
 #include "GAME/scenes/SceneLose.h"
 #include "Tool/EffectSystem/EffectEditor.h"
@@ -25,7 +25,7 @@ SceneFactory::SceneFactory(kEngine* system)
     sceneRegistry_["UITest"] = [this]() { return std::make_unique<UITest>(system_); };
 	sceneRegistry_["ParticleEditor"] = [this]() { return std::make_unique<ParticleEditor>(system_); };
     sceneRegistry_["TITLE"] = [this]() { return std::make_unique<SceneTitle>(system_); };
-    sceneRegistry_["STAGE_01"] = [this]() { return std::make_unique<Scene1>(system_); };
+    sceneRegistry_["STAGE_01"] = [this]() { return std::make_unique<SceneTutorial>(system_); };
     sceneRegistry_["WIN"] = [this]() { return std::make_unique<SceneWin>(system_); };
     sceneRegistry_["LOSE"] = [this]() { return std::make_unique<SceneLose>(system_); };
 

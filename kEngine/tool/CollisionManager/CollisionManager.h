@@ -38,9 +38,5 @@ private:
 	std::vector<Enemy*>* enemyList_ = nullptr;
 
 	float totelDeltaTime_ = 0.0f;
-
-private:
-	bool CheckIsWall(MapChipType type);
-	bool CheckIsNotWall(MapChipType type);
 };
 

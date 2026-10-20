@@ -1,6 +1,6 @@
-#include "Scene1.h"
+#include "SceneTutorial.h"
 
-Scene1::Scene1(kEngine* system) {
+SceneTutorial::SceneTutorial(kEngine* system) {
 	/// =========== システム初期化 ============///
 	system_ = system;
 	debugCamera_ = system_->CreateDebugCamera();
@@ -144,7 +144,7 @@ Scene1::Scene1(kEngine* system) {
 	//system_->SoundPlayBGM(SH_BGM_, 0.7f);
 }
 
-Scene1::~Scene1() {
+SceneTutorial::~SceneTutorial() {
 
 	system_->SoundStop(SH_BGM_);
 
@@ -184,7 +184,7 @@ Scene1::~Scene1() {
 	delete ppp_GlitchScreen_;
 }
 
-void Scene1::Update() {
+void SceneTutorial::Update() {
 
 	/// 後処理更新
 	PhaseUpdate();
@@ -302,7 +302,7 @@ void Scene1::Update() {
 }
 
 
-void Scene1::Draw() {
+void SceneTutorial::Draw() {
 
 	/// 実体処理
 	//system_->DrawModel(&skydome_->objectParts[0].transformationMatrix, &(skydome_->objectParts[0].materialConfig.get()), skydomeModelHandle_);
@@ -360,7 +360,7 @@ void Scene1::Draw() {
 #endif
 }
 
-void Scene1::PhaseUpdate() {
+void SceneTutorial::PhaseUpdate() {
 
 	switch (phase_) {
 	case ScenePhase::PREPARE:
@@ -405,7 +405,7 @@ void Scene1::PhaseUpdate() {
 	}
 }
 
-void Scene1::CameraPart() {
+void SceneTutorial::CameraPart() {
 	if (useDebugCamera) {
 		usingCamera_ = debugCamera_;
 		debugCamera_.lock()->MouseControlUpdate();
@@ -421,7 +421,7 @@ void Scene1::CameraPart() {
 }
 
 #ifdef USE_IMGUI
-void Scene1::ImGuiPart() {
+void SceneTutorial::ImGuiPart() {
 	ImGui::Begin("DebugCamera");
 	ImGui::Checkbox("isUse", &useDebugCamera);
 	ImGui::End();
@@ -523,7 +523,7 @@ void Scene1::ImGuiPart() {
 #endif
 
 
-void Scene1::GenerateMap() {
+void SceneTutorial::GenerateMap() {
 	/// ボックス生成
 	// 要素数
 	int kNumBlockVertical = mapChipField_->GetNumBlockVirtical();
