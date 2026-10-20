@@ -34,6 +34,8 @@ struct MapData {
 	int ySize{};
 	int startX{};
 	int startY{};
+	int blankId = 0;
+	Vector2 cellSpacing = { 1.0f, 1.0f };
 	std::vector<MapUnit> units{};
 	std::vector<TileMapData> maps{};
 
@@ -45,6 +47,8 @@ struct MapData {
 	MapUnit* FindUnit(int id);
 	/// 次に使える代號（今ある最大 + 1）
 	int NextUnitId() const;
+	/// Id交換用
+	void ChangeId(int oldId, int newId);
 };
 
 

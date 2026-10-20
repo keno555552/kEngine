@@ -12,8 +12,20 @@ MapUnit* MapData::FindUnit(int id) {
 	return nullptr;
 }
 
+void MapData::ChangeId(int oldId, int newId) {
+	if (oldId == newId) return;
+	/// 先に両方を探しておく（書き換えた後だと見つけ直せない）
+	const bool selfIsBlank = (oldId == blankId);
+	const bool otherIsBlank = (newId == blankId);
+	MapUnit* self = selfIsBlank ? nullptr : FindUnit(oldId);
+	MapUnit* other = otherIsBlank ? nullptr : FindUnit(newId);
+
+	if (selfIsBlank) blankId = newId;  else if (self)  self->id = newId;
+	if (otherIsBlank) blankId = oldId; else if (other) other->id = oldId;
+}
+
 int MapData::NextUnitId() const {
-	int maxId = 0;
+	int maxId = blankId;                                       // ★空白の番号とも被らないように
 	for (const auto& u : units) maxId = (std::max)(maxId, u.id);
 	return maxId + 1;
 }
