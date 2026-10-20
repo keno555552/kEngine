@@ -80,17 +80,28 @@ private:
 	std::unique_ptr<Object> previewObject_;          // 選択中の MapUnit を描くための Object
 	int previewFocusIndex_ = -2;                     // 前フレームの対象（変わったらカメラを移す）
 	int previewMapDataIndex_ = -1;                   // 前フレームの MapData
+	static constexpr int kBlankUnitIndex = -2;
 
 	/// プレビュー用カメラ（ObjectEditor と同じ自由カメラ）
 	Vector3 previewCamPos_{ 0.0f, 1.0f, -4.0f };
 	Vector3 previewCamRot_{ 0.245f, 0.0f, 0.0f };    // x = pitch（正で下向き）, y = yaw
 
 	/// ====== MapGenerator 関連
-	enum class MapTool { None, Paint, Erase };
+	enum class MapTool { 
+		None,
+		Paint,
+		Erase,
+		Fill,
+		Rect,
+		Circle,
+	};
 	MapTool mapTool_ = MapTool::None;
 	int paintUnitId_ = 1;                                   // 塗る物件の代號
-	float cellSize_ = 1.0f;                                 // 1マスのワールドサイズ
 	int mapResizeBuf_[2] = { 0, 0 };                        // Map Detail のサイズ入力（Apply で反映）
+	bool shapeFilled_ = true;              // 四角・円を塗りつぶすか（false = 外周だけ）
+	bool shapeDragging_ = false;           // 四角・円をドラッグ中
+	int shapeX0_ = 0, shapeY0_ = 0;        // 押したマス
+	int shapeX1_ = 0, shapeY1_ = 0;        // 今のマス
 
 	std::map<int, std::unique_ptr<Object>> mapTileTemplates_;   // 代號 → 見本 Object（モデルが変わった時だけ作り直す）
 	std::vector<ObjectData> mapPreviewCells_;               // マスごとの描画データ（毎フレーム作り直す）
@@ -117,6 +128,9 @@ private:
 	Vector2 newVector2Value_ = Vector2(0.0f, 0.0f);
 	Vector3 newVector3Value_ = Vector3(0.0f, 0.0f, 0.0f);
 	Vector4 newVector4Value_ = Vector4(0.0f, 0.0f, 0.0f, 0.0f);
+
+	/// save/load 用
+	bool useRelativePath_ = true;
 
 
 	/// ============= UI関連 ==============///
@@ -191,11 +205,12 @@ private:
 	void FocusPreviewCamera(const MapUnit& unit);
 	bool UpdateFreeCamera(Vector3& pos, Vector3& rot, float speed);
 	void ImGuiObjectPreview(MapData* data);
+	void ChangeUnitId(MapData& data, int oldId, int newId);
 
 	/// MapGenerator 関連
 	MapData* FindMapData(const std::string& name);
 	void SelectMap(int index);
-	void FocusMapCamera(const TileMapData& map);
+	void FocusMapCamera(const TileMapData& map, const Vector2& sp);
 	void ImGuiMapListWindow(ImVec2 size, ImVec2* outputSize, ImVec2 pos, ImVec2* outputPos, float colimenH);
 	void ImGuiMapDetail(MapInfo& info);
 	void ImGuiMapPreview();
@@ -207,10 +222,10 @@ private:
 
 	/// 保存・読み込み関連
 	std::string GetModelPath(int modelHandle) const;
-	nlohmann::json UnitToJson(const MapUnit& unit) const;
-	MapUnit JsonToUnit(const nlohmann::json& j);
-	nlohmann::json MapDataToJson(const MapData& data) const;
-	MapData JsonToMapData(const nlohmann::json& j);
+	nlohmann::json UnitToJson(const MapUnit& unit, const std::string& baseDir) const;
+	MapUnit JsonToUnit(const nlohmann::json& j, const std::string& baseDir);
+	nlohmann::json MapDataToJson(const MapData& data, const std::string& baseDir) const;
+	MapData JsonToMapData(const nlohmann::json& j, const std::string& baseDir);
 
 	bool SaveMapDataFile(MapData& d, const std::string& path);
 	bool LoadMapDataFile(const std::string& path, MapData& out);
@@ -219,6 +234,8 @@ private:
 	bool SaveProject(const std::string& projectPath);
 	bool LoadProject(const std::string& projectPath);
 	void SaveProjectAs();
+
+	std::string ToSavePath(const std::string& path, const std::string& baseDir) const;
 
 	/// ImGui関連
 	void ImGuiPart();

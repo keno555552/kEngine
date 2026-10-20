@@ -23,15 +23,76 @@ namespace {
 
 	constexpr const char* kJsonFilter = "JSON (*.json)\0*.json\0";
 
+	using CellList = std::vector<std::pair<int, int>>;
+
+	/// 四角：2マスを角とする範囲。filled = false なら外周だけ
+	CellList RectCells(int x0, int y0, int x1, int y1, bool filled) {
+		const int minX = (std::min)(x0, x1), maxX = (std::max)(x0, x1);
+		const int minY = (std::min)(y0, y1), maxY = (std::max)(y0, y1);
+		CellList out;
+		for (int y = minY; y <= maxY; ++y) {
+			for (int x = minX; x <= maxX; ++x) {
+				if (filled || x == minX || x == maxX || y == minY || y == maxY) out.push_back({ x, y });
+			}
+		}
+		return out;
+	}
+
+	/// 楕円：範囲に内接。filled = false なら「中にあって、上下左右のどれかが外」のマスだけ
+	CellList EllipseCells(int x0, int y0, int x1, int y1, bool filled) {
+		const int minX = (std::min)(x0, x1), maxX = (std::max)(x0, x1);
+		const int minY = (std::min)(y0, y1), maxY = (std::max)(y0, y1);
+		const float rx = (maxX - minX + 1) * 0.5f;          // 半径（マス単位）
+		const float ry = (maxY - minY + 1) * 0.5f;
+		const float cxf = minX + rx, cyf = minY + ry;       // 中心（マスの角の座標）
+
+		auto inside = [&](int x, int y) {
+			const float dx = (x + 0.5f - cxf) / rx;          // マスの中心で判定
+			const float dy = (y + 0.5f - cyf) / ry;
+			return dx * dx + dy * dy <= 1.0f;
+			};
+
+		CellList out;
+		for (int y = minY; y <= maxY; ++y) {
+			for (int x = minX; x <= maxX; ++x) {
+				if (!inside(x, y)) continue;
+				const bool edge = !inside(x - 1, y) || !inside(x + 1, y) || !inside(x, y - 1) || !inside(x, y + 1);
+				if (filled || edge) out.push_back({ x, y });
+			}
+		}
+		return out;
+	}
+
+	/// 塗りつぶし：(sx, sy) と同じ番号で上下左右につながっている所を value に。変えたマス数を返す
+	int FloodFill(TileMapData& map, int sx, int sy, int value) {
+		const int target = map.Row[sy][sx];
+		if (target == value) return 0;                      // 同じ番号で塗ると無限に続くので何もしない
+
+		int count = 0;
+		std::vector<std::pair<int, int>> stack{ { sx, sy } };
+		while (!stack.empty()) {
+			const auto [x, y] = stack.back();
+			stack.pop_back();
+			if (!map.InBounds(x, y) || map.Row[y][x] != target) continue;
+			map.Row[y][x] = value;
+			++count;
+			stack.push_back({ x + 1, y });
+			stack.push_back({ x - 1, y });
+			stack.push_back({ x, y + 1 });
+			stack.push_back({ x, y - 1 });
+		}
+		return count;
+	}
+
 	Matrix4x4 MakeScreenMatrix(Matrix4x4 viewProj, const ImVec2& min, const ImVec2& size) {
 		return viewProj * MakeViewportMatrix(min.x, min.y, size.x, size.y, 0.0f, 1.0f);
 	}
 
-	Vector3 CellToWorld(int x, int y, int height, float cs) {
-		return Vector3{ x * cs, (height - 1 - y) * cs, 0.0f };
+	Vector3 CellToWorld(int x, int y, int height, const Vector2& sp) {
+		return Vector3{ (x + 0.5f) * sp.x, (height - 1 - y + 0.5f) * sp.y, 0.0f };
 	}
 
-	bool ScreenToCell(const ImVec2& mouse, const Matrix4x4& toScreen, const TileMapData& map, float cs, int& outX, int& outY) {
+	bool ScreenToCell(const ImVec2& mouse, const Matrix4x4& toScreen, const TileMapData& map, const Vector2& sp, int& outX, int& outY) {
 		const Matrix4x4 toWorld = Inverse(toScreen);
 		Vector3 nearP = viewFinalTransform(Vector3{ mouse.x, mouse.y, 0.0f }, toWorld);
 		Vector3 farP = viewFinalTransform(Vector3{ mouse.x, mouse.y, 1.0f }, toWorld);
@@ -42,8 +103,8 @@ namespace {
 		if (!crashDecision(ray, ground, &t)) return false;
 
 		Vector3 hit = nearP + ray.diff * t;
-		outX = (int)floorf(hit.x / cs + 0.5f);
-		outY = map.Height() - 1 - (int)floorf(hit.y / cs + 0.5f);
+		outX = (int)floorf(hit.x / sp.x + 0.5f);
+		outY = map.Height() - 1 - (int)floorf(hit.y / sp.y + 0.5f);
 		return map.InBounds(outX, outY);
 	}
 
@@ -154,6 +215,10 @@ void MapMakingEditor::ImGuiPart() {
 				else SaveProject(projectFilePath_);
 			}
 			if (ImGui::MenuItem("Save Project As...")) SaveProjectAs();
+			ImGui::Separator();
+			ImGui::MenuItem("Relative Paths", nullptr, &useRelativePath_);
+			ImGui::SetItemTooltip("ON : 保存するファイルから見た相対パス（フォルダごと移動しても読める）\n"
+				"OFF: 絶対パス（別ドライブの素材など）");
 			if (ImGui::MenuItem("Exit")) {
 				outcome_ = SceneOutcome::EXIT;
 				isSceneEnd_ = true;
@@ -318,7 +383,7 @@ bool MapMakingEditor::UpdateFreeCamera(Vector3& pos, Vector3& rot, float speed) 
 
 	/// キーボード
 	if (!io.WantTextInput) {
-		const float step = 0.6f * speed *io.DeltaTime;
+		const float step = 0.6f * speed * io.DeltaTime;
 		if (ImGui::IsKeyDown(ImGuiKey_Q)) move.z += step;
 		if (ImGui::IsKeyDown(ImGuiKey_E)) move.z -= step;
 		if (ImGui::IsKeyDown(ImGuiKey_A)) move.x -= step;
@@ -405,12 +470,31 @@ void MapMakingEditor::ImGuiObjectPreview(MapData* data) {
 	de->SetPreviewRequest(req);
 }
 
-void MapMakingEditor::FocusMapCamera(const TileMapData& map) {
-	const float w = map.Width() * cellSize_;
-	const float h = map.Height() * cellSize_;
-	/// fov 0.7（縦）, 4:3 で全体が入る距離
-	const float dist = (std::max)(w * 1.03f, h * 1.37f) * 1.05f + cellSize_;
-	mapCamPos_ = Vector3{ (w - cellSize_) * 0.5f, (h - cellSize_) * 0.5f, -dist };
+/// MapData の ID を変える + 開いているマップのマスも同じように入れ替える（見た目が変わらないように）
+void MapMakingEditor::ChangeUnitId(MapData& data, int oldId, int newId) {
+	if (newId < 0 || oldId == newId) return;
+	data.ChangeId(oldId, newId);
+	data.isSaved = false;
+
+	for (auto& m : mapList_) {
+		if (m.mapDataName != data.dataName) continue;
+		bool touched = false;
+		for (auto& row : m.tileMapData.Row) {
+			for (int& v : row) {
+				if (v == oldId) { v = newId; touched = true; } else if (v == newId) { v = oldId; touched = true; }
+			}
+		}
+		if (touched) m.isSaved = false;
+	}
+	if (paintUnitId_ == oldId) paintUnitId_ = newId;
+	else if (paintUnitId_ == newId) paintUnitId_ = oldId;
+}
+
+void MapMakingEditor::FocusMapCamera(const TileMapData& map, const Vector2& sp) {
+	const float w = map.Width() * sp.x;
+	const float h = map.Height() * sp.y;
+	const float dist = (std::max)(w * 1.03f, h * 1.37f) * 1.05f + (std::max)(sp.x, sp.y);
+	mapCamPos_ = Vector3{ w * 0.5f, h * 0.5f, -dist };
 	mapCamRot_ = Vector3{ 0.0f, 0.0f, 0.0f };
 }
 
@@ -429,15 +513,16 @@ void MapMakingEditor::ImGuiMapListWindow(ImVec2 size, ImVec2* outputSize, ImVec2
 		if (newMapCounter_ != 0) m.tileMapData.name += "_" + std::to_string(newMapCounter_);
 		newMapCounter_++;
 
-		int w = kDefaultMapW, h = kDefaultMapH;
+		int w = kDefaultMapW, h = kDefaultMapH, blank = 0;
 		if (currentMapDataIndex_ >= 0 && currentMapDataIndex_ < (int)mapDataList_.size()) {
 			const MapData& d = mapDataList_[currentMapDataIndex_];      // 今選んでいる MapData を使う
 			m.mapDataName = d.dataName;
 			if (d.xSize > 0) w = d.xSize;
 			if (d.ySize > 0) h = d.ySize;
+			blank = d.blankId;
 		}
 		m.tileMapData.Resize(w, h, 0);
-		if (hasMap) m.savePath = mapList_[currentMapIndex_].savePath;     // 選択中と同じファイルに入れる
+		if (hasMap) m.savePath = mapList_[currentMapIndex_].savePath;
 		mapList_.push_back(m);
 		SelectMap((int)mapList_.size() - 1);
 		break;
@@ -713,14 +798,12 @@ std::string MapMakingEditor::GetModelPath(int modelHandle) const {
 	return groups[modelHandle]->GetFilePath();
 }
 
-nlohmann::json MapMakingEditor::UnitToJson(const MapUnit& u) const {
+nlohmann::json MapMakingEditor::UnitToJson(const MapUnit& u, const std::string& baseDir) const {
 	nlohmann::json j;
 	j["id"] = u.id;
 	j["name"] = u.name;
 	j["isDirectTile"] = u.isDirectTile;
 	j["previewColor"] = JsonHelper::V4ToJson(u.previewColor);
-	j["material"] = JsonHelper::MaterialConfigToJson(u.material, system_);
-	if (u.material.useModelTexture) j["material"]["textureHandle"] = "";
 
 	nlohmann::json model;                       // handle は保存しない（起動ごとに変わる）
 	if (u.engineModel != EngineModelType::None) {
@@ -729,18 +812,25 @@ nlohmann::json MapMakingEditor::UnitToJson(const MapUnit& u) const {
 		model["params"] = EngineParamsToJson(u.engineParams);
 	} else if (u.modelHandle >= 0) {
 		model["type"] = "file";
-		model["path"] = GetModelPath(u.modelHandle);
+		model["path"] = ToSavePath(GetModelPath(u.modelHandle), baseDir);
 	} else {
 		model["type"] = "none";
 	}
 	j["model"] = model;
 
 	j["transform"] = JsonHelper::TransformToJson(u.transform);
+
+	/// material は1回だけ作って、texture のパスを後から差し替える
 	j["material"] = JsonHelper::MaterialConfigToJson(u.material, system_);
+	if (u.material.useModelTexture) {
+		j["material"]["textureHandle"] = "";                                  // モデル付属 → 持たない
+	} else {
+		j["material"]["textureHandle"] = ToSavePath(j["material"].value("textureHandle", std::string()), baseDir);
+	}
 	return j;
 }
 
-MapUnit MapMakingEditor::JsonToUnit(const nlohmann::json& j) {
+MapUnit MapMakingEditor::JsonToUnit(const nlohmann::json& j, const std::string& baseDir) {
 	MapUnit u{};
 	u.id = j.value("id", 1);
 	u.name = j.value("name", std::string("NewUnit"));
@@ -750,7 +840,9 @@ MapUnit MapMakingEditor::JsonToUnit(const nlohmann::json& j) {
 	bool texturePathEmpty = true;
 	if (j.contains("material")) {
 		nlohmann::json mat = j["material"];
-		std::string texPath = mat.value("textureHandle", std::string());
+		// 相対路径を元のパスに変換
+		std::string texPath = FileManager::ResolveFrom(mat.value("textureHandle", std::string()), baseDir);
+		mat["textureHandle"] = texPath;
 		/// ファイルが無い texture を読むと TextureManager が assert で止まる → 空にして白で代用
 		if (!texPath.empty() && !std::filesystem::exists(texPath)) {
 			debugText_ += "Load Warning: texture not found " + texPath + "\n";
@@ -765,7 +857,7 @@ MapUnit MapMakingEditor::JsonToUnit(const nlohmann::json& j) {
 	const std::string type = model.value("type", std::string("none"));
 
 	if (type == "file") {
-		const std::string path = model.value("path", std::string());
+		const std::string path = FileManager::ResolveFrom(model.value("path", std::string()), baseDir);
 		if (!path.empty()) {
 			const int handle = system_->SetModelObj(path);
 			if (system_->GetMutiModelNum(handle) > 0) u.modelHandle = handle;
@@ -789,7 +881,7 @@ MapUnit MapMakingEditor::JsonToUnit(const nlohmann::json& j) {
 	return u;
 }
 
-nlohmann::json MapMakingEditor::MapDataToJson(const MapData& d) const {
+nlohmann::json MapMakingEditor::MapDataToJson(const MapData& d, const std::string& baseDir) const {
 	nlohmann::json j;
 	j["kind"] = "MapData";
 	j["version"] = kFileVersion;
@@ -799,18 +891,24 @@ nlohmann::json MapMakingEditor::MapDataToJson(const MapData& d) const {
 	j["startX"] = d.startX;
 	j["startY"] = d.startY;
 	j["units"] = nlohmann::json::array();
-	for (const auto& u : d.units) j["units"].push_back(UnitToJson(u));
+	j["blankId"] = d.blankId;
+	j["cellSpacing"] = { d.cellSpacing.x, d.cellSpacing.y };
+	for (const auto& u : d.units) j["units"].push_back(UnitToJson(u, baseDir));
 	return j;
 }
 
-MapData MapMakingEditor::JsonToMapData(const nlohmann::json& j) {
+MapData MapMakingEditor::JsonToMapData(const nlohmann::json& j, const std::string& baseDir) {
 	MapData d{};
 	d.dataName = j.value("name", std::string("new_MapData"));
 	d.xSize = j.value("xSize", 0);
 	d.ySize = j.value("ySize", 0);
 	d.startX = j.value("startX", 0);
 	d.startY = j.value("startY", 0);
-	for (const auto& uj : j.value("units", nlohmann::json::array())) d.units.push_back(JsonToUnit(uj));
+	d.blankId = j.value("blankId", 0);
+	if (j.contains("cellSpacing") && j["cellSpacing"].size() >= 2) {
+		d.cellSpacing = { j["cellSpacing"][0].get<float>(), j["cellSpacing"][1].get<float>() };
+	}
+	for (const auto& uj : j.value("units", nlohmann::json::array())) d.units.push_back(JsonToUnit(uj, baseDir));
 	d.isSaved = true;
 	return d;
 }
@@ -823,7 +921,7 @@ bool MapMakingEditor::SaveMapDataFile(MapData& d, const std::string& path) {
 	std::error_code ec;
 	if (!d.maps.empty()) fs::create_directories(root / folder, ec);
 
-	nlohmann::json j = MapDataToJson(d);
+	nlohmann::json j = MapDataToJson(d, path);
 	j["maps"] = nlohmann::json::array();
 
 	std::set<std::string> used;
@@ -851,7 +949,7 @@ bool MapMakingEditor::LoadMapDataFile(const std::string& path, MapData& out) {
 		debugText_ += "Load Error: not a MapData file: " + path + "\n";
 		return false;
 	}
-	out = JsonToMapData(j);                                         // ここでモデル・texture がエンジンに載る
+	out = JsonToMapData(j, path);                                         // ここでモデル・texture がエンジンに載る
 
 	const std::filesystem::path root = std::filesystem::path(path).parent_path();
 	for (const auto& mj : j.value("maps", nlohmann::json::array())) {
@@ -888,12 +986,13 @@ bool MapMakingEditor::SaveProject(const std::string& projectPath) {
 	project["version"] = kFileVersion;
 	project["mapData"] = nlohmann::json::array();
 	project["mapMaker"] = nlohmann::json::array();
+	project["relativePaths"] = useRelativePath_;
 
 	std::set<std::string> usedData, usedMaker;
 
 	for (auto& d : mapDataList_) {
 		const std::string file = "MapData/" + MakeUniqueName(usedData, FileManager::ToSafeFileName(d.dataName)) + ".json";
-		if (!WriteJsonFile((root / file).string(), MapDataToJson(d))) {
+		if (!WriteJsonFile((root / file).string(), MapDataToJson(d, (root / "MapData").string()))) {
 			debugText_ += "Save Error: " + file + "\n";
 			return false;
 		}
@@ -966,7 +1065,7 @@ bool MapMakingEditor::LoadProject(const std::string& projectPath) {
 	for (const auto& f : project.value("mapData", nlohmann::json::array())) {
 		const std::string file = f.get<std::string>();
 		nlohmann::json j;
-		if (ReadJsonFile((root / file).string(), j)) datas.push_back(JsonToMapData(j));
+		if (ReadJsonFile((root / file).string(), j)) datas.push_back(JsonToMapData(j, (root / "MapData").string()));
 		else debugText_ += "Load Warning: cannot read " + file + "\n";
 	}
 	for (const auto& f : project.value("mapMaker", nlohmann::json::array())) {
@@ -987,6 +1086,7 @@ bool MapMakingEditor::LoadProject(const std::string& projectPath) {
 	codeingText_.clear();
 	previewObject_.reset();
 	selectMode_ = SelectModeForMME::None;
+	useRelativePath_ = project.value("relativePaths", true);     // 古いプロジェクトは相対
 
 	projectFilePath_ = projectPath;
 	debugText_ += "Project loaded: " + projectPath + "\n";
@@ -996,6 +1096,11 @@ bool MapMakingEditor::LoadProject(const std::string& projectPath) {
 void MapMakingEditor::SaveProjectAs() {
 	const std::string path = FileManager::SaveFileDialog(kProjectFilter, "mmproj", "project.mmproj", "Save Project (choose folder)");
 	if (!path.empty()) SaveProject(path);
+}
+
+std::string MapMakingEditor::ToSavePath(const std::string& path, const std::string& baseDir) const {
+	return useRelativePath_ ? FileManager::MakeRelativeTo(path, baseDir)
+		: FileManager::ToAbsolutePath(path);
 }
 
 void MapMakingEditor::ImGuiLeftMenuBar() {
@@ -1259,7 +1364,8 @@ void MapMakingEditor::ImGuiMapDataWindow(ImVec2 size, ImVec2* outputSize, ImVec2
 			const std::string path = FileManager::SaveFileDialog(kJsonFilter, "json",
 				FileManager::ToSafeFileName(d.dataName) + ".json", "Save MapData");
 			if (!path.empty()) {
-				if (WriteJsonFile(path, MapDataToJson(d))) d.isSaved = true;
+				const std::string baseDir = std::filesystem::path(path).parent_path().string();
+				if (WriteJsonFile(path, MapDataToJson(d, baseDir))) d.isSaved = true;
 				else debugText_ += "Save Error: " + path + "\n";
 			}
 		} else {
@@ -1275,7 +1381,8 @@ void MapMakingEditor::ImGuiMapDataWindow(ImVec2 size, ImVec2* outputSize, ImVec2
 		nlohmann::json j;
 		if (!path.empty()) {
 			if (ReadJsonFile(path, j) && j.value("kind", std::string()) == "MapData") {
-				mapDataList_.push_back(JsonToMapData(j));
+				const std::string baseDir = std::filesystem::path(path).parent_path().string();
+				mapDataList_.push_back(JsonToMapData(j, baseDir));
 				currentMapDataIndex_ = (int)mapDataList_.size() - 1;
 				currentUnitIndex_ = -1;
 				selectMode_ = SelectModeForMME::MapData;
@@ -1385,7 +1492,7 @@ void MapMakingEditor::ImGuiMapDataWindow(ImVec2 size, ImVec2* outputSize, ImVec2
 			const std::string path = FileManager::SaveFileDialog(kJsonFilter, "json",
 				FileManager::ToSafeFileName(u.name) + ".json", "Save Object");
 			if (!path.empty()) {
-				nlohmann::json j = UnitToJson(u);
+				nlohmann::json j = UnitToJson(u, std::filesystem::path(path).parent_path().string());
 				j["kind"] = "MapObject";
 				j["version"] = kFileVersion;
 				if (!WriteJsonFile(path, j)) debugText_ += "Save Error: " + path + "\n";
@@ -1404,7 +1511,8 @@ void MapMakingEditor::ImGuiMapDataWindow(ImVec2 size, ImVec2* outputSize, ImVec2
 			nlohmann::json j;
 			if (!path.empty()) {
 				if (ReadJsonFile(path, j) && j.value("kind", std::string()) == "MapObject") {
-					MapUnit unit = JsonToUnit(j);
+					const std::string baseDir = std::filesystem::path(path).parent_path().string();
+					MapUnit unit = JsonToUnit(j, baseDir);
 					unit.id = data->NextUnitId();
 					data->units.push_back(unit);
 					currentUnitIndex_ = (int)data->units.size() - 1;
@@ -1423,13 +1531,25 @@ void MapMakingEditor::ImGuiMapDataWindow(ImVec2 size, ImVec2* outputSize, ImVec2
 	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.80f, 0.30f, 0.30f, 1.0f));
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.40f, 0.10f, 0.10f, 1.0f));
 	if (ImGui::Button("Delete", ImVec2(del3W, 20))) {
-		doubleCheck_ = true;
-		selectMode_ = SelectModeForMME::MapUnit;
+		if (currentUnitIndex_ == kBlankUnitIndex) {
+			debugText_ += "Blank cannot be deleted.\n";
+		} else {
+			doubleCheck_ = true;
+			selectMode_ = SelectModeForMME::MapUnit;
+		}
 	}
 	ImGui::PopStyleColor(3);
 
 	ImGui::BeginChild("UnitList", ImVec2(0, ImGui::GetContentRegionAvail().y), true);
 	if (data) {
+		const std::string blankLabel = "[" + std::to_string(data->blankId) + "] Blank";
+		ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
+		if (ImGui::Selectable(blankLabel.c_str(), currentUnitIndex_ == kBlankUnitIndex)) {
+			currentUnitIndex_ = kBlankUnitIndex;
+			selectMode_ = SelectModeForMME::MapUnit;
+		}
+		ImGui::PopStyleColor();
+		ImGui::Separator();
 		for (int i = 0; i < (int)data->units.size(); i++) {
 			const MapUnit& u = data->units[i];
 			std::string label = "[" + std::to_string(u.id) + "] " + u.name + (u.isDirectTile ? "" : "  (Logic)");
@@ -2102,7 +2222,7 @@ void MapMakingEditor::ImGuiMidWindow() {
 	ImGuiWindowFlags bottomFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
 	if (generator) bottomFlags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar;
 
-	isMBWindowOpen_ = ImGui::Begin("Inspector Details",nullptr, bottomFlags);
+	isMBWindowOpen_ = ImGui::Begin("Inspector Details", nullptr, bottomFlags);
 
 	if (generator) {
 		ImGuiMapToolbar();
@@ -2321,10 +2441,14 @@ void MapMakingEditor::ImGuiMapUnitDetail(MapData& data, float targetHeight) {
 		return "#" + std::to_string(i) + "  [" + std::to_string(u.id) + "] " + u.name;
 		};
 	const bool valid = currentUnitIndex_ >= 0 && currentUnitIndex_ < (int)data.units.size();
-	std::string preview = valid ? makeLabel(currentUnitIndex_, data.units[currentUnitIndex_]) : "(select unit)";
+	std::string preview = valid ? makeLabel(currentUnitIndex_, data.units[currentUnitIndex_])
+		: (currentUnitIndex_ == kBlankUnitIndex ? "[" + std::to_string(data.blankId) + "] Blank" : "(select unit)");
 
 	ImGui::SetNextItemWidth(-FLT_MIN);
 	if (ImGui::BeginCombo("##UnitSelect", preview.c_str())) {
+		if (ImGui::Selectable(("[" + std::to_string(data.blankId) + "] Blank").c_str(), currentUnitIndex_ == kBlankUnitIndex)) {
+			currentUnitIndex_ = kBlankUnitIndex;
+		}
 		for (int i = 0; i < (int)data.units.size(); ++i) {
 			const bool selected = (i == currentUnitIndex_);
 			ImGui::PushID(i);
@@ -2333,6 +2457,14 @@ void MapMakingEditor::ImGuiMapUnitDetail(MapData& data, float targetHeight) {
 			ImGui::PopID();
 		}
 		ImGui::EndCombo();
+	}
+	if (currentUnitIndex_ == kBlankUnitIndex) {
+		int idEdit = data.blankId;
+		ImGui::InputInt("ID", &idEdit, 0, 0, ImGuiInputTextFlags_EnterReturnsTrue);
+		if (ImGui::IsItemDeactivatedAfterEdit() && idEdit != data.blankId) ChangeUnitId(data, data.blankId, idEdit);
+		ImGui::SetItemTooltip("Enter で確定。既存の番号なら入れ替え");
+		ImGui::TextDisabled("空きマス（モデル無し・削除不可）");
+		return;
 	}
 	if (!valid) return;
 
@@ -2353,10 +2485,10 @@ void MapMakingEditor::ImGuiMapUnitDetail(MapData& data, float targetHeight) {
 
 	/// ---------------- Basic ---------------- ///
 	if (ImGui::CollapsingHeader("Basic", ImGuiTreeNodeFlags_DefaultOpen)) {
-		changed |= ImGui::InputInt("ID", &unit.id);
-		int sameId = 0;
-		for (const auto& u : data.units) if (u.id == unit.id) ++sameId;
-		if (sameId > 1) ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "ID is duplicated!");
+		int idEdit = unit.id;
+		ImGui::InputInt("ID", &idEdit, 0, 0, ImGuiInputTextFlags_EnterReturnsTrue);
+		if (ImGui::IsItemDeactivatedAfterEdit() && idEdit != unit.id) ChangeUnitId(data, unit.id, idEdit);
+		ImGui::SetItemTooltip("Enter で確定。既存の番号なら入れ替え");
 
 		changed |= InputTextString("Name", unit.name);
 		changed |= ImGui::Checkbox("Direct Tile", &unit.isDirectTile);
@@ -2454,6 +2586,8 @@ void MapMakingEditor::ImGuiMapDataShowing(MapData& data) {
 	if (InputTextString("Map Name", data.dataName)) data.isSaved = false;
 	InputInt("Max Size X", data.xSize);
 	InputInt("Max Size Y", data.ySize);
+	if (ImGui::DragFloat2("Cell Spacing", &data.cellSpacing.x, 0.01f, 0.01f, 100.0f, "%.2f")) data.isSaved = false;
+	ImGui::SetItemTooltip("マスの間隔（ゲーム側の BlockWidth / BlockHeight）");
 	ImGui::Text("Units: %d", (int)data.units.size());
 
 }
@@ -2710,6 +2844,8 @@ void MapMakingEditor::InputVector4(const char* label, Vector4& vec) {
 /// draw->AddRectFilled(ImVec2(p.x, p.y), ImVec2(p.x + 100, p.y + 50), IM_COL32(0, 255, 0, 255));
 
 void MapMakingEditor::ImGuiMapDetail(MapInfo& info) {
+	const MapData* pd = FindMapData(info.mapDataName);
+	const int blank = pd ? pd->blankId : 0;
 	TileMapData& map = info.tileMapData;
 
 	if (InputTextString("Name", map.name)) info.isSaved = false;
@@ -2732,12 +2868,12 @@ void MapMakingEditor::ImGuiMapDetail(MapInfo& info) {
 	/// サイズは Apply で反映（縮めると消えるので、打つたびには変えない）
 	ImGui::InputInt2("Size (W,H)", mapResizeBuf_);
 	if (ImGui::Button("Apply Size")) {
-		map.Resize((std::max)(1, mapResizeBuf_[0]), (std::max)(1, mapResizeBuf_[1]), 0);
+		map.Resize((std::max)(1, mapResizeBuf_[0]), (std::max)(1, mapResizeBuf_[1]), blank);
 		info.isSaved = false;
 		mapFocusIndex_ = -2;                 // カメラを全体に合わせ直す
 	}
 	ImGui::SameLine();
-	if (ImGui::Button("Clear")) { map.Fill(0); info.isSaved = false; }
+	if (ImGui::Button("Clear")) { map.Fill(blank); info.isSaved = false; }
 
 	ImGui::TextDisabled("File: %s", info.savePath.empty() ? "(Unsaved)" : info.savePath.c_str());
 }
@@ -2750,11 +2886,12 @@ void MapMakingEditor::ImGuiMapPreview() {
 	MapInfo& info = mapList_[currentMapIndex_];
 	TileMapData& map = info.tileMapData;
 	MapData* palette = FindMapData(info.mapDataName);
+	const Vector2 sp = palette ? palette->cellSpacing : Vector2{ 1.0f, 1.0f };
 	const int H = map.Height();
 
 	if (currentMapIndex_ != mapFocusIndex_) {
 		mapFocusIndex_ = currentMapIndex_;
-		FocusMapCamera(map);
+		FocusMapCamera(map, sp);
 	}
 
 	/// ===== 1. 見本 Object を物件ごとに用意 =====
@@ -2780,7 +2917,7 @@ void MapMakingEditor::ImGuiMapPreview() {
 			if (instanceCount + parts > kMaxPreviewInstances) { overflow = true; break; }
 
 			ObjectData cell = *it->second;                        // Object の ObjectData 部分だけコピー
-			const Vector3 c = CellToWorld(x, y, H, cellSize_);
+			const Vector3 c = CellToWorld(x, y, H, sp);
 			Vector3& t = cell.mainPosition.transform.translate;
 			t = Vector3{ t.x + c.x, t.y + c.y, t.z + c.z };       // Object Detail の Translate はオフセットとして残る
 			mapPreviewCells_.push_back(std::move(cell));
@@ -2805,8 +2942,8 @@ void MapMakingEditor::ImGuiMapPreview() {
 	ImGui::InvisibleButton("##mapPreview", size,
 		ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight | ImGuiButtonFlags_MouseButtonMiddle);
 
-	const float camSpeed = (std::max)(1.0f, cellSize_ * (std::max)(map.Width(), H) * 0.25f);
-	if (UpdateFreeCamera(mapCamPos_, mapCamRot_, camSpeed)) FocusMapCamera(map);   // ← InvisibleButton の直後
+	const float camSpeed = (std::max)(1.0f, (std::max)(sp.x, sp.y) * (std::max)(map.Width(), H) * 0.25f);
+	if (UpdateFreeCamera(mapCamPos_, mapCamRot_, camSpeed)) FocusMapCamera(map, sp);   // ← InvisibleButton の直後
 	const bool hovered = ImGui::IsItemHovered();
 	const bool active = ImGui::IsItemActive();
 
@@ -2815,16 +2952,67 @@ void MapMakingEditor::ImGuiMapPreview() {
 	Matrix4x4 viewProj = view * proj;
 	const Matrix4x4 toScreen = MakeScreenMatrix(viewProj, p, size);
 
-	/// ===== 4. 塗る / 消す =====
+	/// ===== 4. 道具ごとの入力 =====
 	ImGuiIO& io = ImGui::GetIO();
 	int cx = -1, cy = -1;
-	const bool onCell = (hovered || active) && ScreenToCell(io.MousePos, toScreen, map, cellSize_, cx, cy);
+	const bool onCell = (hovered || active) && ScreenToCell(io.MousePos, toScreen, map, sp, cx, cy);
+	const int blank = palette ? palette->blankId : 0;
 
-	if (onCell && mapTool_ != MapTool::None && active && ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-		const int value = (mapTool_ == MapTool::Paint) ? paintUnitId_ : 0;
-		if (map.Row[cy][cx] != value) {
-			map.Row[cy][cx] = value;
-			info.isSaved = false;
+	auto apply = [&](const CellList& cells, int value) {
+		bool changed = false;
+		for (const auto& [x, y] : cells) {
+			if (map.InBounds(x, y) && map.Row[y][x] != value) { map.Row[y][x] = value; changed = true; }
+		}
+		if (changed) info.isSaved = false;
+		};
+
+	/// ペン / 消しゴム：押している間ずっと
+	if ((mapTool_ == MapTool::Paint || mapTool_ == MapTool::Erase) && onCell && active && ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+		apply({ { cx, cy } }, mapTool_ == MapTool::Paint ? paintUnitId_ : blank);
+	}
+
+	/// 塗りつぶし：クリックした瞬間に1回だけ
+	if (mapTool_ == MapTool::Fill && onCell && hovered && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+		if (FloodFill(map, cx, cy, paintUnitId_) > 0) info.isSaved = false;
+	}
+
+	/// 四角 / 円：押したマス 〜 離したマス
+	const bool shapeTool = (mapTool_ == MapTool::Rect || mapTool_ == MapTool::Circle);
+	if (!shapeTool) shapeDragging_ = false;
+	CellList shapeCells;
+	if (shapeTool) {
+		if (onCell && hovered && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+			shapeDragging_ = true;
+			shapeX0_ = shapeX1_ = cx;
+			shapeY0_ = shapeY1_ = cy;
+		}
+		if (shapeDragging_) {
+			/// マップの外に出ても端に寄せて追いかける（ScreenToCell は範囲外でも座標は入れてくれる）
+			int ex = shapeX1_, ey = shapeY1_;
+			ScreenToCell(io.MousePos, toScreen, map, sp, ex, ey);
+			ex = std::clamp(ex, 0, map.Width() - 1);
+			ey = std::clamp(ey, 0, H - 1);
+
+			/// Shift：正方形 / 正円
+			if (io.KeyShift) {
+				const int side = (std::max)(std::abs(ex - shapeX0_), std::abs(ey - shapeY0_));
+				ex = shapeX0_ + (ex >= shapeX0_ ? side : -side);
+				ey = shapeY0_ + (ey >= shapeY0_ ? side : -side);
+			}
+			shapeX1_ = ex;
+			shapeY1_ = ey;
+
+			shapeCells = (mapTool_ == MapTool::Rect)
+				? RectCells(shapeX0_, shapeY0_, shapeX1_, shapeY1_, shapeFilled_)
+				: EllipseCells(shapeX0_, shapeY0_, shapeX1_, shapeY1_, shapeFilled_);
+
+			if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {             // キャンセル
+				shapeDragging_ = false;
+				shapeCells.clear();
+			} else if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+				apply(shapeCells, paintUnitId_);
+				shapeDragging_ = false;
+			}
 		}
 	}
 
@@ -2843,16 +3031,26 @@ void MapMakingEditor::ImGuiMapPreview() {
 		if (project(x0, y0, a) && project(x1, y0, b) && project(x1, y1, c) && project(x0, y1, d)) {
 			dl->AddQuad(a, b, c, d, col, thickness);
 		}
-	};
+		};
+	auto worldFill = [&](float x0, float y0, float x1, float y1, ImU32 col) {
+		ImVec2 a, b, c, d;
+		if (project(x0, y0, a) && project(x1, y0, b) && project(x1, y1, c) && project(x0, y1, d)) {
+			dl->AddQuadFilled(a, b, c, d, col);
+		}
+		};
 
-	const float hc = cellSize_ * 0.5f;
-	worldRect(-hc, -hc, map.Width() * cellSize_ - hc, H * cellSize_ - hc, IM_COL32(255, 255, 255, 90), 1.0f);
+	worldRect(0.0f, 0.0f, map.Width() * sp.x, H * sp.y, IM_COL32(255, 255, 255, 90), 1.0f);
+	/// 四角・円：離すと塗られるマスを半透明で表示
+	for (const auto& [x, y] : shapeCells) {
+		const Vector3 c = CellToWorld(x, y, H, sp);
+		worldFill(c.x - sp.x * 0.5f, c.y - sp.y * 0.5f, c.x + sp.x * 0.5f, c.y + sp.y * 0.5f, IM_COL32(90, 200, 255, 90));
+	}
 
 	if (onCell) {
-		const Vector3 c = CellToWorld(cx, cy, H, cellSize_);
+		const Vector3 c = CellToWorld(cx, cy, H, sp);
 		const ImU32 col = (mapTool_ == MapTool::Erase) ? IM_COL32(255, 90, 90, 255)
 			: (mapTool_ == MapTool::Paint) ? IM_COL32(90, 255, 140, 255) : IM_COL32(255, 255, 255, 160);
-		worldRect(c.x - hc, c.y - hc, c.x + hc, c.y + hc, col, 2.0f);
+		worldRect(c.x - sp.x * 0.5f, c.y - sp.y * 0.5f, c.x + sp.x * 0.5f, c.y + sp.y * 0.5f, col, 2.0f);
 	}
 
 	char buf[128];
@@ -2865,7 +3063,7 @@ void MapMakingEditor::ImGuiMapPreview() {
 	if (!palette) dl->AddText(ImVec2(p.x + 8.0f, p.y + 42.0f), IM_COL32(255, 120, 120, 255), "No MapData linked (Map Detail)");
 	if (overflow) dl->AddText(ImVec2(p.x + 8.0f, p.y + 60.0f), IM_COL32(255, 200, 80, 255), "Too many blocks: preview truncated");
 	dl->AddText(ImVec2(p.x + 8.0f, p.y + h - 20.0f), IM_COL32(120, 130, 150, 255),
-		"LMB: paint/erase   RMB: look   MMB: pan   Wheel: zoom   WASDQE: move   R: focus");
+		"LMB: tool (Shift: square/circle, Esc: cancel)   RMB: look   MMB: pan   Wheel: zoom   R: focus");
 	dl->PopClipRect();
 
 	/// ===== 6. 描画申請 =====
@@ -2890,7 +3088,15 @@ void MapMakingEditor::ImGuiMapToolbar() {
 	toolButton("Paint", MapTool::Paint);
 	ImGui::SameLine();
 	toolButton("Erase", MapTool::Erase);
-
+	ImGui::SameLine();
+	toolButton("Fill", MapTool::Fill);
+	ImGui::SameLine();
+	toolButton("Rect", MapTool::Rect);
+	ImGui::SameLine();
+	toolButton("Circle", MapTool::Circle);
+	ImGui::SameLine();
+	ImGui::Checkbox("Filled", &shapeFilled_);
+	ImGui::SetItemTooltip("四角・円：ON = 塗りつぶし / OFF = 外周だけ");
 	ImGui::SameLine();
 	ImGui::TextDisabled("|");
 	ImGui::SameLine();
@@ -2899,11 +3105,15 @@ void MapMakingEditor::ImGuiMapToolbar() {
 	MapInfo* info = (currentMapIndex_ >= 0 && currentMapIndex_ < (int)mapList_.size()) ? &mapList_[currentMapIndex_] : nullptr;
 	MapData* palette = info ? FindMapData(info->mapDataName) : nullptr;
 	const MapUnit* cur = palette ? palette->FindUnit(paintUnitId_) : nullptr;
-	const std::string preview = cur ? "[" + std::to_string(cur->id) + "] " + cur->name : "(none)";
+	const std::string preview = cur ? "[" + std::to_string(cur->id) + "] " + cur->name
+		: (palette && paintUnitId_ == palette->blankId ? "[" + std::to_string(paintUnitId_) + "] Blank" : "(none)");
 
 	ImGui::SetNextItemWidth(180.0f);
 	ImGui::BeginDisabled(palette == nullptr);
 	if (ImGui::BeginCombo("##PaintTile", preview.c_str())) {
+		if (ImGui::Selectable(("[" + std::to_string(palette->blankId) + "] Blank").c_str(), paintUnitId_ == palette->blankId)) {
+			paintUnitId_ = palette->blankId;
+		}
 		for (const auto& u : palette->units) {
 			const std::string label = "[" + std::to_string(u.id) + "] " + u.name;
 			if (ImGui::Selectable(label.c_str(), u.id == paintUnitId_)) paintUnitId_ = u.id;
@@ -2914,5 +3124,4 @@ void MapMakingEditor::ImGuiMapToolbar() {
 
 	ImGui::SameLine();
 	ImGui::SetNextItemWidth(80.0f);
-	ImGui::DragFloat("Cell", &cellSize_, 0.05f, 0.1f, 100.0f, "%.2f");
 }
