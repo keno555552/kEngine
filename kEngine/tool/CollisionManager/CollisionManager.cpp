@@ -1,6 +1,6 @@
 #include "CollisionManager.h"
 #include "GAME/Object/Player/Player.h"
-#include "Data/Game/MapChip/MapChipField.h"
+#include "Tool/MapBulider/MapChipManager.h"
 #include "GAME/Object/Bullet/Bullet.h"
 #include "GAME/Object/BackPoint/BackPoint.h"
 #include "GAME/Object/Enemy/Enemy.h"
@@ -20,13 +20,13 @@ void CollisionManager::Update(float deltaTime) {
 
 bool CollisionManager::PlayerMapCollision() {
 
-	if (!player_ || !mapChipField_) return false;
+	if (!player_ || !mapChipManager_) return false;
 
 	AABB box = player_->GetAABB();
 	Vector3 velocity = player_->GetVelocity();
 
 	// MapChipField内での当たり判定を計算
-	CollisionResult result = mapChipField_->GetMapCollisionCorrection(
+	CollisionResult result = mapChipManager_->GetMapCollisionCorrection(
 		box,
 		velocity,
 		totelDeltaTime_
@@ -51,31 +51,18 @@ bool CollisionManager::PlayerMapCollision() {
 
 void CollisionManager::BulletMapCollision() {
 
-	if (bulletList_ == nullptr || mapChipField_ == nullptr) { return; }
-
-	uint32_t maxX = mapChipField_->GetNumBlockHorizontal();
-	uint32_t maxY = mapChipField_->GetNumBlockVirtical();
+	if (bulletList_ == nullptr || mapChipManager_ == nullptr) { return; }
 
 	for (auto* bullet : *bulletList_) {
 		if (bullet == nullptr || !bullet->IsAlive()) { continue; }
 
-		Vector3 pos = bullet->GetPosition();
-		MapChipField::WorldIndex idx = mapChipField_->GetWorldIndexByPosition(pos);
-
-		// out of bounds -> delete
-		bool outOfBounds = (
-			idx.x < 0 ||
-			idx.y < 0 ||
-			idx.x >= (int)maxX ||
-			idx.y >= (int)maxY
-			);
-
-		if (outOfBounds) {
+		const Vector3 pos = bullet->GetPosition();
+		// マップ外 → 削除
+		if (!mapChipManager_->IsInsideAt(pos)) {
 			bullet->SetAlive(false);
 			continue;
 		}
-
-		if (mapChipField_->IsWallByWorld({ idx.x, idx.y })) {
+		if (mapChipManager_->IsWallAt(pos)) {
 			bullet->HitRockEffect();
 			bullet->SetAlive(false);
 		}
@@ -181,30 +168,22 @@ void CollisionManager::PlayerBackPointCollision() {
 }
 
 void CollisionManager::EnemyMapCollision() {
-	if (mapChipField_ == nullptr || enemyList_ == nullptr) { return; }
+	if (mapChipManager_ == nullptr || enemyList_ == nullptr) { return; }
 
+	const Vector2 blockSize = mapChipManager_->GetBlockSize();
 	for (auto* e : *enemyList_) {
-		if (e == nullptr || !e->IsAlive()) { return; }
-		Vector3 pos = e->GetPosition();
-		Vector2 blockSize = mapChipField_->GetBlockSize();
-		// 探測正前方一個格子（沿 X 軸面向方向，一個 block 寬）
-		Vector3 probe = pos;
+		if (e == nullptr || !e->IsAlive()) { continue; }   // ★return → continue
+
+		// 正面の 1 マス先（向いている方向に半マス）
+		Vector3 probe = e->GetPosition();
 		probe.x += e->IsFaceRight() ? (blockSize.x * 0.5f) : -(blockSize.x * 0.5f);
+		if (!mapChipManager_->IsInsideAt(probe)) { continue; }   // ★return → continue
 
-		MapChipField::WorldIndex idx = mapChipField_->GetWorldIndexByPosition(probe);
-		bool out = (idx.x < 0 || idx.y < 0 || idx.x >= (int)mapChipField_->GetNumBlockHorizontal() || idx.y >= (int)mapChipField_->GetNumBlockVirtical());
-		if (out) { return; }
-
-		const bool frontWall = mapChipField_->IsWallByWorld({ idx.x, idx.y });
-		// check ground one block below the front probe
+		const bool frontWall = mapChipManager_->IsWallAt(probe);
+		// 正面の 1 マス下に地面があるか
 		Vector3 probeDown = probe;
 		probeDown.y -= blockSize.y;
-		MapChipField::WorldIndex idxDown = mapChipField_->GetWorldIndexByPosition(probeDown);
-		bool outDown = (idxDown.x < 0 || idxDown.y < 0 || idxDown.x >= (int)mapChipField_->GetNumBlockHorizontal() || idxDown.y >= (int)mapChipField_->GetNumBlockVirtical());
-		bool cliffAhead = outDown;
-		if (!cliffAhead) {
-			cliffAhead = !mapChipField_->IsWallByWorld({ idxDown.x, idxDown.y }); // no ground means cliff
-		}
+		const bool cliffAhead = !mapChipManager_->IsInsideAt(probeDown) || !mapChipManager_->IsWallAt(probeDown);
 
 		if (frontWall || cliffAhead) {
 			e->SetFaceRight(!e->IsFaceRight());
@@ -216,8 +195,8 @@ void CollisionManager::InputPlayer(Player* player) {
 	player_ = player;
 }
 
-void CollisionManager::InputMapChip(MapChipField* mapChipField) {
-	mapChipField_ = mapChipField;
+void CollisionManager::InputMapChip(MapChipManager* mapChipManager) {
+	mapChipManager_ = mapChipManager;
 }
 
 void CollisionManager::InputBackPoint(BackPoint* backPoint) {

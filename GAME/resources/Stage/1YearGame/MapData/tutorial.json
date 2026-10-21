@@ -1,0 +1,562 @@
+{
+    "blankId": 0,
+    "cellSpacing": [
+        1.0,
+        1.0
+    ],
+    "kind": "MapData",
+    "name": "tutorial",
+    "startX": 0,
+    "startY": 0,
+    "units": [
+        {
+            "id": 21,
+            "isDirectTile": true,
+            "material": {
+                "blendModeType": 0,
+                "depthStencilType": 0,
+                "enableLighting": true,
+                "heightScale": 1.0,
+                "intensity": 0.0,
+                "lightModelType": 4,
+                "rasterizerMode": 0,
+                "reflectiveStrength": 0.0,
+                "renderModelType": 0,
+                "shininess": 1.0,
+                "textureColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "textureColor2": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "textureColor3": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "textureHandle": "../MapResource/dirt.png",
+                "useModelTexture": false,
+                "uvRotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "uvScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "uvTranslate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "model": {
+                "engine": "Cube",
+                "params": {
+                    "cylinderBottom": 1.0,
+                    "cylinderDivide": 32,
+                    "cylinderHeight": 3.0,
+                    "cylinderReverseY": false,
+                    "cylinderTop": 1.0,
+                    "ringDivide": 32,
+                    "ringInner": 0.5,
+                    "ringOuter": 1.0,
+                    "sphereLat": 10,
+                    "sphereLong": 10
+                },
+                "type": "engine"
+            },
+            "name": "kDirt",
+            "previewColor": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "transform": {
+                "rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
+        },
+        {
+            "id": 22,
+            "isDirectTile": true,
+            "material": {
+                "blendModeType": 1,
+                "depthStencilType": 0,
+                "enableLighting": true,
+                "heightScale": 2.0,
+                "intensity": 1.0,
+                "lightModelType": 4,
+                "rasterizerMode": 0,
+                "reflectiveStrength": 0.0,
+                "renderModelType": 0,
+                "shininess": 32.0,
+                "textureColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "textureColor2": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "textureColor3": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "textureHandle": "../MapResource/stone.png",
+                "useModelTexture": false,
+                "uvRotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "uvScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "uvTranslate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "model": {
+                "engine": "Cube",
+                "params": {
+                    "cylinderBottom": 1.0,
+                    "cylinderDivide": 32,
+                    "cylinderHeight": 3.0,
+                    "cylinderReverseY": false,
+                    "cylinderTop": 1.0,
+                    "ringDivide": 32,
+                    "ringInner": 0.5,
+                    "ringOuter": 1.0,
+                    "sphereLat": 10,
+                    "sphereLong": 10
+                },
+                "type": "engine"
+            },
+            "name": "kRock",
+            "previewColor": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "transform": {
+                "rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
+        },
+        {
+            "id": 7,
+            "isDirectTile": false,
+            "material": {
+                "blendModeType": 1,
+                "depthStencilType": 0,
+                "enableLighting": false,
+                "heightScale": 2.0,
+                "intensity": 1.0,
+                "lightModelType": 4,
+                "rasterizerMode": 0,
+                "reflectiveStrength": 0.0,
+                "renderModelType": 0,
+                "shininess": 32.0,
+                "textureColor": [
+                    0.720588207244873,
+                    0.0035322841722518206,
+                    0.0035322841722518206,
+                    1.0
+                ],
+                "textureColor2": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "textureColor3": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "textureHandle": "../MapResource/white5x5.png",
+                "useModelTexture": false,
+                "uvRotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "uvScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "uvTranslate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "model": {
+                "engine": "Triangle",
+                "params": {
+                    "cylinderBottom": 1.0,
+                    "cylinderDivide": 32,
+                    "cylinderHeight": 3.0,
+                    "cylinderReverseY": false,
+                    "cylinderTop": 1.0,
+                    "ringDivide": 32,
+                    "ringInner": 0.5,
+                    "ringOuter": 1.0,
+                    "sphereLat": 10,
+                    "sphereLong": 10
+                },
+                "type": "engine"
+            },
+            "name": "kEnemy",
+            "previewColor": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "transform": {
+                "rotate": [
+                    0.0,
+                    0.0,
+                    3.140000104904175
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
+        },
+        {
+            "id": 8,
+            "isDirectTile": false,
+            "material": {
+                "blendModeType": 1,
+                "depthStencilType": 0,
+                "enableLighting": false,
+                "heightScale": 2.0,
+                "intensity": 1.0,
+                "lightModelType": 4,
+                "rasterizerMode": 0,
+                "reflectiveStrength": 0.0,
+                "renderModelType": 0,
+                "shininess": 32.0,
+                "textureColor": [
+                    0.07352942228317261,
+                    1.0,
+                    0.10077834129333496,
+                    1.0
+                ],
+                "textureColor2": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "textureColor3": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "textureHandle": "../MapResource/white5x5.png",
+                "useModelTexture": false,
+                "uvRotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "uvScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "uvTranslate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "model": {
+                "engine": "Triangle",
+                "params": {
+                    "cylinderBottom": 1.0,
+                    "cylinderDivide": 32,
+                    "cylinderHeight": 3.0,
+                    "cylinderReverseY": false,
+                    "cylinderTop": 1.0,
+                    "ringDivide": 32,
+                    "ringInner": 0.5,
+                    "ringOuter": 1.0,
+                    "sphereLat": 10,
+                    "sphereLong": 10
+                },
+                "type": "engine"
+            },
+            "name": "kPlayer",
+            "previewColor": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "transform": {
+                "rotate": [
+                    0.0,
+                    0.0,
+                    3.140000104904175
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
+        },
+        {
+            "id": 9,
+            "isDirectTile": false,
+            "material": {
+                "blendModeType": 1,
+                "depthStencilType": 0,
+                "enableLighting": false,
+                "heightScale": 2.0,
+                "intensity": 1.0,
+                "lightModelType": 4,
+                "rasterizerMode": 0,
+                "reflectiveStrength": 0.0,
+                "renderModelType": 0,
+                "shininess": 32.0,
+                "textureColor": [
+                    0.11274510622024536,
+                    1.0,
+                    0.21712791919708252,
+                    1.0
+                ],
+                "textureColor2": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "textureColor3": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "textureHandle": "../MapResource/white5x5.png",
+                "useModelTexture": false,
+                "uvRotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "uvScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "uvTranslate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "model": {
+                "engine": "Ring",
+                "params": {
+                    "cylinderBottom": 1.0,
+                    "cylinderDivide": 3,
+                    "cylinderHeight": 0.7900000214576721,
+                    "cylinderReverseY": false,
+                    "cylinderTop": 1.0,
+                    "ringDivide": 6,
+                    "ringInner": 0.5,
+                    "ringOuter": 1.0,
+                    "sphereLat": 10,
+                    "sphereLong": 10
+                },
+                "type": "engine"
+            },
+            "name": "kShipPoint",
+            "previewColor": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "transform": {
+                "rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    0.5,
+                    0.5,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
+        },
+        {
+            "id": 11,
+            "isDirectTile": false,
+            "material": {
+                "blendModeType": 1,
+                "depthStencilType": 0,
+                "enableLighting": true,
+                "heightScale": 2.0,
+                "intensity": 1.0,
+                "lightModelType": 4,
+                "rasterizerMode": 0,
+                "reflectiveStrength": 0.0,
+                "renderModelType": 0,
+                "shininess": 32.0,
+                "textureColor": [
+                    0.37254899740219116,
+                    0.1624261885881424,
+                    0.07487503439188004,
+                    1.0
+                ],
+                "textureColor2": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "textureColor3": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "textureHandle": "../../../../KenoJP/Desktop/Task/Engine/Engine/kEngine/EngineAssets/TemplateResource/texture/white5x5.png",
+                "useModelTexture": false,
+                "uvRotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "uvScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "uvTranslate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "model": {
+                "engine": "Cube",
+                "params": {
+                    "cylinderBottom": 1.0,
+                    "cylinderDivide": 3,
+                    "cylinderHeight": 0.7900000214576721,
+                    "cylinderReverseY": false,
+                    "cylinderTop": 1.0,
+                    "ringDivide": 6,
+                    "ringInner": 0.5,
+                    "ringOuter": 1.0,
+                    "sphereLat": 10,
+                    "sphereLong": 10
+                },
+                "type": "engine"
+            },
+            "name": "kSign",
+            "previewColor": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "transform": {
+                "rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    0.41999998688697815,
+                    0.15000000596046448
+                ],
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
+        }
+    ],
+    "version": 1,
+    "xSize": 35,
+    "ySize": 21
+}

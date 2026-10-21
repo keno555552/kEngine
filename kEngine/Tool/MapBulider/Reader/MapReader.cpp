@@ -35,21 +35,10 @@ bool MapReader::LoadMap(const std::string& csvPath, const std::string& mapDataPa
 	}
 
 	/// MapData の場所：指定が無ければ csv の「#mapData」の名前で、よくある場所を探す
-	std::string dataPath = mapDataPath;
+	std::string dataPath = mapDataPath.empty() ? FindMapDataPath(csvPath, out.grid.mapDataName) : mapDataPath;
 	if (dataPath.empty()) {
-		if (out.grid.mapDataName.empty()) {
-			log_ += "MapReader: no #mapData in " + csvPath + " and no MapData path given\n";
-			return false;
-		}
-		const fs::path dir = fs::path(csvPath).parent_path();
-		const std::string file = out.grid.mapDataName + ".json";
-		for (const fs::path& candidate : { dir / file, dir / "MapData" / file, dir.parent_path() / "MapData" / file }) {
-			if (fs::exists(candidate)) { dataPath = candidate.generic_string(); break; }
-		}
-		if (dataPath.empty()) {
-			log_ += "MapReader: MapData '" + out.grid.mapDataName + "' not found near " + csvPath + "\n";
-			return false;
-		}
+		log_ += "MapReader: MapData '" + out.grid.mapDataName + "' not found near " + csvPath + "\n";
+		return false;
 	}
 
 	if (!ReadMapData(dataPath, out.data)) return false;
@@ -125,6 +114,17 @@ bool MapReader::ReadMapGrid(const std::string& csvPath, MapGrid& out, int fillId
 	}
 	for (auto& row : out.ids) row.resize(maxWidth, fillId);       // 短い行を揃える
 	return !out.ids.empty();
+}
+
+std::string MapReader::FindMapDataPath(const std::string& csvPath, const std::string& mapDataName) {
+	namespace fs = std::filesystem;
+	if (mapDataName.empty()) return {};
+	const fs::path dir = fs::path(csvPath).parent_path();
+	const std::string file = mapDataName + ".json";
+	for (const fs::path& candidate : { dir / file, dir / "MapData" / file, dir.parent_path() / "MapData" / file }) {
+		if (fs::exists(candidate)) return candidate.generic_string();
+	}
+	return {};
 }
 
 /// ============================== 登録器 ============================== ///

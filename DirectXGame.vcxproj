@@ -358,7 +358,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="GAME\resources\PostProcessPreset\PPP_GlitchScreen.cpp" />
     <ClCompile Include="GAME\scenes\SceneTutorial.cpp" />
     <ClCompile Include="GAME\scenes\sceneLose.cpp" />
-    <ClCompile Include="GAME\scenes\SceneTest.cpp" />
     <ClCompile Include="GAME\scenes\SceneTitle.cpp" />
     <ClCompile Include="GAME\scenes\SceneWin.cpp" />
     <ClCompile Include="kEngine\Tool\FileManager\FileManager.cpp" />
@@ -560,6 +559,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ClCompile>
     <ClCompile Include="kEngine\Tool\MapBulider\Data\MapDatas.cpp" />
     <ClCompile Include="kEngine\Tool\MapBulider\Reader\MapReader.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\MapChipManager.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\Data\MapBlockData.cpp" />
     <ClCompile Include="ResourceLoader.cpp" />
     <ClCompile Include="kEngine\Scenes\BaseSceneFactory.cpp" />
     <ClCompile Include="kEngine\GameObject\Object\Sprite.cpp" />
@@ -613,7 +614,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="GAME\resources\PostProcessPreset\PPP_GlitchScreen.h" />
     <ClInclude Include="GAME\scenes\SceneTutorial.h" />
     <ClInclude Include="GAME\scenes\sceneLose.h" />
-    <ClInclude Include="GAME\scenes\SceneTest.h" />
     <ClInclude Include="GAME\scenes\SceneTitle.h" />
     <ClInclude Include="GAME\scenes\SceneWin.h" />
     <ClInclude Include="GAME\Object\Sight\Sight.h" />
@@ -897,6 +897,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ClInclude>
     <ClInclude Include="kEngine\Tool\MapBulider\Data\MapDatas.h" />
     <ClInclude Include="kEngine\Tool\MapBulider\Reader\MapReader.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\MapChipManager.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\Data\MapBlockData.h" />
     <ClInclude Include="ResourceLoader.h" />
     <ClInclude Include="kEngine\Scenes\BaseSceneFactory.h" />
     <ClInclude Include="kEngine\GameObject\Object\Sprite.h" />

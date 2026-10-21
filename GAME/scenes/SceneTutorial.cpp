@@ -35,7 +35,7 @@ SceneTutorial::SceneTutorial(kEngine* system) {
 	MH_object_ = system_->SetModelObj("GAME/resources/Object/pickaxe/pickaxe.obj");
 	MH_enemy_ = system_->SetModelObj("GAME/resources/Object/enemy/enemy.obj");
 	MH_backPoint_ = system_->SetModelObj("GAME/resources/Object/backSign/backSign.obj");
-	
+
 	//TH_ReflectTexture_ = system_->LoadTexture("GAME/resources/texture/skyCube/drachenfels_cellar_2k.dds");
 	TH_ReflectTexture_ = system_->LoadTexture("./GAME/resources/texture/skyCube/output_skybox.dds");
 	TH_box_ = system_->LoadTexture("kEngine/EngineAssets/texture/testBox.png");
@@ -123,19 +123,18 @@ SceneTutorial::SceneTutorial(kEngine* system) {
 	backSign_->mainPosition.transform.scale = { 0.5f,0.5f,0.5f };
 	backSign_->objectParts_[0].materialConfig->textureColor = { 1.0f,1.0f,1.0f,0.999f };
 
-
 	/// マップチップの生成
-	mapChipField_ = new MapChipField();
-	mapChipField_->LoadMapChipCsv("GAME/resources/Stage/blocks1.csv");
-	mapChipField_->SetBlockWidth(1.0f);
-	mapChipField_->SetBlockHeight(1.0f);
+	mapChipManager_ = std::make_unique<MapChipManager>(system_);
+	const bool loaded = mapChipManager_->AddLayer("Main", "GAME/resources/Stage/1YearGame/Maps/tutorial.csv");
+	assert(loaded && "tutorial が読めない（csv か MapData）");
 
 	/// マップチップの初期化
+	RegisterMapSpawner();
 	GenerateMap();
 
 	/// コリジョンマネージャー初期化
 	collisionManager_.InputPlayer(player_);
-	collisionManager_.InputMapChip(mapChipField_);
+	collisionManager_.InputMapChip(mapChipManager_.get());
 	collisionManager_.InputBulletList(&bulletList_);
 	collisionManager_.InputEnemyList(&enemyList_);
 	collisionManager_.InputBackPoint(backPoint_);
@@ -157,8 +156,6 @@ SceneTutorial::~SceneTutorial() {
 	delete skydome_;
 	delete backPoint_;
 
-	delete mapChipField_;
-
 
 	for (auto& enemy : enemyList_) {
 		if (enemy) {
@@ -169,14 +166,6 @@ SceneTutorial::~SceneTutorial() {
 	for (auto& bullet : bulletList_) {
 		if (bullet) {
 			delete bullet;
-		}
-	}
-
-	for (auto& row : blockObjectList_) {
-		for (auto& block : row) {
-			if (block) {
-				delete block;
-			}
 		}
 	}
 
@@ -283,13 +272,7 @@ void SceneTutorial::Update() {
 	collisionManager_.Update(system_->GetDeltaTime());
 
 	/// ブロック更新
-	for (auto& row : blockObjectList_) {
-		for (auto& block : row) {
-			if (block) {
-				block->Update(nullptr);
-			}
-		}
-	}
+	mapBlocks_.Update();
 
 	if (system_->GetTriggerOn(DIK_0)) {
 		if (useDebugCamera)useDebugCamera = false;
@@ -331,17 +314,7 @@ void SceneTutorial::Draw() {
 	Vector3 camPos = usingCamera_.lock()->GetTransform().translate;
 	const float kBlockDrawRadius = 20.0f; // adjust as needed
 	const float kBlockDrawRadiusSq = kBlockDrawRadius * kBlockDrawRadius;
-	for (auto& row : blockObjectList_) {
-		for (auto& block : row) {
-			if (block) {
-				Vector3 d = block->mainPosition.transform.translate - camPos;
-				float distSq = d.x * d.x + d.y * d.y + d.z * d.z;
-				if (distSq <= kBlockDrawRadiusSq) {
-					block->Draw();
-				}
-			}
-		}
-	}
+	mapBlocks_.Draw(camPos, kBlockDrawRadius);
 
 	if (backPoint_) {
 		backPoint_->Draw();
@@ -522,57 +495,38 @@ void SceneTutorial::ImGuiPart() {
 }
 #endif
 
+void SceneTutorial::RegisterMapSpawner() {
+	mapChipManager_->ClearRegistry();
+
+	/// 目印：生成ルールはシーン側（名前は MapData の unit 名と同じにする）
+	mapChipManager_->Register(playerName_, [this](const MapReader::SpawnInfo& s) {
+		player_->mainPosition.transform.translate = s.position;
+		});
+	mapChipManager_->Register(enemyName_, [this](const MapReader::SpawnInfo& s) {
+		Enemy* enemy = new Enemy(system_, s.position);
+		enemy->CreateModelData(MH_enemy_);
+		enemy->mainPosition.transform.scale = { 0.5f,0.5f,0.5f };
+		enemy->objectParts_[0].transform.translate.y = -1.0f;
+		enemyList_.push_back(enemy);
+		});
+	mapChipManager_->Register(shipSpawnPointName_, [this](const MapReader::SpawnInfo& s) {});
+	mapChipManager_->Register(sign, [this](const MapReader::SpawnInfo& s) {});
+
+	/// 終点：船の位置に BackPoint を置く (仮)
+	mapChipManager_->Register(shipSpawnPointName_, [this](const MapReader::SpawnInfo& s) {
+		delete backPoint_;   // 地図に複数あったら最後の 1 個を使う（前のは消す）
+		backPoint_ = new BackPoint(system_, s.position);
+		});
+
+	/// それ以外：直接タイルはブロックとして作る
+	mapChipManager_->SetDefault([this](const MapReader::SpawnInfo& s) {
+		if (!mapBlocks_.OnSpawn(s)) {
+			unhandledMapUnits_.insert(s.unit ? s.unit->name : std::to_string(s.id));   // 登録漏れ
+		}
+		});
+}
 
 void SceneTutorial::GenerateMap() {
-	/// ボックス生成
-	// 要素数
-	int kNumBlockVertical = mapChipField_->GetNumBlockVirtical();
-	int kNumBlockHorizontal = mapChipField_->GetNumBlockHorizontal();
-
-	// 要素数を変更する
-	// 列数を設定(縦方向のブロック数)
-	blockObjectList_.resize(kNumBlockVertical);
-	for (int i = 0; i < kNumBlockVertical; i++) {
-		// 列数を設定(横方向のブロック数)
-		blockObjectList_[i].resize(kNumBlockHorizontal);
-	}
-	// いざボックス生成
-	for (int i = 0; i < kNumBlockVertical; i++) {
-		for (int j = 0; j < kNumBlockHorizontal; j++) {
-			MapChipType mapChipType = mapChipField_->GetMapChipTypeByMap({j, i});
-			if (mapChipType == MapChipType::kEnemy) {
-				Enemy* enemy = new Enemy(system_, mapChipField_->GetWorldPosFromMapByMapIndex({ j, i }) /*+ Vector3{ 0.0f,1.0f,0.0f }*/);
-				enemy->CreateModelData(MH_enemy_);
-				enemy->mainPosition.transform.scale = { 0.5f,0.5f,0.5f };
-				enemy->objectParts_[0].transform.translate.y = -1.0f;
-				enemyList_.push_back(enemy);
-				continue;
-			}
-
-			if (mapChipType == MapChipType::kPlayer) {
-				player_->mainPosition.transform.translate = mapChipField_->GetWorldPosFromMapByMapIndex({ j, i }) /* + Vector3{0.0f,0.0f,0.0f} */ ;
-				continue;
-			}
-
-			if (mapChipType == MapChipType::kBackPoint) {
-				backPoint_ = new BackPoint(system_, mapChipField_->GetWorldPosFromMapByMapIndex({ j, i }));
-				continue;
-			}
-
-			if (mapChipType != MapChipType::kBlank) {
-				blockObjectList_[i][j] = new Object();
-				blockObjectList_[i][j]->IntObject(system_);
-				blockObjectList_[i][j]->CreateDefaultData();
-				blockObjectList_[i][j]->modelHandle_ = config::default_Cube_MeshBufferHandle_;
-				blockObjectList_[i][j]->objectParts_[0].materialConfig->useModelTexture = false;
-				blockObjectList_[i][j]->mainPosition.transform.translate = mapChipField_->GetWorldPosFromMapByMapIndex({ j, i });
-				if (mapChipType == MapChipType::kDirt) {
-					blockObjectList_[i][j]->objectParts_[0].materialConfig->textureHandle = TH_dirt_;
-				} else if (mapChipType == MapChipType::kRock) {
-					blockObjectList_[i][j]->objectParts_[0].materialConfig->textureHandle = TH_rock_;
-				}
-			}
-
-		}
-	}
+	mapBlocks_.Init(mapChipManager_.get(), "Main");
+	mapChipManager_->Generate("Main");
 }

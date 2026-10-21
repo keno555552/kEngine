@@ -1,20 +1,21 @@
 #pragma once
 #include "MathsIncluder.h"
-#include "Data\Game\MapChip\MapChipField.h"
 #include <vector>
 
 class Enemy;
 class Bullet;
 class Player;
 class BackPoint;
+class MapChipManager;
 class CollisionManager
 {
 public:
 	
 	void Update(float deltaTime);
 
+	void InputMapChip(MapChipManager* mapChipManager);
+
 	void InputPlayer(Player* player);
-	void InputMapChip(MapChipField* mapChipField);
 	void InputBackPoint(BackPoint* backPoint);
 	void InputBulletList(std::vector<Bullet*>* bulletList);
 	void InputEnemyList(std::vector<Enemy*>* enemyList);
@@ -32,7 +33,7 @@ private:
 
 private:
 	Player* player_ = nullptr;
-	MapChipField* mapChipField_ = nullptr;
+	MapChipManager* mapChipManager_ = nullptr;
 	BackPoint* backPoint_ = nullptr;
 	std::vector<Bullet*>* bulletList_ = nullptr;
 	std::vector<Enemy*>* enemyList_ = nullptr;

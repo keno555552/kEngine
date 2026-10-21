@@ -7,9 +7,11 @@
 #include "GAME\Object\Player\Player.h"
 #include "GAME\Object\Enemy\Enemy.h"
 #include "GAME\Object\BackPoint\BackPoint.h"
-#include "Data\Game\MapChip\MapChipField.h"
 #include "tool\CollisionManager\CollisionManager.h"
 #include "GAME\resources\PostProcessPreset\PPP_GlitchScreen.h"
+#include "Tool\MapBulider\Data\MapBlockData.h"
+#include <memory>
+#include <set>
 
 
 class SceneTutorial :public BaseScene
@@ -99,13 +101,20 @@ private:
 
 	SimpleSprite* hpUI_[3] = { nullptr,nullptr,nullptr };
 
-	MapChipField* mapChipField_ = nullptr;
-	std::vector<std::vector<Object*>> blockObjectList_;
+	std::unique_ptr<MapChipManager> mapChipManager_;
+	MapBlockData mapBlocks_;
 	std::vector<Bullet*> bulletList_;
 	std::vector<Enemy*> enemyList_;
+	std::set<std::string> unhandledMapUnits_;   // デバッグ用：生成されなかった物の名前
 
 	/// ========== 当たり判定マネージャー =========///
 	CollisionManager collisionManager_;
+
+	/// ============== map対応名前 =============///
+	std::string playerName_ = "kPlayer";
+	std::string enemyName_ = "kEnemy";
+	std::string shipSpawnPointName_ = "kShipPoint";
+	std::string sign = "kSign";
 
 	/// =============== フラグ ================///
 	bool useDebugCamera = false;
@@ -117,6 +126,7 @@ private:
 	void CameraPart();
 	void ImGuiPart();
 
+	void RegisterMapSpawner();
 	void GenerateMap();
 };
 

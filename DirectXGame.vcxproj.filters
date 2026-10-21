@@ -756,9 +756,6 @@
     <ClCompile Include="GAME\scenes\SceneTutorial.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="GAME\scenes\SceneTest.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="GAME\scenes\SceneTitle.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -835,6 +832,12 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Tool\MapBulider\Reader\MapReader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\MapBulider\MapChipManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Tool\MapBulider\Data\MapBlockData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1730,9 +1733,6 @@
     <ClInclude Include="GAME\scenes\SceneTutorial.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="GAME\scenes\SceneTest.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="kEngine\Tool\CollisionManager\CollisionManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -1815,6 +1815,12 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Tool\MapBulider\Reader\MapReader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\MapBulider\MapChipManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Tool\MapBulider\Data\MapBlockData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

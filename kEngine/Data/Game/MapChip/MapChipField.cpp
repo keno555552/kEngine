@@ -130,12 +130,12 @@ CollisionResult MapChipField::GetMapCollisionCorrection(
 			const AABB& tile = t.aabb;
 
 			float overlapX =
-				std::min(predicted.max.x, tile.max.x) -
-				std::max(predicted.min.x, tile.min.x);
+				(std::min)(predicted.max.x, tile.max.x) -
+				(std::max)(predicted.min.x, tile.min.x);
 
 			float overlapY =
-				std::min(predicted.max.y, tile.max.y) -
-				std::max(predicted.min.y, tile.min.y);
+				(std::min)(predicted.max.y, tile.max.y) -
+				(std::max)(predicted.min.y, tile.min.y);
 
 			if (overlapX <= 0.0f || overlapY <= 0.0f) continue;
 
@@ -222,10 +222,10 @@ std::vector<MapChipField::TileInfo> MapChipField::GetTilesOverlapping(const AABB
 	minIdx.y = std::clamp(minIdx.y, 0, (int)GetNumBlockVirtical() - 1);
 	maxIdx.y = std::clamp(maxIdx.y, 0, (int)GetNumBlockVirtical() - 1);
 
-	int xBegin = std::min(minIdx.x, maxIdx.x);
-	int xEnd = std::max(minIdx.x, maxIdx.x);
-	int yBegin = std::min(minIdx.y, maxIdx.y);
-	int yEnd = std::max(minIdx.y, maxIdx.y);
+	int xBegin = (std::min)(minIdx.x, maxIdx.x);
+	int xEnd = (std::max)(minIdx.x, maxIdx.x);
+	int yBegin = (std::min)(minIdx.y, maxIdx.y);
+	int yEnd = (std::max)(minIdx.y, maxIdx.y);
 
 	// 3. 掃描所有 tile
 	for (int y = yBegin; y <= yEnd; ++y) {

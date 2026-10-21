@@ -41,6 +41,8 @@ public:
 	bool ReadMapData(const std::string& jsonPath, MapData& out);
 	/// csv だけ（エンジンを使わないので static）
 	static bool ReadMapGrid(const std::string& csvPath, MapGrid& out, int fillId = 0);
+	/// csv の場所と #mapData の名前から MapData の json を探す（見つからなければ空文字）
+	static std::string FindMapDataPath(const std::string& csvPath, const std::string& mapDataName);
 
 	/// ================= 登録器 ================= ///
 	void Register(const std::string& name, SpawnFunc func);
@@ -58,6 +60,7 @@ public:
 	/// 警告・エラーの記録
 	const std::string& GetLog() const { return log_; }
 	void ClearLog() { log_.clear(); }
+
 
 private:
 	MapUnit JsonToUnit(const nlohmann::json& j, const std::string& baseDir);
