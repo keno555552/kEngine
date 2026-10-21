@@ -576,6 +576,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Tool\MapBulider\TileRunner.cpp" />
     <ClCompile Include="kEngine\Tool\MapBulider\Adapter\ProgramAdapter.cpp" />
     <ClCompile Include="kEngine\Tool\MapBulider\Data\MapMakerData.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\Data\MapDatas.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\Reader\MapReader.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\MapChipManager.cpp" />
+    <ClCompile Include="kEngine\Tool\MapBulider\Data\MapBlockData.cpp" />
     <ClCompile Include="kEngine\Tool\MapMakingEditor\MapMakingEditor.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -902,6 +906,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Tool\MapBulider\TileRunner.h" />
     <ClInclude Include="kEngine\Tool\MapBulider\Adapter\ProgramAdapter.h" />
     <ClInclude Include="kEngine\Tool\MapBulider\Data\MapMakerData.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\Data\MapDatas.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\Reader\MapReader.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\MapChipManager.h" />
+    <ClInclude Include="kEngine\Tool\MapBulider\Data\MapBlockData.h" />
     <ClInclude Include="kEngine\Tool\MapMakingEditor\MapMakingEditor.h" />
   </ItemGroup>
   <ItemGroup>

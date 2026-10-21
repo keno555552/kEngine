@@ -1,6 +1,6 @@
 #include "CollisionManager.h"
 #include "GAME/Object/Player/Player.h"
-#include "Data/Game/MapChip/MapChipField.h"
+#include "Tool/MapBulider/MapChipManager.h"
 #include "GAME/Object/Bullet/Bullet.h"
 #include "GAME/Object/BackPoint/BackPoint.h"
 #include "GAME/Object/Enemy/Enemy.h"
@@ -20,13 +20,13 @@ void CollisionManager::Update(float deltaTime) {
 
 bool CollisionManager::PlayerMapCollision() {
 
-	if (!player_ || !mapChipField_) return false;
+	if (!player_ || !mapChipManager_) return false;
 
 	AABB box = player_->GetAABB();
 	Vector3 velocity = player_->GetVelocity();
 
 	// MapChipField内での当たり判定を計算
-	CollisionResult result = mapChipField_->GetMapCollisionCorrection(
+	CollisionResult result = mapChipManager_->GetMapCollisionCorrection(
 		box,
 		velocity,
 		totelDeltaTime_
@@ -51,32 +51,18 @@ bool CollisionManager::PlayerMapCollision() {
 
 void CollisionManager::BulletMapCollision() {
 
-	if (bulletList_ == nullptr || mapChipField_ == nullptr) { return; }
-
-	uint32_t maxX = mapChipField_->GetNumBlockHorizontal();
-	uint32_t maxY = mapChipField_->GetNumBlockVirtical();
+	if (bulletList_ == nullptr || mapChipManager_ == nullptr) { return; }
 
 	for (auto* bullet : *bulletList_) {
 		if (bullet == nullptr || !bullet->IsAlive()) { continue; }
 
-		Vector3 pos = bullet->GetPosition();
-		MapChipField::WorldIndex idx = mapChipField_->GetWorldIndexByPosition(pos);
-
-		// out of bounds -> delete
-		bool outOfBounds = (
-			idx.x < 0 ||
-			idx.y < 0 ||
-			idx.x >= (int)maxX ||
-			idx.y >= (int)maxY
-			);
-
-		if (outOfBounds) {
+		const Vector3 pos = bullet->GetPosition();
+		// マップ外 → 削除
+		if (!mapChipManager_->IsInsideAt(pos)) {
 			bullet->SetAlive(false);
 			continue;
 		}
-
-		MapChipType tile = mapChipField_->GetMapChipTypeByWorld({ idx.x, idx.y });
-		if (!CheckIsNotWall(tile)) {
+		if (mapChipManager_->IsWallAt(pos)) {
 			bullet->HitRockEffect();
 			bullet->SetAlive(false);
 		}
@@ -105,9 +91,9 @@ void CollisionManager::BulletEnemyCollision() {
 
 	auto isOverlap = [](const AABB& a, const AABB& b) {
 		return (a.min.x <= b.max.x && a.max.x >= b.min.x) &&
-			   (a.min.y <= b.max.y && a.max.y >= b.min.y) &&
-			   (a.min.z <= b.max.z && a.max.z >= b.min.z);
-	};
+			(a.min.y <= b.max.y && a.max.y >= b.min.y) &&
+			(a.min.z <= b.max.z && a.max.z >= b.min.z);
+		};
 
 	for (auto* bullet : *bulletList_) {
 		if (bullet == nullptr || !bullet->IsAlive()) { continue; }
@@ -126,42 +112,42 @@ void CollisionManager::BulletEnemyCollision() {
 
 
 void CollisionManager::PlayerEnemyCollision() {
-    if (player_ == nullptr || enemyList_ == nullptr) { return; }
+	if (player_ == nullptr || enemyList_ == nullptr) { return; }
 	if (player_->IsDisableDamage()) return;
 
-    AABB pBox = player_->GetAABB();
+	AABB pBox = player_->GetAABB();
 
-    auto isOverlap = [](const AABB& a, const AABB& b) {
-        return (a.min.x <= b.max.x && a.max.x >= b.min.x) &&
-               (a.min.y <= b.max.y && a.max.y >= b.min.y) &&
-               (a.min.z <= b.max.z && a.max.z >= b.min.z);
-    };
+	auto isOverlap = [](const AABB& a, const AABB& b) {
+		return (a.min.x <= b.max.x && a.max.x >= b.min.x) &&
+			(a.min.y <= b.max.y && a.max.y >= b.min.y) &&
+			(a.min.z <= b.max.z && a.max.z >= b.min.z);
+		};
 
-    for (auto* enemy : *enemyList_) {
-        if (enemy == nullptr || !enemy->IsAlive()) { continue; }
-        AABB eBox = enemy->GetAABB();
-        if (isOverlap(pBox, eBox)) {
-            // damage
-                player_->GetDamage(1.0f);
+	for (auto* enemy : *enemyList_) {
+		if (enemy == nullptr || !enemy->IsAlive()) { continue; }
+		AABB eBox = enemy->GetAABB();
+		if (isOverlap(pBox, eBox)) {
+			// damage
+			player_->GetDamage(1.0f);
 
-            // knockback: apply velocity impulse instead of teleport
-            Vector3 dir = player_->GetPosition() - enemy->GetPosition();
-            dir.y = 0.0f; // horizontal direction for push
-            float lenSq = dir.x * dir.x + dir.y * dir.y + dir.z * dir.z;
-            if (lenSq < 0.0001f) {
-                dir = { 1.0f, 0.0f, 0.0f }; // fallback
-            } else {
-                dir = Normalize(dir);
-            }
-            const float kKnockbackSpeed = 4.0f; // adjust as needed
-            Vector3 knockbackVel = dir * kKnockbackSpeed;
-            knockbackVel.y = 0.5f; // small lift
-            player_->SetVelocity(knockbackVel);
+			// knockback: apply velocity impulse instead of teleport
+			Vector3 dir = player_->GetPosition() - enemy->GetPosition();
+			dir.y = 0.0f; // horizontal direction for push
+			float lenSq = dir.x * dir.x + dir.y * dir.y + dir.z * dir.z;
+			if (lenSq < 0.0001f) {
+				dir = { 1.0f, 0.0f, 0.0f }; // fallback
+			} else {
+				dir = Normalize(dir);
+			}
+			const float kKnockbackSpeed = 4.0f; // adjust as needed
+			Vector3 knockbackVel = dir * kKnockbackSpeed;
+			knockbackVel.y = 0.5f; // small lift
+			player_->SetVelocity(knockbackVel);
 
-            // refresh player box for further collisions this frame
-            pBox = player_->GetAABB();
-        }
-    }
+			// refresh player box for further collisions this frame
+			pBox = player_->GetAABB();
+		}
+	}
 }
 
 void CollisionManager::PlayerBackPointCollision() {
@@ -173,7 +159,7 @@ void CollisionManager::PlayerBackPointCollision() {
 		return (a.min.x <= b.max.x && a.max.x >= b.min.x) &&
 			(a.min.y <= b.max.y && a.max.y >= b.min.y) &&
 			(a.min.z <= b.max.z && a.max.z >= b.min.z);
-	};
+		};
 	if (isOverlap(pBox, bBox)) {
 		backPoint_->SetIsBack(true);
 	} else {
@@ -182,56 +168,26 @@ void CollisionManager::PlayerBackPointCollision() {
 }
 
 void CollisionManager::EnemyMapCollision() {
-	if (mapChipField_ == nullptr || enemyList_ == nullptr) { return; }
+	if (mapChipManager_ == nullptr || enemyList_ == nullptr) { return; }
 
-	auto processEnemy = [&](Enemy* e) {
-		if (e == nullptr || !e->IsAlive()) { return; }
-		Vector3 pos = e->GetPosition();
-		Vector2 blockSize = mapChipField_->GetBlockSize();
-		// 探測正前方一個格子（沿 X 軸面向方向，一個 block 寬）
-		Vector3 probe = pos;
+	const Vector2 blockSize = mapChipManager_->GetBlockSize();
+	for (auto* e : *enemyList_) {
+		if (e == nullptr || !e->IsAlive()) { continue; }   // ★return → continue
+
+		// 正面の 1 マス先（向いている方向に半マス）
+		Vector3 probe = e->GetPosition();
 		probe.x += e->IsFaceRight() ? (blockSize.x * 0.5f) : -(blockSize.x * 0.5f);
+		if (!mapChipManager_->IsInsideAt(probe)) { continue; }   // ★return → continue
 
-		MapChipField::WorldIndex idx = mapChipField_->GetWorldIndexByPosition(probe);
-		bool out = (idx.x < 0 || idx.y < 0 || idx.x >= (int)mapChipField_->GetNumBlockHorizontal() || idx.y >= (int)mapChipField_->GetNumBlockVirtical());
-		if (out) { return; }
-
-		MapChipType frontTile = mapChipField_->GetMapChipTypeByWorld({idx.x, idx.y});
-		// check ground one block below the front probe
+		const bool frontWall = mapChipManager_->IsWallAt(probe);
+		// 正面の 1 マス下に地面があるか
 		Vector3 probeDown = probe;
 		probeDown.y -= blockSize.y;
-		MapChipField::WorldIndex idxDown = mapChipField_->GetWorldIndexByPosition(probeDown);
-		bool outDown = (idxDown.x < 0 || idxDown.y < 0 || idxDown.x >= (int)mapChipField_->GetNumBlockHorizontal() || idxDown.y >= (int)mapChipField_->GetNumBlockVirtical());
-		bool cliffAhead = outDown;
-		if (!cliffAhead) {
-			MapChipType belowTile = mapChipField_->GetMapChipTypeByWorld({idxDown.x, idxDown.y});
-			cliffAhead = CheckIsNotWall(belowTile); // no ground means cliff
-		}
+		const bool cliffAhead = !mapChipManager_->IsInsideAt(probeDown) || !mapChipManager_->IsWallAt(probeDown);
 
-		if (CheckIsWall(frontTile) || cliffAhead) {
+		if (frontWall || cliffAhead) {
 			e->SetFaceRight(!e->IsFaceRight());
 		}
-	};
-
-	for (auto* e : *enemyList_) { processEnemy(e); }
-}
-
-bool CollisionManager::CheckIsNotWall(MapChipType type) {
-	return !CheckIsWall(type);
-}
-
-bool CollisionManager::CheckIsWall(MapChipType type) {
-	switch (type) {
-	case MapChipType::kBlank:
-	case MapChipType::kEnemy:
-	case MapChipType::kPlayer:
-	case MapChipType::kBackPoint:
-		return false;
-	case MapChipType::kDirt:
-	case MapChipType::kRock:
-		return true;
-	default:
-		return false;
 	}
 }
 
@@ -239,8 +195,8 @@ void CollisionManager::InputPlayer(Player* player) {
 	player_ = player;
 }
 
-void CollisionManager::InputMapChip(MapChipField* mapChipField) {
-	mapChipField_ = mapChipField;
+void CollisionManager::InputMapChip(MapChipManager* mapChipManager) {
+	mapChipManager_ = mapChipManager;
 }
 
 void CollisionManager::InputBackPoint(BackPoint* backPoint) {
