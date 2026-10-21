@@ -227,8 +227,6 @@ private:
 	nlohmann::json MapDataToJson(const MapData& data, const std::string& baseDir) const;
 	MapData JsonToMapData(const nlohmann::json& j, const std::string& baseDir);
 
-	bool SaveMapDataFile(MapData& d, const std::string& path);
-	bool LoadMapDataFile(const std::string& path, MapData& out);
 	MapData* CurrentMapData();
 	TileMapData* CurrentMap();
 	bool SaveProject(const std::string& projectPath);

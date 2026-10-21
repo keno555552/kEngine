@@ -913,62 +913,6 @@ MapData MapMakingEditor::JsonToMapData(const nlohmann::json& j, const std::strin
 	return d;
 }
 
-bool MapMakingEditor::SaveMapDataFile(MapData& d, const std::string& path) {
-	namespace fs = std::filesystem;
-	const fs::path jsonPath(path);
-	const fs::path root = jsonPath.parent_path();
-	const std::string folder = jsonPath.stem().string();          // "Forest"
-	std::error_code ec;
-	if (!d.maps.empty()) fs::create_directories(root / folder, ec);
-
-	nlohmann::json j = MapDataToJson(d, path);
-	j["maps"] = nlohmann::json::array();
-
-	std::set<std::string> used;
-	for (const auto& map : d.maps) {
-		const std::string rel = folder + "/" + MakeUniqueName(used, FileManager::ToSafeFileName(map.name)) + ".csv";
-		if (!map.ExportCsv((root / rel).string())) {
-			debugText_ += "Save Error: " + rel + "\n";
-			return false;
-		}
-		j["maps"].push_back({ { "name", map.name }, { "csv", rel } });   // csv には名前が入らないので json 側に
-	}
-
-	if (!WriteJsonFile(path, j)) {
-		debugText_ += "Save Error: " + path + "\n";
-		return false;
-	}
-	d.isSaved = true;
-	d.savePath = path;
-	return true;
-}
-
-bool MapMakingEditor::LoadMapDataFile(const std::string& path, MapData& out) {
-	nlohmann::json j;
-	if (!ReadJsonFile(path, j) || j.value("kind", std::string()) != "MapData") {
-		debugText_ += "Load Error: not a MapData file: " + path + "\n";
-		return false;
-	}
-	out = JsonToMapData(j, path);                                         // ここでモデル・texture がエンジンに載る
-
-	const std::filesystem::path root = std::filesystem::path(path).parent_path();
-	for (const auto& mj : j.value("maps", nlohmann::json::array())) {
-		TileMapData map;
-		map.name = mj.value("name", std::string("Map"));
-		const std::string csv = mj.value("csv", std::string());
-		if (csv.empty() || !map.ImportCsv((root / csv).string())) {
-			debugText_ += "Load Warning: cannot read " + csv + "\n";
-		}
-		if (out.xSize > 0 && out.ySize > 0) map.Resize(out.xSize, out.ySize, 0);   // 大きさは MapData が正
-		out.maps.push_back(std::move(map));
-	}
-	out.isSaved = true;
-	out.savePath = path;
-	return true;
-}
-
-
-
 bool MapMakingEditor::SaveProject(const std::string& projectPath) {
 	namespace fs = std::filesystem;
 	if (currentMakerIndex_ >= 0 && currentMakerIndex_ < (int)mapMakerlist_.size()) {
