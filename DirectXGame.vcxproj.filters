@@ -1793,8 +1793,6 @@
     <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl" />
     <FxCompile Include="externals\DirectXTex\Shaders\BC7Encode.hlsl" />
     <FxCompile Include="resources\Shader\FlameNeonGlow.PS.hlsl" />
-    <FxCompile Include="resources\Shader\Particle.PS.hlsl" />
-    <FxCompile Include="resources\Shader\Particle.VS.hlsl" />
     <FxCompile Include="kEngine\EngineAssets\Shader\DebugLine.PS.hlsl" />
     <FxCompile Include="kEngine\EngineAssets\Shader\DebugLine.VS.hlsl" />
     <FxCompile Include="kEngine\EngineAssets\Shader\FlameNeonGlow.PS.hlsl" />
