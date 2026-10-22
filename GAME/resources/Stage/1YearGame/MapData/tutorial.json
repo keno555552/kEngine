@@ -466,7 +466,7 @@
         },
         {
             "id": 11,
-            "isDirectTile": false,
+            "isDirectTile": true,
             "material": {
                 "blendModeType": 1,
                 "depthStencilType": 0,
@@ -496,8 +496,8 @@
                     1.0,
                     1.0
                 ],
-                "textureHandle": "../../../../KenoJP/Desktop/Task/Engine/Engine/kEngine/EngineAssets/TemplateResource/texture/white5x5.png",
-                "useModelTexture": false,
+                "textureHandle": "",
+                "useModelTexture": true,
                 "uvRotate": [
                     0.0,
                     0.0,
@@ -515,20 +515,8 @@
                 ]
             },
             "model": {
-                "engine": "Cube",
-                "params": {
-                    "cylinderBottom": 1.0,
-                    "cylinderDivide": 3,
-                    "cylinderHeight": 0.7900000214576721,
-                    "cylinderReverseY": false,
-                    "cylinderTop": 1.0,
-                    "ringDivide": 6,
-                    "ringInner": 0.5,
-                    "ringOuter": 1.0,
-                    "sphereLat": 10,
-                    "sphereLong": 10
-                },
-                "type": "engine"
+                "path": "",
+                "type": "file"
             },
             "name": "kSign",
             "previewColor": [
@@ -545,8 +533,8 @@
                 ],
                 "scale": [
                     1.0,
-                    0.41999998688697815,
-                    0.15000000596046448
+                    1.0,
+                    1.0
                 ],
                 "translate": [
                     0.0,
