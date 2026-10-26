@@ -83,6 +83,9 @@ private:
 	/// 後処理のレイヤー数設定
 	static const int kPostProcessLayer = 5;
 
+	/// 最大ログエントリ数
+	static const int kMaxEntries_ = 2000;
+
 private:
 
 	/// ============================= mesh関連 ============================= ///
@@ -145,6 +148,10 @@ public:
 
 	// 画面の縦幅(Set/Getter)
 	static int GetDefaultHeight() { return kDefaultClientHeight_; }
+
+	// 最大セーブログエントリ数
+	static int GetMaxEntries() { return kMaxEntries_; }
+	
 	// ------------------------------- 現在の設定 ------------------------------ //
 	// 画面のモード関連(Set/Getter)
 	static WindowMode GetClientWindowMode() { return clientWindowMode_; }

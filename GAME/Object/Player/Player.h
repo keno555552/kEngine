@@ -49,11 +49,13 @@ static inline const float kNearAttackEffectTime = 0.5f;
 
 
 class Bullet;
+class Sight;
 class Player :public Object
 {
 public:
 	/// コンストラクタ
 	Player(kEngine* system, const Vector3& position = Vector3{ 0,0,0 });
+	~Player();
 
 	/// ムーブメント
 	void MoveLeft() { moveLeft_ = true; }
@@ -64,12 +66,17 @@ public:
 	void StopRight() { moveRight_ = false; }
 	void StopJump() { moveJump_ = false; }
 
-	void Attack(Vector3 mousePos);
 
-	/// ステージ用
+	/// =============== ステージ用 =============== ///
+	/// ヴァーチャル関数
 	void Update(Camera* camera) override;
+	void Draw() override;
+
+	/// 当たり判定
 	AABB& GetAABB();
 	//AABB& GetMapChipAABB();
+
+	/// 位置・移動関連
 	Vector3 GetVelocity() { return velocity_; }
 	Vector3 GetPosition() { return mainPosition.transform.translate; }
 	void SetVelocity(const Vector3& velocity) { velocity_ = velocity; }
@@ -78,8 +85,15 @@ public:
 	bool IsOnGround() { return onGround_; }
 	void SetOnGround(bool onGround) { onGround_ = onGround; }
 
+	/// 射撃関連
+	Vector3 GetAimPosition() const;
+	void Shoot(Vector3 mousePos);
+	void Shoot() { Shoot(GetAimPosition()); }
+
+	/// 弾丸管理
 	void InputBulletList(std::vector<Bullet*>* bulletList) { bulletList_ = bulletList; };
 
+	/// HP管理
 	int GetHP() const { return static_cast<int>(HP_); }
 	void SetHP(int hp) { HP_ = static_cast<float>(hp); }
 	void GetDamage(float damage);
@@ -125,15 +139,16 @@ private:
 	///モデルハンドル
 	int MH_playerModel_{};
 	int MH_pickaxe_{};
+	int MH_sight_{};
 
 	/// テキスチャハンドル
 	int TH_playerTexture_{};
 	int TH_White5x5_{};
 
 	///サントハンドル
-	int SH_JUMP_ = 0;
-	int SH_SHOOT_ = 0;
-	int SH_DAMAGE_ = 0;
+	int SH_JUMP_{};
+	int SH_SHOOT_{};
+	int SH_DAMAGE_{};
 private:
 	/////// State
 	/// HP
@@ -214,9 +229,17 @@ private:
 	bool disableDamage_ = false;
 
 private:
-	std::vector<Bullet*>* bulletList_ = nullptr;
+	/// ================ 攻撃関連 ================ ///
+	/// 照準
+	std::unique_ptr<Sight> sight_;
 
+	/// ========== 射撃関連
+	std::vector<Bullet*>* bulletList_ = nullptr;
 	Timer shootCD_;
+
+	bool isGun_ = true; // 仮、後で武器により改変
+
+	/// ========== 近接関連
 
 private:
 	/// move

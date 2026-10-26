@@ -130,7 +130,7 @@ void SceneTest::Update() {
 
 	/// Bullet更新
 	if (system_->GetMouseIsPush(0)) {
-		player_->Attack(sight_->GetMouseOnPlane());
+		player_->Shoot(sight_->GetMouseOnPlane());
 	}
 
 	/// Enemy更新

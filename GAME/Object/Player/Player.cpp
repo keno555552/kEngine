@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <numbers>
 #include "GAME/Object/Bullet/Bullet.h"
+#include "GAME/Object/Sight/Sight.h"
 
 Player::Player(kEngine* system, const Vector3& position) {
 	Object::IntObject(system);
@@ -28,9 +29,20 @@ Player::Player(kEngine* system, const Vector3& position) {
 	nearAttackChangeTimer_.InitM(kNearAttackChangeTime, system_->GetTimeManager());
 	nearAttackEffectTimer_.InitM(kNearAttackEffectTime, system_->GetTimeManager());
 
+	/// 照準（★最後に追加）
+	MH_sight_ = system_->SetModelObj("GAME/resources/Object/targeter/targeter.obj");
+	sight_ = std::make_unique<Sight>(system_, this);
+	sight_->IntObject(system_);
+	sight_->CreateModelData(MH_sight_);
+	sight_->mainPosition.transform.scale = { 0.5f, 0.5f, 0.5f };
+	sight_->objectParts_[0].materialConfig->textureColor = { 0.8f,0.2f,0.2f,1.0f };
+
+
 	/// bugCheck
 	checkTimer_.Init0(1.0f, system_->GetTimeManager());
 }
+
+Player::~Player() = default;
 
 void Player::Update(Camera* camera) {
 	totelDeltaTime_ = system_->GetDeltaTime();
@@ -39,7 +51,12 @@ void Player::Update(Camera* camera) {
 	BehaviorRootUpdate();
 	DamageAndEffectPart();
 
-	Object::Update(camera);
+	sight_->Update(camera);
+}
+
+void Player::Draw() {
+	Object::Draw();
+	sight_->Draw();
 }
 
 
@@ -67,7 +84,11 @@ void Player::GetDamage(float damage) {
 	system_->SoundPlaySE(SH_DAMAGE_);
 }
 
-void Player::Attack(Vector3 mousePos) {
+Vector3 Player::GetAimPosition() const {
+	return sight_->GetMouseOnPlane();
+}
+
+void Player::Shoot(Vector3 mousePos) {
 
 	/// 出来ない条件に該当したら終了
 	// 弾のリストがセットされてない

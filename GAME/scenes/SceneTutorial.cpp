@@ -29,7 +29,6 @@ SceneTutorial::SceneTutorial(kEngine* system) {
 
 	MH_skydome_ = system_->SetModelObj("kEngine/EngineAssets/TemplateResource/object/skydome/skydome.obj");
 	MH_player_ = system_->SetModelObj("GAME/resources/Object/player/player.obj");
-	MH_sight_ = system_->SetModelObj("GAME/resources/Object/targeter/targeter.obj");
 	MH_underGround_ = system_->SetModelObj("GAME/resources/Object/underground_BG/underground_BG.obj");
 	MH_bullet_ = system_->SetModelObj("GAME/resources/Object/bullet/bullet.obj");
 	MH_object_ = system_->SetModelObj("GAME/resources/Object/pickaxe/pickaxe.obj");
@@ -86,12 +85,6 @@ SceneTutorial::SceneTutorial(kEngine* system) {
 	underGround_BG_->objectParts_[0].materialConfig->textureColor = { 0.3f,0.3f,0.3f,1.0f };
 	underGround_BG_->mainPosition.transform.translate.z = +0.5f;
 
-	player_ = new Player(system, { 0.0f, 5.5f, 0 });
-	player_->CreateModelData(MH_player_);
-	player_->mainPosition.transform.scale = { 0.5f, 0.5f, 0.5f };
-	player_->InputBulletList(&bulletList_);
-	player_->objectParts_[0].materialConfig->reflectiveStrength = 1.3f;
-
 	//Enemy* enemy = new Enemy(system, { 3.0f, 1.0f, 0 });
 	//enemy->CreateModelData(MH_enemy_);
 	//enemy->mainPosition.transform.scale = { 0.5f,0.5f,0.5f };
@@ -108,14 +101,6 @@ SceneTutorial::SceneTutorial(kEngine* system) {
 		hpUI_[i]->objectParts_[0].materialConfig->textureHandle = TH_hpUI_;
 		hpUI_[i]->Update(nullptr);
 	}
-
-
-	sight_ = new Sight(system, player_);
-	sight_->IntObject(system_);
-	sight_->CreateModelData(MH_sight_);
-	//sight_->mainPosition.transform.scale = { 0.5f, 0.5f, 0.5f };
-	sight_->mainPosition.transform.scale = { 0.5f, 0.5f, 0.5f };
-	sight_->objectParts_[0].materialConfig->textureColor = { 0.8f,0.2f,0.2f,1.0f };
 
 	backSign_ = new Object;
 	backSign_->IntObject(system_);
@@ -149,8 +134,6 @@ SceneTutorial::~SceneTutorial() {
 
 	system_->DestroyCamera(camera_);
 	system_->DestroyCamera(debugCamera_);
-
-	delete sight_;
 
 	delete player_;
 	delete skydome_;
@@ -194,12 +177,9 @@ void SceneTutorial::Update() {
 	if (system_->GetIsPush(DIK_W)) player_->MoveJump();
 	player_->Update(usingCamera_.lock().get());
 
-	/// Sight更新
-	sight_->Update(usingCamera_.lock().get());
-
 	/// Bullet更新
 	if (system_->GetMouseIsPush(0)) {
-		player_->Attack(sight_->GetAngleSightToTarget());
+		player_->Shoot();
 	}
 
 	/// Enemy更新
@@ -215,6 +195,13 @@ void SceneTutorial::Update() {
 			} else {
 				i++;
 			}
+		}
+	}
+
+	/// Sign更新
+	if (!signList_.empty()) {
+		for (int i = 0; i < signList_.size();i++) {
+			signList_[i]->Update(usingCamera_.lock().get());
 		}
 	}
 
@@ -292,7 +279,6 @@ void SceneTutorial::Draw() {
 	skydome_->Draw();
 	underGround_BG_->Draw();
 	player_->Draw();
-	sight_->Draw();
 
 	//system_->Draw3D(skydome_);
 	//system_->Draw3D(player_);
@@ -308,6 +294,11 @@ void SceneTutorial::Draw() {
 	/// bullet描画
 	for (auto& bullet : bulletList_) {
 		bullet->Draw();
+	}
+
+	/// sign描画
+	for (auto& sign : signList_) {
+		sign->Draw();
 	}
 
 	/// ブロック描画
@@ -404,7 +395,7 @@ void SceneTutorial::ImGuiPart() {
 		ImGui::Begin("PlayerPos");
 		ImGui::SliderFloat3("Pos", &player_->mainPosition.transform.translate.x, -1.0f, 1.0f);
 		ImGui::SliderFloat3("Rotate", &player_->mainPosition.transform.rotate.x, -1.0f, 1.0f);
-		ImGui::SliderFloat3("TargeterRotate", &sight_->mainPosition.transform.rotate.x, 0.0f, 5.0f);
+		// ImGui::SliderFloat3("TargeterRotate", &player_->GetAimPosition, 0.0f, 5.0f);
 		ImGui::Text("Player HP = %d", hp);
 		ImGui::SliderFloat("Player ReflectiveStrength", &player_->objectParts_[0].materialConfig->reflectiveStrength, 0.0f, 50.0f);
 		ImGui::End();
@@ -496,37 +487,50 @@ void SceneTutorial::ImGuiPart() {
 #endif
 
 void SceneTutorial::RegisterMapSpawner() {
+	/// 名前 → 保存先 ← 生成関数
 	mapChipManager_->ClearRegistry();
-
-	/// 目印：生成ルールはシーン側（名前は MapData の unit 名と同じにする）
-	mapChipManager_->Register(playerName_, [this](const MapReader::SpawnInfo& s) {
-		player_->mainPosition.transform.translate = s.position;
-		});
-	mapChipManager_->Register(enemyName_, [this](const MapReader::SpawnInfo& s) {
-		Enemy* enemy = new Enemy(system_, s.position);
-		enemy->CreateModelData(MH_enemy_);
-		enemy->mainPosition.transform.scale = { 0.5f,0.5f,0.5f };
-		enemy->objectParts_[0].transform.translate.y = -1.0f;
-		enemyList_.push_back(enemy);
-		});
-	mapChipManager_->Register(shipSpawnPointName_, [this](const MapReader::SpawnInfo& s) {});
-	mapChipManager_->Register(sign, [this](const MapReader::SpawnInfo& s) {});
-
-	/// 終点：船の位置に BackPoint を置く (仮)
-	mapChipManager_->Register(shipSpawnPointName_, [this](const MapReader::SpawnInfo& s) {
-		delete backPoint_;   // 地図に複数あったら最後の 1 個を使う（前のは消す）
-		backPoint_ = new BackPoint(system_, s.position);
-		});
-
-	/// それ以外：直接タイルはブロックとして作る
-	mapChipManager_->SetDefault([this](const MapReader::SpawnInfo& s) {
-		if (!mapBlocks_.OnSpawn(s)) {
-			unhandledMapUnits_.insert(s.unit ? s.unit->name : std::to_string(s.id));   // 登録漏れ
-		}
-		});
+	mapChipManager_->Register(playerName_,         &player_,    this, &SceneTutorial::CreatePlayer);
+	mapChipManager_->Register(enemyName_,          &enemyList_, this, &SceneTutorial::CreateEnemy);
+	mapChipManager_->Register(shipSpawnPointName_, &backPoint_, this, &SceneTutorial::CreateBackPoint);
+	mapChipManager_->Register(signName_,           &signList_,  this, &SceneTutorial::CreateSign);
+	mapChipManager_->SetDefault(this, &SceneTutorial::SpawnDefault);
 }
 
 void SceneTutorial::GenerateMap() {
 	mapBlocks_.Init(mapChipManager_.get(), "Main");
 	mapChipManager_->Generate("Main");
+}
+
+/// ============================== 生成関数 ============================== ///
+
+Player* SceneTutorial::CreatePlayer(const MapReader::SpawnInfo& s) {
+	Player* player = new Player(system_, s.position);
+	player->CreateModelData(MH_player_);
+	player->mainPosition.transform.scale = { 0.5f, 0.5f, 0.5f };
+	player->InputBulletList(&bulletList_);
+	player->objectParts_[0].materialConfig->reflectiveStrength = 1.3f;
+	return player;
+}
+
+Enemy* SceneTutorial::CreateEnemy(const MapReader::SpawnInfo& s) {
+	Enemy* enemy = new Enemy(system_, s.position);
+	enemy->CreateModelData(MH_enemy_);
+	enemy->mainPosition.transform.scale = { 0.5f,0.5f,0.5f };
+	enemy->objectParts_[0].transform.translate.y = -1.0f;
+	return enemy;
+}
+
+BackPoint* SceneTutorial::CreateBackPoint(const MapReader::SpawnInfo& s) {
+	return new BackPoint(system_, s.position);
+}
+
+Sign* SceneTutorial::CreateSign(const MapReader::SpawnInfo& s) {
+	return new Sign(system_, s.position);
+}
+
+/// 登録に無い物：直接タイルはブロック、それ以外は登録漏れとして記録
+void SceneTutorial::SpawnDefault(const MapReader::SpawnInfo& s) {
+	if (!mapBlocks_.OnSpawn(s)) {
+		unhandledMapUnits_.insert(s.unit ? s.unit->name : std::to_string(s.id));
+	}
 }

@@ -2,10 +2,10 @@
 #include "BaseScene.h"
 #include "Object\Object.h"
 #include "Object\Sprite.h"
-#include "GAME\Object\Sight\Sight.h"
 #include "GAME\Object\Bullet\Bullet.h"
 #include "GAME\Object\Player\Player.h"
 #include "GAME\Object\Enemy\Enemy.h"
+#include "GAME\Object\Sign\Sign.h"
 #include "GAME\Object\BackPoint\BackPoint.h"
 #include "tool\CollisionManager\CollisionManager.h"
 #include "GAME\resources\PostProcessPreset\PPP_GlitchScreen.h"
@@ -58,7 +58,6 @@ private:
 	/// モデルハンドル
 	int MH_skydome_ = 0;
 	int MH_player_ = 0;
-	int MH_sight_ = 0;
 	int MH_underGround_ = 0;
 	int MH_bullet_ = 0;
 	int MH_object_ = 0;
@@ -91,8 +90,6 @@ private:
 
 	Object* underGround_BG_ = nullptr;
 
-	Sight* sight_ = nullptr;
-
 	Player* player_ = nullptr;
 
 	BackPoint* backPoint_ = nullptr;
@@ -101,6 +98,7 @@ private:
 
 	SimpleSprite* hpUI_[3] = { nullptr,nullptr,nullptr };
 
+	std::vector<std::unique_ptr <Sign>> signList_;
 	std::unique_ptr<MapChipManager> mapChipManager_;
 	MapBlockData mapBlocks_;
 	std::vector<Bullet*> bulletList_;
@@ -114,19 +112,26 @@ private:
 	std::string playerName_ = "kPlayer";
 	std::string enemyName_ = "kEnemy";
 	std::string shipSpawnPointName_ = "kShipPoint";
-	std::string sign = "kSign";
+	std::string signName_ = "kSign";
 
 	/// =============== フラグ ================///
 	bool useDebugCamera = false;
 	bool isWin_ = false;
 
 private:
-	/// ============= �V�[������� =============///
+	/// ============= ゲーム進行関連 =============///
 	void PhaseUpdate();
 	void CameraPart();
 	void ImGuiPart();
 
 	void RegisterMapSpawner();
 	void GenerateMap();
+
+	/// =============== 生成関連 ===============///
+	Player* CreatePlayer(const MapReader::SpawnInfo& s);
+	Enemy* CreateEnemy(const MapReader::SpawnInfo& s);
+	BackPoint* CreateBackPoint(const MapReader::SpawnInfo& s);
+	Sign* CreateSign(const MapReader::SpawnInfo& s);
+	void SpawnDefault(const MapReader::SpawnInfo& s);
 };
 
