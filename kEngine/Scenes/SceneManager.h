@@ -3,7 +3,6 @@
 #include "SceneFactory.h"
 #include "BaseScene.h"
 #include "GAME/scenes/SceneTitle.h"
-#include "GAME/scenes/SceneTest.h"
 #include "GAME/scenes/SceneWin.h"
 #include "GAME/scenes/SceneLose.h"
 #include "AnimationSystem/AnimationEditor.h"
