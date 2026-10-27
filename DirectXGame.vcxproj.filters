@@ -327,9 +327,6 @@
     <ClCompile Include="kEngine\Data\Geometry\Corner\Corner.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Data\Game\MapChip\MapChipData.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="kEngine\Tool\AnimationSystem\AnimationManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -1038,9 +1035,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Data\Geometry\Corner\Corner.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="kEngine\Data\Game\MapChip\MapChipData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Tool\AnimationSystem\AnimationEditor.h">
@@ -1827,6 +1821,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="GAME\Object\Sign\sign.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Data\Game\MapChip\CollisionResult.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

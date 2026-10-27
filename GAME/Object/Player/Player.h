@@ -7,6 +7,7 @@
 #include "BaseScene.h"
 #include "Data/Geometry/Corner/Corner.h"
 #include "Math/Geometry/Collision/crashDecision.h"
+#include "Data/Game/MapChip/CollisionResult.h"
 
 
 /// 移動速度
@@ -47,7 +48,6 @@ static inline const float kNearAttackBoxHeight = 1.2f;
 static inline const float kNearAttackChangeTime = 0.2f;
 static inline const float kNearAttackEffectTime = 0.5f;
 
-
 class Bullet;
 class Sight;
 class Player :public Object
@@ -74,6 +74,7 @@ public:
 
 	/// 当たり判定
 	AABB& GetAABB();
+	void SetCollisionResult(const CollisionResult& result);
 	//AABB& GetMapChipAABB();
 
 	/// 位置・移動関連
@@ -126,7 +127,6 @@ private:
 	void Move();
 	void ResetMove();
 	void OnGroundChanger(const CollisionMapInfo& info);
-	void MapCollisionDecideDown(CollisionMapInfo& info);
 	void MovePlayerByResult(const CollisionMapInfo& info);
 
 	void BitMapBugCheck();

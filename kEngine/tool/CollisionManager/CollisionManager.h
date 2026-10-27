@@ -1,5 +1,6 @@
 #pragma once
 #include "MathsIncluder.h"
+#include "Data/Game/MapChip/CollisionResult.h"
 #include <vector>
 
 class Enemy;

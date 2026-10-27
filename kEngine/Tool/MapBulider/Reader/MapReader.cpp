@@ -26,29 +26,6 @@ namespace {
 
 /// ============================== 読み込み ============================== ///
 
-bool MapReader::LoadMap(const std::string& csvPath, const std::string& mapDataPath, MapPackage& out) {
-	namespace fs = std::filesystem;
-
-	if (!ReadMapGrid(csvPath, out.grid)) {
-		log_ += "MapReader: cannot read csv " + csvPath + "\n";
-		return false;
-	}
-
-	/// MapData の場所：指定が無ければ csv の「#mapData」の名前で、よくある場所を探す
-	std::string dataPath = mapDataPath.empty() ? FindMapDataPath(csvPath, out.grid.mapDataName) : mapDataPath;
-	if (dataPath.empty()) {
-		log_ += "MapReader: MapData '" + out.grid.mapDataName + "' not found near " + csvPath + "\n";
-		return false;
-	}
-
-	if (!ReadMapData(dataPath, out.data)) return false;
-
-	if (!out.grid.mapDataName.empty() && out.grid.mapDataName != out.data.dataName) {
-		log_ += "MapReader: warning: csv wants '" + out.grid.mapDataName + "' but loaded '" + out.data.dataName + "'\n";
-	}
-	return true;
-}
-
 bool MapReader::ReadMapData(const std::string& jsonPath, MapData& out) {
 	std::ifstream in(jsonPath);
 	if (!in.is_open()) {

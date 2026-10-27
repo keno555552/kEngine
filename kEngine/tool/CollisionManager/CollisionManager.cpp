@@ -19,33 +19,13 @@ void CollisionManager::Update(float deltaTime) {
 }
 
 bool CollisionManager::PlayerMapCollision() {
-
 	if (!player_ || !mapChipManager_) return false;
 
-	AABB box = player_->GetAABB();
-	Vector3 velocity = player_->GetVelocity();
+	const CollisionResult result = mapChipManager_->GetMapCollisionCorrection(
+		player_->GetAABB(), player_->GetVelocity(), totelDeltaTime_);
 
-	// MapChipField内での当たり判定を計算
-	CollisionResult result = mapChipManager_->GetMapCollisionCorrection(
-		box,
-		velocity,
-		totelDeltaTime_
-	);
-
-	// 当たると速度を0にする
-	if (result.xIsMainAxis) {
-		velocity.x = 0.0f;
-	}
-	if (result.yIsMainAxis) {
-		velocity.y = 0.0f;
-	}
-
-	player_->SetVelocity(velocity);
-	player_->SetOnGround(result.landed);
-
-	Vector3 velAfter = player_->GetVelocity();
-	// Logger::Log("PlayerVelocity: (%f, %f, %f)", velAfter.x, velAfter.y, velAfter.z);
-
+	/// 結果を渡す → 動くのは Player 自身
+	player_->SetCollisionResult(result);
 	return true;
 }
 
