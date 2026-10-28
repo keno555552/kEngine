@@ -118,6 +118,41 @@ void CheatEngine::DrawLogList(const std::vector<Entry>& entries, const char* chi
 	ImGui::EndChild();
 }
 
+void CheatEngine::DrawTimeScaleControls() {
+	ImGui::SetNextWindowSize(ImVec2(360, 220), ImGuiCond_FirstUseEver);
+	if (!ImGui::Begin("Time Scale", &isTimeScaleOn_)) { ImGui::End(); return; }
+
+	TimeManager* tm = system_->GetTimeManager();
+
+	bool useCheat = tm->getUseCheatTimeScale();
+	if (ImGui::Checkbox("Override Engine DeltaTime", &useCheat)) {
+		tm->setUseCheatTimeScale(useCheat);
+	}
+
+	ImGui::BeginDisabled(!useCheat);
+	float cheatScale = tm->getCheatTimeScale();
+	ImGui::SetNextItemWidth(-80);
+	if (ImGui::SliderFloat("Scale", &cheatScale, 0.0f, 4.0f, "x%.2f", ImGuiSliderFlags_Logarithmic)) {
+		tm->setCheatTimeScale(cheatScale);
+	}
+	const float presets[] = { 0.0f, 0.1f, 0.25f, 0.5f, 1.0f, 2.0f };
+	for (int i = 0; i < IM_ARRAYSIZE(presets); ++i) {
+		if (i > 0) ImGui::SameLine();
+		char label[16];
+		std::snprintf(label, sizeof(label), "x%g", presets[i]);
+		if (ImGui::Button(label)) tm->setCheatTimeScale(presets[i]);
+	}
+	ImGui::EndDisabled();
+
+	ImGui::Separator();
+	ImGui::Text("Real dt   : %.4f", tm->getRealDeltaTime());
+	ImGui::Text("Engine dt : %.4f", tm->getDeltaTime());
+	ImGui::Text("Scaled dt : %.4f  (game x%.2f)", tm->getScaledDeltaTime(), tm->getTimeScale());
+	ImGui::Text("Timer dt  : %.4f  (timer x%.2f)", tm->getTimerScaledDeltaTime(), tm->getTimerTimeScale());
+
+	ImGui::End();
+}
+
 /// ====================== 描画 ====================== ///
 void CheatEngine::Draw() {
 	// F3 切換（文字輸入中不處理）
@@ -136,6 +171,7 @@ void CheatEngine::Draw() {
 
 			if (ImGui::CollapsingHeader("Playing Speed", ImGuiTreeNodeFlags_DefaultOpen)) {
 				ImGui::Checkbox("Freeze Scene Update", &freezeScene_);
+				ImGui::Checkbox("TimeScale Window", &isTimeScaleOn_);
 			}
 
 			if (ImGui::CollapsingHeader("ObjectsEditor", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -155,7 +191,7 @@ void CheatEngine::Draw() {
 			objectEditor_.Draw();
 			ImGui::End();
 		}
-
+		if (isTimeScaleOn_) DrawTimeScaleControls();
 		if (isLogOn_) DrawLogWindow();
 	}
 	if (!(isOpen_ && isObjectEditorOn_)) {

@@ -108,21 +108,23 @@ void CollisionManager::PlayerEnemyCollision() {
 		AABB eBox = enemy->GetAABB();
 		if (isOverlap(pBox, eBox)) {
 			// damage
-			player_->GetDamage(1.0f);
+			player_->GetDamage(1.0f, enemy->GetPosition());
 
-			// knockback: apply velocity impulse instead of teleport
-			Vector3 dir = player_->GetPosition() - enemy->GetPosition();
-			dir.y = 0.0f; // horizontal direction for push
-			float lenSq = dir.x * dir.x + dir.y * dir.y + dir.z * dir.z;
-			if (lenSq < 0.0001f) {
-				dir = { 1.0f, 0.0f, 0.0f }; // fallback
-			} else {
-				dir = Normalize(dir);
+			if (!player_->IsDead()) {
+				// knockback: apply velocity impulse instead of teleport
+				Vector3 dir = player_->GetPosition() - enemy->GetPosition();
+				dir.y = 0.0f; // horizontal direction for push
+				float lenSq = dir.x * dir.x + dir.y * dir.y + dir.z * dir.z;
+				if (lenSq < 0.0001f) {
+					dir = { 5.0f, 0.5f, 0.0f }; // fallback
+				} else {
+					dir = Normalize(dir);
+				}
+				const float kKnockbackSpeed = 4.0f; // adjust as needed
+				Vector3 knockbackVel = dir * kKnockbackSpeed;
+				knockbackVel.y = 0.5f; // small lift
+				player_->SetVelocity(knockbackVel);
 			}
-			const float kKnockbackSpeed = 4.0f; // adjust as needed
-			Vector3 knockbackVel = dir * kKnockbackSpeed;
-			knockbackVel.y = 0.5f; // small lift
-			player_->SetVelocity(knockbackVel);
 
 			// refresh player box for further collisions this frame
 			pBox = player_->GetAABB();

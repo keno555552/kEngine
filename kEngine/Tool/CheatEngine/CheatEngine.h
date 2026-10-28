@@ -48,6 +48,7 @@ private:
 	bool isOpen_ = false;
 	bool freezeScene_ = false;
 	bool isObjectEditorOn_ = false;
+	bool isTimeScaleOn_ = false;
 	Settings saved_{};
 
 	/// ===== Log ===== ///
@@ -63,5 +64,6 @@ private:
 private:
 	void DrawLogWindow();
 	void DrawLogList(const std::vector<Entry>& entries, const char* childId);
+	void DrawTimeScaleControls();
 };
 

@@ -18,9 +18,16 @@ public:
 	float getFPSPerSecond() const { return fpsPerSecond_; }
 
 	/// 倍率付きの時間関数
+	float getRealDeltaTime() const { return realDeltaTime_; }
 	void setTimeScale(float timeScale) { timeScale_ = timeScale; }
 	float getTimeScale() const { return timeScale_; }
 	float getScaledDeltaTime() const { return scaledDeltaTime_; }
+	/// CheatEngine専用：ONの間はゲーム側の timeScale / timerTimeScale を無視してこっちを使う
+	void setCheatTimeScale(float s) { cheatTimeScale_ = s; }
+	float getCheatTimeScale() const { return cheatTimeScale_; }
+	void setUseCheatTimeScale(bool use) { useCheatTimeScale_ = use; }
+	bool getUseCheatTimeScale() const { return useCheatTimeScale_; }
+
 	/// Timer用の倍率付きの時間関数
 	void setTimerTimeScale(float timerTimeScale) { timerTimeScale_ = timerTimeScale; }
 	float getTimerTimeScale() const { return timerTimeScale_; }
@@ -29,6 +36,7 @@ public:
 
 private:
 	std::chrono::steady_clock::time_point lastUpdateTime;
+	float realDeltaTime_ = 0.0f;
 	float totelDeltaTime_ = 0.0f;
 	float oneScondCounter_ = 0.0f;
 	std::vector<float>fpsHistory_;
@@ -38,6 +46,10 @@ private:
 private:
 	float timeScale_ = 1.0f;
 	float scaledDeltaTime_ = 0.0f;
+
+	float cheatTimeScale_ = 1.0f;
+	bool useCheatTimeScale_ = false;
+
 	float timerTimeScale_ = 1.0f;
 	float timerScaledDeltaTime_ = 0.0f;
 };

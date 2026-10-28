@@ -244,13 +244,11 @@ void SceneTutorial::Update() {
 		if (hp == 1) hpUI_[1]->objectParts_[0].materialConfig->textureHandle = TH_hpUI_empty_;
 		if (hp <= 0) {
 			hpUI_[0]->objectParts_[0].materialConfig->textureHandle = TH_hpUI_empty_;
-			system_->SoundStop(SH_BGM_);
-			outcome_ = SceneOutcome::LOSE;
-			isSceneEnd_ = true;
+			if (phase_ == ScenePhase::PROGRESS) {  
+				phase_ = ScenePhase::TRANSITION;     
+			}
 		}
 	}
-
-
 
 	//object_->mainPosition.transform.translate = player_->mainPosition.transform.translate + Vector3{1.0f,0,0};
 	//object_->Update(usingCamera_);
@@ -352,20 +350,42 @@ void SceneTutorial::PhaseUpdate() {
 	case ScenePhase::PROGRESS:
 		break;
 	case ScenePhase::TRANSITION:
-		/// タイマー初期化
-		if (phaseChangeTimer_->GetIsMax()) {
-			phaseChangeTimer_->Init0(entryTime_, system_->GetTimeManager());
-		}
-		/// 線方補間
-		circleCommand_->vignetteIntensity = phaseChangeTimer_->linearity(circleOpenIntensity, circleCloseIntensity);
-		/// circleに代入
-		system_->GetPostProcessRunner()->SetPassCommand(0, circleHandle_, *circleCommand_);
-
-		/// カンター行動
-		if (phaseChangeTimer_->ToMix()) {
-			outcome_ = SceneOutcome::WIN;
+		if (isWin_) {
+			/// ===== WIN：円で閉じる（元のまま）=====
+			if (phaseChangeTimer_->GetIsMax()) {
+				phaseChangeTimer_->Init0(entryTime_, system_->GetTimeManager());
+			}
+			circleCommand_->vignetteIntensity = phaseChangeTimer_->linearity(circleOpenIntensity, circleCloseIntensity);
+			system_->GetPostProcessRunner()->SetPassCommand(0, circleHandle_, *circleCommand_);
+			if (phaseChangeTimer_->ToMix()) {
+				outcome_ = SceneOutcome::WIN;
+			}
+		} else {
+			/// ===== LOSE：死亡演出 =====
+			LoseTransition();
 		}
 		break;
+	}
+}
+
+void SceneTutorial::LoseTransition() {
+	/// ① 倒れきるまで待つ（Player 側で吹っ飛び→バタン→バウンド中）
+	if (!player_->IsDeathAnimEnd()) return;
+
+	/// ② 倒れたまま kLoseWaitTime_ 秒
+	if (!isLoseCounting_) {
+		isLoseCounting_ = true;
+		loseWaitTimer_.Init0(kLoseWaitTime_, system_->GetTimeManager());
+		phaseChangeTimer_->Init0(entryTime_, system_->GetTimeManager());
+	}
+	if (!loseWaitTimer_.ToMix()) return;
+
+	/// ③ 円で閉じる → LOSE
+	circleCommand_->vignetteIntensity = phaseChangeTimer_->linearity(circleOpenIntensity, circleCloseIntensity);
+	system_->GetPostProcessRunner()->SetPassCommand(0, circleHandle_, *circleCommand_);
+	if (phaseChangeTimer_->ToMix()) {
+		outcome_ = SceneOutcome::LOSE;
+		system_->SoundStop(SH_BGM_);
 	}
 }
 
@@ -499,6 +519,12 @@ void SceneTutorial::RegisterMapSpawner() {
 void SceneTutorial::GenerateMap() {
 	mapBlocks_.Init(mapChipManager_.get(), "Main");
 	mapChipManager_->Generate("Main");
+}
+
+void SceneTutorial::StartTransition(SceneOutcome outcome) {
+	if (phase_ == ScenePhase::TRANSITION) return;   // 二重防止
+	nextOutcome_ = outcome;
+	phase_ = ScenePhase::TRANSITION;
 }
 
 /// ============================== 生成関数 ============================== ///

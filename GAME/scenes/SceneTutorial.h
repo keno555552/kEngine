@@ -118,14 +118,24 @@ private:
 	bool useDebugCamera = false;
 	bool isWin_ = false;
 
+	/// 遷移後の結果（TRANSITION 終了時に outcome_ へ）
+	SceneOutcome nextOutcome_ = SceneOutcome::NONE;
+
+	/// 死亡後の待ち
+	Timer loseWaitTimer_;
+	float kLoseWaitTime_ = 2.0f;
+	bool isLoseCounting_ = false;
+
 private:
 	/// ============= ゲーム進行関連 =============///
 	void PhaseUpdate();
+	void LoseTransition();
 	void CameraPart();
 	void ImGuiPart();
 
 	void RegisterMapSpawner();
 	void GenerateMap();
+	void StartTransition(SceneOutcome outcome);
 
 	/// =============== 生成関連 ===============///
 	Player* CreatePlayer(const MapReader::SpawnInfo& s);
