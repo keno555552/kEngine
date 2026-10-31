@@ -10,8 +10,12 @@
 #include "Data/Game/MapChip/CollisionResult.h"
 
 /// ================== プレイヤーデータ関連
+
+/// HP設定
 static inline const float kPlayerMaxHP = 1.0f;
 
+
+/// ================== 速度関連
 /// 移動速度
 static inline const float kAcceleration = 10.0f;
 /// 移動減衰
