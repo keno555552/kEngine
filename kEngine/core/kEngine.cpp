@@ -236,6 +236,10 @@ void kEngine::DrawParticle(std::vector<ObjectData>& objectList, std::vector<Part
 	drawDataCollector->CollectParticle(objectList, instance);
 }
 
+void kEngine::DrawParticle(std::vector<ParticleInstance>& instance) {
+	drawDataCollector->CollectParticle(instance);
+}
+
 int kEngine::GetModelTextureHandle(int modelHandle, int part) {
 	return ResourceManager::GetInstance()->GetTextureHandleFromModelGroup(modelHandle, part);
 }

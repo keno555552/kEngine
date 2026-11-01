@@ -1,14 +1,19 @@
 #pragma once
 #include <string>
+#include <memory>
 #include "Vector3.h"
 #include "Vector4.h"
 #include "Transform.h"
 #include "TimeManager.h"
 
+struct ParticlePrototype;
 struct ParticleInstance
 {
-	/// パーティクル状態
 
+	/// パーティクルプロトタイプ(この粒子発射される時の設定)
+	std::shared_ptr<ParticlePrototype> prototype;
+
+	/// パーティクル状態
 	int particleId = -1;		/// 粒子ID（Emitter内で一意）
 
 	bool isAlive = false;		/// 生存フラグ

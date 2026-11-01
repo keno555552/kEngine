@@ -101,6 +101,8 @@ public:
 
 	void CollectParticle(std::vector<ObjectData>& objectList, std::vector<ParticleInstance>& instance);
 
+	void CollectParticle(std::vector<ParticleInstance>& instance);
+
 	std::unordered_map<PSOKey,
 		std::unordered_map<MeshBuffer*,
 		std::unordered_map <TextureHandle,

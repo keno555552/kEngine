@@ -6,18 +6,21 @@ ParticleEmitter::ParticleEmitter(kEngine* system,
 	int* particleIdIP,
 	int maxParticles) :
 	system_(system),
-	prototype_(particlePrototype),
+	prototype_(std::make_shared<ParticlePrototype>(particlePrototype)),
 	maxParticles_(maxParticles),
-	particleIdIP_(particleIdIP),
-	emitterPosition(particlePrototype.startPosition) {
-	isObjectType_ = (particlePrototype.renderType == ParticleRenderType::Object) ?
-		ParticleRenderType::Object :
-		ParticleRenderType::Sprite;
-
+	particleIdIP_(particleIdIP) {
+	isObjectType_ = particlePrototype.renderType;
 	emitTimer_.Init0(particlePrototype.emitRate, system_->GetTimeManager());
 }
 
 ParticleEmitter::~ParticleEmitter() {}
+
+void ParticleEmitter::SetPrototype(const ParticlePrototype& proto) {
+	/// 新しい Prototype を作るだけ。古い方は飛んでいる粒子が持っているので、その粒子が全部死ぬまで残る
+	prototype_ = std::make_shared<ParticlePrototype>(proto);
+	isObjectType_ = proto.renderType;
+	emitTimer_.Init0(proto.emitRate, system_->GetTimeManager());
+}
 
 void ParticleEmitter::Update() {
 
@@ -28,12 +31,12 @@ void ParticleEmitter::Update() {
 	float deltaTime = system_->GetDeltaTime() * timeScale_;
 
 	/// 自動發射
-	if (prototype_.emitRate > 0.0f) {
+	if (prototype_->emitRate > 0.0f) {
 		emitTimer_.parameter_ += deltaTime;
-		float interval = 1.0f / prototype_.emitRate;
+		float interval = 1.0f / prototype_->emitRate;
 
 		while (emitTimer_.parameter_ >= interval) {
-			Emit(prototype_.burstCount);
+			Emit(prototype_->burstCount);
 			emitTimer_.parameter_ -= interval;
 		}
 	}
@@ -48,7 +51,7 @@ void ParticleEmitter::Update() {
 		}
 
 		/// 重力
-		p.velocity += prototype_.gravity * deltaTime;
+		p.velocity += p.prototype->gravity * deltaTime;
 
 		/// 位置更新
 		p.nowTranslate += p.velocity * deltaTime;
@@ -76,7 +79,7 @@ void ParticleEmitter::Update() {
 		};
 
 		/// 阻尼
-		p.velocity *= std::exp(-prototype_.damping * deltaTime);
+		p.velocity *= std::exp(-p.prototype->damping * deltaTime);
 	}
 
 	/// 自動發射およびタイマー更新
@@ -89,7 +92,7 @@ void ParticleEmitter::Update() {
 		if (!(isParameter0 || isMaxTime0)) {
 			emitTimer_.ToMix();
 			if (emitTimer_.GetIsMax()) {
-				Emit(prototype_.burstCount);
+				Emit(prototype_->burstCount);
 				emitTimer_.Reset0();
 			}
 		}
@@ -98,7 +101,7 @@ void ParticleEmitter::Update() {
 	/// 無序刪除
 	for (int i = (int)particles_.size() - 1; i >= 0; --i) {
 		if (!particles_[i].isAlive) {
-			dexpiredData_.push_back(particles_.back());
+			dexpiredData_.push_back(particles_[i]);   // 死んだ本人を記録（back() だと別の粒子になる）
 			particles_[i] = std::move(particles_.back());
 			particles_.pop_back();
 		}
@@ -110,13 +113,17 @@ void ParticleEmitter::Update() {
 
 void ParticleEmitter::Emit(int count, ParticlePrototypeOverride* prototype) {
 
-	ParticlePrototype usedPrototype{prototype_};
-	if (prototype) {
-		CopyPPbyActiveData(usedPrototype, *prototype);
-	}
-
 	/// 発射停止中は発射しない
 	if (!isEmitting_) return;
+
+	/// 粒子に持たせる Prototype：普段は今のものを共有（コピーしない）
+	/// Link から上書きが来た時だけ、上書きしたコピーを1つ作る（Emit 1回につき1つ）
+	std::shared_ptr<ParticlePrototype> proto = prototype_;
+	if (prototype) {
+		proto = std::make_shared<ParticlePrototype>(*prototype_);
+		CopyPPbyActiveData(*proto, *prototype);
+	}
+	const ParticlePrototype& usedPrototype = *proto;
 
 
 	for (int i = 0; i < count; i++) {
@@ -126,6 +133,7 @@ void ParticleEmitter::Emit(int count, ParticlePrototypeOverride* prototype) {
 
 		for (int s = 0; s < shootTime; s++) {
 			ParticleInstance p;
+			p.prototype = proto;
 
 			p.particleId = (*particleIdIP_)++;
 			p.isAlive = true;
@@ -154,19 +162,27 @@ void ParticleEmitter::Emit(int count, ParticlePrototypeOverride* prototype) {
 				randomMaker_->randomFloat(-usedPrototype.startVelocityRandom.y, usedPrototype.startVelocityRandom.y),
 				randomMaker_->randomFloat(-usedPrototype.startVelocityRandom.z, usedPrototype.startVelocityRandom.z)
 			};
-
-			p.velocity = usedPrototype.startVelocity + rv;
+			p.velocity = rv + usedPrototype.startVelocity ;
 
 			// 初期状態設定
-			p.startTranslate = emitterPosition;
+			// p.startTranslate = emitterPosition;
+			// 初期位置：Link から位置が来ていればそこ、なければ「線の位置 + startPosition（ずれ）」
+			const Vector3 basePos = (prototype && prototype->hasStartPosition)
+				? prototype->startPosition
+				: emitterPosition + usedPrototype.startPosition;
+			Vector3 rp = {
+				randomMaker_->randomFloat(-usedPrototype.startPositionRandom.x, usedPrototype.startPositionRandom.x),
+				randomMaker_->randomFloat(-usedPrototype.startPositionRandom.y, usedPrototype.startPositionRandom.y),
+				randomMaker_->randomFloat(-usedPrototype.startPositionRandom.z, usedPrototype.startPositionRandom.z)
+			};
+			p.startTranslate =  rp + basePos;
 
 			Vector3 ranScale = {
 				randomMaker_->randomFloat(1.0f - usedPrototype.startScaleRandom.x, 1.0f + usedPrototype.startScaleRandom.x),
 				randomMaker_->randomFloat(1.0f - usedPrototype.startScaleRandom.y, 1.0f + usedPrototype.startScaleRandom.y),
 				randomMaker_->randomFloat(1.0f - usedPrototype.startScaleRandom.z, 1.0f + usedPrototype.startScaleRandom.z)
 			};
-			p.startScale = emitterScale * (usedPrototype.startScale * ranScale);
-
+			p.startScale = emitterScale * (ranScale * usedPrototype.startScale);
 
 			Vector3 ranRotate = {
 				randomMaker_->randomFloat(-usedPrototype.startRotationRandom.x, usedPrototype.startRotationRandom.x),
@@ -196,7 +212,7 @@ void ParticleEmitter::Emit(int count, ParticlePrototypeOverride* prototype) {
 					randomMaker_->randomFloat(1.0f - usedPrototype.endScaleRandom.y, 1.0f + usedPrototype.endScaleRandom.y),
 					randomMaker_->randomFloat(1.0f - usedPrototype.endScaleRandom.z, 1.0f + usedPrototype.endScaleRandom.z)
 				};
-				p.endScale = emitterScale * (usedPrototype.endScale * ranScale);
+				p.endScale = emitterScale * (ranScale * usedPrototype.endScale);
 			}
 
 
@@ -246,11 +262,9 @@ void ParticleEmitter::SwitchEmitter(bool isEmitting) {
 }
 
 void ParticleEmitter::Draw() {
-
+	if (particles_.empty()) return;
 	if (isObjectType_ == ParticleRenderType::Object) {
-		if (!particles_.empty()) {
-			system_->DrawParticle(prototype_.objectList, particles_);
-		}
+		system_->DrawParticle(particles_);
 	}
 }
 

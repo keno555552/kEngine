@@ -68,7 +68,7 @@ nlohmann::json JsonHelper::ObjectPartToJson(const ObjectPart& part, kEngine* sys
 	if (part.materialConfig) {
 		partJson["MaterialConfig"] = MaterialConfigToJson(*part.materialConfig, system);
 	} else {
-		partJson["MaterialConfig"] = "";
+		partJson["MaterialConfig"] = nullptr;
 	}
 
 	partJson["forward"] = V3ToJson(part.forward);
@@ -113,6 +113,16 @@ nlohmann::json JsonHelper::MaterialConfigToJson(const MaterialConfig& mat, kEngi
 	MaterialJson["heightScale"] = mat.heightScale;
 
 	return MaterialJson;
+}
+
+nlohmann::json JsonHelper::EngineParamsToJson(const EngineModelParams& p) {
+	return {
+		{ "sphereLat", p.sphereLat },{ "sphereLong", p.sphereLong },
+		{ "ringDivide", p.ringDivide },{ "ringOuter", p.ringOuter },{ "ringInner", p.ringInner },
+		{ "cylinderDivide", p.cylinderDivide },{ "cylinderTop", p.cylinderTop },
+		{ "cylinderBottom", p.cylinderBottom },{ "cylinderHeight", p.cylinderHeight },
+		{ "cylinderReverseY", p.cylinderReverseY },
+	};
 }
 
 /// ========================================== 読み ========================================== ///
@@ -275,5 +285,20 @@ ObjectPart JsonHelper::JsonToObjectPart(const nlohmann::json& j, kEngine* system
 	}
 
 	return part;
+}
+
+EngineModelParams JsonHelper::JsonToEngineParams(const nlohmann::json& j) {
+	EngineModelParams p{};
+	p.sphereLat = j.value("sphereLat", p.sphereLat);
+	p.sphereLong = j.value("sphereLong", p.sphereLong);
+	p.ringDivide = j.value("ringDivide", p.ringDivide);
+	p.ringOuter = j.value("ringOuter", p.ringOuter);
+	p.ringInner = j.value("ringInner", p.ringInner);
+	p.cylinderDivide = j.value("cylinderDivide", p.cylinderDivide);
+	p.cylinderTop = j.value("cylinderTop", p.cylinderTop);
+	p.cylinderBottom = j.value("cylinderBottom", p.cylinderBottom);
+	p.cylinderHeight = j.value("cylinderHeight", p.cylinderHeight);
+	p.cylinderReverseY = j.value("cylinderReverseY", p.cylinderReverseY);
+	return p;
 }
 

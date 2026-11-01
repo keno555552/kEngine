@@ -3,6 +3,7 @@
 #include "CameraManager/CameraManager.h"
 #include "LightManager/LightManager.h"
 #include "Resource/ResourceManager.h"
+#include "Tool/EffectSystem/ParticleSystem/ParticlePrototype.h"
 
 
 void DrawDataCollector::Initialize(CameraManager* cm, LightManager* lm, AnimationManager* am) {
@@ -664,6 +665,58 @@ void DrawDataCollector::CollectParticle(std::vector<ObjectData>& objectList, std
 	for (int i = 0; i < instance.size(); ++i) {
 
 		const auto& inst = instance[i];
+
+		/// パーティクルのObjectIndexがRenderDataのインデックス範囲内かチェック
+		if (inst.objectIndex < 0 || inst.objectIndex >= (int)objectList.size()) {
+			Logger::Log("[kEngine]DDC:ParticleInstance objectIndex is out of range! Data will not be input.");
+			Logger::Log("[kEngine]DDC:ParticleInstance ObjectIndex:%d", i);
+			continue;
+		}
+
+		auto& targetObject = objectList[inst.objectIndex];
+
+		for (int i = 0; i < targetObject.objectParts_.size(); ++i) {
+			/// ================ RenderData作成
+			/// RenderData作成
+			ParticleInstanceForDDC data;
+
+			/// メッシュ設定
+			Model* modelData = ResourceManager::GetInstance()->modelGroupList_[targetObject.modelHandle_]->GetModel(i);
+			data.mesh = modelData;
+
+			/// Material制作, ID獲得
+			MaterialConfig materialConfig = *targetObject.objectParts_[i].materialConfig;
+			materialConfig.textureColor = inst.nowColor;
+			materialConfig.MakeUVMatrix();
+			MaterialForGPU newData;
+			newData.inputMaterialConfig(materialConfig);
+			instancingListMaterialGPU_[instanceCounterMaterial_] = newData;
+			data.materialID = instanceCounterMaterial_++;
+
+			/// TextureHandle設定
+			data.textureHandle = materialConfig.textureHandle;
+
+			/// PSO制作
+			data.psoKey = PSODecision(materialConfig);
+
+			/// 変換行列設定
+			data.transMatrix = ObjectWVPAdjustmentPC(targetObject, *modelData->GetModelData().get(), i, inst);
+
+			/// バケットに入れる
+			AddObjectToBucketPC(data);
+		}
+	}
+}
+
+void DrawDataCollector::CollectParticle(std::vector<ParticleInstance>& instance) {
+
+	for (int i = 0; i < (int)instance.size(); ++i) {
+
+		const auto& inst = instance[i];
+
+		/// 見た目は粒子が持っている自分の Prototype から取る
+		if (!inst.prototype) continue;
+		auto& objectList = inst.prototype->objectList;
 
 		/// パーティクルのObjectIndexがRenderDataのインデックス範囲内かチェック
 		if (inst.objectIndex < 0 || inst.objectIndex >= (int)objectList.size()) {

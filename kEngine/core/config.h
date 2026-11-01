@@ -59,7 +59,7 @@ private:
 	static const int kDefaultClientWidth_ = 1280;   /// デフォルトのクライアント幅
 	static const int kDefaultClientHeight_ = 720;   /// デフォルトのクライアント高さ
 	static const std::string kDefaultClientTitle_;  /// デフォルトのクライアントタイトル
-	static const WindowMode kDefaultWindowMode_ = WINDOWED_Fixed;  /// デフォルトのウィンドウモード
+	static const WindowMode kDefaultWindowMode_ = WINDOWED_Dynamic;  /// デフォルトのウィンドウモード
 
 	/// 描画設定
 	static const int kDebugLineNumInstance_ = 5000;   /// DebugLineの最大インスタンス数

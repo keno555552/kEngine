@@ -32,7 +32,7 @@ public:
 private:
 
 	/// ============= システム関連 ==============///
-	EffectAdapter effectAdapter_{system_};
+	EffectAdapter effectAdapter_{ nullptr };
 
 	/// ============= ライト関連 ==============///
 	std::unique_ptr<Light> light1_ = nullptr;
@@ -62,9 +62,12 @@ private:
 	/// サントラハンドル
 	int TH_soundHandle_ = 0;
 
-	/// パーティクルハンドル
-	int TH_particleHandle_ = 0;
-	int TH_particleHandle2_ = 0;
+	/// ========== プレビュー関連 ========== ///
+	int previewEffectIndex_ = -1;          // 今 ParticleManager に入っている Effect
+	std::vector<int> previewRootIds_;      // Shoot で撃つ Emitter（どの Link の target にもなってないもの）
+	size_t previewParticleCount_ = 0;      // 作った時の数（増減したら作り直す）
+	size_t previewLinkCount_ = 0;
+	bool isPreviewDirty_ = true;           // 中身が変わった → 作り直す
 
 	int dds = 0;
 
@@ -92,27 +95,12 @@ private:
 
 
 	/// ========== UI関連 ========== ///
+	bool isResetLayout_ = false;
 
-	float leftInspectorWidth_ = 300.0f;
-	bool isEffectWindowOpen_ = true;
-	bool isParticleWindowOpen_ = true;
-	bool isLinkerWindowOpen_ = true;
-
-	float rightInspectorWidth_ = 300.0f;
-	float menuBarHeight_ = 0.0f;
 	bool isShootNonStop_ = false;
 	Timer shootTime;
 
-	bool isMBLWindowOpen_ = false;
-	bool isMBRWindowOpen_ = false;
-
-	bool showLoadWindow_ = false;
-	bool showSaveWindow_ = false;
-
 	std::string codeingText_;
-
-	std::string loadFilePath_;
-	std::string saveFilePath_;
 
 	/// Camera関連
 	bool useDebugCamera = false;
@@ -126,9 +114,31 @@ private:
 	bool doubleCheck_ = false;
 
 	SelectMode saveLoadMode_ = SelectMode::None;
-	bool isSave_ = false;
-	bool isLoad_ = false;
 	bool isDelete_ = false;
+	std::vector<int> previewEmitterIds_;   // 今のプレビューで使っている線（全部）
+
+	/// ========== 保存関連 ========== ///
+	bool useRelativePath_ = true;        
+
+	/// 保存の予約（ボタン → Update で処理）
+	struct SaveRequest {
+		SelectMode target = SelectMode::Effect;   // Effect / Particle / Linker
+		int effectIndex = -1;
+		int itemIndex = -1;                       // Particle / Linker の時だけ
+		bool forceDialog = false;                 // true = Save As
+	};
+	std::vector<SaveRequest> saveQueue_;
+
+	/// 上書き確認待ち
+	struct PendingSave {
+		bool active = false;
+		SaveRequest request;
+		bool detach = false;                      // Effect の Save As
+		EffectSavePlan plan;                      // Effect 用
+		std::string unitPath;                     // Particle / Linker 用
+		std::vector<std::string> conflicts;
+	};
+	PendingSave pendingSave_;
 
 private:
 	/// ======== カメラ関連 ========= ///
@@ -139,35 +149,68 @@ private:
 	/// SaveLoad関連
 	void SaveLoadPart();
 	void SavePart();
-	void LoadPart();
+	void LoadEffectFromDialog();
+	void ImportUnitFromDialog(SelectMode target);
+
+	/// 保存の予約
+	void RequestSave(int effectIndex, bool forceDialog);
+	void RequestSaveAll();
+	/// 1つ処理：パス決定 → 計画 → 衝突があれば確認待ち、なければ書く
+	void RequestSaveUnit(SelectMode target, int effectIndex, int itemIndex, bool forceDialog);
+	/// 1つ処理：種類ごとに振り分け
+	void BeginSave(const SaveRequest& request);
+	void BeginSaveEffect(const SaveRequest& request);
+	void BeginSaveUnit(const SaveRequest& request);
+	/// Particle / Linker を実際に書く
+	bool ExecuteSaveUnit(const SaveRequest& request, const std::string& path);
+	/// 実際に書く
+	bool ExecuteSave(int effectIndex, const EffectSavePlan& plan, bool detach);
+	/// 計画の中で「自分のものではない既存ファイル」を探す
+	std::vector<std::string> FindConflicts(const EffectData& effect, const EffectSavePlan& plan) const;
+	/// ダイアログで親フォルダを選ばせて、<親>/<Effect名>/<Effect名>.json を返す（キャンセルで空）
+	std::string AskEffectPath(const EffectData& effect);
+	/// Effectフォルダの中にある単元の保存先を外す（共用フォルダにあるものはそのまま）
+	void DetachEffectFolder(EffectData& effect);
+	/// 今の選択が有効か（フラグではなく、毎回 index を直接確かめる）
+	bool HasValidEffect() const {
+		return currentEffectIndex_ >= 0 && currentEffectIndex_ < (int)effectDataList_.size();
+	}
+	void RenameParticleInLinks(EffectData& effect, const std::string& oldName, const std::string& newName);
+
+
+	/// ======= プレビュー関連 ======= ///
+	/// 選択中の Effect を ParticleManager に入れる（変わってなければ何もしない）
+	void RefreshPreview();
+	/// 選択中の Effect を発射
+	void ShootPreview();
 
 	/// Delete関連
 	void DeletePart();
 
-	void SetNullSavePathToDesktop();
-	void SetNullLoadPathToDesktop();
-
 #ifdef USE_IMGUI
+	void ImGuiDockSpace();
+	void BuildDefaultLayout(ImGuiID dockId, const ImVec2& size);
+	float CalcButtonWidth(int count);
+
 	void ImGuiPart();
 
 	void ImGuiLeftMenuBar();
 	void ImGuiRightMenuBar();
 	void ImGuiMidWindow();
 
-	void ImGuiLoadWindow();
-	void ImGuiSaveWindow();
+	void ImGuiOverwriteWindow();
 	void ImGuiDoubleCheckWindow();
 
-	void ImGuiEffectShowing();
-	void ImGuiParticleShowing(ParticlePrototype& particle);
-	void ImGuiLinkerShowing(EmitterLink& linker);
+	bool ImGuiEffectShowing(EffectData& effect);
+	bool ImGuiParticleShowing(ParticlePrototype& particle);
+	bool ImGuiLinkerShowing(EmitterLink& linker);
 
 	bool InputTextString(const char *label, std::string &str, ImGuiInputTextFlags flags = 0);
 	bool InputBigTextString(const char *label, std::string &str, ImGuiInputTextFlags flags = 0);
-	void InputInt(const char* label, int& value);
-	void InputFloat(const char* label, float& value);
-	void InputVector3(const char* label, Vector3& vec);
-	void InputVector4(const char* label, Vector4& vec);
+	bool InputInt(const char* label, int& value);
+	bool InputFloat(const char* label, float& value);
+	bool InputVector3(const char* label, Vector3& vec);
+	bool InputVector4(const char* label, Vector4& vec);
 
 	template <typename EnumType>
 	bool EnumCombo(const char* label, EnumType& value, const char* const items[], int itemCount) {

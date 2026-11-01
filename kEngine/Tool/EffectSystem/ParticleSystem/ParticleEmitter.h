@@ -23,23 +23,24 @@ public:
 	void SetPosition(const Vector3& pos) { emitterPosition = pos; }
 	void SetRotation(const Vector3& rot) { emitterRotation = rot; }
 	void SetScale(const Vector3& scale) { emitterScale = scale; }
+	void SetPrototype(const ParticlePrototype& proto);
 
 	Vector3 GetPosition() const { return emitterPosition; }
 	Vector3 GetRotation() const { return emitterRotation; }
 	Vector3 GetScale() const { return emitterScale; }
-	ParticlePrototype GetPrototype() const { return prototype_; }
+	const ParticlePrototype& GetPrototype() const { return *prototype_; }
 
 	int GetParticleCount() const { return static_cast<int>(particles_.size()); }
 
 	/// --- 基本行為 --- ///
 	void Update();
-	void Emit(int count = 1, ParticlePrototypeOverride* prototype = {}); // 手動発射
+	void Emit(int count = 1, ParticlePrototypeOverride* prototype = nullptr); // 手動発射
 	void SwitchEmitter(bool isEmitting);
 
 	void Draw();
 
 	/// --- EmitterLinkための --- ///
-	const std::string& GetName() const { return prototype_.name; }
+	const std::string& GetName() const { return prototype_->name; }
 	const  ParticleRenderType& GetRenderType() const { return isObjectType_; }
 	const std::vector<ParticleInstance>& GetParticles() const { return particles_; }
 	std::vector<ParticleInstance>& GetEmittingData();
@@ -62,7 +63,7 @@ private:
 	kEngine* system_ = nullptr;
 
 	/// 粒子のプロトタイプ
-	ParticlePrototype prototype_{};
+	std::shared_ptr<ParticlePrototype> prototype_;
 	int maxParticles_{};
 
 	/// 発射された粒子のインスタンス

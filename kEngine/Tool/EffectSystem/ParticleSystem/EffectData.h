@@ -12,4 +12,5 @@ public:
 
 	// Editor用のデータ
 	bool isSaved = false; // 保存済みかどうか
+    std::string savePath; // 最後に保存したパス（空なら未保存）
 };

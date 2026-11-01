@@ -72,7 +72,10 @@ struct ParticlePrototype
 
     // Editor用のデータ
     bool isSaved = false; // 保存済みかどうか
-
+    std::string savePath;   // 最後に保存したパス（空なら未保存）
+    // Effect の起点か（Shoot / Play で直接撃つ）。false なら Link からだけ撃たれる
+    // ※ Effect ファイルに保存する（同じ Particle でも Effect ごとに違うことがあるので、Particle ファイルには書かない）
+    bool isRoot = true;
 };
 
 /// ParticlePrototypeのオーバーライド用構造体
