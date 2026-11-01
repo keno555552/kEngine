@@ -12,7 +12,7 @@
 /// ================== プレイヤーデータ関連
 
 /// HP設定
-static inline const float kPlayerMaxHP = 1.0f;
+static inline const float kPlayerMaxHP = 3.0f;
 
 
 /// ================== 速度関連
