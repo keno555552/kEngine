@@ -6,13 +6,15 @@
 #include "GAME\Object\Player\Player.h"
 #include "GAME\Object\Enemy\Enemy.h"
 #include "GAME\Object\Sign\Sign.h"
+#include "GAME\Object\SignBoard\SignBoard.h"
 #include "GAME\Object\BackPoint\BackPoint.h"
+#include "GAME\Object\Driller\Driller.h"
 #include "tool\CollisionManager\CollisionManager.h"
 #include "GAME\resources\PostProcessPreset\PPP_GlitchScreen.h"
 #include "Tool\MapBulider\Data\MapBlockData.h"
 #include <memory>
 #include <set>
-
+#include <numbers>
 
 class SceneTutorial :public BaseScene
 {
@@ -63,6 +65,7 @@ private:
 	int MH_object_ = 0;
 	int MH_enemy_ = 0;
 	int MH_backPoint_ = 0;
+	int MH_driller_ = 0;
 
 	/// テキスチャハンドル
 	int TH_box_ = 0;
@@ -99,6 +102,11 @@ private:
 	SimpleSprite* hpUI_[3] = { nullptr,nullptr,nullptr };
 
 	std::vector<std::unique_ptr <Sign>> signList_;
+
+	std::unique_ptr<SignBoard> signBoard_;
+
+	std::unique_ptr<Driller> driller_;
+
 	std::unique_ptr<MapChipManager> mapChipManager_;
 	MapBlockData mapBlocks_;
 	std::vector<Bullet*> bulletList_;

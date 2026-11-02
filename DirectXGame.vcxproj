@@ -590,6 +590,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Utility\ItemStateCountingSystem.cpp" />
     <ClCompile Include="kEngine\Scenes\SceneEngineTitle.cpp" />
     <ClCompile Include="GAME\Object\Sign\sign.cpp" />
+    <ClCompile Include="GAME\Object\SignBoard\SignBoard.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kEngine\Data\Game\MapChip\CollisionResult.h" />
@@ -930,6 +931,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Data\Render\GPUData\SkinningExtraVertexData.h" />
     <ClInclude Include="kEngine\Scenes\SceneEngineTitle.h" />
     <ClInclude Include="GAME\Object\Sign\sign.h" />
+    <ClInclude Include="GAME\Object\SignBoard\SignBoard.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl">

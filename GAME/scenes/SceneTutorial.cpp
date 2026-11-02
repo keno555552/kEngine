@@ -34,6 +34,7 @@ SceneTutorial::SceneTutorial(kEngine* system) {
 	MH_object_ = system_->SetModelObj("GAME/resources/Object/pickaxe/pickaxe.obj");
 	MH_enemy_ = system_->SetModelObj("GAME/resources/Object/enemy/enemy.obj");
 	MH_backPoint_ = system_->SetModelObj("GAME/resources/Object/backSign/backSign.obj");
+	MH_driller_ = system_->SetModelObj("GAME/resources/Object/driller/driller.gltf");
 
 	//TH_ReflectTexture_ = system_->LoadTexture("GAME/resources/texture/skyCube/drachenfels_cellar_2k.dds");
 	TH_ReflectTexture_ = system_->LoadTexture("./GAME/resources/texture/skyCube/output_skybox.dds");
@@ -93,6 +94,15 @@ SceneTutorial::SceneTutorial(kEngine* system) {
 
 	//MH_enemy_ = system_->SetModelObj("resources/object/player/player.obj");
 
+	/// drillerの生成
+	driller_ = std::make_unique<Driller>(system_);
+	driller_->CreateModelData(MH_driller_);
+	driller_->mainPosition.transform.scale = { 0.5f, 0.5f, 0.5f };
+	driller_->Hide();
+
+	/// SignBoardの生成
+	signBoard_ = std::make_unique<SignBoard>(system_);
+
 	for (int i = 0; i < 3; i++) {
 		hpUI_[i] = new SimpleSprite;
 		hpUI_[i]->IntObject(system);
@@ -123,6 +133,9 @@ SceneTutorial::SceneTutorial(kEngine* system) {
 	collisionManager_.InputBulletList(&bulletList_);
 	collisionManager_.InputEnemyList(&enemyList_);
 	collisionManager_.InputBackPoint(backPoint_);
+	collisionManager_.InputDriller(driller_.get());
+	collisionManager_.InputSignList(&signList_);
+
 
 	/// BGM再生
 	//system_->SoundPlayBGM(SH_BGM_, 0.7f);
@@ -199,9 +212,37 @@ void SceneTutorial::Update() {
 	}
 
 	/// Sign更新
-	if (!signList_.empty()) {
-		for (int i = 0; i < signList_.size();i++) {
-			signList_[i]->Update(usingCamera_.lock().get());
+	{
+		bool isPushE = system_->GetTriggerOn(DIK_E);
+		bool isAnyNear = false;
+		for (auto& sign : signList_) {
+			if (sign->GetIsPlayerNear()) {
+				isAnyNear = true;
+				if (isPushE) {
+					sign->SetIsInteract(true);
+					signBoard_->Toggle();
+					isPushE = false;          // 看板が並んでいても 1 回だけ反応
+				}
+			}
+			sign->Update(usingCamera_.lock().get());
+		}
+		/// 離れたら自動で閉じる
+		if (!isAnyNear) signBoard_->Close();
+		signBoard_->Update();
+	}
+
+	/// Driller更新
+	if (driller_) {
+		/// 近づいたら呼ぶ
+		if (driller_->GetIsPlayerNear() && !driller_->IsCalled()) {
+			driller_->Call();
+		}
+		const bool wasFalling = driller_->IsFalling();
+		driller_->Update(usingCamera_.lock().get());
+
+		/// 着地した瞬間にドアを開ける
+		if (wasFalling && driller_->IsLanded()) {
+			driller_->OpenDoor();
 		}
 	}
 
@@ -298,6 +339,12 @@ void SceneTutorial::Draw() {
 	for (auto& sign : signList_) {
 		sign->Draw();
 	}
+
+	/// signBoard描画
+	signBoard_->Draw();
+
+	/// driller描画
+	if (driller_) driller_->Draw();
 
 	/// ブロック描画
 	Vector3 camPos = usingCamera_.lock()->GetTransform().translate;
@@ -547,6 +594,7 @@ Enemy* SceneTutorial::CreateEnemy(const MapReader::SpawnInfo& s) {
 }
 
 BackPoint* SceneTutorial::CreateBackPoint(const MapReader::SpawnInfo& s) {
+	if (driller_) driller_->SetSpawnPoint(s.position);
 	return new BackPoint(system_, s.position);
 }
 

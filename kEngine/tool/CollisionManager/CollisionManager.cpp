@@ -4,6 +4,8 @@
 #include "GAME/Object/Bullet/Bullet.h"
 #include "GAME/Object/BackPoint/BackPoint.h"
 #include "GAME/Object/Enemy/Enemy.h"
+#include "GAME/Object/Driller/Driller.h"
+#include "GAME/Object/Sign/Sign.h"
 #include <algorithm>
 
 void CollisionManager::Update(float deltaTime) {
@@ -12,6 +14,8 @@ void CollisionManager::Update(float deltaTime) {
 	PlayerMapCollision();
 	PlayerEnemyCollision();
 	PlayerBackPointCollision();
+	PlayerDrillerCollision();
+	PlayerSignCollision();
 	BulletMapCollision();
 	BulletPlayerCollision();
 	BulletEnemyCollision();
@@ -147,6 +151,32 @@ void CollisionManager::PlayerBackPointCollision() {
 	} else {
 		backPoint_->SetIsBack(false);
 	}
+
+}
+
+void CollisionManager::PlayerSignCollision() {
+	if (player_ == nullptr || signList_ == nullptr) { return; }
+
+	AABB pBox = player_->GetAABB();
+	auto isOverlap = [](const AABB& a, const AABB& b) {
+		return (a.min.x <= b.max.x && a.max.x >= b.min.x) &&
+			(a.min.y <= b.max.y && a.max.y >= b.min.y) &&
+			(a.min.z <= b.max.z && a.max.z >= b.min.z);
+		};
+
+	for (auto& sign : *signList_) {
+		if (!sign) { continue; }
+		sign->SetIsPlayerNear(isOverlap(pBox, sign->GetAABB()));
+	}
+}
+
+void CollisionManager::PlayerDrillerCollision() {
+	if (player_ == nullptr || driller_ == nullptr || !driller_->HasSpawnPoint()) { return; }
+
+	/// 生成点から X 方向に kDrillerCallRangeCell マス以内
+	const float cellX = mapChipManager_ ? mapChipManager_->GetBlockSize().x : 1.0f;
+	const float dx = std::abs(player_->GetPosition().x - driller_->GetSpawnPoint().x);
+	driller_->SetIsPlayerNear(dx <= kDrillerCallRangeCell * cellX);
 }
 
 void CollisionManager::EnemyMapCollision() {
@@ -191,4 +221,12 @@ void CollisionManager::InputBulletList(std::vector<Bullet*>* bulletList) {
 
 void CollisionManager::InputEnemyList(std::vector<Enemy*>* enemyList) {
 	enemyList_ = enemyList;
+}
+
+void CollisionManager::InputSignList(std::vector<std::unique_ptr<Sign>>* signList) {
+	signList_ = signList;
+}
+
+void CollisionManager::InputDriller(Driller* driller) {
+	driller_ = driller;
 }
