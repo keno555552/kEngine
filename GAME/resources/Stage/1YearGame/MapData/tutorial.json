@@ -515,8 +515,7 @@
                 ]
             },
             "model": {
-                "path": "",
-                "type": "file"
+                "type": "none"
             },
             "name": "kSign",
             "previewColor": [
@@ -539,6 +538,97 @@
                 "translate": [
                     0.0,
                     -0.5,
+                    0.0
+                ]
+            }
+        },
+        {
+            "id": 23,
+            "isDirectTile": true,
+            "material": {
+                "blendModeType": 1,
+                "depthStencilType": 0,
+                "enableLighting": true,
+                "heightScale": 2.0,
+                "intensity": 1.0,
+                "lightModelType": 4,
+                "rasterizerMode": 0,
+                "reflectiveStrength": 0.0,
+                "renderModelType": 0,
+                "shininess": 32.0,
+                "textureColor": [
+                    0.0,
+                    1.0,
+                    0.8235292434692383,
+                    1.0
+                ],
+                "textureColor2": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "textureColor3": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "textureHandle": "../../../../../kEngine/EngineAssets/TemplateResource/texture/white5x5.png",
+                "useModelTexture": false,
+                "uvRotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "uvScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "uvTranslate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "model": {
+                "engine": "Cube",
+                "params": {
+                    "cylinderBottom": 1.0,
+                    "cylinderDivide": 32,
+                    "cylinderHeight": 3.0,
+                    "cylinderReverseY": false,
+                    "cylinderTop": 1.0,
+                    "ringDivide": 32,
+                    "ringInner": 0.5,
+                    "ringOuter": 1.0,
+                    "sphereLat": 10,
+                    "sphereLong": 10
+                },
+                "type": "engine"
+            },
+            "name": "NewUnit23",
+            "previewColor": [
+                0.004469439387321472,
+                0.23346225917339325,
+                0.30392158031463623,
+                1.0
+            ],
+            "transform": {
+                "rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0,
                     0.0
                 ]
             }

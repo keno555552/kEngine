@@ -11,6 +11,7 @@
 #include "GAME\Object\DetailButton\DetailButton.h"
 #include "GameObject\button\button.h"
 #include "Tool\DefaultMenu\DefaultMenu.h"
+#include "Utility/randomMaker.h"
 
 #include "Tool\MapBulider\TileMap.h"
 #include "Tool\MapBulider\Data\GeneratorVariable.h"
@@ -55,7 +56,6 @@ private:
 	};
 	std::vector<MapInfo> mapList_{};
 
-
 	std::vector<MapData> mapDataList_{};
 
 	/// MapData 調整器（View メニューから開閉）
@@ -75,6 +75,12 @@ private:
 
 	/// 現在のマップ情報
 	MapInfo currentMapInfo_{};
+
+	/// ============= 未保存確認 ==============///
+	/// 確認の後に実行する操作
+	enum class PendingAction { None, NewProject, LoadProject };
+	PendingAction pendingAction_ = PendingAction::None;
+	std::string pendingLoadPath_;                 // LoadProject の時の対象
 
 	/// ============= Preview関連 ==============///
 	std::unique_ptr<Object> previewObject_;          // 選択中の MapUnit を描くための Object
@@ -110,6 +116,7 @@ private:
 	Vector3 mapCamPos_{ 0.0f, 0.0f, -20.0f };
 	Vector3 mapCamRot_{ 0.0f, 0.0f, 0.0f };
 
+	RandomMaker randomMaker_;
 
 	/// ============ 新規作成関連 =============///
 	int newMapCounter_ = 0;
@@ -131,6 +138,9 @@ private:
 
 	/// save/load 用
 	bool useRelativePath_ = true;
+
+	/// TestMap(出力先を選んでいない時の生成先、Map List に入らない・保存しない、プレビュー専用）
+	MapInfo generatorScratchMap_{};
 
 
 	/// ============= UI関連 ==============///
@@ -156,6 +166,7 @@ private:
 	bool showLoadWindow_ = false;
 	bool showSaveWindow_ = false;
 	bool showNewWindow_ = false;
+	bool showUnsavedWindow_ = false;
 
 	/// ============= Engine Model 選択ウィンドウ ==============///
 	bool showEngineModelWindow_ = false;                    // OpenPopup の予約（既存の New 系ウィンドウと同じ方式）
@@ -182,6 +193,7 @@ private:
 	std::string debugText_;
 
 	/// 共用
+	static constexpr int kMakerFocusKey = -10;
 	std::string newName_;
 	bool isPause_ = false;
 	bool doubleCheck_ = false;
@@ -191,10 +203,10 @@ private:
 	bool isLoad_ = false;
 	bool isDelete_ = false;
 
+
 private:
 	/// 独立関数
 	void DeletePart();
-	void MapUpdate(MapData& data, MapMaker& maker);
 
 	/// 頼られる関数
 	void MapInfoLoadJson();
@@ -213,8 +225,11 @@ private:
 	void FocusMapCamera(const TileMapData& map, const Vector2& sp);
 	void ImGuiMapListWindow(ImVec2 size, ImVec2* outputSize, ImVec2 pos, ImVec2* outputPos, float colimenH);
 	void ImGuiMapDetail(MapInfo& info);
-	void ImGuiMapPreview();
+	void ImGuiMapPreview(MapInfo& info, int focusKey, bool editable);
 	void ImGuiMapToolbar();
+	MapInfo& GetMakerOutputMap();
+	void GenerateCurrentMaker();
+	void SelectMaker(int index);
 
 	/// エンジン内部モデルを呼び出し関連
 	int GetEngineModelHandle(EngineModelType type, const EngineModelParams& p);
@@ -227,11 +242,17 @@ private:
 	nlohmann::json MapDataToJson(const MapData& data, const std::string& baseDir) const;
 	MapData JsonToMapData(const nlohmann::json& j, const std::string& baseDir);
 
-	MapData* CurrentMapData();
-	TileMapData* CurrentMap();
 	bool SaveProject(const std::string& projectPath);
 	bool LoadProject(const std::string& projectPath);
-	void SaveProjectAs();
+	bool SaveProjectAs();
+
+	void NewProject();                            // 全部空にして新規
+	bool HasUnsavedChanges() const;               // どこかに * が付いているか
+	void ResetEditingState();                     // 選択・プレビュー等をリセット
+	/// 未保存があれば確認してから action を実行（無ければすぐ実行）
+	void RequestAction(PendingAction action, const std::string& path = "");
+	void RunPendingAction();
+	void ImGuiUnsavedWindow();
 
 	std::string ToSavePath(const std::string& path, const std::string& baseDir) const;
 
@@ -249,6 +270,7 @@ private:
 	void ImGuiDoubleCheckWindow();
 	void ImGuiNewVariablesWindow();
 	void ImGuiMapNewWindow();
+	void ImGuiScriptReadMe();
 
 	void ImGuiMapUnitDetail(MapData& data, float targetHeight);
 	void ImGuiMapDataShowing(MapData& data);

@@ -1,0 +1,15 @@
+{
+    "blankId": 0,
+    "cellSpacing": [
+        1.0,
+        1.0
+    ],
+    "kind": "MapData",
+    "name": "GeneTest",
+    "startX": 0,
+    "startY": 0,
+    "units": [],
+    "version": 1,
+    "xSize": 0,
+    "ySize": 0
+}

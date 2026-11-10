@@ -15,6 +15,13 @@ class MapMaker
 public:
 	MapMaker() = default;
 
+	/// ================= 生成設定（MapMaker.json の context） ================= ///
+	struct GenerateSettings {
+		std::string targetMapName;    // 出力先：空 = Editor 内のマップ、名前あり = Map List のそのマップを上書き
+		int width = 32;               // 生成するマップの大きさ（固定。スクリプトがはみ出しても切り捨て）
+		int height = 32;
+		int seed = 0;                 // 同じ seed → 同じ結果
+	};
 
 	/// ===================== 資料読み取り　===================== ///
 	/// 名前関連
@@ -45,13 +52,15 @@ public:
 	/// MapMaker.json を読み込んで中身を復元（BuildJson の逆）
 	bool ImportMapMakerFromJson(const std::string& filePath);
 
-
 	/// ==================== マップ生成関数　====================== ///
 	/// MapMaker内部データに基づいてマップを生成
-	TileMapData GenerateMap(MapData& mapData);
+	TileMapData GenerateMap(int blankId);
 
 	/// MapMaker.json（生成邏輯）を読み込んでマップを生成
 	TileMapData GenerateMapFromJson(MapData& mapData, const std::string& jsonPath);
+
+	GenerateSettings& GetGenerateSettings() { return generateSettings_; }
+	const GenerateSettings& GetGenerateSettings() const { return generateSettings_; }
 
 
 	/// ==================== ローディング関数　==================== ///
@@ -87,6 +96,8 @@ private:
 
 	// 変数
 	GeneratorVariable generatorVariables_;
+	// 生成設定
+	GenerateSettings generateSettings_;
 
 	std::string debugText_; // 編譯器 debug 資訊
 	bool isSave_ = false;

@@ -1,4 +1,6 @@
 #pragma once
+#include <algorithm>
+#include <cctype>
 #include <vector>
 #include <string>
 #include "Tool/MapBulider/Data/GeneratorVariable.h"
@@ -35,9 +37,11 @@ struct ArgNode {
 };
 
 struct ForNode : Node {
-    ExpressionNode* initExpr;
-    ExpressionNode* condExpr;
-    ExpressionNode* incExpr;
+    std::string loopVar;
+    std::string loopType = "int";  // for (float t = 0; ...) なら "float"
+    ExpressionNode* initExpr = nullptr;
+    ExpressionNode* condExpr = nullptr;
+    ExpressionNode* incExpr = nullptr;
 };
 
 struct IfNode : Node {
@@ -54,7 +58,8 @@ struct CallNode : Node {
 
 struct AssignNode : Node {
     std::string varName;
-    ExpressionNode* expr;
+    std::string declType;          // "int" / "float" = 宣言、空 = ただの代入
+    ExpressionNode* expr = nullptr;
 };
 
 

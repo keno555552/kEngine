@@ -3,6 +3,9 @@
 #include <iostream>
 
 void MapMaker::Compile() {
+	for (auto* n : nodes_) delete n;   // 前回の AST を消す
+	nodes_.clear();
+
 	tokens_ = Tokenize(script_);
 	sentences_ = BuildSentences(tokens_);
 
@@ -15,9 +18,10 @@ void MapMaker::BuildJson() {
 	out["name"] = mapName_;
 	out["code"] = codingText_;
 	out["context"] = {
-		{"maxRow", 128},
-		{"maxCol", 128},
-		{"seed",   12345}
+		{ "targetMap", generateSettings_.targetMapName },
+		{ "width",     generateSettings_.width },
+		{ "height",    generateSettings_.height },
+		{ "seed",      generateSettings_.seed },
 	};
 
 	out["script"] = MapProgramAdapter::BodyToJson(nodes_);
@@ -108,29 +112,17 @@ bool MapMaker::ImportMapMakerFromJson(const std::string& filePath) {
 
 	mapName_ = file.value("name", mapName_);
 	codingText_ = file.value("code", std::string());
+	/// 生成設定（古いファイルは maxCol / maxRow）
+	const nlohmann::json ctx = file.value("context", nlohmann::json::object());
+	generateSettings_.targetMapName = ctx.value("targetMap", std::string());
+	generateSettings_.width = ctx.value("width", ctx.value("maxCol", 32));
+	generateSettings_.height = ctx.value("height", ctx.value("maxRow", 32));
+	generateSettings_.seed = ctx.value("seed", 0);
 	script_ = codingText_;
 
 	/// 変数：BuildJson は variables[ { unitName, units:[...] } ] の形で書いている
 	generatorVariables_.variableList.clear();
-	for (const auto& group : file.value("variables", nlohmann::json::array())) {
-		for (const auto& jv : group.value("units", nlohmann::json::array())) {
-			const std::string name = jv.value("name", std::string());
-			const nlohmann::json& v = jv.contains("value") ? jv["value"] : nlohmann::json();
-
-			VariantValue value;
-			switch (StringToVarType(jv.value("type", std::string("Int")))) {
-			case VarType::Bool:    value = v.is_boolean() ? v.get<bool>() : false; break;
-			case VarType::Int:     value = v.is_number() ? v.get<int>() : 0; break;
-			case VarType::Float:   value = v.is_number() ? v.get<float>() : 0.0f; break;
-			case VarType::Double:  value = v.is_number() ? v.get<double>() : 0.0; break;
-			case VarType::String:  value = v.is_string() ? v.get<std::string>() : std::string(); break;
-			case VarType::Vector2: value = v.size() >= 2 ? Vector2{ v[0].get<float>(), v[1].get<float>() } : Vector2{}; break;
-			case VarType::Vector3: value = v.size() >= 3 ? Vector3{ v[0].get<float>(), v[1].get<float>(), v[2].get<float>() } : Vector3{}; break;
-			case VarType::Vector4: value = v.size() >= 4 ? Vector4{ v[0].get<float>(), v[1].get<float>(), v[2].get<float>(), v[3].get<float>() } : Vector4{}; break;
-			}
-			generatorVariables_.variableList.push_back(CreateVariable(name, value));
-		}
-	}
+	generatorVariables_ = MapProgramAdapter::JsonToVariables(file);
 
 	if (codingText_.empty()) {
 		debugText_ = "Import warning: no \"code\" in file (old format). Script text cannot be restored.";
@@ -142,35 +134,16 @@ bool MapMaker::ImportMapMakerFromJson(const std::string& filePath) {
 	return true;
 }
 
-TileMapData MapMaker::GenerateMap(MapData& mapData) {
-	TileMapData tileMap;
-	tileMap.name = mapData.dataName;
+TileMapData MapMaker::GenerateMap(int blankId) {
+	BuildJson();
+	const nlohmann::json file = nlohmann::json::parse(mapBuilderJson_, nullptr, false);
+	if (file.is_discarded()) return TileMapData();
 
-	int width = mapData.xSize;
-	int height = mapData.ySize;
-
-	// 1. 初始化腳本輸出緩衝區
-	std::vector<std::vector<int>> scriptResult_;
-	scriptResult_.resize(height, std::vector<int>(width, 0));
-
-	//// 2. 綁定 result[][] 給腳本
-	//BindScriptOutput();
-	//
-	//// 3. 執行腳本（你已經有 Compile + LoadScript）
-	//ProgramAdapter::Execute(script_);   // 或你自己的 ExecuteScript()
-
-	// 4. 把腳本輸出寫入 TileMapData
-	tileMap.Column.resize(width);
-	tileMap.Row.resize(height);
-
-	for (int y = 0; y < height; y++) {
-		tileMap.Row[y].resize(width);
-		for (int x = 0; x < width; x++) {
-			tileMap.Row[y][x] = scriptResult_[y][x];
-		}
-	}
-
-	return tileMap;
+	std::vector<std::string> errors;
+	TileMapData map = MapProgramAdapter::GenerateFromJson(file, blankId, -1, nullptr, &errors);
+	debugText_.clear();
+	for (const auto& e : errors) debugText_ += "Script Error: " + e + "\n";
+	return map;
 }
 
 

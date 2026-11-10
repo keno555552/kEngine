@@ -107,25 +107,87 @@ std::vector<std::string> BuildSentences(const std::vector<std::string>& tokens) 
 	return sentences;
 }
 
+/// "result[Y][X]" を Y, X の式に分ける（形が違えば false）
+static bool SplitResultIndex(const std::string& src, std::string& outY, std::string& outX) {
+	const std::string t = Trim(src);
+	if (t.rfind("result", 0) != 0) return false;
+	size_t p = 6;   // "result" の後ろ
+	auto readBracket = [&](std::string& out) {
+		while (p < t.size() && t[p] == ' ') ++p;
+		if (p >= t.size() || t[p] != '[') return false;
+		const size_t start = p + 1;
+		int depth = 0;
+		for (; p < t.size(); ++p) {
+			if (t[p] == '[') depth++;
+			else if (t[p] == ']' && --depth == 0) { out = t.substr(start, p - start); ++p; return true; }
+		}
+		return false;
+		};
+	return readBracket(outY) && readBracket(outX) && Trim(t.substr(p)).empty();
+}
+
+/// "xxx ( ... ) {" の最初の '(' に対応する ')' までの中身（rand(100) のような入れ子にも対応）
+static std::string HeaderInside(const std::string& s) {
+	const size_t l = s.find('(');
+	if (l == std::string::npos) return {};
+	int depth = 0;
+	for (size_t i = l; i < s.size(); ++i) {
+		if (s[i] == '(') depth++;
+		if (s[i] == ')' && --depth == 0) return s.substr(l + 1, i - l - 1);
+	}
+	return s.substr(l + 1);
+}
+
+/// 1 文を解析して out に追加し、index を次の文へ進める（for / if-else はブロックごと）
+static void ParseStatement(const std::vector<std::string>& sentences, int& index, GeneratorVariable* genVars, std::vector<Node*>& out) {
+	const std::string s = Trim(sentences[index]);
+
+	/// for(init;cond;inc){ ... }
+	if (s.rfind("for", 0) == 0 && s.find('{') != std::string::npos) {
+		auto header = ParseSentence(s, genVars);
+		if (!header.empty()) {
+			if (auto* forNode = dynamic_cast<ForNode*>(header[0])) {
+				forNode->body = ParseBlock(sentences, index, genVars);   // index はヘッダー行 → ブロックの次へ
+				out.push_back(forNode);
+				return;
+			}
+		}
+	}
+
+	/// if(cond){ ... } else { ... }
+	if (s.rfind("if", 0) == 0 && s.find('{') != std::string::npos) {
+		auto* ifNode = new IfNode();
+		ifNode->type = "if";
+		ifNode->condExpr = ParseExpression(HeaderInside(s), genVars);
+		ifNode->thenBody = ParseBlock(sentences, index, genVars);
+
+		/// else：ParseBlock が「else {」の行を飛ばしてくれるので、そのまま渡す
+		if (index < static_cast<int>(sentences.size()) && Trim(sentences[index]).rfind("else", 0) == 0) {
+			ifNode->elseBody = ParseBlock(sentences, index, genVars);
+		}
+		out.push_back(ifNode);
+		return;
+	}
+
+	/// 余った '}' は飛ばす
+	if (s == "}") { index++; return; }
+
+	/// その他：assign / call など 1 行
+	auto nodes = ParseSentence(s, genVars);
+	out.insert(out.end(), nodes.begin(), nodes.end());
+	index++;
+}
+
 std::vector<Node*> ParseBlock(const std::vector<std::string>& sentences, int& index, GeneratorVariable* genVars) {
 	std::vector<Node*> body;
-
 	// 跳過 '{'
 	index++;
-
-	while (index < sentences.size()) {
-		std::string s = Trim(sentences[index]);
-
-		if (s == "}") {
+	while (index < static_cast<int>(sentences.size())) {
+		if (Trim(sentences[index]) == "}") {
 			index++; // 跳過 '}'
 			break;
 		}
-
-		auto nodes = ParseSentence(s, genVars);
-		for (auto* n : nodes)
-			body.push_back(n);
-
-		index++;
+		ParseStatement(sentences, index, genVars, body);   // 入れ子の for / if もここで
 	}
 
 	return body;
@@ -134,16 +196,14 @@ std::vector<Node*> ParseBlock(const std::vector<std::string>& sentences, int& in
 std::vector<Node*> ParseSentence(const std::string& sentence, GeneratorVariable* genVars) {
 	std::vector<Node*> out;
 	std::string s = Trim(sentence);
+	if (!s.empty() && s.back() == ';') s = Trim(s.substr(0, s.size() - 1));
 
 	// if(cond){
 	if (s.rfind("if", 0) == 0) {
 		auto* node = new IfNode();
 		node->type = "if";
 
-		size_t l = s.find("(");
-		size_t r = s.find(")");
-
-		std::string cond = s.substr(l + 1, r - l - 1);
+		std::string cond = HeaderInside(s);
 		node->condExpr = ParseExpression(cond, genVars); // 你也可以改成 ParseExpression(cond)
 
 		out.push_back(node);
@@ -155,9 +215,7 @@ std::vector<Node*> ParseSentence(const std::string& sentence, GeneratorVariable*
 		auto* node = new ForNode();
 		node->type = "for";
 
-		size_t l = s.find("(");
-		size_t r = s.find(")");
-		std::string inside = s.substr(l + 1, r - l - 1);
+		std::string inside = HeaderInside(s);
 		std::cout << "inside = [" << inside << "]" << std::endl;
 
 		std::vector<std::string> parts;
@@ -180,6 +238,8 @@ std::vector<Node*> ParseSentence(const std::string& sentence, GeneratorVariable*
 				auto initNodes = ParseSentence(parts[0], genVars);
 				if (!initNodes.empty()) {
 					if (auto* an = dynamic_cast<AssignNode*>(initNodes[0])) {
+						node->loopVar = an->varName;
+						node->loopType = an->declType.empty() ? std::string("int") : an->declType;   // for (float t = 0; ...)
 						node->initExpr = an->expr;
 					} else if (auto* exprNode = dynamic_cast<ExpressionNode*>(initNodes[0])) {
 						node->initExpr = exprNode;
@@ -210,6 +270,24 @@ std::vector<Node*> ParseSentence(const std::string& sentence, GeneratorVariable*
 		return out;
 	}
 
+	/// 宣言：int x; / int x = 5; / float f = 0.5;（for (int i = 0; ...) の init もここを通る）
+	for (const std::string kw : { "int", "float" }) {
+		if (s.rfind(kw + " ", 0) != 0) continue;
+
+		auto* node = new AssignNode();
+		node->type = "assign";
+		node->declType = kw;
+
+		std::string rest = Trim(s.substr(kw.size()));
+		if (!rest.empty() && rest.back() == ';') rest = Trim(rest.substr(0, rest.size() - 1));   // "int x ;" の ;
+		const size_t eq = rest.find('=');
+		node->varName = Trim(rest.substr(0, eq));                                   // "x = 5" → "x" / "x" → "x"
+		node->expr = ParseExpression(eq == std::string::npos ? std::string("0") : rest.substr(eq + 1), genVars);   // 初期値なし → 0
+
+		out.push_back(node);
+		return out;
+	}
+
 	// +=, -=
 	if (s.find("+=") != std::string::npos || s.find("-=") != std::string::npos) {
 		auto* node = new AssignNode();
@@ -220,6 +298,8 @@ std::vector<Node*> ParseSentence(const std::string& sentence, GeneratorVariable*
 
 		std::string var = Trim(s.substr(0, pos));
 		std::string rhs = Trim(s.substr(pos + 2));
+
+
 
 		// c.z += i  →  c.z = c.z + i
 		ExpressionNode* left = ParseExpression(var, genVars);
@@ -283,6 +363,18 @@ std::vector<Node*> ParseSentence(const std::string& sentence, GeneratorVariable*
 		node->varName = Trim(s.substr(0, eq));
 		std::string rhs = Trim(s.substr(eq + 1));
 
+		/// result[y][x] = v → setTile(x, y, v)（マップへの出力）
+		std::string ys, xs;
+		if (SplitResultIndex(node->varName, ys, xs)) {
+			delete node;
+			auto* call = new CallNode();
+			call->type = "call";
+			call->func = "setTile";
+			call->args = { ParseExpression(xs, genVars), ParseExpression(ys, genVars), ParseExpression(rhs, genVars) };
+			out.push_back(call);
+			return out;
+		}
+
 		node->expr = ParseExpression(rhs, genVars);
 
 		out.push_back(node);
@@ -297,8 +389,7 @@ std::vector<Node*> ParseSentence(const std::string& sentence, GeneratorVariable*
 
 		node->func = Trim(s.substr(0, posParen));
 
-		size_t posR = s.find(")");
-		std::string inside = s.substr(posParen + 1, posR - posParen - 1);
+		std::string inside = HeaderInside(s);
 
 		std::vector<std::string> args;
 		{
@@ -309,7 +400,7 @@ std::vector<Node*> ParseSentence(const std::string& sentence, GeneratorVariable*
 				if (c == '(') depth++;
 				if (c == ')') depth--;
 
-				if (c == ',') {
+				if (c == ',' && depth == 0) {
 					args.push_back(Trim(cur));
 					cur.clear();
 				} else {
@@ -333,68 +424,11 @@ std::vector<Node*> ParseSentence(const std::string& sentence, GeneratorVariable*
 
 std::vector<Node*> ParseProgram(const std::vector<std::string>& sentences, GeneratorVariable* genVars) {
 	std::vector<Node*> out;
-
-
 	for (int i = 0; i < static_cast<int>(sentences.size()); ) {
-		std::string s = Trim(sentences[i]);
-
-		// ============================
-		// for(init;cond;inc){ ... }
-		// ============================
-		if (s.rfind("for", 0) == 0 && s.find("{") != std::string::npos) {
-
-			// 先 parse for(...) header（單行）
-			auto headerNodes = ParseSentence(s, genVars);
-			if (!headerNodes.empty()) {
-				auto* forNode = dynamic_cast<ForNode*>(headerNodes[0]);
-				if (forNode) {
-
-					// ⭐ 呼叫 ParseBlock（吃多行 + index）
-					forNode->body = ParseBlock(sentences, i, genVars);
-
-					out.push_back(forNode);
-					continue;   // ⭐ 跳過 block 內的行
-				}
-			}
-		}
-
-		// ============================
-		// if(cond){ ... } else { ... }
-		// ============================
-		if (s.rfind("if", 0) == 0 && s.find("{") != std::string::npos) {
-			auto* ifNode = new IfNode();
-			ifNode->type = "if";
-
-			size_t l = s.find("(");
-			size_t r = s.find(")");
-			std::string cond = s.substr(l + 1, r - l - 1);
-			ifNode->condExpr = ParseExpression(cond, genVars);
-
-			ifNode->thenBody = ParseBlock(sentences, i, genVars);
-
-			if (i < static_cast<int>(sentences.size())) {
-				std::string next = Trim(sentences[i]);
-				if (next.rfind("else", 0) == 0) {
-					i++;
-					ifNode->elseBody = ParseBlock(sentences, i, genVars);
-				}
-			}
-
-			out.push_back(ifNode);
-			continue;
-		}
-
-		// ============================
-		// 其他語句：assign / call / etc
-		// ============================
-		auto nodes = ParseSentence(s, genVars);
-		for (auto* n : nodes) out.push_back(n);
-		i++;
+		ParseStatement(sentences, i, genVars, out);
 	}
-
 	return out;
 }
-
 
 std::string Trim(const std::string& s) {
 	size_t start = s.find_first_not_of(" \t\n\r");
@@ -402,6 +436,28 @@ std::string Trim(const std::string& s) {
 
 	size_t end = s.find_last_not_of(" \t\n\r");
 	return s.substr(start, end - start + 1);
+}
+
+/// 数字か？（12 / -3 / 1.5 / .5 / 2.0f）。"pos.x" は数字ではない
+static bool IsNumberLiteral(const std::string& s) {
+	size_t i = (s.size() > 1 && s[0] == '-') ? 1 : 0;
+	size_t end = s.size();
+	if (end > i + 1 && (s[end - 1] == 'f' || s[end - 1] == 'F') && s.find('.') != std::string::npos) end--;   // 2.0f
+	bool digit = false, dot = false;
+	for (; i < end; ++i) {
+		if (std::isdigit(static_cast<unsigned char>(s[i]))) digit = true;
+		else if (s[i] == '.' && !dot) dot = true;
+		else return false;
+	}
+	return digit;
+}
+
+/// s[i] の +/- が「符号」か？（左が空 / 左が演算子 → -1 や a * -1 の '-'）
+static bool IsUnarySign(const std::string& s, int i) {
+	int k = i - 1;
+	while (k >= 0 && s[k] == ' ') --k;
+	if (k < 0) return true;
+	return std::string("+-*/%<>=!(,").find(s[k]) != std::string::npos;
 }
 
 ExpressionNode* ParseExpression(const std::string& token, GeneratorVariable* genVars) {
@@ -419,6 +475,7 @@ ExpressionNode* ParseExpression(const std::string& token, GeneratorVariable* gen
 	//	s.pop_back();
 	// 改変を加えた後に再度トリム
 	//s = Trim(s);
+
 
 	// 括號で囲まれている場合は中身を再解析する
 	if (s.size() >= 2 && s.front() == '(' && s.back() == ')') {
@@ -442,34 +499,12 @@ ExpressionNode* ParseExpression(const std::string& token, GeneratorVariable* gen
 		}
 	}
 
-	// まず+-を探す（括弧の中は無視）
+	// 次に比較演算子 <= >= == != < > を探す（括弧の中は無視）
 	int parenDepth = 0;
 	for (int i = (int)(s.size() - 1); i >= 0; --i) {
-		char c = s[i];
 
-		if (c == ')') parenDepth++;
-		if (c == '(') parenDepth--;
-
-		// 括弧の深さが0のときに+-を見つけたら、二項演算子として分割する
-		if (parenDepth == 0 &&
-			(c == '+' || c == '-') &&
-			!(i > 0 && s[i] == '+' && s[i - 1] == '+') &&
-			!(i > 0 && s[i] == '-' && s[i - 1] == '-')) {
-			ExpressionNode* node = new ExpressionNode();
-			node->isBinary = true;
-			node->op = std::string(1, c);
-
-			node->left = ParseExpression(s.substr(0, i), genVars);
-			node->right = ParseExpression(s.substr(i + 1), genVars);
-			return node;
-		}
-	}
-
-	// 次に比較演算子 <= >= == != を探す（括弧の中は無視）
-	parenDepth = 0;
-	for (int i = (int)(s.size() - 1); i >= 0; --i) {
-		if (s[i] == ')') parenDepth++;
-		if (s[i] == '(') parenDepth--;
+		if (s[i] == ')' || s[i] == ']') parenDepth++;
+		if (s[i] == '(' || s[i] == '[') parenDepth--;
 
 		if (parenDepth != 0) continue;
 
@@ -499,13 +534,37 @@ ExpressionNode* ParseExpression(const std::string& token, GeneratorVariable* gen
 		}
 	}
 
+	// まず+-を探す（括弧の中は無視）
+	parenDepth = 0;
+	for (int i = (int)(s.size() - 1); i >= 0; --i) {
+		char c = s[i];
+
+		if (c == ')' || c == ']') parenDepth++;
+		if (c == '(' || c == '[') parenDepth--;
+
+		// 括弧の深さが0のときに+-を見つけたら、二項演算子として分割する
+		if (parenDepth == 0 &&
+			(c == '+' || c == '-') &&
+			!(i > 0 && s[i] == '+' && s[i - 1] == '+') &&
+			!(i > 0 && s[i] == '-' && s[i - 1] == '-') &&
+			!IsUnarySign(s, i)) {
+			ExpressionNode* node = new ExpressionNode();
+			node->isBinary = true;
+			node->op = std::string(1, c);
+
+			node->left = ParseExpression(s.substr(0, i), genVars);
+			node->right = ParseExpression(s.substr(i + 1), genVars);
+			return node;
+		}
+	}
+
 	// 次に*/を探す（括弧の中は無視）
 	parenDepth = 0;
 	for (int i = (int)(s.size() - 1); i >= 0; --i) {
 		char c = s[i];
 
-		if (c == ')') parenDepth++;
-		if (c == '(') parenDepth--;
+		if (c == ')' || c == ']') parenDepth++;
+		if (c == '(' || c == '[') parenDepth--;
 
 		if (parenDepth == 0 && (c == '*' || c == '/' || c == '%')) {
 			ExpressionNode* node = new ExpressionNode();
@@ -514,6 +573,30 @@ ExpressionNode* ParseExpression(const std::string& token, GeneratorVariable* gen
 
 			node->left = ParseExpression(s.substr(0, i), genVars);
 			node->right = ParseExpression(s.substr(i + 1), genVars);
+			return node;
+		}
+	}
+
+	// 符号：- a / - 3 → 0 - a（"-3" のようにくっついた数字は後の literal で処理）
+	if (!s.empty() && s[0] == '-' && !IsNumberLiteral(s)) {
+		ExpressionNode* node = new ExpressionNode();
+		node->isBinary = true;
+		node->op = "-";
+		node->left = new ExpressionNode();
+		node->left->isLiteral = true;
+		node->left->literal = "0";
+		node->right = ParseExpression(s.substr(1), genVars);
+		return node;
+	}
+
+	// result[y][x] を読む → getTile(x, y)
+	{
+		std::string ys, xs;
+		if (SplitResultIndex(s, ys, xs)) {
+			ExpressionNode* node = new ExpressionNode();
+			node->isFuncCall = true;
+			node->funcName = "getTile";
+			node->funcArgs = { ParseExpression(xs, genVars), ParseExpression(ys, genVars) };
 			return node;
 		}
 	}
@@ -571,21 +654,15 @@ ExpressionNode* ParseExpression(const std::string& token, GeneratorVariable* gen
 		return expr;
 	}
 
-	if (s.find('.') != std::string::npos) {
-		ExpressionNode* expr = new ExpressionNode();
-		expr->isVariable = true;
-		expr->varName = s; // 例如 "c.z"
-		return expr;
-	}
-
-	// 最後に、変数かリテラルかを判定
+	// 最後に、変数かリテラルかを判定（数字ならリテラル、それ以外は変数）
 	ExpressionNode* expr = new ExpressionNode();
-	if (genVars && genVars->FindVariable(s)) {
-		expr->isVariable = true;
-		expr->varName = s;
-	} else {
+	const bool isNumber = IsNumberLiteral(s);
+	if (isNumber) {
 		expr->isLiteral = true;
 		expr->literal = s;
+	} else {
+		expr->isVariable = true;
+		expr->varName = s;
 	}
 
 	return expr;

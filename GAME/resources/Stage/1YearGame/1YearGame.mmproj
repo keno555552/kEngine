@@ -3,7 +3,9 @@
     "mapData": [
         "MapData/tutorial.json"
     ],
-    "mapMaker": [],
+    "mapMaker": [
+        "MapMaker/new_MapMakerData_1.json"
+    ],
     "maps": [
         "Maps/tutorial.csv"
     ],

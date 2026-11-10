@@ -37,6 +37,7 @@ private:
 
 	/// ============= システム関連 ==============///
 	EffectAdapter effectAdapter_{ nullptr };
+	RandomMaker randomMaker_;          // seed の自動生成用
 
 	/// ============= ライト関連 ==============///
 	std::unique_ptr<Light> light1_ = nullptr;
@@ -179,7 +180,6 @@ private:
 		return currentEffectIndex_ >= 0 && currentEffectIndex_ < (int)effectDataList_.size();
 	}
 	void RenameParticleInLinks(EffectData& effect, const std::string& oldName, const std::string& newName);
-
 
 	/// ======= プレビュー関連 ======= ///
 	/// 選択中の Effect を ParticleManager に入れる（変わってなければ何もしない）

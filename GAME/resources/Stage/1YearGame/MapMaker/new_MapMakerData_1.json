@@ -1,0 +1,163 @@
+{
+    "code": "for (y = 0; y < height; y++) {\n    for (x = 0; x < width; x++) {\n        if (rand(100) < 30) {\n            result[y][x] = 21;\n        }else{\n           if(abc){\n              result[y][x] = 22;\n            }\n        }\n    }\n}",
+    "context": {
+        "height": 21,
+        "seed": 1211145058,
+        "targetMap": "",
+        "width": 35
+    },
+    "name": "new_MapMakerData_1",
+    "script": [
+        {
+            "body": [
+                {
+                    "body": [
+                        {
+                            "cond": {
+                                "left": {
+                                    "args": [
+                                        {
+                                            "type": "literal",
+                                            "value": "100"
+                                        }
+                                    ],
+                                    "func": "rand",
+                                    "type": "funcCall"
+                                },
+                                "op": "<",
+                                "right": {
+                                    "type": "literal",
+                                    "value": "30"
+                                },
+                                "type": "binary"
+                            },
+                            "else": [
+                                {
+                                    "cond": {
+                                        "name": "abc",
+                                        "type": "variable"
+                                    },
+                                    "else": [],
+                                    "then": [
+                                        {
+                                            "args": [
+                                                {
+                                                    "name": "x",
+                                                    "type": "variable"
+                                                },
+                                                {
+                                                    "name": "y",
+                                                    "type": "variable"
+                                                },
+                                                {
+                                                    "type": "literal",
+                                                    "value": "22"
+                                                }
+                                            ],
+                                            "func": "setTile",
+                                            "type": "call"
+                                        }
+                                    ],
+                                    "type": "if"
+                                }
+                            ],
+                            "then": [
+                                {
+                                    "args": [
+                                        {
+                                            "name": "x",
+                                            "type": "variable"
+                                        },
+                                        {
+                                            "name": "y",
+                                            "type": "variable"
+                                        },
+                                        {
+                                            "type": "literal",
+                                            "value": "21"
+                                        }
+                                    ],
+                                    "func": "setTile",
+                                    "type": "call"
+                                }
+                            ],
+                            "type": "if"
+                        }
+                    ],
+                    "cond": {
+                        "left": {
+                            "name": "x",
+                            "type": "variable"
+                        },
+                        "op": "<",
+                        "right": {
+                            "name": "width",
+                            "type": "variable"
+                        },
+                        "type": "binary"
+                    },
+                    "inc": {
+                        "left": {
+                            "name": "x",
+                            "type": "variable"
+                        },
+                        "op": "+",
+                        "right": {
+                            "type": "literal",
+                            "value": "1"
+                        },
+                        "type": "binary"
+                    },
+                    "init": {
+                        "type": "literal",
+                        "value": "0"
+                    },
+                    "type": "for",
+                    "var": "x"
+                }
+            ],
+            "cond": {
+                "left": {
+                    "name": "y",
+                    "type": "variable"
+                },
+                "op": "<",
+                "right": {
+                    "name": "height",
+                    "type": "variable"
+                },
+                "type": "binary"
+            },
+            "inc": {
+                "left": {
+                    "name": "y",
+                    "type": "variable"
+                },
+                "op": "+",
+                "right": {
+                    "type": "literal",
+                    "value": "1"
+                },
+                "type": "binary"
+            },
+            "init": {
+                "type": "literal",
+                "value": "0"
+            },
+            "type": "for",
+            "var": "y"
+        }
+    ],
+    "variables": [
+        {
+            "unitName": "Variables",
+            "units": [
+                {
+                    "name": "abc",
+                    "type": "Bool",
+                    "value": true
+                }
+            ]
+        }
+    ]
+}
