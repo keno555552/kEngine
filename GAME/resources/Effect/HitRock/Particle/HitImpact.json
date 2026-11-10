@@ -1,0 +1,218 @@
+{
+    "burstCount": 1,
+    "damping": 0.0,
+    "dampingRandom": 0.0,
+    "emitIntervalRandom": 0.0,
+    "emitNumRandom": 0.0,
+    "emitRate": 0.0,
+    "endColor": [
+        1.0,
+        1.0,
+        1.0,
+        0.0
+    ],
+    "endColorRandom": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+    ],
+    "endRotation": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "endRotationRandom": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "endScale": [
+        0.30000001192092896,
+        0.30000001192092896,
+        1.0
+    ],
+    "endScaleRandom": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "gravity": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "isConstantColor": false,
+    "isConstantRotation": true,
+    "isConstantScale": false,
+    "kind": "Particle",
+    "lifetime": 0.5,
+    "lifetimeRandomness": 0.0,
+    "name": "HitImpact",
+    "objectList": [
+        {
+            "isBillboard": true,
+            "mainTransform": {
+                "rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "model": {
+                "engine": "Ring",
+                "params": {
+                    "cylinderBottom": 1.0,
+                    "cylinderDivide": 32,
+                    "cylinderHeight": 3.0,
+                    "cylinderReverseY": false,
+                    "cylinderTop": 1.0,
+                    "ringDivide": 32,
+                    "ringInner": 0.5,
+                    "ringOuter": 1.0,
+                    "sphereLat": 10,
+                    "sphereLong": 10
+                },
+                "type": "engine"
+            },
+            "parts": [
+                {
+                    "material": {
+                        "blendModeType": 2,
+                        "depthStencilType": 1,
+                        "enableLighting": false,
+                        "heightScale": 2.0,
+                        "intensity": 1.0,
+                        "lightModelType": 4,
+                        "rasterizerMode": 0,
+                        "reflectiveStrength": 0.0,
+                        "renderModelType": 0,
+                        "shininess": 32.0,
+                        "textureColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureColor2": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureColor3": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureHandle": "../../../texture/gradationLine.png",
+                        "useModelTexture": true,
+                        "uvRotate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "uvScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "uvTranslate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    },
+                    "name": "HitImpact3",
+                    "transform": {
+                        "rotate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "translate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    }
+                }
+            ]
+        }
+    ],
+    "renderType": 0,
+    "startColor": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+    ],
+    "startColorRandom": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+    ],
+    "startPosition": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "startPositionRandom": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "startRotation": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "startRotationRandom": [
+        0.0,
+        0.0,
+        3.200000047683716
+    ],
+    "startScale": [
+        0.20000000298023224,
+        0.20000000298023224,
+        1.0
+    ],
+    "startScaleRandom": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "startSpeedRandom": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "startVelocity": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "startVelocityRandom": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "version": 1
+}

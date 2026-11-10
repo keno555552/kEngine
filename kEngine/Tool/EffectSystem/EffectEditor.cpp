@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "DebugDraw.h"
 #include "ImguiManager.h"
+#include "Renderer\Resource\TextureManager.h"
 #include "FileManager\FileManager.h"
 #include "externals/imgui/imgui_internal.h"
 
@@ -20,6 +21,56 @@ namespace {
 	constexpr const char* kWinDrawingInfo = "Drawing Effect Info";
 	constexpr const char* kWinParticleInfo = "Particle Details";
 	constexpr const char* kEffectFilter = "Effect (*.json)\0*.json\0";
+	constexpr const char* kPreviewKey = "EditorPreview";
+
+	/// LoadModelBranch が対応している拡張子だけ（*.* は入れない：非対応形式は空モデルになる）
+	constexpr const char* kModelFilter = "Model (*.obj;*.gltf;*.glb)\0*.obj;*.gltf;*.glb\0";
+	/// TextureManager は読めないと assert で止まるので画像だけ
+	constexpr const char* kTextureFilter = "Image (*.png;*.jpg;*.dds)\0*.png;*.jpg;*.jpeg;*.dds\0";
+
+	/// パーティクル用の材質。順番が大事：Init が全部リセットするので、Init → MakePSOParticle → 設定
+	std::shared_ptr<MaterialConfig> MakeParticleMaterial(int textureHandle) {
+		auto mat = std::make_shared<MaterialConfig>();
+		InitMaterialConfig(mat.get());
+		mat->MakePSOParticle();
+		mat->textureHandle = textureHandle;
+		mat->useModelTexture = false;     // 内蔵モデル／手で指定 → パスを保存する
+		return mat;
+	}
+
+	/// 内蔵モデル ↔ ハンドル（None などは -1）
+	int EngineModelHandle(EngineModelType type) {
+		switch (type) {
+		case EngineModelType::Plane:    return config::default_Plane_MeshBufferHandle_;
+		case EngineModelType::Triangle: return config::default_Triangle_MeshBufferHandle_;
+		case EngineModelType::Cube:     return config::default_Cube_MeshBufferHandle_;
+		case EngineModelType::Sphere:   return config::default_Sphere_MeshBufferHandle_;
+		case EngineModelType::Ring:     return config::default_Ring_MeshBufferHandle_;
+		case EngineModelType::Cylinder: return config::default_Cylinder_MeshBufferHandle_;
+		default:                        return -1;
+		}
+	}
+	EngineModelType FindEngineModelType(int handle) {
+		for (const auto& [t, name] : EnumNameMap<EngineModelType>) {
+			if (EngineModelHandle(t) == handle) return t;
+		}
+		return EngineModelType::None;     // = ファイルモデル
+	}
+
+	ObjectData MakeDefaultParticleObject() {
+		ObjectData obj;
+		obj.isBillboard_ = true;
+		obj.modelHandle_ = config::default_Plane_MeshBufferHandle_;
+
+		ObjectPart part;
+		part.name = "Default";
+		part.materialConfig = MakeParticleMaterial(config::default_White5x5_TextureHandle_);
+		part.materialConfig->enableLighting = false;
+		obj.objectParts_.push_back(part);
+		return obj;
+	}
+
+	constexpr int kPreviewMaxParticles = 1000;
 
 	/// ファイルがあって、それが own（自分のファイル）ではない → true（上書き確認が必要）
 	bool IsOtherFile(const std::string& target, const std::string& own) {
@@ -29,24 +80,6 @@ namespace {
 		return true;
 	}
 
-	constexpr int kPreviewMaxParticles = 1000;
-
-	/// 見た目が無い Particle 用の既定の見た目（白い Plane のビルボード）
-	ObjectData MakeDefaultParticleObject() {
-		ObjectData obj;
-		obj.isBillboard_ = true;
-		obj.modelHandle_ = config::default_Plane_MeshBufferHandle_;
-
-		ObjectPart part;
-		part.name = "Default";
-		part.materialConfig = std::make_shared<MaterialConfig>();
-		InitMaterialConfig(part.materialConfig.get());
-		part.materialConfig->MakePSOParticle();
-		part.materialConfig->enableLighting = false;
-		part.materialConfig->textureHandle = config::default_White5x5_TextureHandle_;
-		obj.objectParts_.push_back(part);
-		return obj;
-	}
 }
 
 
@@ -179,7 +212,10 @@ EffectEditor::EffectEditor(kEngine* system) : effectAdapter_(system) {
 
 }
 
-EffectEditor::~EffectEditor() {}
+EffectEditor::~EffectEditor() {
+	/// プレビュー用の線と Link を片付ける（飛んでいる粒子は最後まで）
+	system_->GetEffectManager()->UnloadEffect(previewHandle_);
+}
 
 void EffectEditor::Update() {
 
@@ -493,6 +529,8 @@ bool EffectEditor::ExecuteSave(int effectIndex, const EffectSavePlan& plan, bool
 	for (auto& p : effect.prototypes) p.isSaved = true;
 	for (auto& l : effect.links) l.isSaved = true;
 
+	// ゲーム側で読み込んでいる Effect にすぐ反映（共用 Particle を保存した時も含めて全部読み直す）
+	system_->GetEffectManager()->ReloadAll();
 	debugText_ += "Saved Effect: " + plan.effectPath + "\n";
 	return true;
 }
@@ -544,6 +582,8 @@ bool EffectEditor::ExecuteSaveUnit(const SaveRequest& request, const std::string
 		debugText_ += "Note: location changed. Save the effect to update its reference.\n";
 	}
 
+	// ゲーム側で読み込んでいる Effect にすぐ反映（共用 Particle を保存した時も含めて全部読み直す）
+	system_->GetEffectManager()->ReloadAll();
 	debugText_ += std::string("Saved ") + (isParticle ? "Particle: " : "Link: ") + path + "\n";
 	return true;
 }
@@ -598,7 +638,6 @@ void EffectEditor::RenameParticleInLinks(EffectData& effect, const std::string& 
 }
 
 void EffectEditor::RefreshPreview() {
-	if (!isEffectSelected_) return;
 	if (!HasValidEffect()) return;
 	const EffectData& effect = effectDataList_[currentEffectIndex_];
 
@@ -609,39 +648,14 @@ void EffectEditor::RefreshPreview() {
 		previewLinkCount_ != effect.links.size();
 	if (!needRebuild) return;
 
-	auto* pm = system_->GetEffectManager()->GetParticleManager();
-
-	/// Link は全部作り直す（前の Effect の Link が残らないように）
-	pm->ClearEmitterLinks();
-
-	/// Emitter：同じ名前があれば中身だけ更新される（飛んでいる粒子は最後まで残る）
-	std::vector<std::pair<std::string, int>> emitters;   // 名前, id
-	for (const auto& src : effect.prototypes) {
-		ParticlePrototype proto = src;
-		if (proto.objectList.empty()) proto.objectList.push_back(MakeDefaultParticleObject());   // 見た目が無いと描画で範囲外
-		emitters.push_back({ proto.name, pm->CreateEmitter(proto, kPreviewMaxParticles) });
+	/// 見た目が無い Particle は描画で範囲外になるので、プレビュー用のコピーにだけ既定の見た目を付ける
+	EffectData preview = effect;
+	for (auto& proto : preview.prototypes) {
+		if (proto.objectList.empty()) proto.objectList.push_back(MakeDefaultParticleObject());
 	}
 
-	/// 前のプレビューにあって今回は無い線（名前を変えた・消した・別の Effect のもの）→ 引退
-	std::vector<int> newIds;
-	for (const auto& [name, id] : emitters) newIds.push_back(id);
-	for (int oldId : previewEmitterIds_) {
-		if (std::find(newIds.begin(), newIds.end(), oldId) == newIds.end()) {
-			pm->RetireEmitter(oldId);
-		}
-	}
-	previewEmitterIds_ = newIds;
-
-	for (const auto& src : effect.links) {
-		EmitterLink link = src;                 // LinkEmitterToEmitter が非 const 参照なのでコピー
-		pm->LinkEmitterToEmitter(link);
-	}
-
-	/// isRoot の Particle = Shoot で直接撃つもの
-	previewRootIds_.clear();
-	for (size_t i = 0; i < effect.prototypes.size(); i++) {
-		if (effect.prototypes[i].isRoot) previewRootIds_.push_back(emitters[i].second);
-	}
+	/// プレビュー専用の枠を更新（ゲームの Effect には触らない）
+	previewHandle_ = system_->GetEffectManager()->RegisterEffect(kPreviewKey, preview);
 
 	previewEffectIndex_ = currentEffectIndex_;
 	previewParticleCount_ = effect.prototypes.size();
@@ -660,13 +674,81 @@ void EffectEditor::ShootPreview() {
 		return;
 	}
 	RefreshPreview();
-	if (previewRootIds_.empty()) {
+	auto* em = system_->GetEffectManager();
+	if (!em->HasRoot(previewHandle_)) {
 		debugText_ += "Warning: no Root particle in this effect.\n";
 		return;
 	}
+	em->Play(previewHandle_, { 0.0f, 0.0f, 0.0f });
+}
 
-	auto* pm = system_->GetEffectManager()->GetParticleManager();
-	for (int id : previewRootIds_) pm->ShootEmitter(id, 1);
+/// ======================================= 外観 ======================================= ///
+/// 
+/// MapEditor と同じ：材質は1つ（Part0 が本体）。useModelTexture の時だけ Part ごとにモデルのテクスチャ
+
+void EffectEditor::SetObjectModel(ObjectData& obj, int modelHandle, bool isFileModel) {
+	/// 今の材質を元にする（無ければ新規）
+	std::shared_ptr<MaterialConfig> base =
+		(!obj.objectParts_.empty() && obj.objectParts_[0].materialConfig)
+		? obj.objectParts_[0].materialConfig
+		: MakeParticleMaterial(config::default_White5x5_TextureHandle_);
+	MaterialConfig mat = *base;
+
+	if (isFileModel) {
+		/// 手で選んだテクスチャが無ければ（白のまま）モデル付属のを使う
+		if (mat.useModelTexture || mat.textureHandle == config::default_White5x5_TextureHandle_) {
+			mat.useModelTexture = true;
+		}
+	} else if (mat.useModelTexture) {
+		/// 内蔵モデルはテクスチャを持っていない → 白
+		mat.useModelTexture = false;
+		mat.textureHandle = config::default_White5x5_TextureHandle_;
+	}
+
+	const int partNum = isFileModel ? system_->GetMutiModelNum(modelHandle) : 1;
+	std::vector<ObjectPart> parts;
+	for (int i = 0; i < partNum; i++) {
+		ObjectPart part;
+		if (i < (int)obj.objectParts_.size()) part.transform = obj.objectParts_[i].transform;
+		part.name = isFileModel ? "Part" + std::to_string(i) : "Default";
+		part.materialConfig = std::make_shared<MaterialConfig>(mat);   // 共有しない
+		if (mat.useModelTexture) {
+			part.materialConfig->textureHandle = system_->GetModelTextureHandle(modelHandle, i);
+		}
+		parts.push_back(part);
+	}
+	obj.modelHandle_ = modelHandle;
+	obj.objectParts_ = std::move(parts);
+}
+
+void EffectEditor::SetObjectTexture(ObjectData& obj, int textureHandle) {
+	/// 手で選んだテクスチャ → 全 Part 同じ。パスを保存する
+	for (auto& part : obj.objectParts_) {
+		part.materialConfig->textureHandle = textureHandle;
+		part.materialConfig->useModelTexture = false;
+	}
+}
+
+void EffectEditor::UseModelTexture(ObjectData& obj) {
+	const bool isFileModel = FindEngineModelType(obj.modelHandle_) == EngineModelType::None;
+	for (int i = 0; i < (int)obj.objectParts_.size(); i++) {
+		MaterialConfig& mat = *obj.objectParts_[i].materialConfig;
+		mat.useModelTexture = isFileModel;
+		mat.textureHandle = isFileModel
+			? system_->GetModelTextureHandle(obj.modelHandle_, i)
+			: config::default_White5x5_TextureHandle_;      // 内蔵モデル → 白
+	}
+}
+
+void EffectEditor::SyncPartMaterials(ObjectData& obj) {
+	/// Part0 の設定を他の Part にコピー（モデル付属テクスチャの時は自分のテクスチャを残す）
+	const MaterialConfig& base = *obj.objectParts_[0].materialConfig;
+	for (int i = 1; i < (int)obj.objectParts_.size(); i++) {
+		MaterialConfig& mat = *obj.objectParts_[i].materialConfig;
+		const int ownTexture = mat.textureHandle;
+		mat = base;
+		if (base.useModelTexture) mat.textureHandle = ownTexture;
+	}
 }
 
 
@@ -885,6 +967,7 @@ void EffectEditor::ImGuiLeftMenuBar() {
 		if (ImGui::Button("Double", ImVec2(buttonW, 0))) {
 			if (isEffectSelected_) {
 				EffectData newEffect = effectDataList_[currentEffectIndex_];
+				for (auto& p : newEffect.prototypes) DeepCopyMaterials(p);
 				newEffect.name += "_copy";
 				DetachEffectFolder(newEffect);   // 元のフォルダに上書きしないように
 				newEffect.isSaved = false;
@@ -970,6 +1053,7 @@ void EffectEditor::ImGuiLeftMenuBar() {
 				auto& prototypes = effectDataList_[currentEffectIndex_].prototypes;
 				if (currentParticleIndex_ >= 0 && currentParticleIndex_ < (int)prototypes.size()) {
 					ParticlePrototype newPrototype = prototypes[currentParticleIndex_];
+					DeepCopyMaterials(newPrototype);
 					newPrototype.name += "_copy";
 					newPrototype.savePath.clear();
 					newPrototype.isSaved = false;
@@ -1184,12 +1268,12 @@ void EffectEditor::ImGuiRightMenuBar() {
 		ImGui::Text("Pause:");
 		ImGui::SameLine();
 		if (ImGui::Button("Pause")) {
-			pm->Pause(true);
+			system_->GetEffectManager()->PauseEffect(previewHandle_, true);
 			isPause_ = true;
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Resume")) {
-			pm->Pause(false);
+			system_->GetEffectManager()->PauseEffect(previewHandle_, false);
 			isPause_ = false;
 		}
 		bool linkLog = pm->GetLinkLog();
@@ -1376,6 +1460,8 @@ bool EffectEditor::ImGuiParticleShowing(ParticlePrototype& particle) {
 	changed |= ImGui::Checkbox("Root (Shoot on Play)", &particle.isRoot);
 	ImGui::SetItemTooltip("ON : Shoot / Play で直接撃つ\nOFF: Link からだけ撃たれる");
 
+	changed |= ImGuiModelShowing(particle);      // ← 加（Model / Texture / Billboard）
+
 	/// ヘッダーごとに PushID して、同じラベル（Start / isConstant など）のIDが被らないようにする
 	ImGui::PushID("Lifetime");
 	if (ImGui::CollapsingHeader("Lifetime")) {
@@ -1446,6 +1532,7 @@ bool EffectEditor::ImGuiParticleShowing(ParticlePrototype& particle) {
 	}
 	ImGui::PopID();
 
+	changed |= ImGuiMaterialShowing(particle);
 	return changed;
 }
 
@@ -1472,6 +1559,133 @@ bool EffectEditor::ImGuiLinkerShowing(EmitterLink& linker) {
 
 	const char* emitterTimingItems[] = { "SourceEmit", "TimeUp", "SourceEnd" };
 	changed |= EnumCombo("Emitter Timing", linker.emitterTiming, emitterTimingItems, IM_ARRAYSIZE(emitterTimingItems));
+
+	return changed;
+}
+
+/// Particle Details の上（Path の下）：MapEditor の Basic と同じ並び
+bool EffectEditor::ImGuiModelShowing(ParticlePrototype& particle) {
+	bool changed = false;
+
+	/// 1 Particle = 1 物（objectList[0]）。無ければ作る
+	if (particle.objectList.empty()) {
+		particle.objectList.push_back(MakeDefaultParticleObject());
+		changed = true;
+	}
+	ObjectData& obj = particle.objectList[0];
+	for (auto& part : obj.objectParts_) {
+		if (!part.materialConfig) {   // 古いデータ対策（描画で null を踏むと落ちる）
+			part.materialConfig = MakeParticleMaterial(config::default_White5x5_TextureHandle_);
+			changed = true;
+		}
+	}
+
+	/// ---- Model（内蔵なら "[Engine] Sphere"、ファイルならパス） ----
+	EngineModelType engineType = FindEngineModelType(obj.modelHandle_);
+	std::string modelLabel = "[Engine] " + GetEnumName(engineType);
+	if (engineType == EngineModelType::None) {
+		auto& groups = system_->GetResourceManager()->modelGroupList_;
+		modelLabel = (obj.modelHandle_ >= 0 && obj.modelHandle_ < (int)groups.size())
+			? groups[obj.modelHandle_]->GetFilePath() : "";
+	}
+
+	std::string newPath;
+	switch (ImGuiWidgets::FileSlot("Model", modelLabel, kModelFilter, newPath, "Engine")) {
+	case ImGuiWidgets::FileSlotAction::Load: {
+		const int handle = system_->SetModelObj(newPath);
+		if (system_->GetMutiModelNum(handle) <= 0) {
+			debugText_ += "Model Error: cannot load " + newPath + "\n";
+			break;
+		}
+		SetObjectModel(obj, handle, true);
+		changed = true;
+		break;
+	}
+	case ImGuiWidgets::FileSlotAction::Extra:     // 「Engine」→ 内蔵モデルを選ぶ
+		ImGui::OpenPopup("EngineModelPopup");
+		break;
+	case ImGuiWidgets::FileSlotAction::Delete:    // パーティクルはモデル必須 → Plane に戻す
+		SetObjectModel(obj, config::default_Plane_MeshBufferHandle_, false);
+		changed = true;
+		break;
+	default: break;
+	}
+
+	if (ImGui::BeginPopup("EngineModelPopup")) {
+		for (const auto& [type, name] : EnumNameMap<EngineModelType>) {
+			const int handle = EngineModelHandle(type);
+			if (handle < 0) continue;              // None など
+			if (ImGui::Selectable(name.c_str(), type == engineType)) {
+				SetObjectModel(obj, handle, false);
+				changed = true;
+			}
+		}
+		ImGui::EndPopup();
+	}
+
+	/// ---- Texture（モデル付属を使っている時は (none)） ----
+	engineType = FindEngineModelType(obj.modelHandle_);     // 上で変わったかもしれない
+	const MaterialConfig& mat = *obj.objectParts_[0].materialConfig;
+	const bool usingModelTexture = (engineType == EngineModelType::None && mat.useModelTexture);
+	const std::string texPath = usingModelTexture
+		? "" : TextureManager::GetInstance()->GetTextureFilePath(mat.textureHandle);
+
+	switch (ImGuiWidgets::FileSlot("Texture", texPath, kTextureFilter, newPath)) {
+	case ImGuiWidgets::FileSlotAction::Load:
+		SetObjectTexture(obj, system_->LoadTexture(newPath));
+		changed = true;
+		break;
+	case ImGuiWidgets::FileSlotAction::Delete:    // モデル付属に戻す（内蔵モデルなら白）
+		UseModelTexture(obj);
+		changed = true;
+		break;
+	default: break;
+	}
+
+	changed |= ImGui::Checkbox("Billboard", &obj.isBillboard_);
+	ImGui::SetItemTooltip("ON: いつもカメラの方を向く（Plane / Ring 向け）");
+
+	return changed;
+}
+
+/// 一番下：Material と Model Transform（MapEditor と同じく折りたたみ）
+bool EffectEditor::ImGuiMaterialShowing(ParticlePrototype& particle) {
+	bool changed = false;
+	if (particle.objectList.empty() || particle.objectList[0].objectParts_.empty()) return false;
+	ObjectData& obj = particle.objectList[0];
+	MaterialConfig& mat = *obj.objectParts_[0].materialConfig;
+
+	ImGui::PushID("Material");
+	if (ImGui::CollapsingHeader("Material")) {
+		ImGui::SeparatorText("UV");
+		changed |= ImGuiWidgets::UVTransformEditor(mat);
+
+		/// 色は Color の項目で（textureColor は描画時に粒子の色で上書きされる）
+		ImGui::SeparatorText("PSO");
+		changed |= EnumMapCombo("Light Model", mat.lightModelType,
+			{ LightModelType::NONE, LightModelType::Sprite2D, LightModelType::DebugLine, LightModelType::Environment });
+		changed |= ImGuiWidgets::EnumCombo("Blend Mode", mat.blendModeType);
+		changed |= ImGuiWidgets::EnumCombo("Rasterizer", mat.rasterizerMode);
+		changed |= ImGuiWidgets::EnumCombo("Depth Stencil", mat.depthStencilType);
+		if (ImGui::Button("Reset PSO (Particle)")) {
+			mat.MakePSOParticle();
+			changed = true;
+		}
+		ImGui::SetItemTooltip("BlinnPhong / AddBlend / CullBack / ReadOnly");
+
+		ImGui::SeparatorText("Lighting");
+		changed |= ImGui::Checkbox("Enable Lighting", &mat.enableLighting);
+
+		if (changed) SyncPartMaterials(obj);
+	}
+	ImGui::PopID();
+
+	ImGui::PushID("ModelTransform");
+	if (ImGui::CollapsingHeader("Model Transform")) {
+		/// 粒子の中でのモデルの位置・向き・大きさ（モデルの原点がずれている時など）
+		changed |= ImGuiWidgets::TransformEditor(obj.mainPosition.transform);
+	}
+	ImGui::PopID();
 
 	return changed;
 }

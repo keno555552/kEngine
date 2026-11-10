@@ -78,6 +78,18 @@ struct ParticlePrototype
     bool isRoot = true;
 };
 
+/// objectList の materialConfig は shared_ptr → コピーしても同じ材質を指す
+/// 線に渡す時・Double の時に呼んで、材質を自分専用にする（概念 2.2）
+inline void DeepCopyMaterials(ParticlePrototype& proto) {
+    for (auto& obj : proto.objectList) {
+        for (auto& part : obj.objectParts_) {
+            if (part.materialConfig) {
+                part.materialConfig = std::make_shared<MaterialConfig>(*part.materialConfig);
+            }
+        }
+    }
+}
+
 /// ParticlePrototypeのオーバーライド用構造体
 struct ParticlePrototypeOverride
 {

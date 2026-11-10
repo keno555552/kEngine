@@ -321,7 +321,7 @@
     <ClCompile Include="kEngine\Data\Render\CPUData\CornerData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="ResourceLoader.cpp">
+    <ClCompile Include="kEngine\Tool\ResourceLoader\ResourceLoader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\Data\Geometry\Corner\Corner.cpp">
@@ -1037,7 +1037,7 @@
     <ClInclude Include="kEngine\Data\Render\CPUData\CornerData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="ResourceLoader.h">
+    <ClInclude Include="kEngine\Tool\ResourceLoader\ResourceLoader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Data\Geometry\Corner\Corner.h">

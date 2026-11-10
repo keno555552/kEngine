@@ -9,8 +9,12 @@
 #include "Tool\DefaultMenu\DefaultMenu.h"
 #include "EngineAssets\Particle\HitSpark.h"
 #include "EffectSystem/Adapter/EffectAdapter.h"
+#include "Utility/EnumNameFinder/EnumNameFinder.h"
 #include <LinearAlgebra/Vector4.h>
 #include <functional>
+#include "ImGuiWidgets.h"
+#include "Renderer/Resource/ResourceManager.h"
+#include "Renderer/Mesh/ModelGroup.h"
 
 enum class SelectMode {
 	None,
@@ -64,7 +68,6 @@ private:
 
 	/// ========== プレビュー関連 ========== ///
 	int previewEffectIndex_ = -1;          // 今 ParticleManager に入っている Effect
-	std::vector<int> previewRootIds_;      // Shoot で撃つ Emitter（どの Link の target にもなってないもの）
 	size_t previewParticleCount_ = 0;      // 作った時の数（増減したら作り直す）
 	size_t previewLinkCount_ = 0;
 	bool isPreviewDirty_ = true;           // 中身が変わった → 作り直す
@@ -110,12 +113,12 @@ private:
 
 	/// 共用
 	std::string newName_;
+	int previewHandle_ = -1;
 	bool isPause_ = false;
 	bool doubleCheck_ = false;
 
 	SelectMode saveLoadMode_ = SelectMode::None;
 	bool isDelete_ = false;
-	std::vector<int> previewEmitterIds_;   // 今のプレビューで使っている線（全部）
 
 	/// ========== 保存関連 ========== ///
 	bool useRelativePath_ = true;        
@@ -184,6 +187,16 @@ private:
 	/// 選択中の Effect を発射
 	void ShootPreview();
 
+	/// ======= 外観関連（MapEditor と同じ：材質は1つ、Part0 が本体）======= ///
+	/// モデルを替える：Part を作り直す（ファイルモデルは Part 数 = メッシュ数）
+	void SetObjectModel(ObjectData& obj, int modelHandle, bool isFileModel);
+	/// 手で選んだテクスチャを全 Part に
+	void SetObjectTexture(ObjectData& obj, int textureHandle);
+	/// モデル付属のテクスチャに戻す（内蔵モデルなら白）
+	void UseModelTexture(ObjectData& obj);
+	/// Part0 の材質を他の Part へ
+	void SyncPartMaterials(ObjectData& obj);
+
 	/// Delete関連
 	void DeletePart();
 
@@ -205,6 +218,11 @@ private:
 	bool ImGuiParticleShowing(ParticlePrototype& particle);
 	bool ImGuiLinkerShowing(EmitterLink& linker);
 
+	bool ImGuiModelShowing(ParticlePrototype& particle);
+	bool ImGuiMaterialShowing(ParticlePrototype& particle);
+
+
+
 	bool InputTextString(const char *label, std::string &str, ImGuiInputTextFlags flags = 0);
 	bool InputBigTextString(const char *label, std::string &str, ImGuiInputTextFlags flags = 0);
 	bool InputInt(const char* label, int& value);
@@ -222,6 +240,23 @@ private:
 			return true;
 		}
 		return false;
+	}
+
+	/// EnumNameMap<T> から項目を作る Combo（LightModelType のように -1 から始まっても OK）
+	/// hidden：パーティクルで使えない値を隠す
+	template <typename EnumType>
+	bool EnumMapCombo(const char* label, EnumType& value, std::initializer_list<EnumType> hidden = {}) {
+		bool changed = false;
+		if (ImGui::BeginCombo(label, GetEnumName(value).c_str())) {
+			for (const auto& [e, name] : EnumNameMap<EnumType>) {
+				if (std::find(hidden.begin(), hidden.end(), e) != hidden.end()) continue;
+				const bool selected = (e == value);
+				if (ImGui::Selectable(name.c_str(), selected)) { value = e; changed = true; }
+				if (selected) ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
+		return changed;
 	}
 
 #endif // USE_IMGUI

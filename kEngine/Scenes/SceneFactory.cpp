@@ -26,7 +26,7 @@ SceneFactory::SceneFactory(kEngine* system)
     sceneRegistry_["UITest"] = [this]() { return std::make_unique<UITest>(system_); };
 	sceneRegistry_["ParticleEditor"] = [this]() { return std::make_unique<ParticleEditor>(system_); };
     sceneRegistry_["TITLE"] = [this]() { return std::make_unique<SceneTitle>(system_); };
-    sceneRegistry_["STAGE_01"] = [this]() { return std::make_unique<SceneTutorial>(system_); };
+    sceneRegistry_["STAGE_TUTORIAL"] = [this]() { return std::make_unique<SceneTutorial>(system_); };
     sceneRegistry_["WIN"] = [this]() { return std::make_unique<SceneWin>(system_); };
     sceneRegistry_["LOSE"] = [this]() { return std::make_unique<SceneLose>(system_); };
 

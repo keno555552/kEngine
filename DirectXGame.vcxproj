@@ -560,7 +560,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Tool\MapBulider\Reader\MapReader.cpp" />
     <ClCompile Include="kEngine\Tool\MapBulider\MapChipManager.cpp" />
     <ClCompile Include="kEngine\Tool\MapBulider\Data\MapBlockData.cpp" />
-    <ClCompile Include="ResourceLoader.cpp" />
+    <ClCompile Include="kEngine\Tool\ResourceLoader\ResourceLoader.cpp" />
     <ClCompile Include="kEngine\Scenes\BaseSceneFactory.cpp" />
     <ClCompile Include="kEngine\GameObject\Object\Sprite.cpp" />
     <ClCompile Include="kEngine\Data\Render\CPUData\SpriteData.cpp" />
@@ -901,7 +901,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Tool\MapBulider\Reader\MapReader.h" />
     <ClInclude Include="kEngine\Tool\MapBulider\MapChipManager.h" />
     <ClInclude Include="kEngine\Tool\MapBulider\Data\MapBlockData.h" />
-    <ClInclude Include="ResourceLoader.h" />
+    <ClInclude Include="kEngine\Tool\ResourceLoader\ResourceLoader.h" />
     <ClInclude Include="kEngine\Scenes\BaseSceneFactory.h" />
     <ClInclude Include="kEngine\GameObject\Object\Sprite.h" />
     <ClInclude Include="kEngine\Data\Render\CPUData\SpriteData.h" />

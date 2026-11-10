@@ -1,0 +1,24 @@
+{
+    "kind": "Effect",
+    "links": [
+        "EmitterLink/HitImpactToSpark.json",
+        "EmitterLink/HitImpactToRock.json"
+    ],
+    "name": "HitRock",
+    "particles": [
+        {
+            "isRoot": true,
+            "path": "Particle/HitImpact.json"
+        },
+        {
+            "isRoot": true,
+            "path": "Particle/HitSpark.json"
+        },
+        {
+            "isRoot": true,
+            "path": "Particle/HitRock.json"
+        }
+    ],
+    "relativePaths": true,
+    "version": 1
+}
