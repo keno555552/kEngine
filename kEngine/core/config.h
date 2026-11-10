@@ -59,7 +59,7 @@ private:
 	static const int kDefaultClientWidth_ = 1280;   /// デフォルトのクライアント幅
 	static const int kDefaultClientHeight_ = 720;   /// デフォルトのクライアント高さ
 	static const std::string kDefaultClientTitle_;  /// デフォルトのクライアントタイトル
-	static const WindowMode kDefaultWindowMode_ = WINDOWED_Fixed;  /// デフォルトのウィンドウモード
+	static const WindowMode kDefaultWindowMode_ = WINDOWED_Dynamic;  /// デフォルトのウィンドウモード
 
 	/// 描画設定
 	static const int kDebugLineNumInstance_ = 5000;   /// DebugLineの最大インスタンス数
@@ -82,6 +82,9 @@ private:
 
 	/// 後処理のレイヤー数設定
 	static const int kPostProcessLayer = 5;
+
+	/// 最大ログエントリ数
+	static const int kMaxEntries_ = 2000;
 
 private:
 
@@ -145,6 +148,10 @@ public:
 
 	// 画面の縦幅(Set/Getter)
 	static int GetDefaultHeight() { return kDefaultClientHeight_; }
+
+	// 最大セーブログエントリ数
+	static int GetMaxEntries() { return kMaxEntries_; }
+	
 	// ------------------------------- 現在の設定 ------------------------------ //
 	// 画面のモード関連(Set/Getter)
 	static WindowMode GetClientWindowMode() { return clientWindowMode_; }

@@ -2092,17 +2092,17 @@ float D3DX_BC6H::PerturbOne(const EncodeParams* pEP, const INTColor aColors[], s
     for (int step = 1 << (uPrec - 1); step; step >>= 1)
     {
         bool bImproved = false;
-        for (int sign = -1; sign <= 1; sign += 2)
+        for (int Sign = -1; Sign <= 1; Sign += 2)
         {
             if (do_b == 0)
             {
-                tmpEndPts.A[ch] = newEndPts.A[ch] + sign * step;
+                tmpEndPts.A[ch] = newEndPts.A[ch] + Sign * step;
                 if (tmpEndPts.A[ch] < 0 || tmpEndPts.A[ch] >= (1 << uPrec))
                     continue;
             }
             else
             {
-                tmpEndPts.B[ch] = newEndPts.B[ch] + sign * step;
+                tmpEndPts.B[ch] = newEndPts.B[ch] + Sign * step;
                 if (tmpEndPts.B[ch] < 0 || tmpEndPts.B[ch] >= (1 << uPrec))
                     continue;
             }
@@ -2113,7 +2113,7 @@ float D3DX_BC6H::PerturbOne(const EncodeParams* pEP, const INTColor aColors[], s
             {
                 bImproved = true;
                 fMinErr = fErr;
-                beststep = sign * step;
+                beststep = Sign * step;
             }
         }
         // if this was an improvement, move the endpoint and continue search from there
@@ -2919,9 +2919,9 @@ float D3DX_BC7::PerturbOne(const EncodeParams* pEP, const LDRColorA aColors[], s
     {
         bool bImproved = false;
         int beststep = 0;
-        for (int sign = -1; sign <= 1; sign += 2)
+        for (int Sign = -1; Sign <= 1; Sign += 2)
         {
-            int tmp = int(*pnew_c) + sign * step;
+            int tmp = int(*pnew_c) + Sign * step;
             if (tmp < 0 || tmp >= (1 << prec))
                 continue;
             else
@@ -2932,7 +2932,7 @@ float D3DX_BC7::PerturbOne(const EncodeParams* pEP, const LDRColorA aColors[], s
             {
                 bImproved = true;
                 fMinErr = fTotalErr;
-                beststep = sign * step;
+                beststep = Sign * step;
             }
         }
 

@@ -2,6 +2,9 @@
 #include "Data/Render/CPUData/MaterialConfig.h"
 #include "SceneFactory.h"
 #include "BaseScene.h"
+#include "GAME/scenes/SceneTitle.h"
+#include "GAME/scenes/SceneWin.h"
+#include "GAME/scenes/SceneLose.h"
 #include "AnimationSystem/AnimationEditor.h"
 #include "DefaultMenu/DefaultMenu.h"
 #include "CG4_HK_1/Effect2.h"
@@ -65,6 +68,27 @@ private:
 		{"ENGINE_TITLE",
 			{
 				{SceneOutcome::NEXT,"MapMakingEditor"},
+			}
+		},
+		{"TITLE",
+			{
+					{SceneOutcome::NEXT,"STAGE_01"},
+			}
+		},
+		{"STAGE_01",
+			{
+					{SceneOutcome::WIN,"WIN"},
+					{SceneOutcome::LOSE,"LOSE"},
+			}
+		},
+		{"WIN",
+			{
+					{SceneOutcome::NEXT,"TITLE"},
+			}
+		},
+		{"LOSE",
+			{
+					{SceneOutcome::NEXT,"TITLE"},
 			}
 		},
 	};

@@ -4,6 +4,8 @@
 #include "GAME/Object/Bullet/Bullet.h"
 #include "GAME/Object/BackPoint/BackPoint.h"
 #include "GAME/Object/Enemy/Enemy.h"
+#include "GAME/Object/Driller/Driller.h"
+#include "GAME/Object/Sign/Sign.h"
 #include <algorithm>
 
 void CollisionManager::Update(float deltaTime) {
@@ -12,6 +14,8 @@ void CollisionManager::Update(float deltaTime) {
 	PlayerMapCollision();
 	PlayerEnemyCollision();
 	PlayerBackPointCollision();
+	PlayerDrillerCollision();
+	PlayerSignCollision();
 	BulletMapCollision();
 	BulletPlayerCollision();
 	BulletEnemyCollision();
@@ -19,33 +23,13 @@ void CollisionManager::Update(float deltaTime) {
 }
 
 bool CollisionManager::PlayerMapCollision() {
-
 	if (!player_ || !mapChipManager_) return false;
 
-	AABB box = player_->GetAABB();
-	Vector3 velocity = player_->GetVelocity();
+	const CollisionResult result = mapChipManager_->GetMapCollisionCorrection(
+		player_->GetAABB(), player_->GetVelocity(), totelDeltaTime_);
 
-	// MapChipField内での当たり判定を計算
-	CollisionResult result = mapChipManager_->GetMapCollisionCorrection(
-		box,
-		velocity,
-		totelDeltaTime_
-	);
-
-	// 当たると速度を0にする
-	if (result.xIsMainAxis) {
-		velocity.x = 0.0f;
-	}
-	if (result.yIsMainAxis) {
-		velocity.y = 0.0f;
-	}
-
-	player_->SetVelocity(velocity);
-	player_->SetOnGround(result.landed);
-
-	Vector3 velAfter = player_->GetVelocity();
-	// Logger::Log("PlayerVelocity: (%f, %f, %f)", velAfter.x, velAfter.y, velAfter.z);
-
+	/// 結果を渡す → 動くのは Player 自身
+	player_->SetCollisionResult(result);
 	return true;
 }
 
@@ -128,21 +112,23 @@ void CollisionManager::PlayerEnemyCollision() {
 		AABB eBox = enemy->GetAABB();
 		if (isOverlap(pBox, eBox)) {
 			// damage
-			player_->GetDamage(1.0f);
+			player_->GetDamage(1.0f, enemy->GetPosition());
 
-			// knockback: apply velocity impulse instead of teleport
-			Vector3 dir = player_->GetPosition() - enemy->GetPosition();
-			dir.y = 0.0f; // horizontal direction for push
-			float lenSq = dir.x * dir.x + dir.y * dir.y + dir.z * dir.z;
-			if (lenSq < 0.0001f) {
-				dir = { 1.0f, 0.0f, 0.0f }; // fallback
-			} else {
-				dir = Normalize(dir);
+			if (!player_->IsDead()) {
+				// knockback: apply velocity impulse instead of teleport
+				Vector3 dir = player_->GetPosition() - enemy->GetPosition();
+				dir.y = 0.0f; // horizontal direction for push
+				float lenSq = dir.x * dir.x + dir.y * dir.y + dir.z * dir.z;
+				if (lenSq < 0.0001f) {
+					dir = { 5.0f, 0.5f, 0.0f }; // fallback
+				} else {
+					dir = Normalize(dir);
+				}
+				const float kKnockbackSpeed = 4.0f; // adjust as needed
+				Vector3 knockbackVel = dir * kKnockbackSpeed;
+				knockbackVel.y = 0.5f; // small lift
+				player_->SetVelocity(knockbackVel);
 			}
-			const float kKnockbackSpeed = 4.0f; // adjust as needed
-			Vector3 knockbackVel = dir * kKnockbackSpeed;
-			knockbackVel.y = 0.5f; // small lift
-			player_->SetVelocity(knockbackVel);
 
 			// refresh player box for further collisions this frame
 			pBox = player_->GetAABB();
@@ -165,6 +151,32 @@ void CollisionManager::PlayerBackPointCollision() {
 	} else {
 		backPoint_->SetIsBack(false);
 	}
+
+}
+
+void CollisionManager::PlayerSignCollision() {
+	if (player_ == nullptr || signList_ == nullptr) { return; }
+
+	AABB pBox = player_->GetAABB();
+	auto isOverlap = [](const AABB& a, const AABB& b) {
+		return (a.min.x <= b.max.x && a.max.x >= b.min.x) &&
+			(a.min.y <= b.max.y && a.max.y >= b.min.y) &&
+			(a.min.z <= b.max.z && a.max.z >= b.min.z);
+		};
+
+	for (auto& sign : *signList_) {
+		if (!sign) { continue; }
+		sign->SetIsPlayerNear(isOverlap(pBox, sign->GetAABB()));
+	}
+}
+
+void CollisionManager::PlayerDrillerCollision() {
+	if (player_ == nullptr || driller_ == nullptr || !driller_->HasSpawnPoint()) { return; }
+
+	/// 生成点から X 方向に kDrillerCallRangeCell マス以内
+	const float cellX = mapChipManager_ ? mapChipManager_->GetBlockSize().x : 1.0f;
+	const float dx = std::abs(player_->GetPosition().x - driller_->GetSpawnPoint().x);
+	driller_->SetIsPlayerNear(dx <= kDrillerCallRangeCell * cellX);
 }
 
 void CollisionManager::EnemyMapCollision() {
@@ -209,4 +221,12 @@ void CollisionManager::InputBulletList(std::vector<Bullet*>* bulletList) {
 
 void CollisionManager::InputEnemyList(std::vector<Enemy*>* enemyList) {
 	enemyList_ = enemyList;
+}
+
+void CollisionManager::InputSignList(std::vector<std::unique_ptr<Sign>>* signList) {
+	signList_ = signList;
+}
+
+void CollisionManager::InputDriller(Driller* driller) {
+	driller_ = driller;
 }

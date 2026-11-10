@@ -1,0 +1,155 @@
+#pragma once
+#include "BaseScene.h"
+#include "Object\Object.h"
+#include "Object\Sprite.h"
+#include "GAME\Object\Bullet\Bullet.h"
+#include "GAME\Object\Player\Player.h"
+#include "GAME\Object\Enemy\Enemy.h"
+#include "GAME\Object\Sign\Sign.h"
+#include "GAME\Object\SignBoard\SignBoard.h"
+#include "GAME\Object\BackPoint\BackPoint.h"
+#include "GAME\Object\Driller\Driller.h"
+#include "tool\CollisionManager\CollisionManager.h"
+#include "GAME\resources\PostProcessPreset\PPP_GlitchScreen.h"
+#include "Tool\MapBulider\Data\MapBlockData.h"
+#include <memory>
+#include <set>
+#include <numbers>
+
+class SceneTutorial :public BaseScene
+{
+public:
+	SceneTutorial(kEngine* system);
+	~SceneTutorial();
+	void Update() override;
+	void Draw() override;
+
+
+private:
+	kEngine* system_ = nullptr;				// 借り
+
+	/// ============== 後処理関連 ==============///
+
+	PPP_GlitchScreen* ppp_GlitchScreen_ = nullptr;
+	RenderCommand* noiseCommand_;
+	RenderCommand* colorGradingCommand_;
+	RenderCommand* blurCommand_;
+	RenderCommand* vignetteCommand_;
+
+	/// =========== シーン切り替え用
+	float entryTime_ = 1.0f;
+
+	float circleRadius = 0.832f;
+	float circleSoftness = 0.081f;
+	float circleOpenIntensity = 0.0f;
+	float circleCloseIntensity = 90.0f;
+	RenderCommand* circleCommand_;
+	int circleHandle_ = -1;
+
+	int currentGuardType = 0;
+
+	/// ============== カメラ関連 ==============///
+	/// メーンカメラ
+	std::weak_ptr<Camera> camera_;
+	/// デバックカメラ
+	std::weak_ptr<DebugCamera> debugCamera_;
+	/// 今使っているカメラ
+	std::weak_ptr<Camera> usingCamera_;			// 借り
+
+	/// =========== テキスチャハンドル ============///
+	/// モデルハンドル
+	int MH_skydome_ = 0;
+	int MH_player_ = 0;
+	int MH_underGround_ = 0;
+	int MH_bullet_ = 0;
+	int MH_object_ = 0;
+	int MH_enemy_ = 0;
+	int MH_backPoint_ = 0;
+	int MH_driller_ = 0;
+
+	/// テキスチャハンドル
+	int TH_box_ = 0;
+	int TH_try_ = 0;
+	int TH_uv_ = 0;
+
+	int TH_dirt_ = 0;
+	int TH_rock_ = 0;
+
+	int TH_buleSkySkydome_ = 0;
+
+	int TH_hpUI_ = 0;
+	int TH_hpUI_empty_ = 0;
+
+	int TH_ReflectTexture_ = 0;
+
+	/// サウンドハンドル
+
+	int SH_BGM_ = 0;
+	int SE_killEnemy_ = 0;
+
+	/// =========== 実体 ==========///
+	Object* skydome_ = nullptr;
+	//Object* object_ = nullptr;
+
+	Object* underGround_BG_ = nullptr;
+
+	Player* player_ = nullptr;
+
+	BackPoint* backPoint_ = nullptr;
+	
+	Object* backSign_ = nullptr;
+
+	SimpleSprite* hpUI_[3] = { nullptr,nullptr,nullptr };
+
+	std::vector<std::unique_ptr <Sign>> signList_;
+
+	std::unique_ptr<SignBoard> signBoard_;
+
+	std::unique_ptr<Driller> driller_;
+
+	std::unique_ptr<MapChipManager> mapChipManager_;
+	MapBlockData mapBlocks_;
+	std::vector<Bullet*> bulletList_;
+	std::vector<Enemy*> enemyList_;
+	std::set<std::string> unhandledMapUnits_;   // デバッグ用：生成されなかった物の名前
+
+	/// ========== 当たり判定マネージャー =========///
+	CollisionManager collisionManager_;
+
+	/// ============== map対応名前 =============///
+	std::string playerName_ = "kPlayer";
+	std::string enemyName_ = "kEnemy";
+	std::string shipSpawnPointName_ = "kShipPoint";
+	std::string signName_ = "kSign";
+
+	/// =============== フラグ ================///
+	bool useDebugCamera = false;
+	bool isWin_ = false;
+
+	/// 遷移後の結果（TRANSITION 終了時に outcome_ へ）
+	SceneOutcome nextOutcome_ = SceneOutcome::NONE;
+
+	/// 死亡後の待ち
+	Timer loseWaitTimer_;
+	float kLoseWaitTime_ = 2.0f;
+	bool isLoseCounting_ = false;
+
+private:
+	/// ============= ゲーム進行関連 =============///
+	void PhaseUpdate();
+	void LoseTransition();
+	void CameraPart();
+	void ImGuiPart();
+
+	void RegisterMapSpawner();
+	void GenerateMap();
+	void StartTransition(SceneOutcome outcome);
+
+	/// =============== 生成関連 ===============///
+	Player* CreatePlayer(const MapReader::SpawnInfo& s);
+	Enemy* CreateEnemy(const MapReader::SpawnInfo& s);
+	BackPoint* CreateBackPoint(const MapReader::SpawnInfo& s);
+	Sign* CreateSign(const MapReader::SpawnInfo& s);
+	void SpawnDefault(const MapReader::SpawnInfo& s);
+};
+

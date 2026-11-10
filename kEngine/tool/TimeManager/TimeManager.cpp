@@ -6,21 +6,22 @@ void TimeManager::Update() {
 	auto now = std::chrono::steady_clock::now();
 	std::chrono::duration<float> elapsed = now - lastUpdateTime;
 
-	/// deltaTime_に経過時間をセット
-	totelDeltaTime_ = elapsed.count();
-	totelDeltaTime_ = std::min(totelDeltaTime_, 0.033f);
+	/// 実時間（先にclampしてから倍率をかける → x2 が 0.033 に潰されない）
+	realDeltaTime_ = std::min(elapsed.count(), 0.033f);
 
-	/// scaleがある時間の計算
+	/// エンジン全体の deltaTime（Cheat ON ならここで全部変わる）
+	totelDeltaTime_ = realDeltaTime_ * (useCheatTimeScale_ ? cheatTimeScale_ : 1.0f);
+
+	/// ゲーム側の倍率はその上に乗せる（Hit Stop / スロー演出はそのまま効く）
 	scaledDeltaTime_ = totelDeltaTime_ * timeScale_;
 	timerScaledDeltaTime_ = totelDeltaTime_ * timerTimeScale_;
 
 	/// 更新時間を保存
 	lastUpdateTime = now;
 
-	/// FPS計算
-	oneScondCounter_ += totelDeltaTime_;
+	/// FPS計算（実時間で）
+	oneScondCounter_ += realDeltaTime_;
 
-	/// 1秒ごとFPSの計算
 	if (oneScondCounter_ > 1.0f) {
 		float sum = 0.0f;
 		for (auto& ptr : fpsHistory_) {
@@ -30,10 +31,9 @@ void TimeManager::Update() {
 		fpsHistory_.clear();
 		oneScondCounter_ = 0.0f;
 	} else {
-		if (totelDeltaTime_ > 0.0f)instantFps_ = 1.0f / totelDeltaTime_;
+		if (realDeltaTime_ > 0.0f) instantFps_ = 1.0f / realDeltaTime_;
 		fpsHistory_.push_back(instantFps_);
 	}
-
 }
 
 

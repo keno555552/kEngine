@@ -2,6 +2,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <set>
 #include "config.h"
 #include "DirectXCore.h"
 #include "ParticleEmitter.h"
@@ -49,6 +50,7 @@ public:
 	/// --- エミッタ管理 --- ///
 	int CreateEmitter(const ParticlePrototype& proto, int maxParticles);
 	void ClearEmitter(int emitterId);
+	void ClearEmitterLinks();
 
 	/// 手動発射
 	void ShootEmitter(int emitterId, int count);
@@ -60,17 +62,22 @@ public:
 
 	/// データ管理
 	void RemoveEmitter(int id);
+	/// 線を引退させる：もう撃たない＋粒子が全部消えたら自動で削除（飛んでいる粒子は最後まで残る）
+	void RetireEmitter(int emitterId);
 
 	/// データセット
 	void SetEmitterEnd(int emitterId, bool isEnd);
 	void SetEmitterDead(int emitterId);
+	void SetLinkLog(bool enable) { isLinkLogEnabled_ = enable; }
 	void UpdatePrototype(int emitterId, const ParticlePrototype& proto, int maxParticles);
+
 
 	/// データ取得
 	int GetEmitterCount() const { return static_cast<int>(emitterList_.size()); }
 	int GetEmitterParticleCount(int emitterId);
 	int GetEmitterIdByName(const std::string& name) const;
 	int GetAllParticleCount();
+	bool GetLinkLog() const { return isLinkLogEnabled_; }
 
 private:
 
@@ -79,7 +86,7 @@ private:
 
 	/// 粒子生成器
 	std::map<int, std::unique_ptr<ParticleEmitter>> emitterList_;
-	std::map<std::string, std::vector<int>> emitterNameToId_;
+
 	int nextEmitterId_ = 0;
 
 	/// Emitterの粒子ID生成用
@@ -91,6 +98,12 @@ private:
 
 	/// ポーズ用
 	bool isPaused_ = false;
+
+	/// ======= デバッグ用
+	/// Link の成功 Log を出すか（失敗は常に出す）
+	bool isLinkLogEnabled_ = false;
+	/// 失敗の Log を同じ Link で何度も出さないため（ClearEmitterLinks でリセット）
+	std::set<std::string> warnedLinks_;
 
 private:
 	/// --- 内部関数 --- ///

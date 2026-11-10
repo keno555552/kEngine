@@ -35,8 +35,6 @@ public:
 	explicit MapReader(kEngine* system) : system_(system) {}
 
 	/// ================= 読み込み ================= ///
-	/// まとめて：csv → MapData。mapDataPath が空なら csv の「#mapData」の名前で探す
-	bool LoadMap(const std::string& csvPath, const std::string& mapDataPath, MapPackage& out);
 	/// MapData の json だけ（モデル・texture もここでエンジンに読み込む）
 	bool ReadMapData(const std::string& jsonPath, MapData& out);
 	/// csv だけ（エンジンを使わないので static）

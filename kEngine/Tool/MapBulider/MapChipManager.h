@@ -30,10 +30,31 @@ public:
 	void Clear();
 
 	/// ================= 生成の登録（シーン側のルール） ================= ///
-	void Register(const std::string& unitName, MapReader::SpawnFunc func) { reader_->Register(unitName, std::move(func)); }
-	void Register(int id, MapReader::SpawnFunc func) { reader_->Register(id, std::move(func)); }
-	/// 登録に無い物（ブロック等）
-	void SetDefault(MapReader::SpawnFunc func) { reader_->SetDefault(std::move(func)); }
+	/// 複数：create で作った物を list に追加（vector<T*> / vector<unique_ptr<T>> 両方 OK）
+	template<class Owner, class T, class Elem>
+	void Register(const std::string& unitName, std::vector<Elem>* list,
+		Owner* owner, T* (Owner::* create)(const MapReader::SpawnInfo&)) {
+		reader_->Register(unitName, [list, owner, create](const MapReader::SpawnInfo& s) {   // ★reader_->
+			list->emplace_back((owner->*create)(s));
+			});
+	}
+
+	/// 単体：create で作った物を *slot に（既にあれば前のは delete → 最後の 1 個）
+	template<class Owner, class T>
+	void Register(const std::string& unitName, T** slot,
+		Owner* owner, T* (Owner::* create)(const MapReader::SpawnInfo&)) {
+		reader_->Register(unitName, [slot, owner, create](const MapReader::SpawnInfo& s) {   // ★reader_->
+			delete* slot;
+			*slot = (owner->*create)(s);
+			});
+	}
+
+	/// 登録に無い物（戻り値は無視）
+	template<class Owner, class R>
+	void SetDefault(Owner* owner, R(Owner::* method)(const MapReader::SpawnInfo&)) {
+		reader_->SetDefault([owner, method](const MapReader::SpawnInfo& s) { (owner->*method)(s); });
+	}
+
 	void ClearRegistry() { reader_->ClearRegistry(); }
 
 	/// ================= 生成 ================= ///

@@ -7,8 +7,15 @@
 #include "BaseScene.h"
 #include "Data/Geometry/Corner/Corner.h"
 #include "Math/Geometry/Collision/crashDecision.h"
+#include "Data/Game/MapChip/CollisionResult.h"
+
+/// ================== プレイヤーデータ関連
+
+/// HP設定
+static inline const float kPlayerMaxHP = 3.0f;
 
 
+/// ================== 速度関連
 /// 移動速度
 static inline const float kAcceleration = 10.0f;
 /// 移動減衰
@@ -47,13 +54,25 @@ static inline const float kNearAttackBoxHeight = 1.2f;
 static inline const float kNearAttackChangeTime = 0.2f;
 static inline const float kNearAttackEffectTime = 0.5f;
 
+/// ================== 死亡演出関連
+static inline const float kDeathKnockbackX = 3.0f;        // 後ろへの吹っ飛び
+static inline const float kDeathKnockbackY = 2.5f;        // 浮き上がり
+static inline const float kDeathFallTime = 0.45f;         // 倒れきるまで
+static inline const float kDeathFallPower = 3.0f;         // 大きいほど最後に一気に「バタン」
+static inline const float kDeathFallAngle = 1.5707963f;  // 後ろ倒れ（逆なら符号反転）
+static inline const float kDeathBounceTime = 0.2f;        // 着地の跳ね返り
+static inline const float kDeathBounceRatio = 0.15f;      // 跳ね返りで起き上がる割合
+static inline const float kDeathAttenuation = 6.0f;       // 着地後の滑り減衰
+
 
 class Bullet;
+class Sight;
 class Player :public Object
 {
 public:
 	/// コンストラクタ
 	Player(kEngine* system, const Vector3& position = Vector3{ 0,0,0 });
+	~Player();
 
 	/// ムーブメント
 	void MoveLeft() { moveLeft_ = true; }
@@ -64,12 +83,17 @@ public:
 	void StopRight() { moveRight_ = false; }
 	void StopJump() { moveJump_ = false; }
 
-	void Attack(Vector3 mousePos);
-
-	/// ステージ用
+	/// =============== ステージ用 =============== ///
+	/// ヴァーチャル関数
 	void Update(Camera* camera) override;
+	void Draw() override;
+
+	/// 当たり判定
 	AABB& GetAABB();
+	void SetCollisionResult(const CollisionResult& result);
 	//AABB& GetMapChipAABB();
+
+	/// 位置・移動関連
 	Vector3 GetVelocity() { return velocity_; }
 	Vector3 GetPosition() { return mainPosition.transform.translate; }
 	void SetVelocity(const Vector3& velocity) { velocity_ = velocity; }
@@ -78,14 +102,24 @@ public:
 	bool IsOnGround() { return onGround_; }
 	void SetOnGround(bool onGround) { onGround_ = onGround; }
 
+	/// 射撃関連
+	Vector3 GetAimPosition() const;
+	void Shoot(Vector3 mousePos);
+	void Shoot() { Shoot(GetAimPosition()); }
+
+	/// 弾丸管理
 	void InputBulletList(std::vector<Bullet*>* bulletList) { bulletList_ = bulletList; };
 
+	/// HP管理
 	int GetHP() const { return static_cast<int>(HP_); }
 	void SetHP(int hp) { HP_ = static_cast<float>(hp); }
-	void GetDamage(float damage);
+	void GetDamage(float damage, const Vector3& attackerPos);
 
 	bool IsDisableDamage() const { return disableDamage_; }
 
+	/// 状態管理
+	bool IsDead() const { return isDead_; }
+	bool IsDeathAnimEnd() const { return deathPhase_ == DeathPhase::kLie; }
 
 private:
 
@@ -105,35 +139,31 @@ private:
 		Vector3 moveVector = {}; // 移動量
 	};
 
-private:
-
-	void BehaviorRootUpdate();
-	Vector3 CornerPosition(const Vector3& center, Corner4 corner);
-	void Move();
-	void ResetMove();
-	void OnGroundChanger(const CollisionMapInfo& info);
-	void MapCollisionDecideDown(CollisionMapInfo& info);
-	void MovePlayerByResult(const CollisionMapInfo& info);
-
-	void BitMapBugCheck();
-	void ShootUpdate();
-	void NearAttackUpdate();
-
-	void DamageAndEffectPart();
+	/// 死亡動画フェイス用
+	enum class DeathPhase { 
+		kNone, 
+		kFall, 
+		kBounce, 
+		kLie };
+	DeathPhase deathPhase_ = DeathPhase::kNone;
+	Timer deathTimer_;
 
 private:
 	///モデルハンドル
 	int MH_playerModel_{};
 	int MH_pickaxe_{};
+	int MH_sight_{};
 
 	/// テキスチャハンドル
 	int TH_playerTexture_{};
+	int TH_playerTexture_damaged_{};
+	int TH_playerTexture_dead_{};
 	int TH_White5x5_{};
 
 	///サントハンドル
-	int SH_JUMP_ = 0;
-	int SH_SHOOT_ = 0;
-	int SH_DAMAGE_ = 0;
+	int SH_JUMP_{};
+	int SH_SHOOT_{};
+	int SH_DAMAGE_{};
 private:
 	/////// State
 	/// HP
@@ -160,25 +190,25 @@ private:
 	enum class PlayerState {
 
 		kNone = 0,
-		kNormal = 1 << 0,
+		kMove = 1 << 0,
 		kDamage = 1 << 1,
 		kShoot = 1 << 2,
 		kNearAttack = 1 << 3,
 		kDush = 1 << 4,
+		kDead = 1 << 5,
 
-		numStates = 5,///<<< numStatesの値の更新を忘れなく
+		numStates = 6,///<<< numStatesの値の更新を忘れなく
 	};
-	PlayerState drillerState_ = PlayerState::kNormal;
+	PlayerState playerState_ = PlayerState::kNone;
 
 	// 行動可能フラグ
-	int canShoot = static_cast<int>(PlayerState::kNormal) |
-				   static_cast<int>(PlayerState::kDush);
+	int cantShoot = static_cast<int>(PlayerState::kDamage) |
+					static_cast<int>(PlayerState::kNearAttack) |
+					static_cast<int>(PlayerState::kDead);
 
 	Timer checkTimer_;
 
 private:
-
-
 
 	/// オブジェクト
 	Object* pickaxe_ = nullptr;
@@ -214,9 +244,17 @@ private:
 	bool disableDamage_ = false;
 
 private:
-	std::vector<Bullet*>* bulletList_ = nullptr;
+	/// ================ 攻撃関連 ================ ///
+	/// 照準
+	std::unique_ptr<Sight> sight_;
 
+	/// ========== 射撃関連
+	std::vector<Bullet*>* bulletList_ = nullptr;
 	Timer shootCD_;
+
+	bool isGun_ = true; // 仮、後で武器により改変
+
+	/// ========== 近接関連
 
 private:
 	/// move
@@ -232,5 +270,32 @@ private:
 	Timer nearAttackChangeTimer_;
 	Timer nearAttackEffectTimer_;
 
+
+private:
+
+	void BehaviorRootUpdate();
+	Vector3 CornerPosition(const Vector3& center, Corner4 corner);
+	void Move();
+	void ResetMove();
+	void OnGroundChanger(const CollisionMapInfo& info);
+	void MovePlayerByResult(const CollisionMapInfo& info);
+
+	void BitMapBugCheck();
+	void ShootUpdate();
+	void NearAttackUpdate();
+
+	void UpdataState();
+
+	void StartDeath(const Vector3& attackerPos);
+	void DeathUpdate();
+	void SetFaceTexture(int handle);
+
+	void DamageAndEffectPart();
 };
 
+#pragma region TODO（アイデアメモ）
+// - ジャンプ中のブランク時間（コヨーテタイム？）：旧 kBlank = 0.0f
+// - 行動キュー：std::vector<std::function<void()>> で入力バッファ？
+// - 武器切替：isGun_ → 武器 enum に
+// - Pickaxe：MH_pickaxe_ はロード済み、Object 生成まだ
+#pragma endregion

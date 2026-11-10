@@ -15,7 +15,7 @@ public:
 	static nlohmann::json ObjectPartToJson(const ObjectPart& part, kEngine* system);
 	static nlohmann::json TransformToJson(const Transform& transform);
 	static nlohmann::json MaterialConfigToJson(const MaterialConfig& mat, kEngine* system);
-
+	static nlohmann::json EngineParamsToJson(const EngineModelParams& p);
 
 public:
 	static Vector3 JsonToV3(const nlohmann::json& j);
@@ -24,5 +24,6 @@ public:
 	static MaterialConfig JsonToMaterialConfig(const nlohmann::json& j, kEngine* system);
 	static ObjectData JsonToObjectData(const nlohmann::json& j, kEngine* system);
 	static ObjectPart JsonToObjectPart(const nlohmann::json& j, kEngine* system);
+	static EngineModelParams JsonToEngineParams(const nlohmann::json& j);
 };
 

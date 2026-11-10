@@ -83,6 +83,7 @@ public:
 	void Draw2D(SpriteData* spriteData);
 	void Draw3D(ObjectData* objectData);
 	void DrawParticle(std::vector<ObjectData>& objectList, std::vector<ParticleInstance>& instance);
+	void DrawParticle(std::vector<ParticleInstance>& instance);
 
 	int GetModelTextureHandle(int modelHandle, int part);
 

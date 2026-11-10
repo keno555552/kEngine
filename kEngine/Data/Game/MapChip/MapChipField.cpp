@@ -5,7 +5,6 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
-#include "Tool/MapBulider/Reader/MapReader.h"
 
 void MapChipField::Setup(const MapGrid& grid, const MapData* data) {
 	mapData_ = data;
@@ -16,12 +15,6 @@ void MapChipField::Setup(const MapGrid& grid, const MapData* data) {
 		kBlockWidth = data->cellSpacing.x;
 		kBlockHeight = data->cellSpacing.y;
 	}
-}
-
-void MapChipField::LoadMapChipCsv(const std::string& filePath) {
-	MapGrid grid;
-	if (!MapReader::ReadMapGrid(filePath, grid)) return;
-	Setup(grid, nullptr);
 }
 
 void MapChipField::ResetMapChipData() {
@@ -50,19 +43,16 @@ const MapUnit* MapChipField::GetUnitByMap(MapIndex m) const {
 
 bool MapChipField::IsWallByMap(MapIndex m) const {
 	if (!InRange(m)) return false;
-	if (!mapData_) {                                           // MapData 無し（旧 csv）→ 昔のルール
-		const int id = ids_[m.y][m.x];
-		return id == 1 || id == 2;
-	}
 	const MapUnit* u = GetUnitByMap(m);
 	return u && u->isDirectTile;
 }
+
 bool MapChipField::IsWallByWorld(WorldIndex w) const {
 	return IsWallByMap(ExchangeWorld2MapIndex(w));
 }
 
 /// マップチップ座標を取得
-Vector3 MapChipField::GetWorldPosFromMapByMapIndex(MapIndex mapIndex) const{
+Vector3 MapChipField::GetWorldPosFromMapByMapIndex(MapIndex mapIndex) const {
 	Vector3 leftBottom{ kBlockWidth * mapIndex.x,
 						kBlockHeight * (kNumBlockVirtical - 1 - mapIndex.y),
 						0 };
@@ -107,6 +97,7 @@ CollisionResult MapChipField::GetMapCollisionCorrection(
 
 	bool xIsMainAxis = false;
 	bool yIsMainAxis = false;
+	bool ceilingHit = false;
 
 	// ★★★ 最重要：逐 tile 累積推回，而不是只推一次 ★★★
 	for (int step = 0; step < 2; ++step) {
@@ -183,7 +174,8 @@ CollisionResult MapChipField::GetMapCollisionCorrection(
 			push.y = bestDirY * (bestOverlapY + EPS);
 			yIsMainAxis = true;
 
-			if (bestDirY > 0.0f) landed = true; // 往下推 → 落地
+			if (bestDirY > 0.0f) landed = true;        // 上に押し戻す → 床
+			else                 ceilingHit = true;    // ★下に押し戻す → 天井
 		}
 
 		// ★★★ 逐 tile 累積推回（舊版最重要的行為）★★★
@@ -197,6 +189,7 @@ CollisionResult MapChipField::GetMapCollisionCorrection(
 	result.xIsMainAxis = xIsMainAxis;
 	result.yIsMainAxis = yIsMainAxis;
 	result.landed = landed;
+	result.ceilingHit = ceilingHit;
 	return result;
 }
 
@@ -231,9 +224,6 @@ std::vector<MapChipField::TileInfo> MapChipField::GetTilesOverlapping(const AABB
 	for (int y = yBegin; y <= yEnd; ++y) {
 		for (int x = xBegin; x <= xEnd; ++x) {
 
-			MapChipType type = GetMapChipTypeByWorld({ x, y });
-			bool isWall = (type == MapChipType::kDirt || type == MapChipType::kRock);
-
 			TileInfo info;
 			info.isWall = IsWallByWorld({ x, y });
 			info.aabb = GetAABBByWorldIndex({ x, y });
@@ -262,14 +252,6 @@ AABB MapChipField::GetAABBByWorldIndex(WorldIndex worldIndex) const {
 	return GetAABBByMapIndex(ExchangeWorld2MapIndex(worldIndex));
 }
 
-
-void MapChipField::SetBlockWidth(float width) {
-	kBlockWidth = width;
-}
-
-void MapChipField::SetBlockHeight(float height) {
-	kBlockHeight = height;
-}
 
 MapChipField::WorldIndex MapChipField::ExchangeMap2WorldIndex(MapIndex mapSet) const {
 	WorldIndex i;

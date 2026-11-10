@@ -1,10 +1,56 @@
 #include "EffectEditor.h"
+#include <set>
+#include <filesystem>
+#include <algorithm>
 #include "DebugDraw.h"
 #include "ImguiManager.h"
 #include "FileManager\FileManager.h"
+#include "externals/imgui/imgui_internal.h"
+
+namespace {
+	/// ウィンドウ名（Begin と DockBuilderDockWindow で同じ文字列を使うため、一か所で定義する）
+	constexpr const char* kWinEffectList = "Effect List";
+	constexpr const char* kWinParticleList = "Particle List";
+	constexpr const char* kWinLinkerList = "Linker List";
+	constexpr const char* kWinEngineInfo = "Engine Info";
+	constexpr const char* kWinCamera = "Camera";
+	constexpr const char* kWinShooter = "Shooter Setting";
+	constexpr const char* kWinDetails = "Variable Details";
+	constexpr const char* kWinDebugLog = "Debug Log";
+	constexpr const char* kWinDrawingInfo = "Drawing Effect Info";
+	constexpr const char* kWinParticleInfo = "Particle Details";
+	constexpr const char* kEffectFilter = "Effect (*.json)\0*.json\0";
+
+	/// ファイルがあって、それが own（自分のファイル）ではない → true（上書き確認が必要）
+	bool IsOtherFile(const std::string& target, const std::string& own) {
+		std::error_code ec;
+		if (!std::filesystem::exists(target, ec)) return false;
+		if (!own.empty() && std::filesystem::equivalent(target, own, ec)) return false;
+		return true;
+	}
+
+	constexpr int kPreviewMaxParticles = 1000;
+
+	/// 見た目が無い Particle 用の既定の見た目（白い Plane のビルボード）
+	ObjectData MakeDefaultParticleObject() {
+		ObjectData obj;
+		obj.isBillboard_ = true;
+		obj.modelHandle_ = config::default_Plane_MeshBufferHandle_;
+
+		ObjectPart part;
+		part.name = "Default";
+		part.materialConfig = std::make_shared<MaterialConfig>();
+		InitMaterialConfig(part.materialConfig.get());
+		part.materialConfig->MakePSOParticle();
+		part.materialConfig->enableLighting = false;
+		part.materialConfig->textureHandle = config::default_White5x5_TextureHandle_;
+		obj.objectParts_.push_back(part);
+		return obj;
+	}
+}
 
 
-EffectEditor::EffectEditor(kEngine* system) {
+EffectEditor::EffectEditor(kEngine* system) : effectAdapter_(system) {
 	/// =========== システム初期化 ============///
 	system_ = system;
 
@@ -112,22 +158,24 @@ EffectEditor::EffectEditor(kEngine* system) {
 	skybox_->mainPosition.transform.scale = { 200.0f, 200.0f, 200.0f };
 
 	/// =========== パーティクル作る ============///
-
-	HitSpark hitSpark;
-	hitSpark.startPosition = { 0.0f, 0.0f, 0.0f };
-	hitSpark.objectList[0].objectParts_[0].materialConfig->textureHandle = TH_clicleTextureHandle_;
-	TH_particleHandle_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitSpark, 0);
-
-	HitImpact hitImpact;
-	hitImpact.startPosition = { 0.0f, 0.0f, 0.0f };
-	hitImpact.objectList[0].objectParts_[0].materialConfig->textureHandle = TH_effectTextureHandle_;
-	TH_particleHandle2_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitImpact, 1);
-
-	HitSpackImpactLink linkData;
-	system_->GetEffectManager()->GetParticleManager()->LinkEmitterToEmitter(linkData);
+	//HitSpark hitSpark;
+	//hitSpark.startPosition = { 0.0f, 0.0f, 0.0f };
+	//hitSpark.objectList[0].objectParts_[0].materialConfig->textureHandle = TH_clicleTextureHandle_;
+	//TH_particleHandle_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitSpark, 0);
+	//
+	//HitImpact hitImpact;
+	//hitImpact.startPosition = { 0.0f, 0.0f, 0.0f };
+	//hitImpact.objectList[0].objectParts_[0].materialConfig->textureHandle = TH_effectTextureHandle_;
+	//TH_particleHandle2_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitImpact, 1);
+	//
+	//HitSpackImpactLink linkData;
+	//system_->GetEffectManager()->GetParticleManager()->LinkEmitterToEmitter(linkData);
 
 	/// ========== デバッグ用 ============///
-	effectDataList_.push_back(Effect_HitSpark());
+	//Effect_HitSpark debugEffect;
+	//debugEffect.prototypes[0].objectList[0].objectParts_[0].materialConfig->textureHandle = TH_clicleTextureHandle_;   // HitSpark
+	//debugEffect.prototypes[1].objectList[0].objectParts_[0].materialConfig->textureHandle = TH_effectTextureHandle_;   // HitImpact
+	//effectDataList_.push_back(debugEffect);
 
 }
 
@@ -142,7 +190,7 @@ void EffectEditor::Update() {
 	if (!isPause_) {
 		if (isShootNonStop_) {
 			if (shootTime.foreverUp()) {
-				system_->GetEffectManager()->GetParticleManager()->ShootEmitter(TH_particleHandle_, 1);
+				ShootPreview();
 			}
 		}
 	}
@@ -183,916 +231,1249 @@ void EffectEditor::CameraPart() {
 
 void EffectEditor::SaveLoadPart() {
 	SavePart();
-	LoadPart();
 }
 
 void EffectEditor::SavePart() {
-	if (!isSave_) return;
-	if (currentEffectIndex_ >= 0 && currentEffectIndex_ < static_cast<int>(effectDataList_.size())) {
-		switch (saveLoadMode_) {
-		case SelectMode::Effect:
-			effectAdapter_.SaveEffect(effectDataList_[currentEffectIndex_], saveFilePath_);
-			break;
-		case SelectMode::Particle:
-			if (currentParticleIndex_ >= 0 && currentParticleIndex_ < static_cast<int>(effectDataList_[currentEffectIndex_].prototypes.size())) {
-				effectAdapter_.SaveParticle(effectDataList_[currentEffectIndex_].prototypes[currentParticleIndex_], saveFilePath_);
-			} else {
-				debugText_ += "Error: Invalid currentParticleIndex_ for saving.\n";
-			}
-			break;
-		case SelectMode::Linker:
-			if (currentLinkIndex_ >= 0 && currentLinkIndex_ < static_cast<int>(effectDataList_[currentEffectIndex_].links.size())) {
-				effectAdapter_.SaveEmitterLink(effectDataList_[currentEffectIndex_].links[currentLinkIndex_], saveFilePath_, effectDataList_[currentEffectIndex_]);
-			} else {
-				debugText_ += "Error: Invalid currentLinkIndex_ for saving.\n";
-			}
-			break;
-		}
-	} else {
-		debugText_ += "Error: Invalid currentEffectIndex_ for saving.\n";
+	/// 上書き確認の返事待ちなら止まる
+	if (pendingSave_.active) return;
+
+	while (!saveQueue_.empty()) {
+		SaveRequest request = saveQueue_.front();
+		saveQueue_.erase(saveQueue_.begin());
+
+		BeginSave(request);
+		if (pendingSave_.active) break;   // 確認が必要になった → 返事が来るまで次へ行かない
 	}
-	isSave_ = false;
 }
 
-void EffectEditor::LoadPart() {
-	if (!isLoad_) return;
-	isLoad_ = false;
+void EffectEditor::LoadEffectFromDialog() {
+	namespace fs = std::filesystem;
+
+	if (pendingSave_.active || !saveQueue_.empty()) {
+		debugText_ += "Error: Cannot load while saving.\n";
+		return;
+	}
+
+	const std::string path = FileManager::OpenFileDialog(kEffectFilter, "Load Effect");
+	if (path.empty()) return;   // キャンセル
+
+	/// もう開いている Effect → 2つ目は作らずにそれを選ぶ
+	for (int i = 0; i < (int)effectDataList_.size(); i++) {
+		std::error_code ec;
+		if (!effectDataList_[i].savePath.empty() && fs::equivalent(effectDataList_[i].savePath, path, ec)) {
+			currentEffectIndex_ = i;
+			currentParticleIndex_ = -1;
+			currentLinkIndex_ = -1;
+			selectMode_ = SelectMode::Effect;
+			debugText_ += "Already opened: " + effectDataList_[i].name + "\n";
+			return;
+		}
+	}
+
+	EffectData effect;
+	std::string log;
+	const bool ok = effectAdapter_.LoadEffect(path, effect, &log);
+	debugText_ += log;
+	if (!ok) return;
+
+	effectDataList_.push_back(std::move(effect));
+	currentEffectIndex_ = (int)effectDataList_.size() - 1;
+	currentParticleIndex_ = -1;
+	currentLinkIndex_ = -1;
+	selectMode_ = SelectMode::Effect;
+	debugText_ += "Loaded Effect: " + path + "\n";
 }
+
+void EffectEditor::ImportUnitFromDialog(SelectMode target) {
+	namespace fs = std::filesystem;
+
+	if (!isEffectSelected_) {
+		debugText_ += "Error: No effect selected for import.\n";
+		return;
+	}
+	if (pendingSave_.active || !saveQueue_.empty()) {
+		debugText_ += "Error: Cannot import while saving.\n";
+		return;
+	}
+
+	const bool isParticle = (target == SelectMode::Particle);
+	const std::string path = FileManager::OpenFileDialog(kEffectFilter, isParticle ? "Import Particle" : "Import EmitterLink");
+	if (path.empty()) return;
+
+	EffectData& effect = effectDataList_[currentEffectIndex_];
+
+	/// 同じファイルがもうこの Effect にある → 追加しない
+	auto samePath = [&](const std::string& p) {
+		std::error_code ec;
+		return !p.empty() && fs::equivalent(p, path, ec);
+		};
+	if (isParticle) {
+		for (const auto& p : effect.prototypes) if (samePath(p.savePath)) { debugText_ += "Already in effect: " + p.name + "\n"; return; }
+	} else {
+		for (const auto& l : effect.links) if (samePath(l.savePath)) { debugText_ += "Already in effect: " + l.name + "\n"; return; }
+	}
+
+	std::string log;
+	bool ok = false;
+	if (isParticle) {
+		ParticlePrototype proto;
+		ok = effectAdapter_.LoadParticle(path, proto, &log);
+		if (ok) {
+			effect.prototypes.push_back(std::move(proto));
+			currentParticleIndex_ = (int)effect.prototypes.size() - 1;
+			currentLinkIndex_ = -1;
+		}
+	} else {
+		EmitterLink link;
+		ok = effectAdapter_.LoadEmitterLink(path, link, &log);
+		if (ok) {
+			effect.links.push_back(std::move(link));
+			currentLinkIndex_ = (int)effect.links.size() - 1;
+			currentParticleIndex_ = -1;
+		}
+	}
+	debugText_ += log;
+	if (!ok) return;
+
+	selectMode_ = target;
+	effect.isSaved = false;   // Effect ファイルに参照を足す必要がある
+	debugText_ += std::string("Imported ") + (isParticle ? "Particle: " : "Link: ") + path + "\n";
+}
+
+void EffectEditor::RequestSave(int effectIndex, bool forceDialog) {
+	SaveRequest request;
+	request.target = SelectMode::Effect;
+	request.effectIndex = effectIndex;
+	request.forceDialog = forceDialog;
+	saveQueue_.push_back(request);
+}
+
+void EffectEditor::RequestSaveUnit(SelectMode target, int effectIndex, int itemIndex, bool forceDialog) {
+	SaveRequest request;
+	request.target = target;
+	request.effectIndex = effectIndex;
+	request.itemIndex = itemIndex;
+	request.forceDialog = forceDialog;
+	saveQueue_.push_back(request);
+}
+
+void EffectEditor::RequestSaveAll() {
+	for (int i = 0; i < (int)effectDataList_.size(); i++) {
+		if (!effectDataList_[i].isSaved) RequestSave(i, false);
+	}
+}
+
+void EffectEditor::BeginSave(const SaveRequest& request) {
+	switch (request.target) {
+	case SelectMode::Effect:
+
+		BeginSaveEffect(request);
+		break;
+
+	case SelectMode::Particle:
+	case SelectMode::Linker:
+
+		BeginSaveUnit(request);
+		break;
+
+	default:
+		break;
+	}
+}
+
+void EffectEditor::BeginSaveEffect(const SaveRequest& request) {
+	if (request.effectIndex < 0 || request.effectIndex >= (int)effectDataList_.size()) {
+		debugText_ += "Error: Invalid effect index for saving.\n";
+		return;
+	}
+	EffectData& effect = effectDataList_[request.effectIndex];
+
+	/// --- 保存先 ---
+	std::string path = effect.savePath;
+	bool detach = false;
+	if (request.forceDialog || path.empty()) {
+		path = AskEffectPath(effect);
+		if (path.empty()) return;          // キャンセル
+		detach = true;                     // 新しい場所 → 元のフォルダの中身も新しい場所へ
+	}
+
+	/// --- 同名チェック（Linkが名前で区別できなくなるので警告。保存は止めない） ---
+	std::set<std::string> names;
+	for (const auto& p : effect.prototypes) {
+		if (!names.insert(p.name).second) {
+			debugText_ += "Warning: duplicate particle name \"" + p.name + "\" in " + effect.name + "\n";
+		}
+	}
+
+	/// --- 計画（detach の場合はコピーで計画して、確認前に本物を変えない） ---
+	EffectData planned = effect;
+	if (detach) DetachEffectFolder(planned);
+	EffectSavePlan plan = effectAdapter_.PlanEffect(planned, path);
+
+	/// --- 衝突チェック ---
+	std::vector<std::string> conflicts = FindConflicts(planned, plan);
+	if (conflicts.empty()) {
+		ExecuteSave(request.effectIndex, plan, detach);
+		return;
+	}
+
+	pendingSave_ = {};
+	pendingSave_.active = true;
+	pendingSave_.request = request;
+	pendingSave_.detach = detach;
+	pendingSave_.plan = plan;
+	pendingSave_.conflicts = conflicts;
+}
+
+void EffectEditor::BeginSaveUnit(const SaveRequest& request) {
+	namespace fs = std::filesystem;
+
+	if (request.effectIndex < 0 || request.effectIndex >= (int)effectDataList_.size()) {
+		debugText_ += "Error: Invalid effect index for saving.\n";
+		return;
+	}
+	EffectData& effect = effectDataList_[request.effectIndex];
+
+	const bool isParticle = (request.target == SelectMode::Particle);
+	const int count = isParticle ? (int)effect.prototypes.size() : (int)effect.links.size();
+	if (request.itemIndex < 0 || request.itemIndex >= count) {
+		debugText_ += "Error: Invalid item index for saving.\n";
+		return;
+	}
+
+	const std::string& name = isParticle ? effect.prototypes[request.itemIndex].name : effect.links[request.itemIndex].name;
+	const std::string& own = isParticle ? effect.prototypes[request.itemIndex].savePath : effect.links[request.itemIndex].savePath;
+	const char* folder = isParticle ? "Particle" : "EmitterLink";
+	const std::string fileName = FileManager::ToSafeFileName(name) + ".json";
+
+	/// --- 保存先 ---
+	std::string path = own;
+	if (request.forceDialog || path.empty()) {
+		if (!request.forceDialog && !effect.savePath.empty()) {
+			/// まだ保存してない + Effect は保存済み → Effectフォルダの下（既定の場所）
+			path = (fs::path(effect.savePath).parent_path() / folder / fileName).string();
+		} else {
+			/// Save As / Effect もまだ → 好きな場所を選ぶ（共用フォルダなど）
+			path = FileManager::SaveFileDialog(kEffectFilter, "json", fileName,
+				isParticle ? "Save Particle" : "Save EmitterLink");
+			if (path.empty()) return;   // キャンセル
+		}
+	}
+
+	/// --- 衝突チェック ---
+	if (!IsOtherFile(path, own)) {
+		ExecuteSaveUnit(request, path);
+		return;
+	}
+
+	pendingSave_ = {};
+	pendingSave_.active = true;
+	pendingSave_.request = request;
+	pendingSave_.unitPath = path;
+	pendingSave_.conflicts = { path };
+}
+
+bool EffectEditor::ExecuteSave(int effectIndex, const EffectSavePlan& plan, bool detach) {
+	if (effectIndex < 0 || effectIndex >= (int)effectDataList_.size()) {
+		debugText_ += "Error: Invalid effect index for saving.\n";
+		return false;
+	}
+	EffectData& effect = effectDataList_[effectIndex];
+
+	if (detach) DetachEffectFolder(effect);
+
+	std::string error;
+	if (!effectAdapter_.WriteEffect(effect, plan, useRelativePath_, &error)) {
+		debugText_ += "Save Error: " + error + "\n";
+		return false;
+	}
+
+	effect.savePath = plan.effectPath;
+	effect.isSaved = true;
+	for (auto& p : effect.prototypes) p.isSaved = true;
+	for (auto& l : effect.links) l.isSaved = true;
+
+	debugText_ += "Saved Effect: " + plan.effectPath + "\n";
+	return true;
+}
+
+bool EffectEditor::ExecuteSaveUnit(const SaveRequest& request, const std::string& path) {
+	if (request.effectIndex < 0 || request.effectIndex >= (int)effectDataList_.size()) {
+		debugText_ += "Error: Invalid effect index for saving.\n";
+		return false;
+	}
+	EffectData& effect = effectDataList_[request.effectIndex];
+
+	const bool isParticle = (request.target == SelectMode::Particle);
+	const int count = isParticle ? (int)effect.prototypes.size() : (int)effect.links.size();
+	if (request.itemIndex < 0 || request.itemIndex >= count) {
+		debugText_ += "Error: Invalid item index for saving.\n";
+		return false;
+	}
+
+	std::string error;
+	std::string* savePath = nullptr;
+	bool* isSaved = nullptr;
+	bool ok = false;
+
+	if (isParticle) {
+		auto& p = effect.prototypes[request.itemIndex];
+		ok = effectAdapter_.WriteParticle(p, path, useRelativePath_, &error);
+		savePath = &p.savePath;
+		isSaved = &p.isSaved;
+	} else {
+		auto& l = effect.links[request.itemIndex];
+		ok = effectAdapter_.WriteEmitterLink(l, path, &error);
+		savePath = &l.savePath;
+		isSaved = &l.isSaved;
+	}
+
+	if (!ok) {
+		debugText_ += "Save Error: " + error + "\n";
+		return false;
+	}
+
+	/// 場所が変わった → Effectファイルの中の参照も直す必要がある
+	std::error_code ec;
+	const bool moved = savePath->empty() || !std::filesystem::equivalent(*savePath, path, ec);
+
+	*savePath = path;
+	*isSaved = true;
+	if (moved) {
+		effect.isSaved = false;
+		debugText_ += "Note: location changed. Save the effect to update its reference.\n";
+	}
+
+	debugText_ += std::string("Saved ") + (isParticle ? "Particle: " : "Link: ") + path + "\n";
+	return true;
+}
+
+std::vector<std::string> EffectEditor::FindConflicts(const EffectData& effect, const EffectSavePlan& plan) const {
+	std::vector<std::string> result;
+	if (IsOtherFile(plan.effectPath, effect.savePath)) result.push_back(plan.effectPath);
+	for (size_t i = 0; i < effect.prototypes.size() && i < plan.particlePaths.size(); i++) {
+		if (IsOtherFile(plan.particlePaths[i], effect.prototypes[i].savePath)) result.push_back(plan.particlePaths[i]);
+	}
+	for (size_t i = 0; i < effect.links.size() && i < plan.linkPaths.size(); i++) {
+		if (IsOtherFile(plan.linkPaths[i], effect.links[i].savePath)) result.push_back(plan.linkPaths[i]);
+	}
+	return result;
+}
+
+std::string EffectEditor::AskEffectPath(const EffectData& effect) {
+	namespace fs = std::filesystem;
+	const std::string safeName = FileManager::ToSafeFileName(effect.name);
+
+	const std::string picked = FileManager::SaveFileDialog(kEffectFilter, "json", safeName + ".json",
+		"Save Effect (choose output folder)");
+	if (picked.empty()) return "";
+
+	/// 選んだ場所がもう <Effect名> フォルダならそのまま、違うなら <Effect名> フォルダを作る
+	/// ファイル名は入力に関係なく <Effect名>.json に揃える
+	fs::path dir = fs::path(picked).parent_path();
+	if (dir.filename().string() != safeName) dir /= safeName;
+	return (dir / (safeName + ".json")).string();
+}
+
+void EffectEditor::DetachEffectFolder(EffectData& effect) {
+	namespace fs = std::filesystem;
+	if (!effect.savePath.empty()) {
+		const std::string dir = fs::path(effect.savePath).parent_path().generic_string() + "/";
+		auto isInside = [&](const std::string& p) {
+			return !p.empty() && fs::path(p).generic_string().rfind(dir, 0) == 0;
+			};
+		for (auto& p : effect.prototypes) if (isInside(p.savePath)) p.savePath.clear();
+		for (auto& l : effect.links)      if (isInside(l.savePath)) l.savePath.clear();
+	}
+	effect.savePath.clear();
+}
+
+void EffectEditor::RenameParticleInLinks(EffectData& effect, const std::string& oldName, const std::string& newName) {
+	for (auto& link : effect.links) {
+		bool changed = false;
+		if (link.sourceName == oldName) { link.sourceName = newName; changed = true; }
+		if (link.targetName == oldName) { link.targetName = newName; changed = true; }
+		if (changed) link.isSaved = false;   // Link のファイルも保存し直す必要がある
+	}
+}
+
+void EffectEditor::RefreshPreview() {
+	if (!isEffectSelected_) return;
+	if (!HasValidEffect()) return;
+	const EffectData& effect = effectDataList_[currentEffectIndex_];
+
+	const bool needRebuild =
+		isPreviewDirty_ ||
+		previewEffectIndex_ != currentEffectIndex_ ||
+		previewParticleCount_ != effect.prototypes.size() ||
+		previewLinkCount_ != effect.links.size();
+	if (!needRebuild) return;
+
+	auto* pm = system_->GetEffectManager()->GetParticleManager();
+
+	/// Link は全部作り直す（前の Effect の Link が残らないように）
+	pm->ClearEmitterLinks();
+
+	/// Emitter：同じ名前があれば中身だけ更新される（飛んでいる粒子は最後まで残る）
+	std::vector<std::pair<std::string, int>> emitters;   // 名前, id
+	for (const auto& src : effect.prototypes) {
+		ParticlePrototype proto = src;
+		if (proto.objectList.empty()) proto.objectList.push_back(MakeDefaultParticleObject());   // 見た目が無いと描画で範囲外
+		emitters.push_back({ proto.name, pm->CreateEmitter(proto, kPreviewMaxParticles) });
+	}
+
+	/// 前のプレビューにあって今回は無い線（名前を変えた・消した・別の Effect のもの）→ 引退
+	std::vector<int> newIds;
+	for (const auto& [name, id] : emitters) newIds.push_back(id);
+	for (int oldId : previewEmitterIds_) {
+		if (std::find(newIds.begin(), newIds.end(), oldId) == newIds.end()) {
+			pm->RetireEmitter(oldId);
+		}
+	}
+	previewEmitterIds_ = newIds;
+
+	for (const auto& src : effect.links) {
+		EmitterLink link = src;                 // LinkEmitterToEmitter が非 const 参照なのでコピー
+		pm->LinkEmitterToEmitter(link);
+	}
+
+	/// isRoot の Particle = Shoot で直接撃つもの
+	previewRootIds_.clear();
+	for (size_t i = 0; i < effect.prototypes.size(); i++) {
+		if (effect.prototypes[i].isRoot) previewRootIds_.push_back(emitters[i].second);
+	}
+
+	previewEffectIndex_ = currentEffectIndex_;
+	previewParticleCount_ = effect.prototypes.size();
+	previewLinkCount_ = effect.links.size();
+	isPreviewDirty_ = false;
+}
+
+void EffectEditor::ShootPreview() {
+	if (!isEffectSelected_) {
+		debugText_ += "Error: No effect selected for shooting.\n";
+		return;
+	}
+	if (!HasValidEffect()) {
+		debugText_ += "Error: No effect selected for shooting.\n";
+		isShootNonStop_ = false;   // 連発中に消された → 連発も止める（Log が毎秒出続けないように）
+		return;
+	}
+	RefreshPreview();
+	if (previewRootIds_.empty()) {
+		debugText_ += "Warning: no Root particle in this effect.\n";
+		return;
+	}
+
+	auto* pm = system_->GetEffectManager()->GetParticleManager();
+	for (int id : previewRootIds_) pm->ShootEmitter(id, 1);
+}
+
 
 void EffectEditor::DeletePart() {
 	if (!isDelete_) return;
-	if (currentEffectIndex_ >= 0 && currentEffectIndex_ < static_cast<int>(effectDataList_.size())) {
-		auto& effect = effectDataList_[currentEffectIndex_];
-		switch (saveLoadMode_) {
-		case SelectMode::Effect:
-			effectDataList_.erase(effectDataList_.begin() + currentEffectIndex_);
-			break;
-		case SelectMode::Particle:
-			if (currentParticleIndex_ >= 0 && currentParticleIndex_ < static_cast<int>(effectDataList_[currentEffectIndex_].prototypes.size())) {
-				effect.prototypes.erase(effect.prototypes.begin() + currentParticleIndex_);
-			} else {
-				debugText_ += "Error: Invalid currentParticleIndex_ for delete.\n";
-			}
-			break;
-		case SelectMode::Linker:
-			if (currentLinkIndex_ >= 0 && currentLinkIndex_ < static_cast<int>(effectDataList_[currentEffectIndex_].links.size())) {
-				effect.links.erase(effect.links.begin() + currentLinkIndex_);
-			} else {
-				debugText_ += "Error: Invalid currentLinkIndex_ for delete.\n";
-			}
-			break;
-		}
-	} else {
-		debugText_ += "Error: Invalid currentEffectIndex_ for delete.\n";
-	}
 	isDelete_ = false;
-}
 
-void EffectEditor::SetNullSavePathToDesktop() {
-	if (saveFilePath_.empty()) saveFilePath_ = FileManager::GetDesktopPath();
-}
+	if (pendingSave_.active || !saveQueue_.empty()) {
+		debugText_ += "Error: Cannot delete while saving.\n";
+		return;
+	}
 
-void EffectEditor::SetNullLoadPathToDesktop() {
-	if (loadFilePath_.empty()) loadFilePath_ = FileManager::GetDesktopPath();
-}
+	SelectMode mode = saveLoadMode_;
+	saveLoadMode_ = SelectMode::None;
 
+	if (currentEffectIndex_ < 0 || currentEffectIndex_ >= (int)effectDataList_.size()) {
+		debugText_ += "Error: Invalid currentEffectIndex_ for delete.\n";
+		return;
+	}
+	auto& effect = effectDataList_[currentEffectIndex_];
+
+	isPreviewDirty_ = true;
+	switch (mode) {
+	case SelectMode::Effect:
+		effectDataList_.erase(effectDataList_.begin() + currentEffectIndex_);
+		/// 消したら選択をリセット
+		currentEffectIndex_ = -1;
+		currentParticleIndex_ = -1;
+		currentLinkIndex_ = -1;
+		selectMode_ = SelectMode::None;
+		isEffectSelected_ = false;
+		break;
+
+	case SelectMode::Particle:
+		if (currentParticleIndex_ >= 0 && currentParticleIndex_ < (int)effect.prototypes.size()) {
+			effect.prototypes.erase(effect.prototypes.begin() + currentParticleIndex_);
+			effect.isSaved = false;
+			currentParticleIndex_ = -1;
+		} else {
+			debugText_ += "Error: Invalid currentParticleIndex_ for delete.\n";
+		}
+		break;
+
+	case SelectMode::Linker:
+		if (currentLinkIndex_ >= 0 && currentLinkIndex_ < (int)effect.links.size()) {
+			effect.links.erase(effect.links.begin() + currentLinkIndex_);
+			effect.isSaved = false;
+			currentLinkIndex_ = -1;
+		} else {
+			debugText_ += "Error: Invalid currentLinkIndex_ for delete.\n";
+		}
+		break;
+
+	default:
+		break;
+	}
+}
 
 #ifdef USE_IMGUI
 void EffectEditor::ImGuiPart() {
 
-	ImGuiIO& io = ImGui::GetIO();
-	menuBarHeight_ = ImGui::GetFrameHeight();
+	/// ============== ショートカット =============== ///
+	if (ImGui::IsKeyChordPressed(ImGuiMod_Ctrl | ImGuiKey_S) && isEffectSelected_) {
+		RequestSave(currentEffectIndex_, false);
+	}
 
 	/// ============== メニューバー =============== ///
 	if (ImGui::BeginMainMenuBar()) {
 
 		if (ImGui::BeginMenu("File")) {
 			if (ImGui::MenuItem("New")) {};
-			if (ImGui::MenuItem("LoadEffect"))showLoadWindow_ = true;
-			if (ImGui::MenuItem("SaveAll"))showSaveWindow_ = true;
+			if (ImGui::MenuItem("Load Effect...")) LoadEffectFromDialog();
+			if (ImGui::MenuItem("Import Particle...", nullptr, false, isEffectSelected_)) ImportUnitFromDialog(SelectMode::Particle);
+			if (ImGui::MenuItem("Import EmitterLink...", nullptr, false, isEffectSelected_)) ImportUnitFromDialog(SelectMode::Linker);
+			ImGui::Separator();
+			if (ImGui::MenuItem("Save Effect", "Ctrl+S", false, isEffectSelected_)) {
+				RequestSave(currentEffectIndex_, false);
+			}
+			if (ImGui::MenuItem("Save Effect As...", nullptr, false, isEffectSelected_)) {
+				RequestSave(currentEffectIndex_, true);
+			}
+			if (ImGui::MenuItem("Save All")) RequestSaveAll();
+			ImGui::Separator();
+			ImGui::MenuItem("Relative Paths", nullptr, &useRelativePath_);
+			ImGui::SetItemTooltip("ON : 保存するファイルから見た相対パス（フォルダごと移動しても読める）\n"
+				"OFF: 絶対パス（別ドライブの素材など）");
 			if (ImGui::MenuItem("Exit")) {
 				outcome_ = SceneOutcome::EXIT;
 				isSceneEnd_ = true;
 			}
 			ImGui::EndMenu();
 		}
+
+		if (ImGui::BeginMenu("View")) {
+			if (ImGui::MenuItem("Reset Layout")) isResetLayout_ = true;
+			ImGui::EndMenu();
+		}
+
 		ImGui::EndMainMenuBar();
 	}
 
-	/// ============ 左側のウィンドウ群 ============= ///
+	/// ============ ドックスペース（各ウィンドウより先に） ============= ///
+	ImGuiDockSpace();
 
 	ImGuiLeftMenuBar();
-
-	/// ============ 右側のウィンドウ群 ============= ///
-
 	ImGuiRightMenuBar();
-
-	/// ============ 中央のウィンドウ群 ============= ///
 	ImGuiMidWindow();
 
 	/// ============ Popup Window ============= ///
-	ImGuiLoadWindow();
-	ImGuiSaveWindow();
 	ImGuiDoubleCheckWindow();
+	ImGuiOverwriteWindow();
 }
 
+void EffectEditor::ImGuiDockSpace() {
+	const ImGuiViewport* viewport = ImGui::GetMainViewport();
 
-void EffectEditor::ImGuiLeftMenuBar() {
-	ImGuiIO& io = ImGui::GetIO();
+	/// メインウィンドウ（メニューバーを除く）全体を覆う、透明なホストウィンドウ
+	ImGui::SetNextWindowPos(viewport->WorkPos);
+	ImGui::SetNextWindowSize(viewport->WorkSize);
+	ImGui::SetNextWindowViewport(viewport->ID);
 
-	float selectorH = menuBarHeight_;
-	float lineH = ImGui::GetTextLineHeightWithSpacing();
-	float titleH = ImGui::GetFrameHeight();
+	ImGuiWindowFlags hostFlags =
+		ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
+		ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoBackground;
 
-	float templateLines = 1;
-	float templateH = templateLines * lineH + 20.0f + titleH;
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+	ImGui::Begin("##EffectEditorHost", nullptr, hostFlags);
+	ImGui::PopStyleVar(3);
 
-	float selectorPosY = menuBarHeight_;
-	float templatePosY = io.DisplaySize.y - templateH;
+	ImGuiID dockId = ImGui::GetID("EffectEditorDockSpace");
 
-	/// ======== pos計算 =========
-	float MapH =
-		lineH * 7 +
-		ImGui::GetFrameHeight() +
-		10.0f +
-		titleH;
-
-	float colimenH = (io.DisplaySize.y - selectorH - templateH - titleH * 2) / 3;
-	float window2H = 1;
-	float window3H = 1;
-	float window4H = titleH;
-
-	enum {
-		Map = 1 << 0,
-		Generator = 1 << 1,
-		Variables = 1 << 2,
-	};
-
-	int nowState = {
-		(isEffectWindowOpen_ ? Map : 0) |
-		(isParticleWindowOpen_ ? Generator : 0) |
-		(isLinkerWindowOpen_ ? Variables : 0)
-	};
-
-	int maxMidWindowCount = 3;
-	int windowCount = 0;
-	if (nowState & Map)			windowCount++;
-	if (nowState & Generator)	windowCount++;
-	if (nowState & Variables)	windowCount++;
-	int windowLeft = windowCount;
-
-	if (nowState & Map) {
-		window2H = colimenH;
-		windowLeft--;
-		if (windowLeft == 0) window2H += colimenH * (maxMidWindowCount - windowCount);
-	}
-	if (nowState & Generator) {
-		window3H = colimenH;
-		if (nowState & Map) window3H += titleH;
-		windowLeft--;
-		if (windowLeft == 0) window3H += colimenH * (maxMidWindowCount - windowCount);
-	}
-	if (nowState & Variables) {
-		window4H = colimenH;
-		if (nowState & Map)				window4H += titleH;
-		else if (nowState & Generator)	window4H += titleH;
-		windowLeft--;
-		if (windowLeft == 0) window4H += colimenH * (maxMidWindowCount - windowCount);
+	/// imgui.ini に配置が無い（初回）か、Reset Layout のときだけ作る
+	if (ImGui::DockBuilderGetNode(dockId) == nullptr || isResetLayout_) {
+		BuildDefaultLayout(dockId, viewport->WorkSize);
+		isResetLayout_ = false;
 	}
 
-	/// =========================
-	/// 1. EffectList
-	/// ========================= 
-	// ======== pos計算 =========
-	ImVec2 w1Pos;
-	ImVec2 w1Size;
-
-	ImGui::SetNextWindowPos(ImVec2(0, selectorH));
-	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, window2H));
-
-	isEffectWindowOpen_ = ImGui::Begin("Effect List",
-		nullptr,
-		ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_NoResize);
-
-	float fullW = leftInspectorWidth_ - 20;   // 你原本的按鈕寬度邏輯
-	float buttonSize = fullW / 5.0f;
-	float addW = buttonSize;
-	float delW = buttonSize;
-	float douW = buttonSize;
-	float savW = buttonSize;
-
-	/// New
-	if (ImGui::Button("New", ImVec2(addW, 20))) {
-		EffectData newEffect;
-		newEffect.name = "new_link";
-		if (newEffectCounter_ != 0)newEffect.name += "_" + std::to_string(newEffectCounter_);
-		newEffectCounter_++;
-		effectDataList_.push_back(newEffect);
-	}
-
-	ImGui::SameLine();
-
-	/// Double
-	if (ImGui::Button("Double", ImVec2(douW, 20))) {
-		if (isEffectSelected_) {
-			EffectData newEffect = effectDataList_[currentEffectIndex_];
-			newEffect.name += "_copy";
-			effectDataList_.push_back(newEffect);
-		} else {
-			debugText_ += "Error: No effect selected for doubling.\n";
-		}
-	}
-
-	ImGui::SameLine();
-
-	/// Save
-	if (ImGui::Button("Save", ImVec2(savW, 20))) {
-		if (isEffectSelected_) {
-			showSaveWindow_ = true;
-			saveLoadMode_ = SelectMode::Effect;
-			SetNullSavePathToDesktop();
-		} else {
-			debugText_ += "Error: No effect selected for saving.\n";
-		}
-	}
-
-	ImGui::SameLine();
-
-	/// Delete
-	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.60f, 0.20f, 0.20f, 1.0f));
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.80f, 0.30f, 0.30f, 1.0f));
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.40f, 0.10f, 0.10f, 1.0f));
-
-	if (ImGui::Button("Delete", ImVec2(delW, 20))) {
-		doubleCheck_ = true;
-		saveLoadMode_ = SelectMode::Effect;
-	}
-
-	ImGui::PopStyleColor(3);
-
-	// ======== データリスト =========
-	ImGui::BeginChild("EffectList", ImVec2(0, window2H - titleH - ImGui::GetFrameHeight() - 20), true);
-	for (int i = 0; i < effectDataList_.size(); i++) {
-		auto& effect = effectDataList_[i];
-		std::string label = effect.name + (effect.isSaved ? "" : " *");
-
-		if (ImGui::Selectable(label.c_str(), currentEffectIndex_ == i)) {
-			currentEffectIndex_ = i;
-			selectMode_ = SelectMode::Effect;
-			//debugText_ += "SelectMode: Effect\n";
-		}
-	}
-	ImGui::EndChild();
-
-	if (currentEffectIndex_ >= 0 && currentEffectIndex_ < effectDataList_.size()) isEffectSelected_ = true;
-	else isEffectSelected_ = false;
-
-	// ======== 次のウィンドウに使うデータ =========
-	w1Pos = ImGui::GetWindowPos();
-	w1Size = ImGui::GetWindowSize();
+	/// 真ん中は透明（後ろの3Dシーンが見える）、真ん中にはドックさせない
+	ImGui::DockSpace(dockId, ImVec2(0.0f, 0.0f),
+		ImGuiDockNodeFlags_PassthruCentralNode |
+		ImGuiDockNodeFlags_NoDockingOverCentralNode);
 
 	ImGui::End();
+}
+
+void EffectEditor::BuildDefaultLayout(ImGuiID dockId, const ImVec2& size) {
+	ImGui::DockBuilderRemoveNode(dockId);
+	ImGui::DockBuilderAddNode(dockId, ImGuiDockNodeFlags_DockSpace);
+	ImGui::DockBuilderSetNodeSize(dockId, size);   // Splitの前に必ずサイズを決める
+
+	/// --- 大きく分ける：左 / 右 / 下 / 真ん中 ---
+	ImGuiID center = dockId;
+	ImGuiID left = ImGui::DockBuilderSplitNode(center, ImGuiDir_Left, 0.20f, nullptr, &center);
+	ImGuiID right = ImGui::DockBuilderSplitNode(center, ImGuiDir_Right, 0.25f, nullptr, &center);
+	ImGuiID bottom = ImGui::DockBuilderSplitNode(center, ImGuiDir_Down, 0.25f, nullptr, &center);
+
+	/// --- 左列：Effect / Particle / Linker / EngineInfo ---
+	ImGuiID leftInfo = ImGui::DockBuilderSplitNode(left, ImGuiDir_Down, 0.08f, nullptr, &left);
+	ImGuiID leftEffect = ImGui::DockBuilderSplitNode(left, ImGuiDir_Up, 0.33f, nullptr, &left);
+	ImGuiID leftParticle = ImGui::DockBuilderSplitNode(left, ImGuiDir_Up, 0.50f, nullptr, &left);
+	ImGuiID leftLinker = left;
+
+	/// --- 右列：Camera / Shooter / Details / DebugLog ---
+	ImGuiID rightLog = ImGui::DockBuilderSplitNode(right, ImGuiDir_Down, 0.25f, nullptr, &right);
+	ImGuiID rightCamera = ImGui::DockBuilderSplitNode(right, ImGuiDir_Up, 0.12f, nullptr, &right);
+	ImGuiID rightShooter = ImGui::DockBuilderSplitNode(right, ImGuiDir_Up, 0.20f, nullptr, &right);
+	ImGuiID rightDetails = right;
+
+	/// --- 下：左右半分 ---
+	ImGuiID bottomRight = ImGui::DockBuilderSplitNode(bottom, ImGuiDir_Right, 0.50f, nullptr, &bottom);
+
+	/// --- ウィンドウを入れる ---
+	ImGui::DockBuilderDockWindow(kWinEffectList, leftEffect);
+	ImGui::DockBuilderDockWindow(kWinParticleList, leftParticle);
+	ImGui::DockBuilderDockWindow(kWinLinkerList, leftLinker);
+	ImGui::DockBuilderDockWindow(kWinEngineInfo, leftInfo);
+	ImGui::DockBuilderDockWindow(kWinCamera, rightCamera);
+	ImGui::DockBuilderDockWindow(kWinShooter, rightShooter);
+	ImGui::DockBuilderDockWindow(kWinDetails, rightDetails);
+	ImGui::DockBuilderDockWindow(kWinDebugLog, rightLog);
+	ImGui::DockBuilderDockWindow(kWinDrawingInfo, bottom);
+	ImGui::DockBuilderDockWindow(kWinParticleInfo, bottomRight);
+
+	ImGui::DockBuilderFinish(dockId);
+}
+
+float EffectEditor::CalcButtonWidth(int count) {
+	float spacing = ImGui::GetStyle().ItemSpacing.x;
+	float avail = ImGui::GetContentRegionAvail().x;
+	return (avail - spacing * (count - 1)) / count;
+}
+
+void EffectEditor::ImGuiLeftMenuBar() {
+
+	/// =========================
+	/// 1. Effect List
+	/// =========================
+	if (ImGui::Begin(kWinEffectList)) {
+		float buttonW = CalcButtonWidth(4);
+
+		/// New
+		if (ImGui::Button("New", ImVec2(buttonW, 0))) {
+			EffectData newEffect;
+			newEffect.name = "new_effect";
+			if (newEffectCounter_ != 0) newEffect.name += "_" + std::to_string(newEffectCounter_);
+			newEffectCounter_++;
+			effectDataList_.push_back(newEffect);
+		}
+		ImGui::SameLine();
+
+		/// Double
+		if (ImGui::Button("Double", ImVec2(buttonW, 0))) {
+			if (isEffectSelected_) {
+				EffectData newEffect = effectDataList_[currentEffectIndex_];
+				newEffect.name += "_copy";
+				DetachEffectFolder(newEffect);   // 元のフォルダに上書きしないように
+				newEffect.isSaved = false;
+				effectDataList_.push_back(newEffect);
+			} else {
+				debugText_ += "Error: No effect selected for doubling.\n";
+			}
+		}
+		ImGui::SameLine();
+
+		/// Save
+		if (ImGui::Button("Save", ImVec2(buttonW, 0))) {
+			if (isEffectSelected_) RequestSave(currentEffectIndex_, false);
+			else debugText_ += "Error: No effect selected for saving.\n";
+		}
+		ImGui::SameLine();
+
+		/// Delete
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.60f, 0.20f, 0.20f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.80f, 0.30f, 0.30f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.40f, 0.10f, 0.10f, 1.0f));
+		if (ImGui::Button("Delete", ImVec2(buttonW, 0))) {
+			doubleCheck_ = true;
+			saveLoadMode_ = SelectMode::Effect;
+		}
+		ImGui::PopStyleColor(3);
+
+		/// データリスト（残りの高さを全部使う）
+		ImGui::BeginChild("EffectList", ImVec2(0, 0), true);
+		for (int i = 0; i < (int)effectDataList_.size(); i++) {
+			auto& effect = effectDataList_[i];
+			std::string label = effect.name + (effect.isSaved ? "" : " *");
+			ImGui::PushID(i);   // 同名でもIDが被らないように
+			if (ImGui::Selectable(label.c_str(), currentEffectIndex_ == i)) {
+				if (currentEffectIndex_ != i) {
+					/// 別のEffectに切り替えたら下の選択はリセット
+					currentParticleIndex_ = -1;
+					currentLinkIndex_ = -1;
+				}
+				currentEffectIndex_ = i;
+				selectMode_ = SelectMode::Effect;
+			}
+			if (ImGui::BeginPopupContextItem()) {
+				if (ImGui::MenuItem("Save")) RequestSave(i, false);
+				if (ImGui::MenuItem("Save As...")) RequestSave(i, true);
+				ImGui::EndPopup();
+			}
+			ImGui::PopID();
+		}
+		ImGui::EndChild();
+	}
+	ImGui::End();
+
+	/// タブが隠れていても選択状態は更新する
+	isEffectSelected_ = (currentEffectIndex_ >= 0 && currentEffectIndex_ < (int)effectDataList_.size());
 
 
 	/// =========================
 	/// 2. Particle List
 	/// =========================
-	// ======== pos計算 =========
-	float window3Y = w1Pos.y + w1Size.y;
-	ImVec2 w2Pos;
-	ImVec2 w2Size;
+	if (ImGui::Begin(kWinParticleList)) {
+		float buttonW = CalcButtonWidth(4);
 
-	ImGui::SetNextWindowPos(ImVec2(0, window3Y));
-	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, window3H));
-
-	isParticleWindowOpen_ = ImGui::Begin("Particle List",
-		nullptr,
-		ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_NoResize);
-
-	float full2W = leftInspectorWidth_ - 20;   // 你原本的按鈕寬度邏輯
-	float buttonSize2 = full2W / 5.0f;
-	float add2W = buttonSize2;
-	float dou2W = buttonSize2;
-	float sav2W = buttonSize2;
-	float del2W = buttonSize2;
-
-	/// New
-	if (ImGui::Button("New", ImVec2(add2W, 20))) {
-		if (isEffectSelected_) {
-			ParticlePrototype newParticle;
-			newParticle.name = "new_link";
-			if (newParticleCounter_ != 0)newParticle.name += "_" + std::to_string(newParticleCounter_);
-			newParticleCounter_++;
-			effectDataList_[currentEffectIndex_].prototypes.push_back(newParticle);
-		} else {
-			debugText_ += "Error: No effect selected for adding.\n";
-		}
-	}
-
-	ImGui::SameLine();
-
-	/// Double
-	if (ImGui::Button("Double", ImVec2(dou2W, 20))) {
-		if (isEffectSelected_) {
-			if (currentParticleIndex_ >= 0 && currentParticleIndex_ < static_cast<int>(effectDataList_[currentEffectIndex_].prototypes.size())) {
-				ParticlePrototype newPrototype = effectDataList_[currentEffectIndex_].prototypes[currentParticleIndex_];
-				newPrototype.name += "_copy";
-				effectDataList_[currentEffectIndex_].prototypes.push_back(newPrototype);
+		/// New
+		if (ImGui::Button("New", ImVec2(buttonW, 0))) {
+			if (isEffectSelected_) {
+				ParticlePrototype newParticle;
+				newParticle.name = "new_particle";
+				if (newParticleCounter_ != 0) newParticle.name += "_" + std::to_string(newParticleCounter_);
+				newParticleCounter_++;
+				newParticle.objectList.push_back(MakeDefaultParticleObject());
+				effectDataList_[currentEffectIndex_].prototypes.push_back(newParticle);
+				effectDataList_[currentEffectIndex_].isSaved = false;
 			} else {
-				debugText_ += "Error: Invalid currentParticleIndex_ for saving.\n";
+				debugText_ += "Error: No effect selected for adding.\n";
 			}
-		} else {
-			debugText_ += "Error: No effect selected for doubling.\n";
 		}
-	}
+		ImGui::SameLine();
 
-	ImGui::SameLine();
-
-	/// Save
-	if (ImGui::Button("Save", ImVec2(sav2W, 20))) {
-		if (isEffectSelected_) {
-			if (currentParticleIndex_ >= 0 && currentParticleIndex_ < static_cast<int>(effectDataList_[currentEffectIndex_].prototypes.size())) {
-				showSaveWindow_ = true;
-				saveLoadMode_ = SelectMode::Particle;
-				SetNullSavePathToDesktop();
+		/// Double
+		if (ImGui::Button("Double", ImVec2(buttonW, 0))) {
+			if (isEffectSelected_) {
+				auto& prototypes = effectDataList_[currentEffectIndex_].prototypes;
+				if (currentParticleIndex_ >= 0 && currentParticleIndex_ < (int)prototypes.size()) {
+					ParticlePrototype newPrototype = prototypes[currentParticleIndex_];
+					newPrototype.name += "_copy";
+					newPrototype.savePath.clear();
+					newPrototype.isSaved = false;
+					prototypes.push_back(newPrototype);
+					effectDataList_[currentEffectIndex_].isSaved = false;
+				} else {
+					debugText_ += "Error: Invalid currentParticleIndex_ for doubling.\n";
+				}
 			} else {
-				debugText_ += "Error: Invalid currentParticleIndex_ for saving.\n";
-			}
-		} else {
-			debugText_ += "Error: No effect selected for saving.\n";
-		}
-	}
-
-	ImGui::SameLine();
-
-	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.60f, 0.20f, 0.20f, 1.0f));
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.80f, 0.30f, 0.30f, 1.0f));
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.40f, 0.10f, 0.10f, 1.0f));
-
-	/// Delete
-	if (ImGui::Button("Delete", ImVec2(del2W, 20))) {
-		doubleCheck_ = true;
-		saveLoadMode_ = SelectMode::Particle;
-	}
-
-	ImGui::PopStyleColor(3);
-
-	// ======== データリスト =========
-
-
-	ImGui::BeginChild("ParticleList", ImVec2(0, window3H - titleH - ImGui::GetFrameHeight() - 20), true);
-
-	if (isEffectSelected_) {
-		for (int i = 0; i < effectDataList_[currentEffectIndex_].prototypes.size(); i++) {
-			auto& prototype = effectDataList_[currentEffectIndex_].prototypes[i];
-			std::string label = prototype.name + (prototype.isSaved ? "" : " *");
-
-			if (ImGui::Selectable(label.c_str(), currentParticleIndex_ == i)) {
-				currentParticleIndex_ = i;
-				currentLinkIndex_ = -1;
-				selectMode_ = SelectMode::Particle;
-				//debugText_ += "SelectMode: Particle\n";
+				debugText_ += "Error: No effect selected for doubling.\n";
 			}
 		}
+		ImGui::SameLine();
+
+		/// Save
+		if (ImGui::Button("Save", ImVec2(buttonW, 0))) {
+			if (isEffectSelected_) {
+				auto& prototypes = effectDataList_[currentEffectIndex_].prototypes;
+				if (currentParticleIndex_ >= 0 && currentParticleIndex_ < (int)prototypes.size()) {
+					RequestSaveUnit(SelectMode::Particle, currentEffectIndex_, currentParticleIndex_, false);
+				} else {
+					debugText_ += "Error: Invalid currentParticleIndex_ for saving.\n";
+				}
+			} else {
+				debugText_ += "Error: No effect selected for saving.\n";
+			}
+		}
+		ImGui::SameLine();
+
+		/// Delete
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.60f, 0.20f, 0.20f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.80f, 0.30f, 0.30f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.40f, 0.10f, 0.10f, 1.0f));
+		if (ImGui::Button("Delete", ImVec2(buttonW, 0))) {
+			doubleCheck_ = true;
+			saveLoadMode_ = SelectMode::Particle;
+		}
+		ImGui::PopStyleColor(3);
+
+		/// データリスト
+		ImGui::BeginChild("ParticleList", ImVec2(0, 0), true);
+		if (isEffectSelected_) {
+			auto& prototypes = effectDataList_[currentEffectIndex_].prototypes;
+			for (int i = 0; i < (int)prototypes.size(); i++) {
+				auto& prototype = prototypes[i];
+				std::string label = std::string(prototype.isRoot ? "> " : "  ") + prototype.name + (prototype.isSaved ? "" : " *");
+				ImGui::PushID(i);
+				if (ImGui::Selectable(label.c_str(), currentParticleIndex_ == i)) {
+					currentParticleIndex_ = i;
+					currentLinkIndex_ = -1;
+					selectMode_ = SelectMode::Particle;
+				}
+				/// 右クリックメニュー
+				if (ImGui::BeginPopupContextItem()) {
+					if (ImGui::MenuItem("Save")) RequestSaveUnit(SelectMode::Particle, currentEffectIndex_, i, false);
+					if (ImGui::MenuItem("Save As...")) RequestSaveUnit(SelectMode::Particle, currentEffectIndex_, i, true);
+					ImGui::EndPopup();
+				}
+				ImGui::PopID();
+			}
+		}
+		ImGui::EndChild();
 	}
-	ImGui::EndChild();
-
-
-	// ======== 次のウィンドウに使うデータ =========
-	w2Pos = ImGui::GetWindowPos();
-	w2Size = ImGui::GetWindowSize();
-
 	ImGui::End();
 
 
 	/// =========================
-	/// 3. Linker List（獨立視窗）
+	/// 3. Linker List
 	/// =========================
+	if (ImGui::Begin(kWinLinkerList)) {
+		float buttonW = CalcButtonWidth(4);
 
-	float window4Y = w2Pos.y + w2Size.y;
-	ImVec2 w3Pos;
-	ImVec2 w3Size;
-
-	ImGui::SetNextWindowPos(ImVec2(0, window4Y));
-	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, window4H));
-
-	isLinkerWindowOpen_ = ImGui::Begin("Linker List",
-		nullptr,
-		ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_NoResize);
-
-	float full3W = leftInspectorWidth_ - 20;   // 你原本的按鈕寬度邏輯
-	float buttonSize3 = full3W / 5.0f;
-	float add3W = buttonSize3;
-	float dou3W = buttonSize3;
-	float sav3W = buttonSize3;
-	float del3W = buttonSize3;
-
-	/// New
-	if (ImGui::Button("New", ImVec2(add3W, 20))) {
-		if (isEffectSelected_) {
-			EmitterLink newLink;
-			newLink.name = "new_link";
-			if (newLinkCounter_ != 0)newLink.name += "_" + std::to_string(newLinkCounter_);
-			newLinkCounter_++;
-			effectDataList_[currentEffectIndex_].links.push_back(newLink);
-		} else {
-			debugText_ += "Error: No effect selected for adding.\n";
-		}
-	}
-
-	ImGui::SameLine();
-
-	/// Double
-	if (ImGui::Button("Double", ImVec2(dou3W, 20))) {
-		if (isEffectSelected_) {
-			if (currentLinkIndex_ >= 0 && currentLinkIndex_ < static_cast<int>(effectDataList_[currentEffectIndex_].links.size())) {
-				EmitterLink newLink = effectDataList_[currentEffectIndex_].links[currentLinkIndex_];
-				newLink.name += "_copy";
+		/// New
+		if (ImGui::Button("New", ImVec2(buttonW, 0))) {
+			if (isEffectSelected_) {
+				EmitterLink newLink;
+				newLink.name = "new_link";
+				if (newLinkCounter_ != 0) newLink.name += "_" + std::to_string(newLinkCounter_);
+				newLinkCounter_++;
 				effectDataList_[currentEffectIndex_].links.push_back(newLink);
+				effectDataList_[currentEffectIndex_].isSaved = false;
 			} else {
-				debugText_ += "Error: Invalid currentLinkIndex_ for saving.\n";
+				debugText_ += "Error: No effect selected for adding.\n";
 			}
-		} else {
-			debugText_ += "Error: No effect selected for doubling.\n";
 		}
-	}
+		ImGui::SameLine();
 
-	ImGui::SameLine();
+		/// Double
+		if (ImGui::Button("Double", ImVec2(buttonW, 0))) {
+			if (isEffectSelected_) {
+				auto& links = effectDataList_[currentEffectIndex_].links;
+				if (currentLinkIndex_ >= 0 && currentLinkIndex_ < (int)links.size()) {
+					EmitterLink newLink = links[currentLinkIndex_];
+					newLink.name += "_copy";
+					newLink.savePath.clear();
+					newLink.isSaved = false;
+					links.push_back(newLink);
+					effectDataList_[currentEffectIndex_].isSaved = false;
+				} else {
+					debugText_ += "Error: Invalid currentLinkIndex_ for doubling.\n";
+				}
+			} else {
+				debugText_ += "Error: No effect selected for doubling.\n";
+			}
+		}
+		ImGui::SameLine();
 
-	/// Save
-	if (ImGui::Button("Save", ImVec2(sav3W, 20))) {
+		/// Save
+		if (ImGui::Button("Save", ImVec2(buttonW, 0))) {
+			if (isEffectSelected_) {
+				auto& links = effectDataList_[currentEffectIndex_].links;
+				if (currentLinkIndex_ >= 0 && currentLinkIndex_ < (int)links.size()) {
+					RequestSaveUnit(SelectMode::Linker, currentEffectIndex_, currentLinkIndex_, false);
+				} else {
+					debugText_ += "Error: Invalid currentLinkIndex_ for saving.\n";
+				}
+			} else {
+				debugText_ += "Error: No effect selected for saving.\n";
+			}
+		}
+		ImGui::SameLine();
+
+		/// Delete
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.60f, 0.20f, 0.20f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.80f, 0.30f, 0.30f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.40f, 0.10f, 0.10f, 1.0f));
+		if (ImGui::Button("Delete", ImVec2(buttonW, 0))) {
+			doubleCheck_ = true;
+			saveLoadMode_ = SelectMode::Linker;
+		}
+		ImGui::PopStyleColor(3);
+
+		/// データリスト
+		ImGui::BeginChild("LinkerList", ImVec2(0, 0), true);
 		if (isEffectSelected_) {
-			if (currentLinkIndex_ >= 0 && currentLinkIndex_ < static_cast<int>(effectDataList_[currentEffectIndex_].links.size())) {
-				showSaveWindow_ = true;
-				saveLoadMode_ = SelectMode::Linker;
-				SetNullSavePathToDesktop();
-			} else {
-				debugText_ += "Error: Invalid currentLinkIndex_ for saving.\n";
-			}
-		} else {
-			debugText_ += "Error: No effect selected for saving.\n";
-		}
-	}
-
-	ImGui::SameLine();
-
-	///
-
-	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.60f, 0.20f, 0.20f, 1.0f));
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.80f, 0.30f, 0.30f, 1.0f));
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.40f, 0.10f, 0.10f, 1.0f));
-
-	if (ImGui::Button("Delete", ImVec2(del3W, 20))) {
-		doubleCheck_ = true;
-		saveLoadMode_ = SelectMode::Linker;
-	}
-
-	ImGui::PopStyleColor(3);
-
-	int index[2] = { 0, 0 };
-
-	///選択したgeneratorの変数リストを表示する
-
-	ImGui::BeginChild("LinkerList", ImVec2(0, window4H - titleH - ImGui::GetFrameHeight() - 20), true);
-
-	if (isEffectSelected_) {
-		for (int i = 0; i < effectDataList_[currentEffectIndex_].links.size(); i++) {
-			auto& linker = effectDataList_[currentEffectIndex_].links[i];
-			std::string label = linker.name + (linker.isSaved ? "" : " *");
-
-			if (ImGui::Selectable(label.c_str(), currentLinkIndex_ == i)) {
-				currentLinkIndex_ = i;
-				currentParticleIndex_ = -1;
-				selectMode_ = SelectMode::Linker;
-				//debugText_ += "SelectMode: Linker\n";
+			auto& links = effectDataList_[currentEffectIndex_].links;
+			for (int i = 0; i < (int)links.size(); i++) {
+				auto& linker = links[i];
+				std::string label = linker.name + (linker.isSaved ? "" : " *");
+				ImGui::PushID(i);
+				if (ImGui::Selectable(label.c_str(), currentLinkIndex_ == i)) {
+					currentLinkIndex_ = i;
+					currentParticleIndex_ = -1;
+					selectMode_ = SelectMode::Linker;
+				}
+				/// 右クリックメニュー
+				if (ImGui::BeginPopupContextItem()) {
+					if (ImGui::MenuItem("Save")) RequestSaveUnit(SelectMode::Linker, currentEffectIndex_, i, false);
+					if (ImGui::MenuItem("Save As...")) RequestSaveUnit(SelectMode::Linker, currentEffectIndex_, i, true);
+					ImGui::EndPopup();
+				}
+				ImGui::PopID();
 			}
 		}
+		ImGui::EndChild();
 	}
-	ImGui::EndChild();
-
-	w3Pos = ImGui::GetWindowPos();
-	w3Size = ImGui::GetWindowSize();
-
 	ImGui::End();
 
 
-	// =========================
-	// 4. Engine Info（獨立視窗）
-	// =========================
-
-	if (nowState == 0) {
-		templatePosY = w3Pos.y + w3Size.y;
-		templateH = io.DisplaySize.y - templatePosY;
+	/// =========================
+	/// 4. Engine Info
+	/// =========================
+	if (ImGui::Begin(kWinEngineInfo)) {
+		ImGui::Text("Fps/s: %.2f", system_->GetFPSPerSecond());
 	}
-	ImGui::SetNextWindowPos(ImVec2(0, templatePosY));
-	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, templateH));
-
-	ImGui::Begin("Engine Info",
-		nullptr,
-		ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoCollapse);
-
-	ImGui::Text("Fps/s: %.2f", system_->GetFPSPerSecond());
-
 	ImGui::End();
 }
 
 void EffectEditor::ImGuiRightMenuBar() {
 
-	ImGuiIO& io = ImGui::GetIO();
-
-	ImVec2 w1Pos{};
-	ImVec2 w1Size{};
-
-	float selectorH = menuBarHeight_;
-	float lineH = ImGui::GetTextLineHeightWithSpacing();
-	float titleH = ImGui::GetFrameHeight();
-
-	float lastLineNum = 5;
-	float debugLogH = lineH * lastLineNum + 20.0f + titleH;
-
-	float debugLogY = io.DisplaySize.y - debugLogH;
-
-	// =========================
-	// 1. Camera
-	// =========================
-	ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - rightInspectorWidth_, menuBarHeight_));
-	ImGui::SetNextWindowSize(ImVec2(rightInspectorWidth_, 0));
-	ImGui::Begin("Camera",
-		nullptr,
-		ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_AlwaysAutoResize);
-
-	rightInspectorWidth_ = ImGui::GetWindowSize().x;
-
-	ImGui::Text("BackTo(0,0):");
-	ImGui::SameLine();
-	if (ImGui::Button("Click")) {
-		debugCamera_.lock()->SetCamera(debugCamera_.lock()->GetDefaultTransform());
-	}
-
-	ImGui::Text("Use Debug Camera:");
-	ImGui::SameLine();
-	ImGui::Checkbox("##Use Debug Camera", &useDebugCamera);
-
-	w1Pos = ImGui::GetWindowPos();
-	w1Size = ImGui::GetWindowSize();
-
-	ImGui::End();
-
-	// =========================
-	// 2. Shooter Setting
-	// =========================
-	float window2Y = w1Pos.y + w1Size.y;
-	ImVec2 w2Pos;
-	ImVec2 w2Size;
-
-	ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - rightInspectorWidth_, window2Y));
-	ImGui::SetNextWindowSize(ImVec2(rightInspectorWidth_, 0));
-	ImGui::Begin("Shooter Setting",
-		nullptr,
-		ImGuiWindowFlags_NoMove);
-	ImGui::Text("Shooter:");
-	ImGui::SameLine();
-	if (ImGui::Button("Shoot")) {
-		system_->GetEffectManager()->GetParticleManager()->ShootEmitter(TH_particleHandle_, 1);
-	}
-
-	ImGui::Text("IsShootNonStop:");
-	ImGui::SameLine();
-	ImGui::Checkbox("##IsShootNonStop:", &isShootNonStop_);
-
-	if (isShootNonStop_) {
-		ImGui::Text("ShootTimer:");
+	/// =========================
+	/// 1. Camera
+	/// =========================
+	if (ImGui::Begin(kWinCamera)) {
+		ImGui::Text("BackTo(0,0):");
 		ImGui::SameLine();
-		ImGui::Text("0/");
-		ImGui::SameLine();
-		ImGui::InputFloat("##ShootTime", &shootTime.maxTime_);
-	}
-
-	ImGui::Text("Pause:");
-	ImGui::SameLine();
-	if (ImGui::Button("Pause")) {
-		system_->GetEffectManager()->GetParticleManager()->Pause(true);
-		isPause_ = true;
-	}
-	ImGui::SameLine();
-	if (ImGui::Button("Resume")) {
-		system_->GetEffectManager()->GetParticleManager()->Pause(false);
-		isPause_ = false;
-	}
-
-	w2Pos = ImGui::GetWindowPos();
-	w2Size = ImGui::GetWindowSize();
-
-	ImGui::End();
-
-	// =========================
-	// 3. Info
-	// =========================
-	float window3Y = w2Pos.y + w2Size.y;
-	ImVec2 w3Pos;
-	ImVec2 w3Size;
-	w3Size.y = io.DisplaySize.y - window3Y - debugLogH - titleH;
-
-	ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - rightInspectorWidth_, window3Y));
-
-	ImGui::SetNextWindowSize(ImVec2(rightInspectorWidth_, w3Size.y));
-	ImGui::Begin("Variable Details",
-		nullptr,
-		ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_AlwaysAutoResize);
-
-	ImGui::PushItemWidth(150);   // 你想要的寬度
-	if (currentEffectIndex_ >= 0 && currentEffectIndex_ < effectDataList_.size()) {
-		auto& effectData = effectDataList_[currentEffectIndex_];
-		switch (selectMode_) {
-		case SelectMode::Effect:
-			// Handle Effect-specific UI
-			ImGui::Text("Please Select an Particle or Linker");
-			break;
-		case SelectMode::Particle:
-			if (currentParticleIndex_ >= 0 && currentParticleIndex_ < effectData.prototypes.size()) {
-				ImGuiParticleShowing(effectData.prototypes[currentParticleIndex_]);
+		if (ImGui::Button("Click")) {
+			if (auto cam = debugCamera_.lock()) {
+				cam->SetCamera(cam->GetDefaultTransform());
 			}
-			break;
-		case SelectMode::Linker:
-			if (currentLinkIndex_ >= 0 && currentLinkIndex_ < effectData.links.size()) {
-				ImGuiLinkerShowing(effectData.links[currentLinkIndex_]);
-			}
-			break;
-		default:
-			ImGui::Text("No Data Selected");
-			break;
 		}
-	} else {
-		ImGui::Text("No Data Selected");
-	}
-	ImGui::PopItemWidth();
 
-	w3Pos = ImGui::GetWindowPos();
-	w3Size = ImGui::GetWindowSize();
+		ImGui::Text("Use Debug Camera:");
+		ImGui::SameLine();
+		ImGui::Checkbox("##Use Debug Camera", &useDebugCamera);
+	}
 	ImGui::End();
 
+	/// =========================
+	/// 2. Shooter Setting
+	/// =========================
+	if (ImGui::Begin(kWinShooter)) {
+		auto* pm = system_->GetEffectManager()->GetParticleManager();
 
-	// =========================
-	// 4. Inspector Details
-	// =========================
-	float window4Y = w3Pos.y + w3Size.y;
-	float mainBottomY = io.DisplaySize.y;
-	float secondHeight = mainBottomY - window4Y;
-	if (secondHeight < 0) secondHeight = 0;
+		ImGui::Text("Shooter:");
+		ImGui::SameLine();
+		if (ImGui::Button("Shoot")) {
+			ShootPreview();
+		}
 
-	ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - rightInspectorWidth_, window4Y));
-	ImGui::SetNextWindowSize(ImVec2(rightInspectorWidth_, secondHeight));
-	ImGui::Begin("Debug Log",
-		nullptr,
-		ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_NoCollapse |
-		ImGuiWindowFlags_AlwaysAutoResize);
+		ImGui::Text("IsShootNonStop:");
+		ImGui::SameLine();
+		ImGui::Checkbox("##IsShootNonStop", &isShootNonStop_);
 
-	ImGui::Text("Debug Log:");
-	ImGui::SameLine();
-	if (ImGui::Button("Clear")) {
-		debugText_ = "";
+		if (isShootNonStop_) {
+			ImGui::Text("ShootTimer: 0/");
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(-FLT_MIN);
+			ImGui::InputFloat("##ShootTime", &shootTime.maxTime_);
+		}
+
+		ImGui::Text("Pause:");
+		ImGui::SameLine();
+		if (ImGui::Button("Pause")) {
+			pm->Pause(true);
+			isPause_ = true;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Resume")) {
+			pm->Pause(false);
+			isPause_ = false;
+		}
+		bool linkLog = pm->GetLinkLog();
+		ImGui::Text("Link Log:");
+		ImGui::SameLine();
+		if (ImGui::Checkbox("##LinkLog", &linkLog)) pm->SetLinkLog(linkLog);
 	}
-	ImGui::SameLine();
-	if (ImGui::Button("AddDummy")) {
-		debugText_ += "Dummy debug message\n";
+	ImGui::End();
+
+	/// =========================
+	/// 3. Variable Details
+	/// =========================
+	if (ImGui::Begin(kWinDetails)) {
+		ImGui::PushItemWidth(-FLT_MIN);   // 入力欄をパネルの右端まで伸ばす
+
+		if (isEffectSelected_) {
+			auto& effectData = effectDataList_[currentEffectIndex_];
+			switch (selectMode_) {
+			case SelectMode::Effect:
+				if (ImGuiEffectShowing(effectData)) { 
+					effectData.isSaved = false;
+					isPreviewDirty_ = true; 
+				}
+				break;
+			case SelectMode::Particle:
+				if (currentParticleIndex_ >= 0 && currentParticleIndex_ < (int)effectData.prototypes.size()) {
+					auto& proto = effectData.prototypes[currentParticleIndex_];
+					const std::string oldName = proto.name;      // 変更前の名前を覚えておく
+
+					if (ImGuiParticleShowing(proto)) {
+						proto.isSaved = false;
+						effectData.isSaved = false;
+						isPreviewDirty_ = true;
+
+						/// 名前が変わった → この Effect の Link も新しい名前に追従させる
+						if (proto.name != oldName) {
+							RenameParticleInLinks(effectData, oldName, proto.name);
+						}
+					}
+				}
+				break;
+			case SelectMode::Linker:
+				if (currentLinkIndex_ >= 0 && currentLinkIndex_ < (int)effectData.links.size()) {
+					auto& link = effectData.links[currentLinkIndex_];
+					if (ImGuiLinkerShowing(link)) {
+						link.isSaved = false;
+						effectData.isSaved = false;
+						isPreviewDirty_ = true;
+					}
+				}
+				break;
+			default:
+				ImGui::Text("No Data Selected");
+				break;
+			}
+		} else {
+			ImGui::Text("No Data Selected");
+		}
+
+		ImGui::PopItemWidth();
 	}
-	ImGui::BeginChild("DebugLogChild", ImVec2(0, 0), true);
-	ImGui::Text("%s", debugText_.c_str());
-	ImGui::SetScrollHereY(1.0f);
-	ImGui::EndChild();
+	ImGui::End();
+
+	/// =========================
+	/// 4. Debug Log
+	/// =========================
+	if (ImGui::Begin(kWinDebugLog)) {
+		ImGui::Text("Debug Log:");
+		ImGui::SameLine();
+		if (ImGui::Button("Clear")) debugText_ = "";
+		ImGui::SameLine();
+		if (ImGui::Button("AddDummy")) debugText_ += "Dummy debug message\n";
+
+		ImGui::BeginChild("DebugLogChild", ImVec2(0, 0), true);
+		ImGui::TextUnformatted(debugText_.c_str());
+		ImGui::SetScrollHereY(1.0f);
+		ImGui::EndChild();
+	}
 	ImGui::End();
 }
 
 void EffectEditor::ImGuiMidWindow() {
-	ImGuiIO& io = ImGui::GetIO();
-
-	float lineH = ImGui::GetTextLineHeightWithSpacing();
-	float titleH = ImGui::GetFrameHeight();;
-
-	// 中間視窗寬度
-	float centerPosX = leftInspectorWidth_;
-	float centerWidth = io.DisplaySize.x - leftInspectorWidth_ - rightInspectorWidth_;
-
-	// 下のウィンドウの高さ
-	int lineCount = 10; // 下のウィンドウに表示する
-	if (lineCount < 0) lineCount = 0;
-
-	float bottomH = (lineH * lineCount) + titleH;
-	float bottomWindowY;
-	if (isMBLWindowOpen_) {
-		bottomWindowY = io.DisplaySize.y - bottomH;
-	} else {
-		bottomWindowY = io.DisplaySize.y - titleH;
+	if (ImGui::Begin(kWinDrawingInfo)) {
+		auto* pm = system_->GetEffectManager()->GetParticleManager();
+		ImGui::Text("Emitter Num: %d", pm->GetEmitterCount());
+		ImGui::Text("All Particle Num: %d", pm->GetAllParticleCount());
+		ImGui::BeginChild("EmitterList", ImVec2(0, 0), true);
+		ImGui::EndChild();
 	}
-	float bottomWindowRY = bottomWindowY;
-	float bottomWindowLW = centerWidth;
-	float bottomWindowRW = centerWidth / 2;
-	if (isMBRWindowOpen_) {
-		bottomWindowLW /= 2;
-	} else {
-		bottomWindowRY -= titleH;
-	}
+	ImGui::End();
 
-	// ===== Bottom(Left) Window =====
-	ImGui::SetNextWindowPos(ImVec2(centerPosX, bottomWindowY));
-	ImGui::SetNextWindowSize(ImVec2(bottomWindowLW, bottomH));
-
-	isMBLWindowOpen_ = ImGui::Begin("Drawing Effect Info",
-		nullptr,
-		ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_NoResize);
-	ImGui::Text("Emitter Num: %d", system_->GetEffectManager()->GetParticleManager()->GetEmitterCount());
-	ImGui::Text("All Particle Num: %d", system_->GetEffectManager()->GetParticleManager()->GetAllParticleCount());
-	ImGui::BeginChild("EmitterList", ImVec2(0, 0), true);
-
-	ImGui::EndChild();
-
-	{
-		// ===== Bottom(Right) Window =====
-		ImGui::SetNextWindowPos(ImVec2(centerPosX + centerWidth / 2, bottomWindowRY));
-		ImGui::SetNextWindowSize(ImVec2(bottomWindowRW, bottomH));
-		isMBRWindowOpen_ = ImGui::Begin("Particle Details",
-			nullptr,
-			ImGuiWindowFlags_NoMove |
-			ImGuiWindowFlags_NoResize);
-
-		ImGui::End();
+	if (ImGui::Begin(kWinParticleInfo)) {
 	}
 	ImGui::End();
 }
 
-void EffectEditor::ImGuiLoadWindow() {
-	if (showLoadWindow_) {
-		float lineHeight = ImGui::GetTextLineHeightWithSpacing();
-		float padding = ImGui::GetStyle().WindowPadding.y * 2;
-		float titleBar = ImGui::GetFrameHeight();
-		float fixedHeight = lineHeight * 3 + padding + titleBar;
-		ImGui::SetNextWindowSize(ImVec2(0, fixedHeight));
-		ImGui::SetNextWindowFocus();
-		ImGui::Begin("Load Window", &showLoadWindow_, ImGuiWindowFlags_NoResize);
+void EffectEditor::ImGuiOverwriteWindow() {
+	if (!pendingSave_.active) return;
 
-		InputTextString("Load File Path", loadFilePath_);
+	ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+	ImGui::SetNextWindowSize(ImVec2(520, 0), ImGuiCond_Appearing);
+	ImGui::SetNextWindowFocus();
+	ImGui::Begin("Overwrite?", nullptr, ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoCollapse);
 
-		bool isButtonClicked = false;
-		if (ImGui::Button("Load")) {
-			isButtonClicked = true;
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Close")) {
-			isButtonClicked = true;
-		}
-		if (isButtonClicked) {
-			showLoadWindow_ = false;
-		}
-		ImGui::End();
+
+	const auto& req = pendingSave_.request;
+	const bool validIndex = req.effectIndex >= 0 && req.effectIndex < (int)effectDataList_.size();
+	const char* kindName = (req.target == SelectMode::Effect) ? "Effect"
+		: (req.target == SelectMode::Particle) ? "Particle" : "EmitterLink";
+	ImGui::Text("%s of: %s", kindName, validIndex ? effectDataList_[req.effectIndex].name.c_str() : "(removed)");
+	ImGui::Text("These files already exist and will be overwritten:");
+
+	ImGui::BeginChild("ConflictList", ImVec2(0, ImGui::GetTextLineHeightWithSpacing() * 6), true);
+	for (const auto& path : pendingSave_.conflicts) {
+		ImGui::TextUnformatted(path.c_str());
 	}
-}
+	ImGui::EndChild();
 
-
-void EffectEditor::ImGuiSaveWindow() {
-	if (showSaveWindow_) {
-		float lineHeight = ImGui::GetTextLineHeightWithSpacing();
-		float padding = ImGui::GetStyle().WindowPadding.y * 2;
-		float titleBar = ImGui::GetFrameHeight();
-		float fixedHeight = lineHeight * 3 + padding + titleBar;
-		ImGui::SetNextWindowSize(ImVec2(0, fixedHeight));
-		ImGui::SetNextWindowFocus();
-		ImGui::Begin("Save Window", &showSaveWindow_, ImGuiWindowFlags_NoResize);
-
-		InputTextString("Save File Path", saveFilePath_);
-
-		bool isButtonClicked = false;
-		if (ImGui::Button("Save")) {
-			isButtonClicked = true;
-			isSave_ = true;
+	if (ImGui::Button("Overwrite")) {
+		if (req.target == SelectMode::Effect) {
+			ExecuteSave(req.effectIndex, pendingSave_.plan, pendingSave_.detach);
+		} else {
+			ExecuteSaveUnit(req, pendingSave_.unitPath);
 		}
-		ImGui::SameLine();
-		if (ImGui::Button("Close")) {
-			isButtonClicked = true;
-			saveLoadMode_ = SelectMode::None;
-		}
-		if (isButtonClicked) {
-			showSaveWindow_ = false;
-		}
-		ImGui::End();
+		pendingSave_ = {};
 	}
+	ImGui::SameLine();
+	if (ImGui::Button("Skip")) {
+		debugText_ += "Save skipped.\n";
+		pendingSave_ = {};                  // この Effect だけ飛ばす（Save All なら次へ）
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Cancel All")) {
+		debugText_ += "Save cancelled.\n";
+		pendingSave_ = {};
+		saveQueue_.clear();                 // 残りの予約も全部やめる
+	}
+
+	ImGui::End();
 }
 
 void EffectEditor::ImGuiDoubleCheckWindow() {
-	if (doubleCheck_) {
-		float lineHeight = ImGui::GetTextLineHeightWithSpacing();
-		float padding = ImGui::GetStyle().WindowPadding.y * 2;
-		float titleBar = ImGui::GetFrameHeight();
-		float fixedHeight = lineHeight * 3 + padding + titleBar;
-		ImGui::SetNextWindowSize(ImVec2(0, fixedHeight));
-		ImGui::SetNextWindowFocus();
-		ImGui::Begin("Double Check Window", &doubleCheck_, ImGuiWindowFlags_NoResize);
+	if (!doubleCheck_) return;
 
-		ImGui::Text("Are you sure you want to delete this item?");
+	float lineHeight = ImGui::GetTextLineHeightWithSpacing();
+	float padding = ImGui::GetStyle().WindowPadding.y * 2;
+	float titleBar = ImGui::GetFrameHeight();
+	float fixedHeight = lineHeight * 3 + padding + titleBar;
 
-		bool isButtonClicked = false;
-		if (ImGui::Button("Delete")) {
-			isButtonClicked = true;
-			isDelete_ = true;
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Close")) {
-			isButtonClicked = true;
-			saveLoadMode_ = SelectMode::None;
-		}
-		if (isButtonClicked) {
-			doubleCheck_ = false;
-		}
-		ImGui::End();
+	ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+	ImGui::SetNextWindowSize(ImVec2(0, fixedHeight));
+	ImGui::SetNextWindowFocus();
+	ImGui::Begin("Double Check Window", &doubleCheck_, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDocking);
+
+	ImGui::Text("Are you sure you want to delete this item?");
+
+	if (ImGui::Button("Delete")) {
+		isDelete_ = true;
+		doubleCheck_ = false;
 	}
+	ImGui::SameLine();
+	if (ImGui::Button("Close")) {
+		saveLoadMode_ = SelectMode::None;
+		doubleCheck_ = false;
+	}
+
+	ImGui::End();
 }
 
-void EffectEditor::ImGuiEffectShowing() {}
+bool EffectEditor::ImGuiEffectShowing(EffectData& effect) {
+	bool changed = false;
+	changed |= InputTextString("Effect Name", effect.name);
+	ImGui::Text("Particles: %d", (int)effect.prototypes.size());
+	ImGui::Text("Links: %d", (int)effect.links.size());
+	ImGui::Text("Path: %s", effect.savePath.empty() ? "(not saved)" : effect.savePath.c_str());
+	return changed;
+}
 
-void EffectEditor::ImGuiParticleShowing(ParticlePrototype& particle) {
+bool EffectEditor::ImGuiParticleShowing(ParticlePrototype& particle) {
+	bool changed = false;
 
-	InputTextString("Linker Name", particle.name);
+	changed |= InputTextString("Particle Name", particle.name);
+	ImGui::TextWrapped("Path: %s", particle.savePath.empty() ? "(not saved)" : particle.savePath.c_str());
+	changed |= ImGui::Checkbox("Root (Shoot on Play)", &particle.isRoot);
+	ImGui::SetItemTooltip("ON : Shoot / Play で直接撃つ\nOFF: Link からだけ撃たれる");
 
+	/// ヘッダーごとに PushID して、同じラベル（Start / isConstant など）のIDが被らないようにする
+	ImGui::PushID("Lifetime");
 	if (ImGui::CollapsingHeader("Lifetime")) {
-		InputFloat("lifetime", particle.lifetime);
-		InputFloat("lifetimeRandomness", particle.lifetimeRandomness);
+		changed |= InputFloat("lifetime", particle.lifetime);
+		changed |= InputFloat("lifetimeRandomness", particle.lifetimeRandomness);
 	}
+	ImGui::PopID();
 
+	ImGui::PushID("Position");
 	if (ImGui::CollapsingHeader("Position")) {
-		InputVector3("Start", particle.startPosition);
-		InputVector3("StartRandom", particle.startPositionRandom);
+		changed |= InputVector3("Start", particle.startPosition);
+		changed |= InputVector3("StartRandom", particle.startPositionRandom);
 	}
+	ImGui::PopID();
 
+	ImGui::PushID("Velocity");
 	if (ImGui::CollapsingHeader("Velocity")) {
-		InputVector3("StartVelocity", particle.startVelocity);
-		InputVector3("StartRandom", particle.startVelocityRandom);
-		InputVector3("StartSpeedRandom", particle.startSpeedRandom);
+		changed |= InputVector3("StartVelocity", particle.startVelocity);
+		changed |= InputVector3("StartRandom", particle.startVelocityRandom);
+		changed |= InputVector3("StartSpeedRandom", particle.startSpeedRandom);
 	}
+	ImGui::PopID();
 
+	ImGui::PushID("Scale");
 	if (ImGui::CollapsingHeader("Scale")) {
-		InputVector3("Start", particle.startScale);
-		InputVector3("End", particle.endScale);
-		InputVector3("StartRandom", particle.startScaleRandom);
-		InputVector3("EndRandom", particle.endScaleRandom);
-		ImGui::Checkbox("isConstant", &particle.isConstantScale);
+		changed |= InputVector3("Start", particle.startScale);
+		changed |= InputVector3("End", particle.endScale);
+		changed |= InputVector3("StartRandom", particle.startScaleRandom);
+		changed |= InputVector3("EndRandom", particle.endScaleRandom);
+		changed |= ImGui::Checkbox("isConstant", &particle.isConstantScale);
 	}
+	ImGui::PopID();
 
+	ImGui::PushID("Rotation");
 	if (ImGui::CollapsingHeader("Rotation")) {
-		InputVector3("Start", particle.startRotation);
-		InputVector3("End", particle.endRotation);
-		InputVector3("StartRandom", particle.startRotationRandom);
-		InputVector3("EndRandom", particle.endRotationRandom);
-		ImGui::Checkbox("isConstant", &particle.isConstantRotation);
+		changed |= InputVector3("Start", particle.startRotation);
+		changed |= InputVector3("End", particle.endRotation);
+		changed |= InputVector3("StartRandom", particle.startRotationRandom);
+		changed |= InputVector3("EndRandom", particle.endRotationRandom);
+		changed |= ImGui::Checkbox("isConstant", &particle.isConstantRotation);
 	}
+	ImGui::PopID();
 
+	ImGui::PushID("Color");
 	if (ImGui::CollapsingHeader("Color")) {
-		InputVector4("Start", particle.startColor);
-		InputVector4("End", particle.endColor);
-		InputVector4("StartRandom", particle.startColorRandom);
-		InputVector4("EndRandom", particle.endColorRandom);
-		ImGui::Checkbox("isConstant", &particle.isConstantColor);
+		changed |= InputVector4("Start", particle.startColor);
+		changed |= InputVector4("End", particle.endColor);
+		changed |= InputVector4("StartRandom", particle.startColorRandom);
+		changed |= InputVector4("EndRandom", particle.endColorRandom);
+		changed |= ImGui::Checkbox("isConstant", &particle.isConstantColor);
 	}
+	ImGui::PopID();
 
+	ImGui::PushID("Movement");
 	if (ImGui::CollapsingHeader("Movement")) {
-		InputVector3("Gravity", particle.gravity);
-		InputFloat("damping", particle.damping);
-		InputFloat("dampingRandom", particle.dampingRandom);
+		changed |= InputVector3("Gravity", particle.gravity);
+		changed |= InputFloat("damping", particle.damping);
+		changed |= InputFloat("dampingRandom", particle.dampingRandom);
 	}
+	ImGui::PopID();
 
+	ImGui::PushID("Emitting");
 	if (ImGui::CollapsingHeader("EmittingSettings")) {
-		InputFloat("Rate", particle.emitRate);
-		InputFloat("IntervalRandom", particle.emitIntervalRandom);
-		InputInt("BurstCount", particle.burstCount);
-		InputFloat("EmitNumRandom", particle.emitNumRandom);
+		changed |= InputFloat("Rate", particle.emitRate);
+		changed |= InputFloat("IntervalRandom", particle.emitIntervalRandom);
+		changed |= InputInt("BurstCount", particle.burstCount);
+		changed |= InputFloat("EmitNumRandom", particle.emitNumRandom);
 	}
+	ImGui::PopID();
 
+	return changed;
 }
 
-void EffectEditor::ImGuiLinkerShowing(EmitterLink& linker) {
+bool EffectEditor::ImGuiLinkerShowing(EmitterLink& linker) {
+	bool changed = false;
 
-	InputTextString("Linker Name", linker.name);
-	InputTextString("Source Name", linker.sourceName);
-	InputTextString("Target Name", linker.targetName);
-	InputInt("Emit Count", linker.emitCount);
-	InputFloat("Delay Time", linker.delayTime);
+	changed |= InputTextString("Linker Name", linker.name);
+	ImGui::TextWrapped("Path: %s", linker.savePath.empty() ? "(not saved)" : linker.savePath.c_str());
+	changed |= InputTextString("Source Name", linker.sourceName);
+	changed |= InputTextString("Target Name", linker.targetName);
+	changed |= InputInt("Emit Count", linker.emitCount);
+	changed |= InputFloat("Delay Time", linker.delayTime);
+
+	/// データにはあったがUIが無かった3つ
+	changed |= ImGui::Checkbox("Follow Position", &linker.followPosition);
+	changed |= ImGui::Checkbox("Follow Rotation", &linker.followRotation);
+	changed |= ImGui::Checkbox("Follow Scale", &linker.followScale);
 
 	const char* linkModeItems[] = { "PerBurst", "PerParticle" };
-	EnumCombo("LinkMode", linker.linkMode, linkModeItems, IM_ARRAYSIZE(linkModeItems));
+	changed |= EnumCombo("LinkMode", linker.linkMode, linkModeItems, IM_ARRAYSIZE(linkModeItems));
 
 	const char* linkFollowItems[] = { "Particle", "Emitter" };
-	EnumCombo("LinkFollow", linker.linkFollow, linkFollowItems, IM_ARRAYSIZE(linkFollowItems));
+	changed |= EnumCombo("LinkFollow", linker.linkFollow, linkFollowItems, IM_ARRAYSIZE(linkFollowItems));
 
 	const char* emitterTimingItems[] = { "SourceEmit", "TimeUp", "SourceEnd" };
-	EnumCombo("Emitter Timing", linker.emitterTiming, emitterTimingItems, IM_ARRAYSIZE(emitterTimingItems));
+	changed |= EnumCombo("Emitter Timing", linker.emitterTiming, emitterTimingItems, IM_ARRAYSIZE(emitterTimingItems));
 
+	return changed;
 }
 
 // --- 專用 Callback ---
@@ -1162,33 +1543,31 @@ bool EffectEditor::InputBigTextString(const char* label, std::string& str, ImGui
 	return result;
 }
 
-void EffectEditor::InputInt(const char* label, int& value) {
+bool EffectEditor::InputInt(const char* label, int& value) {
 	ImGui::Text("%s:", label);
 	ImGui::SameLine();
 	std::string newLabel = std::string("##") + label;
-	ImGui::InputInt(newLabel.c_str(), &value);
+	return ImGui::InputInt(newLabel.c_str(), &value);
 }
 
-void EffectEditor::InputFloat(const char* label, float& value) {
+bool EffectEditor::InputFloat(const char* label, float& value) {
 	ImGui::Text("%s:", label);
 	ImGui::SameLine();
 	std::string newLabel = std::string("##") + label;
-	ImGui::InputFloat(newLabel.c_str(), &value);
+	return ImGui::InputFloat(newLabel.c_str(), &value);
 }
 
-void EffectEditor::InputVector3(const char* label, Vector3& vec) {
-
+bool EffectEditor::InputVector3(const char* label, Vector3& vec) {
 	ImGui::Text("%s:", label);
 	ImGui::SameLine();
 	std::string newLabel = std::string("##") + label;
-	ImGui::InputFloat3(newLabel.c_str(), &vec.x);
+	return ImGui::InputFloat3(newLabel.c_str(), &vec.x);
 }
-void EffectEditor::InputVector4(const char* label, Vector4& vec) {
-
+bool EffectEditor::InputVector4(const char* label, Vector4& vec) {
 	ImGui::Text("%s:", label);
 	ImGui::SameLine();
 	std::string newLabel = std::string("##") + label;
-	ImGui::InputFloat4(newLabel.c_str(), &vec.x);
+	return ImGui::InputFloat4(newLabel.c_str(), &vec.x);
 }
 #endif
 

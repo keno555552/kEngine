@@ -18,7 +18,8 @@ delayData InputLinkData(
 		d.followParticle = false;
 		d.particleId = -1;
 
-		d.positionOffset = sourceEmitter.GetPosition();
+		/// 「その粒子が撃たれた時の位置」（線の今の位置だと、同じフレームに別の場所で撃った時にずれる）
+		d.positionOffset = targetParticle.startTranslate;
 		d.rotationOffset = sourceEmitter.GetRotation();
 		d.scaleOffset = sourceEmitter.GetScale();
 	} else {
@@ -52,51 +53,24 @@ ParticleManager::~ParticleManager() {}
 void ParticleManager::Update() {
 	/// ポーズ中は更新しない
 	if (isPaused_)return;
-	
+
 	/// Emitterの更新
 	for (auto& [id, emitter] : emitterList_) {
 		emitter->Update();
 	}
-	
+
 	/// Emitter同士のリンクを更新
 	UpdateEmitterLinks();
-	//
-	///// Emitterの寿命が終わったら削除する
-	//for (auto it = emitterList_.begin(); it != emitterList_.end(); ) {
-	//	auto& emitter = it->second;
-	//
-	//	emitter->ClearEmittingData();
-	//	emitter->ClearDexpiredData();;
-	//
-	//	if (emitter->GetIsEnd() && emitter->GetIsFinished()) {
-	//		it = emitterList_.erase(it);
-	//	} else {
-	//		++it;
-	//	}
-	//}
 
-
-	/// 先收集要刪的 id，再一起刪（遍歷中不改 map）
+	/// 先に消すものを集めて、後でまとめて消す（ループ中に map を変えない）
 	std::vector<int> removeList;
 	for (auto& [id, emitter] : emitterList_) {
-
 		emitter->ClearEmittingData();
 		emitter->ClearDexpiredData();
 
-		/// 原本的規則：明確結束且粒子死光
+		/// 明示的に終わらせて、粒子も全部死んだ
 		if (emitter->GetIsEnd() && emitter->GetIsFinished()) {
 			removeList.push_back(id);
-			continue;
-		}
-
-		/// 新規則：同名、已停止發射、粒子也死光，且不是現行的那一個 → 刪除
-		if (!emitter->GetIsEmitting() && emitter->GetIsFinished()) {
-			auto n = emitterNameToId_.find(emitter->GetName());
-			if (n != emitterNameToId_.end() &&
-				n->second.size() > 1 &&
-				n->second[0] != id) {
-				removeList.push_back(id);
-			}
 		}
 	}
 	for (int id : removeList) RemoveEmitter(id);
@@ -112,32 +86,31 @@ void ParticleManager::Draw() {
 
 int ParticleManager::CreateEmitter(const ParticlePrototype& proto, int maxParticles) {
 
-	/// Emitterの名前がすでに存在する場合、既存のEmitterIdを返す
-	if (emitterNameToId_.find(proto.name) != emitterNameToId_.end()) {
-		int id = emitterNameToId_[proto.name][0];
-		UpdatePrototype(id, proto, maxParticles);
-		return id;
+	/// 同じ名前の線がある → Prototype だけ差し替える（飛んでいる粒子はそのまま）
+	const int existing = GetEmitterIdByName(proto.name);
+	if (existing != -1) {
+		auto& emitter = emitterList_[existing];
+		emitter->SetPrototype(proto);
+		emitter->SwitchEmitter(true);    // 引退中だった場合に戻す
+		emitter->SetIsEnd(false);
+		return existing;
 	}
 
-	/// 新しいEmitterを作成
-	int id = nextEmitterId_++;
+	/// 新しい線
+	const int id = nextEmitterId_++;
 	emitterList_[id] = std::make_unique<ParticleEmitter>(system_, proto, &EMParticleID, maxParticles);
-	emitterNameToId_[proto.name].push_back(id);
 	return id;
 }
 
 void ParticleManager::ClearEmitter(int emitterId) {
+	if (EmitterIDCheckMiss(emitterId)) return;
+	RemoveEmitter(emitterId);
+}
 
-	auto it = emitterList_.find(emitterId);
-	if (it != emitterList_.end()) {
-		std::string emitterName = it->second->GetPrototype().name;
-		for (auto id : emitterNameToId_[emitterName]) {
-			emitterList_.erase(id);
-		}
-		emitterNameToId_.erase(emitterName);
-	} else {
-		Logger::Log("[kError] ParticleManager::ClearEmitter() Emitter ID not found: " + std::to_string(emitterId));
-	}
+void ParticleManager::ClearEmitterLinks() {
+	emitterLinks_.clear();
+	delayDataList_.clear();
+	warnedLinks_.clear();
 }
 
 void ParticleManager::ShootEmitter(int emitterId, int count) {
@@ -160,78 +133,60 @@ void ParticleManager::SwitchEmitter(int emitterId, bool isEmitting) {
 
 void ParticleManager::LinkEmitterToEmitter(EmitterLink& linkData) {
 
-	/// リンクデータを保存
-	EmitterLink emitterLinks{ linkData };
+	/// 同じ名前の Link がある → 中身を差し替える（増えない）
+	for (auto& link : emitterLinks_) {
+		if (link.name == linkData.name) {
+			link = linkData;
+			return;
+		}
+	}
 
-	/// リンクデータをリストに追加
-	emitterLinks_.push_back(emitterLinks);
+	/// 無ければ追加
+	emitterLinks_.push_back(linkData);
 }
 
 void ParticleManager::RemoveEmitter(int id) {
-	
-	auto it = emitterList_.find(id);
-	if (it == emitterList_.end()) return;
+	emitterList_.erase(id);
+}
 
-	const std::string name = it->second->GetName();   // 先複製名字再 erase
-	emitterList_.erase(it);
-
-	auto nameIt = emitterNameToId_.find(name);
-	if (nameIt != emitterNameToId_.end()) {
-		auto& ids = nameIt->second;
-		ids.erase(std::remove(ids.begin(), ids.end(), id), ids.end());
-		if (ids.empty()) emitterNameToId_.erase(nameIt);
-	}
-
+void ParticleManager::RetireEmitter(int emitterId) {
+	if (EmitterIDCheckMiss(emitterId)) return;
+	emitterList_[emitterId]->SwitchEmitter(false);   // Emit() が何もしなくなる（Link からも撃てない）
+	emitterList_[emitterId]->SetIsEnd(true);         // 粒子が全部死んだら Update で削除
 }
 
 void ParticleManager::SetEmitterEnd(int emitterId, bool isEnd) {
 
 	/// EmitterIdが存在するか確認
-	if (!EmitterIDCheckMiss(emitterId)) return;
+	if (EmitterIDCheckMiss(emitterId)) return;
 	emitterList_[emitterId]->SetIsEnd(isEnd);
 }
 
 void ParticleManager::SetEmitterDead(int emitterId) {
 
 	/// EmitterIdが存在するか確認
-	if (!EmitterIDCheckMiss(emitterId)) return;
+	if (EmitterIDCheckMiss(emitterId)) return;
 	emitterList_[emitterId]->SetIsDead();
 }
 
 void ParticleManager::UpdatePrototype(int emitterId, const ParticlePrototype& proto, int maxParticles) {
-
-	auto it = emitterList_.find(emitterId);
-	if (it != emitterList_.end()) {
-
-		// 旧Emitterを新しいどころに移動する
-		emitterList_[nextEmitterId_] = std::move(emitterList_[emitterId]);
-		emitterList_[nextEmitterId_]->SwitchEmitter(false);
-		emitterNameToId_[proto.name].push_back(nextEmitterId_);
-
-		// 新しいParticlePrototypeでEmitterを作る
-		emitterList_[emitterId] = std::make_unique<ParticleEmitter>(system_, proto, &EMParticleID, maxParticles);
-
-		nextEmitterId_++;
-	} else {
-		Logger::Log("[kError] ParticleManager::UpdatePrototype() Emitter ID not found: " + std::to_string(emitterId));
-	}
+	if (EmitterIDCheckMiss(emitterId)) return;
+	emitterList_[emitterId]->SetPrototype(proto);
 }
 
 int ParticleManager::GetEmitterParticleCount(int emitterId) {
 
 	/// EmitterIdが存在するか確認
-	if (!EmitterIDCheckMiss(emitterId)) { return -1; }
+	if (EmitterIDCheckMiss(emitterId)) { return -1; }
 
 	/// 存在する場合、Emitterの粒子数を返す
 	return emitterList_[emitterId]->GetParticleCount();
 }
 
 int ParticleManager::GetEmitterIdByName(const std::string& name) const {
-
-	/// 名前からEmitterIdを取得
-	auto it = emitterNameToId_.find(name);
-	if (it != emitterNameToId_.end()) {
-		return it->second[0];
+	/// 線の数は少ないので、そのまま全部見る
+	for (const auto& [id, emitter] : emitterList_) {
+		if (emitter->GetName() == name) return id;
 	}
 	return -1;
 }
@@ -257,7 +212,7 @@ void ParticleManager::UpdateEmitterLinks() {
 	for (auto& [emitterID, currentEmitter] : emitterList_) {
 
 		const std::string& currectEmitterName = currentEmitter->GetPrototype().name;
-		
+
 
 		for (int linkID = 0; linkID < (int)emitterLinks_.size(); linkID++) {
 			const auto& linkData = emitterLinks_[linkID];
@@ -283,11 +238,12 @@ void ParticleManager::UpdateEmitterLinks() {
 				delayData d = InputLinkData(linkData, p, *currentEmitter, system_->GetTimeManager(), linkID);
 				delayDataList_.push_back(d);
 
-				particleIdList.push_back( std::make_pair( currectLinkname, p.particleId ) );
+				particleIdList.push_back(std::make_pair(currectLinkname, p.particleId));
 
-				Logger::Log("Particle Name: " + currentEmitter->GetPrototype().name + "\n");
-				Logger::Log("LinkerName Name: " + currectLinkname + "\n");
-				Logger::Log("Shot Particle: " + std::to_string(p.particleId) + "\n");
+				if (isLinkLogEnabled_) {
+					Logger::Log("[Link] " + currectLinkname + " : " + currectEmitterName + " -> " + linkData.targetName
+						+ " (particle " + std::to_string(p.particleId) + ")");
+				}
 			}
 		}
 	}
@@ -304,53 +260,57 @@ void ParticleManager::UpdateEmitterLinks() {
 
 		if (!ready) continue;
 
+		/// Link が消されていた → 捨てる
+		if (delayData.emitterLinkIndex < 0 || delayData.emitterLinkIndex >= (int)emitterLinks_.size()) {
+			delayData.hasEmitted = true;
+			continue;
+		}
 		auto& linkData = emitterLinks_[delayData.emitterLinkIndex];
-		int targetId = GetEmitterIdByName(linkData.targetName);
-		int sourceId = GetEmitterIdByName(linkData.sourceName);
-		if (targetId == -1) {
-			Logger::Log("[kError] ParticleManager::UpdateEmitterLinks() Invalid emitter name: " + linkData.targetName);
-			continue;
-		}
-		if (sourceId == -1) {
-			Logger::Log("[kError] ParticleManager::UpdateEmitterLinks() Invalid emitter name: " + linkData.sourceName);
-			continue;
-		}
 
+		/// 処理済みにする（成功でも失敗でも、この delayData は今回で終わり → 下で消される）
+		delayData.hasEmitted = true;
+
+		/// target が無い → 撃つ先が無いので捨てる（1回だけ Log）
+		int targetId = GetEmitterIdByName(linkData.targetName);
+		if (targetId == -1) {
+			/// 同じ Link の失敗は1回だけ Log（連発中に毎回出さない）
+			if (warnedLinks_.insert(linkData.name).second) {
+				Logger::Log("[kError] Link \"" + linkData.name + "\" target not found: " + linkData.targetName + " (not fired)");
+			}
+			continue;
+		}
 		auto& targetEmitter = emitterList_[targetId];
-		auto& sourceEmitter = emitterList_[sourceId];
+
+		/// source は「追従する粒子を探す」ためだけに使う。無ければ保存してある位置を使う
+		int sourceId = GetEmitterIdByName(linkData.sourceName);
+		ParticleInstance* particle = (sourceId != -1)
+			? emitterList_[sourceId]->FindParticleById(delayData.particleId)
+			: nullptr;
 
 		ParticlePrototypeOverride protoOverride{};
 		protoOverride.hasStartPosition = true;
 		if (linkData.followScale)protoOverride.hasStartScale = true;
 		if (linkData.followRotation)protoOverride.hasStartRotation = true;
 
-		auto particle = sourceEmitter->FindParticleById(delayData.particleId);
 		if (linkData.followPosition) {
-			protoOverride.startPosition = (particle) ?
-				protoOverride.startPosition = particle->nowTranslate :
-				protoOverride.startPosition = delayData.positionOffset;
+			protoOverride.startPosition = (particle) ? particle->nowTranslate : delayData.positionOffset;
 		} else {
 			protoOverride.startPosition = delayData.positionOffset;
 		}
 
 		if (linkData.followScale) {
-			protoOverride.startScale = (particle) ?
-				protoOverride.startScale = particle->nowScale :
-				protoOverride.startScale = delayData.scaleOffset;
+			protoOverride.startScale = (particle) ? particle->nowScale : delayData.scaleOffset;
 		} else {
 			protoOverride.startScale = delayData.scaleOffset;
 		}
+
 		if (linkData.followRotation) {
-			protoOverride.startRotation = (particle) ?
-				protoOverride.startRotation = particle->nowRotate :
-				protoOverride.startRotation = delayData.rotationOffset;
+			protoOverride.startRotation = (particle) ? particle->nowRotate : delayData.rotationOffset;
 		} else {
 			protoOverride.startRotation = delayData.rotationOffset;
 		}
 
 		targetEmitter->Emit(delayData.emittyCount, &protoOverride);
-
-		delayData.hasEmitted = true;
 	}
 
 	/// 無序刪除
@@ -362,8 +322,8 @@ void ParticleManager::UpdateEmitterLinks() {
 
 bool ParticleManager::EmitterIDCheckMiss(int emitterId) {
 
-	if (emitterList_.find(emitterId) == emitterList_.end()) return true;
+	if (emitterList_.find(emitterId) != emitterList_.end()) return false;
 	Logger::Log("[EffectManager] ParticleManager::EmitterIDCheckMiss Invalid emitter ID: " + std::to_string(emitterId));
-	return false;
+	return true;
 }
 

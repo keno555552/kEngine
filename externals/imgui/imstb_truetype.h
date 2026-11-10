@@ -3144,7 +3144,7 @@ static void stbtt__fill_active_edges_new(float *scanline, float *scanline_fill, 
                scanline_fill[x] += height; // everything right of this pixel is filled
             } else {
                int x,x1,x2;
-               float y_crossing, y_final, step, sign, area;
+               float y_crossing, y_final, step, Sign, area;
                // covers 2+ pixels
                if (x_top > x_bottom) {
                   // flip scanline vertically; signed area is the same
@@ -3190,10 +3190,10 @@ static void stbtt__fill_active_edges_new(float *scanline, float *scanline_fill, 
                if (y_crossing > y_bottom)
                   y_crossing = y_bottom;
 
-               sign = e->direction;
+               Sign = e->direction;
 
                // area of the rectangle covered from sy0..y_crossing
-               area = sign * (y_crossing-sy0);
+               area = Sign * (y_crossing-sy0);
 
                // area of the triangle (x_top,sy0), (x1+1,sy0), (x1+1,y_crossing)
                scanline[x1] += stbtt__sized_triangle_area(area, x1+1 - x_top);
@@ -3217,7 +3217,7 @@ static void stbtt__fill_active_edges_new(float *scanline, float *scanline_fill, 
                // the second pixel's contribution to the third pixel will be the
                // rectangle 1 wide times the height change in the second pixel, which is dy.
 
-               step = sign * dy * 1; // dy is dy/dx, change in y for every 1 change in x,
+               step = Sign * dy * 1; // dy is dy/dx, change in y for every 1 change in x,
                // which multiplied by 1-pixel-width is how much pixel area changes for each step in x
                // so the area advances by 'step' every time
 
@@ -3230,10 +3230,10 @@ static void stbtt__fill_active_edges_new(float *scanline, float *scanline_fill, 
 
                // area covered in the last pixel is the rectangle from all the pixels to the left,
                // plus the trapezoid filled by the line segment in this pixel all the way to the right edge
-               scanline[x2] += area + sign * stbtt__position_trapezoid_area(sy1-y_final, (float) x2, x2+1.0f, x_bottom, x2+1.0f);
+               scanline[x2] += area + Sign * stbtt__position_trapezoid_area(sy1-y_final, (float) x2, x2+1.0f, x_bottom, x2+1.0f);
 
                // the rest of the line is filled based on the total height of the line segment in this pixel
-               scanline_fill[x2] += sign * (sy1-sy0);
+               scanline_fill[x2] += Sign * (sy1-sy0);
             }
          } else {
             // if edge goes outside of box we're drawing, we require

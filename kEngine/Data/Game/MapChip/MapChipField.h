@@ -3,24 +3,8 @@
 #include "MathsIncluder.h"
 #include "Data/Geometry/Shape/Quad/AABB.h"
 #include "Tool/MapBulider/Data/MapDatas.h"
+#include "CollisionResult.h"
 #include <string>
-
-enum class MapChipType {
-	kBlank, // 空白
-	kDirt, // ブロック
-	kRock, // 岩
-	kEnemy = 7,
-	kPlayer = 8,
-	kBackPoint = 9,
-	NumOfTypes,
-};
-
-struct CollisionResult {
-	Vector3 correction;
-	bool xIsMainAxis;
-	bool yIsMainAxis;
-	bool landed;
-};
 
 class MapChipField {
 
@@ -35,8 +19,6 @@ public:
 	/// ================= 準備 ================= ///
 	/// MapReader で読んだ grid と MapData を渡す（MapData は参照だけ持つ → こちらより先に消さないこと）
 	void Setup(const MapGrid& grid, const MapData* data);
-	/// 旧互換：csv だけ（MapData 無し → 1, 2 を壁扱い）
-	void LoadMapChipCsv(const std::string& filePath);
 	/// 今の大きさのまま全部空白に
 	void ResetMapChipData();
 
@@ -50,10 +32,6 @@ public:
 	/// 壁か（今は「isDirectTile = 壁」。後で isSolid に変える）
 	bool IsWallByMap(MapIndex mapIndex) const;
 	bool IsWallByWorld(WorldIndex worldIndex) const;
-
-	/// 旧互換
-	MapChipType GetMapChipTypeByMap(MapIndex mapIndex) const { return static_cast<MapChipType>(GetIdByMap(mapIndex)); }
-	MapChipType GetMapChipTypeByWorld(WorldIndex worldIndex) const { return static_cast<MapChipType>(GetIdByWorld(worldIndex)); }
 
 	/// ================= 座標 ================= ///
 	Vector3 GetWorldPosFromMapByMapIndex(MapIndex mapIndex) const;
@@ -69,8 +47,6 @@ public:
 	AABB GetAABBByWorldIndex(WorldIndex worldIndex) const;
 
 	/// ================= 大きさ ================= ///
-	void SetBlockWidth(float width);
-	void SetBlockHeight(float height);
 	Vector2 GetBlockSize() const { return { kBlockWidth, kBlockHeight }; }
 	int GetNumBlockVirtical() const { return kNumBlockVirtical; }
 	int GetNumBlockHorizontal() const { return kNumBlockHorizontal; }
@@ -97,5 +73,3 @@ private:
 	std::vector<std::vector<int>> ids_;     // [y][x]、y = 0 が一番上
 	const MapData* mapData_ = nullptr;      // 借り
 };
-
-// void GenerateBlocks(std::vector<std::vector<WorldTransform*>>& worldTransformBlocks);

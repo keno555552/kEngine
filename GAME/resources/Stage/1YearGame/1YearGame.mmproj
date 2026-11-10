@@ -1,0 +1,12 @@
+{
+    "kind": "MapEditorProject",
+    "mapData": [
+        "MapData/tutorial.json"
+    ],
+    "mapMaker": [],
+    "maps": [
+        "Maps/tutorial.csv"
+    ],
+    "relativePaths": true,
+    "version": 1
+}

@@ -33,10 +33,10 @@ struct MapData {
 	std::string savePath;
 
 	/// 検索（見つからなければ nullptr）
-	MapUnit* FindUnit(const std::string& name);
-	MapUnit* FindUnit(int id);
 	const MapUnit* FindUnit(const std::string& name) const;
 	const MapUnit* FindUnit(int id) const;
+	MapUnit* FindUnit(const std::string& name);
+	MapUnit* FindUnit(int id);
 	/// 次に使える番号（空白とも被らない）
 	int NextUnitId() const;
 	/// id を newId に。newId を使っている物（空白も含む）があれば入れ替え
@@ -51,10 +51,4 @@ struct MapGrid {
 
 	int Width() const { return ids.empty() ? 0 : (int)ids[0].size(); }
 	int Height() const { return (int)ids.size(); }
-};
-
-/// LoadMap の結果：定義 + マップ
-struct MapPackage {
-	MapData data;
-	MapGrid grid;
 };

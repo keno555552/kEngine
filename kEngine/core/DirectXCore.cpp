@@ -480,6 +480,7 @@ static void WriteCallstack(std::ofstream& log, CONTEXT* ctx) {
 
 
 static LONG WINAPI CrashHandler(EXCEPTION_POINTERS* info) {
+	const long long crashTimeMs = Logger::NowMs();
 	std::ofstream log("CrashLog.txt");
 
 	// 時間戳記
@@ -495,6 +496,12 @@ static LONG WINAPI CrashHandler(EXCEPTION_POINTERS* info) {
 		<< std::setw(2) << std::setfill('0') << local.tm_hour << ":"
 		<< std::setw(2) << std::setfill('0') << local.tm_min << ":"
 		<< std::setw(2) << std::setfill('0') << local.tm_sec << "\n\n";
+
+	/// ★ログとの照合
+	log << "Log File: " << Logger::GetLogFilePath() << "\n\n";
+	log << "=== Recent Log (古い順、クラッシュからの時間差) ===\n";
+	Logger::WriteRecent(log, 50, crashTimeMs);
+	log << "\n";
 
 	// 錯誤碼
 	DWORD code = info->ExceptionRecord->ExceptionCode;

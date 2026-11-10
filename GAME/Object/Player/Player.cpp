@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <numbers>
 #include "GAME/Object/Bullet/Bullet.h"
+#include "GAME/Object/Sight/Sight.h"
 
 Player::Player(kEngine* system, const Vector3& position) {
 	Object::IntObject(system);
@@ -19,6 +20,9 @@ Player::Player(kEngine* system, const Vector3& position) {
 	MH_pickaxe_ = system_->SetModelObj("GAME/resources/Object/pickaxe/pickaxe.obj");
 
 	TH_playerTexture_ = system_->LoadTexture("GAME/resources/Object/player/playerUV.png");
+	TH_playerTexture_damaged_ = system_->LoadTexture("GAME/resources/Object/player/playerUV_damage.png");
+	TH_playerTexture_dead_ = system_->LoadTexture("GAME/resources/Object/player/playerUV_dead.png");
+
 	TH_White5x5_ = system_->LoadTexture("kEngine/EngineAssets/TemplateResource/texture/white5x5.png");
 
 	SH_JUMP_ = system_->SoundLoadSE("GAME/resources/sound/SE/player_jump.wav");
@@ -28,27 +32,51 @@ Player::Player(kEngine* system, const Vector3& position) {
 	nearAttackChangeTimer_.InitM(kNearAttackChangeTime, system_->GetTimeManager());
 	nearAttackEffectTimer_.InitM(kNearAttackEffectTime, system_->GetTimeManager());
 
+	/// 照準（★最後に追加）
+	MH_sight_ = system_->SetModelObj("GAME/resources/Object/targeter/targeter.obj");
+	sight_ = std::make_unique<Sight>(system_, this);
+	sight_->IntObject(system_);
+	sight_->CreateModelData(MH_sight_);
+	sight_->mainPosition.transform.scale = { 0.5f, 0.5f, 0.5f };
+	sight_->objectParts_[0].materialConfig->textureColor = { 0.8f,0.2f,0.2f,1.0f };
+
+	/// Playerデータ設定
+	HP_ = kPlayerMaxHP;
+
 	/// bugCheck
 	checkTimer_.Init0(1.0f, system_->GetTimeManager());
 }
 
+Player::~Player() = default;
+
 void Player::Update(Camera* camera) {
 	totelDeltaTime_ = system_->GetDeltaTime();
 
+	if (isDead_) {          // ★ 入力・旋回・点滅 全部止める
+		DeathUpdate();
+		return;
+	}
 	BitMapBugCheck();
 	BehaviorRootUpdate();
 	DamageAndEffectPart();
+	UpdataState();
 
-	Object::Update(camera);
+	sight_->Update(camera);
+
+}
+
+void Player::Draw() {
+	Object::Draw();
+	if (!isDead_) sight_->Draw();
 }
 
 
 AABB& Player::GetAABB() {
 
 	const Vector3& s = mainPosition.transform.scale;
-	float halfWidth = kPlayerWidth   * kPlayerHitScale * 0.5f;
+	float halfWidth = kPlayerWidth * kPlayerHitScale * 0.5f;
 	float halfHeight = kPlayerHeight * kPlayerHitScale * 0.5f;
-	float halfDepth = kPlayerWidth   * kPlayerHitScale * 0.5f;
+	float halfDepth = kPlayerWidth * kPlayerHitScale * 0.5f;
 
 	Vector3 center = mainPosition.transform.translate;
 
@@ -58,16 +86,34 @@ AABB& Player::GetAABB() {
 	return hitBox_;
 }
 
-void Player::GetDamage(float damage) {
+void Player::SetCollisionResult(const CollisionResult& result) {
+
+	CollisionMapInfo collisionMapInfo;
+	collisionMapInfo.ceilingHit = result.ceilingHit;
+	collisionMapInfo.floorHit = result.landed;
+	collisionMapInfo.wallHit = result.xIsMainAxis;
+	collisionMapInfo.moveVector = result.correction;
+
+	MovePlayerByResult(collisionMapInfo);
+	OnGroundChanger(collisionMapInfo);
+}
+
+void Player::GetDamage(float damage, const Vector3& attackerPos) {
+	if (isDead_) return;
 	disableDamage_ = true;
 	damageEffectTimer_.Reset0();
 	HP_ -= damage;
+	if (HP_ <= 0.0f) StartDeath(attackerPos);
 
 	/// 音再生
 	system_->SoundPlaySE(SH_DAMAGE_);
 }
 
-void Player::Attack(Vector3 mousePos) {
+Vector3 Player::GetAimPosition() const {
+	return sight_->GetMouseOnPlane();
+}
+
+void Player::Shoot(Vector3 mousePos) {
 
 	/// 出来ない条件に該当したら終了
 	// 弾のリストがセットされてない
@@ -75,7 +121,7 @@ void Player::Attack(Vector3 mousePos) {
 	// 射撃CD中
 	if (shootCD_.parameter_ != shootCD_.maxTime_)return;
 	// 状態が射撃可能でない
-	if (!(static_cast<int>(drillerState_) & canShoot)) return;
+	if (static_cast<int>(playerState_) & cantShoot) return;
 
 	/// 弾の生成
 	Vector3 shootDirection = mousePos - mainPosition.transform.translate;
@@ -88,16 +134,8 @@ void Player::Attack(Vector3 mousePos) {
 }
 
 void Player::BehaviorRootUpdate() {
-	/// 衝突情報を初期化
-	CollisionMapInfo collisionMapInfo;
-	/// 移動量に速度の値をコピー
-	collisionMapInfo.moveVector = velocity_;
-
 	/// 移動関連
 	Move();
-	//MapCollisionDecideDown(collisionMapInfo);
-	OnGroundChanger(collisionMapInfo);
-	MovePlayerByResult(collisionMapInfo);
 
 	///射撃CD更新
 	ShootUpdate();
@@ -107,10 +145,10 @@ void Player::BehaviorRootUpdate() {
 
 Vector3 Player::CornerPosition(const Vector3& center, Corner4 corner) {
 	Vector3 offsetTable[(int)Corner4::kNumCorner] = {
-		{+kPlayerWidth / 2.0f, -kPlayerHeight / 2.0f, 0}, // kRightBottom
-		{-kPlayerWidth / 2.0f, -kPlayerHeight / 2.0f, 0}, // kLeftBottom
-		{+kPlayerWidth / 2.0f, +kPlayerHeight / 2.0f, 0}, // kRightTop
-		{-kPlayerWidth / 2.0f, +kPlayerHeight / 2.0f, 0}, // kLeftTop
+		{ +kPlayerWidth / 2.0f, -kPlayerHeight / 2.0f, 0 }, // kRightBottom
+		{ -kPlayerWidth / 2.0f, -kPlayerHeight / 2.0f, 0 }, // kLeftBottom
+		{ +kPlayerWidth / 2.0f, +kPlayerHeight / 2.0f, 0 }, // kRightTop
+		{ -kPlayerWidth / 2.0f, +kPlayerHeight / 2.0f, 0 }, // kLeftTop
 	};
 
 	Vector3 result;
@@ -194,21 +232,13 @@ void Player::Move() {
 		mainPosition.transform.rotate.y = turnFirstRotationY_ * ratio + destinationRotationY * (1.0f - ratio);
 	}
 
-	if (onGround_) {
-		// ジャンプ
-		if (moveJump_) {
-			// ジャンプ初速を加える
-			velocity_.y += kJumpAcceleration;
-
-			/// 音再生
-			system_->SoundPlaySE(SH_JUMP_);
-		}
-	} else {
-		// 落下速度
-		velocity_.y -= kGravityAcceleration * totelDeltaTime_;
-		// 落下速度制限
-		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
+	if (onGround_ && moveJump_) {
+		velocity_.y += kJumpAcceleration;
+		system_->SoundPlaySE(SH_JUMP_);
 	}
+	velocity_.y -= kGravityAcceleration * totelDeltaTime_;
+	velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
+
 
 	ResetMove();
 }
@@ -220,41 +250,20 @@ void Player::ResetMove() {
 }
 
 void Player::OnGroundChanger(const CollisionMapInfo& info) {
-	// CollisionManager 已判定 floorHit，這裡只根據 floorHit 切換狀態
-	if (onGround_) {
-		if (velocity_.y > 0.0f) {
-			onGround_ = false;
-		}
+	if (info.wallHit)    velocity_.x = 0.0f;
+	if (info.ceilingHit) velocity_.y = 0.0f;
+
+	if (info.floorHit) {
+		if (!onGround_) velocity_.x *= (1.0f - kAttenuationLanding);   // 着地した瞬間
+		velocity_.y = 0.0f;
+		onGround_ = true;
 	} else {
-		if (info.floorHit) {
-			onGround_ = true;
-			velocity_.x *= (1.0f - kAttenuationLanding);
-			velocity_.y = 0.0f;
-		}
-	}
-}
-
-void Player::MapCollisionDecideDown(CollisionMapInfo& info) {
-	/// 移動後の4つの角の座標
-	std::vector<Vector3> positionsNew((int)Corner4::kNumCorner);
-
-	for (uint32_t i = 0; i < positionsNew.size(); i++) {
-		Vector3 translation_ = {};
-		translation_.x = mainPosition.transform.translate.x + info.moveVector.x * totelDeltaTime_;
-		translation_.y = mainPosition.transform.translate.y + info.moveVector.y * totelDeltaTime_;
-		translation_.z = mainPosition.transform.translate.z + info.moveVector.z * totelDeltaTime_;
-		positionsNew[i] = CornerPosition(translation_, static_cast<Corner4>(i));
-	}
-	// 這裡不再做 y<=0 萠地判定，floorHit 由 CollisionManager 決定
-	if (info.moveVector.y > 0) {
-		return;
+		onGround_ = false;
 	}
 }
 
 void Player::MovePlayerByResult(const CollisionMapInfo& info) {
-	mainPosition.transform.translate.x += info.moveVector.x * totelDeltaTime_;
-	mainPosition.transform.translate.y += info.moveVector.y * totelDeltaTime_;
-	mainPosition.transform.translate.z += info.moveVector.z * totelDeltaTime_;
+	mainPosition.transform.translate += info.moveVector;
 }
 
 void Player::BitMapBugCheck() {
@@ -266,18 +275,18 @@ void Player::BitMapBugCheck() {
 
 	{
 		std::vector<int> bugChecksList = {
-			{ static_cast<int>(PlayerState::kDamage) | static_cast<int>(PlayerState::kNormal) },
+			{ static_cast<int>(PlayerState::kDamage) | static_cast<int>(PlayerState::kMove) },
 			{ static_cast<int>(PlayerState::kDamage) | static_cast<int>(PlayerState::kShoot) },
 			{ static_cast<int>(PlayerState::kDamage) | static_cast<int>(PlayerState::kNearAttack) },
 			{ static_cast<int>(PlayerState::kDamage) | static_cast<int>(PlayerState::kDush) },
 		};
 
 		for (auto& bugCheck : bugChecksList) {
-			if ((static_cast<int>(drillerState_) & bugCheck) == bugCheck) {
+			if ((static_cast<int>(playerState_) & bugCheck) == bugCheck) {
 				Logger::Log("Player:: PlayerState Bug Detected:");
 				// 状態をビットごとに出力
 				for (int i = 0; i < static_cast<int>(PlayerState::numStates); i++) {
-					if (static_cast<int>(drillerState_) & (1 << i)) {
+					if (static_cast<int>(playerState_) & (1 << i)) {
 						Logger::Log("%d,", (1 << i));
 					}
 				}
@@ -303,6 +312,73 @@ void Player::NearAttackUpdate() {
 		}
 	}
 	///<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< 未完成
+}
+
+void Player::UpdataState() {
+}
+
+void Player::StartDeath(const Vector3& attackerPos) {
+	isDead_ = true;
+	playerState_ = PlayerState::kDead;     // 射撃も自動で不可になる
+
+	/// 攻撃者の方を向く（kRight = +π/2 と同じ）
+	const float faceSign = (attackerPos.x >= mainPosition.transform.translate.x) ? 1.0f : -1.0f;
+	mainPosition.transform.rotate.y = faceSign * std::numbers::pi_v<float> *0.5f;
+	turnTimer_ = 0.0f;
+
+	/// 後ろへ吹っ飛ぶ
+	velocity_.x = -faceSign * kDeathKnockbackX;
+	velocity_.y = kDeathKnockbackY;
+	onGround_ = false;
+
+	deathPhase_ = DeathPhase::kFall;
+	deathTimer_.Init0(kDeathFallTime, system_->GetTimeManager());
+	SetFaceTexture(TH_playerTexture_damaged_);
+}
+
+void Player::DeathUpdate() {
+	/// 物理：重力だけ。着地したら滑りを止める
+	velocity_.y -= kGravityAcceleration * totelDeltaTime_;
+	velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
+	if (onGround_) velocity_.x *= std::exp(-kDeathAttenuation * totelDeltaTime_);
+
+	float& rotX = objectParts_[0].transform.rotate.x;
+
+	switch (deathPhase_) {
+	case DeathPhase::kFall:
+		/// T^r：だんだん速く倒れる
+		rotX = kDeathFallAngle * deathTimer_.easyOut(kDeathFallPower);
+		deathTimer_.ToMix();
+
+		/// 倒れきった ＆ 着地した瞬間 → バタン
+		if (deathTimer_.GetIsMax() && onGround_) {
+			rotX = kDeathFallAngle;
+			SetFaceTexture(TH_playerTexture_dead_);
+			//system_->SoundPlaySE(SH_LOSE_);
+			deathPhase_ = DeathPhase::kBounce;
+			deathTimer_.Init0(kDeathBounceTime, system_->GetTimeManager());
+		}
+		break;
+
+	case DeathPhase::kBounce:
+		/// 一回だけ少し起き上がって戻る
+		rotX = kDeathFallAngle * (1.0f - kDeathBounceRatio * std::sin(std::numbers::pi_v<float> *deathTimer_.linearity()));
+		if (deathTimer_.ToMix()) {
+			rotX = kDeathFallAngle;
+			deathPhase_ = DeathPhase::kLie;
+		}
+		break;
+
+	case DeathPhase::kLie:
+		break;
+	}
+}
+
+void Player::SetFaceTexture(int handle) {
+	auto& mc = objectParts_[0].materialConfig;
+	mc->useModelTexture = false;
+	mc->enableLighting = true;
+	mc->textureHandle = handle;
 }
 
 void Player::DamageAndEffectPart() {
