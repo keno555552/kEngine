@@ -36,6 +36,7 @@ public:
 	void Update();
 	void Emit(int count = 1, ParticlePrototypeOverride* prototype = nullptr); // 手動発射
 	void SwitchEmitter(bool isEmitting);
+	void SetPause(bool pause) { isPaused_ = pause; }
 
 	void Draw();
 

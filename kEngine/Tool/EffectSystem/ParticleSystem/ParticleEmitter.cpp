@@ -9,6 +9,7 @@ ParticleEmitter::ParticleEmitter(kEngine* system,
 	prototype_(std::make_shared<ParticlePrototype>(particlePrototype)),
 	maxParticles_(maxParticles),
 	particleIdIP_(particleIdIP) {
+	DeepCopyMaterials(*prototype_);          // ← 加
 	isObjectType_ = particlePrototype.renderType;
 	emitTimer_.Init0(particlePrototype.emitRate, system_->GetTimeManager());
 }
@@ -18,6 +19,7 @@ ParticleEmitter::~ParticleEmitter() {}
 void ParticleEmitter::SetPrototype(const ParticlePrototype& proto) {
 	/// 新しい Prototype を作るだけ。古い方は飛んでいる粒子が持っているので、その粒子が全部死ぬまで残る
 	prototype_ = std::make_shared<ParticlePrototype>(proto);
+	DeepCopyMaterials(*prototype_);
 	isObjectType_ = proto.renderType;
 	emitTimer_.Init0(proto.emitRate, system_->GetTimeManager());
 }
@@ -143,16 +145,8 @@ void ParticleEmitter::Emit(int count, ParticlePrototypeOverride* prototype) {
 			float randLife = usedPrototype.lifetimeRandomness * usedPrototype.lifetime;
 			p.life.maxTime_ = usedPrototype.lifetime + randomMaker_->randomFloat(-randLife, randLife);
 
-			// 外觀
-			int listSize = (usedPrototype.renderType == ParticleRenderType::Object) ?
-				(int)usedPrototype.objectList.size() :
-				(int)usedPrototype.spriteList.size();
-
-			if (listSize > 0) {
-				p.objectIndex = randomMaker_->randomInt(0, listSize - 1);
-			} else {
-				p.objectIndex = 0;
-			}
+			// もでるのランダムはしない
+			p.objectIndex = 0;
 
 			/// ============================== 初期状態設定 ============================== ///
 
@@ -162,7 +156,7 @@ void ParticleEmitter::Emit(int count, ParticlePrototypeOverride* prototype) {
 				randomMaker_->randomFloat(-usedPrototype.startVelocityRandom.y, usedPrototype.startVelocityRandom.y),
 				randomMaker_->randomFloat(-usedPrototype.startVelocityRandom.z, usedPrototype.startVelocityRandom.z)
 			};
-			p.velocity = rv + usedPrototype.startVelocity ;
+			p.velocity = rv + usedPrototype.startVelocity;
 
 			// 初期状態設定
 			// p.startTranslate = emitterPosition;
@@ -175,7 +169,7 @@ void ParticleEmitter::Emit(int count, ParticlePrototypeOverride* prototype) {
 				randomMaker_->randomFloat(-usedPrototype.startPositionRandom.y, usedPrototype.startPositionRandom.y),
 				randomMaker_->randomFloat(-usedPrototype.startPositionRandom.z, usedPrototype.startPositionRandom.z)
 			};
-			p.startTranslate =  rp + basePos;
+			p.startTranslate = rp + basePos;
 
 			Vector3 ranScale = {
 				randomMaker_->randomFloat(1.0f - usedPrototype.startScaleRandom.x, 1.0f + usedPrototype.startScaleRandom.x),
@@ -268,11 +262,11 @@ void ParticleEmitter::Draw() {
 	}
 }
 
-std::vector<ParticleInstance>& ParticleEmitter::GetEmittingData(){
+std::vector<ParticleInstance>& ParticleEmitter::GetEmittingData() {
 	return emittingData_;
 }
 
-std::vector<ParticleInstance>& ParticleEmitter::GetDexpiredData(){
+std::vector<ParticleInstance>& ParticleEmitter::GetDexpiredData() {
 	return dexpiredData_;
 }
 
@@ -284,7 +278,7 @@ ParticleInstance* ParticleEmitter::FindParticleById(int id) {
 }
 
 void ParticleEmitter::ClearEmittingData() {
-	if(!emittingData_.empty()) {
+	if (!emittingData_.empty()) {
 		emittingData_.clear();
 	}
 }

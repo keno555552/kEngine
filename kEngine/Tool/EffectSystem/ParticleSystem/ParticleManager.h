@@ -14,7 +14,7 @@ struct delayData {
 	bool activeNow{ false };
 	bool followParticle{ false };
 	int emittyCount{ 1 };
-	int emitterLinkIndex{ -1 };
+	std::string linkName{};
 	std::string sourceEmitterName{};
 	std::string targetEmitterName{};
 	int particleId{ -1 };
@@ -29,8 +29,7 @@ delayData InputLinkData(
 	const EmitterLink& linkData,
 	const ParticleInstance& targetParticle,
 	const ParticleEmitter& sourceEmitter,
-	TimeManager* timeManager,
-	int linkIndex);
+	TimeManager* timeManager);
 
 class kEngine;
 class ParticleManager
@@ -64,8 +63,14 @@ public:
 	void RemoveEmitter(int id);
 	/// 線を引退させる：もう撃たない＋粒子が全部消えたら自動で削除（飛んでいる粒子は最後まで残る）
 	void RetireEmitter(int emitterId);
+	/// 名前で Link を1本消す（その Link の待っている遅延発射は、発射時に見つからず自然に捨てられる）
+	void RemoveEmitterLink(const std::string& name);
+	/// 線ごとの一時停止（ほかの線は動き続ける）
+	void PauseEmitter(int emitterId, bool pause);
 
 	/// データセット
+	// 次の Emit() で撃つ位置を指定する（EmitterTiming::SourceEmit の時に使う）
+	void SetEmitterPosition(int emitterId, const Vector3& position);
 	void SetEmitterEnd(int emitterId, bool isEnd);
 	void SetEmitterDead(int emitterId);
 	void SetLinkLog(bool enable) { isLinkLogEnabled_ = enable; }

@@ -26,9 +26,7 @@ private:
 private:
 	int MH_bullet_{};
 
-	int clicleTextureHandle_{};
-	int effectTextureHandle_{};	
-	int whiteTextureHandle_{};
-	int particleHandle_{};
+	/// 当たった時のエフェクト（EffectManager のハンドル）
+	int effectHitRock_ = -1;
 };
 

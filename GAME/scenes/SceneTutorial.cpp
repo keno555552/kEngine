@@ -352,12 +352,12 @@ void SceneTutorial::Draw() {
 	const float kBlockDrawRadiusSq = kBlockDrawRadius * kBlockDrawRadius;
 	mapBlocks_.Draw(camPos, kBlockDrawRadius);
 
-	if (backPoint_) {
-		backPoint_->Draw();
-		if (backPoint_->GetIsBack()) {
-			backSign_->Draw();
-		}
-	}
+	//if (backPoint_) {
+	//	backPoint_->Draw();
+	//	if (backPoint_->GetIsBack()) {
+	//		backSign_->Draw();
+	//	}
+	//}
 
 	for (int i = 0; i < 3; i++) {
 		hpUI_[i]->Draw();

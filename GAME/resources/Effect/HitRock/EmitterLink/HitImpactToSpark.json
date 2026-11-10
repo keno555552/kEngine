@@ -1,0 +1,15 @@
+{
+    "delayTime": 0.0,
+    "emitCount": 1,
+    "emitterTiming": 0,
+    "followPosition": true,
+    "followRotation": false,
+    "followScale": false,
+    "kind": "EmitterLink",
+    "linkFollow": 1,
+    "linkMode": 0,
+    "name": "HitImpactToSpark",
+    "sourceEmitter": "HitImpact",
+    "targetEmitter": "HitSpark",
+    "version": 1
+}

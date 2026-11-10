@@ -718,44 +718,39 @@ void DrawDataCollector::CollectParticle(std::vector<ParticleInstance>& instance)
 		if (!inst.prototype) continue;
 		auto& objectList = inst.prototype->objectList;
 
-		/// パーティクルのObjectIndexがRenderDataのインデックス範囲内かチェック
-		if (inst.objectIndex < 0 || inst.objectIndex >= (int)objectList.size()) {
-			Logger::Log("[kEngine]DDC:ParticleInstance objectIndex is out of range! Data will not be input.");
-			Logger::Log("[kEngine]DDC:ParticleInstance ObjectIndex:%d", i);
-			continue;
-		}
+		/// objectList 全部で「1つの物」：全部同じ粒子の変換で描く
+		for (auto& targetObject : objectList) {
 
-		auto& targetObject = objectList[inst.objectIndex];
+			for (int p = 0; p < (int)targetObject.objectParts_.size(); ++p) {
+				if (!targetObject.objectParts_[p].materialConfig) continue;   // null 対策
 
-		for (int i = 0; i < targetObject.objectParts_.size(); ++i) {
-			/// ================ RenderData作成
-			/// RenderData作成
-			ParticleInstanceForDDC data;
+				ParticleInstanceForDDC data;
 
-			/// メッシュ設定
-			Model* modelData = ResourceManager::GetInstance()->modelGroupList_[targetObject.modelHandle_]->GetModel(i);
-			data.mesh = modelData;
+				/// メッシュ設定
+				Model* modelData = ResourceManager::GetInstance()->modelGroupList_[targetObject.modelHandle_]->GetModel(p);
+				data.mesh = modelData;
 
-			/// Material制作, ID獲得
-			MaterialConfig materialConfig = *targetObject.objectParts_[i].materialConfig;
-			materialConfig.textureColor = inst.nowColor;
-			materialConfig.MakeUVMatrix();
-			MaterialForGPU newData;
-			newData.inputMaterialConfig(materialConfig);
-			instancingListMaterialGPU_[instanceCounterMaterial_] = newData;
-			data.materialID = instanceCounterMaterial_++;
+				/// Material制作, ID獲得
+				MaterialConfig materialConfig = *targetObject.objectParts_[p].materialConfig;
+				materialConfig.textureColor = inst.nowColor;
+				materialConfig.MakeUVMatrix();
+				MaterialForGPU newData;
+				newData.inputMaterialConfig(materialConfig);
+				instancingListMaterialGPU_[instanceCounterMaterial_] = newData;
+				data.materialID = instanceCounterMaterial_++;
 
-			/// TextureHandle設定
-			data.textureHandle = materialConfig.textureHandle;
+				/// TextureHandle設定
+				data.textureHandle = materialConfig.textureHandle;
 
-			/// PSO制作
-			data.psoKey = PSODecision(materialConfig);
+				/// PSO制作
+				data.psoKey = PSODecision(materialConfig);
 
-			/// 変換行列設定
-			data.transMatrix = ObjectWVPAdjustmentPC(targetObject, *modelData->GetModelData().get(), i, inst);
+				/// 変換行列設定
+				data.transMatrix = ObjectWVPAdjustmentPC(targetObject, *modelData->GetModelData().get(), p, inst);
 
-			/// バケットに入れる
-			AddObjectToBucketPC(data);
+				/// バケットに入れる
+				AddObjectToBucketPC(data);
+			}
 		}
 	}
 }
@@ -800,7 +795,7 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustmentPC(ObjectData& object
 	}
 
 	//Matrix4x4 worldMatrix = localMatrix * partParentMatrix * followWorldMatrix;
-	Matrix4x4 worldMatrix = localMatrix * followWorldMatrix;
+	Matrix4x4 worldMatrix = followWorldMatrix * localMatrix;
 
 	Matrix4x4 finalWorld = worldMatrix;
 

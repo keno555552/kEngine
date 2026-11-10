@@ -52,19 +52,6 @@ private:
 	/// シーンの遷移の流れを管理するマップ
 	std::map<std::string, std::map<SceneOutcome, std::string>> sceneFlow_ =
 	{
-		// シーン転移の書き方
-		//{"TITLE",
-		//	{
-		//		{SceneOutcome::NEXT,"STAGE_01"},
-		//		{SceneOutcome::WIN,"WIN"},
-		//	}
-		//},
-		//{"SCENE1",
-		//	{
-		//		{SceneOutcome::NEXT,"STAGE_01"},
-		//		{SceneOutcome::WIN,"WIN"},
-		//	}
-		//},
 		{"ENGINE_TITLE",
 			{
 				{SceneOutcome::NEXT,"TITLE"},
@@ -72,10 +59,10 @@ private:
 		},
 		{"TITLE",
 			{
-					{SceneOutcome::NEXT,"STAGE_01"},
+					{SceneOutcome::NEXT,"STAGE_TUTORIAL"},
 			}
 		},
-		{"STAGE_01",
+		{"STAGE_TUTORIAL",
 			{
 					{SceneOutcome::WIN,"WIN"},
 					{SceneOutcome::LOSE,"LOSE"},
