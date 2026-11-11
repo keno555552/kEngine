@@ -12,6 +12,7 @@
 #include "tool\CollisionManager\CollisionManager.h"
 #include "GAME\resources\PostProcessPreset\PPP_GlitchScreen.h"
 #include "Tool\MapBulider\Data\MapBlockData.h"
+#include "Camera/GameCamera.h"
 #include <memory>
 #include <set>
 #include <numbers>
@@ -50,7 +51,7 @@ private:
 
 	/// ============== カメラ関連 ==============///
 	/// メーンカメラ
-	std::weak_ptr<Camera> camera_;
+	std::weak_ptr<GameCamera> gameCamera_;
 	/// デバックカメラ
 	std::weak_ptr<DebugCamera> debugCamera_;
 	/// 今使っているカメラ
@@ -151,5 +152,6 @@ private:
 	BackPoint* CreateBackPoint(const MapReader::SpawnInfo& s);
 	Sign* CreateSign(const MapReader::SpawnInfo& s);
 	void SpawnDefault(const MapReader::SpawnInfo& s);
+	void SetupGameCamera();
 };
 

@@ -337,6 +337,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="kEngine\GameObject\Camera\GameCamera.cpp" />
     <ClCompile Include="kEngine\Tool\ImGuiManager\ImGuiWidgets.cpp" />
     <ClCompile Include="kEngine\Tool\MapBulider\Adapter\InstructionCompiler.cpp" />
     <ClCompile Include="kEngine\Tool\MapBulider\Data\GeneratorVariable.cpp" />
@@ -593,6 +594,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="GAME\Object\SignBoard\SignBoard.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="kEngine\GameObject\Camera\GameCamera.h" />
     <ClInclude Include="kEngine\Data\Game\MapChip\CollisionResult.h" />
     <ClInclude Include="kEngine\Tool\ImGuiManager\ImGuiWidgets.h" />
     <ClInclude Include="kEngine\Utility\EnumNameFinder\EnumNameFinder.h" />

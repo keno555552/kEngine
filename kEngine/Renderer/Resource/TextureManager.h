@@ -71,6 +71,7 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE GetTextureCPUDescriptorHandle(int textureHandle);
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureGPUDescriptorHandle(int textureHandle);
 
+	bool HasAlpha(int textureHandle)const;
 
 	int GetTextureCounter() { return descriptorIndex_; }
 	void TextureCounterPlus(int index) { descriptorIndex_ += index; }

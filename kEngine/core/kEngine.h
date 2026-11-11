@@ -108,8 +108,10 @@ public:
 	//void SetPostProcessPass_Copy(RenderCommand& renderCommand);
 	//void ChangeRenderCommand(RenderCommand& renderCommand);
 
+	/// カメラ関連
 	std::weak_ptr <DebugCamera> CreateDebugCamera();
 	std::weak_ptr <Camera> CreateCamera();
+	std::weak_ptr <GameCamera> CreateGameCamera();
 	void DestroyCamera(std::weak_ptr<Camera> camera);
 	void SetCamera(std::weak_ptr<Camera> camera);
 	void ResetToDefaultCamera();

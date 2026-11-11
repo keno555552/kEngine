@@ -316,6 +316,10 @@ std::weak_ptr <Camera> kEngine::CreateCamera() {
 	return cameraManager->CreateCamera();
 }
 
+std::weak_ptr <GameCamera> kEngine::CreateGameCamera() {
+	return cameraManager->CreateGameCamera(this);
+}
+
 void kEngine::DestroyCamera(std::weak_ptr <Camera> camera) {
 	cameraManager->DestroyCamera(camera);
 }

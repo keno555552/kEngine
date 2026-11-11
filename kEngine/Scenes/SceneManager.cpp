@@ -60,57 +60,62 @@ void SceneManager::SceneChanger() {
 		/// ステージが変わるかどうかのフラグ
 		bool isSceneChange = false;
 
-		/// シーンの結果を取得
-		SceneOutcome outcome = sceneUsing_->GetOutcome();
-
-		/// 戻りがない場合シーン転移しないのでreturn
-		if (outcome == SceneOutcome::NONE)return;
-
-		/// まずはシーンがマップに存在するかを確認する
-		auto targetFlow = sceneFlow_.find(sceneUsingNameHandle_);
-		if (targetFlow == sceneFlow_.end()) {
-
-			/// もし見つからなかった場合、エラーログを出力する
-			Logger::Log("[kError] SM :: SceneChanger: Scene not found in sceneFlow_: " + sceneUsingNameHandle_);
-
-		} else {
-
-			/// もし見つかった場合、シーンの結果がマップに存在するかを確認する
-			auto targetScene = targetFlow->second.find(outcome);
-			if (targetScene == targetFlow->second.end()) {
-
-				/// 同じく見つからなかった場合
-				Logger::Log("[kError] SM :: SceneChanger: Scene not found in sceneFlow_: " + sceneUsingNameHandle_);
-
-			} else {
-
-				/// 見つかった場合、次のシーンに遷移するためのフラグを立てる
-				sceneUsingNameHandle_ = targetScene->second;
+		/// ① デフォルトメニュー（シーンの結果より優先。結果が NONE でも効く）
+		if (defaultMenu_) {
+			if (defaultMenu_->IsBack()) {
+				sceneUsingNameHandle_ = "TITLE";
 				isSceneChange = true;
+			} else if (defaultMenu_->IsRetry()) {
+				isSceneChange = true;          // 同じシーンを作り直す
 			}
 		}
 
-		/// デフォルトメニューによって流れを上書きする
-		if (defaultMenu_->IsBack()) {
-			isSceneChange = true;
-			sceneUsingNameHandle_ = "TITLE";
-		}
-		if (defaultMenu_->IsRetry()) {
-			isSceneChange = true;
-		}
+		/// ② シーンの結果
+		if (!isSceneChange) {
+			SceneOutcome outcome = sceneUsing_->GetOutcome();
 
-		/// EXITが押されたらゲーム終了
-		if (outcome == SceneOutcome::EXIT) {
-			kEngine::EndGame();
-			return;
-		}
+			/// 戻りがない場合シーン転移しない
+			if (outcome == SceneOutcome::NONE) return;
 
-		if (!isSceneChange)return;
+			/// EXITが押されたらゲーム終了
+			if (outcome == SceneOutcome::EXIT) {
+				kEngine::EndGame();
+				return;
+			}
+
+			auto targetFlow = sceneFlow_.find(sceneUsingNameHandle_);
+			if (targetFlow == sceneFlow_.end()) {
+				Logger::Log("[kError] SM :: SceneChanger: Scene not found in sceneFlow_: " + sceneUsingNameHandle_);
+			} else {
+				auto targetScene = targetFlow->second.find(outcome);
+				if (targetScene == targetFlow->second.end()) {
+					Logger::Log("[kError] SM :: SceneChanger: Outcome not found in sceneFlow_: " + sceneUsingNameHandle_);
+				} else {
+					sceneUsingNameHandle_ = targetScene->second;
+					isSceneChange = true;
+				}
+			}
+		}
+		if (!isSceneChange) return;
 
 		sceneUsing_.reset();
 	}
 
 	sceneUsing_ = sceneFactory_->CreateScene(sceneUsingNameHandle_);
+
+	/// ③ シーンごとのメニュー設定
+	if (defaultMenu_) {
+		const bool isTitle = (sceneUsingNameHandle_ == "TITLE");
+		defaultMenu_->SetCanOpen(!isTitle && sceneUsingNameHandle_ != "ENGINE_TITLE");   // タイトルは Esc で開かない
+		defaultMenu_->SetIsTitle(isTitle);
+
+		/// タイトルには「設定」から開けるようにメニューを渡す
+		if (isTitle) {
+			if (auto* title = dynamic_cast<SceneTitle*>(sceneUsing_.get())) {
+				title->SetMenu(defaultMenu_.get());
+			}
+		}
+	}
 }
 
 
@@ -119,14 +124,14 @@ void SceneManager::Update() {
 
 	SceneChanger();
 
-	//defaultMenu_->Update();
+	defaultMenu_->Update();
 
 	bool frozen = false;
 
 #ifdef _DEBUG
 	/// CheatEngine部分関連
 	if (cheatEngine_) {
-		if(cheatEngine_->IsSceneFrozen()) {
+		if (cheatEngine_->IsSceneFrozen()) {
 			frozen = true;
 		}
 	}
@@ -134,12 +139,11 @@ void SceneManager::Update() {
 
 	/// defaultMenu部分関連
 	if (defaultMenu_) {
-		if(defaultMenu_->GetIsPause()) {
+		if (defaultMenu_->GetIsPause()) {
 			frozen = true;
 		}
 	}
 
-	
 	/// =========== 実際更新する部分 ========== ///
 	if (!frozen) {
 		if (sceneUsing_ != nullptr) sceneUsing_->Update();
@@ -159,7 +163,7 @@ void SceneManager::Render() {
 	}
 #endif
 
-	//defaultMenu_->Draw();
+	defaultMenu_->Draw();
 
 #ifdef USE_IMGUI
 	//ImGuiPart();
@@ -192,13 +196,13 @@ void SceneManager::ImGuiPart() {
 		} else {
 			ImGui::Text("IsClicked: False");
 		}
-		
+
 		if (defaultMenu_->IsRetry()) {
 			ImGui::Text("IsRetry: True");
 		} else {
 			ImGui::Text("IsRetry: False");
 		}
-		
+
 		if (defaultMenu_->IsBack()) {
 			ImGui::Text("IsBack: True");
 		} else {

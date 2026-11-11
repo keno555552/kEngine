@@ -89,9 +89,15 @@ D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetTextureGPUDescriptorHandle(int te
 	return textureDatas[textureHandle].srvHandleGPU;
 }
 
+/// テクスチャに透明ピクセルがあるか（読み込み時に判定済み）
+bool TextureManager::HasAlpha(int textureHandle) const {
+	auto it = textureDatas.find(textureHandle);
+	return (it != textureDatas.end()) ? it->second.hasAlpha : false;
+}
+
 #pragma region CommonTexture
 
-int TextureManager::LoadCommonTexture(const std::string& filePath) {
+int TextureManager::LoadCommonTexture(const std::string & filePath) {
 	/// すでに同じテクスチャが読み込まれているか確認
 	int textureHandle = CheckSameCommonTextureLoaded(filePath);
 	if (textureHandle != -1)return textureHandle;
@@ -180,7 +186,7 @@ int TextureManager::LoadCommonTexture(const std::string& filePath) {
 	return textureHandle;
 }
 
-int TextureManager::CheckSameCommonTextureLoaded(const std::string& filePath) {
+int TextureManager::CheckSameCommonTextureLoaded(const std::string & filePath) {
 
 	auto checker = filePathToHandle_.find(filePath);
 	if (checker == filePathToHandle_.end())	return -1;
@@ -188,7 +194,7 @@ int TextureManager::CheckSameCommonTextureLoaded(const std::string& filePath) {
 
 }
 
-uint32_t TextureManager::MakeCommonTextureShaderResourceView(TextureData* textureData) {
+uint32_t TextureManager::MakeCommonTextureShaderResourceView(TextureData * textureData) {
 
 	/// SRV作成
 	uint32_t srvIndex = srvManager_->Allocate();
@@ -208,7 +214,7 @@ uint32_t TextureManager::MakeCommonTextureShaderResourceView(TextureData* textur
 
 #pragma region ModelTexture
 
-int TextureManager::LoadModelTexture(const std::string& filePath) {
+int TextureManager::LoadModelTexture(const std::string & filePath) {
 	/// すでに同じテクスチャが読み込まれているか確認
 	int textureHandle = CheckSameModelTextureLoaded(filePath);
 	if (textureHandle != -1)return textureHandle;
@@ -220,7 +226,7 @@ int TextureManager::LoadModelTexture(const std::string& filePath) {
 	DirectX::ScratchImage image{};
 	HRESULT hr;
 	std::wstring wFilePath = std::filesystem::path(filePath).wstring();
-	if(lastName == ".dds") {
+	if (lastName == ".dds") {
 		hr = DirectX::LoadFromDDSFile(wFilePath.c_str(),
 			DirectX::DDS_FLAGS_NONE, nullptr, image);
 	} else {
@@ -234,7 +240,7 @@ int TextureManager::LoadModelTexture(const std::string& filePath) {
 	DirectX::ScratchImage mipImages{};
 	if (DirectX::IsCompressed(image.GetMetadata().format)) {
 		mipImages = std::move(image);
-	}else{
+	} else {
 		hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), image.GetMetadata(),
 			DirectX::TEX_FILTER_SRGB, 0, mipImages);
 	}
@@ -269,7 +275,7 @@ int TextureManager::LoadModelTexture(const std::string& filePath) {
 	return textureHandle;
 }
 
-int TextureManager::CheckSameModelTextureLoaded(const std::string& filePath) {
+int TextureManager::CheckSameModelTextureLoaded(const std::string & filePath) {
 
 	auto checker = filePathToHandle_.find(filePath);
 	if (checker == filePathToHandle_.end())	return -1;
@@ -278,7 +284,7 @@ int TextureManager::CheckSameModelTextureLoaded(const std::string& filePath) {
 }
 
 
-uint32_t TextureManager::MakeModelTextureShaderResourceView(TextureData* textureData) {
+uint32_t TextureManager::MakeModelTextureShaderResourceView(TextureData * textureData) {
 
 	/// SRV作成
 	uint32_t srvIndex = srvManager_->Allocate();
@@ -294,7 +300,7 @@ uint32_t TextureManager::MakeModelTextureShaderResourceView(TextureData* texture
 
 #pragma endregion
 
-ID3D12Resource* TextureManager::CreateTextureResource(const DirectX::TexMetadata& metadata) {
+ID3D12Resource* TextureManager::CreateTextureResource(const DirectX::TexMetadata & metadata) {
 
 	///  textureの元、時関があればこれをセーブして以降使う<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/// 1. metadataを基にResourceの設定
@@ -329,7 +335,7 @@ ID3D12Resource* TextureManager::CreateTextureResource(const DirectX::TexMetadata
 }
 
 [[nodiscard]]//<---c++属性,戻り値が無視されることを防ぐ
-ID3D12Resource* TextureManager::UploadTextureData(const DirectX::ScratchImage& mipImages, TextureData* textureData) {
+ID3D12Resource* TextureManager::UploadTextureData(const DirectX::ScratchImage & mipImages, TextureData * textureData) {
 
 
 	DirectX::TexMetadata metadata = textureData->metadata;

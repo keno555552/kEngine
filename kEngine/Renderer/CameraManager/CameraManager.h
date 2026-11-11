@@ -2,6 +2,7 @@
 #include <vector>
 #include <memory>
 #include "Camera/DebugCamera.h"
+#include "Camera/GameCamera.h"
 
 class CameraManager {
 public:
@@ -16,9 +17,8 @@ public:
 	/// ================= カメラの管理 ================= ///
 	/// カメラの生成
 	std::weak_ptr<Camera> CreateCamera();
-
-	/// デバッグカメラの生成
 	std::weak_ptr<DebugCamera> CreateDebugCamera(kEngine* kEngine);
+	std::weak_ptr<GameCamera> CreateGameCamera(kEngine* kEngine);
 
 	/// カメラの破棄
     void DestroyCamera(std::weak_ptr<Camera> cam);
