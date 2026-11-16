@@ -1,0 +1,20 @@
+{
+    "context": {
+        "height": 16,
+        "seed": 1211145058,
+        "targetMap": "",
+        "width": 16
+    },
+    "functions": [
+        {
+            "enabled": true,
+            "file": "MapMakerData/Function/Main.json"
+        }
+    ],
+    "kind": "MapMaker",
+    "name": "new_MapMakerData_1",
+    "sharedVariables": [
+        "MapMakerData/Variables/Shared/Common.json"
+    ],
+    "variables": "MapMakerData/Variables/new_MapMakerData_1_variables.json"
+}

@@ -1,12 +1,29 @@
 {
+    "functions": [
+        "MapMakerData/Function/Main.json",
+        "MapMakerData/Function/SpawnStone.json",
+        "MapMakerData/Function/GrownGrass.json",
+        "MapMakerData/Function/Function2.json"
+    ],
     "kind": "MapEditorProject",
     "mapData": [
         "MapData/tutorial.json"
     ],
-    "mapMaker": [],
+    "mapMaker": [
+        "MapMakerData/MapMaker/new_MapMakerData_1.json",
+        "MapMakerData/MapMaker/new_MapMakerData_2.json"
+    ],
     "maps": [
         "Maps/tutorial.csv"
     ],
     "relativePaths": true,
+    "sharedVariables": [
+        "MapMakerData/Variables/Shared/Common.json"
+    ],
+    "variables": [
+        "MapMakerData/Variables/Shared/Common.json",
+        "MapMakerData/Variables/new_MapMakerData_1_variables.json",
+        "MapMakerData/Variables/new_MapMakerData_2_variables.json"
+    ],
     "version": 1
 }

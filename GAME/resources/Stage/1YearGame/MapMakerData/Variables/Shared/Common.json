@@ -1,0 +1,11 @@
+{
+    "kind": "MapVariables",
+    "name": "Common",
+    "shared": true,
+    "variables": [
+        {
+            "unitName": "Variables",
+            "units": []
+        }
+    ]
+}
