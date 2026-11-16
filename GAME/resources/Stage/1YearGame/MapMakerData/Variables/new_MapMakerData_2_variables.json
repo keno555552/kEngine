@@ -1,0 +1,32 @@
+{
+    "kind": "MapVariables",
+    "name": "new_MapMakerData_2_variables",
+    "shared": false,
+    "variables": [
+        {
+            "unitName": "Variables",
+            "units": [
+                {
+                    "name": "grassCode",
+                    "type": "Int",
+                    "value": 1
+                },
+                {
+                    "name": "stroneCode",
+                    "type": "Int",
+                    "value": 2
+                },
+                {
+                    "name": "groundLayerNumber",
+                    "type": "Int",
+                    "value": 1
+                },
+                {
+                    "name": "NewVariable1",
+                    "type": "Bool",
+                    "value": false
+                }
+            ]
+        }
+    ]
+}

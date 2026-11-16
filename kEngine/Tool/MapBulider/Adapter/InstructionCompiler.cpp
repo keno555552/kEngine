@@ -196,6 +196,7 @@ std::vector<Node*> ParseBlock(const std::vector<std::string>& sentences, int& in
 std::vector<Node*> ParseSentence(const std::string& sentence, GeneratorVariable* genVars) {
 	std::vector<Node*> out;
 	std::string s = Trim(sentence);
+	/// 文末の ; を外す（"a ++ ;" → "a ++"。i++ の判定は末尾を見るので）
 	if (!s.empty() && s.back() == ';') s = Trim(s.substr(0, s.size() - 1));
 
 	// if(cond){

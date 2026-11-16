@@ -7,13 +7,15 @@ void SceneManager::Initialize(kEngine* system) {
 	sceneFactory_ = std::make_unique<SceneFactory>(system);
 	//sceneUsingNameHandle_ = "ENGINE_TITLE";
 	//sceneUsingNameHandle_ = "TITLE";
-	//sceneUsingNameHandle_ = "STAGE_TUTORIAL";
+	sceneUsingNameHandle_ = "STAGE_TUTORIAL";
 	//sceneUsingNameHandle_ = "CGHK2";
 	//sceneUsingNameHandle_ = "UITest";
-	sceneUsingNameHandle_ = "MapMakingEditor";
+	//sceneUsingNameHandle_ = "MapMakingEditor";
 	//sceneUsingNameHandle_ = "ParticleEditor";
 	//sceneUsingNameHandle_ = "EffectEditor";
 	//sceneUsingNameHandle_ = "ANIMATIONEDITOR";
+	//sceneUsingNameHandle_ = "MAP_TEST";
+
 
 	/// チートエンジンの初期化
 #ifdef _DEBUG

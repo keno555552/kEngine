@@ -41,6 +41,10 @@ struct MapData {
 	int NextUnitId() const;
 	/// id を newId に。newId を使っている物（空白も含む）があれば入れ替え
 	void ChangeId(int oldId, int newId);
+	/// units を id の小さい順に並べる（同じ id は今の順番のまま）
+	/// trackIndex：選択中の index を渡すと、並べ替え後もその物件を指すように直す
+	/// 戻り値：順番が変わったら true
+	bool SortUnitsById(int* trackIndex = nullptr);
 };
 
 /// Mapの資料(csvから読み込みの資料)

@@ -1,0 +1,17 @@
+{
+    "kind": "MapVariables",
+    "name": "new_MapMakerData_1_variables",
+    "shared": false,
+    "variables": [
+        {
+            "unitName": "Variables",
+            "units": [
+                {
+                    "name": "abc",
+                    "type": "Bool",
+                    "value": true
+                }
+            ]
+        }
+    ]
+}

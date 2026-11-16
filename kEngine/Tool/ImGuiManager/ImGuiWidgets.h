@@ -26,7 +26,7 @@ namespace ImGuiWidgets {
 	/// [New][Double][Save][Load][Delete]（Delete は赤）
 	/// 1個の幅 = fullWidth / slots（今の /6.0f と同じ見た目）
 	/// 戻り値：このフレームで押されたボタン
-	ListButton ListToolbar(float fullWidth, float slots = 6.0f);
+	ListButton ListToolbar();
 
 	/// EnumInfo<E> が特殊化されている enum class なら何でも Combo にできる
 	template <typename E>
@@ -52,4 +52,8 @@ namespace ImGuiWidgets {
 	bool TransformEditor(Transform& t, bool showReset = true);
 	bool UVTransformEditor(MaterialConfig& m);
 	bool MaterialConfigEditor(MaterialConfig& m, bool showReset = true, bool showTexture = true);
+	/// 行に入らなければ自動で改行するボタン。first = その行の最初のボタン
+	bool WrapButton(const char* label, bool first = false);
+	/// 赤いボタン（Delete / Remove）。WrapButton と同じく入らなければ改行
+	bool RedButton(const char* label, bool first = false);
 }

@@ -1,0 +1,22 @@
+{
+    "context": {
+        "height": 16,
+        "seed": 102128407,
+        "targetMap": "",
+        "width": 16
+    },
+    "functions": [
+        {
+            "enabled": true,
+            "file": "MapMakerData/Function/SpawnStone.json"
+        },
+        {
+            "enabled": true,
+            "file": "MapMakerData/Function/GrownGrass.json"
+        }
+    ],
+    "kind": "MapMaker",
+    "name": "new_MapMakerData_2",
+    "sharedVariables": [],
+    "variables": "MapMakerData/Variables/new_MapMakerData_2_variables.json"
+}

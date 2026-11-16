@@ -14,7 +14,7 @@
 #include "Tool/EffectSystem/EffectEditor.h"
 #include "Scenes/SceneEngineTitle.h"
 #include "Tool/MapMakingEditor/MapMakingEditor.h"
-
+#include "GAME/scenes/SceneMapTest.h"
 
 SceneFactory::SceneFactory(kEngine* system)
     : system_(system)
@@ -32,6 +32,7 @@ SceneFactory::SceneFactory(kEngine* system)
 
     sceneRegistry_["EffectEditor"] = [this]() { return std::make_unique<EffectEditor>(system_); };
     sceneRegistry_["MapMakingEditor"] = [this]() { return std::make_unique<MapMakingEditor>(system_); };
+    sceneRegistry_["MAP_TEST"] = [this]() { return std::make_unique<SceneMapTest>(system_); };
 }
 
 std::unique_ptr<BaseScene> SceneFactory::CreateScene(const std::string& sceneName) {

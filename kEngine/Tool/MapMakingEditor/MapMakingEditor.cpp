@@ -201,7 +201,9 @@ void MapMakingEditor::ImGuiPart() {
 	ImGuiIO& io = ImGui::GetIO();
 	menuBarHeight_ = ImGui::GetFrameHeight();
 
-	//ImGui::ShowDemoWindow();
+	/// 左右の幅は画面の割合から（最小幅あり）
+	leftInspectorWidth_ = (std::max)(kMinPanelW, io.DisplaySize.x * leftWidthRatio_);
+	rightInspectorWidth_ = (std::max)(kMinPanelW, io.DisplaySize.x * rightWidthRatio_);
 
 	/// ============== メニューバー =============== ///
 	if (ImGui::BeginMainMenuBar()) {
@@ -251,6 +253,7 @@ void MapMakingEditor::ImGuiPart() {
 	ImGuiDoubleCheckWindow();
 	ImGuiMapNewWindow();
 	ImGuiNewVariablesWindow();
+	ImGuiPickVariablesWindow();
 	ImGuiEngineModelWindow();
 }
 
@@ -267,20 +270,22 @@ void MapMakingEditor::DeletePart() {
 		}
 		break;
 	case SelectModeForMME::MapMaker:
-		if (currentMakerIndex_ >= 0 && currentMakerIndex_ < static_cast<int>(mapMakerlist_.size())) {
-			mapMakerlist_.erase(mapMakerlist_.begin() + currentMakerIndex_);
+		if (CurrentMaker()) {
+			makerStore_.RemoveMaker(currentMakerIndex_);   // プロジェクトの一覧から外す（ファイルは消さない）
+			SelectMaker(-1);
 		} else {
 			debugText_ += "Error: Invalid currentMakerIndex_ for delete.\n";
 		}
 		break;
 	case SelectModeForMME::Variable:
 	{
-		// MapMaker index 安全檢查
-		if (currentMakerIndex_ < 0 || currentMakerIndex_ >= mapMakerlist_.size()) {
-			debugText_ += "Error: Invalid currentMakerIndex_ for variable delete.\n";
+		/// 今の函數の Variables
+		MapVariablesAsset* vs = CurrentVariables();
+		if (!vs) {
+			debugText_ += "Error: No variables set for delete.\n";
 			break;
 		}
-		auto& list = mapMakerlist_[currentMakerIndex_].GetGeneratorVariables().variableList;
+		auto& list = vs->vars.variableList;
 		// Variable index 安全檢查
 		if (currentVariableIndex_ < 0 || currentVariableIndex_ >= list.size()) {
 			debugText_ += "Error: Invalid currentVariableIndex_ for delete.\n";
@@ -288,6 +293,7 @@ void MapMakingEditor::DeletePart() {
 		}
 		// 執行刪除
 		list.erase(list.begin() + currentVariableIndex_);
+		vs->isSaved = false;
 		// 刪除後修正 index
 		if (currentVariableIndex_ >= list.size())
 			currentVariableIndex_ = (int)list.size() - 1;
@@ -330,9 +336,17 @@ void MapMakingEditor::DeletePart() {
 }
 
 void MapMakingEditor::MapInfoLoadJson() {
-	if (currentMakerIndex_ >= 0 && currentMakerIndex_ < mapMakerlist_.size()) {
-		auto& maker = mapMakerlist_[currentMakerIndex_];
-		currentMapInfo_.jsonData = maker.GetMapMakerJson();
+	/// Compile タブの表示：選んでいる函數（無ければ MapMaker）のファイルの中身
+	if (MapFunctionAsset* f = CurrentFunction()) {
+
+		currentMapInfo_.jsonData = makerStore_.FunctionToJson(*f).dump(2);
+
+	} else if (MapMakerAsset* m = CurrentMaker()) {
+
+		currentMapInfo_.jsonData = makerStore_.MakerToJson(*m).dump(2);
+
+	} else {
+		currentMapInfo_.jsonData.clear();
 	}
 }
 
@@ -506,11 +520,12 @@ void MapMakingEditor::ImGuiMapListWindow(ImVec2 size, ImVec2* outputSize, ImVec2
 	SetNextWindowPosLocal(ImVec2(0, size.y + pos.y));
 	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, colimenH));      // MapData List + Object List と同じ高さ
 
-	ImGui::Begin("Map List", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+	ImGui::Begin("Map List", nullptr, ImGuiWindowFlags_NoMove);
+	ReadLeftPanelDrag(0.0f, 0.0f);
 
 	const bool hasMap = currentMapIndex_ >= 0 && currentMapIndex_ < (int)mapList_.size();
 
-	switch (ImGuiWidgets::ListToolbar(leftInspectorWidth_ - 20)) {
+	switch (ImGuiWidgets::ListToolbar()) {
 	case ImGuiWidgets::ListButton::New: {
 		MapInfo m{};
 		m.tileMapData.name = "new_Map";
@@ -913,30 +928,27 @@ MapData MapMakingEditor::JsonToMapData(const nlohmann::json& j, const std::strin
 		d.cellSpacing = { j["cellSpacing"][0].get<float>(), j["cellSpacing"][1].get<float>() };
 	}
 	for (const auto& uj : j.value("units", nlohmann::json::array())) d.units.push_back(JsonToUnit(uj, baseDir));
+	d.SortUnitsById();
 	d.isSaved = true;
 	return d;
 }
 
 bool MapMakingEditor::SaveProject(const std::string& projectPath) {
 	namespace fs = std::filesystem;
-	if (currentMakerIndex_ >= 0 && currentMakerIndex_ < (int)mapMakerlist_.size()) {
-		mapMakerlist_[currentMakerIndex_].SetCodingText(codeingText_);   // 編集中の腳本を戻す
-	}
+	CommitCode();
 
 	const fs::path root = fs::path(projectPath).parent_path();
 	std::error_code ec;
 	fs::create_directories(root / "MapData", ec);
-	fs::create_directories(root / "MapMaker", ec);
 	if (ec) debugText_ += "Folder Error: " + ec.message() + "\n";
 
 	nlohmann::json project;
 	project["kind"] = "MapEditorProject";
 	project["version"] = kFileVersion;
 	project["mapData"] = nlohmann::json::array();
-	project["mapMaker"] = nlohmann::json::array();
 	project["relativePaths"] = useRelativePath_;
 
-	std::set<std::string> usedData, usedMaker;
+	std::set<std::string> usedData;
 
 	for (auto& d : mapDataList_) {
 		const std::string file = "MapData/" + MakeUniqueName(usedData, FileManager::ToSafeFileName(d.dataName)) + ".json";
@@ -962,18 +974,11 @@ bool MapMakingEditor::SaveProject(const std::string& projectPath) {
 		project["maps"].push_back(file);
 	}
 
-	for (auto& m : mapMakerlist_) {
-		m.SetMapName(MakeUniqueName(usedMaker, FileManager::ToSafeFileName(m.GetMapName())));  // 同名だと同じファイルに上書きされる
-		m.LoadScript(m.GetCodingText());
-		m.Compile();
-		m.BuildJson();
-		if (!m.ExportMapMakerToJson((root / "MapMaker").string())) {
-			debugText_ += "Save Error: " + m.GetDebugText() + "\n";
-			return false;
-		}
-		m.SetSaved(true);
-		project["mapMaker"].push_back("MapMaker/" + m.GetMapName() + ".json");
-	}
+	/// MapMaker / Function / Variables（3 つのフォルダに 1 ファイルずつ。一覧は project に入る）
+	makerStore_.SetRoot(root.string());
+	const bool makerOk = makerStore_.WriteToProject(project);
+	FlushStoreLog();
+	if (!makerOk) return false;
 
 	if (!WriteJsonFile(projectPath, project)) {
 		debugText_ += "Save Error: " + projectPath + "\n";
@@ -995,7 +1000,6 @@ bool MapMakingEditor::LoadProject(const std::string& projectPath) {
 	const fs::path root = fs::path(projectPath).parent_path();
 
 	std::vector<MapData> datas;          // 一旦別の入れ物に（途中で失敗しても今のデータを壊さない）
-	std::vector<MapMaker> makers;
 	std::vector<MapInfo> maps;
 
 	for (const auto& f : project.value("maps", nlohmann::json::array())) {
@@ -1016,18 +1020,18 @@ bool MapMakingEditor::LoadProject(const std::string& projectPath) {
 		if (ReadJsonFile((root / file).string(), j)) datas.push_back(JsonToMapData(j, (root / "MapData").string()));
 		else debugText_ += "Load Warning: cannot read " + file + "\n";
 	}
-	for (const auto& f : project.value("mapMaker", nlohmann::json::array())) {
-		const std::string file = f.get<std::string>();
-		MapMaker maker;
-		if (maker.ImportMapMakerFromJson((root / file).string())) makers.push_back(maker);
-		if (!maker.GetDebugText().empty()) debugText_ += maker.GetDebugText() + "\n";
-	}
+	/// MapMaker → Function → Variables（ここも一旦別の入れ物に）
+	MapMakerStore store;
+	store.SetRoot(root.string());
+	store.ReadFromProject(project);
+	for (const auto& l : store.Log()) debugText_ += l + "\n";
+	store.Log().clear();
 
 	mapDataList_ = std::move(datas);
-	mapMakerlist_ = std::move(makers);
-	mapList_ = std::move(maps);									 // mapDataList_ / mapMakerlist_ と一緒に入れ替え
+	makerStore_ = std::move(store);
+	mapList_ = std::move(maps);									 // mapDataList_ / makerStore_ と一緒に入れ替え
 	ResetEditingState();
-	if (!mapMakerlist_.empty()) SelectMaker(0);
+	if (const auto makers = makerStore_.MakerHandles(); !makers.empty()) SelectMaker(makers.front());
 	useRelativePath_ = project.value("relativePaths", true);     // 古いプロジェクトは相対
 
 	projectFilePath_ = projectPath;
@@ -1048,6 +1052,7 @@ void MapMakingEditor::ResetEditingState() {
 	currentMapDataIndex_ = -1;
 	currentUnitIndex_ = -1;
 	currentMakerIndex_ = -1;
+	currentFunctionSlot_ = -1;
 	currentVariableIndex_ = -1;
 	codeingText_.clear();
 	previewObject_.reset();
@@ -1057,7 +1062,8 @@ void MapMakingEditor::ResetEditingState() {
 void MapMakingEditor::NewProject() {
 	mapList_.clear();
 	mapDataList_.clear();
-	mapMakerlist_.clear();
+	makerStore_.Clear();
+	makerStore_.SetRoot("");           // まだ保存先が無い
 	ResetEditingState();
 
 	projectFilePath_.clear();          // まだどこにも保存していない → 次の Save は Save As
@@ -1066,9 +1072,9 @@ void MapMakingEditor::NewProject() {
 }
 
 bool MapMakingEditor::HasUnsavedChanges() const {
-	for (const auto& m : mapList_)      if (!m.isSaved)     return true;
-	for (const auto& d : mapDataList_)  if (!d.isSaved)     return true;
-	for (const auto& k : mapMakerlist_) if (!k.isSaved())   return true;
+	for (const auto& m : mapList_)      if (!m.isSaved)					    return true;
+	for (const auto& d : mapDataList_)  if (!d.isSaved)					    return true;
+	if (makerStore_.HasUnsaved())       return true;
 	return false;
 }
 
@@ -1203,26 +1209,24 @@ void MapMakingEditor::ImGuiLeftMenuBar() {
 	if (!IsGeneratorMode() && selectModeForLeftData_ == SelectModeForLeftData::MapData) {
 		// 目前選擇的 MapMaker 名稱
 		const char* preview = "None";
-		if (currentMakerIndex_ >= 0 && currentMakerIndex_ < mapMakerlist_.size())
-			preview = mapMakerlist_[currentMakerIndex_].GetMapName().c_str();
+		if (MapMakerAsset* cm = CurrentMaker()) {
+			preview = cm->name.c_str();
+		}
 
 		if (ImGui::BeginCombo("##MakerSelector", preview)) {
-			for (int i = 0; i < mapMakerlist_.size(); i++) {
-				auto& maker = mapMakerlist_[i];
-				bool selected = (currentMakerIndex_ == i);
-
-				if (ImGui::Selectable(maker.GetMapName().c_str(), selected)) {
-					SelectMaker(i);
+			for (int h : makerStore_.MakerHandles()) {
+				ImGui::PushID(h);
+				if (ImGui::Selectable(makerStore_.GetMaker(h)->name.c_str(), currentMakerIndex_ == h)) {
+					SelectMaker(h);
 				}
+				ImGui::PopID();
 			}
 			ImGui::EndCombo();
 		}
-	}
-
-	/// ------------------------------------------------------------
-	/// 如果 Tag 選的是 MapMaker → 這裡顯示 MapData 的 list
-	/// ------------------------------------------------------------
-	else {
+	} else {
+		/// ------------------------------------------------------------
+		/// 如果 Tag 選的是 MapMaker → 這裡顯示 MapData 的 list
+		/// ------------------------------------------------------------
 		const char* preview = "None";
 		if (currentMapDataIndex_ >= 0 && currentMapDataIndex_ < mapDataList_.size())
 			preview = mapDataList_[currentMapDataIndex_].dataName.c_str();
@@ -1339,29 +1343,20 @@ void MapMakingEditor::ImGuiMapDataWindow(ImVec2 size, ImVec2* outputSize, ImVec2
 	ImVec2 wSize;
 	ImVec2 wPos;
 
-	float oneColimenH = colimenH / 3;
+	const float upperH = colimenH * leftUpperRatio_;
+	const float lowerH = colimenH - upperH;
 
 	float titleH = ImGui::GetFrameHeight();
 
 	SetNextWindowPosLocal(ImVec2(0, windowY));
-	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, oneColimenH));
+	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, upperH));
 
 	isMapMakerWindowOpen_ = ImGui::Begin("MapData List",
 		nullptr,
-		ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_NoResize);
+		ImGuiWindowFlags_NoMove);
+	ReadLeftPanelDrag(upperH, colimenH, &leftUpperRatio_);
 
-
-	float full2W = leftInspectorWidth_ - 20;
-	float buttonSize2 = full2W / 6.0f;
-	float add2W = buttonSize2;
-	float dou2W = buttonSize2;
-	float sav2W = buttonSize2;
-	float load2W = buttonSize2;
-	float del2W = buttonSize2;
-
-
-	if (ImGui::Button("New", ImVec2(add2W, 20))) {
+	if (ImGuiWidgets::WrapButton("New", true)) {
 		MapData newData{};
 		newData.dataName = "new_MapData";
 		if (newMapDataCounter_ != 0) newData.dataName += "_" + std::to_string(newMapDataCounter_);
@@ -1371,10 +1366,8 @@ void MapMakingEditor::ImGuiMapDataWindow(ImVec2 size, ImVec2* outputSize, ImVec2
 		currentUnitIndex_ = -1;
 	}
 
-	ImGui::SameLine();
-
 	/// Double
-	if (ImGui::Button("Double", ImVec2(dou2W, 20))) {
+	if (ImGuiWidgets::WrapButton("Double")) {
 		if (isMapDataSelected_) {
 			MapData copy = mapDataList_[currentMapDataIndex_];
 			copy.dataName += "_copy";
@@ -1385,10 +1378,8 @@ void MapMakingEditor::ImGuiMapDataWindow(ImVec2 size, ImVec2* outputSize, ImVec2
 		}
 	}
 
-	ImGui::SameLine();
-
 	/// Save
-	if (ImGui::Button("Save", ImVec2(sav2W, 20))) {
+	if (ImGuiWidgets::WrapButton("Save")) {
 		if (isMapDataSelected_) {
 			MapData& d = mapDataList_[currentMapDataIndex_];
 			const std::string path = FileManager::SaveFileDialog(kJsonFilter, "json",
@@ -1403,10 +1394,8 @@ void MapMakingEditor::ImGuiMapDataWindow(ImVec2 size, ImVec2* outputSize, ImVec2
 		}
 	}
 
-	ImGui::SameLine();
-
 	/// Load
-	if (ImGui::Button("Load", ImVec2(load2W, 20))) {
+	if (ImGuiWidgets::WrapButton("Load")) {
 		const std::string path = FileManager::OpenFileDialog(kJsonFilter, "Load MapData");
 		nlohmann::json j;
 		if (!path.empty()) {
@@ -1422,12 +1411,10 @@ void MapMakingEditor::ImGuiMapDataWindow(ImVec2 size, ImVec2* outputSize, ImVec2
 		}
 	}
 
-	ImGui::SameLine();
-
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.60f, 0.20f, 0.20f, 1.0f));
 	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.80f, 0.30f, 0.30f, 1.0f));
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.40f, 0.10f, 0.10f, 1.0f));
-	if (ImGui::Button("Delete", ImVec2(del2W, 20))) {
+	if (ImGuiWidgets::WrapButton("Delete")) {
 		doubleCheck_ = true;
 		selectMode_ = SelectModeForMME::MapData;
 	}
@@ -1465,27 +1452,18 @@ void MapMakingEditor::ImGuiMapDataWindow(ImVec2 size, ImVec2* outputSize, ImVec2
 	float window2Y = wPos.y + wSize.y;
 
 	SetNextWindowPosLocal(ImVec2(0, window2Y));
-	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, oneColimenH * 2));
+	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, lowerH));
 
 	isVariablesWindowOpen_ = ImGui::Begin("Object List",
 		nullptr,
-		ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_NoResize);
-
-	float full3W = leftInspectorWidth_ - 20;   // 你原本的按鈕寬度邏輯
-	float buttonSize3 = full3W / 6.0f;
-	float add3W = buttonSize3;
-	float dou3W = buttonSize3;
-	float sav3W = buttonSize3;
-	float load3W = buttonSize3;
-	float del3W = buttonSize3;
-
+		ImGuiWindowFlags_NoMove);
+	ReadLeftPanelDrag(0.0f, 0.0f);
 
 	MapData* data = isMapDataSelected_ ? &mapDataList_[currentMapDataIndex_] : nullptr;
 	const bool hasUnit = data && currentUnitIndex_ >= 0 && currentUnitIndex_ < (int)data->units.size();
 
 	/// New
-	if (ImGui::Button("New", ImVec2(add3W, 20))) {
+	if (ImGuiWidgets::WrapButton("New", true)) {
 		if (data) {
 			MapUnit unit{};
 			unit.id = data->NextUnitId();
@@ -1493,30 +1471,28 @@ void MapMakingEditor::ImGuiMapDataWindow(ImVec2 size, ImVec2* outputSize, ImVec2
 			data->units.push_back(unit);
 			currentUnitIndex_ = (int)data->units.size() - 1;
 			data->isSaved = false;
+			data->SortUnitsById(&currentUnitIndex_);
 		} else {
 			debugText_ += "Error: No MapData selected for adding unit.\n";
 		}
 	}
 
-	ImGui::SameLine();
-
 	/// Double
-	if (ImGui::Button("Double", ImVec2(dou3W, 20))) {
+	if (ImGuiWidgets::WrapButton("Double")) {
 		if (hasUnit) {
 			MapUnit copy = data->units[currentUnitIndex_];
 			copy.id = data->NextUnitId();        // 代號は重複させない
 			copy.name += "_copy";
 			data->units.push_back(copy);
 			data->isSaved = false;
+			data->SortUnitsById(&currentUnitIndex_);
 		} else {
 			debugText_ += "Error: No unit selected for doubling.\n";
 		}
 	}
 
-	ImGui::SameLine();
-
 	/// Save
-	if (ImGui::Button("Save", ImVec2(sav3W, 20))) {
+	if (ImGuiWidgets::WrapButton("Save")) {
 		if (hasUnit) {
 			const MapUnit& u = data->units[currentUnitIndex_];
 			const std::string path = FileManager::SaveFileDialog(kJsonFilter, "json",
@@ -1532,10 +1508,8 @@ void MapMakingEditor::ImGuiMapDataWindow(ImVec2 size, ImVec2* outputSize, ImVec2
 		}
 	}
 
-	ImGui::SameLine();
-
 	/// Load（選択中の MapData に追加、代號は振り直す）
-	if (ImGui::Button("Load", ImVec2(load3W, 20))) {
+	if (ImGuiWidgets::WrapButton("Load")) {
 		if (data) {
 			const std::string path = FileManager::OpenFileDialog(kJsonFilter, "Load Object");
 			nlohmann::json j;
@@ -1547,6 +1521,7 @@ void MapMakingEditor::ImGuiMapDataWindow(ImVec2 size, ImVec2* outputSize, ImVec2
 					data->units.push_back(unit);
 					currentUnitIndex_ = (int)data->units.size() - 1;
 					data->isSaved = false;
+					data->SortUnitsById(&currentUnitIndex_);
 				} else {
 					debugText_ += "Load Error: not an Object file: " + path + "\n";
 				}
@@ -1555,12 +1530,15 @@ void MapMakingEditor::ImGuiMapDataWindow(ImVec2 size, ImVec2* outputSize, ImVec2
 			debugText_ += "Error: No MapData selected for loading object.\n";
 		}
 	}
-	ImGui::SameLine();
+
+	if (ImGuiWidgets::WrapButton("Sort")) {
+		if (data && data->SortUnitsById(&currentUnitIndex_)) data->isSaved = false;
+	}
 
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.60f, 0.20f, 0.20f, 1.0f));
 	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.80f, 0.30f, 0.30f, 1.0f));
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.40f, 0.10f, 0.10f, 1.0f));
-	if (ImGui::Button("Delete", ImVec2(del3W, 20))) {
+	if (ImGuiWidgets::WrapButton("Delete")) {
 		if (currentUnitIndex_ == kBlankUnitIndex) {
 			debugText_ += "Blank cannot be deleted.\n";
 		} else {
@@ -1609,368 +1587,468 @@ void MapMakingEditor::ImGuiMapMakerWindow(ImVec2 size, ImVec2* outputSize, ImVec
 	ImVec2 wSize;
 	ImVec2 wPos;
 
-	float oneColimenH = colimenH / 3;
+	const float upperH = colimenH * leftUpperRatio_;                        // MapMaker List
+	const float midH = colimenH * leftMidRatio_;                          // Function List
+	const float lowerH = (std::max)(60.0f, colimenH - upperH - midH);        // Variables List
 
-	float titleH = ImGui::GetFrameHeight();
-
+	// =========================
+	// MapMaker List（函數の並べ方 = 地図の作り方）
+	// =========================
 	SetNextWindowPosLocal(ImVec2(0, windowY));
-	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, oneColimenH));
+	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, upperH));
 
 	isMapMakerWindowOpen_ = ImGui::Begin("MapMaker List",
 		nullptr,
-		ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_NoResize);
+		ImGuiWindowFlags_NoMove);
+	ReadLeftPanelDrag(upperH, colimenH, &leftUpperRatio_);
 
-
-	float fullW = leftInspectorWidth_ - 20;
-	float buttonSize = fullW / 6.0f;
-	float addW = buttonSize;
-	float douW = buttonSize;
-	float savW = buttonSize;
-	float loadW = buttonSize;
-	float delW = buttonSize;
-
-
-	if (ImGui::Button("New", ImVec2(addW, 20))) {
-		MapMaker newMapMakerData;
+	if (ImGuiWidgets::WrapButton("New", true)) {
 		std::string newName = "new_MapMakerData";
 		if (newMapMakerDataCounter_ != 0) newName += "_" + std::to_string(newMapMakerDataCounter_);
-		newMapMakerData.SetMapName(newName);
 		newMapMakerDataCounter_++;
-		mapMakerlist_.push_back(newMapMakerData);
+		SelectMaker(makerStore_.CreateMaker(newName));
+		selectMode_ = SelectModeForMME::MapMaker;
 	}
 
-	ImGui::SameLine();
-
-	/// Double
-	if (ImGui::Button("Double", ImVec2(douW, 20))) {
-		if (isMakerSelected_) {
-			MapMaker newMapMakerData = mapMakerlist_[currentMakerIndex_];
-			newMapMakerData.SetMapName(newMapMakerData.GetMapName() + "_copy");
-			mapMakerlist_.push_back(newMapMakerData);
-		} else {
-			debugText_ += "Error: No generator selected for doubling.\n";
-		}
+	/// Double：MapMaker のコピー（函數は同じものを共有したまま）
+	if (ImGuiWidgets::WrapButton("Double")) {
+		if (CurrentMaker()) SelectMaker(makerStore_.DuplicateMaker(currentMakerIndex_));
+		else debugText_ += "Error: No MapMaker selected for doubling.\n";
 	}
 
-	ImGui::SameLine();
-
-	/// Save
-	if (ImGui::Button("Save", ImVec2(savW, 20))) {
-		if (isMakerSelected_) {
-			auto& maker = mapMakerlist_[currentMakerIndex_];
-			const std::string path = FileManager::SaveFileDialog(kJsonFilter, "json",
-				FileManager::ToSafeFileName(maker.GetMapName()) + ".json", "Save MapMaker");
-
-			if (!path.empty()) {
-				const std::filesystem::path p(path);
-				maker.SetMapName(p.stem().string());     // ExportMapMakerToJson は「フォルダ/mapName_.json」で書くので合わせる
-
-				maker.SetCodingText(codeingText_);
-				maker.LoadScript(codeingText_);
-				maker.Compile();
-				maker.BuildJson();
-
-				if (maker.ExportMapMakerToJson(p.parent_path().string())) {
-					maker.SetSaved(true);
-					debugText_ += "Save: " + path + "\n";
-				} else {
-					debugText_ += "Save Error: Cannot write " + path + "\n";
-					debugText_ += maker.GetDebugText();
-				}
-			}
-		} else {
-			debugText_ += "Error: No generator selected for save.\n";
-		}
+	/// Save：プロジェクトごと（MapMaker / Function / Variables はつながっているので一緒に保存）
+	if (ImGuiWidgets::WrapButton("Save")) {
+		CommitCode();
+		if (projectFilePath_.empty()) SaveProjectAs();
+		else SaveProject(projectFilePath_);
 	}
-
-	ImGui::SameLine();
 
 	/// Load
-	if (ImGui::Button("Load", ImVec2(loadW, 20))) {
+	if (ImGuiWidgets::WrapButton("Load")) {
 		const std::string path = FileManager::OpenFileDialog(kJsonFilter, "Load MapMaker");
 		if (!path.empty()) {
-			MapMaker maker;
-			if (maker.ImportMapMakerFromJson(path)) {
-				if (currentMakerIndex_ >= 0 && currentMakerIndex_ < mapMakerlist_.size()) {
-					mapMakerlist_[currentMakerIndex_].SetCodingText(codeingText_);   // 編集中の腳本を失わないように
+			const std::string path = FileManager::OpenFileDialog(kJsonFilter, "Load MapMaker");
+			const std::string rel = path.empty() ? std::string() : ToProjectRelative(path);
+			if (!rel.empty()) {
+				const int h = makerStore_.LoadMaker(rel);
+				FlushStoreLog();
+				if (h >= 0) {
+					SelectMaker(h);
+					selectMode_ = SelectModeForMME::MapMaker;
 				}
-				mapMakerlist_.push_back(maker);
-				currentMakerIndex_ = (int)mapMakerlist_.size() - 1;
-				selectMode_ = SelectModeForMME::MapMaker;
-				codeingText_ = mapMakerlist_.back().GetCodingText();
-				MapInfoLoadJson();
 			}
-			if (!maker.GetDebugText().empty()) debugText_ += maker.GetDebugText() + "\n";
 		}
 	}
 
-	ImGui::SameLine();
-
-	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.60f, 0.20f, 0.20f, 1.0f));
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.80f, 0.30f, 0.30f, 1.0f));
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.40f, 0.10f, 0.10f, 1.0f));
-
-	if (ImGui::Button("Delete", ImVec2(delW, 20))) {
+	if (ImGuiWidgets::RedButton("Delete")) {
 		doubleCheck_ = true;
 		selectMode_ = SelectModeForMME::MapMaker;
 	}
 
-	ImGui::PopStyleColor(3);
-
 	ImGui::BeginChild("GeneratorList", ImVec2(0, ImGui::GetContentRegionAvail().y), true);
-	for (int i = 0; i < mapMakerlist_.size(); i++) {
-		auto& Data = mapMakerlist_[i]; // Assuming each MapMakerData has at least one prototype
-		std::string label = Data.GetMapName() + (Data.isSaved() ? "" : " *");
-
-		if (ImGui::Selectable(label.c_str(), currentMakerIndex_ == i)) {
-			SelectMaker(i);
+	for (int h : makerStore_.MakerHandles()) {
+		const MapMakerAsset* mk = makerStore_.GetMaker(h);
+		ImGui::PushID(h);
+		const std::string label = mk->name + (mk->isSaved ? "" : " *");
+		if (ImGui::Selectable(label.c_str(), currentMakerIndex_ == h)) {
+			SelectMaker(h);
 			selectMode_ = SelectModeForMME::MapMaker;
 		}
+		ImGui::PopID();
 	}
 	ImGui::EndChild();
 
-	if (currentMakerIndex_ >= 0 && currentMakerIndex_ < mapMakerlist_.size()) isMakerSelected_ = true;
-	else isMakerSelected_ = false;
+	isMakerSelected_ = (CurrentMaker() != nullptr);
 	isMapDataSelected_ = false;
 
 	wPos = GetWindowPosLocal();
 	wSize = ImGui::GetWindowSize();
-
 	ImGui::End();
 
-
 	// =========================
-	// Variable List
+	// Function List（この MapMaker の実行順。Function は他の MapMaker と共有できる）
 	// =========================
 
-	float window2Y = wPos.y + wSize.y;
+	SetNextWindowPosLocal(ImVec2(0, wPos.y + wSize.y));
+	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, midH));
+	ImGui::Begin("Function List", nullptr, ImGuiWindowFlags_NoMove);
+	ReadLeftPanelDrag(midH, colimenH, &leftMidRatio_);
 
-	SetNextWindowPosLocal(ImVec2(0, window2Y));
-	if (isMapMakerWindowOpen_) {
-		ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, oneColimenH * 2));
+	if (MapMakerAsset* maker = CurrentMaker()) {
+		auto& slots = maker->functions;
+		const int cur = currentFunctionSlot_;
+		const bool hasCur = cur >= 0 && cur < (int)slots.size();
+		const int insertAt = hasCur ? cur + 1 : (int)slots.size();   // 選んでいる所のすぐ下（無ければ最後）
+
+		/// New：新しい Function ファイル（今の函數と同じ Variables を使う）
+		if (ImGuiWidgets::WrapButton("New", true)) {
+			const int fh = makerStore_.CreateFunction("Function" + std::to_string(slots.size()));
+			slots.insert(slots.begin() + insertAt, MapMakerAsset::Entry{ fh, true });
+			maker->isSaved = false;
+			SelectFunctionSlot(insertAt);
+
+		}
+
+		/// Add：既にある Function を入れる（共有。直すと使っている全部の MapMaker に効く）
+		if (ImGuiWidgets::WrapButton("Add")) ImGui::OpenPopup("AddFunction");
+		if (ImGui::BeginPopup("AddFunction")) {
+			for (int fh : makerStore_.FunctionHandles()) {
+				const MapFunctionAsset* f = makerStore_.GetFunction(fh);
+				ImGui::PushID(fh);
+				if (ImGui::Selectable((f->name + "  (" + f->path + ")").c_str())) {
+					slots.insert(slots.begin() + insertAt, MapMakerAsset::Entry{ fh, true });
+					maker->isSaved = false;
+					SelectFunctionSlot(insertAt);
+
+				}
+				ImGui::PopID();
+
+			}
+			ImGui::EndPopup();
+		}
+
+		/// Load：Function ファイルを読んで、選んでいる所の下に入れる（読み込み済みなら同じもの = 共有）
+		if (ImGuiWidgets::WrapButton("Load")) {
+			const std::string path = FileManager::OpenFileDialog(kJsonFilter, "Load Function");
+			const std::string rel = path.empty() ? std::string() : ToProjectRelative(path);
+			if (!rel.empty()) {
+				const int fh = makerStore_.LoadFunction(rel);   // 使っている Variables も一緒に読む
+				FlushStoreLog();
+				if (fh >= 0) {
+					slots.insert(slots.begin() + insertAt, MapMakerAsset::Entry{ fh, true });
+					maker->isSaved = false;
+					SelectFunctionSlot(insertAt);
+				}
+			}
+		}
+
+		/// Double：コピーを新しいファイルとして作る（元とは別物になる）
+		if (ImGuiWidgets::WrapButton("Double") && hasCur) {
+			CommitCode();
+			const int fh = makerStore_.DuplicateFunction(slots[cur].functionHandle);
+			slots.insert(slots.begin() + cur + 1, MapMakerAsset::Entry{ fh, true });
+			maker->isSaved = false;
+			SelectFunctionSlot(cur + 1);
+
+		}
+
+		/// Up / Down：実行順を入れ替え（選択も付いていく）
+		if (ImGuiWidgets::WrapButton("Up") && hasCur && cur > 0) {
+			CommitCode();
+			std::swap(slots[cur], slots[cur - 1]);
+			currentFunctionSlot_ = cur - 1;
+			maker->isSaved = false;
+
+		}
+		if (ImGuiWidgets::WrapButton("Down") && hasCur && cur + 1 < (int)slots.size()) {
+			CommitCode();
+			std::swap(slots[cur], slots[cur + 1]);
+			currentFunctionSlot_ = cur + 1;
+			maker->isSaved = false;
+
+		}
+
+		/// Remove：この MapMaker から外すだけ（Function ファイルは残る。他の MapMaker は使い続ける）
+		if (ImGuiWidgets::RedButton("Remove") && hasCur) {
+			CommitCode();
+			slots.erase(slots.begin() + cur);
+			maker->isSaved = false;
+			currentFunctionSlot_ = -1;                       // 外した函數に腳本を書き戻さないように
+			SelectFunctionSlot((std::min)(cur, (int)slots.size() - 1));
+
+		}
+
+		ImGui::Separator();
+
+		for (int i = 0; i < (int)slots.size(); ++i) {
+			const MapFunctionAsset* f = makerStore_.GetFunction(slots[i].functionHandle);
+			if (!f) continue;
+			ImGui::PushID(i);
+			/// ON/OFF + 実行順の番号 + 名前（OFF は灰色）
+			if (ImGui::Checkbox("##on", &slots[i].enabled)) maker->isSaved = false;
+			ImGui::SameLine();
+			if (!slots[i].enabled) ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+			/// 2 個以上の MapMaker で使われている = 共有中（直すと全部に効く）
+			const int users = (int)makerStore_.MakersUsingFunction(slots[i].functionHandle).size();
+			std::string label = std::to_string(i + 1) + ". " + f->name + (f->isSaved ? "" : " *");
+			if (users > 1) label += "  [shared x" + std::to_string(users) + "]";
+			if (ImGui::Selectable(label.c_str(), i == currentFunctionSlot_)) SelectFunctionSlot(i);
+			if (!slots[i].enabled) ImGui::PopStyleColor();
+			ImGui::PopID();
+		}
 	} else {
-		ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, oneColimenH * 3));
+		ImGui::TextDisabled("No MapMaker selected.");
 	}
+
+	wPos = GetWindowPosLocal();
+	wSize = ImGui::GetWindowSize();
+	ImGui::End();
+
+	// =========================
+	// Variables List（この MapMaker の設定。全部の函數が同じものを読む）
+	// =========================
+
+	SetNextWindowPosLocal(ImVec2(0, wPos.y + wSize.y));
+	ImGui::SetNextWindowSize(ImVec2(leftInspectorWidth_, isMapMakerWindowOpen_ ? lowerH : colimenH));
 
 	isVariablesWindowOpen_ = ImGui::Begin("Variables List",
 		nullptr,
-		ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_NoResize);
+		ImGuiWindowFlags_NoMove);
+	ReadLeftPanelDrag(0.0f, 0.0f);
 
-	float full2W = leftInspectorWidth_ - 20;   // 你原本的按鈕寬度邏輯
-	float buttonSize2 = full2W / 6.0f;
-	float add2W = buttonSize2;
-	float dou2W = buttonSize2;
-	float sav2W = buttonSize2;
-	float load2W = buttonSize2;
-	float del2W = buttonSize2;
+	if (MapVariablesAsset* vs = CurrentVariables()) {
+		/// 選択中の番号が範囲外にならないように
+		currentVariableIndex_ = (std::min)(currentVariableIndex_, (int)vs->vars.variableList.size() - 1);
 
+		/// New：Variables が無ければ New の時に作る（ImGuiNewVariablesWindow）
+		if (ImGuiWidgets::WrapButton("New", true)) showNewVariablesWindow_ = true;
 
-	if (ImGui::Button("New", ImVec2(add2W, 20))) {
-		if (isMakerSelected_) {
-			showNewVariablesWindow_ = true;
-		} else {
-			debugText_ += "Error: No generator selected for adding new variable.\n";
+		/// Load：ファイルを読んで、入れる変数を選ぶ（コピーなのでプロジェクトの外のファイルでも OK）
+		if (ImGuiWidgets::WrapButton("Load")) {
+			const std::string path = FileManager::OpenFileDialog(kJsonFilter, "Load Variables");
+			if (!path.empty()) {
+				std::ifstream in(path);
+				const nlohmann::json file = in ? nlohmann::json::parse(in, nullptr, false) : nlohmann::json();
+				if (file.is_object() && file.contains("variables")) {          // Variables ファイル / 古い MapMaker ファイル
+					pickVars_ = MapProgramAdapter::JsonToVariables(file);
+					pickChecked_.assign(pickVars_.variableList.size(), 1);    // 最初は全部チェック
+					pickSourceName_ = std::filesystem::path(path).filename().string();
+					showPickVariablesWindow_ = true;
+				} else {
+					debugText_ += "Load Error: no variables in " + path + "\n";
+				}
+			}
 		}
-	}
 
-	ImGui::SameLine();
-
-	/// Double (Duplicate Variable)
-	if (ImGui::Button("Double", ImVec2(dou2W, 20))) {
-
-		if (currentMakerIndex_ >= 0 && currentMakerIndex_ < mapMakerlist_.size()) {
-
-			auto& list = mapMakerlist_[currentMakerIndex_].GetGeneratorVariables().variableList;
-
-			if (currentVariableIndex_ >= 0 && currentVariableIndex_ < list.size()) {
-
-				Variable newVar = list[currentVariableIndex_];
-				newVar.name += "_copy";
-
-				list.push_back(newVar);
-
-				debugText_ += "Variable duplicated.\n";
+		if (ImGuiWidgets::WrapButton("Double") && vs) {
+			auto& list = vs->vars.variableList;
+			if (currentVariableIndex_ >= 0 && currentVariableIndex_ < (int)list.size()) {
+				Variable copy = list[currentVariableIndex_];
+				copy.name += "_copy";
+				list.push_back(copy);
+				vs->isSaved = false;
 
 			} else {
 				debugText_ += "Error: No variable selected for duplication.\n";
 			}
-
-		} else {
-			debugText_ += "Error: No MapMaker selected for variable duplication.\n";
-		}
-	}
-
-	ImGui::SameLine();
-
-	/// Save (Apply changes to variable)
-	if (ImGui::Button("Save", ImVec2(sav2W, 20))) {
-
-		if (isMakerSelected_) {
-			auto& maker = mapMakerlist_[currentMakerIndex_];
-			const std::string path = FileManager::SaveFileDialog(kJsonFilter, "json",
-				FileManager::ToSafeFileName(maker.GetMapName()) + ".json", "Save MapMaker (with variables)");
-			if (!path.empty()) {
-				const std::filesystem::path p(path);
-				maker.SetMapName(p.stem().string());
-				maker.SetCodingText(codeingText_);
-				maker.LoadScript(codeingText_);
-				maker.Compile();
-				maker.BuildJson();
-				if (maker.ExportMapMakerToJson(p.parent_path().string())) maker.SetSaved(true);
-				else debugText_ += maker.GetDebugText() + "\n";
-			}
-		} else {
-			debugText_ += "Error: No generator selected for save.\n";
 		}
 
-	}
-
-	ImGui::SameLine();
-
-	/// Load（別の MapMaker ファイルから変数を取り込む）
-	if (ImGui::Button("Load", ImVec2(load2W, 20))) {
-		if (isMakerSelected_) {
-			const std::string path = FileManager::OpenFileDialog(kJsonFilter, "Load Variables from MapMaker");
-			MapMaker tmp;
-			if (!path.empty() && tmp.ImportMapMakerFromJson(path)) {
-				auto& vars = mapMakerlist_[currentMakerIndex_].GetGeneratorVariables();
-				for (const auto& v : tmp.GetGeneratorVariables().variableList) {
-					if (Variable* exist = vars.FindVariable(v.name)) *exist = v;   // 同名は上書き
-					else vars.variableList.push_back(v);
-				}
-				mapMakerlist_[currentMakerIndex_].SetSaved(false);
-				debugText_ += "Variables loaded: " + path + "\n";
-			}
-		} else {
-			debugText_ += "Error: No generator selected for loading variables.\n";
-		}
-	}
-
-	ImGui::SameLine();
-
-	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.60f, 0.20f, 0.20f, 1.0f));
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.80f, 0.30f, 0.30f, 1.0f));
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.40f, 0.10f, 0.10f, 1.0f));
-
-	if (ImGui::Button("Delete", ImVec2(del2W, 20))) {
-		doubleCheck_ = true;
-		selectMode_ = SelectModeForMME::Variable;
-	}
-
-	ImGui::PopStyleColor(3);
-
-	bool skipVariableList = false;
-
-	ImGui::BeginChild("VariableList", ImVec2(0, ImGui::GetContentRegionAvail().y), true);
-
-	// =========================
-	// MapMaker 安全檢查
-	// =========================
-	if (mapMakerlist_.empty()) {
-		ImGui::Text("No MapMaker available.");
-		skipVariableList = true;
-	}
-
-	if (!skipVariableList) {
-
-		// =========================
-		// currentMakerIndex_ 安全管理
-		// =========================
-		if (currentMakerIndex_ < 0 || currentMakerIndex_ >= (int)mapMakerlist_.size()) {
-			ImGui::Text("No MapMaker selected.");
-			skipVariableList = true;
+		if (ImGuiWidgets::RedButton("Delete")) {
+			doubleCheck_ = true;
+			selectMode_ = SelectModeForMME::Variable;
 		}
 
-		if (!skipVariableList) {
+		/// 共用 Variables（掛ける・外す・並び替え）
+		if (MapMakerAsset* mk = CurrentMaker()) ImGuiSharedVariablesSection(*mk);
 
-			auto& list = mapMakerlist_[currentMakerIndex_].GetGeneratorVariables().variableList;
+		ImGui::BeginChild("VariableList", ImVec2(0, ImGui::GetContentRegionAvail().y), true);
+		{
+			MapMakerAsset* mk = CurrentMaker();
+			auto& list = vs->vars.variableList;
 
-			// =========================
-			// 顯示變數列表
-			// =========================
-			for (int i = 0; i < list.size(); i++) {
+			/// ループの中では消したり移したりしない（後でまとめて）
+			int moveIndex = -1, moveTarget = -1;          // 自分 → 共用組
+			int delShared = -1, delSharedIndex = -1;      // 共用組の変数を消す
 
+			/// ---- 自分の変数 ----
+			for (int i = 0; i < (int)list.size(); i++) {
 				auto& v = list[i];
 				ImGui::PushID(i);
 
-				// -------------------------
-				// Type（左側）
-				// -------------------------
+				/// Type（左）と 選択用 checkbox（右）
 				ImGui::Text("Type: %s", VarTypeToString(v.type).c_str());
-
-				// -------------------------
-				// 選擇用 checkbox（右側）
-				// -------------------------
-				ImGui::SameLine(ImGui::GetContentRegionAvail().x - 20); // 靠右
+				/// 共用組へ移す（掛けている組から選ぶ）
+				if (mk && !mk->sharedVariables.empty()) {
+					ImGui::SameLine();
+					if (ImGui::SmallButton("Move to Shared")) ImGui::OpenPopup("##moveTo");
+					if (ImGui::BeginPopup("##moveTo")) {
+						for (int sh : mk->sharedVariables) {
+							if (MapVariablesAsset* s = makerStore_.GetSharedVariables(sh)) {
+								if (ImGui::MenuItem(s->name.c_str())) { moveIndex = i; moveTarget = sh; }
+							}
+						}
+						ImGui::EndPopup();
+					}
+				}
+				ImGui::SameLine(ImGui::GetContentRegionAvail().x - 20);
 				bool selected = (currentVariableIndex_ == i);
-				if (ImGui::Checkbox("##select", &selected)) {
-					currentVariableIndex_ = selected ? i : -1;
-				}
+				if (ImGui::Checkbox("##select", &selected)) currentVariableIndex_ = selected ? i : -1;
 
-				// -------------------------
-				// Name
-				// -------------------------
-				InputTextString("Name", v.name);
-
-				// -------------------------
-				// Value
-				// -------------------------
-				switch (v.type) {
-				case VarType::Bool:
-					if (auto val = std::get_if<bool>(&v.value))
-						InputCheckbox("Value", *val);
-					break;
-
-				case VarType::Int:
-					if (auto val = std::get_if<int>(&v.value))
-						InputInt("Value", *val);
-					break;
-
-				case VarType::Float:
-					if (auto val = std::get_if<float>(&v.value))
-						InputFloat("Value", *val);
-					break;
-
-				case VarType::Double:
-					if (auto val = std::get_if<double>(&v.value))
-						InputDouble("Value", *val);
-					break;
-
-				case VarType::String:
-					if (auto val = std::get_if<std::string>(&v.value))
-						InputTextString("Value", *val);
-					break;
-
-				case VarType::Vector2:
-					if (auto val = std::get_if<Vector2>(&v.value))
-						InputVector2("Value", *val);
-					break;
-
-				case VarType::Vector3:
-					if (auto val = std::get_if<Vector3>(&v.value))
-						InputVector3("Value", *val);
-					break;
-
-				case VarType::Vector4:
-					if (auto val = std::get_if<Vector4>(&v.value))
-						InputVector4("Value", *val);
-					break;
-				}
+				/// Name / Value（直したら未保存に）
+				if (InputTextString("Name", v.name)) vs->isSaved = false;
+				if (ImGuiVariableValue(v)) vs->isSaved = false;
 
 				ImGui::Separator();
 				ImGui::PopID();
 			}
-		}
-	}
 
-	ImGui::EndChild();
+			/// ---- 共用 Variables（自分 → 上の組 → 下の組 の順で優先。負けた物は灰色）----
+			if (mk) {
+				std::set<std::string> taken;
+				for (const auto& v : list) taken.insert(v.name);
+
+				ImGui::PushID("shared");
+				for (int sh : mk->sharedVariables) {
+					MapVariablesAsset* s = makerStore_.GetSharedVariables(sh);
+					if (!s) continue;
+					ImGui::PushID(sh);
+					ImGui::SeparatorText(("[" + s->name + "]").c_str());
+					if (s->vars.variableList.empty()) ImGui::TextDisabled("(empty)  New -> Add to: %s / Move to Shared", s->name.c_str());
+
+					for (int i = 0; i < (int)s->vars.variableList.size(); ++i) {
+						Variable& v = s->vars.variableList[i];
+						ImGui::PushID(i);
+						const bool overridden = taken.count(v.name) > 0;
+
+						/// Type（共用は色付き）+ Override / 消す
+						ImGui::TextColored(overridden ? ImVec4(0.5f, 0.5f, 0.5f, 1.0f) : ImVec4(0.4f, 0.8f, 1.0f, 1.0f),
+							"Type: %s  [%s]", VarTypeToString(v.type).c_str(), s->name.c_str());
+						ImGui::SameLine();
+						if (overridden) {
+							ImGui::TextDisabled("overridden");
+						} else if (ImGui::SmallButton("Override")) {
+							/// 自分の Variables にコピー（この MapMaker だけ違う値にする）
+							vs->vars.variableList.push_back(v);
+							vs->isSaved = false;
+						}
+						ImGui::SameLine(ImGui::GetContentRegionAvail().x - 20);
+						if (ImGui::SmallButton("x")) { delShared = sh; delSharedIndex = i; }
+
+						/// Name / Value（ここで直すと、この組を掛けている全部の MapMaker に効く）
+						if (InputTextString("Name", v.name)) s->isSaved = false;
+						ImGui::BeginDisabled(overridden);
+						if (ImGuiVariableValue(v)) s->isSaved = false;
+						ImGui::EndDisabled();
+
+						taken.insert(v.name);
+						ImGui::Separator();
+						ImGui::PopID();
+					}
+					ImGui::PopID();
+				}
+				ImGui::PopID();
+			}
+
+			/// ---- まとめて反映 ----
+			if (moveIndex >= 0) {
+				if (MapVariablesAsset* s = makerStore_.GetSharedVariables(moveTarget)) {
+					const Variable v = list[moveIndex];
+					if (Variable* exist = s->vars.FindVariable(v.name)) *exist = v;   // 同じ名前は上書き
+					else s->vars.variableList.push_back(v);
+					list.erase(list.begin() + moveIndex);
+					s->isSaved = false;
+					vs->isSaved = false;
+					currentVariableIndex_ = -1;
+				}
+			}
+			if (delShared >= 0) {
+				if (MapVariablesAsset* s = makerStore_.GetSharedVariables(delShared)) {
+					auto& sl = s->vars.variableList;
+					if (delSharedIndex >= 0 && delSharedIndex < (int)sl.size()) {
+						sl.erase(sl.begin() + delSharedIndex);
+						s->isSaved = false;
+					}
+				}
+			}
+		}
+		ImGui::EndChild();
+	} else {
+		ImGui::TextDisabled("No MapMaker selected.");
+	}
 
 	*outputPos = GetWindowPosLocal();
 	*outputSize = ImGui::GetWindowSize();
 
 	ImGui::End();
+}
+
+bool MapMakingEditor::ImGuiVariableValue(Variable& v) {
+	switch (v.type) {
+	case VarType::Bool:    if (auto val = std::get_if<bool>(&v.value))        InputCheckbox("Value", *val); break;
+	case VarType::Int:     if (auto val = std::get_if<int>(&v.value))         InputInt("Value", *val); break;
+	case VarType::Float:   if (auto val = std::get_if<float>(&v.value))       InputFloat("Value", *val); break;
+	case VarType::Double:  if (auto val = std::get_if<double>(&v.value))      InputDouble("Value", *val); break;
+	case VarType::String:  if (auto val = std::get_if<std::string>(&v.value)) InputTextString("Value", *val); break;
+	case VarType::Vector2: if (auto val = std::get_if<Vector2>(&v.value))     InputVector2("Value", *val); break;
+	case VarType::Vector3: if (auto val = std::get_if<Vector3>(&v.value))     InputVector3("Value", *val); break;
+	case VarType::Vector4: if (auto val = std::get_if<Vector4>(&v.value))     InputVector4("Value", *val); break;
+	}
+	return ImGui::IsItemEdited();
+}
+
+void MapMakingEditor::ImGuiSharedVariablesSection(MapMakerAsset& maker) {
+	if (!ImGui::CollapsingHeader("Shared", ImGuiTreeNodeFlags_DefaultOpen)) return;
+
+	/// ---- 掛けている組（上が優先）----
+	auto& list = maker.sharedVariables;
+	int moveFrom = -1, moveTo = -1, detach = -1;
+	for (int i = 0; i < (int)list.size(); ++i) {
+		MapVariablesAsset* s = makerStore_.GetSharedVariables(list[i]);
+		if (!s) continue;
+		ImGui::PushID(i);
+
+		/// 並び替え
+		ImGui::BeginDisabled(i == 0);
+		if (ImGui::ArrowButton("##up", ImGuiDir_Up)) { moveFrom = i; moveTo = i - 1; }
+		ImGui::EndDisabled();
+		ImGui::SameLine();
+		ImGui::BeginDisabled(i == (int)list.size() - 1);
+		if (ImGui::ArrowButton("##down", ImGuiDir_Down)) { moveFrom = i; moveTo = i + 1; }
+		ImGui::EndDisabled();
+
+		/// 名前（変えたら Save の時にファイル名も変わる）
+		ImGui::SameLine();
+		ImGui::SetNextItemWidth(110.0f);
+		if (ImGui::InputText("##name", &s->name)) s->isSaved = false;
+		if (ImGui::BeginPopupContextItem("##ctx")) {           // 右クリック：組ごと削除
+			if (ImGui::MenuItem("Delete set (all MapMakers)")) { sharedToDelete_ = list[i]; openDeleteShared_ = true; }
+			ImGui::EndPopup();
+		}
+
+		/// 何個の MapMaker が使っているか / 外す
+		ImGui::SameLine();
+		ImGui::TextDisabled("(x%d)%s", (int)makerStore_.MakersUsingVariables(list[i]).size(), s->isSaved ? "" : " *");
+		ImGui::SameLine();
+		if (ImGui::SmallButton("x")) detach = list[i];
+
+		ImGui::PopID();
+	}
+	/// ループの外で変える（回している途中で list を変えない）
+	if (moveFrom >= 0) { std::swap(list[moveFrom], list[moveTo]); maker.isSaved = false; }
+	if (detach >= 0) makerStore_.DetachShared(currentMakerIndex_, detach);
+
+	/// ---- 掛ける：まだ掛けていない組から選ぶ ----
+	ImGui::SetNextItemWidth(110.0f);
+	if (ImGui::BeginCombo("##attach", "Attach...")) {
+		for (int h : makerStore_.SharedVariablesHandles()) {
+			if (std::find(list.begin(), list.end(), h) != list.end()) continue;
+			if (ImGui::Selectable(makerStore_.GetSharedVariables(h)->name.c_str())) makerStore_.AttachShared(currentMakerIndex_, h);
+		}
+		ImGui::EndCombo();
+	}
+
+	/// ---- 新しく作って掛ける ----
+	ImGui::SameLine();
+	ImGui::SetNextItemWidth(90.0f);
+	ImGui::InputText("##newShared", &newSharedName_);
+	ImGui::SameLine();
+	if (ImGui::Button("New Shared") && !newSharedName_.empty()) {
+		const int h = makerStore_.CreateSharedVariables(newSharedName_);
+		makerStore_.AttachShared(currentMakerIndex_, h);
+	}
+
+	/// ---- 削除の確認（OpenPopup と BeginPopupModal は同じ ID スタックで）----
+	if (openDeleteShared_) { ImGui::OpenPopup("Delete Shared Variables"); openDeleteShared_ = false; }
+	if (ImGui::BeginPopupModal("Delete Shared Variables", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+		MapVariablesAsset* s = makerStore_.GetSharedVariables(sharedToDelete_);
+		ImGui::Text("Delete \"%s\" ?", s ? s->name.c_str() : "?");
+		ImGui::Text("Used by %d MapMaker(s). They will lose these variables.",
+			(int)makerStore_.MakersUsingVariables(sharedToDelete_).size());
+		if (ImGuiWidgets::RedButton("Delete")) { makerStore_.RemoveSharedVariables(sharedToDelete_); sharedToDelete_ = -1; ImGui::CloseCurrentPopup(); }
+		ImGui::SameLine();
+		if (ImGui::Button("Cancel")) { sharedToDelete_ = -1; ImGui::CloseCurrentPopup(); }
+		ImGui::EndPopup();
+	}
 }
 
 
@@ -1985,8 +2063,7 @@ void MapMakingEditor::ImGuiRightMenuBar() {
 	float titleH = ImGui::GetFrameHeight();
 
 	float lastLineNum = 5;
-	float debugLogH = lineH * lastLineNum + 20.0f + titleH;
-
+	float debugLogH = io.DisplaySize.y * rightLogRatio_;
 	float debugLogY = io.DisplaySize.y - debugLogH;
 
 	// ===== Camera =====
@@ -1994,10 +2071,7 @@ void MapMakingEditor::ImGuiRightMenuBar() {
 	ImGui::SetNextWindowSize(ImVec2(rightInspectorWidth_, 0));
 	ImGui::Begin("Camera",
 		nullptr,
-		ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_AlwaysAutoResize);
-
-	rightInspectorWidth_ = ImGui::GetWindowSize().x;
+		ImGuiWindowFlags_NoMove);
 
 	if (ImGui::Button("BackTo(0,0)")) {
 		//debugCamera_.lock()->SetCamera(debugCamera_.lock()->GetDefaultTransform());
@@ -2042,10 +2116,7 @@ void MapMakingEditor::ImGuiRightMenuBar() {
 			ImGuiWindowFlags_NoMove |
 			ImGuiWindowFlags_AlwaysAutoResize);
 
-		if (currentMakerIndex_ >= 0 && currentMakerIndex_ < (int)mapMakerlist_.size()) {
-			MapMaker& selectedMakerInfo = mapMakerlist_[currentMakerIndex_];
-			ImGuiMapMakerShowing(selectedMakerInfo);
-		}
+		if (MapMakerAsset* sm = CurrentMaker()) ImGuiMapMakerShowing(*sm);
 
 		w2Pos = GetWindowPosLocal();
 		w2Size = ImGui::GetWindowSize();
@@ -2078,19 +2149,21 @@ void MapMakingEditor::ImGuiRightMenuBar() {
 		nullptr,
 		ImGuiWindowFlags_NoMove |
 		ImGuiWindowFlags_AlwaysAutoResize);
+	ReadRightPanelDrag(w3Size.y, window3Y);
 
 	w3Pos = GetWindowPosLocal();
 	w3Size = ImGui::GetWindowSize();
 
-	if (isMakerSelected_) {
-		auto& dataBase = mapMakerlist_[currentMakerIndex_].GetGeneratorVariables().variableList;
-
+	MapVariablesAsset* rightVars = isMakerSelected_ ? CurrentVariables() : nullptr;
+	if (rightVars) {
+		auto& dataBase = rightVars->vars.variableList;
 		for (int i = 0; i < dataBase.size(); i++) {
 
 			Variable* v = &dataBase[i];
 
 			ImGui::SetNextItemWidth(120.0f);
 			ImGui::InputText(("##Name%s" + std::to_string(i)).c_str(), &v->name);
+			if (ImGui::IsItemEdited()) rightVars->isSaved = false;
 
 			ImGui::SameLine();
 
@@ -2121,6 +2194,7 @@ void MapMakingEditor::ImGuiRightMenuBar() {
 				ImGui::InputFloat4(("##Vector4%s" + std::to_string(i)).c_str(), &GetValueRef<Vector4>(*v).x);
 				break;
 			}
+			if (ImGui::IsItemEdited()) rightVars->isSaved = false;
 		}
 	} else if (isMapDataSelected_) {
 		ImGuiMapUnitDetail(mapDataList_[currentMapDataIndex_], detailTargetH);
@@ -2180,8 +2254,8 @@ void MapMakingEditor::ImGuiMidWindow() {
 		bottomH = toolbarH;
 		bottomWindowY = io.DisplaySize.y - toolbarH;
 	} else if (isMTWindowOpen_) {
-		bottomH = lineH * lineCount + titleH;
-		if (isMBWindowOpen_) bottomWindowY = io.DisplaySize.y - lineH * lineCount - titleH;
+		bottomH = (io.DisplaySize.y - menuBarHeight_) * midBottomRatio_;
+		if (isMBWindowOpen_) bottomWindowY = io.DisplaySize.y - bottomH;
 		else bottomWindowY = io.DisplaySize.y - titleH;
 	} else {
 		bottomH = io.DisplaySize.y - menuBarHeight_ - titleH;
@@ -2204,11 +2278,18 @@ void MapMakingEditor::ImGuiMidWindow() {
 	/// タイトルだけ切り替え（### 以降が ID。位置・サイズの計算はそのまま使える）
 	const char* midTitle = generator ? "Map Preview###MidTop"
 		: showPreview ? "Object Preview###MidTop" : "Map###MidTop";
-	ImGuiWindowFlags midFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
+	ImGuiWindowFlags midFlags = ImGuiWindowFlags_NoMove;
 	if (!generator && selectModeForLeftData_ == SelectModeForLeftData::MapMaker) midFlags |= ImGuiWindowFlags_NoScrollWithMouse;
 	if (showMapPreview || showPreview) midFlags |= ImGuiWindowFlags_NoScrollWithMouse;
 
 	isMTWindowOpen_ = ImGui::Begin(midTitle, nullptr, midFlags);
+
+	/// 下の端を引っ張った → 下のウィンドウとの比率に
+	if (!generator && isMBWindowOpen_) {
+		const float midH = io.DisplaySize.y - menuBarHeight_;
+		const float nowH = ImGui::GetWindowSize().y;
+		if (std::fabs(nowH - centerTotalH) > 0.5f) midBottomRatio_ = std::clamp(1.0f - nowH / midH, 0.1f, 0.8f);
+	}
 
 	if (showMapPreview) {
 
@@ -2259,39 +2340,35 @@ void MapMakingEditor::ImGuiMidWindow() {
 
 		/// ===== スクリプト =====
 		if (ImGui::BeginTabItem("Code")) {
+
+			/// 今の函數の名前（この函數を使う全部の MapMaker で変わる）
+			if (MapFunctionAsset* f = CurrentFunction()) {
+				if (ImGui::InputText("Function Name", &f->name)) f->isSaved = false;
+				ImGui::TextDisabled("%s", f->path.c_str());
+			}
+
 			InputBigTextString("Codeing Text", codeingText_);
 
-			if (ImGui::Button("Save")) {
-				if (currentMakerIndex_ >= 0 && currentMakerIndex_ < mapMakerlist_.size()) {
+			/// Apply：腳本 → 函數（AST も作り直す）
+			if (ImGui::Button("Apply")) {
 
-					auto& maker = mapMakerlist_[currentMakerIndex_];
-					maker.SetCodingText(codeingText_);
-					maker.LoadScript(codeingText_);
-
-					maker.Compile();
-					maker.BuildJson();
-					maker.SetSaved(false);
+				if (CurrentFunction()) {
+					CommitCode();
+					MapInfoLoadJson();
+					debugText_ += "Apply: Script updated and recompiled.\n";
+				} else {
+					debugText_ += "Error: No function selected.\n";
 				}
 			}
 
 			ImGui::SameLine();
 
-			if (ImGui::Button("Apply")) {
-				if (currentMakerIndex_ >= 0 && currentMakerIndex_ < mapMakerlist_.size()) {
+			/// Save：プロジェクトごと保存（MapMaker / Function / Variables はつながっているので一緒に）
+			if (ImGui::Button("Save Project")) {
+				CommitCode();
+				if (projectFilePath_.empty()) SaveProjectAs();
+				else SaveProject(projectFilePath_);
 
-					auto& maker = mapMakerlist_[currentMakerIndex_];
-					maker.SetCodingText(codeingText_);
-					maker.LoadScript(codeingText_);
-
-					maker.Compile();
-					maker.BuildJson();
-					MapInfoLoadJson();
-					maker.SetSaved(false);
-
-					debugText_ += "Apply: Script updated and recompiled.\n";
-				} else {
-					debugText_ += "Error: No valid map maker selected.\n";
-				}
 			}
 
 			ImGui::SameLine();
@@ -2528,6 +2605,65 @@ void MapMakingEditor::ImGuiScriptReadMe() {
 	table("Syntax", kSyntax, std::size(kSyntax));
 }
 
+void MapMakingEditor::ImGuiPickVariablesWindow() {
+	/// 予約されていたら開く（OpenPopup と BeginPopupModal は同じ ID スタックで）
+	if (showPickVariablesWindow_) {
+		ImGui::OpenPopup("Load Variables");
+		showPickVariablesWindow_ = false;
+	}
+	if (!ImGui::BeginPopupModal("Load Variables", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) return;
+
+	MapVariablesAsset* target = CurrentVariables();
+
+	ImGui::Text("From: %s", pickSourceName_.c_str());
+	ImGui::Text("To  : %s", target ? target->name.c_str() : "(no MapMaker)");
+	ImGui::Separator();
+
+	/// 全部 / 無し
+	if (ImGui::SmallButton("All"))  std::fill(pickChecked_.begin(), pickChecked_.end(), 1);
+	ImGui::SameLine();
+	if (ImGui::SmallButton("None")) std::fill(pickChecked_.begin(), pickChecked_.end(), 0);
+
+	/// 1 行 = チェック + 名前 + 型（同じ名前があれば上書きと表示）
+	ImGui::BeginChild("PickList", ImVec2(360, 240), true);
+	for (int i = 0; i < (int)pickVars_.variableList.size(); ++i) {
+		const Variable& v = pickVars_.variableList[i];
+		ImGui::PushID(i);
+		bool on = pickChecked_[i] != 0;
+		if (ImGui::Checkbox("##pick", &on)) pickChecked_[i] = on ? 1 : 0;
+		ImGui::SameLine();
+		ImGui::Text("%s  (%s)", v.name.c_str(), VarTypeToString(v.type).c_str());
+		if (target && target->vars.FindVariable(v.name)) {
+			ImGui::SameLine();
+			ImGui::TextColored(ImVec4(1.0f, 0.7f, 0.3f, 1.0f), "overwrite");
+		}
+		ImGui::PopID();
+	}
+	ImGui::EndChild();
+
+	/// Add：チェックしたものをコピー（同じ名前は上書き、無ければ追加）
+	ImGui::BeginDisabled(target == nullptr);
+	if (ImGui::Button("Add", ImVec2(100, 0))) {
+		/// 函數に Variables が無ければ、函數と同じ名前で作る
+		int added = 0;
+		for (int i = 0; i < (int)pickVars_.variableList.size(); ++i) {
+			if (!pickChecked_[i]) continue;
+			const Variable& v = pickVars_.variableList[i];
+			if (Variable* exist = target->vars.FindVariable(v.name)) *exist = v;
+			else target->vars.variableList.push_back(v);
+			++added;
+		}
+		if (added > 0) target->isSaved = false;
+		debugText_ += "Variables loaded: " + std::to_string(added) + " from " + pickSourceName_ + "\n";
+		ImGui::CloseCurrentPopup();
+	}
+	ImGui::EndDisabled();
+	ImGui::SameLine();
+	if (ImGui::Button("Cancel", ImVec2(100, 0))) ImGui::CloseCurrentPopup();
+
+	ImGui::EndPopup();
+}
+
 
 void MapMakingEditor::ImGuiMapUnitDetail(MapData& data, float targetHeight) {
 
@@ -2692,19 +2828,16 @@ void MapMakingEditor::ImGuiMapDataShowing(MapData& data) {
 
 }
 
-void MapMakingEditor::ImGuiMapMakerShowing(MapMaker& maker) {
+void MapMakingEditor::ImGuiMapMakerShowing(MapMakerAsset& maker) {
 
-	std::string name = maker.GetMapName();
-	if (InputTextString("Map Name", name)) { maker.SetMapName(name); maker.SetSaved(false); }
-
-	std::string savePath = maker.GetProjectPath();
-	InputTextString("Save Path", savePath);
-	maker.SetProjectPath(savePath);
-	ImGui::Text("VariablesNumber:%d", static_cast<int>(maker.GetGeneratorVariables().variableList.size()));
+	/// 名前は表示用（ファイル名 = 参照のキーは変わらない）
+	if (InputTextString("Map Name", maker.name)) maker.isSaved = false;
+	ImGui::TextDisabled("File: %s", maker.path.c_str());
+	ImGui::Text("Functions: %d", static_cast<int>(maker.functions.size()));
 
 	/// ============== 生成設定 ============== ///
 	ImGui::SeparatorText("Generate");
-	MapMaker::GenerateSettings& gs = maker.GetGenerateSettings();
+	MapMakerAsset& gs = maker;     // width / height / seed / targetMapName
 	bool changed = false;
 
 	/// 大きさ（固定）
@@ -2752,10 +2885,30 @@ void MapMakingEditor::ImGuiMapMakerShowing(MapMaker& maker) {
 		}
 	}
 
-	if (changed) maker.SetSaved(false);
+	if (changed) maker.isSaved = false;
 
 	/// 実行
 	if (ImGui::Button("Generate", ImVec2(-1, 0))) GenerateCurrentMaker();
+}
+
+void MapMakingEditor::ReadLeftPanelDrag(float setH, float totalH, float* heightRatio) {
+	const ImVec2 now = ImGui::GetWindowSize();
+	const float screenW = ImGui::GetIO().DisplaySize.x;
+	if (std::fabs(now.x - leftInspectorWidth_) > 0.5f) leftWidthRatio_ = std::clamp(now.x / screenW, 0.1f, 0.45f);
+	/// 高さ：下の端を引っ張った → 渡された割合に
+	if (heightRatio && setH > 0.0f && totalH > 0.0f && std::fabs(now.y - setH) > 0.5f) *heightRatio = std::clamp(now.y / totalH, 0.1f, 0.8f);
+}
+
+void MapMakingEditor::ReadRightPanelDrag(float setH, float topY) {
+	const ImVec2 now = ImGui::GetWindowSize();
+	const ImGuiIO& io = ImGui::GetIO();
+	/// 幅：左の端を引っ張った（右列は右に張り付いているので、幅だけ見ればいい）
+	if (std::fabs(now.x - rightInspectorWidth_) > 0.5f) rightWidthRatio_ = std::clamp(now.x / io.DisplaySize.x, 0.1f, 0.45f);
+	/// 高さ：Details の下の端 → 残りが Debug Log
+	if (std::fabs(now.y - setH) > 0.5f) {
+		const float logH = io.DisplaySize.y - topY - now.y - ImGui::GetFrameHeight();
+		rightLogRatio_ = std::clamp(logH / io.DisplaySize.y, 0.05f, 0.6f);
+	}
 }
 
 void MapMakingEditor::ImGuiNewVariablesWindow() {
@@ -2822,11 +2975,28 @@ void MapMakingEditor::ImGuiNewVariablesWindow() {
 			break;
 		}
 
+		/// 追加先：自分 / 掛けている共用組
+		if (MapMakerAsset* mk = CurrentMaker()) {
+			/// 外された組を指していたら自分に戻す
+			auto& sl = mk->sharedVariables;
+			if (newVarTarget_ >= 0 && std::find(sl.begin(), sl.end(), newVarTarget_) == sl.end()) newVarTarget_ = -1;
+
+			MapVariablesAsset* t = newVarTarget_ >= 0 ? makerStore_.GetSharedVariables(newVarTarget_) : nullptr;
+			if (ImGui::BeginCombo("Add to", t ? t->name.c_str() : "Own")) {
+				if (ImGui::Selectable("Own", newVarTarget_ < 0)) newVarTarget_ = -1;
+				for (int sh : sl) {
+					if (MapVariablesAsset* s = makerStore_.GetSharedVariables(sh)) {
+						if (ImGui::Selectable(s->name.c_str(), newVarTarget_ == sh)) newVarTarget_ = sh;
+					}
+				}
+				ImGui::EndCombo();
+			}
+		}
 
 		bool isButtonClicked = false;
 		if (ImGui::Button("New")) {
 
-			if (currentMakerIndex_ != -1) {
+			if (MapVariablesAsset* nvs = (newVarTarget_ >= 0 ? makerStore_.GetSharedVariables(newVarTarget_) : CurrentVariables())) {
 				// Add VariableUnit 動作
 				Variable newVariable{};
 
@@ -2842,8 +3012,9 @@ void MapMakingEditor::ImGuiNewVariablesWindow() {
 				case VarType::Vector4: newVariable = CreateVariable(newName_, newVector4Value_);		break;
 				}
 
-				/// [選択したGenerator][変数の種類]に新しい変数を追加する
-				mapMakerlist_[currentMakerIndex_].GetGeneratorVariables().variableList.push_back(newVariable);
+				/// この MapMaker の Variables に追加
+				nvs->vars.variableList.push_back(newVariable);
+				nvs->isSaved = false;
 
 				std::string newNumber = std::to_string(newVariableCounter_);
 				if (newVariableCounter_ == 0)newNumber = "";
@@ -2853,7 +3024,7 @@ void MapMakingEditor::ImGuiNewVariablesWindow() {
 				isButtonClicked = true;
 			} else {
 				/// 後でエラーウィンドウに変わる
-				Logger::Log("MapMakingEditor: No generator selected. Cannot add new variable.");
+				Logger::Log("No MapMaker selected.");
 			}
 		}
 		ImGui::SameLine();
@@ -3293,27 +3464,23 @@ void MapMakingEditor::ImGuiMapToolbar() {
 }
 
 MapMakingEditor::MapInfo& MapMakingEditor::GetMakerOutputMap() {
-	if (currentMakerIndex_ >= 0 && currentMakerIndex_ < (int)mapMakerlist_.size()) {
-		const std::string& name = mapMakerlist_[currentMakerIndex_].GetGenerateSettings().targetMapName;
-		for (MapInfo& m : mapList_) {
-			if (!name.empty() && m.tileMapData.name == name) return m;
+	if (MapMakerAsset* m = CurrentMaker()) {
+		for (MapInfo& info : mapList_) {
+			if (!m->targetMapName.empty() && info.tileMapData.name == m->targetMapName) return info;
 		}
 	}
 	return currentMapInfo_;     // 選んでいない / 見つからない → Editor Map
 }
 
 void MapMakingEditor::GenerateCurrentMaker() {
-	if (currentMakerIndex_ < 0 || currentMakerIndex_ >= (int)mapMakerlist_.size()) {
+	MapMakerAsset* maker = CurrentMaker();
+	if (!maker) {
 		debugText_ += "Generate Error: No map maker selected.\n";
 		return;
 	}
-	MapMaker& maker = mapMakerlist_[currentMakerIndex_];
 
-	/// 1. Compile（Apply と同じ）
-	maker.SetCodingText(codeingText_);
-	maker.LoadScript(codeingText_);
-	maker.Compile();
-	maker.BuildJson();
+	/// 1. 編集中の腳本を函數に入れる（Apply と同じ）
+	CommitCode();
 	MapInfoLoadJson();
 
 	/// 2. 出力先を探す
@@ -3322,29 +3489,89 @@ void MapMakingEditor::GenerateCurrentMaker() {
 	const MapData* data = FindMapData(out.mapDataName);
 	const int blank = data ? data->blankId : 0;
 
-	/// 3. 生成
-	TileMapData result = maker.GenerateMap(blank);
-	debugText_ += maker.GetDebugText();
+	/// 3. 生成（エンジン側：MapMaker → Function → Variables をたどって実行。ゲームと同じ）
+	std::vector<std::string> errors;
+	TileMapData result = makerStore_.Generate(currentMakerIndex_, blank, -1, &errors);
+	for (const auto& e : errors) debugText_ += "Script Error: " + e + "\n";
 
 	/// 4. 出力（名前は出力先のものを残す）
-	result.name = toEditorMap ? maker.GetMapName() : out.tileMapData.name;
+	result.name = toEditorMap ? maker->name : out.tileMapData.name;
 	out.tileMapData = std::move(result);
 	if (!toEditorMap) out.isSaved = false;
 	mapFocusIndex_ = -2;                         // 大きさが変わるのでカメラを合わせ直す
 	debugText_ += "Generate: " + out.tileMapData.name + "\n";
 }
 
-void MapMakingEditor::SelectMaker(int index) {
-	/// 編集中の腳本を今の maker に戻す（同じ maker を選び直しても安全）
-	if (currentMakerIndex_ >= 0 && currentMakerIndex_ < (int)mapMakerlist_.size()) {
-		mapMakerlist_[currentMakerIndex_].SetCodingText(codeingText_);
-	}
-	if (index < 0 || index >= (int)mapMakerlist_.size()) {
-		currentMakerIndex_ = -1;
-		codeingText_.clear();
-		return;
-	}
-	currentMakerIndex_ = index;
-	codeingText_ = mapMakerlist_[index].GetCodingText();
+void MapMakingEditor::SelectMaker(int handle) {
+	CommitCode();                                              // 編集中の腳本を今の函數に戻す
+	currentMakerIndex_ = makerStore_.GetMaker(handle) ? handle : -1;
+	currentVariableIndex_ = -1;
+
+	/// 最初の函數を開く
+	MapMakerAsset* m = CurrentMaker();
+	currentFunctionSlot_ = (m && !m->functions.empty()) ? 0 : -1;
+	MapFunctionAsset* f = CurrentFunction();
+	codeingText_ = f ? f->code : std::string();
 	MapInfoLoadJson();
+
+}
+
+/// ====================== MapMaker（Store）の小道具 ====================== ///
+
+MapMakerAsset* MapMakingEditor::CurrentMaker() {
+	return makerStore_.GetMaker(currentMakerIndex_);
+
+}
+
+MapFunctionAsset* MapMakingEditor::CurrentFunction() {
+	MapMakerAsset* m = CurrentMaker();
+	if (!m || currentFunctionSlot_ < 0 || currentFunctionSlot_ >= (int)m->functions.size()) return nullptr;
+	return makerStore_.GetFunction(m->functions[currentFunctionSlot_].functionHandle);
+
+}
+
+MapVariablesAsset* MapMakingEditor::CurrentVariables() {
+	return makerStore_.GetMakerVariables(currentMakerIndex_);
+}
+
+void MapMakingEditor::CommitCode() {
+	MapMakerAsset* m = CurrentMaker();
+	if (!m || currentFunctionSlot_ < 0 || currentFunctionSlot_ >= (int)m->functions.size()) return;
+	const int fh = m->functions[currentFunctionSlot_].functionHandle;
+	MapFunctionAsset* f = makerStore_.GetFunction(fh);
+	if (f && f->code != codeingText_) makerStore_.SetFunctionCode(fh, codeingText_);   // 変わった時だけ（AST も作り直す）
+
+}
+
+void MapMakingEditor::SelectFunctionSlot(int slot) {
+	CommitCode();                                              // 前の函數に書いてから切り替える
+	MapMakerAsset* m = CurrentMaker();
+	currentFunctionSlot_ = (m && slot >= 0 && slot < (int)m->functions.size()) ? slot : -1;
+	currentVariableIndex_ = -1;
+	MapFunctionAsset* f = CurrentFunction();
+	codeingText_ = f ? f->code : std::string();
+	MapInfoLoadJson();
+}
+
+void MapMakingEditor::FlushStoreLog() {
+	for (const auto& l : makerStore_.Log()) debugText_ += l + "\n";
+	makerStore_.Log().clear();
+
+}
+
+std::string MapMakingEditor::ToProjectRelative(const std::string& path) {
+	namespace fs = std::filesystem;
+	/// まだプロジェクトが無い → ファイルのフォルダの親（MapMakerData の下なら、さらにその親）をプロジェクトにする
+	if (makerStore_.GetRoot().empty()) {
+		fs::path root = fs::path(path).parent_path().parent_path();
+		if (root.filename() == "MapMakerData") root = root.parent_path();
+		makerStore_.SetRoot(root.string());
+	}
+	std::error_code ec;
+	const std::string rel = fs::relative(path, makerStore_.GetRoot(), ec).generic_string();
+	if (ec || rel.empty() || rel.rfind("..", 0) == 0) {
+		debugText_ += "Load Error: the file must be inside the project folder: " + makerStore_.GetRoot() + "\n";
+		return {};
+	}
+	return rel;
 }

@@ -1,0 +1,95 @@
+{
+    "code": "for(y = 0; y < groundLayerNumber;y++){\n for(x = 0; x < width; x++){\n  result[y][x] = grassCode;\n }\n}",
+    "kind": "MapFunction",
+    "name": "GrownGrass",
+    "script": [
+        {
+            "body": [
+                {
+                    "body": [
+                        {
+                            "args": [
+                                {
+                                    "name": "x",
+                                    "type": "variable"
+                                },
+                                {
+                                    "name": "y",
+                                    "type": "variable"
+                                },
+                                {
+                                    "name": "grassCode",
+                                    "type": "variable"
+                                }
+                            ],
+                            "func": "setTile",
+                            "type": "call"
+                        }
+                    ],
+                    "cond": {
+                        "left": {
+                            "name": "x",
+                            "type": "variable"
+                        },
+                        "op": "<",
+                        "right": {
+                            "name": "width",
+                            "type": "variable"
+                        },
+                        "type": "binary"
+                    },
+                    "inc": {
+                        "left": {
+                            "name": "x",
+                            "type": "variable"
+                        },
+                        "op": "+",
+                        "right": {
+                            "type": "literal",
+                            "value": "1"
+                        },
+                        "type": "binary"
+                    },
+                    "init": {
+                        "type": "literal",
+                        "value": "0"
+                    },
+                    "type": "for",
+                    "var": "x",
+                    "varType": "int"
+                }
+            ],
+            "cond": {
+                "left": {
+                    "name": "y",
+                    "type": "variable"
+                },
+                "op": "<",
+                "right": {
+                    "name": "groundLayerNumber",
+                    "type": "variable"
+                },
+                "type": "binary"
+            },
+            "inc": {
+                "left": {
+                    "name": "y",
+                    "type": "variable"
+                },
+                "op": "+",
+                "right": {
+                    "type": "literal",
+                    "value": "1"
+                },
+                "type": "binary"
+            },
+            "init": {
+                "type": "literal",
+                "value": "0"
+            },
+            "type": "for",
+            "var": "y",
+            "varType": "int"
+        }
+    ]
+}

@@ -74,14 +74,27 @@ public:
 					       std::vector<std::string>* outErrors = nullptr);
 
 	/// ==================== 解碼器（Editor もゲームもここを通る） ===================== ///
-/// MapMaker.json の中身から生成（seed < 0 ならファイルの seed、vars が nullptr ならファイルの変数）
+	/// MapMaker.json の中身から生成（seed < 0 ならファイルの seed、vars が nullptr ならファイルの変数）
 	static TileMapData GenerateFromJson(const nlohmann::json& file, 
 														  int blankId = 0, 
 														  int seed = -1,
 									 const GeneratorVariable* vars = nullptr,
 									std::vector<std::string>* outErrors = nullptr);
+
+	static TileMapData GenerateUnit(const std::vector<std::vector<Node*>>& layers,
+										   const std::vector<std::string>& layerNames,
+																	   int width, 
+																	   int height, 
+																	   int seed,
+																	   int blankId,
+														GeneratorVariable* vars,
+												 std::vector<std::string>* outErrors = nullptr,
+									const std::vector<GeneratorVariable*>* layerVars = nullptr);
+
 	/// json の "variables" → GeneratorVariable
 	static GeneratorVariable JsonToVariables(const nlohmann::json& file);
+	/// GeneratorVariable → json の "variables"（JsonToVariables の逆）
+	static nlohmann::json VariablesToJson(const GeneratorVariable& vars);
 
 	/// 組み込み関数を名前で呼ぶ（文・式どちらからも）
 	static int CallBuiltin(const std::string& name, const std::vector<ExpressionNode*>& args, RuntimeContext& ctx);

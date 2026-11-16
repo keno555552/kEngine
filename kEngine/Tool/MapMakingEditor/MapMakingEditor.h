@@ -17,6 +17,7 @@
 #include "Tool\MapBulider\Data\GeneratorVariable.h"
 #include "Tool\MapBulider\Adapter\ProgramAdapter.h"
 #include "Tool\MapBulider\Data\MapMakerData.h"
+#include "Tool\MapBulider\Data\MapMakerStore.h"
 
 
 enum class SelectModeForMME {
@@ -58,8 +59,8 @@ private:
 
 	std::vector<MapData> mapDataList_{};
 
-	/// MapData 調整器（View メニューから開閉）
-	std::vector<MapMaker> mapMakerlist_{};
+	/// MapMaker / Function / Variables（ファイルごと。MapMaker → Function → Variables の順につながる）
+	MapMakerStore makerStore_;
 
 	/// ============ 選択関連 =============///
 
@@ -69,7 +70,8 @@ private:
 	bool isVariableSelected_ = false;
 	int currentMapIndex_ = -1;
 	int currentMapDataIndex_ = -1;
-	int currentMakerIndex_ = -1;
+	int currentMakerIndex_ = -1;          // MapMaker の handle（makerStore_ の番号）
+	int currentFunctionSlot_ = -1;        // 今の MapMaker の何番目の函數を編集しているか
 	int currentVariableIndex_ = -1;
 	int currentUnitIndex_ = -1;
 
@@ -136,6 +138,17 @@ private:
 	Vector3 newVector3Value_ = Vector3(0.0f, 0.0f, 0.0f);
 	Vector4 newVector4Value_ = Vector4(0.0f, 0.0f, 0.0f, 0.0f);
 
+	std::string newSharedName_ = "Common";    // New Shared の名前
+	int sharedToDelete_ = -1;                 // 削除確認中の共用 Variables
+	bool openDeleteShared_ = false;           // 確認ウィンドウを開く予約
+	int newVarTarget_ = -1;					  // New Variable の追加先（-1 = 自分の Variables、それ以外 = 共用組の handle）
+
+	/// Variables の Load：読んだファイルの変数から選んで、今の函數の Variables にコピーする
+	bool showPickVariablesWindow_ = false;
+	GeneratorVariable pickVars_;              // 読んだファイルの中身（選ぶ前）
+	std::vector<char> pickChecked_;           // チェック（vector<bool> は ImGui に渡せないので char）
+	std::string pickSourceName_;              // どのファイルから
+
 	/// save/load 用
 	bool useRelativePath_ = true;
 
@@ -144,6 +157,16 @@ private:
 
 
 	/// ============= UI関連 ==============///
+	
+	/// ============ レイアウト（画面に対する割合 → ウィンドウを広げると一緒に広がる） =============///
+	float leftWidthRatio_  = 0.22f;          // 左列の幅 / 画面の幅
+	float rightWidthRatio_ = 0.22f;          // 右列の幅 / 画面の幅
+	float leftUpperRatio_  = 1.0f / 3.0f;    // 左の上のリスト / 左のリスト部分の高さ
+	float leftMidRatio_	   = 1.0f / 3.0f;		 // 左の真ん中（Function List）/ 左のリスト部分の高さ
+	float midBottomRatio_  = 0.30f;          // 中央下（Inspector Details）/ 中央の高さ
+	float rightLogRatio_   = 0.20f;          // 右下（Debug Log）/ 画面の高さ
+	static constexpr float kMinPanelW = 160.0f;
+
 	/// ============= 左ウィンドウ
 	float menuBarHeight_ = 0.0f;
 
@@ -229,7 +252,19 @@ private:
 	void ImGuiMapToolbar();
 	MapInfo& GetMakerOutputMap();
 	void GenerateCurrentMaker();
-	void SelectMaker(int index);
+	void SelectMaker(int handle);
+	/// 今選んでいる MapMaker / 函數 / その函數の Variables（無ければ nullptr）
+	MapMakerAsset * CurrentMaker();
+	MapFunctionAsset * CurrentFunction();
+	MapVariablesAsset * CurrentVariables();
+	/// 編集中の腳本を今の函數に入れる（変わっていれば AST も作り直す）
+	void CommitCode();
+	/// 今の MapMaker の slot 番目の函數を編集する
+	void SelectFunctionSlot(int slot);
+	/// makerStore_ のログを debugText_ に移す
+	void FlushStoreLog();
+	/// プロジェクトフォルダからの相対パスにする（フォルダの外なら空。まだプロジェクトが無ければ決める）
+	std::string ToProjectRelative(const std::string& path);
 
 	/// エンジン内部モデルを呼び出し関連
 	int GetEngineModelHandle(EngineModelType type, const EngineModelParams& p);
@@ -256,6 +291,7 @@ private:
 
 	std::string ToSavePath(const std::string& path, const std::string& baseDir) const;
 
+
 	/// ImGui関連
 	void ImGuiPart();
 	void ImGuiLeftMenuBar();
@@ -264,6 +300,8 @@ private:
 
 	void ImGuiMapDataWindow(ImVec2 size, ImVec2* outputSize, ImVec2 pos, ImVec2* outputPos, float colimenH);
 	void ImGuiMapMakerWindow(ImVec2 size, ImVec2* outputSize, ImVec2 pos, ImVec2* outputPos, float colimenH);
+	void ImGuiSharedVariablesSection(MapMakerAsset& maker);
+	bool ImGuiVariableValue(Variable& v);     // 値の入力欄（直したら true）
 
 	void ImGuiLoadWindow();
 	void ImGuiSaveWindow();
@@ -271,10 +309,15 @@ private:
 	void ImGuiNewVariablesWindow();
 	void ImGuiMapNewWindow();
 	void ImGuiScriptReadMe();
+	void ImGuiPickVariablesWindow();
 
 	void ImGuiMapUnitDetail(MapData& data, float targetHeight);
 	void ImGuiMapDataShowing(MapData& data);
-	void ImGuiMapMakerShowing(MapMaker& maker);
+	void ImGuiMapMakerShowing(MapMakerAsset& maker);
+
+	/// 端のドラッグで変わった大きさを割合に戻す（Begin の直後に呼ぶ）
+	void ReadLeftPanelDrag(float setH, float totalH, float* heightRatio = nullptr);
+	void ReadRightPanelDrag(float setH, float topY);
 
 	bool InputTextString(const char* label, std::string& str, ImGuiInputTextFlags flags = 0);
 	bool InputBigTextString(const char* label, std::string& str, ImGuiInputTextFlags flags = 0);

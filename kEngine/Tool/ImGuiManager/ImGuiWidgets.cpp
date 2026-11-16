@@ -43,23 +43,38 @@ namespace ImGuiWidgets {
 		return action;
 	}
 
-	ListButton ListToolbar(float fullWidth, float slots) {
-		const ImVec2 size(fullWidth / slots, 20.0f);
+	bool WrapButton(const char* label, bool first) {
+		const ImGuiStyle& st = ImGui::GetStyle();
+		const float w = ImGui::CalcTextSize(label, nullptr, true).x + st.FramePadding.x * 2.0f;   // 文字 + 内側の余白
+		if (!first) {
+			const float lastRight = ImGui::GetItemRectMax().x;                                      // 直前の部品の右端
+			const float windowRight = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
+			if (lastRight + st.ItemSpacing.x + w <= windowRight) ImGui::SameLine();                // 入るなら同じ行
+		}
+		return ImGui::Button(label, ImVec2(0.0f, 20.0f));                                           // 幅 0 = 文字に合わせる
+	}
+
+	bool ImGuiWidgets::RedButton(const char* label, bool first) {
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.60f, 0.20f, 0.20f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.80f, 0.30f, 0.30f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.40f, 0.10f, 0.10f, 1.0f));
+		const bool pressed = WrapButton(label, first);
+		ImGui::PopStyleColor(3);
+		return pressed;
+	}
+
+	ListButton ListToolbar() {
 		ListButton pressed = ListButton::None;
 
-		if (ImGui::Button("New", size))    pressed = ListButton::New;
-		ImGui::SameLine();
-		if (ImGui::Button("Double", size)) pressed = ListButton::Double;
-		ImGui::SameLine();
-		if (ImGui::Button("Save", size))   pressed = ListButton::Save;
-		ImGui::SameLine();
-		if (ImGui::Button("Load", size))   pressed = ListButton::Load;
-		ImGui::SameLine();
+		if (WrapButton("New", true)) pressed = ListButton::New;
+		if (WrapButton("Double"))    pressed = ListButton::Double;
+		if (WrapButton("Save"))      pressed = ListButton::Save;
+		if (WrapButton("Load"))      pressed = ListButton::Load;
 
-		ImGui::PushStyleColor(ImGuiCol_Button,			ImVec4(0.60f, 0.20f, 0.20f, 1.0f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered,	ImVec4(0.80f, 0.30f, 0.30f, 1.0f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive,	ImVec4(0.40f, 0.10f, 0.10f, 1.0f));
-		if (ImGui::Button("Delete", size)) pressed = ListButton::Delete;
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.60f, 0.20f, 0.20f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.80f, 0.30f, 0.30f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.40f, 0.10f, 0.10f, 1.0f));
+		if (WrapButton("Delete"))    pressed = ListButton::Delete;
 		ImGui::PopStyleColor(3);
 
 		return pressed;

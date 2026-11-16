@@ -259,10 +259,35 @@ GeneratorVariable MapProgramAdapter::JsonToVariables(const nlohmann::json& file)
 			case VarType::Vector3: value = v.size() >= 3 ? Vector3{ v[0].get<float>(), v[1].get<float>(), v[2].get<float>() } : Vector3{}; break;
 			case VarType::Vector4: value = v.size() >= 4 ? Vector4{ v[0].get<float>(), v[1].get<float>(), v[2].get<float>(), v[3].get<float>() } : Vector4{}; break;
 			}
-			out.variableList.push_back(CreateVariable(name, value));
+			Variable var = CreateVariable(name, value);
+			out.variableList.push_back(var);
 		}
 	}
 	return out;
+}
+
+nlohmann::json MapProgramAdapter::VariablesToJson(const GeneratorVariable& vars) {
+	nlohmann::json unit;
+	unit["unitName"] = "Variables";
+	unit["units"] = nlohmann::json::array();
+	for (const auto& v : vars.variableList) {
+		nlohmann::json jv;
+		jv["name"] = v.name;
+		jv["type"] = VarTypeToString(v.type);
+		switch (v.type) {
+		case VarType::Bool:    jv["value"] = std::get<bool>(v.value); break;
+		case VarType::Int:     jv["value"] = std::get<int>(v.value); break;
+		case VarType::Float:   jv["value"] = std::get<float>(v.value); break;
+		case VarType::Double:  jv["value"] = std::get<double>(v.value); break;
+		case VarType::String:  jv["value"] = std::get<std::string>(v.value); break;
+		case VarType::Vector2: { const auto& a = std::get<Vector2>(v.value); jv["value"] = { a.x, a.y }; break; }
+		case VarType::Vector3: { const auto& a = std::get<Vector3>(v.value); jv["value"] = { a.x, a.y, a.z }; break; }
+		case VarType::Vector4: { const auto& a = std::get<Vector4>(v.value); jv["value"] = { a.x, a.y, a.z, a.w }; break; }
+		}
+		unit["units"].push_back(jv);
+	}
+	/// JsonToVariables と同じ形：[ { unitName, units:[...] } ]
+	return nlohmann::json::array({ unit });
 }
 
 int MapProgramAdapter::CallBuiltin(const std::string& name, const std::vector<ExpressionNode*>& args, RuntimeContext& ctx) {
@@ -290,12 +315,63 @@ TileMapData MapProgramAdapter::GenerateFromJson(const nlohmann::json& file, int 
 	/// 変数：指定があればそれ、無ければファイルの値（どちらもコピーで実行）
 	GeneratorVariable runVars = vars ? *vars : JsonToVariables(file);
 
-	/// JSON → AST → 実行
-	std::vector<Node*> nodes = LoadAstFromJson(file.value("script", nlohmann::json::array()));
-	TileMapData map = Run(nodes, width, height, useSeed, blankId, &runVars, outErrors);
+	/// JSON → AST（函數ごと。OFF の函數は飛ばす。古い形式は "script" 1 つ）
+	std::vector<std::vector<Node*>> layers;
+	std::vector<std::string> layerNames;
+	if (file.contains("functions")) {
+		for (const auto& f : file["functions"]) {
+			if (!f.value("enabled", true)) continue;
+			layers.push_back(LoadAstFromJson(f.value("script", nlohmann::json::array())));
+			layerNames.push_back(f.value("name", std::string("Function")));
+		}
+	} else {
+		layers.push_back(LoadAstFromJson(file.value("script", nlohmann::json::array())));
+		layerNames.push_back("Main");
+	}
+
+	TileMapData map = GenerateUnit(layers, layerNames, width, height, useSeed, blankId, &runVars, outErrors);
 	map.name = file.value("name", std::string("UnnamedMap"));
 
-	for (auto* n : nodes) delete n;
+	for (auto& layer : layers) for (auto* n : layer) delete n;
+	return map;
+}
+
+TileMapData MapProgramAdapter::GenerateUnit(
+	const std::vector<std::vector<Node*>>& layers,
+	const std::vector<std::string>& layerNames,
+	int width,
+	int height,
+	int seed,
+	int blankId,
+	GeneratorVariable* vars,
+	std::vector<std::string>* outErrors,
+	const std::vector<GeneratorVariable*>* layerVars) {
+
+	TileMapData map;
+	map.Resize(width, height, blankId);
+
+	RuntimeContext ctx;
+	ctx.width = width;
+	ctx.height = height;
+	ctx.blankId = blankId;
+	ctx.map = &map;
+	ctx.genVars = vars;
+	ctx.rng.SetSeed(static_cast<unsigned int>(seed));
+
+	/// 函數（層）を上から順に、同じマップへ重ねる
+	for (size_t i = 0; i < layers.size(); ++i) {
+		ctx.locals.clear();                         // int x などは函數ごと（マップ・変数・乱数は引き継ぐ）
+		/// その層の変数（函數ごとに違う Variables を使う時）
+		ctx.genVars = (layerVars && i < layerVars->size() && (*layerVars)[i]) ? (*layerVars)[i] : vars;
+		const size_t before = ctx.errors.size();
+		for (auto* n : layers[i]) ExecuteNode(n, ctx);
+
+		/// どの函數のエラーか分かるように名前を付ける
+		const std::string tag = "[" + (i < layerNames.size() ? layerNames[i] : std::to_string(i + 1)) + "] ";
+		for (size_t e = before; e < ctx.errors.size(); ++e) ctx.errors[e] = tag + ctx.errors[e];
+	}
+
+	if (outErrors) *outErrors = ctx.errors;
 	return map;
 }
 

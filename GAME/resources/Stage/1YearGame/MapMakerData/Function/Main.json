@@ -1,12 +1,7 @@
 {
     "code": "for (y = 0; y < height; y++) {\n    for (x = 0; x < width; x++) {\n        if (rand(100) < 30) {\n            result[y][x] = 21;\n        }else{\n           if(abc){\n              result[y][x] = 22;\n            }\n        }\n    }\n}",
-    "context": {
-        "height": 21,
-        "seed": 1211145058,
-        "targetMap": "",
-        "width": 35
-    },
-    "name": "new_MapMakerData_1",
+    "kind": "MapFunction",
+    "name": "Main",
     "script": [
         {
             "body": [
@@ -113,7 +108,8 @@
                         "value": "0"
                     },
                     "type": "for",
-                    "var": "x"
+                    "var": "x",
+                    "varType": "int"
                 }
             ],
             "cond": {
@@ -145,19 +141,8 @@
                 "value": "0"
             },
             "type": "for",
-            "var": "y"
-        }
-    ],
-    "variables": [
-        {
-            "unitName": "Variables",
-            "units": [
-                {
-                    "name": "abc",
-                    "type": "Bool",
-                    "value": true
-                }
-            ]
+            "var": "y",
+            "varType": "int"
         }
     ]
 }

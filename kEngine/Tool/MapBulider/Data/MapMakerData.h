@@ -31,14 +31,13 @@ public:
 	void SetProjectPath(const std::string& path) { mapMakerPath_ = path; }
 	std::string GetProjectPath() const { return mapMakerPath_; }
 	/// Script関連
-	void SetCodingText(const std::string& text) { codingText_ = text; }
-	const std::string& GetCodingText() const { return codingText_; }
+	/// Script関連（今選んでいる函數の腳本）
+	void SetCodingText(const std::string& text) { if (MakerFunction* f = CurrentFunction()) f->code = text; }
+	const std::string& GetCodingText() const;
 	/// GeneratorVariable取得
 	GeneratorVariable& GetGeneratorVariables() { return generatorVariables_; }
 
 	/// ====================== コンパイル　====================== ///
-	/// 資料をロジックか、暗号化
-	void Compile();
 	/// std::stringのJson文章を生成
 	void BuildJson();
 
@@ -62,10 +61,25 @@ public:
 	GenerateSettings& GetGenerateSettings() { return generateSettings_; }
 	const GenerateSettings& GetGenerateSettings() const { return generateSettings_; }
 
+	/// ================= 函數（層）：上から順に同じマップへ重ねて実行 ================= ///
+	struct MakerFunction {
+		std::string name = "Main";
+		bool enabled = true;          // false = 生成の時に飛ばす
+		std::string code;             // 腳本
+	};
+	std::vector<MakerFunction>& GetFunctions() { return functions_; }
+	int GetCurrentFunction() const { return currentFunction_; }
+	MakerFunction* CurrentFunction();
+	const MakerFunction* CurrentFunction() const;
+	/// 編集する函數を切り替える（範囲外 → -1）
+	void SelectFunction(int index);
+	/// 追加 / 複製 / 削除 / 並べ替え（選択も追いかける）
+	void AddFunction(const std::string& name);
+	void DuplicateFunction(int index);
+	void RemoveFunction(int index);
+	void MoveFunction(int index, int dir);
 
 	/// ==================== ローディング関数　==================== ///
-	// 載入使用者腳本
-	void LoadScript(const std::string& script) { script_ = script; }
 	// 取得編譯結果
 	const std::string& GetMapMakerJson() const { return mapBuilderJson_; }
 	const std::string& GetMapDataJson() const { return mapDataJson_; }
@@ -81,14 +95,9 @@ private:
 	std::string mapName_;
 	std::string mapMakerPath_ = (FileManager::GetDesktopPath());
 
-	// 使用者腳本
-	std::string script_;
-	std::string codingText_;   // UI 暫存文字
-
-	// 編譯器中間資料
-	std::vector<std::string> tokens_;
-	std::vector<std::string> sentences_;
-	std::vector<Node*> nodes_;
+	// 函數（層）。最初から 1 つ
+	std::vector<MakerFunction> functions_{ MakerFunction{} };
+	int currentFunction_ = 0;
 
 	// 編譯結果 JSON
 	std::string mapBuilderJson_;   // MapBuilder.json（生成邏輯）
