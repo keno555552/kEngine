@@ -9,7 +9,7 @@
                 {
                     "name": "abc",
                     "type": "Bool",
-                    "value": true
+                    "value": false
                 }
             ]
         }
