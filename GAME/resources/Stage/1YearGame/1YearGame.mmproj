@@ -3,7 +3,13 @@
         "MapMakerData/Function/Main.json",
         "MapMakerData/Function/SpawnStone.json",
         "MapMakerData/Function/GrownGrass.json",
-        "MapMakerData/Function/Function2.json"
+        "MapMakerData/Function/Function2.json",
+        "MapMakerData/Function/Earth.json",
+        "MapMakerData/Function/Grass.json",
+        "MapMakerData/Function/OldOre.json",
+        "MapMakerData/Function/Rock.json",
+        "MapMakerData/Function/Cave.json",
+        "MapMakerData/Function/OldDungeon.json"
     ],
     "kind": "MapEditorProject",
     "mapData": [

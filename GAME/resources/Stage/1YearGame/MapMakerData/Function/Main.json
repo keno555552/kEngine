@@ -1,61 +1,191 @@
 {
-    "code": "for (y = 0; y < height; y++) {\n    for (x = 0; x < width; x++) {\n        if (rand(100) < 30) {\n            result[y][x] = 21;\n        }else{\n           if(abc){\n              result[y][x] = 22;\n            }\n        }\n    }\n}",
+    "code": "/// Setup\ntileType(1, 1);   // AIR \ntileType(3, 3);   // EARTH\ntileType(4, 4);   // ROCK\nfor (int y = 0; y < height; y++) { for (int x = 0; x < width; x++) { result[y][x] = 1; } }\n\n/// Earth\nfor (int y = 0; y < height; y++) { for (int x = 0; x < width; x++) {\nint n = noise(x, y) * 10;\nif (y > n + 0) { result[y][x] = 3; }\n} }\n\n/// Rock\nfor (int y = 0; y < height; y++) { for (int x = 0; x < width; x++) {\nint n = noise(x, y) * 27;\nif (y > n + 6) { result[y][x] = 4; }\n} }\n\n/// Burrow\nburrow();\n/// Grass\nsurface(3, 2);\n/// Ore\nore();\n/// Dungeon（120 x 40 以上）\ndungeon();",
     "kind": "MapFunction",
     "name": "Main",
     "script": [
+        {
+            "args": [
+                {
+                    "type": "literal",
+                    "value": "1"
+                },
+                {
+                    "type": "literal",
+                    "value": "1"
+                }
+            ],
+            "func": "tileType",
+            "type": "call"
+        },
+        {
+            "args": [
+                {
+                    "type": "literal",
+                    "value": "3"
+                },
+                {
+                    "type": "literal",
+                    "value": "3"
+                }
+            ],
+            "func": "tileType",
+            "type": "call"
+        },
+        {
+            "args": [
+                {
+                    "type": "literal",
+                    "value": "4"
+                },
+                {
+                    "type": "literal",
+                    "value": "4"
+                }
+            ],
+            "func": "tileType",
+            "type": "call"
+        },
         {
             "body": [
                 {
                     "body": [
                         {
-                            "cond": {
+                            "args": [
+                                {
+                                    "name": "x",
+                                    "type": "variable"
+                                },
+                                {
+                                    "name": "y",
+                                    "type": "variable"
+                                },
+                                {
+                                    "type": "literal",
+                                    "value": "1"
+                                }
+                            ],
+                            "func": "setTile",
+                            "type": "call"
+                        }
+                    ],
+                    "cond": {
+                        "left": {
+                            "name": "x",
+                            "type": "variable"
+                        },
+                        "op": "<",
+                        "right": {
+                            "name": "width",
+                            "type": "variable"
+                        },
+                        "type": "binary"
+                    },
+                    "inc": {
+                        "left": {
+                            "name": "x",
+                            "type": "variable"
+                        },
+                        "op": "+",
+                        "right": {
+                            "type": "literal",
+                            "value": "1"
+                        },
+                        "type": "binary"
+                    },
+                    "init": {
+                        "type": "literal",
+                        "value": "0"
+                    },
+                    "type": "for",
+                    "var": "x",
+                    "varType": "int"
+                }
+            ],
+            "cond": {
+                "left": {
+                    "name": "y",
+                    "type": "variable"
+                },
+                "op": "<",
+                "right": {
+                    "name": "height",
+                    "type": "variable"
+                },
+                "type": "binary"
+            },
+            "inc": {
+                "left": {
+                    "name": "y",
+                    "type": "variable"
+                },
+                "op": "+",
+                "right": {
+                    "type": "literal",
+                    "value": "1"
+                },
+                "type": "binary"
+            },
+            "init": {
+                "type": "literal",
+                "value": "0"
+            },
+            "type": "for",
+            "var": "y",
+            "varType": "int"
+        },
+        {
+            "body": [
+                {
+                    "body": [
+                        {
+                            "declType": "int",
+                            "expr": {
                                 "left": {
                                     "args": [
                                         {
-                                            "type": "literal",
-                                            "value": "100"
+                                            "name": "x",
+                                            "type": "variable"
+                                        },
+                                        {
+                                            "name": "y",
+                                            "type": "variable"
                                         }
                                     ],
-                                    "func": "rand",
+                                    "func": "noise",
                                     "type": "funcCall"
                                 },
-                                "op": "<",
+                                "op": "*",
                                 "right": {
                                     "type": "literal",
-                                    "value": "30"
+                                    "value": "10"
                                 },
                                 "type": "binary"
                             },
-                            "else": [
-                                {
-                                    "cond": {
-                                        "name": "abc",
+                            "type": "assign",
+                            "var": "n"
+                        },
+                        {
+                            "cond": {
+                                "left": {
+                                    "name": "y",
+                                    "type": "variable"
+                                },
+                                "op": ">",
+                                "right": {
+                                    "left": {
+                                        "name": "n",
                                         "type": "variable"
                                     },
-                                    "else": [],
-                                    "then": [
-                                        {
-                                            "args": [
-                                                {
-                                                    "name": "x",
-                                                    "type": "variable"
-                                                },
-                                                {
-                                                    "name": "y",
-                                                    "type": "variable"
-                                                },
-                                                {
-                                                    "type": "literal",
-                                                    "value": "22"
-                                                }
-                                            ],
-                                            "func": "setTile",
-                                            "type": "call"
-                                        }
-                                    ],
-                                    "type": "if"
-                                }
-                            ],
+                                    "op": "+",
+                                    "right": {
+                                        "type": "literal",
+                                        "value": "0"
+                                    },
+                                    "type": "binary"
+                                },
+                                "type": "binary"
+                            },
+                            "else": [],
                             "then": [
                                 {
                                     "args": [
@@ -69,7 +199,7 @@
                                         },
                                         {
                                             "type": "literal",
-                                            "value": "21"
+                                            "value": "3"
                                         }
                                     ],
                                     "func": "setTile",
@@ -143,6 +273,191 @@
             "type": "for",
             "var": "y",
             "varType": "int"
+        },
+        {
+            "body": [
+                {
+                    "body": [
+                        {
+                            "declType": "int",
+                            "expr": {
+                                "left": {
+                                    "args": [
+                                        {
+                                            "name": "x",
+                                            "type": "variable"
+                                        },
+                                        {
+                                            "name": "y",
+                                            "type": "variable"
+                                        }
+                                    ],
+                                    "func": "noise",
+                                    "type": "funcCall"
+                                },
+                                "op": "*",
+                                "right": {
+                                    "type": "literal",
+                                    "value": "27"
+                                },
+                                "type": "binary"
+                            },
+                            "type": "assign",
+                            "var": "n"
+                        },
+                        {
+                            "cond": {
+                                "left": {
+                                    "name": "y",
+                                    "type": "variable"
+                                },
+                                "op": ">",
+                                "right": {
+                                    "left": {
+                                        "name": "n",
+                                        "type": "variable"
+                                    },
+                                    "op": "+",
+                                    "right": {
+                                        "type": "literal",
+                                        "value": "6"
+                                    },
+                                    "type": "binary"
+                                },
+                                "type": "binary"
+                            },
+                            "else": [],
+                            "then": [
+                                {
+                                    "args": [
+                                        {
+                                            "name": "x",
+                                            "type": "variable"
+                                        },
+                                        {
+                                            "name": "y",
+                                            "type": "variable"
+                                        },
+                                        {
+                                            "type": "literal",
+                                            "value": "4"
+                                        }
+                                    ],
+                                    "func": "setTile",
+                                    "type": "call"
+                                }
+                            ],
+                            "type": "if"
+                        }
+                    ],
+                    "cond": {
+                        "left": {
+                            "name": "x",
+                            "type": "variable"
+                        },
+                        "op": "<",
+                        "right": {
+                            "name": "width",
+                            "type": "variable"
+                        },
+                        "type": "binary"
+                    },
+                    "inc": {
+                        "left": {
+                            "name": "x",
+                            "type": "variable"
+                        },
+                        "op": "+",
+                        "right": {
+                            "type": "literal",
+                            "value": "1"
+                        },
+                        "type": "binary"
+                    },
+                    "init": {
+                        "type": "literal",
+                        "value": "0"
+                    },
+                    "type": "for",
+                    "var": "x",
+                    "varType": "int"
+                }
+            ],
+            "cond": {
+                "left": {
+                    "name": "y",
+                    "type": "variable"
+                },
+                "op": "<",
+                "right": {
+                    "name": "height",
+                    "type": "variable"
+                },
+                "type": "binary"
+            },
+            "inc": {
+                "left": {
+                    "name": "y",
+                    "type": "variable"
+                },
+                "op": "+",
+                "right": {
+                    "type": "literal",
+                    "value": "1"
+                },
+                "type": "binary"
+            },
+            "init": {
+                "type": "literal",
+                "value": "0"
+            },
+            "type": "for",
+            "var": "y",
+            "varType": "int"
+        },
+        {
+            "args": [
+                {
+                    "name": "",
+                    "type": "variable"
+                }
+            ],
+            "func": "burrow",
+            "type": "call"
+        },
+        {
+            "args": [
+                {
+                    "type": "literal",
+                    "value": "3"
+                },
+                {
+                    "type": "literal",
+                    "value": "2"
+                }
+            ],
+            "func": "surface",
+            "type": "call"
+        },
+        {
+            "args": [
+                {
+                    "name": "",
+                    "type": "variable"
+                }
+            ],
+            "func": "ore",
+            "type": "call"
+        },
+        {
+            "args": [
+                {
+                    "name": "",
+                    "type": "variable"
+                }
+            ],
+            "func": "dungeon",
+            "type": "call"
         }
     ]
 }

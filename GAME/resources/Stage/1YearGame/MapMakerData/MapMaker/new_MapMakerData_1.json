@@ -1,14 +1,34 @@
 {
     "context": {
-        "height": 16,
-        "seed": 1211145058,
+        "height": 200,
+        "seed": 1211145081,
         "targetMap": "",
-        "width": 16
+        "width": 200
     },
     "functions": [
         {
             "enabled": true,
-            "file": "MapMakerData/Function/Main.json"
+            "file": "MapMakerData/Function/Earth.json"
+        },
+        {
+            "enabled": true,
+            "file": "MapMakerData/Function/Rock.json"
+        },
+        {
+            "enabled": true,
+            "file": "MapMakerData/Function/Grass.json"
+        },
+        {
+            "enabled": true,
+            "file": "MapMakerData/Function/OldOre.json"
+        },
+        {
+            "enabled": true,
+            "file": "MapMakerData/Function/Cave.json"
+        },
+        {
+            "enabled": true,
+            "file": "MapMakerData/Function/OldDungeon.json"
         }
     ],
     "kind": "MapMaker",
