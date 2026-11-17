@@ -1,7 +1,6 @@
 #include "OreSpawner.h"
 
-void OreSpawner::SetOreSetting() {
-}
+void OreSpawner::SetOreSetting() {}
 
 void OreSpawner::SetOreSpawner(int maxRow, int maxCol,
 	float attenuation, int threshold, int seed) {
@@ -17,32 +16,29 @@ void OreSpawner::SetOreSpawner(int maxRow, int maxCol) {
 	maxCol_ = maxCol;
 }
 
-void OreSpawner::MakeFormMap(TileMapData* targetMap, TileMapData* refenceMap,  int stopper) {
+void OreSpawner::MakeFormMap(TileMapData* targetMap, TileMapData* refenceMap, int stopper) {
 	for (int i = 0; i < OreType::maxType; i++) {
-		for (int y = oreSetting[i].startLevel; y <= maxRow_ && y < oreSetting[i].endLevel; y++) {
+		for (int y = oreSetting[i].startLevel; y < maxRow_ && y < oreSetting[i].endLevel; y++) {
 			for (int x = 0; x < maxCol_; x++) {
-				if (refenceMap->Row[y][x] == oreSetting[i].startPoint) {
-					if (targetMap->Row[y][x] != oreSetting[i].type) {
-						if (targetMap->Row[y][x] != stopper) {
-							bool isSkip = false;
-							for (int dy = -oreSetting[i].minGap; dy <= oreSetting[i].minGap; dy++) {
-								for (int dx = -oreSetting[i].minGap; dx <= oreSetting[i].minGap; dx++) {
-									int nx = x + dx;
-									int ny = y + dy;
-									if (nx < 0 || nx >= maxCol_ || ny < 0 || ny >= maxRow_)continue;
-									if (dx * dx + dy * dy > oreSetting[i].minGap * oreSetting[i].minGap) continue;
-									if (targetMap->Row[ny][nx] == oreSetting[i].type) {
-										isSkip = true;
-										break;
-									}
-								}
-								if (isSkip)break;
-							}
-							if (isSkip)break;
-							runOreSpawner(oreSetting[i].radius, targetMap, x, y, *refenceMap, oreSetting[i].minVolume, oreSetting[i].maxVolume, oreSetting[i].type, stopper);
+				if (refenceMap->Row[y][x] != oreSetting[i].startPoint) continue;
+				if (targetMap->Row[y][x] == oreSetting[i].type) continue;
+				if (targetMap->Row[y][x] == stopper) continue;
+				bool isSkip = false;
+				for (int dy = -oreSetting[i].minGap; dy <= oreSetting[i].minGap; dy++) {
+					for (int dx = -oreSetting[i].minGap; dx <= oreSetting[i].minGap; dx++) {
+						int nx = x + dx;
+						int ny = y + dy;
+						if (nx < 0 || nx >= maxCol_ || ny < 0 || ny >= maxRow_)continue;
+						if (dx * dx + dy * dy > oreSetting[i].minGap * oreSetting[i].minGap) continue;
+						if (targetMap->Row[ny][nx] == oreSetting[i].type) {
+							isSkip = true;
+							break;
 						}
 					}
+					if (isSkip)break;
 				}
+				if (isSkip)break;
+				runOreSpawner(oreSetting[i].radius, targetMap, x, y, *refenceMap, oreSetting[i].minVolume, oreSetting[i].maxVolume, oreSetting[i].type, stopper);
 			}
 		}
 	}
@@ -60,34 +56,32 @@ void OreSpawner::MakeOverWriteMap(TileMapData* targetMap, int stopper) {
 		for (int y = 0; y < maxRow_; y++) {
 			for (int x = 0; x < maxCol_; x++) {
 				mapData.Row[y][x] = int(perlinNoise->fBm(
-					Vector3{ float(x),float(y),1.0f } *Vector3{ 0.056f, 0.145f, 0.1f },
+					Vector3{ float(x),float(y),1.0f } * Vector3{ 0.056f, 0.145f, 0.1f },
 					1, 1.0f, 1.0f, 1.0f) * 255);
 			}
 		}
-		for (int y = oreSetting[i].startLevel; y <= maxRow_ && y < oreSetting[i].endLevel; y++) {
+		for (int y = oreSetting[i].startLevel; y < maxRow_ && y < oreSetting[i].endLevel; y++) {
 			for (int x = 0; x < maxCol_; x++) {
-				if (mapData.Row[y][x] == oreSetting[i].startPoint) {
-					if (targetMap->Row[y][x] != oreSetting[i].type) {
-						if (targetMap->Row[y][x] != stopper) {
-							bool isSkip = false;
-							for (int dy = -oreSetting[i].minGap; dy <= oreSetting[i].minGap; dy++) {
-								for (int dx = -oreSetting[i].minGap; dx <= oreSetting[i].minGap; dx++) {
-									int nx = x + dx;
-									int ny = y + dy;
-									if (nx < 0 || nx >= maxCol_ || ny < 0 || ny >= maxRow_)continue;
-									if (dx * dx + dy * dy > oreSetting[i].minGap * oreSetting[i].minGap) continue;
-									if (targetMap->Row[ny][nx] == oreSetting[i].type) {
-										isSkip = true;
-										break;
-									}
-								}
-								if (isSkip)break;
-							}
-							if (isSkip)break;
-							runOreSpawner(oreSetting[i].radius, targetMap, x, y, mapData, oreSetting[i].minVolume, oreSetting[i].maxVolume, oreSetting[i].type, stopper);
+				if (mapData.Row[y][x] != oreSetting[i].startPoint) continue;
+				if (targetMap->Row[y][x] == oreSetting[i].type) continue;
+				if (targetMap->Row[y][x] == stopper) continue;
+				bool isSkip = false;
+				for (int dy = -oreSetting[i].minGap; dy <= oreSetting[i].minGap; dy++) {
+					for (int dx = -oreSetting[i].minGap; dx <= oreSetting[i].minGap; dx++) {
+						int nx = x + dx;
+						int ny = y + dy;
+						if (nx < 0 || nx >= maxCol_ || ny < 0 || ny >= maxRow_)continue;
+						if (dx * dx + dy * dy > oreSetting[i].minGap * oreSetting[i].minGap) continue;
+						if (targetMap->Row[ny][nx] == oreSetting[i].type) {
+							isSkip = true;
+							break;
 						}
 					}
+					if (isSkip)break;
 				}
+				if (isSkip)break;
+				runOreSpawner(oreSetting[i].radius, targetMap, x, y, mapData, oreSetting[i].minVolume, oreSetting[i].maxVolume, oreSetting[i].type, stopper);
+
 			}
 		}
 

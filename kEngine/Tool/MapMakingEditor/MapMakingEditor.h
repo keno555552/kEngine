@@ -155,6 +155,12 @@ private:
 	/// TestMap(出力先を選んでいない時の生成先、Map List に入らない・保存しない、プレビュー専用）
 	MapInfo generatorScratchMap_{};
 
+	/// ===== エンジン既定 Function（PresetFunction フォルダ） ===== ///
+	struct FunctionPreset { std::string name; std::string code; };
+	std::vector<FunctionPreset> functionPresets_;
+	static constexpr const char* kPresetFolder = "kEngine/EngineAssets/MapMakerEditor/PresetFunction";
+
+
 
 	/// ============= UI関連 ==============///
 	
@@ -242,6 +248,7 @@ private:
 	void ImGuiObjectPreview(MapData* data);
 	void ChangeUnitId(MapData& data, int oldId, int newId);
 
+
 	/// MapGenerator 関連
 	MapData* FindMapData(const std::string& name);
 	void SelectMap(int index);
@@ -261,6 +268,8 @@ private:
 	void CommitCode();
 	/// 今の MapMaker の slot 番目の函數を編集する
 	void SelectFunctionSlot(int slot);
+	/// フォルダの Function ファイルを読む（コンストラクタで 1 回、New の Reload でも）
+	void LoadFunctionPresets();
 	/// makerStore_ のログを debugText_ に移す
 	void FlushStoreLog();
 	/// プロジェクトフォルダからの相対パスにする（フォルダの外なら空。まだプロジェクトが無ければ決める）

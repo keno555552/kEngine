@@ -3,7 +3,13 @@
         "MapMakerData/Function/Main.json",
         "MapMakerData/Function/SpawnStone.json",
         "MapMakerData/Function/GrownGrass.json",
-        "MapMakerData/Function/Function2.json"
+        "MapMakerData/Function/Function2.json",
+        "MapMakerData/Function/Earth.json",
+        "MapMakerData/Function/Grass.json",
+        "MapMakerData/Function/OldOre.json",
+        "MapMakerData/Function/Rock.json",
+        "MapMakerData/Function/Cave.json",
+        "MapMakerData/Function/OldDungeon.json"
     ],
     "kind": "MapEditorProject",
     "mapData": [
@@ -21,9 +27,9 @@
         "MapMakerData/Variables/Shared/Common.json"
     ],
     "variables": [
+        "MapMakerData/Variables/Shared/Common.json",
         "MapMakerData/Variables/new_MapMakerData_1_variables.json",
-        "MapMakerData/Variables/new_MapMakerData_2_variables.json",
-        "MapMakerData/Variables/Shared/Common.json"
+        "MapMakerData/Variables/new_MapMakerData_2_variables.json"
     ],
     "version": 1
 }

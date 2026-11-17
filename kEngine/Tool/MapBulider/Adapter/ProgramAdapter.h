@@ -12,6 +12,7 @@ using std::endl;
 #include "Utility/randomMaker.h"
 
 #include "Tool/MapBulider/TileMap.h"
+#include "PerlinNoise/PerlinNoise.h"
 #include "InstructionCompiler.h"
 
 /// スクリプトの値（int か float）
@@ -44,6 +45,25 @@ struct RuntimeContext
 
 	/// 同じ seed → 同じ乱数列
 	RandomMaker rng{ true, 0 };
+
+	/// 地図の seed（srand / noise / burrow などが使う）
+	int seed = 0;
+	/// noise() 用（seed で並びが変わる）
+	PerlinNoise perlin;
+	/// 旧生成器の種類（Type：AIR=1, EARTH=3 ...）→ この地図の ID。無ければ同じ番号
+	std::map<int, int> tileTypes;
+
+	/// seed をまとめて設定
+	void SetSeed(int s) {
+		seed = s;
+		rng.SetSeed(static_cast<unsigned int>(s));
+		perlin.SetSeed(s);
+	}
+	/// 旧 Type → この地図の ID
+	int TypeToId(int type) const {
+		auto it = tileTypes.find(type);
+		return it != tileTypes.end() ? it->second : type;
+	}
 
 	/// 実行中のエラー（知らない関数・引数の数違い）。同じものは 1 回だけ
 	std::vector<std::string> errors;
@@ -96,8 +116,10 @@ public:
 	/// GeneratorVariable → json の "variables"（JsonToVariables の逆）
 	static nlohmann::json VariablesToJson(const GeneratorVariable& vars);
 
+	/// 変数を名前で読む（ローカル → GeneratorVariable）。無ければ false（組み込み関数の「名前付き設定」用）
+	static bool ReadVariable(RuntimeContext& ctx, const std::string& name, ScriptValue& out);
 	/// 組み込み関数を名前で呼ぶ（文・式どちらからも）
-	static int CallBuiltin(const std::string& name, const std::vector<ExpressionNode*>& args, RuntimeContext& ctx);
+	static ScriptValue CallBuiltin(const std::string& name, const std::vector<ExpressionNode*>& args, RuntimeContext& ctx);
 
 	/// ==================== Ast実行相關 ===================== ///
 	static void ExecuteNode(Node* node, RuntimeContext& ctx);

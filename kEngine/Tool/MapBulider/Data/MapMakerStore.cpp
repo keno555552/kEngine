@@ -137,6 +137,7 @@ bool MapMakerStore::WriteToProject(nlohmann::json& project, bool onlyUnsaved) {
 	if (ok) {
 		for (const auto& old : oldFiles) {
 			if (makerPathMap_.count(old) || functionPathMap_.count(old) || variablesPathMap_.count(old)) continue;
+			if (old.rfind("MapMakerData/", 0) != 0) continue;   // プロジェクトの外（Preset・別プロジェクト）は消さない＝コピー扱い
 			fs::remove(FullPath(old), ec);
 		}
 	}

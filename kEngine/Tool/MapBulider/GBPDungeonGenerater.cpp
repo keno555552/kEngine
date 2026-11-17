@@ -1,4 +1,4 @@
-﻿#include "GBPDungeonGenerater.h"
+#include "GBPDungeonGenerater.h"
 
 GBPDungeonGenerater::~GBPDungeonGenerater() {
 	delete perlinNoise, perlinNoise = nullptr;
@@ -293,13 +293,13 @@ void GBPDungeonGenerater::RoadSpawner(TileMapData* targetMap, std::vector<GBPDun
 	RoadSpawnerVertical(targetMap, roomData, stopper);
 }
 
-
 Vector2 GBPDungeonGenerater::CenterTunner(int cx, int cy, int dungeonWidth, int dungeonHeight) {
+	/// ダンジョン全体がマップに入るように中心をずらす（中心は [半分, 端 - 半分]）
 	Vector2 resuit = { (float)cx,(float)cy };
-	if ((cx + dungeonWidth / 2) > maxCol_) { resuit.x = float(maxCol_ - dungeonWidth); }
-	if ((cy + dungeonHeight / 2) > maxRow_) { resuit.y = float(maxRow_ - dungeonHeight); }
-	if ((cx - dungeonWidth / 2) < 0) { resuit.x = float(dungeonWidth); }
-	if ((cy - dungeonHeight / 2) < 0) { resuit.y = float(dungeonHeight); }
+	if ((cx + dungeonWidth / 2) > maxCol_) { resuit.x = float(maxCol_ - (dungeonWidth - dungeonWidth / 2)); }
+	if ((cy + dungeonHeight / 2) > maxRow_) { resuit.y = float(maxRow_ - (dungeonHeight - dungeonHeight / 2)); }
+	if ((cx - dungeonWidth / 2) < 0) { resuit.x = float(dungeonWidth / 2); }
+	if ((cy - dungeonHeight / 2) < 0) { resuit.y = float(dungeonHeight / 2); }
 	return resuit;
 }
 

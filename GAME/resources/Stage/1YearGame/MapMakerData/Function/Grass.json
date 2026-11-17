@@ -1,0 +1,39 @@
+{
+    "code": "/// Grass: the top earth cell of each column becomes grass\n/// ---- Settings ----\nint earthId = 3;\nint grassId = 2;\n\nsurface(earthId, grassId);\n",
+    "kind": "MapFunction",
+    "name": "Grass",
+    "script": [
+        {
+            "declType": "int",
+            "expr": {
+                "type": "literal",
+                "value": "3"
+            },
+            "type": "assign",
+            "var": "earthId"
+        },
+        {
+            "declType": "int",
+            "expr": {
+                "type": "literal",
+                "value": "2"
+            },
+            "type": "assign",
+            "var": "grassId"
+        },
+        {
+            "args": [
+                {
+                    "name": "earthId",
+                    "type": "variable"
+                },
+                {
+                    "name": "grassId",
+                    "type": "variable"
+                }
+            ],
+            "func": "surface",
+            "type": "call"
+        }
+    ]
+}

@@ -1,0 +1,87 @@
+{
+    "code": "/// OldDungeon: old GBPDungeon rooms (map must be at least 120 x 40)\n/// old type -> id of this map (not needed if the numbers are the same)\ntileType(1, 0);   // AIR\ntileType(4, 4);   // ROCK (wall)\ntileType(5, 5);   // IRON (treasure room)\ntileType(8, 8);   // SPAWNER\ntileType(9, 9);   // DOOR\n\ndungeon(1);\n",
+    "kind": "MapFunction",
+    "name": "OldDungeon",
+    "script": [
+        {
+            "args": [
+                {
+                    "type": "literal",
+                    "value": "1"
+                },
+                {
+                    "type": "literal",
+                    "value": "0"
+                }
+            ],
+            "func": "tileType",
+            "type": "call"
+        },
+        {
+            "args": [
+                {
+                    "type": "literal",
+                    "value": "4"
+                },
+                {
+                    "type": "literal",
+                    "value": "4"
+                }
+            ],
+            "func": "tileType",
+            "type": "call"
+        },
+        {
+            "args": [
+                {
+                    "type": "literal",
+                    "value": "5"
+                },
+                {
+                    "type": "literal",
+                    "value": "5"
+                }
+            ],
+            "func": "tileType",
+            "type": "call"
+        },
+        {
+            "args": [
+                {
+                    "type": "literal",
+                    "value": "8"
+                },
+                {
+                    "type": "literal",
+                    "value": "8"
+                }
+            ],
+            "func": "tileType",
+            "type": "call"
+        },
+        {
+            "args": [
+                {
+                    "type": "literal",
+                    "value": "9"
+                },
+                {
+                    "type": "literal",
+                    "value": "9"
+                }
+            ],
+            "func": "tileType",
+            "type": "call"
+        },
+        {
+            "args": [
+                {
+                    "type": "literal",
+                    "value": "1"
+                }
+            ],
+            "func": "dungeon",
+            "type": "call"
+        }
+    ]
+}

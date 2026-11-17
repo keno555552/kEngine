@@ -1,0 +1,73 @@
+{
+    "code": "/// OldOre: old OreSpawner (iron / gold / diamond, depth and amount are fixed)\n/// old type -> id of this map (not needed if the numbers are the same)\ntileType(1, 1);   // AIR\ntileType(5, 5);   // IRON\ntileType(6, 6);   // GOLD\ntileType(7, 7);   // DIAMOND\n\nore();\n",
+    "kind": "MapFunction",
+    "name": "OldOre",
+    "script": [
+        {
+            "args": [
+                {
+                    "type": "literal",
+                    "value": "1"
+                },
+                {
+                    "type": "literal",
+                    "value": "1"
+                }
+            ],
+            "func": "tileType",
+            "type": "call"
+        },
+        {
+            "args": [
+                {
+                    "type": "literal",
+                    "value": "5"
+                },
+                {
+                    "type": "literal",
+                    "value": "5"
+                }
+            ],
+            "func": "tileType",
+            "type": "call"
+        },
+        {
+            "args": [
+                {
+                    "type": "literal",
+                    "value": "6"
+                },
+                {
+                    "type": "literal",
+                    "value": "6"
+                }
+            ],
+            "func": "tileType",
+            "type": "call"
+        },
+        {
+            "args": [
+                {
+                    "type": "literal",
+                    "value": "7"
+                },
+                {
+                    "type": "literal",
+                    "value": "7"
+                }
+            ],
+            "func": "tileType",
+            "type": "call"
+        },
+        {
+            "args": [
+                {
+                    "name": "",
+                    "type": "variable"
+                }
+            ],
+            "func": "ore",
+            "type": "call"
+        }
+    ]
+}

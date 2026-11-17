@@ -1,0 +1,5 @@
+{
+    "kind": "MapFunction",
+    "name": "Grass",
+    "code": "/// Grass: the top earth cell of each column becomes grass\n/// ---- Settings ----\nint earthId = 3;\nint grassId = 2;\n\nsurface(earthId, grassId);\n"
+}

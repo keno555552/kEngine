@@ -1,0 +1,216 @@
+{
+    "code": "/// Earth: ground surface made with noise (above the ground = air)\n/// ---- Settings (to share with other maps, delete the line and add the same name to Variables) ----\nint airId = 0;        // air id\nint earthId = 3;      // earth id\nint earthLevel = 0;   // ground height (cells from the top)\nint earthRange = 10;  // height of the hills\nfloat scale = 0.1;    // noise scale (smaller = smoother)\n\nfor (int y = 0; y < height; y++) { for (int x = 0; x < width; x++) {\n\tint n = noise(x, y, scale) * earthRange;\n\tif (y > n + earthLevel) { result[y][x] = earthId; } else { result[y][x] = airId; }\n} }\n",
+    "kind": "MapFunction",
+    "name": "Earth",
+    "script": [
+        {
+            "declType": "int",
+            "expr": {
+                "type": "literal",
+                "value": "0"
+            },
+            "type": "assign",
+            "var": "airId"
+        },
+        {
+            "declType": "int",
+            "expr": {
+                "type": "literal",
+                "value": "3"
+            },
+            "type": "assign",
+            "var": "earthId"
+        },
+        {
+            "declType": "int",
+            "expr": {
+                "type": "literal",
+                "value": "0"
+            },
+            "type": "assign",
+            "var": "earthLevel"
+        },
+        {
+            "declType": "int",
+            "expr": {
+                "type": "literal",
+                "value": "10"
+            },
+            "type": "assign",
+            "var": "earthRange"
+        },
+        {
+            "declType": "float",
+            "expr": {
+                "type": "literal",
+                "value": "0.1"
+            },
+            "type": "assign",
+            "var": "scale"
+        },
+        {
+            "body": [
+                {
+                    "body": [
+                        {
+                            "declType": "int",
+                            "expr": {
+                                "left": {
+                                    "args": [
+                                        {
+                                            "name": "x",
+                                            "type": "variable"
+                                        },
+                                        {
+                                            "name": "y",
+                                            "type": "variable"
+                                        },
+                                        {
+                                            "name": "scale",
+                                            "type": "variable"
+                                        }
+                                    ],
+                                    "func": "noise",
+                                    "type": "funcCall"
+                                },
+                                "op": "*",
+                                "right": {
+                                    "name": "earthRange",
+                                    "type": "variable"
+                                },
+                                "type": "binary"
+                            },
+                            "type": "assign",
+                            "var": "n"
+                        },
+                        {
+                            "cond": {
+                                "left": {
+                                    "name": "y",
+                                    "type": "variable"
+                                },
+                                "op": ">",
+                                "right": {
+                                    "left": {
+                                        "name": "n",
+                                        "type": "variable"
+                                    },
+                                    "op": "+",
+                                    "right": {
+                                        "name": "earthLevel",
+                                        "type": "variable"
+                                    },
+                                    "type": "binary"
+                                },
+                                "type": "binary"
+                            },
+                            "else": [
+                                {
+                                    "args": [
+                                        {
+                                            "name": "x",
+                                            "type": "variable"
+                                        },
+                                        {
+                                            "name": "y",
+                                            "type": "variable"
+                                        },
+                                        {
+                                            "name": "airId",
+                                            "type": "variable"
+                                        }
+                                    ],
+                                    "func": "setTile",
+                                    "type": "call"
+                                }
+                            ],
+                            "then": [
+                                {
+                                    "args": [
+                                        {
+                                            "name": "x",
+                                            "type": "variable"
+                                        },
+                                        {
+                                            "name": "y",
+                                            "type": "variable"
+                                        },
+                                        {
+                                            "name": "earthId",
+                                            "type": "variable"
+                                        }
+                                    ],
+                                    "func": "setTile",
+                                    "type": "call"
+                                }
+                            ],
+                            "type": "if"
+                        }
+                    ],
+                    "cond": {
+                        "left": {
+                            "name": "x",
+                            "type": "variable"
+                        },
+                        "op": "<",
+                        "right": {
+                            "name": "width",
+                            "type": "variable"
+                        },
+                        "type": "binary"
+                    },
+                    "inc": {
+                        "left": {
+                            "name": "x",
+                            "type": "variable"
+                        },
+                        "op": "+",
+                        "right": {
+                            "type": "literal",
+                            "value": "1"
+                        },
+                        "type": "binary"
+                    },
+                    "init": {
+                        "type": "literal",
+                        "value": "0"
+                    },
+                    "type": "for",
+                    "var": "x",
+                    "varType": "int"
+                }
+            ],
+            "cond": {
+                "left": {
+                    "name": "y",
+                    "type": "variable"
+                },
+                "op": "<",
+                "right": {
+                    "name": "height",
+                    "type": "variable"
+                },
+                "type": "binary"
+            },
+            "inc": {
+                "left": {
+                    "name": "y",
+                    "type": "variable"
+                },
+                "op": "+",
+                "right": {
+                    "type": "literal",
+                    "value": "1"
+                },
+                "type": "binary"
+            },
+            "init": {
+                "type": "literal",
+                "value": "0"
+            },
+            "type": "for",
+            "var": "y",
+            "varType": "int"
+        }
+    ]
+}

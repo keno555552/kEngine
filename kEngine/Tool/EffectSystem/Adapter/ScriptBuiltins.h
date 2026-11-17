@@ -12,8 +12,8 @@ struct BuiltinFunc {
 	int maxArgs = 0;
 	std::string usage;                // ReadMe 用："rand(min, max)"
 	std::string desc;                 // ReadMe 用：説明
-	/// 引数は評価済みの値。戻り値は式で使われる時だけ意味がある（文なら捨てる）
-	std::function<int(RuntimeContext& ctx, const std::vector<int>& args)> func;
+	/// 引数は評価済みの値（int / float）。戻り値は式で使われる時だけ意味がある（文なら捨てる）
+	std::function<ScriptValue(RuntimeContext& ctx, const std::vector<ScriptValue>& args)> func;
 };
 
 class ScriptBuiltins {

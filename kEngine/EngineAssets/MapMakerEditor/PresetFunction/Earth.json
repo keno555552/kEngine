@@ -1,0 +1,5 @@
+{
+    "kind": "MapFunction",
+    "name": "Earth",
+    "code": "/// Earth: ground surface made with noise (above the ground = air)\n/// ---- Settings (to share with other maps, delete the line and add the same name to Variables) ----\nint airId = 1;        // air id\nint earthId = 3;      // earth id\nint earthLevel = 0;   // ground height (cells from the top)\nint earthRange = 10;  // height of the hills\nfloat scale = 0.1;    // noise scale (smaller = smoother)\n\nfor (int y = 0; y < height; y++) { for (int x = 0; x < width; x++) {\n\tint n = noise(x, y, scale) * earthRange;\n\tif (y > n + earthLevel) { result[y][x] = earthId; } else { result[y][x] = airId; }\n} }\n"
+}

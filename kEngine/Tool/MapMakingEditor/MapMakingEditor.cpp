@@ -1680,13 +1680,35 @@ void MapMakingEditor::ImGuiMapMakerWindow(ImVec2 size, ImVec2* outputSize, ImVec
 		const bool hasCur = cur >= 0 && cur < (int)slots.size();
 		const int insertAt = hasCur ? cur + 1 : (int)slots.size();   // 選んでいる所のすぐ下（無ければ最後）
 
-		/// New：新しい Function ファイル（今の函數と同じ Variables を使う）
-		if (ImGuiWidgets::WrapButton("New", true)) {
-			const int fh = makerStore_.CreateFunction("Function" + std::to_string(slots.size()));
-			slots.insert(slots.begin() + insertAt, MapMakerAsset::Entry{ fh, true });
-			maker->isSaved = false;
-			SelectFunctionSlot(insertAt);
+		/// New：空の Function か、Preset から作る（コピー。直しても Preset は変わらない）
+		if (ImGuiWidgets::WrapButton("New", true)) ImGui::OpenPopup("NewFunction");
+		if (ImGui::BeginPopup("NewFunction")) {
+			int made = -1;
+			if (ImGui::Selectable("(Empty)")) made = makerStore_.CreateFunction("Function" + std::to_string(slots.size()));
 
+			ImGui::SeparatorText("Preset");
+			if (functionPresets_.empty()) ImGui::TextDisabled("(none in %s)", kPresetFolder);
+			for (size_t p = 0; p < functionPresets_.size(); ++p) {
+				const FunctionPreset& pr = functionPresets_[p];
+				ImGui::PushID(static_cast<int>(p));
+				if (ImGui::Selectable(pr.name.c_str())) {
+					/// 同じ名前があれば _2, _3 ...
+					std::string name = pr.name;
+					for (int n = 2; makerStore_.FindFunction(name) >= 0; ++n) name = pr.name + "_" + std::to_string(n);
+					made = makerStore_.CreateFunction(name);
+					makerStore_.SetFunctionCode(made, pr.code);   // コンパイルもここで
+				}
+				ImGui::PopID();
+			}
+			ImGui::Separator();
+			if (ImGui::Selectable("Reload Presets", false, ImGuiSelectableFlags_DontClosePopups)) LoadFunctionPresets();
+
+			if (made >= 0) {
+				slots.insert(slots.begin() + insertAt, MapMakerAsset::Entry{ made, true });
+				maker->isSaved = false;
+				SelectFunctionSlot(insertAt);                  // code 欄に中身が出る
+			}
+			ImGui::EndPopup();
 		}
 
 		/// Add：既にある Function を入れる（共有。直すと使っている全部の MapMaker に効く）
@@ -2550,32 +2572,29 @@ void MapMakingEditor::ImGuiScriptReadMe() {
 
 	/// 出力
 	static const Entry kOutput[] = {
-		{ "result[y][x] = v",  "save v to the map at (x, y)  ※disabled outside the map" },
+		{ "result[y][x] = v",  "save v to the map at (x, y). ignored outside the map" },
 		{ "setTile(x, y, v)",  "same as result[y][x] = v" },
 	};
 	/// 読み取り
 	static const Entry kRead[] = {
-		{ "result[y][x]",      "value at (x, y)  ※disabled outside the map" },
+		{ "result[y][x]",      "value at (x, y). blank outside the map" },
 		{ "getTile(x, y)",     "same as result[y][x]" },
 	};
 	/// 組み込みの値
 	static const Entry kBuiltin[] = {
-		{ "width / height",    "map size (Maker Info の Size)" },
-		{ "blank",             "blank id of the target MapData (if not it will be 0)" },
-	};
-	/// 関数
-	static const Entry kFunc[] = {
-		{ "rand()",            "random 0 ~ 99 (seed to lock the random number)" },
-		{ "rand(n)",           "random 0 ~ n-1" },
-		{ "rand(min, max)",    "random min ~ max" },
+		{ "width / height",    "map size (Size in Maker Info)" },
+		{ "blank",             "blank id of the target MapData (0 if none)" },
 	};
 	/// 構文
 	static const Entry kSyntax[] = {
-		{ "a = expr",                  "local variable (if Variables List is used)" },
+		{ "int a = 1;  float f = 0.5;",  "declare a local variable (must declare before use)" },
+		{ "a = expr;",                   "assign (local, or a variable in Variables List)" },
+		{ "pos.x / pos.y",               "member of a Vector variable (read / write)" },
 		{ "a += n / a -= n / a++ / a--", "" },
-		{ "for (i = 0; i < n; i++) { }", "loop (multiple levels OK)" },
-		{ "if (cond) { } else { }",    "else if isn't supported → else { if ... }" },
-		{ "+ - * / %   < > <= >= == !=", "int only, && || isn't supported" },
+		{ "for (int i = 0; i < n; i++) { }", "loop (nesting OK, the counter is declared automatically)" },
+		{ "if (cond) { } else { }",      "no 'else if' yet: use else { if ... }" },
+		{ "+ - * / %   < > <= >= == !=", "int / float (int / int = int). && || not supported yet" },
+		{ "// comment   /* comment */",  "ignored by the compiler" },
 	};
 
 	auto table = [](const char* title, const Entry* list, size_t count) {
@@ -3551,6 +3570,23 @@ void MapMakingEditor::SelectFunctionSlot(int slot) {
 	MapFunctionAsset* f = CurrentFunction();
 	codeingText_ = f ? f->code : std::string();
 	MapInfoLoadJson();
+}
+
+void MapMakingEditor::LoadFunctionPresets() {
+	functionPresets_.clear();
+	std::error_code ec;
+	if (!std::filesystem::exists(kPresetFolder, ec)) return;
+
+	for (const auto& e : std::filesystem::directory_iterator(kPresetFolder, ec)) {
+		if (e.path().extension() != ".json") continue;
+		std::ifstream in(e.path());
+		const nlohmann::json j = nlohmann::json::parse(in, nullptr, false);   // 壊れたファイルは飛ばす
+		if (j.is_discarded() || !j.contains("code")) continue;               // Function ファイルだけ
+		functionPresets_.push_back({ j.value("name", e.path().stem().string()), j.value("code", std::string()) });
+	}
+	/// 名前順
+	std::sort(functionPresets_.begin(), functionPresets_.end(),
+		[](const FunctionPreset& a, const FunctionPreset& b) { return a.name < b.name; });
 }
 
 void MapMakingEditor::FlushStoreLog() {

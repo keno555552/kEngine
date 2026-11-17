@@ -1,0 +1,493 @@
+{
+    "code": "/// Cave: Terraria-like caves (small holes -> medium caves -> tunnels from the surface)\n/// tunnel(x, y, id, radius, length). How it turns is set by variables with the same name\n/// ---- Settings ----\nint airId = 0;\nint caveTop = 15;     // dig below this row\n\n/// Many small holes\nint turnEvery = 4;    // turn every n steps\nint turnAngle = 50;   // max turn per time (degrees)\nint branchMin = 0;    // number of branches (min)\nint branchMax = 0;    // number of branches (max)\nfloat roughness = 0.5;// edge roughness (0 = smooth)\nfloat endRatio = 0.7; // radius at the end (1 = no shrink)\nfor (int i = 0; i < 40; i++) { tunnel(srand(i * 2, 0, width), srand(i * 2 + 1, caveTop, height), airId, 1.5, 10); }\n\n/// Medium caves (with branches)\nturnEvery = 8;\nturnAngle = 30;\nbranchMin = 1;\nbranchMax = 2;\nroughness = 0.3;\nendRatio = 0.4;\nfor (int i = 0; i < 6; i++) { tunnel(srand(300 + i * 2, 0, width), srand(301 + i * 2, caveTop + 5, height), airId, 3.5, 60); }\n\n/// Long tunnels going down from the surface\nfloat dir = 80;       // direction (degrees: 0 = right, 90 = down, -1 = random)\nturnEvery = 12;\nturnAngle = 20;\nfor (int i = 0; i < 2; i++) { tunnel(srand(600 + i, 10, width - 10), 5, airId, 2.5, 90); }\n",
+    "kind": "MapFunction",
+    "name": "Cave",
+    "script": [
+        {
+            "declType": "int",
+            "expr": {
+                "type": "literal",
+                "value": "0"
+            },
+            "type": "assign",
+            "var": "airId"
+        },
+        {
+            "declType": "int",
+            "expr": {
+                "type": "literal",
+                "value": "15"
+            },
+            "type": "assign",
+            "var": "caveTop"
+        },
+        {
+            "declType": "int",
+            "expr": {
+                "type": "literal",
+                "value": "4"
+            },
+            "type": "assign",
+            "var": "turnEvery"
+        },
+        {
+            "declType": "int",
+            "expr": {
+                "type": "literal",
+                "value": "50"
+            },
+            "type": "assign",
+            "var": "turnAngle"
+        },
+        {
+            "declType": "int",
+            "expr": {
+                "type": "literal",
+                "value": "0"
+            },
+            "type": "assign",
+            "var": "branchMin"
+        },
+        {
+            "declType": "int",
+            "expr": {
+                "type": "literal",
+                "value": "0"
+            },
+            "type": "assign",
+            "var": "branchMax"
+        },
+        {
+            "declType": "float",
+            "expr": {
+                "type": "literal",
+                "value": "0.5"
+            },
+            "type": "assign",
+            "var": "roughness"
+        },
+        {
+            "declType": "float",
+            "expr": {
+                "type": "literal",
+                "value": "0.7"
+            },
+            "type": "assign",
+            "var": "endRatio"
+        },
+        {
+            "body": [
+                {
+                    "args": [
+                        {
+                            "args": [
+                                {
+                                    "left": {
+                                        "name": "i",
+                                        "type": "variable"
+                                    },
+                                    "op": "*",
+                                    "right": {
+                                        "type": "literal",
+                                        "value": "2"
+                                    },
+                                    "type": "binary"
+                                },
+                                {
+                                    "type": "literal",
+                                    "value": "0"
+                                },
+                                {
+                                    "name": "width",
+                                    "type": "variable"
+                                }
+                            ],
+                            "func": "srand",
+                            "type": "funcCall"
+                        },
+                        {
+                            "args": [
+                                {
+                                    "left": {
+                                        "left": {
+                                            "name": "i",
+                                            "type": "variable"
+                                        },
+                                        "op": "*",
+                                        "right": {
+                                            "type": "literal",
+                                            "value": "2"
+                                        },
+                                        "type": "binary"
+                                    },
+                                    "op": "+",
+                                    "right": {
+                                        "type": "literal",
+                                        "value": "1"
+                                    },
+                                    "type": "binary"
+                                },
+                                {
+                                    "name": "caveTop",
+                                    "type": "variable"
+                                },
+                                {
+                                    "name": "height",
+                                    "type": "variable"
+                                }
+                            ],
+                            "func": "srand",
+                            "type": "funcCall"
+                        },
+                        {
+                            "name": "airId",
+                            "type": "variable"
+                        },
+                        {
+                            "type": "literal",
+                            "value": "1.5"
+                        },
+                        {
+                            "type": "literal",
+                            "value": "10"
+                        }
+                    ],
+                    "func": "tunnel",
+                    "type": "call"
+                }
+            ],
+            "cond": {
+                "left": {
+                    "name": "i",
+                    "type": "variable"
+                },
+                "op": "<",
+                "right": {
+                    "type": "literal",
+                    "value": "40"
+                },
+                "type": "binary"
+            },
+            "inc": {
+                "left": {
+                    "name": "i",
+                    "type": "variable"
+                },
+                "op": "+",
+                "right": {
+                    "type": "literal",
+                    "value": "1"
+                },
+                "type": "binary"
+            },
+            "init": {
+                "type": "literal",
+                "value": "0"
+            },
+            "type": "for",
+            "var": "i",
+            "varType": "int"
+        },
+        {
+            "declType": "",
+            "expr": {
+                "type": "literal",
+                "value": "8"
+            },
+            "type": "assign",
+            "var": "turnEvery"
+        },
+        {
+            "declType": "",
+            "expr": {
+                "type": "literal",
+                "value": "30"
+            },
+            "type": "assign",
+            "var": "turnAngle"
+        },
+        {
+            "declType": "",
+            "expr": {
+                "type": "literal",
+                "value": "1"
+            },
+            "type": "assign",
+            "var": "branchMin"
+        },
+        {
+            "declType": "",
+            "expr": {
+                "type": "literal",
+                "value": "2"
+            },
+            "type": "assign",
+            "var": "branchMax"
+        },
+        {
+            "declType": "",
+            "expr": {
+                "type": "literal",
+                "value": "0.3"
+            },
+            "type": "assign",
+            "var": "roughness"
+        },
+        {
+            "declType": "",
+            "expr": {
+                "type": "literal",
+                "value": "0.4"
+            },
+            "type": "assign",
+            "var": "endRatio"
+        },
+        {
+            "body": [
+                {
+                    "args": [
+                        {
+                            "args": [
+                                {
+                                    "left": {
+                                        "type": "literal",
+                                        "value": "300"
+                                    },
+                                    "op": "+",
+                                    "right": {
+                                        "left": {
+                                            "name": "i",
+                                            "type": "variable"
+                                        },
+                                        "op": "*",
+                                        "right": {
+                                            "type": "literal",
+                                            "value": "2"
+                                        },
+                                        "type": "binary"
+                                    },
+                                    "type": "binary"
+                                },
+                                {
+                                    "type": "literal",
+                                    "value": "0"
+                                },
+                                {
+                                    "name": "width",
+                                    "type": "variable"
+                                }
+                            ],
+                            "func": "srand",
+                            "type": "funcCall"
+                        },
+                        {
+                            "args": [
+                                {
+                                    "left": {
+                                        "type": "literal",
+                                        "value": "301"
+                                    },
+                                    "op": "+",
+                                    "right": {
+                                        "left": {
+                                            "name": "i",
+                                            "type": "variable"
+                                        },
+                                        "op": "*",
+                                        "right": {
+                                            "type": "literal",
+                                            "value": "2"
+                                        },
+                                        "type": "binary"
+                                    },
+                                    "type": "binary"
+                                },
+                                {
+                                    "left": {
+                                        "name": "caveTop",
+                                        "type": "variable"
+                                    },
+                                    "op": "+",
+                                    "right": {
+                                        "type": "literal",
+                                        "value": "5"
+                                    },
+                                    "type": "binary"
+                                },
+                                {
+                                    "name": "height",
+                                    "type": "variable"
+                                }
+                            ],
+                            "func": "srand",
+                            "type": "funcCall"
+                        },
+                        {
+                            "name": "airId",
+                            "type": "variable"
+                        },
+                        {
+                            "type": "literal",
+                            "value": "3.5"
+                        },
+                        {
+                            "type": "literal",
+                            "value": "60"
+                        }
+                    ],
+                    "func": "tunnel",
+                    "type": "call"
+                }
+            ],
+            "cond": {
+                "left": {
+                    "name": "i",
+                    "type": "variable"
+                },
+                "op": "<",
+                "right": {
+                    "type": "literal",
+                    "value": "6"
+                },
+                "type": "binary"
+            },
+            "inc": {
+                "left": {
+                    "name": "i",
+                    "type": "variable"
+                },
+                "op": "+",
+                "right": {
+                    "type": "literal",
+                    "value": "1"
+                },
+                "type": "binary"
+            },
+            "init": {
+                "type": "literal",
+                "value": "0"
+            },
+            "type": "for",
+            "var": "i",
+            "varType": "int"
+        },
+        {
+            "declType": "float",
+            "expr": {
+                "type": "literal",
+                "value": "80"
+            },
+            "type": "assign",
+            "var": "dir"
+        },
+        {
+            "declType": "",
+            "expr": {
+                "type": "literal",
+                "value": "12"
+            },
+            "type": "assign",
+            "var": "turnEvery"
+        },
+        {
+            "declType": "",
+            "expr": {
+                "type": "literal",
+                "value": "20"
+            },
+            "type": "assign",
+            "var": "turnAngle"
+        },
+        {
+            "body": [
+                {
+                    "args": [
+                        {
+                            "args": [
+                                {
+                                    "left": {
+                                        "type": "literal",
+                                        "value": "600"
+                                    },
+                                    "op": "+",
+                                    "right": {
+                                        "name": "i",
+                                        "type": "variable"
+                                    },
+                                    "type": "binary"
+                                },
+                                {
+                                    "type": "literal",
+                                    "value": "10"
+                                },
+                                {
+                                    "left": {
+                                        "name": "width",
+                                        "type": "variable"
+                                    },
+                                    "op": "-",
+                                    "right": {
+                                        "type": "literal",
+                                        "value": "10"
+                                    },
+                                    "type": "binary"
+                                }
+                            ],
+                            "func": "srand",
+                            "type": "funcCall"
+                        },
+                        {
+                            "type": "literal",
+                            "value": "5"
+                        },
+                        {
+                            "name": "airId",
+                            "type": "variable"
+                        },
+                        {
+                            "type": "literal",
+                            "value": "2.5"
+                        },
+                        {
+                            "type": "literal",
+                            "value": "90"
+                        }
+                    ],
+                    "func": "tunnel",
+                    "type": "call"
+                }
+            ],
+            "cond": {
+                "left": {
+                    "name": "i",
+                    "type": "variable"
+                },
+                "op": "<",
+                "right": {
+                    "type": "literal",
+                    "value": "2"
+                },
+                "type": "binary"
+            },
+            "inc": {
+                "left": {
+                    "name": "i",
+                    "type": "variable"
+                },
+                "op": "+",
+                "right": {
+                    "type": "literal",
+                    "value": "1"
+                },
+                "type": "binary"
+            },
+            "init": {
+                "type": "literal",
+                "value": "0"
+            },
+            "type": "for",
+            "var": "i",
+            "varType": "int"
+        }
+    ]
+}

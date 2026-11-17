@@ -235,7 +235,7 @@ TileMapData MapProgramAdapter::Run(const std::vector<Node*>& nodes, int width, i
 	ctx.blankId = blankId;
 	ctx.map = &map;
 	ctx.genVars = vars;
-	ctx.rng.SetSeed(static_cast<unsigned int>(seed));
+	ctx.SetSeed(seed);
 
 	for (auto* n : nodes) ExecuteNode(n, ctx);
 	if (outErrors) *outErrors = ctx.errors;   // エラーを返す
@@ -290,18 +290,29 @@ nlohmann::json MapProgramAdapter::VariablesToJson(const GeneratorVariable& vars)
 	return nlohmann::json::array({ unit });
 }
 
-int MapProgramAdapter::CallBuiltin(const std::string& name, const std::vector<ExpressionNode*>& args, RuntimeContext& ctx) {
+bool MapProgramAdapter::ReadVariable(RuntimeContext& ctx, const std::string& name, ScriptValue& out) {
+	if (auto it = ctx.locals.find(name); it != ctx.locals.end()) { out = it->second; return true; }
+	return ReadGenVar(ctx.genVars, name, out);
+}
+
+ScriptValue MapProgramAdapter::CallBuiltin(const std::string& name, const std::vector<ExpressionNode*>& args, RuntimeContext& ctx) {
 	const BuiltinFunc* f = ScriptBuiltins::Find(name);
-	const int count = static_cast<int>(args.size());
+	/// rand() / burrow() のような空の () は「引数 0 個」（parser は空の引数を 1 つ作るので外す）
+	std::vector<ExpressionNode*> used;
+	for (auto* a : args) {
+		const bool isEmpty = a && a->isVariable && a->varName.empty();
+		if (a && !isEmpty) used.push_back(a);
+	}
+	const int count = static_cast<int>(used.size());
 
 	/// 見つからない / 引数の数が違う → エラーを 1 回だけ記録して 0
-	if (!f) { AddError(ctx, "unknown function: " + name); return 0; }
-	if (count < f->minArgs || count > f->maxArgs) { AddError(ctx, "wrong argument count: " + f->usage); return 0; }
+	if (!f) { AddError(ctx, "unknown function: " + name); return ScriptValue::Int(0); }
+	if (count < f->minArgs || count > f->maxArgs) { AddError(ctx, "wrong argument count: " + f->usage); return ScriptValue::Int(0); }
 
-	/// 引数を先に全部評価してから呼ぶ
-	std::vector<int> values;
-	values.reserve(args.size());
-	for (auto* a : args) values.push_back(EvaluateExpression(a, ctx).AsInt());
+	/// 引数を先に全部評価してから呼ぶ（int / float のまま渡す）
+	std::vector<ScriptValue> values;
+	values.reserve(used.size());
+	for (auto* a : used) values.push_back(EvaluateExpression(a, ctx));
 	return f->func(ctx, values);
 }
 
@@ -356,7 +367,7 @@ TileMapData MapProgramAdapter::GenerateUnit(
 	ctx.blankId = blankId;
 	ctx.map = &map;
 	ctx.genVars = vars;
-	ctx.rng.SetSeed(static_cast<unsigned int>(seed));
+	ctx.SetSeed(seed);
 
 	/// 函數（層）を上から順に、同じマップへ重ねる
 	for (size_t i = 0; i < layers.size(); ++i) {
@@ -505,7 +516,7 @@ ScriptValue MapProgramAdapter::EvaluateExpression(ExpressionNode* expr, RuntimeC
 
 	/// 関数は全部 ScriptBuiltins から（rand / getTile もここ）
 	if (expr->isFuncCall) {
-		return ScriptValue::Int(CallBuiltin(expr->funcName, expr->funcArgs, ctx));
+		return CallBuiltin(expr->funcName, expr->funcArgs, ctx);   // float を返す関数もある（noise）
 	}
 
 	return ScriptValue::Int(0);

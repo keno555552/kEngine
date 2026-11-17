@@ -1,0 +1,5 @@
+{
+    "kind": "MapFunction",
+    "name": "OldOre",
+    "code": "/// OldOre: old OreSpawner (iron / gold / diamond, depth and amount are fixed)\n/// old type -> id of this map (not needed if the numbers are the same)\ntileType(1, 1);   // AIR\ntileType(5, 5);   // IRON\ntileType(6, 6);   // GOLD\ntileType(7, 7);   // DIAMOND\n\nore();\n"
+}

@@ -26,8 +26,21 @@ std::vector<std::string> Tokenize(const std::string& program) {
 		char c = program[i];
 
 		// 空白：結束 token
-		if (c == ' ' || c == '\t' || c == '\n') {
+		if (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
 			flush();
+			continue;
+		}
+
+		/// コメント：// から行末まで（/// も同じ）、/* ... */ は閉じるまで飛ばす
+		if (c == '/' && i + 1 < program.size() && program[i + 1] == '/') {
+			flush();
+			while (i < program.size() && program[i] != '\n') i++;
+			continue;
+		}
+		if (c == '/' && i + 1 < program.size() && program[i + 1] == '*') {
+			flush();
+			const size_t end = program.find("*/", i + 2);
+			i = (end == std::string::npos) ? program.size() : end + 1;   // for の i++ で */ の次へ
 			continue;
 		}
 
