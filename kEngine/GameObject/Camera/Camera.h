@@ -10,6 +10,7 @@
 Transform CameraDefaultTransform();
 
 class CameraManager;
+class GameCamera;
 class DebugCamera;
 class Camera {
 public:
@@ -19,6 +20,7 @@ public:
 		/// CameraManagerからのみ生成・破棄可能
 		friend class CameraManager;
 		friend class DebugCamera;
+		friend class GameCamera;
 		ConstructorKey() {}
 	};
 

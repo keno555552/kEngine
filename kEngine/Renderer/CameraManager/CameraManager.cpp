@@ -32,6 +32,13 @@ std::weak_ptr<DebugCamera> CameraManager::CreateDebugCamera(kEngine* kEngine) {
     return debugCameraList_.back();
 }
 
+std::weak_ptr<GameCamera> CameraManager::CreateGameCamera(kEngine* kEngine) {
+    /// cameraList_ に入れる → Destroy / SetActive / OnResize はそのまま効く
+    auto cam = std::make_shared<GameCamera>(kEngine, GameCamera::ConstructorKey());
+    cameraList_.push_back(cam);
+    return cam;
+}
+
 void CameraManager::DestroyCamera(std::weak_ptr<Camera> cam) {
 
     auto sp = cam.lock();

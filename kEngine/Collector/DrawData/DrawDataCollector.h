@@ -4,6 +4,7 @@
 #include <map>
 #include <span>
 #include <unordered_map>
+#include <unordered_set>
 #include "Data/Render/CPUData/materialConfig.h"
 #include "Data/Render/CPUData/ObjectData.h"
 #include "Data/Render/CPUData/SpriteData.h"
@@ -24,8 +25,13 @@
 #include "Data/Render/CPUData/VertexInfluence.h"
 using ModelID = int;
 
-inline const float layerDepth_Sprite = 0.00001f;
-inline const float layeredSpriteDepth_ = 0.4f;
+inline const float  layerDepth_Sprite = 0.00001f;   // 自動排（unlayered）用：既存
+inline const float  layeredSpriteDepth_ = 0.4f;       // レイヤー付きの開始位置：既存
+inline const int    kSpriteSubLayerScale = 10000;      // part は main の下 4 桁
+inline const int    kSpriteMaxMainLayer = 200;        // main レイヤーの上限
+inline const float  kLayeredSpriteRange = 0.6f;       // -0.4 ～ -1.0 を使う
+/// key 1 つ分の z（0.6 / (201 × 10000) ≒ 3e-7 → 深度で 1.5e-7、D24 の分解能 6e-8 より大きい）
+inline const double kLayeredKeyDepth = kLayeredSpriteRange / ((kSpriteMaxMainLayer + 1.0) * kSpriteSubLayerScale);
 
 /// 2D = sprite
 /// 3D = model
@@ -182,6 +188,7 @@ private:
 	/// 2Dスブライドカンター
 	int simpleSpriteCounter_{};
 	int unlayeredSpriteCounter_{};
+	std::unordered_set<int64_t> usedSpriteLayerKeys_;
 
 	/// ==================== 3Dデータ ====================///
 	/// 不透明オブジェクトバケット
@@ -242,7 +249,7 @@ private:
 
 	/// ============ スプライト関連 ==============///
 	/// ｚバッファ調整	
-	float SpriteLayerManagement(float zBuffer);
+	float SpriteLayerManagement(float mainZ, float partZ);
 	/// フォローマトリックス作成
 	Matrix4x4 MakeFollowObjectMatrix2D(SpriteData* sprite, SpritePart* part);
 	/// WVP調整

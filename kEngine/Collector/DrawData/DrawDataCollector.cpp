@@ -42,6 +42,7 @@ void DrawDataCollector::PreCollect() {
 	/// レイヤードスプライト用リストクリア
 	simpleSpriteCounter_ = 0;
 	unlayeredSpriteCounter_ = 0;
+	usedSpriteLayerKeys_.clear();
 
 	/// skinning用リストクリア
 	skinningDataList_ = {};
@@ -178,9 +179,13 @@ void DrawDataCollector::Collect2D(SpriteData* sprite) {
 	}
 }
 
-float DrawDataCollector::SpriteLayerManagement(float zBuffer) {
+float DrawDataCollector::SpriteLayerManagement(float mainZ, float partZ) {
 
-	if (zBuffer == 0) {
+	const int mainLayer = (int)std::lround(mainZ);
+	const int partLayer = (int)std::lround(partZ);
+
+	/// ② どちらも指定なし → 自動で並べる（呼ばれた順に手前へ）
+	if (mainLayer == 0 && partLayer == 0) {
 		if (unlayeredSpriteCounter_ > 4000) {
 			Logger::Log("[kWarning]DDC:unlayered Sprite meet max number!");
 			return (float)unlayeredSpriteCounter_ * -layerDepth_Sprite;
@@ -188,16 +193,33 @@ float DrawDataCollector::SpriteLayerManagement(float zBuffer) {
 		float z = (float)unlayeredSpriteCounter_ * -layerDepth_Sprite;
 		unlayeredSpriteCounter_++;
 		return z;
-	} else {
-		float z = -layeredSpriteDepth_ + (zBuffer * -layerDepth_Sprite);
-		if (z < -1.0f) {
-			Logger::Log("[kWarning]DDC:layered Sprite meet max number!");
-			return -1.0f;
-		}
-		return z;
 	}
-	Logger::Log("[kWarning]DDC:Unknow Error!");
-	return 0.0f;
+
+	/// ① ② ③ key を作る（大きいほど手前）
+	int64_t key = 0;
+	if (mainLayer != 0) {
+		/// main 指定あり：main が上位、part は下 4 桁
+		key = (int64_t)mainLayer * kSpriteSubLayerScale
+			+ std::clamp(partLayer, 0, kSpriteSubLayerScale - 1);
+	} else {
+		/// main なし：part をレイヤーとして使う
+		key = (int64_t)partLayer * kSpriteSubLayerScale;
+	}
+
+	/// ④ 重複 → 後から来た方を +1
+	while (usedSpriteLayerKeys_.count(key)) {
+		key++;
+	}
+	usedSpriteLayerKeys_.insert(key);
+
+	/// 範囲チェック
+	const int64_t maxKey = (int64_t)(kSpriteMaxMainLayer + 1) * kSpriteSubLayerScale - 1;
+	if (key < 0 || key > maxKey) {
+		Logger::Log("[kWarning]DDC:sprite layer out of range!");
+		key = std::clamp<int64_t>(key, 0, maxKey);
+	}
+
+	return -layeredSpriteDepth_ - (float)(key * kLayeredKeyDepth);
 }
 
 Matrix4x4 DrawDataCollector::MakeFollowObjectMatrix2D(SpriteData* sprite, SpritePart* part) {
@@ -229,7 +251,7 @@ Matrix4x4 DrawDataCollector::MakeFollowObjectMatrix2D(SpriteData* sprite, Sprite
 
 TransformationMatrix DrawDataCollector::SpriteWVPAdjustment2D(SpriteData& sprite, SpritePart& part) {
 
-	float zBuffer = SpriteLayerManagement(part.transform.translate.z);
+	float zBuffer = SpriteLayerManagement(sprite.mainPosition.transform.translate.z, part.transform.translate.z);
 	// 2D UI 用：View 取單位矩陣，Projection 用螢幕尺寸的正交矩陣（左上原點，Y 向下）
 	Matrix4x4 viewMatrix = Identity();
 	Matrix4x4 projectionMatrix = MakeOrthographicMatrix(
@@ -269,12 +291,11 @@ void DrawDataCollector::AddSpriteToBucket2D(RenderData& renderData) {
 		Logger::Log("[kEngine]DDC::AddObjectToBucket2D()MaterialID Error!");
 		return;
 	} else {
-		/// 透明判定
-		bool isTransparent = false;
-		for (int i = 0; i < material.layerCount; ++i) {
+		/// 透明判定（マテリアルの alpha ＋ テクスチャの透明ピクセル）
+		bool isTransparent = TextureManager::GetInstance()->HasAlpha(renderData.textureHandle);
+		for (int i = 0; i < material.layerCount && !isTransparent; ++i) {
 			if (material.layers[i].color.w < 1.0f) {
 				isTransparent = true;
-				break;
 			}
 		}
 

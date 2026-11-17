@@ -1,11 +1,13 @@
+#define NOMINMAX
 #include "SceneTutorial.h"
 
 SceneTutorial::SceneTutorial(kEngine* system) {
 	/// =========== システム初期化 ============///
 	system_ = system;
 	debugCamera_ = system_->CreateDebugCamera();
-	camera_ = system_->CreateCamera();
-	camera_.lock()->Move({ 0.0f, 0.5f, -10.0f });
+	//camera_ = system_->CreateCamera();
+	//camera_.lock()->Move({ 0.0f, 0.5f, -10.0f });
+	gameCamera_ = system_->CreateGameCamera();
 
 	phaseChangeTimer_ = new Timer();
 
@@ -126,6 +128,7 @@ SceneTutorial::SceneTutorial(kEngine* system) {
 	/// マップチップの初期化
 	RegisterMapSpawner();
 	GenerateMap();
+	SetupGameCamera();
 
 	/// コリジョンマネージャー初期化
 	collisionManager_.InputPlayer(player_);
@@ -145,8 +148,9 @@ SceneTutorial::~SceneTutorial() {
 
 	system_->SoundStop(SH_BGM_);
 
-	system_->DestroyCamera(camera_);
+	//system_->DestroyCamera(camera_);
 	system_->DestroyCamera(debugCamera_);
+	system_->DestroyCamera(gameCamera_);
 
 	delete player_;
 	delete skydome_;
@@ -441,12 +445,13 @@ void SceneTutorial::CameraPart() {
 		usingCamera_ = debugCamera_;
 		debugCamera_.lock()->MouseControlUpdate();
 	} else {
-		Transform cameraTransform = CreateDefaultTransform();
-		cameraTransform.translate.x = player_->mainPosition.transform.translate.x;
-		cameraTransform.translate.y = player_->mainPosition.transform.translate.y + 0.5f;
-		cameraTransform.translate.z = player_->mainPosition.transform.translate.z - 15.0f;
-		camera_.lock()->SetCamera(cameraTransform);
-		usingCamera_ = camera_;
+		/// 入力方向（A と D を同時に押したら 0）
+		float moveDir = 0.0f;
+		if (system_->GetIsPush(DIK_D)) moveDir += 1.0f;
+		if (system_->GetIsPush(DIK_A)) moveDir -= 1.0f;
+
+		if (auto gc = gameCamera_.lock()) gc->UpdateFollow(player_->GetPosition(), moveDir);
+		usingCamera_ = gameCamera_;
 	}
 	system_->SetCamera(usingCamera_);
 }
@@ -550,6 +555,7 @@ void SceneTutorial::ImGuiPart() {
 			ImGui::End();
 		}
 	}
+	if (auto gc = gameCamera_.lock()) gc->ImGuiPart();
 }
 #endif
 
@@ -606,5 +612,41 @@ Sign* SceneTutorial::CreateSign(const MapReader::SpawnInfo& s) {
 void SceneTutorial::SpawnDefault(const MapReader::SpawnInfo& s) {
 	if (!mapBlocks_.OnSpawn(s)) {
 		unhandledMapUnits_.insert(s.unit ? s.unit->name : std::to_string(s.id));
+	}
+}
+
+void SceneTutorial::SetupGameCamera() {
+	auto gc = gameCamera_.lock();
+	if (!gc) return;
+
+	/// ① 見た目の基本（今までの CameraPart と同じ：プレイヤーの 0.5 上、z = -15）
+	gc->SetLookOffset({ 0.0f, 0.5f });
+	gc->SetDistance(-15.0f);
+
+	/// ② 追従の調整（ImGui の "GameCamera" ウィンドウで触って決める）
+	gc->SetLeadDistance(2.7f);   // 進行方向に 3 マス先まで見る
+	gc->SetLeadSpeed(1.0f);      // だんだん先を見に行く
+	gc->SetReturnSpeed(3.0f);    // 止まったらそのまま戻る
+	gc->SetFollowSpeed(10.0f);
+
+	/// ③ 地図の範囲（端のマスの中心 ± 半マス）→ 画面が地図の外を映さない
+	if (mapChipManager_) {
+		const auto [w, h] = mapChipManager_->GetMapSize("Main");
+		if (w > 0 && h > 0) {
+			const Vector3 c0 = mapChipManager_->GetCellCenter("Main", { 0, 0 });
+			const Vector3 c1 = mapChipManager_->GetCellCenter("Main", { w - 1, h - 1 });
+			const Vector2 bs = mapChipManager_->GetBlockSize();
+			const Vector2 half = { bs.x * 0.5f, bs.y * 0.5f };
+
+			/// csv は y=0 が一番上なので、min / max で向きを気にしない
+			const Vector2 min = { std::min(c0.x, c1.x) - half.x, std::min(c0.y, c1.y) - half.y };
+			const Vector2 max = { std::max(c0.x, c1.x) + half.x, std::max(c0.y, c1.y) + half.y };
+			gc->SetBounds(min, max);
+		}
+	}
+
+	/// ④ 最初はプレイヤーの位置にいきなり置く（下から平滑で寄ってこないように）
+	if (player_) {
+		gc->SnapTo(player_->GetPosition());
 	}
 }
