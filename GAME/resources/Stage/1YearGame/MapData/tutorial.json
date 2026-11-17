@@ -333,7 +333,8 @@
                 ]
             },
             "model": {
-                "type": "none"
+                "path": "",
+                "type": "file"
             },
             "name": "kSign",
             "previewColor": [
