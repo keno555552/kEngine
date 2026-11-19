@@ -2,6 +2,7 @@
 #include "BaseScene.h"
 #include "Object\Object.h"
 #include "Object\Sprite.h"
+#include "GAME\Object\ScreenUI\ScreenUI.h"
 #include "GAME\Object\Bullet\Bullet.h"
 #include "GAME\Object\Player\Player.h"
 #include "GAME\Object\Enemy\Enemy.h"
@@ -11,7 +12,7 @@
 #include "GAME\Object\Driller\Driller.h"
 #include "tool\CollisionManager\CollisionManager.h"
 #include "GAME\resources\PostProcessPreset\PPP_GlitchScreen.h"
-#include "Tool\MapBulider\Data\MapBlockData.h"
+#include "Tool\MapBulider\MapChipManager.h"
 #include "Camera/GameCamera.h"
 #include <memory>
 #include <set>
@@ -86,9 +87,14 @@ private:
 	/// サウンドハンドル
 
 	int SH_BGM_ = 0;
-	int SE_killEnemy_ = 0;
+	int SH_killEnemy_ = 0;
+
+	/// マップハンドル
+	int MH_map_ = -1;
 
 	/// =========== 実体 ==========///
+	ScreenUI* screenUI_ = nullptr;
+
 	Object* skydome_ = nullptr;
 	//Object* object_ = nullptr;
 
@@ -109,7 +115,6 @@ private:
 	std::unique_ptr<Driller> driller_;
 
 	std::unique_ptr<MapChipManager> mapChipManager_;
-	MapBlockData mapBlocks_;
 	std::vector<Bullet*> bulletList_;
 	std::vector<Enemy*> enemyList_;
 	std::set<std::string> unhandledMapUnits_;   // デバッグ用：生成されなかった物の名前

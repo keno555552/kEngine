@@ -337,6 +337,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GAME\Object\Backpack\Backpack.cpp" />
+    <ClCompile Include="kEngine\Math\Kinematics\Gravity.cpp" />
     <ClCompile Include="kEngine\GameObject\Camera\GameCamera.cpp" />
     <ClCompile Include="kEngine\Tool\ImGuiManager\ImGuiWidgets.cpp" />
     <ClCompile Include="kEngine\Tool\MapBulider\Adapter\InstructionCompiler.cpp" />
@@ -560,7 +562,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Tool\MapBulider\Data\MapDatas.cpp" />
     <ClCompile Include="kEngine\Tool\MapBulider\Reader\MapReader.cpp" />
     <ClCompile Include="kEngine\Tool\MapBulider\MapChipManager.cpp" />
-    <ClCompile Include="kEngine\Tool\MapBulider\Data\MapBlockData.cpp" />
     <ClCompile Include="kEngine\Tool\ResourceLoader\ResourceLoader.cpp" />
     <ClCompile Include="kEngine\Scenes\BaseSceneFactory.cpp" />
     <ClCompile Include="kEngine\GameObject\Object\Sprite.cpp" />
@@ -592,8 +593,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="kEngine\Scenes\SceneEngineTitle.cpp" />
     <ClCompile Include="GAME\Object\Sign\sign.cpp" />
     <ClCompile Include="GAME\Object\SignBoard\SignBoard.cpp" />
+    <ClCompile Include="GAME\Object\ScreenUI\ScreenUI.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GAME\Setting\GameConfig.h" />
+    <ClInclude Include="GAME\Object\Backpack\Backpack.h" />
+    <ClInclude Include="kEngine\Math\Kinematics\Gravity.h" />
     <ClInclude Include="kEngine\GameObject\Camera\GameCamera.h" />
     <ClInclude Include="kEngine\Data\Game\MapChip\CollisionResult.h" />
     <ClInclude Include="kEngine\Tool\ImGuiManager\ImGuiWidgets.h" />
@@ -901,7 +906,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Tool\MapBulider\Data\MapDatas.h" />
     <ClInclude Include="kEngine\Tool\MapBulider\Reader\MapReader.h" />
     <ClInclude Include="kEngine\Tool\MapBulider\MapChipManager.h" />
-    <ClInclude Include="kEngine\Tool\MapBulider\Data\MapBlockData.h" />
     <ClInclude Include="kEngine\Tool\ResourceLoader\ResourceLoader.h" />
     <ClInclude Include="kEngine\Scenes\BaseSceneFactory.h" />
     <ClInclude Include="kEngine\GameObject\Object\Sprite.h" />
@@ -934,6 +938,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="kEngine\Scenes\SceneEngineTitle.h" />
     <ClInclude Include="GAME\Object\Sign\sign.h" />
     <ClInclude Include="GAME\Object\SignBoard\SignBoard.h" />
+    <ClInclude Include="GAME\Object\ScreenUI\ScreenUI.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl">

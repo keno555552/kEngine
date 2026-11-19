@@ -1,26 +1,25 @@
 #include "Vector3.h"
 
-Vector3 Vector3::operator+(const Vector3& target) {
+Vector3 Vector3::operator+(const Vector3& target) const {
 	return { x + target.x, y + target.y , z + target.z };
 }
-Vector3 Vector3::operator-(const Vector3& target) {
+Vector3 Vector3::operator-(const Vector3& target) const {
 	return { x - target.x, y - target.y , z - target.z };
 }
 
-Vector3 Vector3::operator*(const Vector3& target) {
+Vector3 Vector3::operator*(const Vector3& target) const {
 	return { x * target.x, y * target.y, z * target.z };
 }
 
-Vector3 Vector3::operator/(const Vector3& target) {
+Vector3 Vector3::operator/(const Vector3& target) const {
 	return { x / target.x, y / target.y, z / target.z };
 }
 
-Vector3 Vector3::operator*(const float& target) {
+Vector3 Vector3::operator*(const float& target) const {
 	return { x * target, y * target, z * target };
 }
 
-Vector3 Vector3::operator*=(const float& target)
-{
+Vector3 Vector3::operator*=(const float& target) {
 	x *= target;
 	y *= target;
 	z *= target;
@@ -31,7 +30,7 @@ Vector3 operator*(float scalar, const Vector3& vec) {
 	return { vec.x * scalar, vec.y * scalar, vec.z * scalar };
 }
 
-Vector3 Vector3::operator/(const float& target) {
+Vector3 Vector3::operator/(const float& target) const {
 	return { x / target, y / target, z / target };
 }
 
@@ -40,13 +39,17 @@ Vector3 Vector3::operator+=(const Vector3& target) {
 	return *this;
 }
 
+Vector3 Vector3::operator-=(const Vector3& target) {
+	*this = *this - target;
+	return *this;
+}
 
 Vector3 Vector3::operator*=(const Vector3& target) {
 	*this = *this * target;
 	return *this;
 }
 
-bool Vector3::operator==(const Vector3& target) const{
+bool Vector3::operator==(const Vector3& target) const {
 	if (x != target.x)return false;
 	if (y != target.y)return false;
 	if (z != target.z)return false;
@@ -60,7 +63,7 @@ bool Vector3::operator!=(const Vector3& target) const {
 
 
 
-Vector3 Vector3::operator*(const int& target) {
+Vector3 Vector3::operator*(const int& target) const          {
 	return { x * (float)target, y * (float)target, z * (float)target };
 }
 

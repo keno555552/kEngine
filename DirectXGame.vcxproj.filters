@@ -834,9 +834,6 @@
     <ClCompile Include="kEngine\Tool\MapBulider\MapChipManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="kEngine\Tool\MapBulider\Data\MapBlockData.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="GAME\Object\Sign\sign.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -844,6 +841,15 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="kEngine\GameObject\Camera\GameCamera.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="GAME\Object\Backpack\Backpack.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="GAME\Object\ScreenUI\ScreenUI.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="kEngine\Math\Kinematics\Gravity.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1823,9 +1829,6 @@
     <ClInclude Include="kEngine\Tool\MapBulider\MapChipManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="kEngine\Tool\MapBulider\Data\MapBlockData.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="GAME\Object\Sign\sign.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -1836,6 +1839,18 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\GameObject\Camera\GameCamera.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="GAME\Object\Backpack\Backpack.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="GAME\Object\ScreenUI\ScreenUI.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="GAME\Setting\GameConfig.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kEngine\Math\Kinematics\Gravity.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1862,8 +1877,6 @@
     <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl" />
     <FxCompile Include="externals\DirectXTex\Shaders\BC7Encode.hlsl" />
     <FxCompile Include="resources\Shader\FlameNeonGlow.PS.hlsl" />
-    <FxCompile Include="resources\Shader\Particle.PS.hlsl" />
-    <FxCompile Include="resources\Shader\Particle.VS.hlsl" />
     <FxCompile Include="kEngine\EngineAssets\Shader\DebugLine.PS.hlsl" />
     <FxCompile Include="kEngine\EngineAssets\Shader\DebugLine.VS.hlsl" />
     <FxCompile Include="kEngine\EngineAssets\Shader\FlameNeonGlow.PS.hlsl" />

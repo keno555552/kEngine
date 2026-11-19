@@ -19,15 +19,17 @@ class Object;
 class MapChipManager {
 public:
 	explicit MapChipManager(kEngine* system);
+	//~MapChipManager();
 
 	/// ================= 読み込み ================= ///
-	/// csv を 1 枚読んでレイヤーに追加（MapData が見つからなければ失敗）
-	bool AddLayer(const std::string& layerName, const std::string& csvPath, const std::string& mapDataPath = "");
+	int LoadLayer(const std::string& csvPath, const std::string& mapDataPath = "");
 	/// 空のレイヤー（エディタ用）
-	bool CreateLayer(const std::string& layerName, const std::string& mapDataPath, int width, int height);
-	void RemoveLayer(const std::string& layerName);
-	bool HasLayer(const std::string& layerName) const { return Find(layerName) != nullptr; }
+	int CreateLayer(const std::string& mapDataPath, int width, int height);
+	void UnloadLayer(int handle);
 	void Clear();
+
+	MapLayer* GetLayer(int handle);
+	const MapLayer* GetLayer(int handle) const;
 
 	/// ================= 生成の登録（シーン側のルール） ================= ///
 	/// 複数：create で作った物を list に追加（vector<T*> / vector<unique_ptr<T>> 両方 OK）
@@ -52,33 +54,25 @@ public:
 	/// 登録に無い物（戻り値は無視）
 	template<class Owner, class R>
 	void SetDefault(Owner* owner, R(Owner::* method)(const MapReader::SpawnInfo&)) {
-		reader_->SetDefault([owner, method](const MapReader::SpawnInfo& s) { (owner->*method)(s); });
+		userDefault_ = [owner, method](const MapReader::SpawnInfo& s) { (owner->*method)(s); };
 	}
 
-	void ClearRegistry() { reader_->ClearRegistry(); }
+	void ClearRegistry() { reader_->ClearRegistry(); userDefault_ = nullptr; }
 
 	/// ================= 生成 ================= ///
 	/// 登録に従って全マスの生成関数を呼ぶ（物は呼ばれた側が持つ）
-	MapReader::SpawnReport Generate(const std::string& layerName);
+	MapReader::SpawnReport Generate(int handle);
 	void GenerateAll();
 	/// MapUnit の見た目で Object を作る（new したものを返す。delete は呼んだ側）
 	Object* BuildObject(const MapUnit& unit, const Vector3& position) const { return reader_->BuildObject(unit, position); }
 
 	/// ================= マス単位の読み書き（破壊・設置用） ================= ///
-	using MapIndex = MapChipField::MapIndex;
-	/// ワールド座標 → マス（範囲外なら nullopt）
-	std::optional<MapIndex> GetIndexAt(const std::string& layerName, const Vector3& position) const;
-	/// マスの中心のワールド座標
-	Vector3 GetCellCenter(const std::string& layerName, MapIndex index) const;
-	int GetId(const std::string& layerName, MapIndex index) const;
-	void SetId(const std::string& layerName, MapIndex index, int id);
-	/// マスの物件（空白なら nullptr）
-	const MapUnit* GetUnit(const std::string& layerName, MapIndex index) const;
-	/// レイヤーの MapData から名前で探す（設置するときに使う）
-	const MapUnit* FindUnit(const std::string& layerName, const std::string& unitName) const;
-	int GetBlankId(const std::string& layerName) const;
-	/// {横の数, 縦の数}
-	std::pair<int, int> GetMapSize(const std::string& layerName) const;
+	/// position のブロックを壊す（collision レイヤーから探す）
+	bool Break(const Vector3& position);
+	/// handle のレイヤーの position に unitName を置く
+	bool Place(int handle, const Vector3& position, const std::string& unitName);
+	void UpdateBlocks();
+	void DrawBlocks(const Vector3& center, float drawRadius);
 
 	/// ================= 問い合わせ（ワールド座標） ================= ///
 	/// collision レイヤーのどれかが壁なら true
@@ -86,7 +80,7 @@ public:
 	/// collision レイヤーのどれかの範囲内なら true
 	bool IsInsideAt(const Vector3& position) const;
 	/// 押し戻し（今はメインの collision レイヤー 1 枚）
-	CollisionResult GetMapCollisionCorrection(const AABB& box, const Vector3& velocity, float deltaTime);
+	CollisionResult GetMapCollisionCorrection(const AABB& box, const Vector3& velocity, float deltaTime) const;
 	/// メインの collision レイヤーのマスの大きさ
 	Vector2 GetBlockSize() const;
 
@@ -94,23 +88,15 @@ public:
 	const std::string& GetLog() const { return reader_->GetLog(); }
 
 private:
-	struct Layer {
-		std::string name;
-		std::string csvPath;
-		std::unique_ptr<MapChipField> field;
-		bool collision = true;   // 当たり判定に使うか
-		bool visible = true;     // 描画するか
-	};
-
-	Layer* Find(const std::string& name);
-	const Layer* Find(const std::string& name) const;
-	const Layer* GetCollisionLayer() const;
-	Layer& PushLayer(const std::string& name, const MapGrid& grid, const MapData* data);
+	int PushLayer(const MapGrid& grid, const MapData* data);
+	MapReader::SpawnReport SpawnLayer(MapLayer& layer);
+	const MapLayer* GetCollisionLayer() const;
 	const MapData* LoadMapData(const std::string& jsonPath);
 	static std::string NormalizePath(const std::string& path);
 
 	std::unique_ptr<MapReader> reader_;
+	MapReader::SpawnFunc userDefault_;
 	/// ★宣言順に注意：data を先に → 解放は layers_ が先（field は data を借りている）
-	std::map<std::string, std::unique_ptr<MapData>> dataStore_;   // key = 正規化した絶対パス
-	std::vector<Layer> layers_;                                     // 順番 = 追加順
+	std::map<std::string, std::unique_ptr<MapData>> dataStore_;
+	std::vector<std::unique_ptr<MapLayer>> layers_;   // index = handle（Unload したら nullptr）
 };

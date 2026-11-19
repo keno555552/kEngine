@@ -7,6 +7,39 @@ MapChipManager::MapChipManager(kEngine* system)
 
 /// ============================== 読み込み ============================== ///
 
+int MapChipManager::PushLayer(const MapGrid& grid, const MapData* data) {
+	layers_.push_back(std::make_unique<MapLayer>(grid, data));
+	return static_cast<int>(layers_.size()) - 1;
+}
+
+int MapChipManager::LoadLayer(const std::string& csvPath, const std::string& mapDataPath) {
+	MapGrid grid;
+	if (!MapReader::ReadMapGrid(csvPath, grid)) return -1;
+
+	const std::string dataPath = mapDataPath.empty()
+		? MapReader::FindMapDataPath(csvPath, grid.mapDataName)
+		: mapDataPath;
+	if (dataPath.empty()) return -1;
+
+	const MapData* data = LoadMapData(dataPath);
+	if (!data) return -1;
+	return PushLayer(grid, data);
+}
+
+int MapChipManager::CreateLayer(const std::string& mapDataPath, int width, int height) {
+	const MapData* data = LoadMapData(mapDataPath);
+	if (!data) return -1;
+
+	MapGrid grid;
+	grid.mapDataName = data->dataName;
+	grid.ids.assign(height, std::vector<int>(width, data->blankId));
+	return PushLayer(grid, data);
+}
+
+void MapChipManager::UnloadLayer(int handle) {
+	if (handle >= 0 && handle < (int)layers_.size()) layers_[handle].reset();   // 番号はずらさない
+}
+
 std::string MapChipManager::NormalizePath(const std::string& path) {
 	std::error_code ec;
 	auto p = std::filesystem::weakly_canonical(path, ec);
@@ -24,148 +57,106 @@ const MapData* MapChipManager::LoadMapData(const std::string& jsonPath) {
 	return ptr;
 }
 
-MapChipManager::Layer& MapChipManager::PushLayer(const std::string& name, const MapGrid& grid, const MapData* data) {
-	RemoveLayer(name);   // 同名は置き換え
-	Layer layer;
-	layer.name = name;
-	layer.field = std::make_unique<MapChipField>();
-	layer.field->Setup(grid, data);
-	layers_.push_back(std::move(layer));
-	return layers_.back();
-}
-
-bool MapChipManager::AddLayer(const std::string& layerName, const std::string& csvPath, const std::string& mapDataPath) {
-	MapGrid grid;
-	if (!MapReader::ReadMapGrid(csvPath, grid)) return false;
-
-	const std::string dataPath = mapDataPath.empty()
-		? MapReader::FindMapDataPath(csvPath, grid.mapDataName)
-		: mapDataPath;
-	if (dataPath.empty()) return false;
-
-	const MapData* data = LoadMapData(dataPath);
-	if (!data) return false;
-
-	PushLayer(layerName, grid, data).csvPath = csvPath;
-	return true;
-}
-
-bool MapChipManager::CreateLayer(const std::string& layerName, const std::string& mapDataPath, int width, int height) {
-	const MapData* data = LoadMapData(mapDataPath);
-	if (!data) return false;
-
-	MapGrid grid;
-	grid.name = layerName;
-	grid.mapDataName = data->dataName;
-	grid.ids.assign(height, std::vector<int>(width, data->blankId));
-	PushLayer(layerName, grid, data);
-	return true;
-}
-
-void MapChipManager::RemoveLayer(const std::string& layerName) {
-	std::erase_if(layers_, [&](const Layer& l) { return l.name == layerName; });
-}
-
 void MapChipManager::Clear() {
 	layers_.clear();      // ブロック・field が先
 	dataStore_.clear();   // data は後
 }
 
-MapChipManager::Layer* MapChipManager::Find(const std::string& name) {
-	for (auto& l : layers_) if (l.name == name) return &l;
-	return nullptr;
+MapLayer* MapChipManager::GetLayer(int handle) {
+	return (handle >= 0 && handle < (int)layers_.size()) ? layers_[handle].get() : nullptr;
 }
-const MapChipManager::Layer* MapChipManager::Find(const std::string& name) const {
-	return const_cast<MapChipManager*>(this)->Find(name);
+
+const MapLayer* MapChipManager::GetLayer(int handle) const {
+	return const_cast<MapChipManager*>(this)->GetLayer(handle);
 }
-const MapChipManager::Layer* MapChipManager::GetCollisionLayer() const {
-	for (const auto& l : layers_) if (l.collision) return &l;
+
+const MapLayer* MapChipManager::GetCollisionLayer() const {
+	for (const auto& l : layers_) if (l && l->collision) return l.get();
 	return nullptr;
 }
 
 /// ============================== 生成 ============================== ///
 
-MapReader::SpawnReport MapChipManager::Generate(const std::string& layerName) {
-	const Layer* layer = Find(layerName);
-	if (!layer) return {};
-	return reader_->Spawn(*layer->field);
+MapReader::SpawnReport MapChipManager::SpawnLayer(MapLayer& layer) {
+	/// 直接タイル → ブロック（レイヤーが持つ）／それ以外 → シーンの Default
+	reader_->SetDefault([this, &layer](const MapReader::SpawnInfo& s) {
+		if (s.unit && s.unit->isDirectTile) {
+			layer.SetBlock(s.index, s.id, std::unique_ptr<Object>(BuildObject(*s.unit, s.position)));
+		} else if (userDefault_) {
+			userDefault_(s);
+		}
+		});
+	return reader_->Spawn(layer.GetField());
 }
+
+MapReader::SpawnReport MapChipManager::Generate(int handle) {
+	MapLayer* layer = GetLayer(handle);
+	return layer ? SpawnLayer(*layer) : MapReader::SpawnReport{};
+}
+
 void MapChipManager::GenerateAll() {
-	for (auto& l : layers_) reader_->Spawn(*l.field);
+	for (auto& l : layers_) if (l) SpawnLayer(*l);
 }
 
-/// ============================== マス単位 ============================== ///
+/// ============================== ブロック ============================== ///
 
-std::optional<MapChipManager::MapIndex> MapChipManager::GetIndexAt(const std::string& layerName, const Vector3& position) const {
-	const Layer* l = Find(layerName);
-	if (!l) return std::nullopt;
-	const MapIndex m = l->field->GetMapIndexByPosition(position);
-	if (m.x < 0 || m.y < 0 || m.x >= l->field->GetNumBlockHorizontal() || m.y >= l->field->GetNumBlockVirtical()) return std::nullopt;
-	return m;
+bool MapChipManager::Break(const Vector3& position) {
+	for (auto& l : layers_) {
+		if (!l || !l->collision) continue;
+		if (l->Break(l->GetField().GetMapIndexByPosition(position))) return true;
+	}
+	return false;
 }
 
-Vector3 MapChipManager::GetCellCenter(const std::string& layerName, MapIndex index) const {
-	const Layer* l = Find(layerName);
-	return l ? l->field->GetWorldPosFromMapByMapIndex(index) : Vector3{};
+bool MapChipManager::Place(int handle, const Vector3& position, const std::string& unitName) {
+	MapLayer* l = GetLayer(handle);
+	if (!l) return false;
+	const MapChipField& f = l->GetField();
+
+	const MapIndex m = f.GetMapIndexByPosition(position);
+	if (!f.InRange(m) || f.GetIdByMap(m) != f.GetBlankId()) return false;   // 範囲外 / 埋まっている
+
+	const MapUnit* unit = f.GetMapData() ? f.GetMapData()->FindUnit(unitName) : nullptr;
+	if (!unit || !unit->isDirectTile) return false;
+
+	l->SetBlock(m, unit->id, std::unique_ptr<Object>(BuildObject(*unit, f.GetWorldPosFromMapByMapIndex(m))));
+	return true;
 }
 
-int MapChipManager::GetId(const std::string& layerName, MapIndex index) const {
-	const Layer* l = Find(layerName);
-	return l ? l->field->GetIdByMap(index) : 0;
+void MapChipManager::UpdateBlocks() {
+	for (auto& l : layers_) if (l) l->UpdateBlocks();
 }
 
-void MapChipManager::SetId(const std::string& layerName, MapIndex index, int id) {
-	if (Layer* l = Find(layerName)) l->field->SetIdByMap(index, id);
-}
-
-const MapUnit* MapChipManager::GetUnit(const std::string& layerName, MapIndex index) const {
-	const Layer* l = Find(layerName);
-	return l ? l->field->GetUnitByMap(index) : nullptr;
-}
-
-const MapUnit* MapChipManager::FindUnit(const std::string& layerName, const std::string& unitName) const {
-	const Layer* l = Find(layerName);
-	const MapData* data = l ? l->field->GetMapData() : nullptr;
-	return data ? data->FindUnit(unitName) : nullptr;
-}
-
-int MapChipManager::GetBlankId(const std::string& layerName) const {
-	const Layer* l = Find(layerName);
-	return l ? l->field->GetBlankId() : 0;
-}
-
-std::pair<int, int> MapChipManager::GetMapSize(const std::string& layerName) const {
-	const Layer* l = Find(layerName);
-	return l ? std::pair{ l->field->GetNumBlockHorizontal(), l->field->GetNumBlockVirtical() } : std::pair{ 0, 0 };
+void MapChipManager::DrawBlocks(const Vector3& center, float drawRadius) {
+	for (auto& l : layers_) if (l) l->DrawBlocks(center, drawRadius);
 }
 
 /// ============================== 問い合わせ ============================== ///
 
 bool MapChipManager::IsWallAt(const Vector3& position) const {
 	for (const auto& l : layers_) {
-		if (!l.collision) continue;
-		if (l.field->IsWallByWorld(l.field->GetWorldIndexByPosition(position))) return true;
+		if (!l || !l->collision) continue;
+		const MapChipField& f = l->GetField();
+		if (f.IsWallByMap(f.GetMapIndexByPosition(position))) return true;
 	}
 	return false;
 }
 
 bool MapChipManager::IsInsideAt(const Vector3& position) const {
 	for (const auto& l : layers_) {
-		if (!l.collision) continue;
-		const auto idx = l.field->GetWorldIndexByPosition(position);
-		if (idx.x >= 0 && idx.y >= 0 &&
-			idx.x < l.field->GetNumBlockHorizontal() && idx.y < l.field->GetNumBlockVirtical()) return true;
+		if (!l || !l->collision) continue;
+		const MapChipField& f = l->GetField();
+		if (f.InRange(f.GetMapIndexByPosition(position))) return true;
 	}
 	return false;
 }
 
-CollisionResult MapChipManager::GetMapCollisionCorrection(const AABB& box, const Vector3& velocity, float deltaTime) {
-	const Layer* l = GetCollisionLayer();
-	if (!l) return {};
-	return l->field->GetMapCollisionCorrection(box, velocity, deltaTime);
+CollisionResult MapChipManager::GetMapCollisionCorrection(const AABB& box, const Vector3& velocity, float deltaTime) const {
+	const MapLayer* l = GetCollisionLayer();
+	return l ? l->GetField().GetMapCollisionCorrection(box, velocity, deltaTime) : CollisionResult{};
 }
 
 Vector2 MapChipManager::GetBlockSize() const {
-	const Layer* l = GetCollisionLayer();
-	return l ? l->field->GetBlockSize() : Vector2{ 1.0f, 1.0f };
+	const MapLayer* l = GetCollisionLayer();
+	return l ? l->GetField().GetBlockSize() : Vector2{ 1.0f, 1.0f };
 }

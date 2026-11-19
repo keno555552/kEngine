@@ -124,7 +124,7 @@ MapReader::SpawnReport MapReader::Spawn(MapChipField& field) const {
 
 	for (int y = 0; y < field.GetNumBlockVirtical(); ++y) {
 		for (int x = 0; x < field.GetNumBlockHorizontal(); ++x) {
-			const MapChipField::MapIndex index{ x, y };
+			const MapIndex index{ x, y };
 			const int id = field.GetIdByMap(index);
 			if (id == blank) continue;
 

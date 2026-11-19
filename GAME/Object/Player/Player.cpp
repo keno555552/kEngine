@@ -45,6 +45,14 @@ Player::Player(kEngine* system, const Vector3& position) {
 
 	/// bugCheck
 	checkTimer_.Init0(1.0f, system_->GetTimeManager());
+
+
+	digCD_.InitM(kDigInterval, system_->GetTimeManager());
+
+	/// 初期装備（仮）
+	inventery_.ObtainItem(BPItemID::Gun);
+	inventery_.ObtainItem(BPItemID::Pickaxe);
+	inventery_.Equip(BPItemID::Gun);
 }
 
 Player::~Player() = default;
@@ -133,14 +141,42 @@ void Player::Shoot(Vector3 mousePos) {
 	system_->SoundPlaySE(SH_SHOOT_);
 }
 
+/// ============================== 手持ち行動 ============================== ///
+void Player::UseEquipped(const Vector3& aimPos) {
+	switch (inventery_.GetEquipped()) {
+	case BPItemID::Gun:     Shoot(aimPos); break;
+	case BPItemID::Pickaxe: Dig(aimPos);   break;
+	default: break;                                     // 手ぶら
+	}
+}
+
+bool Player::ConsumeDigRequest(Vector3& outPos) {
+	if (!hasDigRequest_) return false;
+	hasDigRequest_ = false;
+	outPos = digRequestPos_;
+	return true;
+}
+
 void Player::BehaviorRootUpdate() {
 	/// 移動関連
 	Move();
 
 	///射撃CD更新
-	ShootUpdate();
+	CDUpdate();
+}
 
-	/// 
+void Player::Dig(const Vector3& aimPos) {
+	if (!digCD_.GetIsMax()) return;                     // CD 中
+	if (static_cast<int>(playerState_) & cantShoot) return;   // 硬直・死亡中は不可（射撃と同じ条件）
+
+	/// 届く範囲だけ
+	Vector3 d = mainPosition.transform.translate - aimPos;
+	d.z = 0.0f;
+	if (d.x * d.x + d.y * d.y > kDigReach * kDigReach) return;
+
+	digRequestPos_ = { aimPos.x, aimPos.y, mainPosition.transform.translate.z };
+	hasDigRequest_ = true;
+	digCD_.Reset0();
 }
 
 Vector3 Player::CornerPosition(const Vector3& center, Corner4 corner) {
@@ -236,9 +272,7 @@ void Player::Move() {
 		velocity_.y += kJumpAcceleration;
 		system_->SoundPlaySE(SH_JUMP_);
 	}
-	velocity_.y -= kGravityAcceleration * totelDeltaTime_;
-	velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
-
+	velocity_.y = GravityCalc(velocity_.y, GameConfig::gravity, GameConfig::limitFallSpeed, totelDeltaTime_);
 
 	ResetMove();
 }
@@ -295,9 +329,10 @@ void Player::BitMapBugCheck() {
 	}
 }
 
-void Player::ShootUpdate() {
+void Player::CDUpdate() {
 
 	if (shootCD_.parameter_ != shootCD_.maxTime_) shootCD_.ToMix();
+	if (!digCD_.GetIsMax()) digCD_.ToMix();
 
 }
 
@@ -314,8 +349,7 @@ void Player::NearAttackUpdate() {
 	///<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< 未完成
 }
 
-void Player::UpdataState() {
-}
+void Player::UpdataState() {}
 
 void Player::StartDeath(const Vector3& attackerPos) {
 	isDead_ = true;
@@ -338,8 +372,7 @@ void Player::StartDeath(const Vector3& attackerPos) {
 
 void Player::DeathUpdate() {
 	/// 物理：重力だけ。着地したら滑りを止める
-	velocity_.y -= kGravityAcceleration * totelDeltaTime_;
-	velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
+	velocity_.y = GravityCalc(velocity_.y, GameConfig::gravity, GameConfig::limitFallSpeed, totelDeltaTime_);
 	if (onGround_) velocity_.x *= std::exp(-kDeathAttenuation * totelDeltaTime_);
 
 	float& rotX = objectParts_[0].transform.rotate.x;

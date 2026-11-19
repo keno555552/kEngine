@@ -102,6 +102,45 @@ void Driller::DrillDown() {
 	isDrilling_ = true;
 	onGround_ = false;
 	velocity_.y = 0.0f;
+	hasStopPoint_ = false;
+}
+
+void Driller::DrillDownTo(float targetY) {
+	DrillDown();
+	hasStopPoint_ = true;
+	stopY_ = targetY;
+}
+
+void Driller::MoveUpdate() {
+	if (!isFalling_) return;
+
+	velocity_.y = GravityCalc(velocity_.y, GameConfig::gravity, GameConfig::limitFallSpeed, totelDeltaTime_);
+	mainPosition.transform.translate += velocity_ * totelDeltaTime_;
+
+	/// 停止点に着いたら止まる処理
+	if (hasStopPoint_ && mainPosition.transform.translate.y <= stopY_) {
+		mainPosition.transform.translate.y = stopY_;
+		StopFall();
+		justArrived_ = true;
+	}
+}
+
+void Driller::Call() {
+	if (!hasSpawnPoint_ || isCalled_) return;
+	isCalled_ = true;
+	mainPosition.transform.translate = spawnPoint_ + Vector3{ 0.0f, kDrillerCallHeight, 0.0f };
+	velocity_ = {};
+	Show();
+	DrillDownTo(spawnPoint_.y + kDrillerLandOffsetY);   // ← 地面で止まる
+}
+
+Vector3 Driller::GetTipPoint() const {
+	Vector3 result = mainPosition.transform.translate;
+	Vector3 offset{ 0.0f, kDrillerTipOffset, 0.0f };
+
+	result -= offset;
+
+	return mainPosition.transform.translate - Vector3{ 0.0f, kDrillerTipOffset, 0.0f };
 }
 
 void Driller::StopFall() {
@@ -109,23 +148,7 @@ void Driller::StopFall() {
 	isDrilling_ = false;
 	velocity_.y = 0.0f;
 	onGround_ = true;
-}
-
-void Driller::MoveUpdate() {
-	if (!isFalling_) return;
-
-	velocity_.y -= kDrillerGravity * totelDeltaTime_;
-	velocity_.y = std::max(velocity_.y, -kDrillerLimitFallSpeed);
-
-	/// 今は自分で動く（衝突を入れたら Player と同じく CollisionManager の結果で動かす）
-	mainPosition.transform.translate += velocity_ * totelDeltaTime_;
-
-	/// 【仮】衝突の代わり：生成点の地面で止まる
-	const float landY = spawnPoint_.y + kDrillerLandOffsetY;
-	if (hasSpawnPoint_ && mainPosition.transform.translate.y <= landY) {
-		mainPosition.transform.translate.y = landY;
-		StopFall();
-	}
+	hasStopPoint_ = false;
 }
 
 /// ============================== ドア ============================== ///
@@ -137,15 +160,6 @@ void Driller::OpenDoor() {
 void Driller::CloseDoor() {
 	if (doorState_ == DoorState::kClosed || doorState_ == DoorState::kClosing) return;
 	doorState_ = DoorState::kClosing;
-}
-
-void Driller::Call() {
-	if (!hasSpawnPoint_ || isCalled_) return;
-	isCalled_ = true;
-	mainPosition.transform.translate = spawnPoint_ + Vector3{ 0.0f, kDrillerCallHeight, 0.0f };
-	velocity_ = {};
-	Show();
-	DrillDown();
 }
 
 void Driller::DoorUpdate() {

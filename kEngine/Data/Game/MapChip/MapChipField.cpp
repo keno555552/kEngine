@@ -6,33 +6,29 @@
 #include <string>
 #include <algorithm>
 
+/// ================================================ MapChipField ================================================ ///
+
 void MapChipField::Setup(const MapGrid& grid, const MapData* data) {
 	mapData_ = data;
 	ids_ = grid.ids;
-	kNumBlockVirtical = grid.Height();
-	kNumBlockHorizontal = grid.Width();
+	numBlockVirtical_ = grid.Height();
+	numBlockHorizontal_ = grid.Width();
 	if (data) {
-		kBlockWidth = data->cellSpacing.x;
-		kBlockHeight = data->cellSpacing.y;
+		blockWidth_ = data->cellSpacing.x;
+		blockHeight_ = data->cellSpacing.y;
 	}
 }
 
 void MapChipField::ResetMapChipData() {
-	ids_.assign(kNumBlockVirtical, std::vector<int>(kNumBlockHorizontal, GetBlankId()));
+	ids_.assign(numBlockVirtical_, std::vector<int>(numBlockHorizontal_, GetBlankId()));
 }
 
 int MapChipField::GetIdByMap(MapIndex m) const {
 	return InRange(m) ? ids_[m.y][m.x] : GetBlankId();     // 範囲外は空白
 }
-int MapChipField::GetIdByWorld(WorldIndex w) const {
-	return GetIdByMap(ExchangeWorld2MapIndex(w));
-}
 
 void MapChipField::SetIdByMap(MapIndex m, int id) {
 	if (InRange(m)) ids_[m.y][m.x] = id;
-}
-void MapChipField::SetIdByWorld(WorldIndex w, int id) {
-	SetIdByMap(ExchangeWorld2MapIndex(w), id);
 }
 
 const MapUnit* MapChipField::GetUnitByMap(MapIndex m) const {
@@ -47,47 +43,27 @@ bool MapChipField::IsWallByMap(MapIndex m) const {
 	return u && u->isDirectTile;
 }
 
-bool MapChipField::IsWallByWorld(WorldIndex w) const {
-	return IsWallByMap(ExchangeWorld2MapIndex(w));
-}
-
 /// マップチップ座標を取得
-Vector3 MapChipField::GetWorldPosFromMapByMapIndex(MapIndex mapIndex) const {
-	Vector3 leftBottom{ kBlockWidth * mapIndex.x,
-						kBlockHeight * (kNumBlockVirtical - 1 - mapIndex.y),
-						0 };
-
-	Vector3 center{ leftBottom.x + kBlockWidth * 0.5f,
-						leftBottom.y + kBlockHeight * 0.5f,
-						0 };
-
-	return center;
+Vector3 MapChipField::GetWorldPosFromMapByMapIndex(MapIndex m) const {
+	return {
+		blockWidth_ * (m.x + 0.5f),
+		blockHeight_ * (numBlockVirtical_ - 1 - m.y + 0.5f),
+		0.0f
+	};
 }
 
-Vector3 MapChipField::GetWorldPosFromMapByWorldIndex(WorldIndex worldIndex) const {
-	MapIndex mapIndex = ExchangeWorld2MapIndex(worldIndex);
-	return GetWorldPosFromMapByMapIndex(mapIndex);
+MapIndex MapChipField::GetMapIndexByPosition(const Vector3& position) const {
+	const int worldY = static_cast<int>(std::floor(position.y / blockHeight_));   // 下から数えた段
+	return {
+		static_cast<int>(std::floor(position.x / blockWidth_)),
+		numBlockVirtical_ - 1 - worldY                                          // 上から数えた行
+	};
 }
-
-/// 座標からマップチップの番号を計算
-MapChipField::WorldIndex MapChipField::GetWorldIndexByPosition(const Vector3& position) const {
-	WorldIndex worldIndex = {};
-	worldIndex.x = static_cast<int>(std::floor(position.x / kBlockWidth));
-	worldIndex.y = static_cast<int>(std::floor(position.y / kBlockHeight));
-	return worldIndex;
-}
-
-MapChipField::MapIndex MapChipField::GetMapIndexByPosition(const Vector3& position) const {
-	WorldIndex worldIndex = GetWorldIndexByPosition(position);
-	return ExchangeWorld2MapIndex(worldIndex);
-}
-
-
 
 CollisionResult MapChipField::GetMapCollisionCorrection(
-	const AABB& box, const Vector3& velocity, float deltaTime, bool& landed) {
+	const AABB& box, const Vector3& velocity, float deltaTime) const {
 
-	landed = false;
+	bool landed = false;
 	Vector3 unConstVelocity = velocity;
 	Vector3 move = unConstVelocity * deltaTime;
 	Vector3 finalMove = move;
@@ -193,76 +169,71 @@ CollisionResult MapChipField::GetMapCollisionCorrection(
 	return result;
 }
 
-
-
-
-CollisionResult MapChipField::GetMapCollisionCorrection(const AABB& box, const Vector3& velocity, float deltaTime) {
-	bool dummyLanded;
-	return GetMapCollisionCorrection(box, velocity, deltaTime, dummyLanded);
-}
-
-std::vector<MapChipField::TileInfo> MapChipField::GetTilesOverlapping(const AABB& box) {
+std::vector<TileInfo> MapChipField::GetTilesOverlapping(const AABB& box) const {
 
 	std::vector<TileInfo> result;
+	if (numBlockHorizontal_ <= 0 || numBlockVirtical_ <= 0) return result;
 
-	float eps = 0.001f;
-	WorldIndex minIdx = GetWorldIndexByPosition({ box.min.x, box.min.y, box.min.z });
-	WorldIndex maxIdx = GetWorldIndexByPosition({ box.max.x - eps, box.max.y - eps, box.max.z });
+	const float eps = 0.001f;
+	const MapIndex a = GetMapIndexByPosition(box.min);
+	const MapIndex b = GetMapIndexByPosition({ box.max.x - eps, box.max.y - eps, box.max.z });
 
-	// 2. clamp 避免越界
-	minIdx.x = std::clamp(minIdx.x, 0, (int)GetNumBlockHorizontal() - 1);
-	maxIdx.x = std::clamp(maxIdx.x, 0, (int)GetNumBlockHorizontal() - 1);
-	minIdx.y = std::clamp(minIdx.y, 0, (int)GetNumBlockVirtical() - 1);
-	maxIdx.y = std::clamp(maxIdx.y, 0, (int)GetNumBlockVirtical() - 1);
+	/// y は上下反転しているので min / max で並べ直してから clamp
+	const int xBegin = std::clamp((std::min)(a.x, b.x), 0, numBlockHorizontal_ - 1);
+	const int xEnd = std::clamp((std::max)(a.x, b.x), 0, numBlockHorizontal_ - 1);
+	const int yBegin = std::clamp((std::min)(a.y, b.y), 0, numBlockVirtical_ - 1);
+	const int yEnd = std::clamp((std::max)(a.y, b.y), 0, numBlockVirtical_ - 1);
 
-	int xBegin = (std::min)(minIdx.x, maxIdx.x);
-	int xEnd = (std::max)(minIdx.x, maxIdx.x);
-	int yBegin = (std::min)(minIdx.y, maxIdx.y);
-	int yEnd = (std::max)(minIdx.y, maxIdx.y);
-
-	// 3. 掃描所有 tile
 	for (int y = yBegin; y <= yEnd; ++y) {
 		for (int x = xBegin; x <= xEnd; ++x) {
-
-			TileInfo info;
-			info.isWall = IsWallByWorld({ x, y });
-			info.aabb = GetAABBByWorldIndex({ x, y });
-
-			result.push_back(info);
+			result.push_back({ IsWallByMap({ x, y }), GetAABBByMapIndex({ x, y }) });
 		}
 	}
-
 	return result;
 
 }
 
-AABB MapChipField::GetAABBByMapIndex(MapIndex mapIndex) const {
-	Vector3 center = GetWorldPosFromMapByMapIndex(mapIndex);
-
-	float halfW = kBlockWidth * 0.5f;
-	float halfH = kBlockHeight * 0.5f;
-
-	AABB aabb;
-	aabb.min = center - Vector3{ halfW, halfH, 0 };
-	aabb.max = center + Vector3{ halfW, halfH, 0 };
-	return aabb;
+AABB MapChipField::GetAABBByMapIndex(MapIndex m) const {
+	const Vector3 center = GetWorldPosFromMapByMapIndex(m);
+	const Vector3 half{ blockWidth_ * 0.5f, blockHeight_ * 0.5f, 0.0f };
+	return { center - half, center + half };
 }
 
-AABB MapChipField::GetAABBByWorldIndex(WorldIndex worldIndex) const {
-	return GetAABBByMapIndex(ExchangeWorld2MapIndex(worldIndex));
+/// ================================================== MapLayer ================================================== ///
+
+MapLayer::MapLayer(const MapGrid& grid, const MapData* data) : name_(grid.name) {
+	field_.Setup(grid, data);
+	blocks_.data_.resize(field_.GetNumBlockVirtical());
+	for (auto& row : blocks_.data_) row.resize(field_.GetNumBlockHorizontal());
 }
 
-
-MapChipField::WorldIndex MapChipField::ExchangeMap2WorldIndex(MapIndex mapSet) const {
-	WorldIndex i;
-	i.x = mapSet.x;
-	i.y = (kNumBlockVirtical - 1 - mapSet.y); // 上下翻轉
-	return i;
+void MapLayer::SetBlock(MapIndex m, int id, std::unique_ptr<Object> obj) {
+	if (!field_.InRange(m)) return;
+	field_.SetIdByMap(m, id);              // ID → 当たり判定
+	blocks_.data_[m.y][m.x] = std::move(obj);    // 見た目
 }
 
-MapChipField::MapIndex MapChipField::ExchangeWorld2MapIndex(WorldIndex worldIndex) const {
-	MapIndex m;
-	m.x = worldIndex.x;
-	m.y = (kNumBlockVirtical - 1 - worldIndex.y); // 上下翻轉
-	return m;
+bool MapLayer::Break(MapIndex m) {
+	if (!HasBlock(m)) return false;
+	field_.SetIdByMap(m, field_.GetBlankId());
+	blocks_.data_[m.y][m.x].reset();
+	return true;
+}
+
+void MapLayer::UpdateBlocks() {
+	for (auto& row : blocks_.data_)
+		for (auto& block : row)
+			if (block) block->Update(nullptr);
+}
+
+void MapLayer::DrawBlocks(const Vector3& center, float drawRadius) {
+	if (!visible) return;
+	const float radiusSq = drawRadius * drawRadius;
+	for (auto& row : blocks_.data_) {
+		for (auto& block : row) {
+			if (!block) continue;
+			const Vector3 d = block->mainPosition.transform.translate - center;
+			if (d.x * d.x + d.y * d.y + d.z * d.z <= radiusSq) block->Draw();
+		}
+	}
 }

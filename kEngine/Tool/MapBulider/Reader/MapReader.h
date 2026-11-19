@@ -22,7 +22,7 @@ public:
 	struct SpawnInfo {
 		int id = 0;
 		const MapUnit* unit = nullptr;              // MapData に無い番号なら nullptr
-		MapChipField::MapIndex index{};              // csv 上の位置（y = 0 が一番上）
+		MapIndex index{};              // csv 上の位置（y = 0 が一番上）
 		Vector3 position{};                          // マスの中心（ワールド）
 	};
 	using SpawnFunc = std::function<void(const SpawnInfo&)>;
