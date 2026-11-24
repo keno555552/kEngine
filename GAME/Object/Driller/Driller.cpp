@@ -134,6 +134,14 @@ void Driller::Call() {
 	DrillDownTo(spawnPoint_.y + kDrillerLandOffsetY);   // ← 地面で止まる
 }
 
+AABB Driller::GetBoardAABB() const {
+	const Vector3& p = mainPosition.transform.translate;   // 本体の底
+	AABB box;
+	box.min = { p.x - kDrillerBoardHalfWidth, p.y,                       p.z - kDrillerBoardHalfWidth };
+	box.max = { p.x + kDrillerBoardHalfWidth, p.y + kDrillerBoardHeight, p.z + kDrillerBoardHalfWidth };
+	return box;
+}
+
 Vector3 Driller::GetTipPoint() const {
 	Vector3 result = mainPosition.transform.translate;
 	Vector3 offset{ 0.0f, kDrillerTipOffset, 0.0f };

@@ -27,11 +27,17 @@ enum class SelectMode {
 class EffectEditor : public BaseScene
 {
 public:
-	EffectEditor(kEngine *system);
+	EffectEditor(kEngine* system);
 	~EffectEditor();
 
 	void Update() override;
 	void Draw() override;
+
+	void Pause() override;
+	void Resume() override;
+
+	/// 今編集する軌跡（Separate でない / Part0 → mainTrack）
+	ParticlePartTrack& GetEditTrack(ParticlePrototype& p);
 
 private:
 
@@ -44,6 +50,7 @@ private:
 	std::unique_ptr<Light> light3_ = nullptr;
 	std::unique_ptr<AreaLight> areaLight_ = nullptr;
 	std::unique_ptr<AreaLight> areaLight2_ = nullptr;
+	bool isLightsOn_ = false;
 
 	/// ============== カメラ関連 ==============///
 	/// ステージカメラ(mainカメラ)
@@ -90,6 +97,7 @@ private:
 	int currentEffectIndex_ = -1;
 	int currentParticleIndex_ = -1;
 	int currentLinkIndex_ = -1;
+	int currentPartIndex_ = -1;
 
 	/// ======== newCounter ========== ///
 	int newEffectCounter_ = 0;
@@ -117,11 +125,12 @@ private:
 	bool isPause_ = false;
 	bool doubleCheck_ = false;
 
+	bool isNewConfirm_ = false;
 	SelectMode saveLoadMode_ = SelectMode::None;
 	bool isDelete_ = false;
 
 	/// ========== 保存関連 ========== ///
-	bool useRelativePath_ = true;        
+	bool useRelativePath_ = true;
 
 	/// 保存の予約（ボタン → Update で処理）
 	struct SaveRequest {
@@ -149,6 +158,13 @@ private:
 
 
 	/// ========== UI関連 ========== ///
+	
+	/// 空の Effect を作って選択する（メニューの New・List の New 共通）
+	void CreateNewEffect();
+	void RequestNewWorkspace();   // 未保存があれば確認を出す
+	void NewWorkspace();          // 実際に全部クリアして作る
+	void NewConfirmWindow();      // 未保存がある時の確認
+	
 	/// SaveLoad関連
 	void SaveLoadPart();
 	void SavePart();
@@ -197,6 +213,11 @@ private:
 	/// Part0 の材質を他の Part へ
 	void SyncPartMaterials(ObjectData& obj);
 
+	int GetEditPart(const ObjectData& obj) const;
+
+	void AddEditorLights();
+	void RemoveEditorLights();
+
 	/// Delete関連
 	void DeletePart();
 
@@ -223,8 +244,8 @@ private:
 
 
 
-	bool InputTextString(const char *label, std::string &str, ImGuiInputTextFlags flags = 0);
-	bool InputBigTextString(const char *label, std::string &str, ImGuiInputTextFlags flags = 0);
+	bool InputTextString(const char* label, std::string& str, ImGuiInputTextFlags flags = 0);
+	bool InputBigTextString(const char* label, std::string& str, ImGuiInputTextFlags flags = 0);
 	bool InputInt(const char* label, int& value);
 	bool InputFloat(const char* label, float& value);
 	bool InputVector3(const char* label, Vector3& vec);

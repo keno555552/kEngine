@@ -232,7 +232,7 @@ private:
 	void SetLightingGPU();
 	void SetEnviromentReflectionGPU();
 
-	void PSODecision(PSOKey& psoKey);
+	bool PSODecision(PSOKey& psoKey);
 	void MakeDepthStencilView();
 
 	void UpdateDebugLineVertexBuffer(const std::vector<DebugLineVertexGPU>& vertices);

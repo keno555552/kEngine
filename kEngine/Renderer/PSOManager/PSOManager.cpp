@@ -6,7 +6,7 @@ void PSOManager::Initialize(DirectXCore* directXDriver) {
 	psoFactory_.Initialize(directXDriver);
 	directXDriver_ = directXDriver;
 	commandList_ = directXDriver_->GetCommandList();
-	
+
 	/// PSOcacheのファイルの位置を保存
 	psoCacheFilePath_ = config::GetPsoCacheFolderPath() + config::GetPsoCacheFolderName();
 	psoRecorder_.Load(psoCacheFilePath_);
@@ -36,7 +36,7 @@ Microsoft::WRL::ComPtr<ID3D12PipelineState> PSOManager::GetPso(PSOKey keys) {
 
 }
 
-void PSOManager::SetPSO(PSOKey keys) {
+bool PSOManager::SetPSO(PSOKey keys) {
 
 	/// PSOKeyからハンドルを探す
 	int newPSOHandle = GetPSOHandle(keys);
@@ -60,6 +60,7 @@ void PSOManager::SetPSO(PSOKey keys) {
 		newPSOHandle = handle;
 	}
 
+
 	/// ある場合、今使ってるPSOと比較。違う場合更新する
 	if (currentPSOHandle_ != newPSOHandle) {
 
@@ -68,8 +69,13 @@ void PSOManager::SetPSO(PSOKey keys) {
 		currentPSOHandle_ = newPSOHandle;
 
 		// RootSignatureをセット
-		rootSignature_ = psoFactory_.getRootSignatureFactory()->Make(keys, directXDriver_).Get();
+		ID3D12RootSignature* rs = psoFactory_.getRootSignatureFactory()->Make(keys, directXDriver_).Get();
+		if (rs == rootSignature_) return false;
+		rootSignature_ = rs;
 		commandList_->SetGraphicsRootSignature(rootSignature_);
+		return true;
+	} else {
+		return false;
 	}
 }
 
@@ -99,7 +105,7 @@ void PSOManager::SetPSOStrong(PSOKey keys) {
 	}
 
 	///　どうしても更新する
-	
+
 	// PSOをセット
 	commandList_->SetPipelineState(psoMap_[newPSOHandle].Get());
 	currentPSOHandle_ = newPSOHandle;
@@ -110,16 +116,16 @@ void PSOManager::SetPSOStrong(PSOKey keys) {
 }
 
 void PSOManager::LasyCreatePSO() {
-	
+
 	/// 読み取り
 	psoRecorder_.Load(psoCacheFilePath_);
-	
+
 	/// PSOを作成する
 	// まずはPSOKeyのリストを取る
 	std::vector<PSOKey> keys = psoRecorder_.GetAllKeys();
 
 	// 実際生成
-	for(auto& key : keys) {
+	for (auto& key : keys) {
 		auto pso = psoFactory_.createPSO(key);
 
 		int handle = (int)psoMap_.size();
@@ -161,7 +167,7 @@ void PSOManager::CreateAllPSO() {
 			}
 		}
 	}
-	
+
 }
 
 int PSOManager::GetPSOHandle(PSOKey keys) {

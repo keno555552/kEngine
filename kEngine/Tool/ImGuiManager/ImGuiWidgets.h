@@ -1,4 +1,5 @@
 #pragma once
+#include <functional> 
 #include "ImGuiManager.h"
 #include "Utility/EnumNameFinder/EnumNameFinder.h"
 
@@ -52,4 +53,19 @@ namespace ImGuiWidgets {
 	bool TransformEditor(Transform& t, bool showReset = true);
 	bool UVTransformEditor(MaterialConfig& m);
 	bool MaterialConfigEditor(MaterialConfig& m, bool showReset = true, bool showTexture = true);
+
+	/// ============== Editor Layout ============== ///
+
+	/// buildLayout の中では DockBuilderSplitNode / DockBuilderDockWindow だけ書けばいい
+	/// （RemoveNode・AddNode・SetNodeSize・Finish は EditorDockSpace 側でやる）
+	/// ※ DockBuilder を使うので、呼ぶ側の cpp でも imgui_internal.h が必要
+	using DockLayoutBuilder = std::function<void(ImGuiID dockId, const ImVec2& size)>;
+
+	/// メニューバーを除いた全体に DockSpace を張る（中央は透明、中央にはドック不可）
+	/// imgui.ini に配置が無い（初回）か isResetLayout が true のときだけ buildLayout を呼ぶ
+	void EditorDockSpace(const char* dockName, bool& isResetLayout, const DockLayoutBuilder& buildLayout);
+
+	/// よく使う形：左にパネル1枚、残りは透明。幅は境界線ドラッグで調整（imgui.ini に保存）
+	void EditorDockSpaceLeftPanel(const char* dockName, const char* leftWindowName,
+		bool& isResetLayout, float leftRatio = 0.22f);
 }

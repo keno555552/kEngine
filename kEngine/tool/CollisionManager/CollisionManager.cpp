@@ -172,7 +172,16 @@ void CollisionManager::PlayerSignCollision() {
 }
 
 void CollisionManager::PlayerDrillerCollision() {
-	if (player_ == nullptr || driller_ == nullptr || !driller_->HasSpawnPoint()) { return; }
+	if (player_ == nullptr || driller_ == nullptr) { return; }
+
+	/// 乗り込み判定（帰還）：z は比べない
+	const AABB p = player_->GetAABB();
+	const AABB d = driller_->GetBoardAABB();
+	driller_->SetIsPlayerInBoard(
+		p.min.x <= d.max.x && p.max.x >= d.min.x &&
+		p.min.y <= d.max.y && p.max.y >= d.min.y);
+
+	if (!driller_->HasSpawnPoint()) { return; }
 
 	/// 生成点から X 方向に kDrillerCallRangeCell マス以内
 	const float cellX = mapChipManager_ ? mapChipManager_->GetBlockSize().x : 1.0f;

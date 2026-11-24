@@ -744,6 +744,7 @@ void DrawDataCollector::CollectParticle(std::vector<ParticleInstance>& instance)
 
 			for (int p = 0; p < (int)targetObject.objectParts_.size(); ++p) {
 				if (!targetObject.objectParts_[p].materialConfig) continue;   // null 対策
+				if (inst.partIndex >= 0 && p != inst.partIndex) continue;     // ← Separate Parts：自分の Part だけ
 
 				ParticleInstanceForDDC data;
 
@@ -754,6 +755,10 @@ void DrawDataCollector::CollectParticle(std::vector<ParticleInstance>& instance)
 				/// Material制作, ID獲得
 				MaterialConfig materialConfig = *targetObject.objectParts_[p].materialConfig;
 				materialConfig.textureColor = inst.nowColor;
+				materialConfig.uvTranslate += inst.nowUVTranslate;   // ← UV
+				materialConfig.uvRotate.z += inst.nowUVRotate;
+				materialConfig.uvScale.x *= inst.nowUVScale.x;
+				materialConfig.uvScale.y *= inst.nowUVScale.y;
 				materialConfig.MakeUVMatrix();
 				MaterialForGPU newData;
 				newData.inputMaterialConfig(materialConfig);
@@ -780,6 +785,7 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustmentPC(ObjectData& object
 	Camera* cam = cameraManager_->GetActiveCamera();
 	Matrix4x4 viewMatrix = cam->GetViewMatrix();
 	Matrix4x4 projectionMatrix = cam->GetProjectionMatrix();
+	Matrix4x4 partMatrix = Identity();
 
 	Matrix4x4 followWorldMatrix = MakeFollowObjectMatrix3D(&object);
 
@@ -808,6 +814,12 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustmentPC(ObjectData& object
 		localMatrix = localMatrix * rot;
 	} else {
 
+		partMatrix = MakeAffineMatrix(
+			part.transform.scale,
+			part.transform.rotate,
+			part.transform.translate
+		);
+
 		localMatrix = MakeAffineMatrix(
 			particleData.nowScale,
 			particleData.nowRotate,
@@ -815,8 +827,9 @@ TransformationMatrix DrawDataCollector::ObjectWVPAdjustmentPC(ObjectData& object
 		);
 	}
 
-	//Matrix4x4 worldMatrix = localMatrix * partParentMatrix * followWorldMatrix;
-	Matrix4x4 worldMatrix = followWorldMatrix * localMatrix;
+	Matrix4x4 worldMatrix = partMatrix * followWorldMatrix * localMatrix;
+	//Matrix4x4 worldMatrix = localMatrix * partMatrix * followWorldMatrix;
+	//Matrix4x4 worldMatrix = followWorldMatrix * localMatrix;
 
 	Matrix4x4 finalWorld = worldMatrix;
 

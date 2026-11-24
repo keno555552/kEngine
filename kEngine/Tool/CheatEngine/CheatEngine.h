@@ -28,6 +28,10 @@ public:
 	}
 	static void ClearGameLog() { gameLogEntries_.clear(); }
 
+	/// ======== Data渡し ======== ///
+	bool IsEffectEditorOn() const { return isEffectEditorOn_; }
+	void SetEffectEditorOn(bool on) { isEffectEditorOn_ = on; }
+
 private:
 	struct Settings {
 		bool isOpen = false;
@@ -49,6 +53,7 @@ private:
 	bool freezeScene_ = false;
 	bool isObjectEditorOn_ = false;
 	bool isTimeScaleOn_ = false;
+	bool isEffectEditorOn_ = false;
 	Settings saved_{};
 
 	/// ===== Log ===== ///

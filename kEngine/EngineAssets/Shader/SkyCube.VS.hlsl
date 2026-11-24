@@ -4,7 +4,7 @@
 StructuredBuffer<TransformationMatrix> gTransformationMatrices : register(t0);
 StructuredBuffer<uint> gMaterialIndexList : register(t1);
 
-cbuffer OffSetGroup : register(b1)
+cbuffer OffSetGroup : register(b0)
 {
     uint gWVPOffset;
     uint gMaterialIndexListOffset;

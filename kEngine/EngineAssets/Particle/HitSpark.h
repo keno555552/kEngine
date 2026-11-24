@@ -10,13 +10,13 @@ struct HitSpark : ParticlePrototype
 		lifetime = 1.0f;
 		/// 移動しないから設定要らない
 		/// スケール設定、その後変わらない
-		startScale = { 0.05f, 1.0f, 1.0f };
-		endScale = { 0.05f, 1.0f, 1.0f };
-		isConstantScale = true;
+		mainTrack.startScale = { 0.05f, 1.0f, 1.0f };
+		mainTrack.endScale = { 0.05f, 1.0f, 1.0f };
+		mainTrack.isConstantScale = true;
 
 		/// 回転はランダム
-		startRotationRandom = { 0.0f, 0.0f, 3.2f };
-		isConstantRotation = true;
+		mainTrack.startRotationRandom = { 0.0f, 0.0f, 3.2f };
+		mainTrack.isConstantRotation = true;
 
 		/// 色は元の色から透明へ
 		startColor = { 1.0f, 0.3f, 0.3f, 1.0f };
@@ -53,12 +53,12 @@ struct HitImpact : ParticlePrototype
 		lifetime = 0.5f;
 		/// 移動しないから設定要らない
 		/// スケール設定、その後変わらない
-		startScale = { 0.2f, 0.2f, 1.0f };
-		endScale = { 0.3f, 0.3f, 1.0f };
-		isConstantScale = false;
+		mainTrack.startScale = { 0.2f, 0.2f, 1.0f };
+		mainTrack.endScale = { 0.3f, 0.3f, 1.0f };
+		mainTrack.isConstantScale = false;
 		/// 回転はランダム
-		startRotationRandom = { 0.0f, 0.0f, 3.2f };
-		isConstantRotation = true;
+		mainTrack.startRotationRandom = { 0.0f, 0.0f, 3.2f };
+		mainTrack.isConstantRotation = true;
 		/// 色は元の色から透明へ
 		startColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 		endColor = { 1.0f, 1.0f, 1.0f, 0.0f };

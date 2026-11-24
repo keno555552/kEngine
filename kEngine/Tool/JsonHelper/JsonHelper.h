@@ -9,6 +9,7 @@ class kEngine;
 class JsonHelper
 {
 public:
+	static nlohmann::json V2ToJson(const Vector2& v);
 	static nlohmann::json V3ToJson(const Vector3& v);
 	static nlohmann::json V4ToJson(const Vector4& v);
 	static nlohmann::json ObjectDataToJson(const ObjectData& obj, kEngine* system);
@@ -18,6 +19,7 @@ public:
 	static nlohmann::json EngineParamsToJson(const EngineModelParams& p);
 
 public:
+	static Vector2 JsonToV2(const nlohmann::json& j);
 	static Vector3 JsonToV3(const nlohmann::json& j);
 	static Vector4 JsonToV4(const nlohmann::json& j);
 	static Transform JsonToTransform(const nlohmann::json& j);

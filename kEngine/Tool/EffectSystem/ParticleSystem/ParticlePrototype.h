@@ -6,204 +6,240 @@
 #include "Transform.h"
 #include "Data/Render/CPUData/ObjectData.h"
 #include "Data/Render/CPUData/SpriteData.h"
-    
+
 enum class ParticleRenderType
 {
 	Object,
 	Sprite
 };
 
+struct ParticlePartTrack {
+	Vector3 startPosition = { 0, 0, 0 };
+	Vector3 startPositionRandom = { 0, 0, 0 }; // 初始位置ランダム比率
+
+	Vector3 startVelocity = { 0, 0, 0 };
+	Vector3 startVelocityRandom = { 0, 0, 0 }; // 初速ランダム比率
+	Vector3 startSpeedRandom = { 0.0f, 0.0f, 0.0f }; // 初速ランダム比率（全体速度のランダム率）
+
+	Vector3 startScale = { 1, 1, 1 };
+	Vector3 endScale = { 1, 1, 1 };
+	Vector3 startScaleRandom = { 0.0f, 0.0f, 0.0f }; // 大きさの変化値（+-のランダム率）
+	Vector3 endScaleRandom = { 0.0f, 0.0f, 0.0f }; // 大きさの変化値（+-のランダム率）
+	bool isConstantScale = true; // 変化しないかどうか
+
+	Vector3 startRotation = { 0, 0, 0 };
+	Vector3 endRotation = { 0, 0, 0 };
+	Vector3 startRotationRandom = { 0.0f, 0.0f, 0.0f }; // 回転の変化値（+-のランダム率）
+	Vector3 endRotationRandom = { 0.0f, 0.0f, 0.0f };
+	bool isConstantRotation = true; // 変化しないかどうか
+
+	// --- UV（Material の UV に足す。寿命の間で Start → End） ---
+	Vector3 uvTranslateStart = { 0, 0, 0 };
+	Vector3 uvTranslateEnd = { 0, 0, 0 };
+	float uvRotateStart = 0.0f;
+	float uvRotateEnd = 0.0f;
+	Vector2 uvScaleStart = { 1, 1 };
+	Vector2 uvScaleEnd = { 1, 1 };
+};
 
 struct ParticlePrototype
 {
 	std::string name = "";
-    // --- 基本生命サイクル ---
-    float lifetime = 1.0f;           // 粒子の最大寿命（秒）
-    float lifetimeRandomness = 0.0f; // 壽命ランダム比率（0~1）
+	// --- 基本生命サイクル ---
+	float lifetime = 1.0f;           // 粒子の最大寿命（秒）
+	float lifetimeRandomness = 0.0f; // 壽命ランダム比率（0~1）
 
-    // --- 初始狀態 ---
-	Vector3 startPosition = { 0, 0, 0 };
-	Vector3 startPositionRandom = { 0, 0, 0 }; // 初始位置ランダム比率
+	// --- 初始狀態 ---
+	ParticlePartTrack mainTrack;     // メイン軌跡（Part0）
+	std::vector<ParticlePartTrack> partTracks; // パーズの軌跡（Part1以降）
 
-    Vector3 startVelocity = { 0, 0, 0 };
-    Vector3 startVelocityRandom = { 0, 0, 0 }; // 初速ランダム比率
-    Vector3 startSpeedRandom = { 0.0f, 0.0f, 0.0f }; // 初速ランダム比率（全体速度のランダム率）
-
-    Vector3 startScale = { 1, 1, 1 };
-    Vector3 endScale = { 1, 1, 1 };
-    Vector3 startScaleRandom = { 0.0f, 0.0f, 0.0f }; // 大きさの変化値（+-のランダム率）
-    Vector3 endScaleRandom = { 0.0f, 0.0f, 0.0f }; // 大きさの変化値（+-のランダム率）
-	bool isConstantScale = true; // 変化しないかどうか
-
-    Vector3 startRotation = { 0, 0, 0 };
-    Vector3 endRotation = { 0, 0, 0 };
-    Vector3 startRotationRandom = { 0.0f, 0.0f, 0.0f }; // 回転の変化値（+-のランダム率）
-    Vector3 endRotationRandom = { 0.0f, 0.0f, 0.0f };
-    bool isConstantRotation = true; // 変化しないかどうか
-
-    Vector4 startColor = { 1, 1, 1, 1 };
-    Vector4 endColor = { 1, 1, 1, 0 };
-    Vector4 startColorRandom = { 0.0f, 0.0f, 0.0f, 0.0f }; // 色の変化値（+-のランダム率）
-    Vector4 endColorRandom = { 0.0f, 0.0f, 0.0f, 0.0f };
+	Vector4 startColor = { 1, 1, 1, 1 };
+	Vector4 endColor = { 1, 1, 1, 0 };
+	Vector4 startColorRandom = { 0.0f, 0.0f, 0.0f, 0.0f }; // 色の変化値（+-のランダム率）
+	Vector4 endColorRandom = { 0.0f, 0.0f, 0.0f, 0.0f };
 	bool isConstantColor = false; // 変化しないかどうか
 
-    // --- 行為変数 ---
-    Vector3 gravity = { 0, 0, 0 };
-    float damping = 0.0f; // 速度減衰（0 = 無減衰, 1 = 即停止）
+	// --- 行為変数 ---
+	Vector3 gravity = { 0, 0, 0 };
+	float damping = 0.0f; // 速度減衰（0 = 無減衰, 1 = 即停止）
 	float dampingRandom = 0.0f; // 速度減衰のランダム率（+-のランダム率）
 
-    // --- 発射設定 ---
-    float emitRate = 0.0f; // 秒こと発射回数（0 = 手動）
+	// --- 発射設定 ---
+	float emitRate = 0.0f; // 秒こと発射回数（0 = 手動）
 	float emitIntervalRandom = 0.0f; // 発射間隔のランダム率（+-のランダム率）
 
-    int burstCount = 1;    // 一回発射で生成する粒子数
+	int burstCount = 1;    // 一回発射で生成する粒子数
 	float emitNumRandom = 0.0f; // 発射間隔のランダム率（+-のランダム率）
 
-    // --- 外観設定（未來可擴展） ---
+	// --- 外観設定（未來可擴展） ---
 	ParticleRenderType renderType = ParticleRenderType::Object;     // 描画タイプ
-    std::vector<ObjectData> objectList;                             // 表示用物体(object)
-    std::vector<SimpleSpriteData> spriteList;                       // 表示用スプライト(sprite)
+	std::vector<ObjectData> objectList;                             // 表示用物体(object)
+	std::vector<SimpleSpriteData> spriteList;                       // 表示用スプライト(sprite)
 
-    // --- マテリアルのロケーション（以降のJSON用） ---
-    std::string modelPath;
-    std::string texturePath;
+	// --- マテリアルのロケーション（以降のJSON用） ---
+	std::string modelPath;
+	std::string texturePath;
 
 
 
-    // Editor用のデータ
-    bool isSaved = false; // 保存済みかどうか
-    std::string savePath;   // 最後に保存したパス（空なら未保存）
-    // Effect の起点か（Shoot / Play で直接撃つ）。false なら Link からだけ撃たれる
-    // ※ Effect ファイルに保存する（同じ Particle でも Effect ごとに違うことがあるので、Particle ファイルには書かない）
-    bool isRoot = true;
+	// Editor用のデータ
+	bool isSaved = false; // 保存済みかどうか
+	std::string savePath;   // 最後に保存したパス（空なら未保存）
+	// Effect の起点か（Shoot / Play で直接撃つ）。false なら Link からだけ撃たれる
+	// ※ Effect ファイルに保存する（同じ Particle でも Effect ごとに違うことがあるので、Particle ファイルには書かない）
+	bool isRoot = true;
 };
 
 /// objectList の materialConfig は shared_ptr → コピーしても同じ材質を指す
 /// 線に渡す時・Double の時に呼んで、材質を自分専用にする（概念 2.2）
 inline void DeepCopyMaterials(ParticlePrototype& proto) {
-    for (auto& obj : proto.objectList) {
-        for (auto& part : obj.objectParts_) {
-            if (part.materialConfig) {
-                part.materialConfig = std::make_shared<MaterialConfig>(*part.materialConfig);
-            }
-        }
-    }
+	for (auto& obj : proto.objectList) {
+		for (auto& part : obj.objectParts_) {
+			if (part.materialConfig) {
+				part.materialConfig = std::make_shared<MaterialConfig>(*part.materialConfig);
+			}
+		}
+	}
+}
+/// Part の軌跡（Part0・足りない分は mainTrack）
+inline const ParticlePartTrack& GetPartTrack(const ParticlePrototype& p, int part) {
+	if (part <= 0 || part - 1 >= (int)p.partTracks.size()) return p.mainTrack;
+	return p.partTracks[part - 1];
 }
 
 /// ParticlePrototypeのオーバーライド用構造体
 struct ParticlePrototypeOverride
 {
-    // --- 基本生命サイクル ---
-    bool hasLifetime = false;
-    float lifetime = 1.0f;
+	// --- 基本生命サイクル ---
+	bool hasLifetime = false;
+	float lifetime = 1.0f;
 
-    bool hasLifetimeRandomness = false;
-    float lifetimeRandomness = 0.0f;
+	bool hasLifetimeRandomness = false;
+	float lifetimeRandomness = 0.0f;
 
-    // --- 初始位置 ---
-    bool hasStartPosition = false;
-    Vector3 startPosition = { 0,0,0 };
+	// --- 初始位置 ---
+	bool hasStartPosition = false;
+	Vector3 startPosition = { 0,0,0 };
 
-    bool hasStartPositionRandom = false;
-    Vector3 startPositionRandom = { 0,0,0 };
+	bool hasStartPositionRandom = false;
+	Vector3 startPositionRandom = { 0,0,0 };
 
-    // --- 初速 ---
-    bool hasStartVelocity = false;
-    Vector3 startVelocity = { 0,0,0 };
+	// --- 初速 ---
+	bool hasStartVelocity = false;
+	Vector3 startVelocity = { 0,0,0 };
 
-    bool hasStartVelocityRandom = false;
-    Vector3 startVelocityRandom = { 0,0,0 };
+	bool hasStartVelocityRandom = false;
+	Vector3 startVelocityRandom = { 0,0,0 };
 
-    bool hasStartSpeedRandom = false;
-    Vector3 startSpeedRandom = { 0,0,0 };
+	bool hasStartSpeedRandom = false;
+	Vector3 startSpeedRandom = { 0,0,0 };
 
-    // --- 大小 ---
-    bool hasStartScale = false;
-    Vector3 startScale = { 1,1,1 };
+	// --- 大小 ---
+	bool hasStartScale = false;
+	Vector3 startScale = { 1,1,1 };
 
-    bool hasEndScale = false;
-    Vector3 endScale = { 1,1,1 };
+	bool hasEndScale = false;
+	Vector3 endScale = { 1,1,1 };
 
-    bool hasStartScaleRandom = false;
-    Vector3 startScaleRandom = { 0,0,0 };
+	bool hasStartScaleRandom = false;
+	Vector3 startScaleRandom = { 0,0,0 };
 
-    bool hasEndScaleRandom = false;
-    Vector3 endScaleRandom = { 0,0,0 };
+	bool hasEndScaleRandom = false;
+	Vector3 endScaleRandom = { 0,0,0 };
 
-    bool hasIsConstantScale = false;
-    bool isConstantScale = true;
+	bool hasIsConstantScale = false;
+	bool isConstantScale = true;
 
-    // --- 旋轉 ---
-    bool hasStartRotation = false;
-    Vector3 startRotation = { 0,0,0 };
+	// --- 旋轉 ---
+	bool hasStartRotation = false;
+	Vector3 startRotation = { 0,0,0 };
 
-    bool hasEndRotation = false;
-    Vector3 endRotation = { 0,0,0 };
+	bool hasEndRotation = false;
+	Vector3 endRotation = { 0,0,0 };
 
-    bool hasStartRotationRandom = false;
-    Vector3 startRotationRandom = { 0,0,0 };
+	bool hasStartRotationRandom = false;
+	Vector3 startRotationRandom = { 0,0,0 };
 
-    bool hasEndRotationRandom = false;
-    Vector3 endRotationRandom = { 0,0,0 };
+	bool hasEndRotationRandom = false;
+	Vector3 endRotationRandom = { 0,0,0 };
 
-    bool hasIsConstantRotation = false;
-    bool isConstantRotation = true;
+	bool hasIsConstantRotation = false;
+	bool isConstantRotation = true;
 
-    // --- 顏色 ---
-    bool hasStartColor = false;
-    Vector4 startColor = { 1,1,1,1 };
+	// --- 顏色 ---
+	bool hasStartColor = false;
+	Vector4 startColor = { 1,1,1,1 };
 
-    bool hasEndColor = false;
-    Vector4 endColor = { 1,1,1,0 };
+	bool hasEndColor = false;
+	Vector4 endColor = { 1,1,1,0 };
 
-    bool hasStartColorRandom = false;
-    Vector4 startColorRandom = { 0,0,0,0 };
+	bool hasStartColorRandom = false;
+	Vector4 startColorRandom = { 0,0,0,0 };
 
-    bool hasEndColorRandom = false;
-    Vector4 endColorRandom = { 0,0,0,0 };
+	bool hasEndColorRandom = false;
+	Vector4 endColorRandom = { 0,0,0,0 };
 
-    bool hasIsConstantColor = false;
-    bool isConstantColor = false;
+	bool hasIsConstantColor = false;
+	bool isConstantColor = false;
 
-    // --- 行為 ---
-    bool hasGravity = false;
-    Vector3 gravity = { 0,0,0 };
+	// --- UV（Material の UV に足す。寿命の間で Start → End） ---
+	bool hasUVTranslateStart = false;
+	Vector3 uvTranslateStart = { 0, 0, 0 };
 
-    bool hasDamping = false;
-    float damping = 0.0f;
+	bool hasUVTranslateEnd = false;
+	Vector3 uvTranslateEnd = { 0, 0, 0 };
 
-    bool hasDampingRandom = false;
-    float dampingRandom = 0.0f;
+	bool hasUVRotateStart = false;
+	float uvRotateStart = 0.0f;
 
-    // --- 發射設定 ---
-    bool hasEmitRate = false;
-    float emitRate = 0.0f;
+	bool hasUVRotateEnd = false;
+	float uvRotateEnd = 0.0f;
 
-    bool hasEmitIntervalRandom = false;
-    float emitIntervalRandom = 0.0f;
+	bool hasUVScaleStart = false;
+	Vector2 uvScaleStart = { 1, 1 };
 
-    bool hasBurstCount = false;
-    int burstCount = 1;
+	bool hasUVScaleEnd = false;
+	Vector2 uvScaleEnd = { 1, 1 };
 
-    bool hasEmitNumRandom = false;
-    float emitNumRandom = 0.0f;
+	// --- 行為 ---
+	bool hasGravity = false;
+	Vector3 gravity = { 0,0,0 };
 
-    // --- 外觀 ---
-    bool hasRenderType = false;
-    ParticleRenderType renderType = ParticleRenderType::Object;
+	bool hasDamping = false;
+	float damping = 0.0f;
 
-    bool hasObjectList = false;
-    std::vector<ObjectData> objectList;
+	bool hasDampingRandom = false;
+	float dampingRandom = 0.0f;
 
-    bool hasSpriteList = false;
-    std::vector<SimpleSpriteData> spriteList;
+	// --- 發射設定 ---
+	bool hasEmitRate = false;
+	float emitRate = 0.0f;
 
-    // --- 路徑 ---
-    bool hasModelPath = false;
-    std::string modelPath;
+	bool hasEmitIntervalRandom = false;
+	float emitIntervalRandom = 0.0f;
 
-    bool hasTexturePath = false;
-    std::string texturePath;
+	bool hasBurstCount = false;
+	int burstCount = 1;
+
+	bool hasEmitNumRandom = false;
+	float emitNumRandom = 0.0f;
+
+	// --- 外觀 ---
+	bool hasRenderType = false;
+	ParticleRenderType renderType = ParticleRenderType::Object;
+
+	bool hasObjectList = false;
+	std::vector<ObjectData> objectList;
+
+	bool hasSpriteList = false;
+	std::vector<SimpleSpriteData> spriteList;
+
+	// --- 路徑 ---
+	bool hasModelPath = false;
+	std::string modelPath;
+
+	bool hasTexturePath = false;
+	std::string texturePath;
 };
 
 /// ParticlePrototypeにParticlePrototypeOverrideの内容をコピーする関数

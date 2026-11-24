@@ -263,22 +263,24 @@ void SceneTutorial::Update() {
 		}
 	}
 
-	/// backPoint更新
-	if (backPoint_) {
-		backPoint_->Update(usingCamera_.lock().get());
-		if (backPoint_->GetIsBack()) {
-
-			backSign_->mainPosition.transform.translate = backPoint_->mainPosition.transform.translate + Vector3{ 0,0, -1.0f };
-			backSign_->Update(nullptr);
-
-			if (system_->GetTriggerOn(DIK_E)) {
-				system_->SoundStop(SH_BGM_);
-				isWin_ = true;
-				phase_ = ScenePhase::TRANSITION;
-			}
-		}
+	/// 【テスト】空中でエフェクト
+	if (system_->GetTriggerOn(DIK_P)) {
+		static int testFx = system_->GetEffectManager()->LoadEffect("./GAME/resources/Effect/HitRock/HitRock.json");
+		system_->GetEffectManager()->Play(testFx, player_->GetPosition() + Vector3{ 1.5f, 1.0f, 0.0f });
 	}
 
+	/// 帰還（Driller に乗る）
+	if (driller_ && driller_->CanBoard()) {
+		backSign_->mainPosition.transform.translate =
+			driller_->GetPosition() + Vector3{ 0.0f, kDrillerBoardHeight - 0.25f, -0.5f };
+		backSign_->Update(nullptr);
+
+		if (system_->GetTriggerOn(DIK_E)) {
+			system_->SoundStop(SH_BGM_);
+			isWin_ = true;
+			phase_ = ScenePhase::TRANSITION;
+		}
+	}
 
 	/// HP関連更新
 	{
@@ -316,16 +318,10 @@ void SceneTutorial::Update() {
 void SceneTutorial::Draw() {
 
 	/// 実体処理
-	//system_->DrawModel(&skydome_->objectParts[0].transformationMatrix, &(skydome_->objectParts[0].materialConfig.get()), skydomeModelHandle_);
 	skydome_->Draw();
 	underGround_BG_->Draw();
 	player_->Draw();
 
-	//system_->Draw3D(skydome_);
-	//system_->Draw3D(player_);
-	//system_->Draw3D(model_);
-
-	//object_->Draw();
 
 	/// enemy描画
 	for (auto& enemy : enemyList_) {
@@ -354,23 +350,30 @@ void SceneTutorial::Draw() {
 	const float kBlockDrawRadiusSq = kBlockDrawRadius * kBlockDrawRadius;
 	mapChipManager_->DrawBlocks(camPos, kBlockDrawRadius);
 
-	//if (backPoint_) {
-	//	backPoint_->Draw();
-	//	if (backPoint_->GetIsBack()) {
-	//		backSign_->Draw();
-	//	}
-	//}
+	/// 帰還の看板
+	if (driller_ && driller_->CanBoard()) backSign_->Draw();
 
 	for (int i = 0; i < 3; i++) {
 		hpUI_[i]->Draw();
 	}
-
+	
 	screenUI_->Draw();
 
 #ifdef USE_IMGUI
 	/// ImGui処理
 	ImGuiPart();
 #endif
+}
+
+void SceneTutorial::Pause() {
+	ppp_GlitchScreen_->OffAllPass();
+}
+
+void SceneTutorial::Resume() {
+	system_->GetDrawEngine()->SetEnviromentReflectionTexture(TH_ReflectTexture_);
+
+	ppp_GlitchScreen_->OnAllPass();
+	circleHandle_ = system_->GetPostProcessRunner()->SetPassVignette(0, *circleCommand_);
 }
 
 void SceneTutorial::PhaseUpdate() {
@@ -600,7 +603,7 @@ Enemy* SceneTutorial::CreateEnemy(const MapReader::SpawnInfo& s) {
 
 BackPoint* SceneTutorial::CreateBackPoint(const MapReader::SpawnInfo& s) {
 	if (driller_) driller_->SetSpawnPoint(s.position);
-	return new BackPoint(system_, s.position);
+	return nullptr;
 }
 
 Sign* SceneTutorial::CreateSign(const MapReader::SpawnInfo& s) {

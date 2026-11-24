@@ -69,6 +69,7 @@ private:
 	nlohmann::json EmitterLinkToJson(const EmitterLink& link) const;
 	nlohmann::json ObjectToJson(const ObjectData& obj, const std::string& baseDir) const;
 	nlohmann::json ModelToJson(int modelHandle, const std::string& baseDir) const;
+	nlohmann::json TrackToJson(const ParticlePartTrack& t) const;
 
 	/// --- パス関連 ---
 	std::string GetModelPath(int modelHandle) const;
@@ -82,5 +83,7 @@ private:
 	/// model の json → モデルハンドル。ファイルモデルなら isFileModel = true
 	int JsonToModel(const nlohmann::json& model, const std::string& baseDir, bool* isFileModel, std::string* log);
 	/// 保存されたテクスチャパス → ハンドル（空・無いファイルは白）
+	/// 無いキーは今の値のまま（古いファイル対策）
+	ParticlePartTrack JsonToTrack(const nlohmann::json& j);
 	int LoadTextureFrom(const std::string& rawPath, const std::string& baseDir, std::string* log);
 };

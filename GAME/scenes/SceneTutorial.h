@@ -25,7 +25,8 @@ public:
 	~SceneTutorial();
 	void Update() override;
 	void Draw() override;
-
+	void Pause() override;
+	void Resume() override;
 
 private:
 	kEngine* system_ = nullptr;				// 借り

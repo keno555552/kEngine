@@ -319,24 +319,13 @@ nlohmann::json EffectAdapter::ParticleToJson(const ParticlePrototype& proto, con
 	j["lifetime"] = proto.lifetime;
 	j["lifetimeRandomness"] = proto.lifetimeRandomness;
 
-	j["startPosition"] = JsonHelper::V3ToJson(proto.startPosition);
-	j["startPositionRandom"] = JsonHelper::V3ToJson(proto.startPositionRandom);
+	/// mainTrack はファイルの一番上に（古いファイルと同じキー）
+	j.update(TrackToJson(proto.mainTrack));
 
-	j["startVelocity"] = JsonHelper::V3ToJson(proto.startVelocity);
-	j["startVelocityRandom"] = JsonHelper::V3ToJson(proto.startVelocityRandom);
-	j["startSpeedRandom"] = JsonHelper::V3ToJson(proto.startSpeedRandom);
-
-	j["startScale"] = JsonHelper::V3ToJson(proto.startScale);
-	j["endScale"] = JsonHelper::V3ToJson(proto.endScale);
-	j["startScaleRandom"] = JsonHelper::V3ToJson(proto.startScaleRandom);
-	j["endScaleRandom"] = JsonHelper::V3ToJson(proto.endScaleRandom);
-	j["isConstantScale"] = proto.isConstantScale;
-
-	j["startRotation"] = JsonHelper::V3ToJson(proto.startRotation);
-	j["endRotation"] = JsonHelper::V3ToJson(proto.endRotation);
-	j["startRotationRandom"] = JsonHelper::V3ToJson(proto.startRotationRandom);
-	j["endRotationRandom"] = JsonHelper::V3ToJson(proto.endRotationRandom);
-	j["isConstantRotation"] = proto.isConstantRotation;
+	j["partTracks"] = nlohmann::json::array();
+	for (const auto& t : proto.partTracks) {
+		j["partTracks"].push_back(TrackToJson(t));
+	}
 
 	j["startColor"] = JsonHelper::V4ToJson(proto.startColor);
 	j["endColor"] = JsonHelper::V4ToJson(proto.endColor);
@@ -440,6 +429,34 @@ nlohmann::json EffectAdapter::ModelToJson(int modelHandle, const std::string& ba
 	return model;
 }
 
+nlohmann::json EffectAdapter::TrackToJson(const ParticlePartTrack& t) const {
+	nlohmann::json j;
+
+	j["startPosition"] = JsonHelper::V3ToJson(t.startPosition);
+	j["startPositionRandom"] = JsonHelper::V3ToJson(t.startPositionRandom);
+	j["startVelocity"] = JsonHelper::V3ToJson(t.startVelocity);
+	j["startVelocityRandom"] = JsonHelper::V3ToJson(t.startVelocityRandom);
+	j["startSpeedRandom"] = JsonHelper::V3ToJson(t.startSpeedRandom);
+	j["startScale"] = JsonHelper::V3ToJson(t.startScale);
+	j["endScale"] = JsonHelper::V3ToJson(t.endScale);
+	j["startScaleRandom"] = JsonHelper::V3ToJson(t.startScaleRandom);
+	j["endScaleRandom"] = JsonHelper::V3ToJson(t.endScaleRandom);
+	j["isConstantScale"] = t.isConstantScale;
+	j["startRotation"] = JsonHelper::V3ToJson(t.startRotation);
+	j["endRotation"] = JsonHelper::V3ToJson(t.endRotation);
+	j["startRotationRandom"] = JsonHelper::V3ToJson(t.startRotationRandom);
+	j["endRotationRandom"] = JsonHelper::V3ToJson(t.endRotationRandom);
+	j["isConstantRotation"] = t.isConstantRotation;
+	j["uvTranslateStart"] = JsonHelper::V3ToJson(t.uvTranslateStart);
+	j["uvTranslateEnd"] = JsonHelper::V3ToJson(t.uvTranslateEnd);
+	j["uvRotateStart"] = t.uvRotateStart;
+	j["uvRotateEnd"] = t.uvRotateEnd;
+	j["uvScaleStart"] = JsonHelper::V2ToJson({ t.uvScaleStart.x, t.uvScaleStart.y });
+	j["uvScaleEnd"] = JsonHelper::V2ToJson({ t.uvScaleEnd.x, t.uvScaleEnd.y });
+
+	return j;
+}
+
 std::string EffectAdapter::GetModelPath(int modelHandle) const {
 	auto& groups = system_->GetResourceManager()->modelGroupList_;
 	if (modelHandle < 0 || modelHandle >= (int)groups.size()) return "";
@@ -463,24 +480,12 @@ ParticlePrototype EffectAdapter::JsonToParticle(const nlohmann::json& j, const s
 	p.lifetime = j.value("lifetime", p.lifetime);
 	p.lifetimeRandomness = j.value("lifetimeRandomness", p.lifetimeRandomness);
 
-	p.startPosition = v3("startPosition", p.startPosition);
-	p.startPositionRandom = v3("startPositionRandom", p.startPositionRandom);
-
-	p.startVelocity = v3("startVelocity", p.startVelocity);
-	p.startVelocityRandom = v3("startVelocityRandom", p.startVelocityRandom);
-	p.startSpeedRandom = v3("startSpeedRandom", p.startSpeedRandom);
-
-	p.startScale = v3("startScale", p.startScale);
-	p.endScale = v3("endScale", p.endScale);
-	p.startScaleRandom = v3("startScaleRandom", p.startScaleRandom);
-	p.endScaleRandom = v3("endScaleRandom", p.endScaleRandom);
-	p.isConstantScale = j.value("isConstantScale", p.isConstantScale);
-
-	p.startRotation = v3("startRotation", p.startRotation);
-	p.endRotation = v3("endRotation", p.endRotation);
-	p.startRotationRandom = v3("startRotationRandom", p.startRotationRandom);
-	p.endRotationRandom = v3("endRotationRandom", p.endRotationRandom);
-	p.isConstantRotation = j.value("isConstantRotation", p.isConstantRotation);
+	/// 軌跡：mainTrack は一番上のキー（古いファイルもそのまま読める）
+	p.mainTrack = JsonToTrack(j);
+	p.partTracks.clear();
+	for (const auto& tj : j.value("partTracks", nlohmann::json::array())) {
+		p.partTracks.push_back(JsonToTrack(tj));
+	}
 
 	p.startColor = v4("startColor", p.startColor);
 	p.endColor = v4("endColor", p.endColor);
@@ -587,6 +592,37 @@ int EffectAdapter::JsonToModel(const nlohmann::json& model, const std::string& b
 	}
 
 	return config::default_Plane_MeshBufferHandle_;
+}
+
+ParticlePartTrack EffectAdapter::JsonToTrack(const nlohmann::json& j) {
+
+	ParticlePartTrack t;
+	auto v3 = [&](const char* key, const Vector3& def) { return j.contains(key) ? JsonHelper::JsonToV3(j[key]) : def; };
+	auto v2 = [&](const char* key, const Vector2& def) { return j.contains(key) ? JsonHelper::JsonToV2(j[key]) : def; };
+
+	t.startPosition = v3("startPosition", t.startPosition);
+	t.startPositionRandom = v3("startPositionRandom", t.startPositionRandom);
+	t.startVelocity = v3("startVelocity", t.startVelocity);
+	t.startVelocityRandom = v3("startVelocityRandom", t.startVelocityRandom);
+	t.startSpeedRandom = v3("startSpeedRandom", t.startSpeedRandom);
+	t.startScale = v3("startScale", t.startScale);
+	t.endScale = v3("endScale", t.endScale);
+	t.startScaleRandom = v3("startScaleRandom", t.startScaleRandom);
+	t.endScaleRandom = v3("endScaleRandom", t.endScaleRandom);
+	t.isConstantScale = j.value("isConstantScale", t.isConstantScale);
+	t.startRotation = v3("startRotation", t.startRotation);
+	t.endRotation = v3("endRotation", t.endRotation);
+	t.startRotationRandom = v3("startRotationRandom", t.startRotationRandom);
+	t.endRotationRandom = v3("endRotationRandom", t.endRotationRandom);
+	t.isConstantRotation = j.value("isConstantRotation", t.isConstantRotation);
+	t.uvTranslateStart = v3("uvTranslateStart", t.uvTranslateStart);
+	t.uvTranslateEnd = v3("uvTranslateEnd", t.uvTranslateEnd);
+	t.uvRotateStart = j.value("uvRotateStart", t.uvRotateStart);
+	t.uvRotateEnd = j.value("uvRotateEnd", t.uvRotateEnd);
+	t.uvScaleStart = v2("uvScaleStart", t.uvScaleStart);
+	t.uvScaleEnd = v2("uvScaleEnd", t.uvScaleEnd);
+
+	return t;
 }
 
 int EffectAdapter::LoadTextureFrom(const std::string& rawPath, const std::string& baseDir, std::string* log) {

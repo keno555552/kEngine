@@ -32,7 +32,14 @@ bool MaterialConfig::operator!=(const MaterialConfig& target) const {
 }
 
 void MaterialConfig::MakeUVMatrix() {
-	uvTransformMatrix = MakeAffineMatrix(uvScale, uvRotate, uvTranslate);
+	/// 回転・拡大は UV の中心 (0.5, 0.5) 基準
+	const Vector3 toCenter = { -0.5f, -0.5f, 0.0f };
+	const Vector3 backCenter = { 0.5f,  0.5f, 0.0f };
+
+	uvTransformMatrix =
+		MakeTranslateMatrix(toCenter) *
+		MakeAffineMatrix(uvScale, uvRotate, { 0, 0, 0 }) *
+		MakeTranslateMatrix(backCenter + uvTranslate);
 }
 
 void InitMaterialConfig(MaterialConfig* materialConfig) {

@@ -14,9 +14,6 @@
 
 
 /// リソースパーズ
-// GAME/resources/Object/driller/
-// driller.gltf
-
 static const float Driller_MaxSpeed = 0.1f;
 static const float Driller_DrillMaxSpeed = 0.1f;
 static const float Driller_OnOffTime = 0.1f;
@@ -31,6 +28,9 @@ static inline const float kDrillerDoorTime = 0.6f;			// ドア開閉時間
 static inline const float kDrillerDoorOpenAngle = 0.85f;    // ドアの開く角度（rad）
 static inline const int	kDrillerDrillHalfWidthCell = 1;		// ドリルの幅：中心から左右に何マス（1 → 左中右の 3 マス）
 
+/// ===== 乗り込み判定 ===== ///
+static inline const float kDrillerBoardHalfWidth = 0.6f;   // 乗り込み判定：横の半分
+static inline const float kDrillerBoardHeight = 1.0f;   // 乗り込み判定：本体の底からの高さ
 
 class Driller :public Object
 {
@@ -98,6 +98,12 @@ public:
 
 	bool IsCalled() const { return isCalled_; }
 	bool IsLanded() const { return isCalled_ && !isFalling_; }
+
+	/// ================= 当たり判定 ================= ///
+	AABB GetBoardAABB() const;
+	void SetIsPlayerInBoard(bool in) { isPlayerInBoard_ = in; }
+	/// ドアが開いていて、プレイヤーが横にいる → 乗れる
+	bool CanBoard() const { return IsDoorOpen() && isPlayerInBoard_; }
 
 	/// ================= 状態 ================= ///
 	bool IsVisible() const { return isVisible_; }
@@ -169,6 +175,7 @@ private:
 	bool hasSpawnPoint_ = false;
 	bool isCalled_ = false;
 	bool isPlayerNear_ = false;
+	bool isPlayerInBoard_ = false;
 
 	Timer doorAnimationTimer_;
 
