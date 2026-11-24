@@ -330,6 +330,7 @@ int ResourceManager::CreateModelResource(std::string Path) {
 
 	/// ないからモデルグループを作成
 	auto modelGroup = std::make_shared<ModelGroup>();
+	modelGroup->SetModelGroupData(modelDataPointer);
 
 	/// ModelDataからModelを作成してModelGroupに追加
 	for (int i = 0; i < modelDataPointer.get()->meshDataList.size(); i++) {

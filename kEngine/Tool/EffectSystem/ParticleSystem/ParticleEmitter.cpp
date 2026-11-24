@@ -177,7 +177,11 @@ void ParticleEmitter::SwitchEmitter(bool isEmitting) {
 void ParticleEmitter::Draw() {
 	if (particles_.empty()) return;
 	if (isObjectType_ == ParticleRenderType::Object) {
-		system_->DrawParticle(particles_);
+		if (!Run3DPath()) {
+			system_->DrawParticle(particles_);
+		} else {
+			system_->DrawParticleBy3DPath(particles_);
+		}
 	}
 }
 
@@ -316,4 +320,11 @@ ParticleInstance ParticleEmitter::BuildParticle(const ParticlePrototype& pr, con
 	p.nowUVRotate = p.startUVRotate;
 
 	return p;
+}
+
+bool ParticleEmitter::Run3DPath() {
+	if (prototype_->objectList.empty()) return false;
+	const auto& parts = prototype_->objectList[0].objectParts_;
+	if (parts.empty() || !parts[0].materialConfig) return false;
+	return parts[0].materialConfig->blendModeType == BlendModeType::Opaque;
 }

@@ -1,0 +1,13 @@
+{
+    "kind": "Effect",
+    "links": [],
+    "name": "BrokeRock",
+    "particles": [
+        {
+            "isRoot": true,
+            "path": "Particle/new_particle.json"
+        }
+    ],
+    "relativePaths": true,
+    "version": 1
+}

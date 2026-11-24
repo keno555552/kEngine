@@ -1,0 +1,1409 @@
+{
+    "burstCount": 1,
+    "damping": 0.5,
+    "dampingRandom": 0.0,
+    "emitIntervalRandom": 0.0,
+    "emitNumRandom": 0.0,
+    "emitRate": 0.0,
+    "endColor": [
+        1.0,
+        1.0,
+        1.0,
+        0.800000011920929
+    ],
+    "endColorRandom": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+    ],
+    "endRotation": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "endRotationRandom": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "endScale": [
+        0.30000001192092896,
+        0.30000001192092896,
+        0.30000001192092896
+    ],
+    "endScaleRandom": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "gravity": [
+        0.0,
+        -15.0,
+        0.0
+    ],
+    "isConstantColor": false,
+    "isConstantRotation": true,
+    "isConstantScale": false,
+    "kind": "Particle",
+    "lifetime": 1.0,
+    "lifetimeRandomness": 0.20000000298023224,
+    "name": "BrokeRockMove",
+    "objectList": [
+        {
+            "isBillboard": false,
+            "mainTransform": {
+                "rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "translate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "model": {
+                "path": "../../../Object/brokenRock/brokenRock.gltf",
+                "type": "file"
+            },
+            "parts": [
+                {
+                    "material": {
+                        "blendModeType": 1,
+                        "depthStencilType": 0,
+                        "enableLighting": false,
+                        "heightScale": 2.0,
+                        "intensity": 1.0,
+                        "lightModelType": 4,
+                        "rasterizerMode": 0,
+                        "reflectiveStrength": 0.0,
+                        "renderModelType": 0,
+                        "shininess": 32.0,
+                        "textureColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureColor2": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureColor3": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureHandle": "../../../texture/stone.png",
+                        "useModelTexture": false,
+                        "uvRotate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "uvScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "uvTranslate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    },
+                    "name": "Part0",
+                    "transform": {
+                        "rotate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "translate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    }
+                },
+                {
+                    "material": {
+                        "blendModeType": 1,
+                        "depthStencilType": 0,
+                        "enableLighting": false,
+                        "heightScale": 2.0,
+                        "intensity": 1.0,
+                        "lightModelType": 4,
+                        "rasterizerMode": 0,
+                        "reflectiveStrength": 0.0,
+                        "renderModelType": 0,
+                        "shininess": 32.0,
+                        "textureColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureColor2": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureColor3": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureHandle": "../../../texture/stone.png",
+                        "useModelTexture": false,
+                        "uvRotate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "uvScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "uvTranslate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    },
+                    "name": "Part1",
+                    "transform": {
+                        "rotate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "translate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    }
+                },
+                {
+                    "material": {
+                        "blendModeType": 1,
+                        "depthStencilType": 0,
+                        "enableLighting": false,
+                        "heightScale": 2.0,
+                        "intensity": 1.0,
+                        "lightModelType": 4,
+                        "rasterizerMode": 0,
+                        "reflectiveStrength": 0.0,
+                        "renderModelType": 0,
+                        "shininess": 32.0,
+                        "textureColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureColor2": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureColor3": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureHandle": "../../../texture/stone.png",
+                        "useModelTexture": false,
+                        "uvRotate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "uvScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "uvTranslate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    },
+                    "name": "Part2",
+                    "transform": {
+                        "rotate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "translate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    }
+                },
+                {
+                    "material": {
+                        "blendModeType": 1,
+                        "depthStencilType": 0,
+                        "enableLighting": false,
+                        "heightScale": 2.0,
+                        "intensity": 1.0,
+                        "lightModelType": 4,
+                        "rasterizerMode": 0,
+                        "reflectiveStrength": 0.0,
+                        "renderModelType": 0,
+                        "shininess": 32.0,
+                        "textureColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureColor2": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureColor3": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureHandle": "../../../texture/stone.png",
+                        "useModelTexture": false,
+                        "uvRotate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "uvScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "uvTranslate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    },
+                    "name": "Part3",
+                    "transform": {
+                        "rotate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "translate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    }
+                },
+                {
+                    "material": {
+                        "blendModeType": 1,
+                        "depthStencilType": 0,
+                        "enableLighting": false,
+                        "heightScale": 2.0,
+                        "intensity": 1.0,
+                        "lightModelType": 4,
+                        "rasterizerMode": 0,
+                        "reflectiveStrength": 0.0,
+                        "renderModelType": 0,
+                        "shininess": 32.0,
+                        "textureColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureColor2": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureColor3": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureHandle": "../../../texture/stone.png",
+                        "useModelTexture": false,
+                        "uvRotate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "uvScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "uvTranslate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    },
+                    "name": "Part4",
+                    "transform": {
+                        "rotate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "translate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    }
+                },
+                {
+                    "material": {
+                        "blendModeType": 1,
+                        "depthStencilType": 0,
+                        "enableLighting": false,
+                        "heightScale": 2.0,
+                        "intensity": 1.0,
+                        "lightModelType": 4,
+                        "rasterizerMode": 0,
+                        "reflectiveStrength": 0.0,
+                        "renderModelType": 0,
+                        "shininess": 32.0,
+                        "textureColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureColor2": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureColor3": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureHandle": "../../../texture/stone.png",
+                        "useModelTexture": false,
+                        "uvRotate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "uvScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "uvTranslate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    },
+                    "name": "Part5",
+                    "transform": {
+                        "rotate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "translate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    }
+                },
+                {
+                    "material": {
+                        "blendModeType": 1,
+                        "depthStencilType": 0,
+                        "enableLighting": false,
+                        "heightScale": 2.0,
+                        "intensity": 1.0,
+                        "lightModelType": 4,
+                        "rasterizerMode": 0,
+                        "reflectiveStrength": 0.0,
+                        "renderModelType": 0,
+                        "shininess": 32.0,
+                        "textureColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureColor2": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureColor3": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureHandle": "../../../texture/stone.png",
+                        "useModelTexture": false,
+                        "uvRotate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "uvScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "uvTranslate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    },
+                    "name": "Part6",
+                    "transform": {
+                        "rotate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "translate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    }
+                },
+                {
+                    "material": {
+                        "blendModeType": 1,
+                        "depthStencilType": 0,
+                        "enableLighting": false,
+                        "heightScale": 2.0,
+                        "intensity": 1.0,
+                        "lightModelType": 4,
+                        "rasterizerMode": 0,
+                        "reflectiveStrength": 0.0,
+                        "renderModelType": 0,
+                        "shininess": 32.0,
+                        "textureColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureColor2": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureColor3": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "textureHandle": "../../../texture/stone.png",
+                        "useModelTexture": false,
+                        "uvRotate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "uvScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "uvTranslate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    },
+                    "name": "Part7",
+                    "transform": {
+                        "rotate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "translate": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    }
+                }
+            ]
+        }
+    ],
+    "partTracks": [
+        {
+            "endRotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "endRotationRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "endScale": [
+                0.30000001192092896,
+                0.30000001192092896,
+                0.30000001192092896
+            ],
+            "endScaleRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "isConstantRotation": true,
+            "isConstantScale": false,
+            "startPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startPositionRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startRotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startRotationRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startScale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "startScaleRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startSpeedRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startVelocity": [
+                0.75,
+                -0.5799999833106995,
+                0.33000001311302185
+            ],
+            "startVelocityRandom": [
+                0.5,
+                0.5,
+                0.30000001192092896
+            ],
+            "uvRotateEnd": 0.0,
+            "uvRotateStart": 0.0,
+            "uvScaleEnd": [
+                1.0,
+                1.0
+            ],
+            "uvScaleStart": [
+                1.0,
+                1.0
+            ],
+            "uvTranslateEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "uvTranslateStart": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        {
+            "endRotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "endRotationRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "endScale": [
+                0.30000001192092896,
+                0.30000001192092896,
+                0.30000001192092896
+            ],
+            "endScaleRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "isConstantRotation": true,
+            "isConstantScale": false,
+            "startPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startPositionRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startRotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startRotationRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startScale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "startScaleRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startSpeedRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startVelocity": [
+                0.6100000143051147,
+                0.23000000417232513,
+                -0.7599999904632568
+            ],
+            "startVelocityRandom": [
+                0.5,
+                0.5,
+                0.30000001192092896
+            ],
+            "uvRotateEnd": 0.0,
+            "uvRotateStart": 0.0,
+            "uvScaleEnd": [
+                1.0,
+                1.0
+            ],
+            "uvScaleStart": [
+                1.0,
+                1.0
+            ],
+            "uvTranslateEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "uvTranslateStart": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        {
+            "endRotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "endRotationRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "endScale": [
+                0.30000001192092896,
+                0.30000001192092896,
+                0.30000001192092896
+            ],
+            "endScaleRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "isConstantRotation": true,
+            "isConstantScale": false,
+            "startPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startPositionRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startRotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startRotationRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startScale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "startScaleRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startSpeedRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startVelocity": [
+                0.46000000834465027,
+                -0.6499999761581421,
+                -0.6000000238418579
+            ],
+            "startVelocityRandom": [
+                0.5,
+                0.5,
+                0.30000001192092896
+            ],
+            "uvRotateEnd": 0.0,
+            "uvRotateStart": 0.0,
+            "uvScaleEnd": [
+                1.0,
+                1.0
+            ],
+            "uvScaleStart": [
+                1.0,
+                1.0
+            ],
+            "uvTranslateEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "uvTranslateStart": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        {
+            "endRotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "endRotationRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "endScale": [
+                0.30000001192092896,
+                0.30000001192092896,
+                0.30000001192092896
+            ],
+            "endScaleRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "isConstantRotation": true,
+            "isConstantScale": false,
+            "startPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startPositionRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startRotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startRotationRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startScale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "startScaleRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startSpeedRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startVelocity": [
+                -0.6200000047683716,
+                0.4300000071525574,
+                0.6499999761581421
+            ],
+            "startVelocityRandom": [
+                0.5,
+                0.5,
+                0.30000001192092896
+            ],
+            "uvRotateEnd": 0.0,
+            "uvRotateStart": 0.0,
+            "uvScaleEnd": [
+                1.0,
+                1.0
+            ],
+            "uvScaleStart": [
+                1.0,
+                1.0
+            ],
+            "uvTranslateEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "uvTranslateStart": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        {
+            "endRotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "endRotationRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "endScale": [
+                0.30000001192092896,
+                0.30000001192092896,
+                0.30000001192092896
+            ],
+            "endScaleRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "isConstantRotation": true,
+            "isConstantScale": false,
+            "startPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startPositionRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startRotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startRotationRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startScale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "startScaleRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startSpeedRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startVelocity": [
+                -0.5899999737739563,
+                -0.7799999713897705,
+                0.1899999976158142
+            ],
+            "startVelocityRandom": [
+                0.5,
+                0.5,
+                0.30000001192092896
+            ],
+            "uvRotateEnd": 0.0,
+            "uvRotateStart": 0.0,
+            "uvScaleEnd": [
+                1.0,
+                1.0
+            ],
+            "uvScaleStart": [
+                1.0,
+                1.0
+            ],
+            "uvTranslateEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "uvTranslateStart": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        {
+            "endRotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "endRotationRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "endScale": [
+                0.30000001192092896,
+                0.30000001192092896,
+                0.30000001192092896
+            ],
+            "endScaleRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "isConstantRotation": true,
+            "isConstantScale": false,
+            "startPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startPositionRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startRotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startRotationRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startScale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "startScaleRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startSpeedRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startVelocity": [
+                -0.5299999713897705,
+                0.6299999952316284,
+                -0.5600000023841858
+            ],
+            "startVelocityRandom": [
+                0.5,
+                0.5,
+                0.30000001192092896
+            ],
+            "uvRotateEnd": 0.0,
+            "uvRotateStart": 0.0,
+            "uvScaleEnd": [
+                1.0,
+                1.0
+            ],
+            "uvScaleStart": [
+                1.0,
+                1.0
+            ],
+            "uvTranslateEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "uvTranslateStart": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        {
+            "endRotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "endRotationRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "endScale": [
+                0.30000001192092896,
+                0.30000001192092896,
+                0.30000001192092896
+            ],
+            "endScaleRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "isConstantRotation": true,
+            "isConstantScale": false,
+            "startPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startPositionRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startRotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startRotationRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startScale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "startScaleRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startSpeedRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startVelocity": [
+                -0.07999999821186066,
+                -0.5400000214576721,
+                -0.8399999737739563
+            ],
+            "startVelocityRandom": [
+                0.5,
+                0.5,
+                0.30000001192092896
+            ],
+            "uvRotateEnd": 0.0,
+            "uvRotateStart": 0.0,
+            "uvScaleEnd": [
+                1.0,
+                1.0
+            ],
+            "uvScaleStart": [
+                1.0,
+                1.0
+            ],
+            "uvTranslateEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "uvTranslateStart": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        {
+            "endRotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "endRotationRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "endScale": [
+                0.30000001192092896,
+                0.30000001192092896,
+                0.30000001192092896
+            ],
+            "endScaleRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "isConstantRotation": true,
+            "isConstantScale": false,
+            "startPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startPositionRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startRotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startRotationRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startScale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "startScaleRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startSpeedRandom": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "startVelocity": [
+                1.5,
+                4.800000190734863,
+                0.6000000238418579
+            ],
+            "startVelocityRandom": [
+                0.5,
+                0.5,
+                0.30000001192092896
+            ],
+            "uvRotateEnd": 0.0,
+            "uvRotateStart": 0.0,
+            "uvScaleEnd": [
+                1.0,
+                1.0
+            ],
+            "uvScaleStart": [
+                1.0,
+                1.0
+            ],
+            "uvTranslateEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "uvTranslateStart": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    ],
+    "renderType": 0,
+    "startColor": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+    ],
+    "startColorRandom": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+    ],
+    "startPosition": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "startPositionRandom": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "startRotation": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "startRotationRandom": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "startScale": [
+        1.0,
+        1.0,
+        1.0
+    ],
+    "startScaleRandom": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "startSpeedRandom": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "startVelocity": [
+        0.5099999904632568,
+        0.7699999809265137,
+        0.38999998569488525
+    ],
+    "startVelocityRandom": [
+        0.5,
+        0.5,
+        0.30000001192092896
+    ],
+    "uvRotateEnd": 0.0,
+    "uvRotateStart": 0.0,
+    "uvScaleEnd": [
+        1.0,
+        1.0
+    ],
+    "uvScaleStart": [
+        1.0,
+        1.0
+    ],
+    "uvTranslateEnd": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "uvTranslateStart": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "version": 1
+}

@@ -240,6 +240,10 @@ void kEngine::DrawParticle(std::vector<ParticleInstance>& instance) {
 	drawDataCollector->CollectParticle(instance);
 }
 
+void kEngine::DrawParticleBy3DPath(std::vector<ParticleInstance>& instance) {
+	drawDataCollector->CollectParticle(instance, true);
+}
+
 int kEngine::GetModelTextureHandle(int modelHandle, int part) {
 	return ResourceManager::GetInstance()->GetTextureHandleFromModelGroup(modelHandle, part);
 }
