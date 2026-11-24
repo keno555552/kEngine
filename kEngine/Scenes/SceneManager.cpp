@@ -5,13 +5,13 @@ std::unique_ptr <SceneManager> SceneManager::sceneManager_ = nullptr;
 void SceneManager::Initialize(kEngine* system) {
 	system_ = system;
 	sceneFactory_ = std::make_unique<SceneFactory>(system);
-	//sceneUsingNameHandle_ = "ENGINE_TITLE";
+	sceneUsingNameHandle_ = "ENGINE_TITLE";
 	//sceneUsingNameHandle_ = "TITLE";
 	//sceneUsingNameHandle_ = "STAGE_TUTORIAL";
 	//sceneUsingNameHandle_ = "CGHK2";
 	//sceneUsingNameHandle_ = "UITest";
 	//sceneUsingNameHandle_ = "ParticleEditor";
-	sceneUsingNameHandle_ = "EffectEditor";
+	//sceneUsingNameHandle_ = "EffectEditor";
 	//sceneUsingNameHandle_ = "ANIMATIONEDITOR";
 
 	/// チートエンジンの初期化
