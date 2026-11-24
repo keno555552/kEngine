@@ -1,6 +1,6 @@
 {
     "freezeScene": false,
     "isLogOn": false,
-    "isObjectEditorOn": true,
-    "menuOpen": false
+    "isObjectEditorOn": false,
+    "menuOpen": true
 }
