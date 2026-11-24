@@ -166,6 +166,7 @@ void CheatEngine::Draw() {
 
 			if (ImGui::CollapsingHeader("System", ImGuiTreeNodeFlags_DefaultOpen)) {
 				ImGui::Text("FPS: %.1f", system_->GetFPS());
+				ImGui::Text("FPS_1s: %.1f", system_->GetFPSPerSecond());
 				ImGui::Text("DeltaTime: %.4f", system_->GetDeltaTime());
 			}
 
@@ -176,6 +177,11 @@ void CheatEngine::Draw() {
 
 			if (ImGui::CollapsingHeader("ObjectsEditor", ImGuiTreeNodeFlags_DefaultOpen)) {
 				ImGui::Checkbox("On/Off", &isObjectEditorOn_);
+			}
+
+			if (ImGui::CollapsingHeader("ParticleEditor", ImGuiTreeNodeFlags_DefaultOpen)) {
+				ImGui::Text("ParticleNum: %d", system_->GetEffectManager()->GetParticleManager()->GetAllParticleCount());
+				ImGui::Checkbox("EffectEditor On/Off", &isEffectEditorOn_);
 			}
 
 			if (ImGui::CollapsingHeader("Log", ImGuiTreeNodeFlags_DefaultOpen)) {

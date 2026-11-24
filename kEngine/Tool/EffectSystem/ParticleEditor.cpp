@@ -132,12 +132,10 @@ ParticleEditor::ParticleEditor(kEngine* system) {
 	/// =========== パーティクル作る ============///
 
 	HitSpark hitSpark;
-	hitSpark.startPosition = { 0.0f, 0.0f, 0.0f };
 	hitSpark.objectList[0].objectParts_[0].materialConfig->textureHandle = clicleTextureHandle_;
 	particleHandle_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitSpark, 0);
 
 	HitImpact hitImpact;
-	hitImpact.startPosition = { 0.0f, 0.0f, 0.0f };
 	hitImpact.objectList[0].objectParts_[0].materialConfig->textureHandle = effectTextureHandle_;
 	particleHandle2_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitImpact, 1);
 
@@ -197,24 +195,9 @@ void ParticleEditor::Update() {
 		system_->SoundPlaySE(soundHandle_, 0.5f);
 	}
 
-	//if (detailButton_->GetIsPress()) {
-	//	for(auto& object : box_->objectParts_){ object.materialConfig->reflectiveStrength = 1.0f; }
-	//} else {
-	//	for(auto& object : box_->objectParts_){ object.materialConfig->reflectiveStrength = 0.0f; }
-	//}
-
 	if (detailButton_->GetIsClicked()) {
 		system_->GetEffectManager()->GetParticleManager()->ShootEmitter(particleHandle_, 1);
 	}
-
-
-	//if (system_->GetMouseTriggerOn(0)) {
-	//	box_->objectParts_[0].materialConfig->reflectiveStrength += 0.05f;
-	//}
-	//
-	//if (system_->GetMouseTriggerOn(1)) {
-	//	box_->objectParts_[0].materialConfig->reflectiveStrength -= 0.05f;
-	//}
 
 	/// Panelのロジック処理
 	if (isPress_) {
@@ -226,17 +209,6 @@ void ParticleEditor::Update() {
 			panel_->SetClose();
 		}
 	}
-	///// Panelのロジック処理
-	//if (isHit) {
-	//	if (panel_->GetIsEnd()) {
-	//		panel_->SetOpen();
-	//	}
-	//} else {
-	//	if (panel_->GetIsNormal()) {
-	//		panel_->SetClose();
-	//	}
-	//}
-
 
 }
 

@@ -160,19 +160,19 @@ UITest::UITest(kEngine* system) {
 
 	HitSpark3 hitSpark;
 	hitSpark.name = "HitSpark";
-	hitSpark.startPosition = { 0.0f, 0.0f, 0.0f };
+	hitSpark.mainTrack.startPosition = { 0.0f, 0.0f, 0.0f };
 	hitSpark.objectList[0].objectParts_[0].materialConfig->textureHandle = clicleTextureHandle_;
 	particleHandle_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitSpark, 0);
 
 	HitImpact3 hitImpact;
 	hitImpact.name = "HitImpact";
-	hitImpact.startPosition = { 0.0f, 0.0f, 0.0f };
+	hitImpact.mainTrack.startPosition = { 0.0f, 0.0f, 0.0f };
 	hitImpact.objectList[0].objectParts_[0].materialConfig->textureHandle = effectTextureHandle_;
 	particleHandle2_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitImpact, 1);
 
 	HitRock hitRock;
 	hitRock.name = "HitRock";
-	hitRock.startPosition = { 0.0f, 0.0f, 0.0f };
+	hitRock.mainTrack.startPosition = { 0.0f, 0.0f, 0.0f };
 	hitRock.objectList[0].objectParts_[0].materialConfig->textureHandle = whiteTextureHandle_;
 	particleHandle3_ = system_->GetEffectManager()->GetParticleManager()->CreateEmitter(hitRock, 0);
 
@@ -249,22 +249,6 @@ void UITest::Update() {
 	if (detailButton_->GetIsClicked()) {
 		system_->GetEffectManager()->GetParticleManager()->ShootEmitter(particleHandle_, 1);
 	}
-
-	//if (button_->GetIsClick()) {
-	//	system_->ChangeEngineModel(sphereBuildMaterial_, objectHandle_);
-	//}
-	//if (button_->GetIsClick()) {
-	//	system_->ChangeEngineModel(cylinderBuildMaterial_, objectHandle_);
-	//}
-
-
-	//if (system_->GetMouseTriggerOn(0)) {
-	//	box_->objectParts_[0].materialConfig->reflectiveStrength += 0.05f;
-	//}
-	//
-	//if (system_->GetMouseTriggerOn(1)) {
-	//	box_->objectParts_[0].materialConfig->reflectiveStrength -= 0.05f;
-	//}
 
 	/// Panelのロジック処理
 	if (isPress_) {

@@ -215,7 +215,7 @@ void DrawEngine::OnResize(int width, int height) {
 			directXDriver_->GetDevice(),
 			kClientWidth_,
 			kClientHeight_)
-		);
+	);
 	// DSF heapの更新
 	MakeDepthStencilView();
 
@@ -336,14 +336,14 @@ void DrawEngine::RenderPreview() {
 }
 #endif
 
-void DrawEngine::PSODecision(PSOKey& psoKey) {
+bool DrawEngine::PSODecision(PSOKey& psoKey) {
 
 	PSOKey psoKeyInt = psoKey;
 	if (enviromentReflectionTextureHandle_ == -1) {
 		psoKeyInt.featureMask &= ~(uint64_t)FeatureFlags::EnvReflection;
 	}
 
-	psoManager_->SetPSO(psoKeyInt);
+	bool isPSOSet = psoManager_->SetPSO(psoKeyInt);
 
 	/// Topology設定
 	switch (psoKeyInt.primitiveType) {
@@ -355,6 +355,7 @@ void DrawEngine::PSODecision(PSOKey& psoKey) {
 		commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		break;
 	}
+	return isPSOSet;
 }
 
 /// ======================================== Draw関数 ========================================== ///
@@ -402,15 +403,16 @@ void DrawEngine::Draw2DTransparent() {
 
 	auto& transparent2D_ = drawDataCollector_->GetTransparentObjectParts2D();
 
-	/// TileSRV
-	commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::TransformMatricesList_SB), tile2DWVPResource_->GetGPUDescriptorHandle());
-	commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialList_SB), materialResource_->GetGPUDescriptorHandle());
-	commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialIndexList_SB), materialIndexListResource_->GetGPUDescriptorHandle());
 
 	for (auto& object : transparent2D_) {
 
 		/// Set PSO
 		PSODecision(object.psoKey);
+		/// TileSRV
+		commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::TransformMatricesList_SB), tile2DWVPResource_->GetGPUDescriptorHandle());
+		commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialList_SB), materialResource_->GetGPUDescriptorHandle());
+		commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialIndexList_SB), materialIndexListResource_->GetGPUDescriptorHandle());
+
 
 		SetLightingGPU();
 
@@ -461,16 +463,17 @@ void DrawEngine::Draw2DTransparent() {
 void DrawEngine::Draw2DOpaque() {
 	auto& transparentObjectParts2D_ = drawDataCollector_->GetOpaqueBuckets2D();
 
-	/// TileSRV
-	commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::TransformMatricesList_SB), tile2DWVPResource_->GetGPUDescriptorHandle());
-	commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialList_SB), materialResource_->GetGPUDescriptorHandle());
-	commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialIndexList_SB), materialIndexListResource_->GetGPUDescriptorHandle());
 
 	for (auto& [psoKey, materialBuckets] : transparentObjectParts2D_) {
 
 		/// Set PSO
 		PSOKey psoKeyInt = psoKey;
 		PSODecision(psoKeyInt);
+		/// TileSRV
+		commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::TransformMatricesList_SB), tile2DWVPResource_->GetGPUDescriptorHandle());
+		commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialList_SB), materialResource_->GetGPUDescriptorHandle());
+		commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialIndexList_SB), materialIndexListResource_->GetGPUDescriptorHandle());
+
 
 		for (auto& [meshBuffer, TextureHandleGroup] : materialBuckets) {
 
@@ -552,9 +555,6 @@ void DrawEngine::Draw3DTransparent() {
 	auto& transparent3D_ = drawDataCollector_->GetTransparentObjectParts3D();
 
 	/// TileSRV
-	commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::TransformMatricesList_SB), tile3DWVPResource_->GetGPUDescriptorHandle());
-	commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialList_SB), materialResource_->GetGPUDescriptorHandle());
-	commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialIndexList_SB), materialIndexListResource_->GetGPUDescriptorHandle());
 
 
 	for (auto& object : transparent3D_) {
@@ -562,7 +562,12 @@ void DrawEngine::Draw3DTransparent() {
 		/// Set PSO
 		PSOKey psoKeyInt = object.psoKey;
 		psoKeyInt.depthStencilType = DepthStencilType::ReadOnly;
+
 		PSODecision(psoKeyInt);
+		commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::TransformMatricesList_SB), tile3DWVPResource_->GetGPUDescriptorHandle());
+		commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialList_SB), materialResource_->GetGPUDescriptorHandle());
+		commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialIndexList_SB), materialIndexListResource_->GetGPUDescriptorHandle());
+
 
 		if (enviromentReflectionTextureHandle_ != -1) {
 			SetEnviromentReflectionGPU();
@@ -634,16 +639,17 @@ void DrawEngine::Draw3DTransparent() {
 void DrawEngine::Draw3DOpaque() {
 	auto& transparentObjectParts3D_ = drawDataCollector_->GetOpaqueBuckets3D();
 
-	/// TileSRV
-	commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::TransformMatricesList_SB), tile3DWVPResource_->GetGPUDescriptorHandle());
-	commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialList_SB), materialResource_->GetGPUDescriptorHandle());
-	commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialIndexList_SB), materialIndexListResource_->GetGPUDescriptorHandle());
 
 	for (auto& [psoKey, materialBuckets] : transparentObjectParts3D_) {
 
 		/// Set PSO
 		PSOKey psoKeyInt = psoKey;
 		PSODecision(psoKeyInt);
+		/// TileSRV
+		commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::TransformMatricesList_SB), tile3DWVPResource_->GetGPUDescriptorHandle());
+		commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialList_SB), materialResource_->GetGPUDescriptorHandle());
+		commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialIndexList_SB), materialIndexListResource_->GetGPUDescriptorHandle());
+
 
 		if (enviromentReflectionTextureHandle_ != -1) {
 			SetEnviromentReflectionGPU();
@@ -731,16 +737,17 @@ void DrawEngine::DrawParticle() {
 
 	auto& objectBucket_ = drawDataCollector_->GetParticleBucket();
 
-	/// TileSRV
-	commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::TransformMatricesList_SB), tilePCWVPResource_->GetGPUDescriptorHandle());
-	commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialList_SB), materialResource_->GetGPUDescriptorHandle());
-	commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialIndexList_SB), materialIndexListResource_->GetGPUDescriptorHandle());
 
 	for (auto& [psoKey, materialBuckets] : objectBucket_) {
 
 		/// Set PSO
 		PSOKey psoKeyInt = psoKey;
 		PSODecision(psoKeyInt);
+		/// TileSRV
+		commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::TransformMatricesList_SB), tilePCWVPResource_->GetGPUDescriptorHandle());
+		commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialList_SB), materialResource_->GetGPUDescriptorHandle());
+		commandList_->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::MaterialIndexList_SB), materialIndexListResource_->GetGPUDescriptorHandle());
+
 
 		if (enviromentReflectionTextureHandle_ != -1) {
 			SetEnviromentReflectionGPU();
@@ -810,7 +817,7 @@ void DrawEngine::DrawParticle() {
 	}
 }
 
-/// ------------------------------------- まとめのDrawCell -------------------------------------- ///
+/// ------------------------------------- まとめのDrawCall -------------------------------------- ///
 
 void DrawEngine::DrawCall() {
 
@@ -818,8 +825,8 @@ void DrawEngine::DrawCall() {
 	/// 3D、Sprite、Particle、DebugLineの順
 	/// で描画する
 	Draw3D();
-	Draw2D();
 	DrawParticle();
+	Draw2D();
 	DrawDebugLine();
 }
 

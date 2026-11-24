@@ -7,22 +7,23 @@ typedef struct Vector3 {
 	float x, y, z;
 
 	///演算子再定義
-	Vector3 operator+(const Vector3& target);
-	Vector3 operator-(const Vector3& target);
-	Vector3 operator*(const Vector3& target);
-	Vector3 operator/(const Vector3& target);
-	Vector3 operator*(const float& target);
+	Vector3 operator+(const Vector3& target) const;
+	Vector3 operator-(const Vector3& target) const;
+	Vector3 operator*(const Vector3& target) const;
+	Vector3 operator/(const Vector3& target) const;
+	Vector3 operator*(const float& target) const;
+	Vector3 operator/(const float& target) const;
 	Vector3 operator*=(const float& target);
 	friend Vector3 operator*(float scalar, const Vector3& vec);
-	Vector3 operator/(const float& target);
 	Vector3 operator+=(const Vector3& target);
+	Vector3 operator-=(const Vector3& target);
 	Vector3 operator*=(const Vector3& target);
 	bool operator==(const Vector3& target)const;
 	bool operator!=(const Vector3& target)const;
 
 
 	///int
-	Vector3 operator*(const int& target);
+	Vector3 operator*(const int& target)const;
 	friend Vector3 operator*(int scalar, const Vector3& vec);
 
 	///ヘルム

@@ -7,15 +7,15 @@ void SceneManager::Initialize(kEngine* system) {
 	sceneFactory_ = std::make_unique<SceneFactory>(system);
 	//sceneUsingNameHandle_ = "ENGINE_TITLE";
 	//sceneUsingNameHandle_ = "TITLE";
-	sceneUsingNameHandle_ = "STAGE_TUTORIAL";
+	//sceneUsingNameHandle_ = "STAGE_TUTORIAL";
 	//sceneUsingNameHandle_ = "CGHK2";
 	//sceneUsingNameHandle_ = "UITest";
 	//sceneUsingNameHandle_ = "ParticleEditor";
-	//sceneUsingNameHandle_ = "EffectEditor";
+	sceneUsingNameHandle_ = "EffectEditor";
 	//sceneUsingNameHandle_ = "ANIMATIONEDITOR";
 
 	/// チートエンジンの初期化
-#ifdef _DEBUG
+#ifdef USE_IMGUI
 	cheatEngine_ = std::make_unique<CheatEngine>();
 	cheatEngine_->Initialize(system_);
 #endif
@@ -35,10 +35,11 @@ void SceneManager::Initialize(kEngine* system) {
 
 void SceneManager::Finalize() {
 
-#ifdef _DEBUG
+#ifdef USE_IMGUI
 	cheatEngine_.reset();
 #endif
 
+	effectEditor_.reset();
 	sceneUsing_.reset();
 	sceneOld_.reset();
 	sceneFactory_.reset();
@@ -121,21 +122,31 @@ void SceneManager::SceneChanger() {
 
 void SceneManager::Update() {
 
-
-	SceneChanger();
-
-	defaultMenu_->Update();
-
 	bool frozen = false;
 
-#ifdef _DEBUG
-	/// CheatEngine部分関連
+#ifdef USE_IMGUI
+	/// CheatEngine の EffectEditor チェック ⇔ 今の前後をそろえる
 	if (cheatEngine_) {
+		if (cheatEngine_->IsEffectEditorOn() != isEditorFront_) {
+			ToggleEffectEditor();
+			/// 作れなかった → チェックを戻す（毎フレーム作り直そうとしないように）
+			if (cheatEngine_->IsEffectEditorOn() != isEditorFront_) cheatEngine_->SetEffectEditorOn(isEditorFront_);
+		}
 		if (cheatEngine_->IsSceneFrozen()) {
 			frozen = true;
 		}
 	}
+	if (isEditorFront_) {
+		effectEditor_->Update();
+		/// エディタの File > Exit = ゲームに戻る（チェックを外す → 次のフレームで切り替わる）
+		if (effectEditor_->GetOutcome() == SceneOutcome::EXIT && cheatEngine_) cheatEngine_->SetEffectEditorOn(false);
+		return;
+	}
 #endif
+
+	SceneChanger();
+
+	defaultMenu_->Update();
 
 	/// defaultMenu部分関連
 	if (defaultMenu_) {
@@ -152,22 +163,39 @@ void SceneManager::Update() {
 
 void SceneManager::Render() {
 
-	if (sceneUsing_ != nullptr) {
+	if (isEditorFront_) {
+		if (effectEditor_) effectEditor_->Draw();
+	} else if (sceneUsing_ != nullptr) {
 		sceneUsing_->Draw();
-	} else {
 	}
-
-#ifdef _DEBUG
-	if (cheatEngine_) {
-		cheatEngine_->Draw();
-	}
-#endif
 
 	defaultMenu_->Draw();
 
 #ifdef USE_IMGUI
+	if (cheatEngine_) {
+		cheatEngine_->Draw();
+	}
 	//ImGuiPart();
 #endif
+}
+
+void SceneManager::ToggleEffectEditor() {
+	if (!effectEditor_) {
+		effectEditor_ = sceneFactory_->CreateScene("EffectEditor");
+		if (!effectEditor_) return;
+	}
+
+	isEditorFront_ = !isEditorFront_;
+
+	if (isEditorFront_) {
+		if (sceneUsing_) sceneUsing_->Pause();
+		effectEditor_->ResetOutcome();
+		effectEditor_->Resume();
+	} else {
+		effectEditor_->Pause();
+		if (sceneUsing_) sceneUsing_->Resume();
+	}
+	if (defaultMenu_) defaultMenu_->SetCanOpen(!isEditorFront_ && sceneUsingNameHandle_ != "TITLE" && sceneUsingNameHandle_ != "ENGINE_TITLE");
 }
 
 void SceneManager::ClearStage() {
@@ -178,37 +206,5 @@ void SceneManager::ClearStage() {
 }
 
 #ifdef USE_IMGUI
-void SceneManager::ImGuiPart() {
-	{
-		float fps = system_->GetFPS();
-		float fps1s = system_->GetFPSPerSecond();
-		float deltaTime = system_->GetDeltaTime();
-		ImGui::Begin("FPS");
-		ImGui::InputFloat("FPS", &fps);
-		ImGui::InputFloat("FPS_1s", &fps1s);
-		ImGui::InputFloat("deltaTime", &deltaTime);
-		ImGui::End();
-	}
-	{
-		ImGui::Begin("MenuTest");
-		if (defaultMenu_->isClicked()) {
-			ImGui::Text("IsClicked: True");
-		} else {
-			ImGui::Text("IsClicked: False");
-		}
-
-		if (defaultMenu_->IsRetry()) {
-			ImGui::Text("IsRetry: True");
-		} else {
-			ImGui::Text("IsRetry: False");
-		}
-
-		if (defaultMenu_->IsBack()) {
-			ImGui::Text("IsBack: True");
-		} else {
-			ImGui::Text("IsBack: False");
-		}
-		ImGui::End();
-	}
-}
+void SceneManager::ImGuiPart() {}
 #endif

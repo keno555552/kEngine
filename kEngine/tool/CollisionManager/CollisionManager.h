@@ -37,6 +37,7 @@ private:
 	void BulletPlayerCollision();
 	void BulletEnemyCollision();
 	void EnemyMapCollision();
+	void DrillerMapCollision();
 
 private:
 	Player* player_ = nullptr;

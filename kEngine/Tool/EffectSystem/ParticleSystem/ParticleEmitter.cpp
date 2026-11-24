@@ -80,6 +80,18 @@ void ParticleEmitter::Update() {
 			std::clamp(Lerp(p.startColor.w, p.endColor.w, p.life.parameter_, p.life.maxTime_),0.0f,1.0f)
 		};
 
+		/// UV 插值
+		p.nowUVTranslate = {
+			Lerp(p.startUVTranslate.x, p.endUVTranslate.x, p.life.parameter_, p.life.maxTime_),
+			Lerp(p.startUVTranslate.y, p.endUVTranslate.y, p.life.parameter_, p.life.maxTime_),
+			Lerp(p.startUVTranslate.z, p.endUVTranslate.z, p.life.parameter_, p.life.maxTime_)
+		};
+		p.nowUVRotate = Lerp(p.startUVRotate, p.endUVRotate, p.life.parameter_, p.life.maxTime_);
+		p.nowUVScale = {
+			Lerp(p.startUVScale.x, p.endUVScale.x, p.life.parameter_, p.life.maxTime_),
+			Lerp(p.startUVScale.y, p.endUVScale.y, p.life.parameter_, p.life.maxTime_)
+		};
+
 		/// 阻尼
 		p.velocity *= std::exp(-p.prototype->damping * deltaTime);
 	}
@@ -103,7 +115,7 @@ void ParticleEmitter::Update() {
 	/// 無序刪除
 	for (int i = (int)particles_.size() - 1; i >= 0; --i) {
 		if (!particles_[i].isAlive) {
-			dexpiredData_.push_back(particles_[i]);   // 死んだ本人を記録（back() だと別の粒子になる）
+			if (particles_[i].partIndex <= 0) dexpiredData_.push_back(particles_[i]);   // 死亡 Link は Part0 だけ
 			particles_[i] = std::move(particles_.back());
 			particles_.pop_back();
 		}
@@ -127,6 +139,9 @@ void ParticleEmitter::Emit(int count, ParticlePrototypeOverride* prototype) {
 	}
 	const ParticlePrototype& usedPrototype = *proto;
 
+	/// Part ごとに飛ばすか（partTracks が空なら今まで通り：1 粒子で全 Part）
+	const bool isSeparate = !usedPrototype.partTracks.empty() && !usedPrototype.objectList.empty();
+	const int partCount = isSeparate ? (int)usedPrototype.objectList[0].objectParts_.size() : 1;
 
 	for (int i = 0; i < count; i++) {
 
@@ -134,123 +149,27 @@ void ParticleEmitter::Emit(int count, ParticlePrototypeOverride* prototype) {
 		int shootTime = (int)(usedPrototype.burstCount * emitRate);
 
 		for (int s = 0; s < shootTime; s++) {
-			ParticleInstance p;
-			p.prototype = proto;
 
-			p.particleId = (*particleIdIP_)++;
-			p.isAlive = true;
-			p.life.parameter_ = 0.0f;
+			/// 寿命は 1 回だけ決める（同じ物の破片は同時に消える）
+			const float randLife = usedPrototype.lifetimeRandomness * usedPrototype.lifetime;
+			const float life = usedPrototype.lifetime + randomMaker_->randomFloat(-randLife, randLife);
 
-			// 壽命
-			float randLife = usedPrototype.lifetimeRandomness * usedPrototype.lifetime;
-			p.life.maxTime_ = usedPrototype.lifetime + randomMaker_->randomFloat(-randLife, randLife);
+			for (int part = 0; part < partCount; part++) {
+				const ParticlePartTrack& tr = isSeparate ? GetPartTrack(usedPrototype, part) : usedPrototype.mainTrack;
 
-			// もでるのランダムはしない
-			p.objectIndex = 0;
+				ParticleInstance p = BuildParticle(usedPrototype, tr, prototype, life);
+				p.prototype = proto;
+				p.partIndex = isSeparate ? part : -1;
 
-			/// ============================== 初期状態設定 ============================== ///
-
-			// 初速
-			Vector3 rv = {
-				randomMaker_->randomFloat(-usedPrototype.startVelocityRandom.x, usedPrototype.startVelocityRandom.x),
-				randomMaker_->randomFloat(-usedPrototype.startVelocityRandom.y, usedPrototype.startVelocityRandom.y),
-				randomMaker_->randomFloat(-usedPrototype.startVelocityRandom.z, usedPrototype.startVelocityRandom.z)
-			};
-			p.velocity = rv + usedPrototype.startVelocity;
-
-			// 初期状態設定
-			// p.startTranslate = emitterPosition;
-			// 初期位置：Link から位置が来ていればそこ、なければ「線の位置 + startPosition（ずれ）」
-			const Vector3 basePos = (prototype && prototype->hasStartPosition)
-				? prototype->startPosition
-				: emitterPosition + usedPrototype.startPosition;
-			Vector3 rp = {
-				randomMaker_->randomFloat(-usedPrototype.startPositionRandom.x, usedPrototype.startPositionRandom.x),
-				randomMaker_->randomFloat(-usedPrototype.startPositionRandom.y, usedPrototype.startPositionRandom.y),
-				randomMaker_->randomFloat(-usedPrototype.startPositionRandom.z, usedPrototype.startPositionRandom.z)
-			};
-			p.startTranslate = rp + basePos;
-
-			Vector3 ranScale = {
-				randomMaker_->randomFloat(1.0f - usedPrototype.startScaleRandom.x, 1.0f + usedPrototype.startScaleRandom.x),
-				randomMaker_->randomFloat(1.0f - usedPrototype.startScaleRandom.y, 1.0f + usedPrototype.startScaleRandom.y),
-				randomMaker_->randomFloat(1.0f - usedPrototype.startScaleRandom.z, 1.0f + usedPrototype.startScaleRandom.z)
-			};
-			p.startScale = emitterScale * (ranScale * usedPrototype.startScale);
-
-			Vector3 ranRotate = {
-				randomMaker_->randomFloat(-usedPrototype.startRotationRandom.x, usedPrototype.startRotationRandom.x),
-				randomMaker_->randomFloat(-usedPrototype.startRotationRandom.y, usedPrototype.startRotationRandom.y),
-				randomMaker_->randomFloat(-usedPrototype.startRotationRandom.z, usedPrototype.startRotationRandom.z)
-			};
-			p.startRotate = emitterRotation + usedPrototype.startRotation + ranRotate;
-
-			Vector4 ranColor = {
-				randomMaker_->randomFloat(1.0f - usedPrototype.startColorRandom.x, 1.0f + usedPrototype.startColorRandom.x),
-				randomMaker_->randomFloat(1.0f - usedPrototype.startColorRandom.y, 1.0f + usedPrototype.startColorRandom.y),
-				randomMaker_->randomFloat(1.0f - usedPrototype.startColorRandom.z, 1.0f + usedPrototype.startColorRandom.z),
-				randomMaker_->randomFloat(1.0f - usedPrototype.startColorRandom.w, 1.0f + usedPrototype.startColorRandom.w)
-			};
-			p.startColor.x = usedPrototype.startColor.x * ranColor.x;
-			p.startColor.y = usedPrototype.startColor.y * ranColor.y;
-			p.startColor.z = usedPrototype.startColor.z * ranColor.z;
-			p.startColor.w = usedPrototype.startColor.w * ranColor.w;
-
-			/// ============================== 最終状態設定 ============================== ///
-
-			if (usedPrototype.isConstantScale) {
-				p.endScale = p.startScale;
-			} else {
-				ranScale = {
-					randomMaker_->randomFloat(1.0f - usedPrototype.endScaleRandom.x, 1.0f + usedPrototype.endScaleRandom.x),
-					randomMaker_->randomFloat(1.0f - usedPrototype.endScaleRandom.y, 1.0f + usedPrototype.endScaleRandom.y),
-					randomMaker_->randomFloat(1.0f - usedPrototype.endScaleRandom.z, 1.0f + usedPrototype.endScaleRandom.z)
-				};
-				p.endScale = emitterScale * (ranScale * usedPrototype.endScale);
+				particles_.push_back(p);
+				/// Link は 1 つの物につき 1 回（Part0 だけ）
+				if (part == 0) emittingData_.push_back(p);
 			}
-
-
-			if (usedPrototype.isConstantRotation) {
-				p.endRotate = p.startRotate;
-			} else {
-				ranRotate = {
-				   randomMaker_->randomFloat(-usedPrototype.endRotationRandom.x, usedPrototype.endRotationRandom.x),
-				   randomMaker_->randomFloat(-usedPrototype.endRotationRandom.y, usedPrototype.endRotationRandom.y),
-				   randomMaker_->randomFloat(-usedPrototype.endRotationRandom.z, usedPrototype.endRotationRandom.z)
-				};
-				p.endRotate = emitterRotation + usedPrototype.endRotation + ranRotate;
-			}
-
-			if (usedPrototype.isConstantColor) {
-				p.endColor = p.startColor;
-			} else {
-				ranColor = {
-					randomMaker_->randomFloat(1.0f - usedPrototype.endColorRandom.x, 1.0f + usedPrototype.endColorRandom.x),
-					randomMaker_->randomFloat(1.0f - usedPrototype.endColorRandom.y, 1.0f + usedPrototype.endColorRandom.y),
-					randomMaker_->randomFloat(1.0f - usedPrototype.endColorRandom.z, 1.0f + usedPrototype.endColorRandom.z),
-					randomMaker_->randomFloat(1.0f - usedPrototype.endColorRandom.w, 1.0f + usedPrototype.endColorRandom.w)
-				};
-				p.endColor.x = usedPrototype.endColor.x * ranColor.x;
-				p.endColor.y = usedPrototype.endColor.y * ranColor.y;
-				p.endColor.z = usedPrototype.endColor.z * ranColor.z;
-				p.endColor.w = usedPrototype.endColor.w * ranColor.w;
-			}
-
-			/// ============================== 現在状態設定 ============================== ///
-
-			p.nowTranslate = p.startTranslate;	/// 位置
-			p.nowRotate = p.startRotate;		/// 旋轉
-			p.nowScale = p.startScale;		/// 縮放
-			p.nowColor = p.startColor;		/// 顏色
-
-			particles_.push_back(p);
-			emittingData_.push_back(p);
 		}
 	}
 
 	if (isFinished_ == true) isFinished_ = false;
 }
-
 void ParticleEmitter::SwitchEmitter(bool isEmitting) {
 	isEmitting_ = isEmitting;
 }
@@ -287,4 +206,114 @@ void ParticleEmitter::ClearDexpiredData() {
 	if (!dexpiredData_.empty()) {
 		dexpiredData_.clear();
 	}
+}
+
+ParticleInstance ParticleEmitter::BuildParticle(const ParticlePrototype& pr, const ParticlePartTrack& tr,
+	const ParticlePrototypeOverride* ov, float life) {
+
+	ParticleInstance p;
+	p.particleId = (*particleIdIP_)++;
+	p.isAlive = true;
+	p.life.parameter_ = 0.0f;
+	p.life.maxTime_ = life;
+	p.objectIndex = 0;
+
+	/// ============================== 初期状態設定 ============================== ///
+
+	// 初速
+	Vector3 rv = {
+		randomMaker_->randomFloat(-tr.startVelocityRandom.x, tr.startVelocityRandom.x),
+		randomMaker_->randomFloat(-tr.startVelocityRandom.y, tr.startVelocityRandom.y),
+		randomMaker_->randomFloat(-tr.startVelocityRandom.z, tr.startVelocityRandom.z)
+	};
+	p.velocity = rv + tr.startVelocity;
+
+	// 初期位置：Link から位置が来ていればそこ、なければ「線の位置 + startPosition（ずれ）」
+	const Vector3 basePos = (ov && ov->hasStartPosition)
+		? ov->startPosition
+		: emitterPosition + tr.startPosition;
+	Vector3 rp = {
+		randomMaker_->randomFloat(-tr.startPositionRandom.x, tr.startPositionRandom.x),
+		randomMaker_->randomFloat(-tr.startPositionRandom.y, tr.startPositionRandom.y),
+		randomMaker_->randomFloat(-tr.startPositionRandom.z, tr.startPositionRandom.z)
+	};
+	p.startTranslate = rp + basePos;
+
+	Vector3 ranScale = {
+		randomMaker_->randomFloat(1.0f - tr.startScaleRandom.x, 1.0f + tr.startScaleRandom.x),
+		randomMaker_->randomFloat(1.0f - tr.startScaleRandom.y, 1.0f + tr.startScaleRandom.y),
+		randomMaker_->randomFloat(1.0f - tr.startScaleRandom.z, 1.0f + tr.startScaleRandom.z)
+	};
+	p.startScale = emitterScale * (ranScale * tr.startScale);
+
+	Vector3 ranRotate = {
+		randomMaker_->randomFloat(-tr.startRotationRandom.x, tr.startRotationRandom.x),
+		randomMaker_->randomFloat(-tr.startRotationRandom.y, tr.startRotationRandom.y),
+		randomMaker_->randomFloat(-tr.startRotationRandom.z, tr.startRotationRandom.z)
+	};
+	p.startRotate = emitterRotation + tr.startRotation + ranRotate;
+
+	Vector4 ranColor = {
+		randomMaker_->randomFloat(1.0f - pr.startColorRandom.x, 1.0f + pr.startColorRandom.x),
+		randomMaker_->randomFloat(1.0f - pr.startColorRandom.y, 1.0f + pr.startColorRandom.y),
+		randomMaker_->randomFloat(1.0f - pr.startColorRandom.z, 1.0f + pr.startColorRandom.z),
+		randomMaker_->randomFloat(1.0f - pr.startColorRandom.w, 1.0f + pr.startColorRandom.w)
+	};
+	p.startColor = { pr.startColor.x * ranColor.x, pr.startColor.y * ranColor.y,
+					 pr.startColor.z * ranColor.z, pr.startColor.w * ranColor.w };
+
+	p.startUVTranslate = tr.uvTranslateStart;
+	p.startUVRotate = tr.uvRotateStart;
+	p.startUVScale = tr.uvScaleStart;
+
+	/// ============================== 最終状態設定 ============================== ///
+
+	if (tr.isConstantScale) {
+		p.endScale = p.startScale;
+	} else {
+		ranScale = {
+			randomMaker_->randomFloat(1.0f - tr.endScaleRandom.x, 1.0f + tr.endScaleRandom.x),
+			randomMaker_->randomFloat(1.0f - tr.endScaleRandom.y, 1.0f + tr.endScaleRandom.y),
+			randomMaker_->randomFloat(1.0f - tr.endScaleRandom.z, 1.0f + tr.endScaleRandom.z)
+		};
+		p.endScale = emitterScale * (ranScale * tr.endScale);
+	}
+
+	if (tr.isConstantRotation) {
+		p.endRotate = p.startRotate;
+	} else {
+		ranRotate = {
+			randomMaker_->randomFloat(-tr.endRotationRandom.x, tr.endRotationRandom.x),
+			randomMaker_->randomFloat(-tr.endRotationRandom.y, tr.endRotationRandom.y),
+			randomMaker_->randomFloat(-tr.endRotationRandom.z, tr.endRotationRandom.z)
+		};
+		p.endRotate = emitterRotation + tr.endRotation + ranRotate;
+	}
+
+	if (pr.isConstantColor) {
+		p.endColor = p.startColor;
+	} else {
+		ranColor = {
+			randomMaker_->randomFloat(1.0f - pr.endColorRandom.x, 1.0f + pr.endColorRandom.x),
+			randomMaker_->randomFloat(1.0f - pr.endColorRandom.y, 1.0f + pr.endColorRandom.y),
+			randomMaker_->randomFloat(1.0f - pr.endColorRandom.z, 1.0f + pr.endColorRandom.z),
+			randomMaker_->randomFloat(1.0f - pr.endColorRandom.w, 1.0f + pr.endColorRandom.w)
+		};
+		p.endColor = { pr.endColor.x * ranColor.x, pr.endColor.y * ranColor.y,
+					   pr.endColor.z * ranColor.z, pr.endColor.w * ranColor.w };
+	}
+
+	p.endUVTranslate = tr.uvTranslateEnd;
+	p.endUVRotate = tr.uvRotateEnd;
+	p.endUVScale = tr.uvScaleEnd;
+
+	/// ============================== 現在状態設定 ============================== ///
+	p.nowTranslate = p.startTranslate;
+	p.nowRotate = p.startRotate;
+	p.nowScale = p.startScale;
+	p.nowColor = p.startColor;
+	p.nowUVTranslate = p.startUVTranslate;
+	p.nowUVRotate = p.startUVRotate;
+
+	return p;
 }

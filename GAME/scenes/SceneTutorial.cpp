@@ -38,7 +38,6 @@ SceneTutorial::SceneTutorial(kEngine* system) {
 	MH_backPoint_ = system_->SetModelObj("GAME/resources/Object/backSign/backSign.obj");
 	MH_driller_ = system_->SetModelObj("GAME/resources/Object/driller/driller.gltf");
 
-	//TH_ReflectTexture_ = system_->LoadTexture("GAME/resources/texture/skyCube/drachenfels_cellar_2k.dds");
 	TH_ReflectTexture_ = system_->LoadTexture("./GAME/resources/texture/skyCube/output_skybox.dds");
 	TH_box_ = system_->LoadTexture("kEngine/EngineAssets/texture/testBox.png");
 	TH_try_ = system_->LoadTexture("kEngine/EngineAssets/texture/Tryer.png");
@@ -53,27 +52,13 @@ SceneTutorial::SceneTutorial(kEngine* system) {
 	TH_hpUI_empty_ = system_->LoadTexture("kEngine/EngineAssets/texture/Armer_0.png");
 
 	SH_BGM_ = system_->SoundLoadSE("GAME/resources/sound/BGM/Stage.wav");
-	SE_killEnemy_ = system_->SoundLoadSE("GAME/resources/sound/SE/killEnemy.wav");
+	SH_killEnemy_ = system_->SoundLoadSE("GAME/resources/sound/SE/killEnemy.wav");
 
-
-	//MH_skydome_ = system_->SetModelObj("kEngine/EngineAssets/TemplateResource/object/skydome/skydome.obj");
-	//MH_ground_ = system_->SetModelObj("GAME/resources/Object/ground/ground.obj");
-	//
-	//TH_buleSkySkydome_ = system_->LoadTexture("kEngine/EngineAssets/texture/sky/bluesky.png");
-	//TH_title = system_->LoadTexture("kEngine/EngineAssets/texture/title.png");
-	//
-	//TH_startButton_ = system_->LoadTexture("kEngine/EngineAssets/texture/button/startButton.png");
-	//TH_settingButton_ = system_->LoadTexture("kEngine/EngineAssets/texture/button/settingButton.png");
-	//TH_quitButton_ = system_->LoadTexture("kEngine/EngineAssets/texture/button/quitButton.png");
-	//TH_buttonBack_notSelect_ = system_->LoadTexture("kEngine/EngineAssets/texture/button/buttonNotSelect.png");
-	//TH_buttonBack_Select_ = system_->LoadTexture("kEngine/EngineAssets/texture/button/buttonSelect.png");
-	//
 	//SH_BGM_ = system_->SoundLoadSE("GAME/resources/sound/BGM/Title.wav");
 	//SH_Select_ = system_->SoundLoadSE("GAME/resources/sound/SE/menuSelect.wav");
 	//SH_Decide_ = system_->SoundLoadSE("GAME/resources/sound/SE/menuChoose.wav");
 
 	system_->GetDrawEngine()->SetEnviromentReflectionTexture(TH_ReflectTexture_);
-	//skydome_->CreateDefaultData();
 	skydome_ = new Object;
 	skydome_->IntObject(system_);
 	skydome_->CreateModelData(MH_skydome_);
@@ -87,14 +72,6 @@ SceneTutorial::SceneTutorial(kEngine* system) {
 	underGround_BG_->objectParts_[0].materialConfig->uvScale = { 500.0f,500.0f,1.0f };
 	underGround_BG_->objectParts_[0].materialConfig->textureColor = { 0.3f,0.3f,0.3f,1.0f };
 	underGround_BG_->mainPosition.transform.translate.z = +0.5f;
-
-	//Enemy* enemy = new Enemy(system, { 3.0f, 1.0f, 0 });
-	//enemy->CreateModelData(MH_enemy_);
-	//enemy->mainPosition.transform.scale = { 0.5f,0.5f,0.5f };
-	//enemy->objectParts_[0].transform.translate.y = -1.0f;
-	//enemyList_.push_back(enemy);
-
-	//MH_enemy_ = system_->SetModelObj("resources/object/player/player.obj");
 
 	/// drillerの生成
 	driller_ = std::make_unique<Driller>(system_);
@@ -122,13 +99,18 @@ SceneTutorial::SceneTutorial(kEngine* system) {
 
 	/// マップチップの生成
 	mapChipManager_ = std::make_unique<MapChipManager>(system_);
-	const bool loaded = mapChipManager_->AddLayer("Main", "GAME/resources/Stage/1YearGame/Maps/tutorial.csv");
-	assert(loaded && "tutorial が読めない（csv か MapData）");
+	MH_map_ = mapChipManager_->LoadLayer("GAME/resources/Stage/1YearGame/Maps/tutorial.csv");
+	assert(MH_map_ >= 0 && "tutorial が読めない（csv か MapData）");
 
 	/// マップチップの初期化
 	RegisterMapSpawner();
 	GenerateMap();
 	SetupGameCamera();
+
+	/// UIの初期化
+	screenUI_ = new ScreenUI(system_);
+	screenUI_->SetPlayer(player_);
+	screenUI_->Initialize();
 
 	/// コリジョンマネージャー初期化
 	collisionManager_.InputPlayer(player_);
@@ -171,6 +153,8 @@ SceneTutorial::~SceneTutorial() {
 
 	ppp_GlitchScreen_->OffAllPass();
 	delete ppp_GlitchScreen_;
+	screenUI_->Finalize();
+	delete screenUI_;
 }
 
 void SceneTutorial::Update() {
@@ -194,9 +178,23 @@ void SceneTutorial::Update() {
 	if (system_->GetIsPush(DIK_W)) player_->MoveJump();
 	player_->Update(usingCamera_.lock().get());
 
-	/// Bullet更新
+	/// 武器切り替え（滾輪）
+	const int scroll = system_->GetMouseScroll();
+	if (scroll > 0) player_->GetInventory().EquipPrev();
+	if (scroll < 0) player_->GetInventory().EquipNext();
+
+	/// UI更新
+	screenUI_->Update();
+
+	/// 左クリック：手に持っている物で行動
 	if (system_->GetMouseIsPush(0)) {
-		player_->Shoot();
+		player_->UseEquipped();
+	}
+
+	/// 掘る（マップを持っているのは Scene）
+	Vector3 digPos;
+	if (player_->ConsumeDigRequest(digPos)) {
+		mapChipManager_->Break(digPos);
 	}
 
 	/// Enemy更新
@@ -208,7 +206,7 @@ void SceneTutorial::Update() {
 			if (!enemyList_[i]->IsAlive()) {
 				delete enemyList_[i];
 				enemyList_.erase(enemyList_.begin() + i);
-				system_->SoundPlaySE(SE_killEnemy_);
+				system_->SoundPlaySE(SH_killEnemy_);
 			} else {
 				i++;
 			}
@@ -265,22 +263,24 @@ void SceneTutorial::Update() {
 		}
 	}
 
-	/// backPoint更新
-	if (backPoint_) {
-		backPoint_->Update(usingCamera_.lock().get());
-		if (backPoint_->GetIsBack()) {
-
-			backSign_->mainPosition.transform.translate = backPoint_->mainPosition.transform.translate + Vector3{ 0,0, -1.0f };
-			backSign_->Update(nullptr);
-
-			if (system_->GetTriggerOn(DIK_SPACE)) {
-				system_->SoundStop(SH_BGM_);
-				isWin_ = true;
-				phase_ = ScenePhase::TRANSITION;
-			}
-		}
+	/// 【テスト】空中でエフェクト
+	if (system_->GetTriggerOn(DIK_P)) {
+		static int testFx = system_->GetEffectManager()->LoadEffect("./GAME/resources/Effect/HitRock/HitRock.json");
+		system_->GetEffectManager()->Play(testFx, player_->GetPosition() + Vector3{ 1.5f, 1.0f, 0.0f });
 	}
 
+	/// 帰還（Driller に乗る）
+	if (driller_ && driller_->CanBoard()) {
+		backSign_->mainPosition.transform.translate =
+			driller_->GetPosition() + Vector3{ 0.0f, kDrillerBoardHeight - 0.25f, -0.5f };
+		backSign_->Update(nullptr);
+
+		if (system_->GetTriggerOn(DIK_E)) {
+			system_->SoundStop(SH_BGM_);
+			isWin_ = true;
+			phase_ = ScenePhase::TRANSITION;
+		}
+	}
 
 	/// HP関連更新
 	{
@@ -302,7 +302,7 @@ void SceneTutorial::Update() {
 	collisionManager_.Update(system_->GetDeltaTime());
 
 	/// ブロック更新
-	mapBlocks_.Update();
+	mapChipManager_->UpdateBlocks();
 
 	if (system_->GetTriggerOn(DIK_0)) {
 		if (useDebugCamera)useDebugCamera = false;
@@ -318,16 +318,10 @@ void SceneTutorial::Update() {
 void SceneTutorial::Draw() {
 
 	/// 実体処理
-	//system_->DrawModel(&skydome_->objectParts[0].transformationMatrix, &(skydome_->objectParts[0].materialConfig.get()), skydomeModelHandle_);
 	skydome_->Draw();
 	underGround_BG_->Draw();
 	player_->Draw();
 
-	//system_->Draw3D(skydome_);
-	//system_->Draw3D(player_);
-	//system_->Draw3D(model_);
-
-	//object_->Draw();
 
 	/// enemy描画
 	for (auto& enemy : enemyList_) {
@@ -354,23 +348,32 @@ void SceneTutorial::Draw() {
 	Vector3 camPos = usingCamera_.lock()->GetTransform().translate;
 	const float kBlockDrawRadius = 20.0f; // adjust as needed
 	const float kBlockDrawRadiusSq = kBlockDrawRadius * kBlockDrawRadius;
-	mapBlocks_.Draw(camPos, kBlockDrawRadius);
+	mapChipManager_->DrawBlocks(camPos, kBlockDrawRadius);
 
-	//if (backPoint_) {
-	//	backPoint_->Draw();
-	//	if (backPoint_->GetIsBack()) {
-	//		backSign_->Draw();
-	//	}
-	//}
+	/// 帰還の看板
+	if (driller_ && driller_->CanBoard()) backSign_->Draw();
 
 	for (int i = 0; i < 3; i++) {
 		hpUI_[i]->Draw();
 	}
+	
+	screenUI_->Draw();
 
 #ifdef USE_IMGUI
 	/// ImGui処理
 	ImGuiPart();
 #endif
+}
+
+void SceneTutorial::Pause() {
+	ppp_GlitchScreen_->OffAllPass();
+}
+
+void SceneTutorial::Resume() {
+	system_->GetDrawEngine()->SetEnviromentReflectionTexture(TH_ReflectTexture_);
+
+	ppp_GlitchScreen_->OnAllPass();
+	circleHandle_ = system_->GetPostProcessRunner()->SetPassVignette(0, *circleCommand_);
 }
 
 void SceneTutorial::PhaseUpdate() {
@@ -570,8 +573,7 @@ void SceneTutorial::RegisterMapSpawner() {
 }
 
 void SceneTutorial::GenerateMap() {
-	mapBlocks_.Init(mapChipManager_.get(), "Main");
-	mapChipManager_->Generate("Main");
+	mapChipManager_->Generate(MH_map_);
 }
 
 void SceneTutorial::StartTransition(SceneOutcome outcome) {
@@ -601,7 +603,7 @@ Enemy* SceneTutorial::CreateEnemy(const MapReader::SpawnInfo& s) {
 
 BackPoint* SceneTutorial::CreateBackPoint(const MapReader::SpawnInfo& s) {
 	if (driller_) driller_->SetSpawnPoint(s.position);
-	return new BackPoint(system_, s.position);
+	return nullptr;
 }
 
 Sign* SceneTutorial::CreateSign(const MapReader::SpawnInfo& s) {
@@ -610,9 +612,7 @@ Sign* SceneTutorial::CreateSign(const MapReader::SpawnInfo& s) {
 
 /// 登録に無い物：直接タイルはブロック、それ以外は登録漏れとして記録
 void SceneTutorial::SpawnDefault(const MapReader::SpawnInfo& s) {
-	if (!mapBlocks_.OnSpawn(s)) {
-		unhandledMapUnits_.insert(s.unit ? s.unit->name : std::to_string(s.id));
-	}
+	unhandledMapUnits_.insert(s.unit ? s.unit->name : std::to_string(s.id));
 }
 
 void SceneTutorial::SetupGameCamera() {
@@ -629,20 +629,9 @@ void SceneTutorial::SetupGameCamera() {
 	gc->SetReturnSpeed(3.0f);    // 止まったらそのまま戻る
 	gc->SetFollowSpeed(10.0f);
 
-	/// ③ 地図の範囲（端のマスの中心 ± 半マス）→ 画面が地図の外を映さない
-	if (mapChipManager_) {
-		const auto [w, h] = mapChipManager_->GetMapSize("Main");
-		if (w > 0 && h > 0) {
-			const Vector3 c0 = mapChipManager_->GetCellCenter("Main", { 0, 0 });
-			const Vector3 c1 = mapChipManager_->GetCellCenter("Main", { w - 1, h - 1 });
-			const Vector2 bs = mapChipManager_->GetBlockSize();
-			const Vector2 half = { bs.x * 0.5f, bs.y * 0.5f };
-
-			/// csv は y=0 が一番上なので、min / max で向きを気にしない
-			const Vector2 min = { std::min(c0.x, c1.x) - half.x, std::min(c0.y, c1.y) - half.y };
-			const Vector2 max = { std::max(c0.x, c1.x) + half.x, std::max(c0.y, c1.y) + half.y };
-			gc->SetBounds(min, max);
-		}
+	/// ③ 地図の範囲 → 画面が地図の外を映さない
+	if (const MapLayer* layer = mapChipManager_ ? mapChipManager_->GetLayer(MH_map_) : nullptr) {
+		gc->SetBounds({ 0.0f, 0.0f }, layer->GetField().GetWorldSize());
 	}
 
 	/// ④ 最初はプレイヤーの位置にいきなり置く（下から平滑で寄ってこないように）

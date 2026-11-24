@@ -8,9 +8,14 @@
 #include "Data/Geometry/Corner/Corner.h"
 #include "Math/Geometry/Collision/crashDecision.h"
 #include "Data/Game/MapChip/CollisionResult.h"
+#include "GAME/Object/Backpack/Backpack.h"
+#include "Math/Kinematics/Gravity.h"
+#include "GAME/Setting/GameConfig.h"
+
+using ItemQuantity = int;
+using IsOwned = bool;
 
 /// ================== プレイヤーデータ関連
-
 /// HP設定
 static inline const float kPlayerMaxHP = 3.0f;
 
@@ -24,10 +29,6 @@ static inline const float kAttenuation = 12.0f;
 static inline const float kTimeTurn = 0.15f;
 /// 移動限界速度
 static inline const float kLimitRunSpeed = 3.0f;
-/// 重力加速度
-static inline const float kGravityAcceleration = 10.0f;
-/// 最大落下速度
-static inline const float kLimitFallSpeed = 10.0f;
 /// ジャンプ初速
 static inline const float kJumpAcceleration = 7.0f;
 /// キャラクターの当たり判定サイズ
@@ -39,6 +40,10 @@ static inline const float kAttenuationLanding = 0.00000001f;
 
 /// 射撃間隔
 static inline const float kShootInterval = 0.25f;
+
+/// ================== 掘削関連
+static inline const float kDigReach = 2.0f;       // 何マス先まで掘れるか
+static inline const float kDigInterval = 0.25f;   // 掘る間隔（秒）
 
 /// 被ダメージエフェクト
 static inline const float kPlayerDamageEffectTime = 1.0f;
@@ -102,7 +107,7 @@ public:
 	bool IsOnGround() { return onGround_; }
 	void SetOnGround(bool onGround) { onGround_ = onGround; }
 
-	/// 射撃関連
+	/// ========================================= 射撃関連
 	Vector3 GetAimPosition() const;
 	void Shoot(Vector3 mousePos);
 	void Shoot() { Shoot(GetAimPosition()); }
@@ -110,12 +115,22 @@ public:
 	/// 弾丸管理
 	void InputBulletList(std::vector<Bullet*>* bulletList) { bulletList_ = bulletList; };
 
+	/// ========================================= 近接・堀関連
+	/// 左クリック：手に持っている物で行動
+	void UseEquipped(const Vector3& aimPos);
+	void UseEquipped() { UseEquipped(GetAimPosition()); }
+	/// 掘るリクエストを受け取る（あれば true、Scene が Break する）
+	bool ConsumeDigRequest(Vector3& outPos);
+
 	/// HP管理
 	int GetHP() const { return static_cast<int>(HP_); }
 	void SetHP(int hp) { HP_ = static_cast<float>(hp); }
 	void GetDamage(float damage, const Vector3& attackerPos);
 
 	bool IsDisableDamage() const { return disableDamage_; }
+
+	/// 手持ちもの関連
+	BPItem& GetInventory() { return inventery_; }
 
 	/// 状態管理
 	bool IsDead() const { return isDead_; }
@@ -130,6 +145,7 @@ private:
 	std::vector<std::function<void()>> function;
 
 private:
+	/// ================== 状態関連 ================== ///
 
 	/// マップとの当たり判定情報
 	struct CollisionMapInfo {
@@ -137,6 +153,20 @@ private:
 		bool floorHit = false;   // 床に当の当たり判定
 		bool wallHit = false;    // 壁に当の当たり判定
 		Vector3 moveVector = {}; // 移動量
+	};
+
+	/// State
+	enum class PlayerState {
+
+		kNone = 0,
+		kMove = 1 << 0,
+		kDamage = 1 << 1,
+		kShoot = 1 << 2,
+		kNearAttack = 1 << 3,
+		kDush = 1 << 4,
+		kDead = 1 << 5,
+
+		numStates = 6,///<<< numStatesの値の更新を忘れなく
 	};
 
 	/// 死亡動画フェイス用
@@ -149,6 +179,7 @@ private:
 	Timer deathTimer_;
 
 private:
+	/// ================== ハンドル関連 ================== ///
 	///モデルハンドル
 	int MH_playerModel_{};
 	int MH_pickaxe_{};
@@ -165,6 +196,7 @@ private:
 	int SH_SHOOT_{};
 	int SH_DAMAGE_{};
 private:
+	/// ================== プレイヤーデータ ================== ///
 	/////// State
 	/// HP
 	float HP_ = 3.0f;
@@ -186,26 +218,24 @@ private:
 	float kDamageCD_ = 1.0f; ///(秒)
 	float kDamageParameter_ = kDamageCD_ * 60.0f;
 
-	/// State
-	enum class PlayerState {
+	/// ========== 掘削
+	Timer digCD_;
+	bool hasDigRequest_ = false;
+	Vector3 digRequestPos_{};
 
-		kNone = 0,
-		kMove = 1 << 0,
-		kDamage = 1 << 1,
-		kShoot = 1 << 2,
-		kNearAttack = 1 << 3,
-		kDush = 1 << 4,
-		kDead = 1 << 5,
-
-		numStates = 6,///<<< numStatesの値の更新を忘れなく
-	};
+	/// Player状態
 	PlayerState playerState_ = PlayerState::kNone;
 
-	// 行動可能フラグ
+	/// 行動可能フラグ
 	int cantShoot = static_cast<int>(PlayerState::kDamage) |
 					static_cast<int>(PlayerState::kNearAttack) |
 					static_cast<int>(PlayerState::kDead);
 
+	/// バックパック
+	BPItem inventery_{};
+
+
+	/// debug用
 	Timer checkTimer_;
 
 private:
@@ -281,8 +311,10 @@ private:
 	void MovePlayerByResult(const CollisionMapInfo& info);
 
 	void BitMapBugCheck();
-	void ShootUpdate();
+	void CDUpdate();
 	void NearAttackUpdate();
+
+	void Dig(const Vector3& aimPos);
 
 	void UpdataState();
 

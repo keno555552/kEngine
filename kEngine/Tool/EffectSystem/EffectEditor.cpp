@@ -91,7 +91,6 @@ EffectEditor::EffectEditor(kEngine* system) : effectAdapter_(system) {
 	light1_->direction = { -0.5f, -1.0f, -0.3f };
 	light1_->color = { 1.0f, 1.0f, 1.0f };
 	light1_->intensity = 1.0f;
-	system_->AddLight(light1_.get());
 
 	light2_ = std::make_unique<Light>();
 	light2_->lightingType = LightingType::PointLight;
@@ -99,7 +98,6 @@ EffectEditor::EffectEditor(kEngine* system) : effectAdapter_(system) {
 	light2_->range = 10.0f;
 	light2_->color = { 1.0f, 0.2f, 0.2f };
 	light2_->intensity = 2.0f;
-	system_->AddLight(light2_.get());
 
 	light3_ = std::make_unique<Light>();
 	light3_->lightingType = LightingType::SpotLight;
@@ -109,7 +107,6 @@ EffectEditor::EffectEditor(kEngine* system) : effectAdapter_(system) {
 	light3_->range = 12.0f;
 	light3_->color = { 0.3f, 0.3f, 1.0f }; // 藍光
 	light3_->intensity = 3.0f;
-	system_->AddLight(light3_.get());
 
 	areaLight_ = std::make_unique<AreaLight>();
 	areaLight_->lightingType = LightingType::AreaLight;
@@ -121,7 +118,6 @@ EffectEditor::EffectEditor(kEngine* system) : effectAdapter_(system) {
 	areaLight_->color = { 1.0f, 0.9f, 0.7f }; // 暖色光
 	areaLight_->intensity = 5.0f;
 	areaLight_->range = 10.0f;
-	system_->AddLight(areaLight_.get());
 
 	areaLight2_ = std::make_unique<AreaLight>();
 	areaLight2_->ableLight = false;
@@ -134,7 +130,8 @@ EffectEditor::EffectEditor(kEngine* system) : effectAdapter_(system) {
 	areaLight2_->color = { 1.0f, 0.9f, 0.7f }; // 暖色光
 	areaLight2_->intensity = 5.0f;
 	areaLight2_->range = 10.0f;
-	system_->AddLight(areaLight2_.get());
+
+	AddEditorLights();
 
 	debugCamera_ = system_->CreateDebugCamera();
 	camera_ = system_->CreateCamera();
@@ -215,6 +212,7 @@ EffectEditor::EffectEditor(kEngine* system) : effectAdapter_(system) {
 EffectEditor::~EffectEditor() {
 	/// プレビュー用の線と Link を片付ける（飛んでいる粒子は最後まで）
 	system_->GetEffectManager()->UnloadEffect(previewHandle_);
+	RemoveEditorLights();
 }
 
 void EffectEditor::Update() {
@@ -245,6 +243,24 @@ void EffectEditor::Draw() {
 #endif
 }
 
+void EffectEditor::Pause() {
+	RemoveEditorLights();
+}
+
+void EffectEditor::Resume() {
+	AddEditorLights();
+	system_->GetDrawEngine()->SetEnviromentReflectionTexture(dds);
+	system_->SetCamera(usingCamera_);
+}
+
+ParticlePartTrack& EffectEditor::GetEditTrack(ParticlePrototype& p) {
+	if (p.partTracks.empty() || p.objectList.empty()) return p.mainTrack;
+	const int part = GetEditPart(p.objectList[0]);
+	if (part == 0) return p.mainTrack;
+	if ((int)p.partTracks.size() < part) p.partTracks.resize(part, p.mainTrack);   // モデルが変わって足りない時
+	return p.partTracks[part - 1];
+}
+
 void EffectEditor::CameraPart() {
 	if (useDebugCamera) {
 		usingCamera_ = debugCamera_;
@@ -264,6 +280,70 @@ void EffectEditor::CameraPart() {
 }
 
 /// ================= Save/Load関連 ================= ///
+
+void EffectEditor::CreateNewEffect() {
+	EffectData newEffect;
+	newEffect.name = "new_effect";
+	if (newEffectCounter_ != 0) newEffect.name += "_" + std::to_string(newEffectCounter_);
+	newEffectCounter_++;
+	effectDataList_.push_back(std::move(newEffect));
+
+	/// 作ったものをそのまま選ぶ（LoadEffect と同じ）
+	currentEffectIndex_ = (int)effectDataList_.size() - 1;
+	currentParticleIndex_ = -1;
+	currentLinkIndex_ = -1;
+	selectMode_ = SelectMode::Effect;
+}
+
+void EffectEditor::RequestNewWorkspace() {
+	if (pendingSave_.active || !saveQueue_.empty()) {
+		debugText_ += "Error: Cannot create new while saving.\n";
+		return;
+	}
+	/// 未保存（* が付いてる）が 1 つでもあれば確認
+	for (const auto& e : effectDataList_) {
+		if (!e.isSaved) { isNewConfirm_ = true; return; }
+	}
+	NewWorkspace();
+}
+
+void EffectEditor::NewWorkspace() {
+	effectDataList_.clear();
+
+	/// 名前の番号も最初から
+	newEffectCounter_ = 0;
+	newParticleCounter_ = 0;
+	newLinkCounter_ = 0;
+
+	/// 選択リセット（Delete と同じ）
+	currentEffectIndex_ = -1;
+	currentParticleIndex_ = -1;
+	currentLinkIndex_ = -1;
+	selectMode_ = SelectMode::None;
+	isEffectSelected_ = false;
+	isPreviewDirty_ = true;
+
+	CreateNewEffect();   // 空の Effect を 1 つ作って選ぶ
+}
+
+void EffectEditor::NewConfirmWindow() {
+	if (!isNewConfirm_) return;
+
+	ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+	ImGui::SetNextWindowFocus();
+	ImGui::Begin("New Confirm", &isNewConfirm_,
+		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize);
+
+	ImGui::Text("There are unsaved effects. Discard all and create new?");
+	if (ImGui::Button("Discard & New")) {
+		isNewConfirm_ = false;
+		NewWorkspace();
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Cancel")) isNewConfirm_ = false;
+
+	ImGui::End();
+}
 
 void EffectEditor::SaveLoadPart() {
 	SavePart();
@@ -751,6 +831,31 @@ void EffectEditor::SyncPartMaterials(ObjectData& obj) {
 	}
 }
 
+int EffectEditor::GetEditPart(const ObjectData& obj) const {
+	if (currentPartIndex_ < 0 || currentPartIndex_ >= (int)obj.objectParts_.size()) return 0;
+	return currentPartIndex_;
+}
+
+void EffectEditor::AddEditorLights() {
+	if (isLightsOn_) return;
+	system_->AddLight(light1_.get());
+	system_->AddLight(light2_.get());
+	system_->AddLight(light3_.get());
+	system_->AddLight(areaLight_.get());
+	system_->AddLight(areaLight2_.get());
+	isLightsOn_ = true;
+}
+
+void EffectEditor::RemoveEditorLights() {
+	if (!isLightsOn_) return;
+	system_->RemoveLight(light1_.get());
+	system_->RemoveLight(light2_.get());
+	system_->RemoveLight(light3_.get());
+	system_->RemoveLight(areaLight_.get());
+	system_->RemoveLight(areaLight2_.get());
+	isLightsOn_ = false;
+}
+
 
 void EffectEditor::DeletePart() {
 	if (!isDelete_) return;
@@ -819,7 +924,7 @@ void EffectEditor::ImGuiPart() {
 	if (ImGui::BeginMainMenuBar()) {
 
 		if (ImGui::BeginMenu("File")) {
-			if (ImGui::MenuItem("New")) {};
+			if (ImGui::MenuItem("New")) RequestNewWorkspace();
 			if (ImGui::MenuItem("Load Effect...")) LoadEffectFromDialog();
 			if (ImGui::MenuItem("Import Particle...", nullptr, false, isEffectSelected_)) ImportUnitFromDialog(SelectMode::Particle);
 			if (ImGui::MenuItem("Import EmitterLink...", nullptr, false, isEffectSelected_)) ImportUnitFromDialog(SelectMode::Linker);
@@ -858,6 +963,7 @@ void EffectEditor::ImGuiPart() {
 	ImGuiMidWindow();
 
 	/// ============ Popup Window ============= ///
+	NewConfirmWindow();
 	ImGuiDoubleCheckWindow();
 	ImGuiOverwriteWindow();
 }
@@ -955,11 +1061,7 @@ void EffectEditor::ImGuiLeftMenuBar() {
 
 		/// New
 		if (ImGui::Button("New", ImVec2(buttonW, 0))) {
-			EffectData newEffect;
-			newEffect.name = "new_effect";
-			if (newEffectCounter_ != 0) newEffect.name += "_" + std::to_string(newEffectCounter_);
-			newEffectCounter_++;
-			effectDataList_.push_back(newEffect);
+			CreateNewEffect();
 		}
 		ImGui::SameLine();
 
@@ -1293,9 +1395,9 @@ void EffectEditor::ImGuiRightMenuBar() {
 			auto& effectData = effectDataList_[currentEffectIndex_];
 			switch (selectMode_) {
 			case SelectMode::Effect:
-				if (ImGuiEffectShowing(effectData)) { 
+				if (ImGuiEffectShowing(effectData)) {
 					effectData.isSaved = false;
-					isPreviewDirty_ = true; 
+					isPreviewDirty_ = true;
 				}
 				break;
 			case SelectMode::Particle:
@@ -1470,38 +1572,56 @@ bool EffectEditor::ImGuiParticleShowing(ParticlePrototype& particle) {
 	}
 	ImGui::PopID();
 
+	ParticlePartTrack& tr = GetEditTrack(particle);
+	if (!particle.partTracks.empty() && !particle.objectList.empty()) {
+		const int part = GetEditPart(particle.objectList[0]);
+		ImGui::SeparatorText(("Track: Part " + std::to_string(part) + " " + particle.objectList[0].objectParts_[part].name).c_str());
+	}
+
 	ImGui::PushID("Position");
 	if (ImGui::CollapsingHeader("Position")) {
-		changed |= InputVector3("Start", particle.startPosition);
-		changed |= InputVector3("StartRandom", particle.startPositionRandom);
+		changed |= InputVector3("Start", tr.startPosition);
+		changed |= InputVector3("StartRandom", tr.startPositionRandom);
 	}
 	ImGui::PopID();
 
 	ImGui::PushID("Velocity");
 	if (ImGui::CollapsingHeader("Velocity")) {
-		changed |= InputVector3("StartVelocity", particle.startVelocity);
-		changed |= InputVector3("StartRandom", particle.startVelocityRandom);
-		changed |= InputVector3("StartSpeedRandom", particle.startSpeedRandom);
+		changed |= InputVector3("StartVelocity", tr.startVelocity);
+		changed |= InputVector3("StartRandom", tr.startVelocityRandom);
+		changed |= InputVector3("StartSpeedRandom", tr.startSpeedRandom);
 	}
 	ImGui::PopID();
 
 	ImGui::PushID("Scale");
 	if (ImGui::CollapsingHeader("Scale")) {
-		changed |= InputVector3("Start", particle.startScale);
-		changed |= InputVector3("End", particle.endScale);
-		changed |= InputVector3("StartRandom", particle.startScaleRandom);
-		changed |= InputVector3("EndRandom", particle.endScaleRandom);
-		changed |= ImGui::Checkbox("isConstant", &particle.isConstantScale);
+		changed |= InputVector3("Start", tr.startScale);
+		changed |= InputVector3("End", tr.endScale);
+		changed |= InputVector3("StartRandom", tr.startScaleRandom);
+		changed |= InputVector3("EndRandom", tr.endScaleRandom);
+		changed |= ImGui::Checkbox("isConstant", &tr.isConstantScale);
 	}
 	ImGui::PopID();
 
 	ImGui::PushID("Rotation");
 	if (ImGui::CollapsingHeader("Rotation")) {
-		changed |= InputVector3("Start", particle.startRotation);
-		changed |= InputVector3("End", particle.endRotation);
-		changed |= InputVector3("StartRandom", particle.startRotationRandom);
-		changed |= InputVector3("EndRandom", particle.endRotationRandom);
-		changed |= ImGui::Checkbox("isConstant", &particle.isConstantRotation);
+		changed |= InputVector3("Start", tr.startRotation);
+		changed |= InputVector3("End", tr.endRotation);
+		changed |= InputVector3("StartRandom", tr.startRotationRandom);
+		changed |= InputVector3("EndRandom", tr.endRotationRandom);
+		changed |= ImGui::Checkbox("isConstant", &tr.isConstantRotation);
+	}
+	ImGui::PopID();
+
+	ImGui::PushID("UV");
+	if (ImGui::CollapsingHeader("UV Animation")) {
+		changed |= InputVector3("Translate Start", tr.uvTranslateStart);
+		changed |= InputVector3("Translate End", tr.uvTranslateEnd);
+		changed |= InputFloat("Rotate Start", tr.uvRotateStart);
+		changed |= InputFloat("Rotate End", tr.uvRotateEnd);
+		changed |= ImGui::InputFloat2("Scale Start", &tr.uvScaleStart.x);
+		changed |= ImGui::InputFloat2("Scale End", &tr.uvScaleEnd.x);
+		ImGui::TextDisabled("Material の UV に足される（寿命の間で Start → End）");
 	}
 	ImGui::PopID();
 
@@ -1623,8 +1743,39 @@ bool EffectEditor::ImGuiModelShowing(ParticlePrototype& particle) {
 		ImGui::EndPopup();
 	}
 
-	/// ---- Texture（モデル付属を使っている時は (none)） ----
-	engineType = FindEngineModelType(obj.modelHandle_);     // 上で変わったかもしれない
+	if (obj.objectParts_.size() > 1) {
+		bool separate = !particle.partTracks.empty();
+		if (ImGui::Checkbox("Separate Parts", &separate)) {
+			if (separate) {
+				particle.partTracks.assign(obj.objectParts_.size() - 1, particle.mainTrack);   // 最初は全部 Part0 と同じ
+				currentPartIndex_ = 0;
+			} else {
+				particle.partTracks.clear();
+				currentPartIndex_ = -1;
+			}
+			changed = true;
+		}
+		ImGui::SetItemTooltip("ON ：Part ごとに別の軌跡（位置・速度・大きさ・回転・UV）で飛ぶ\nOFF：全 Part 一緒。Part1 以降の軌跡は消える");
+
+		if (separate) {
+			const int sel = GetEditPart(obj);
+			if (ImGui::BeginCombo("Part", (std::to_string(sel) + ": " + obj.objectParts_[sel].name).c_str())) {
+				for (int i = 0; i < (int)obj.objectParts_.size(); i++) {
+					if (ImGui::Selectable((std::to_string(i) + ": " + obj.objectParts_[i].name).c_str(), i == sel)) {
+						currentPartIndex_ = i;
+					}
+				}
+				ImGui::EndCombo();
+			}
+		}
+	} else if (!particle.partTracks.empty()) {
+		particle.partTracks.clear();   // Part が 1 個になった
+		changed = true;
+	}
+	const int editPart = GetEditPart(obj);
+
+	/// ---- Texture（材質は全 Part 共通。モデル付属を使っている時は (none)） ----
+	engineType = FindEngineModelType(obj.modelHandle_);
 	const MaterialConfig& mat = *obj.objectParts_[0].materialConfig;
 	const bool usingModelTexture = (engineType == EngineModelType::None && mat.useModelTexture);
 	const std::string texPath = usingModelTexture
@@ -1641,7 +1792,6 @@ bool EffectEditor::ImGuiModelShowing(ParticlePrototype& particle) {
 		break;
 	default: break;
 	}
-
 	changed |= ImGui::Checkbox("Billboard", &obj.isBillboard_);
 	ImGui::SetItemTooltip("ON: いつもカメラの方を向く（Plane / Ring 向け）");
 

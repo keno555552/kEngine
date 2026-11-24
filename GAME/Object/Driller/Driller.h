@@ -7,28 +7,30 @@
 #include "BaseScene.h"
 #include "Data/Geometry/Corner/Corner.h"
 #include "Math/Geometry/Collision/crashDecision.h"
+#include "Math/Kinematics/Gravity.h"
+#include "GAME/Setting/GameConfig.h"
 #include "Tool/MovementObject/MovementObject.h"
 #include "Utility/randomMaker.h"
 
 
 /// リソースパーズ
-// GAME/resources/Object/driller/
-// driller.gltf
-
 static const float Driller_MaxSpeed = 0.1f;
 static const float Driller_DrillMaxSpeed = 0.1f;
 static const float Driller_OnOffTime = 0.1f;
 
 /// ===== 落下・ドリル・ドア ===== ///
-static inline const float kDrillerCallHeight = 10.0f;   // 生成点の何マス上から降りるか
-static inline const float kDrillerCallRangeCell = 5.0f;    // プレイヤーが何マス以内で呼ばれるか
-static inline const float kDrillerLandOffsetY = -0.5f;   // 生成点（マスの中心）→ 地面の上
-static inline const float kDrillerGravity = 10.0f;   // 落下加速度
-static inline const float kDrillerLimitFallSpeed = 10.0f;   // 最大落下速度
+static inline const float kDrillerCallHeight = 10.0f;		// 生成点の何マス上から降りるか
+static inline const float kDrillerCallRangeCell = 5.0f;     // プレイヤーが何マス以内で呼ばれるか
+static inline const float kDrillerLandOffsetY = -0.5f;		// 生成点（マスの中心）→ 地面の上
+static inline const float kDrillerTipOffset = 0.375f;		// 本体の底 → ドリルの先
 static inline const float kDrillerDrillSpinSpeed = 3.0f;    // ドリル回転速度（rad/s）
-static inline const float kDrillerDoorTime = 0.6f;    // ドア開閉時間
+static inline const float kDrillerDoorTime = 0.6f;			// ドア開閉時間
 static inline const float kDrillerDoorOpenAngle = 0.85f;    // ドアの開く角度（rad）
+static inline const int	kDrillerDrillHalfWidthCell = 1;		// ドリルの幅：中心から左右に何マス（1 → 左中右の 3 マス）
 
+/// ===== 乗り込み判定 ===== ///
+static inline const float kDrillerBoardHalfWidth = 0.6f;   // 乗り込み判定：横の半分
+static inline const float kDrillerBoardHeight = 1.0f;   // 乗り込み判定：本体の底からの高さ
 
 class Driller :public Object
 {
@@ -54,8 +56,23 @@ public:
 	void SetOnGround(bool onGround) { onGround_ = onGround; }
 
 	/// ================= 操作 ================= ///
-	/// 落下開始＋ドリル回転（止めるまで落ち続ける）
+	/// 下へ掘り続ける（止まらない）
 	void DrillDown();
+	/// targetY（本体の底）まで掘って止まる
+	void DrillDownTo(float targetY);
+
+
+	/// 停止点（CollisionManager が見る）
+	bool HasStopPoint() const { return hasStopPoint_; }
+	float GetStopY() const { return stopY_; }
+
+	/// ドリルの先
+	Vector3 GetTipPoint() const;
+	/// ブロックを壊した：速度 0 から落ち直す
+	void OnDrillHit() { velocity_.y = 0.0f; }
+	/// ② で停止点に着いた瞬間を 1 回だけ受け取る
+	bool ConsumeArrived() { const bool r = justArrived_; justArrived_ = false; return r; }
+
 	/// 落下を止める（着地・衝突時）
 	void StopFall();
 	/// ドリルだけ
@@ -81,6 +98,12 @@ public:
 
 	bool IsCalled() const { return isCalled_; }
 	bool IsLanded() const { return isCalled_ && !isFalling_; }
+
+	/// ================= 当たり判定 ================= ///
+	AABB GetBoardAABB() const;
+	void SetIsPlayerInBoard(bool in) { isPlayerInBoard_ = in; }
+	/// ドアが開いていて、プレイヤーが横にいる → 乗れる
+	bool CanBoard() const { return IsDoorOpen() && isPlayerInBoard_; }
 
 	/// ================= 状態 ================= ///
 	bool IsVisible() const { return isVisible_; }
@@ -143,12 +166,16 @@ private:
 	bool isVisible_ = true;
 	bool isFalling_ = false;
 	bool isDrilling_ = false;
+	bool hasStopPoint_ = false;    // 止まるポイントがあるかどうか
+	bool justArrived_ = false;
+	float stopY_ = 0.0f;
 
 	/// 生成点
 	Vector3 spawnPoint_{};
 	bool hasSpawnPoint_ = false;
 	bool isCalled_ = false;
 	bool isPlayerNear_ = false;
+	bool isPlayerInBoard_ = false;
 
 	Timer doorAnimationTimer_;
 

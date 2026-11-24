@@ -114,7 +114,7 @@ int TextureManager::LoadCommonTexture(const std::string & filePath) {
 			DirectX::DDS_FLAGS_NONE, nullptr, image);
 	} else {
 		hr = DirectX::LoadFromWICFile(wFilePath.c_str(),
-			DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
+			DirectX::WIC_FLAGS_DEFAULT_SRGB, nullptr, image);
 	}
 
 	assert(SUCCEEDED(hr));
@@ -231,7 +231,7 @@ int TextureManager::LoadModelTexture(const std::string & filePath) {
 			DirectX::DDS_FLAGS_NONE, nullptr, image);
 	} else {
 		hr = DirectX::LoadFromWICFile(wFilePath.c_str(),
-			DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
+			DirectX::WIC_FLAGS_DEFAULT_SRGB, nullptr, image);
 	}
 
 	assert(SUCCEEDED(hr));

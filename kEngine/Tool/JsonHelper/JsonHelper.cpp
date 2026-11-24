@@ -5,6 +5,10 @@
 
 /// ========================================== 書き ========================================== ///
 
+nlohmann::json JsonHelper::V2ToJson(const Vector2& v) {
+	return nlohmann::json::array({ v.x, v.y });
+}
+
 nlohmann::json JsonHelper::V3ToJson(const Vector3& v) {
 	return nlohmann::json::array({ v.x, v.y, v.z });
 }
@@ -126,6 +130,17 @@ nlohmann::json JsonHelper::EngineParamsToJson(const EngineModelParams& p) {
 }
 
 /// ========================================== 読み ========================================== ///
+
+Vector2 JsonHelper::JsonToV2(const nlohmann::json& j) {
+	Vector2 v{ 0, 0 };
+
+	if (j.is_array() && j.size() >= 2) {
+		v.x = j[0].get<float>();
+		v.y = j[1].get<float>();
+	}
+
+	return v;
+}
 
 Vector3 JsonHelper::JsonToV3(const nlohmann::json& j) {
 	Vector3 v{ 0, 0, 0 };

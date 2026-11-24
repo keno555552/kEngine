@@ -12,13 +12,13 @@ struct HitSpark3 : ParticlePrototype
 		/// 移動しないから設定要らない
 
 		/// スケール設定、その後変わらない
-		startScale = { 0.1f * hitRockScale, 2.0f * hitRockScale, 1.0f * hitRockScale };
-		endScale = { 0.1f * hitRockScale, 2.0f * hitRockScale, 1.0f * hitRockScale };
-		isConstantScale = true;
-
+		mainTrack.startScale = { 0.1f * hitRockScale, 2.0f * hitRockScale, 1.0f * hitRockScale };
+		mainTrack.endScale = { 0.1f * hitRockScale, 2.0f * hitRockScale, 1.0f * hitRockScale };
+		mainTrack.isConstantScale = true;
+		
 		/// 回転はランダム
-		startRotationRandom = { 0.0f, 0.0f, 3.2f };
-		isConstantRotation = true;
+		mainTrack.startRotationRandom = { 0.0f, 0.0f, 3.2f };
+		mainTrack.isConstantRotation = true;
 
 		/// 色は元の色から透明へ
 		startColor = { 1.0f, 0.3f, 0.3f, 1.0f };
@@ -55,12 +55,12 @@ struct HitImpact3 : ParticlePrototype
 		lifetime = 0.5f;
 		/// 移動しないから設定要らない
 		/// スケール設定、その後変わらない
-		startScale = { 0.2f * hitRockScale, 0.2f * hitRockScale, 1.0f * hitRockScale };
-		endScale = { 0.3f * hitRockScale, 0.3f * hitRockScale, 1.0f * hitRockScale };
-		isConstantScale = false;
+		mainTrack.startScale = { 0.2f * hitRockScale, 0.2f * hitRockScale, 1.0f * hitRockScale };
+		mainTrack.endScale = { 0.3f * hitRockScale, 0.3f * hitRockScale, 1.0f * hitRockScale };
+		mainTrack.isConstantScale = false;
 		/// 回転はランダム
-		startRotationRandom = { 0.0f, 0.0f, 3.2f };
-		isConstantRotation = true;
+		mainTrack.startRotationRandom = { 0.0f, 0.0f, 3.2f };
+		mainTrack.isConstantRotation = true;
 		/// 色は元の色から透明へ
 		startColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 		endColor = { 1.0f, 1.0f, 1.0f, 0.0f };
@@ -90,17 +90,17 @@ struct HitRock : ParticlePrototype
 		/// 移動しないから設定要らない
 		/// スケール設定、その後変わらない
 		float scale = 0.05f * hitRockScale;
-		startScale = { scale, scale, scale };
-		endScale = { scale, scale, scale };
-		isConstantScale = false;
+		mainTrack.startScale = { scale, scale, scale };
+		mainTrack.endScale = { scale, scale, scale };
+		mainTrack.isConstantScale = false;
 		/// 色は元の色から透明へ
 		Vector3 color = { 0.63f, 0.55f, 0.42f};
 		startColor = { color.x, color.y, color.z, 1.0f };
 		endColor = { color.x, color.y, color.z, 0.0f };
 		/// 移動設定
-		startVelocity = { 0.0f, 3.5f, 0.0f };
-		startVelocityRandom = { 0.5f, 0.5f, 0.0f };
-		startSpeedRandom = { 0.2f,0.2f,0.0f };
+		mainTrack.startVelocity = { 0.0f, 3.5f, 0.0f };
+		mainTrack.startVelocityRandom = { 0.5f, 0.5f, 0.0f };
+		mainTrack.startSpeedRandom = { 0.2f,0.2f,0.0f };
 
 		gravity = { 0.0f, -9.8f, 0.0f };
 

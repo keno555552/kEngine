@@ -10,7 +10,7 @@
 #include "CG4_HK_1/Effect2.h"
 #include "CG3_HK_2/SceneCGHK2.h"
 
-#ifdef _DEBUG
+#ifdef USE_IMGUI
 #include "CheatEngine/CheatEngine.h"
 #endif
 
@@ -91,6 +91,10 @@ private:
 private:
 	std::unique_ptr <BaseScene> sceneUsing_ = nullptr;
 	std::unique_ptr <BaseScene> sceneOld_ = nullptr;
+	std::unique_ptr<BaseScene> effectEditor_ = nullptr;
+	bool isEditorFront_ = false;
+
+	void ToggleEffectEditor();
 
 private:
 	kEngine* system_ = nullptr; // 借り
@@ -99,7 +103,7 @@ private:
 
 	std::unique_ptr <DefaultMenu> defaultMenu_ = nullptr;
 
-#ifdef _DEBUG
+#ifdef USE_IMGUI
 	/// チートエンジン
 	std::unique_ptr<CheatEngine> cheatEngine_ = nullptr;
 #endif

@@ -16,6 +16,7 @@ void CollisionManager::Update(float deltaTime) {
 	PlayerBackPointCollision();
 	PlayerDrillerCollision();
 	PlayerSignCollision();
+	DrillerMapCollision();
 	BulletMapCollision();
 	BulletPlayerCollision();
 	BulletEnemyCollision();
@@ -171,7 +172,16 @@ void CollisionManager::PlayerSignCollision() {
 }
 
 void CollisionManager::PlayerDrillerCollision() {
-	if (player_ == nullptr || driller_ == nullptr || !driller_->HasSpawnPoint()) { return; }
+	if (player_ == nullptr || driller_ == nullptr) { return; }
+
+	/// 乗り込み判定（帰還）：z は比べない
+	const AABB p = player_->GetAABB();
+	const AABB d = driller_->GetBoardAABB();
+	driller_->SetIsPlayerInBoard(
+		p.min.x <= d.max.x && p.max.x >= d.min.x &&
+		p.min.y <= d.max.y && p.max.y >= d.min.y);
+
+	if (!driller_->HasSpawnPoint()) { return; }
 
 	/// 生成点から X 方向に kDrillerCallRangeCell マス以内
 	const float cellX = mapChipManager_ ? mapChipManager_->GetBlockSize().x : 1.0f;
@@ -201,6 +211,25 @@ void CollisionManager::EnemyMapCollision() {
 			e->SetFaceRight(!e->IsFaceRight());
 		}
 	}
+}
+
+void CollisionManager::DrillerMapCollision() {
+	if (!driller_ || !mapChipManager_ || !driller_->IsFalling()) return;
+
+	const Vector3 tip = driller_->GetTipPoint();
+	/// 停止点より下は壊さない（止まった時にドリルの先が刺さる地面）
+	if (driller_->HasStopPoint() && tip.y < driller_->GetStopY()) return;
+
+	/// ドリルの幅：中心 ± kDrillerDrillHalfWidthCell マス
+	const float cellX = mapChipManager_->GetBlockSize().x;
+	bool isBroken = false;
+	for (int i = -kDrillerDrillHalfWidthCell; i <= kDrillerDrillHalfWidthCell; ++i) {
+		const Vector3 point = tip + Vector3{ cellX * i, 0.0f, 0.0f };
+		if (mapChipManager_->Break(point)) isBroken = true;
+	}
+
+	/// 1 マスでも壊したら速度 0 → また加速
+	if (isBroken) driller_->OnDrillHit();
 }
 
 void CollisionManager::InputPlayer(Player* player) {

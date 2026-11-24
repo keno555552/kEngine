@@ -1,7 +1,9 @@
 #include "ImGuiWidgets.h"
+#include "externals/imgui/imgui_internal.h"   
 #include "Transform.h"
 #include "Data/Render/CPUData/MaterialConfig.h"
 #include "Tool/FileManager/FileManager.h"
+#include <string>            
 
 
 namespace ImGuiWidgets {
@@ -129,5 +131,58 @@ namespace ImGuiWidgets {
 			changed = true;
 		}
 		return changed;
+	}
+	void EditorDockSpace(const char* dockName, bool& isResetLayout, const DockLayoutBuilder& buildLayout) {
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+		/// メニューバーを除いた全体を覆う、透明なホストウィンドウ
+		ImGui::SetNextWindowPos(viewport->WorkPos);
+		ImGui::SetNextWindowSize(viewport->WorkSize);
+		ImGui::SetNextWindowViewport(viewport->ID);
+
+		const ImGuiWindowFlags hostFlags =
+			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+			ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
+			ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoBackground;
+
+		/// dockName ごとに別のホスト（シーンが違えば imgui.ini の配置も別）
+		const std::string hostName = std::string("##Host_") + dockName;
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::Begin(hostName.c_str(), nullptr, hostFlags);
+		ImGui::PopStyleVar(3);
+
+		const ImGuiID dockId = ImGui::GetID(dockName);
+
+		if (ImGui::DockBuilderGetNode(dockId) == nullptr || isResetLayout) {
+			ImGui::DockBuilderRemoveNode(dockId);
+			ImGui::DockBuilderAddNode(dockId, ImGuiDockNodeFlags_DockSpace);
+			ImGui::DockBuilderSetNodeSize(dockId, viewport->WorkSize);   // Split の前に必ず
+
+			if (buildLayout) buildLayout(dockId, viewport->WorkSize);
+
+			ImGui::DockBuilderFinish(dockId);
+			isResetLayout = false;
+		}
+
+		ImGui::DockSpace(dockId, ImVec2(0.0f, 0.0f),
+			ImGuiDockNodeFlags_PassthruCentralNode |
+			ImGuiDockNodeFlags_NoDockingOverCentralNode);
+
+		ImGui::End();
+	}
+
+	void EditorDockSpaceLeftPanel(const char* dockName, const char* leftWindowName,
+		bool& isResetLayout, float leftRatio) {
+
+		EditorDockSpace(dockName, isResetLayout,
+			[&](ImGuiID dockId, const ImVec2& /*size*/) {
+				ImGuiID center = dockId;
+				const ImGuiID left = ImGui::DockBuilderSplitNode(center, ImGuiDir_Left, leftRatio, nullptr, &center);
+				ImGui::DockBuilderDockWindow(leftWindowName, left);
+			});
 	}
 }
