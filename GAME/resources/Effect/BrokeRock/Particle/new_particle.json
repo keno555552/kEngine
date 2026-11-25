@@ -78,7 +78,7 @@
                     "material": {
                         "blendModeType": 1,
                         "depthStencilType": 0,
-                        "enableLighting": false,
+                        "enableLighting": true,
                         "heightScale": 2.0,
                         "intensity": 1.0,
                         "lightModelType": 4,
@@ -145,7 +145,7 @@
                     "material": {
                         "blendModeType": 1,
                         "depthStencilType": 0,
-                        "enableLighting": false,
+                        "enableLighting": true,
                         "heightScale": 2.0,
                         "intensity": 1.0,
                         "lightModelType": 4,
@@ -212,7 +212,7 @@
                     "material": {
                         "blendModeType": 1,
                         "depthStencilType": 0,
-                        "enableLighting": false,
+                        "enableLighting": true,
                         "heightScale": 2.0,
                         "intensity": 1.0,
                         "lightModelType": 4,
@@ -279,7 +279,7 @@
                     "material": {
                         "blendModeType": 1,
                         "depthStencilType": 0,
-                        "enableLighting": false,
+                        "enableLighting": true,
                         "heightScale": 2.0,
                         "intensity": 1.0,
                         "lightModelType": 4,
@@ -346,7 +346,7 @@
                     "material": {
                         "blendModeType": 1,
                         "depthStencilType": 0,
-                        "enableLighting": false,
+                        "enableLighting": true,
                         "heightScale": 2.0,
                         "intensity": 1.0,
                         "lightModelType": 4,
@@ -413,7 +413,7 @@
                     "material": {
                         "blendModeType": 1,
                         "depthStencilType": 0,
-                        "enableLighting": false,
+                        "enableLighting": true,
                         "heightScale": 2.0,
                         "intensity": 1.0,
                         "lightModelType": 4,
@@ -480,7 +480,7 @@
                     "material": {
                         "blendModeType": 1,
                         "depthStencilType": 0,
-                        "enableLighting": false,
+                        "enableLighting": true,
                         "heightScale": 2.0,
                         "intensity": 1.0,
                         "lightModelType": 4,
@@ -547,7 +547,7 @@
                     "material": {
                         "blendModeType": 1,
                         "depthStencilType": 0,
-                        "enableLighting": false,
+                        "enableLighting": true,
                         "heightScale": 2.0,
                         "intensity": 1.0,
                         "lightModelType": 4,

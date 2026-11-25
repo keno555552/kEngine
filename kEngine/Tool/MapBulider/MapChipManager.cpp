@@ -103,7 +103,13 @@ void MapChipManager::GenerateAll() {
 bool MapChipManager::Break(const Vector3& position) {
 	for (auto& l : layers_) {
 		if (!l || !l->collision) continue;
-		if (l->Break(l->GetField().GetMapIndexByPosition(position))) return true;
+		const MapChipField& f = l->GetField();
+		const MapIndex m = f.GetMapIndexByPosition(position);
+		const MapUnit* unit = f.GetUnitByMap(m);   // 壊す前に何だったか
+		if (l->Break(m)) {
+			brokenBlock_.push_back({ f.GetWorldPosFromMapByMapIndex(m), unit ? unit->name : "" });   // 格子の中心
+			return true;
+		}
 	}
 	return false;
 }

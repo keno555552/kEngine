@@ -5,17 +5,22 @@
 #include <string>
 #include <vector>
 #include <optional>
+#include <utility>
 #include "Data/Game/MapChip/MapChipField.h"
 #include "Tool/MapBulider/Reader/MapReader.h"
 
-class kEngine;
-class Object;
+struct BrokenBlock {
+	Vector3 position;       // 格子の中心
+	std::string unitName;   // "kDirt" / "kRock" など
+};
 
 /// 全マップ（レイヤー）の窓口。MapChipField / MapReader は外に出さない
 ///  - 読み込み：MapData（共有キャッシュ）＋ csv → レイヤー
 ///  - 生成　　：登録された関数を呼ぶだけ（物は呼ばれた側が持つ）
 ///  - 読み書き：マス単位の ID（破壊・設置は MapBlockData から）
 ///  - 問い合わせ：ワールド座標だけで答える（当たり判定用）
+class kEngine;
+class Object;
 class MapChipManager {
 public:
 	explicit MapChipManager(kEngine* system);
@@ -83,6 +88,9 @@ public:
 	CollisionResult GetMapCollisionCorrection(const AABB& box, const Vector3& velocity, float deltaTime) const;
 	/// メインの collision レイヤーのマスの大きさ
 	Vector2 GetBlockSize() const;
+	/// 前回取り出してから壊れたブロックの中心（演出用）。取り出すと空になる(std::exchange)
+	std::vector<BrokenBlock> ConsumeBrokenPositions() { return std::exchange(brokenBlock_, {}); }
+
 
 	/// ================= デバッグ ================= ///
 	const std::string& GetLog() const { return reader_->GetLog(); }
@@ -99,4 +107,6 @@ private:
 	/// ★宣言順に注意：data を先に → 解放は layers_ が先（field は data を借りている）
 	std::map<std::string, std::unique_ptr<MapData>> dataStore_;
 	std::vector<std::unique_ptr<MapLayer>> layers_;   // index = handle（Unload したら nullptr）
+	/// 壊れたブロックを記録するところ
+	std::vector<BrokenBlock> brokenBlock_;
 };

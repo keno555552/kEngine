@@ -852,6 +852,9 @@
     <ClCompile Include="kEngine\Math\Kinematics\Gravity.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="GAME\EffectController\EffectController.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kEngine\Tool\MapBulider\Adapter\InstructionCompiler.h">
@@ -1851,6 +1854,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="kEngine\Math\Kinematics\Gravity.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="GAME\EffectController\EffectController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

@@ -110,6 +110,7 @@ void EffectManager::ApplyEffect(LoadedEffect& e, const EffectData& data) {
 	e.lines = newLines;
 	e.rootIds = newRoots;
 	e.linkNames = newLinks;
+	e.links = data.links;
 }
 
 void EffectManager::ReloadAll() {
@@ -163,6 +164,27 @@ int EffectManager::GetLine(int handle, const std::string& particleName) const {
 
 bool EffectManager::HasRoot(int handle) const {
 	return IsValid(handle) && !effects_[handle].rootIds.empty();
+}
+
+bool EffectManager::GetEffectData(int handle, EffectData& out) const {
+	if (!IsValid(handle)) return false;
+	const auto& e = effects_[handle];
+
+	out = EffectData{};
+	for (const auto& [originalName, id] : e.lines) {
+		ParticleEmitter* emitter = particleManager_->GetEmitter(id);
+		if (!emitter) continue;
+
+		ParticlePrototype proto = emitter->GetPrototype();   // コピー
+		DeepCopyMaterials(proto);                            // Material を元の線から切り離す
+		proto.name = originalName;                           // prefix を外す（RegisterEffect がまた付ける）
+		proto.isRoot = std::find(e.rootIds.begin(), e.rootIds.end(), id) != e.rootIds.end();
+		out.prototypes.push_back(std::move(proto));
+	}
+	out.links = e.links;
+	out.name = e.prefix.substr(e.prefix.find(':') + 1);      // "3:BrokeRock/" → "BrokeRock/"
+	if (!out.name.empty() && out.name.back() == '/') out.name.pop_back();
+	return true;
 }
 
 /// ======================================= 内部 ======================================= ///

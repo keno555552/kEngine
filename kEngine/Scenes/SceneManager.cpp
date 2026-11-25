@@ -1,4 +1,5 @@
 #include "SceneManager.h"
+#include "GAME/EffectController/EffectController.h"
 
 std::unique_ptr <SceneManager> SceneManager::sceneManager_ = nullptr;
 
@@ -7,11 +8,11 @@ void SceneManager::Initialize(kEngine* system) {
 	sceneFactory_ = std::make_unique<SceneFactory>(system);
 	//sceneUsingNameHandle_ = "ENGINE_TITLE";
 	//sceneUsingNameHandle_ = "TITLE";
-	//sceneUsingNameHandle_ = "STAGE_TUTORIAL";
+	sceneUsingNameHandle_ = "STAGE_TUTORIAL";
 	//sceneUsingNameHandle_ = "CGHK2";
 	//sceneUsingNameHandle_ = "UITest";
 	//sceneUsingNameHandle_ = "ParticleEditor";
-	sceneUsingNameHandle_ = "EffectEditor";
+	//sceneUsingNameHandle_ = "EffectEditor";
 	//sceneUsingNameHandle_ = "ANIMATIONEDITOR";
 
 	/// チートエンジンの初期化
@@ -31,6 +32,9 @@ void SceneManager::Initialize(kEngine* system) {
 	config::default_White5x5_TextureHandle_ = system_->LoadTexture("./kEngine/EngineAssets/TemplateResource/texture/white5x5.png");
 
 	defaultMenu_ = std::make_unique <DefaultMenu>(system_);
+
+	/// エフェクトエディタの初期化
+	EffectController::Initialize(system_, true);
 }
 
 void SceneManager::Finalize() {
@@ -45,6 +49,8 @@ void SceneManager::Finalize() {
 	sceneFactory_.reset();
 	defaultMenu_.reset();
 	helperSprite_.reset();
+
+	EffectController::Finalize();
 }
 
 SceneManager& SceneManager::GetInstance() {
