@@ -90,7 +90,7 @@ void Camera::SetFarClip(float farClip) {
 }
 
 
-void Camera::Move(Vector3 speed) {
+void Camera::MoveUpdata(Vector3 speed) {
 	Matrix4x4 handle = MakeTranslateMatrix4x4(speed) * MakeRotateMatrix4x4(cameraTransform_.rotate);
 	cameraTransform_.translate = cameraTransform_.translate + MakeTranslateVector3(handle);
 	dirty_ = true;

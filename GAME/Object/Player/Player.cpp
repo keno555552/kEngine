@@ -13,9 +13,23 @@ Player::Player(kEngine* system, const Vector3& position) {
 
 	mainPosition.transform.rotate.y = 0.0f;
 
+	/// 状態更新関数の登録
+	stateUpdateFunc_[(int)PlayerState::kNormal] = [this]()						{ NormalUpdate(); };
+	stateUpdateFunc_[(int)PlayerState::kDamage] = [this]()						{ DamageUpdate(); };
+	stateUpdateFunc_[(int)PlayerState::kDead]	= [this]()						{ DeathUpdate(); };
+
+	/// 持ち物使用関数の登録
+	useFunc_		[(int)BPItemID::None]		= [this](const Vector3& aimPos) {};
+	useFunc_		[(int)BPItemID::Gun]		= [this](const Vector3& aimPos) { Shoot(aimPos); };
+	useFunc_		[(int)BPItemID::Pickaxe]	= [this](const Vector3& aimPos) { Dig(aimPos); };
+
+	/// CDタイマーの初期化
 	shootCD_.Init0(kShootInterval, system_->GetTimeManager());
+
+	/// ダメージエフェクトタイマーの初期化
 	damageEffectTimer_.InitM(kPlayerDamageEffectTime, system_->GetTimeManager());
 
+	/// リソースローティング
 	MH_playerModel_ = system_->SetModelObj("GAME/resources/Object/player/player.obj");
 	MH_pickaxe_ = system_->SetModelObj("GAME/resources/Object/pickaxe/pickaxe.obj");
 
@@ -29,10 +43,11 @@ Player::Player(kEngine* system, const Vector3& position) {
 	SH_SHOOT_ = system_->SoundLoadSE("GAME/resources/sound/SE/player_attack.wav");
 	SH_DAMAGE_ = system_->SoundLoadSE("GAME/resources/sound/SE/playerDamage.wav");
 
+	/// 近接攻撃関連
 	nearAttackChangeTimer_.InitM(kNearAttackChangeTime, system_->GetTimeManager());
 	nearAttackEffectTimer_.InitM(kNearAttackEffectTime, system_->GetTimeManager());
 
-	/// 照準（★最後に追加）
+	/// 照準
 	MH_sight_ = system_->SetModelObj("GAME/resources/Object/targeter/targeter.obj");
 	sight_ = std::make_unique<Sight>(system_, this);
 	sight_->IntObject(system_);
@@ -60,22 +75,17 @@ Player::~Player() = default;
 void Player::Update(Camera* camera) {
 	totelDeltaTime_ = system_->GetDeltaTime();
 
-	if (isDead_) {          // ★ 入力・旋回・点滅 全部止める
-		DeathUpdate();
-		return;
-	}
-	BitMapBugCheck();
-	BehaviorRootUpdate();
-	DamageAndEffectPart();
-	UpdataState();
+	ApplyDamageRequest();   // 受けた指令 → 状態の切り替え
+	StateUpdate();          // 今の状態が動作を呼ぶ
+	CDUpdate();             // CD 更新
+	input_ = {};            // 入力指令はここで全部消す
 
-	sight_->Update(camera);
-
+	if (!IsDead()) sight_->Update(camera);
 }
 
 void Player::Draw() {
 	Object::Draw();
-	if (!isDead_) sight_->Draw();
+	if (IsDead()) sight_->Draw();
 }
 
 
@@ -107,29 +117,21 @@ void Player::SetCollisionResult(const CollisionResult& result) {
 }
 
 void Player::GetDamage(float damage, const Vector3& attackerPos) {
-	if (isDead_) return;
-	disableDamage_ = true;
-	damageEffectTimer_.Reset0();
-	HP_ -= damage;
-	if (HP_ <= 0.0f) StartDeath(attackerPos);
-
-	/// 音再生
-	system_->SoundPlaySE(SH_DAMAGE_);
+	if (damageRequest_.has) return;
+	damageRequest_ = { true, damage, attackerPos };
 }
 
 Vector3 Player::GetAimPosition() const {
 	return sight_->GetMouseOnPlane();
 }
 
-void Player::Shoot(Vector3 mousePos) {
+void Player::Shoot(const Vector3& mousePos) {
 
 	/// 出来ない条件に該当したら終了
 	// 弾のリストがセットされてない
 	if (bulletList_ == nullptr)return;
 	// 射撃CD中
 	if (shootCD_.parameter_ != shootCD_.maxTime_)return;
-	// 状態が射撃可能でない
-	if (static_cast<int>(playerState_) & cantShoot) return;
 
 	/// 弾の生成
 	Vector3 shootDirection = mousePos - mainPosition.transform.translate;
@@ -141,15 +143,6 @@ void Player::Shoot(Vector3 mousePos) {
 	system_->SoundPlaySE(SH_SHOOT_);
 }
 
-/// ============================== 手持ち行動 ============================== ///
-void Player::UseEquipped(const Vector3& aimPos) {
-	switch (inventery_.GetEquipped()) {
-	case BPItemID::Gun:     Shoot(aimPos); break;
-	case BPItemID::Pickaxe: Dig(aimPos);   break;
-	default: break;                                     // 手ぶら
-	}
-}
-
 bool Player::ConsumeDigRequest(Vector3& outPos) {
 	if (!hasDigRequest_) return false;
 	hasDigRequest_ = false;
@@ -157,17 +150,8 @@ bool Player::ConsumeDigRequest(Vector3& outPos) {
 	return true;
 }
 
-void Player::BehaviorRootUpdate() {
-	/// 移動関連
-	Move();
-
-	///射撃CD更新
-	CDUpdate();
-}
-
 void Player::Dig(const Vector3& aimPos) {
 	if (!digCD_.GetIsMax()) return;                     // CD 中
-	if (static_cast<int>(playerState_) & cantShoot) return;   // 硬直・死亡中は不可（射撃と同じ条件）
 
 	/// 届く範囲だけ
 	Vector3 d = mainPosition.transform.translate - aimPos;
@@ -195,15 +179,15 @@ Vector3 Player::CornerPosition(const Vector3& center, Corner4 corner) {
 	return result;
 }
 
-void Player::Move() {
+void Player::MoveUpdata() {
 	/// 移動
 	// 左右移動捜索
-	if (moveLeft_ || moveRight_) {
+	if (input_.left || input_.right) {
 
 		Vector3 acceleration{};
 
 		// 方向が変わったら、旋回タイマーをリセットする
-		if (moveRight_ && !moveLeft_) {
+		if (input_.right && !input_.left) {
 
 			if (lrDirection_ != LRDirection::kRight) {
 				lrDirection_ = LRDirection::kRight;
@@ -212,7 +196,7 @@ void Player::Move() {
 			}
 
 			acceleration.x = +kAcceleration;
-		} else if (moveLeft_ && !moveRight_) {
+		} else if (input_.left && !input_.right) {
 
 			if (lrDirection_ != LRDirection::kLeft) {
 				lrDirection_ = LRDirection::kLeft;
@@ -227,7 +211,7 @@ void Player::Move() {
 		velocity_.x += acceleration.x * totelDeltaTime_;
 
 		// 入力がない場合速度を減衰をかける
-		if (!moveRight_ && !moveLeft_) {
+		if (!input_.right && !input_.left) {
 			velocity_.x *= std::exp(-kAttenuation * totelDeltaTime_);
 			if (std::abs(velocity_.x) < 0.01f) {
 				velocity_.x = 0.0f;
@@ -268,19 +252,11 @@ void Player::Move() {
 		mainPosition.transform.rotate.y = turnFirstRotationY_ * ratio + destinationRotationY * (1.0f - ratio);
 	}
 
-	if (onGround_ && moveJump_) {
+	if (onGround_ && input_.jump) {
 		velocity_.y += kJumpAcceleration;
 		system_->SoundPlaySE(SH_JUMP_);
 	}
 	velocity_.y = GravityCalc(velocity_.y, GameConfig::gravity, GameConfig::limitFallSpeed, totelDeltaTime_);
-
-	ResetMove();
-}
-
-void Player::ResetMove() {
-	moveLeft_ = false;
-	moveRight_ = false;
-	moveJump_ = false;
 }
 
 void Player::OnGroundChanger(const CollisionMapInfo& info) {
@@ -307,26 +283,26 @@ void Player::BitMapBugCheck() {
 	}
 	checkTimer_.Reset0();
 
-	{
-		std::vector<int> bugChecksList = {
-			{ static_cast<int>(PlayerState::kDamage) | static_cast<int>(PlayerState::kMove) },
-			{ static_cast<int>(PlayerState::kDamage) | static_cast<int>(PlayerState::kShoot) },
-			{ static_cast<int>(PlayerState::kDamage) | static_cast<int>(PlayerState::kNearAttack) },
-			{ static_cast<int>(PlayerState::kDamage) | static_cast<int>(PlayerState::kDush) },
-		};
-
-		for (auto& bugCheck : bugChecksList) {
-			if ((static_cast<int>(playerState_) & bugCheck) == bugCheck) {
-				Logger::Log("Player:: PlayerState Bug Detected:");
-				// 状態をビットごとに出力
-				for (int i = 0; i < static_cast<int>(PlayerState::numStates); i++) {
-					if (static_cast<int>(playerState_) & (1 << i)) {
-						Logger::Log("%d,", (1 << i));
-					}
-				}
-			}
-		}
-	}
+	//{
+	//	std::vector<int> bugChecksList = {
+	//		{ static_cast<int>(PlayerState::kDamage) | static_cast<int>(PlayerState::kMove) },
+	//		{ static_cast<int>(PlayerState::kDamage) | static_cast<int>(PlayerState::kShoot) },
+	//		{ static_cast<int>(PlayerState::kDamage) | static_cast<int>(PlayerState::kNearAttack) },
+	//		{ static_cast<int>(PlayerState::kDamage) | static_cast<int>(PlayerState::kDush) },
+	//	};
+	//
+	//	for (auto& bugCheck : bugChecksList) {
+	//		if ((static_cast<int>(playerState_) & bugCheck) == bugCheck) {
+	//			Logger::Log("Player:: PlayerState Bug Detected:");
+	//			// 状態をビットごとに出力
+	//			for (int i = 0; i < static_cast<int>(PlayerState::numStates); i++) {
+	//				if (static_cast<int>(playerState_) & (1 << i)) {
+	//					Logger::Log("%d,", (1 << i));
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 }
 
 void Player::CDUpdate() {
@@ -339,20 +315,35 @@ void Player::CDUpdate() {
 void Player::NearAttackUpdate() {
 
 	/// 近接攻撃触発
-	if (system_->GetTriggerOn(DIK_SPACE)) {
-		if (!isNearAttack_) {
-			nearAttackChangeTimer_.Reset0();
-			isNearAttack_ = true;
-
-		}
-	}
+	//if (system_->GetTriggerOn(DIK_SPACE)) {
+	//	if (!isNearAttack_) {
+	//		nearAttackChangeTimer_.Reset0();
+	//		isNearAttack_ = true;
+	//
+	//	}
+	//}
 	///<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< 未完成
 }
 
-void Player::UpdataState() {}
+void Player::StateUpdate() {
+
+	/// 状態ごとの更新
+	stateUpdateFunc_[(int) playerState_]();
+
+}
+
+void Player::NormalUpdate() {
+	MoveUpdata();
+	UseUpdate();
+}
+
+void Player::DamageUpdate() {
+	NormalUpdate();
+	DamageAndEffectPart();
+}
+
 
 void Player::StartDeath(const Vector3& attackerPos) {
-	isDead_ = true;
 	playerState_ = PlayerState::kDead;     // 射撃も自動で不可になる
 
 	/// 攻撃者の方を向く（kRight = +π/2 と同じ）
@@ -407,6 +398,11 @@ void Player::DeathUpdate() {
 	}
 }
 
+void Player::UseUpdate() {
+	if (!input_.use) return;
+	useFunc_[(size_t)inventery_.GetEquipped()](input_.aimPos);
+}
+
 void Player::SetFaceTexture(int handle) {
 	auto& mc = objectParts_[0].materialConfig;
 	mc->useModelTexture = false;
@@ -414,8 +410,27 @@ void Player::SetFaceTexture(int handle) {
 	mc->textureHandle = handle;
 }
 
+void Player::ApplyDamageRequest() {
+	if (!damageRequest_.has) return;
+	const DamageRequest req = damageRequest_;
+	damageRequest_ = {};
+
+	if (playerState_ == PlayerState::kDead || disableDamage_) return;   // 状態が受け付けない
+	HP_ -= req.amount;
+	system_->SoundPlaySE(SH_DAMAGE_);
+
+	if (HP_ <= 0.0f) {
+		StartDeath(req.from);
+		return;
+	}
+	disableDamage_ = true;
+	damageEffectTimer_.Reset0();
+	playerState_ = PlayerState::kDamage;
+}
+
 void Player::DamageAndEffectPart() {
-	if (damageEffectTimer_.parameter_ == damageEffectTimer_.maxTime_) {
+	if (damageEffectTimer_.GetIsMax()) {
+		playerState_ = PlayerState::kNormal;
 		return;
 	}
 

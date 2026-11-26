@@ -6,7 +6,7 @@ AnimationEditor::AnimationEditor(kEngine* system) {
 
 	/// ============ カメラ設定 ============///
 	camera_ = system_->CreateDebugCamera();
-	camera_.lock()->Move({0.0f,0.5f,-10.0f});
+	camera_.lock()->MoveUpdata({0.0f,0.5f,-10.0f});
 	//camera_.lock()->SetDefaultTransform(camera_.lock()->GetTransform());
 	system_->SetCamera(camera_);
 

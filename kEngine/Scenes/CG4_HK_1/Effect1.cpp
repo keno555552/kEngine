@@ -5,7 +5,7 @@ Effect1::Effect1(kEngine* system) {
 	system_ = system;
 	debugCamera_ = system_->CreateDebugCamera();
 	camera_ = system_->CreateCamera();
-	camera_.lock()->Move(Vector3(-2.736f, -4.474f, -27.334f));
+	camera_.lock()->MoveUpdata(Vector3(-2.736f, -4.474f, -27.334f));
 	camera_.lock()->Rotate(Vector3(-0.324f, 0.228f, 0.0f));
 
 	/// =========== リソースロード ============///

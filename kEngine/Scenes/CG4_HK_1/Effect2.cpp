@@ -5,7 +5,7 @@ Effect2::Effect2(kEngine* system) {
 	system_ = system;
 	debugCamera_ = system_->CreateDebugCamera();
 	camera_ = system_->CreateCamera();
-	camera_.lock()->Move(Vector3(0.0f, 0.5f, -10.0f));
+	camera_.lock()->MoveUpdata(Vector3(0.0f, 0.5f, -10.0f));
 
 	/// =========== リソースロード ============///
 	skydomeModelHandle_ = system_->SetModelObj("resources/TemplateResource/object/skydome/skydome.obj");

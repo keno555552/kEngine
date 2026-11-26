@@ -173,24 +173,24 @@ void SceneTutorial::Update() {
 	/// underGround_BG更新
 	underGround_BG_->Update(usingCamera_.lock().get());
 
-	/// player更新
+	/// playerキー入力
 	if (system_->GetIsPush(DIK_A)) player_->MoveLeft();
 	if (system_->GetIsPush(DIK_D)) player_->MoveRight();
 	if (system_->GetIsPush(DIK_W)) player_->MoveJump();
-	player_->Update(usingCamera_.lock().get());
-
+	/// 左クリック：手に持っている物で行動
+	if (system_->GetMouseIsPush(0)) {
+		player_->RequestUse();
+	}
 	/// 武器切り替え（滾輪）
 	const int scroll = system_->GetMouseScroll();
 	if (scroll > 0) player_->GetInventory().EquipPrev();
 	if (scroll < 0) player_->GetInventory().EquipNext();
 
+	/// player更新
+	player_->Update(usingCamera_.lock().get());
+
 	/// UI更新
 	screenUI_->Update();
-
-	/// 左クリック：手に持っている物で行動
-	if (system_->GetMouseIsPush(0)) {
-		player_->UseEquipped();
-	}
 
 	/// 掘る（マップを持っているのは Scene）
 	Vector3 digPos;
