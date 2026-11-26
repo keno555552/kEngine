@@ -40,7 +40,7 @@ public:
 
 
 	/// 平行移動
-	void Move(Vector3 speed);
+	void MoveUpdata(Vector3 speed);
 	void Rotate(Vector3 Theta);
 
 	/// セットカメラ
