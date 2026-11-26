@@ -39,7 +39,7 @@ static inline const float kPlayerHitScale = 0.9f;
 static inline const float kAttenuationLanding = 0.00000001f;
 
 /// 射撃間隔
-static inline const float kShootInterval = 0.25f;
+static inline const float kShootInterval = 1.0f / 2.0f;
 
 /// ================== 掘削関連
 static inline const float kDigReach = 2.0f;       // 何マス先まで掘れるか

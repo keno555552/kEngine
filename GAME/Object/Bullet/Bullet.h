@@ -25,8 +25,5 @@ private:
 
 private:
 	int MH_bullet_{};
-
-	/// 当たった時のエフェクト（EffectManager のハンドル）
-	int effectHitRock_ = -1;
 };
 

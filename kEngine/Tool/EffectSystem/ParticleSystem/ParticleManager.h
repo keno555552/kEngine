@@ -83,6 +83,7 @@ public:
 	int GetEmitterIdByName(const std::string& name) const;
 	int GetAllParticleCount();
 	bool GetLinkLog() const { return isLinkLogEnabled_; }
+	ParticleEmitter* GetEmitter(int id);
 
 private:
 

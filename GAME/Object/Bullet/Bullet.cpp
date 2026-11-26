@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cmath>
 #include "ImguiManager.h"
+#include "GAME/EffectController/EffectController.h"
 
 // 定義 pi 常數
 #ifndef M_PI
@@ -37,9 +38,6 @@ Bullet::Bullet(kEngine* system, const Vector3& position, const Vector3& directio
 		mainPosition.transform.rotate.x = 0.0f;
 		mainPosition.transform.rotate.y = 0.0f;
 	}
-
-	/// 当たった時のエフェクト。2個目の弾からは同じハンドルが返るだけ（線と Link は作り直さない）
-	effectHitRock_ = system_->GetEffectManager()->LoadEffect("./GAME/resources/Effect/HitRock/HitRock.json");
 }
 
 Bullet::~Bullet() {
@@ -52,49 +50,5 @@ void Bullet::Update(Camera* camera) {
 
 void Bullet::HitRockEffect() {
 	/// 当たった位置で発射（起点＝HitImpact、そこから Link で火花と碎石）
-	system_->GetEffectManager()->Play(effectHitRock_, mainPosition.transform.translate);
+	EffectController::Play(GameFx::HitRock, mainPosition.transform.translate);
 }
-
-//void Bullet::HitRockEffect() {
-//
-//	// [短縮]パーティクルマネージャーを取得
-//	auto ParticleManager = system_->GetEffectManager()->GetParticleManager();
-//
-//	// エフェクトの準備
-//	HitSpark3 hitSpark;
-//	hitSpark.name = "HitSpark";
-//	hitSpark.startPosition = mainPosition.transform.translate;
-//	hitSpark.objectList[0].objectParts_[0].materialConfig->textureHandle = clicleTextureHandle_;
-//	int particleHandle2_ = ParticleManager->CreateEmitter(hitSpark, 0);
-//
-//	HitImpact3 hitImpact;
-//	hitImpact.name = "HitImpact";
-//	hitImpact.startPosition = mainPosition.transform.translate;
-//	hitImpact.objectList[0].objectParts_[0].materialConfig->textureHandle = effectTextureHandle_;
-//	particleHandle_ = ParticleManager->CreateEmitter(hitImpact, 1);
-//
-//	HitRock hitRock;
-//	hitRock.name = "HitRock";
-//	hitRock.startPosition = mainPosition.transform.translate;
-//	float velocityScale = 2.0f;
-//	hitRock.startVelocity = { -direction_.x * velocityScale,
-//							 -direction_.y * velocityScale * 1.5f,
-//							 -direction_.z * velocityScale };
-//	hitRock.objectList[0].objectParts_[0].materialConfig->textureHandle = whiteTextureHandle_;
-//	int particleHandle3_ = ParticleManager->CreateEmitter(hitRock, 0);
-//
-//	HitSpackImpactLink3 linkData;
-//	linkData.name = "HitImpactToSpark";
-//	linkData.sourceName = "HitImpact";
-//	linkData.targetName = "HitSpark";
-//	ParticleManager->LinkEmitterToEmitter(linkData);
-//
-//	HitSpackImpactLink3_2 linkData2;
-//	linkData2.name = "HitImpactToRock";
-//	linkData2.sourceName = "HitImpact";
-//	linkData2.targetName = "HitRock";
-//	ParticleManager->LinkEmitterToEmitter(linkData2);
-//
-//	ParticleManager->ShootEmitter(particleHandle_, 1);
-//
-//}

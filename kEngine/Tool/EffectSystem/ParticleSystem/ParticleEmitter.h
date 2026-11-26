@@ -102,4 +102,6 @@ private:
 	/// 1 粒子を軌跡から作る（Part ごとでも同じ処理）
 	ParticleInstance BuildParticle(const ParticlePrototype& pr, const ParticlePartTrack& tr,
 		const ParticlePrototypeOverride* ov, float life);
+
+	bool Run3DPath();
 };

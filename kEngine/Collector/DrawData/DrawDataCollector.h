@@ -107,7 +107,7 @@ public:
 
 	void CollectParticle(std::vector<ObjectData>& objectList, std::vector<ParticleInstance>& instance);
 
-	void CollectParticle(std::vector<ParticleInstance>& instance);
+	void CollectParticle(std::vector<ParticleInstance>& instance, bool isTo3D = false);
 
 	std::unordered_map<PSOKey,
 		std::unordered_map<MeshBuffer*,

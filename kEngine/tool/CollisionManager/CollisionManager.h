@@ -18,7 +18,6 @@ public:
 	void Update(float deltaTime);
 
 	void InputMapChip(MapChipManager* mapChipManager);
-
 	void InputPlayer(Player* player);
 	void InputBackPoint(BackPoint* backPoint);
 	void InputBulletList(std::vector<Bullet*>* bulletList);

@@ -217,6 +217,11 @@ int ParticleManager::GetAllParticleCount() {
 
 }
 
+ParticleEmitter* ParticleManager::GetEmitter(int id) {
+	auto it = emitterList_.find(id);
+	return it != emitterList_.end() ? it->second.get() : nullptr;
+}
+
 void ParticleManager::UpdateEmitterLinks() {
 
 	/// EmitterLinkが存在しない場合は処理をスキップ

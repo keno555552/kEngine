@@ -1,5 +1,5 @@
 #include "SceneTitle.h"
-
+#include "GAME/EffectController/EffectController.h"
 
 SceneTitle::SceneTitle(kEngine* system) {
 	system_ = system;

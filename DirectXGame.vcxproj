@@ -337,6 +337,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GAME\EffectController\EffectController.cpp" />
     <ClCompile Include="GAME\Object\Backpack\Backpack.cpp" />
     <ClCompile Include="kEngine\Math\Kinematics\Gravity.cpp" />
     <ClCompile Include="kEngine\GameObject\Camera\GameCamera.cpp" />
@@ -596,6 +597,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="GAME\Object\ScreenUI\ScreenUI.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GAME\EffectController\EffectController.h" />
     <ClInclude Include="GAME\Setting\GameConfig.h" />
     <ClInclude Include="GAME\Object\Backpack\Backpack.h" />
     <ClInclude Include="kEngine\Math\Kinematics\Gravity.h" />

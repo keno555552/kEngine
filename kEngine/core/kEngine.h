@@ -84,6 +84,7 @@ public:
 	void Draw3D(ObjectData* objectData);
 	void DrawParticle(std::vector<ObjectData>& objectList, std::vector<ParticleInstance>& instance);
 	void DrawParticle(std::vector<ParticleInstance>& instance);
+	void DrawParticleBy3DPath(std::vector<ParticleInstance>& instance);
 
 	int GetModelTextureHandle(int modelHandle, int part);
 

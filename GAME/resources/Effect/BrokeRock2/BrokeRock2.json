@@ -1,0 +1,13 @@
+{
+    "kind": "Effect",
+    "links": [],
+    "name": "BrokeRock2",
+    "particles": [
+        {
+            "isRoot": true,
+            "path": "Particle/BrokeRockMove.json"
+        }
+    ],
+    "relativePaths": true,
+    "version": 1
+}

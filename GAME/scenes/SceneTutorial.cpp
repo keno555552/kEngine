@@ -1,5 +1,6 @@
 #define NOMINMAX
 #include "SceneTutorial.h"
+#include "GAME/EffectController/EffectController.h"
 
 SceneTutorial::SceneTutorial(kEngine* system) {
 	/// =========== システム初期化 ============///
@@ -303,6 +304,13 @@ void SceneTutorial::Update() {
 
 	/// ブロック更新
 	mapChipManager_->UpdateBlocks();
+
+	/// 破壊されてブロックがある限りエフェクトを呼び出す
+	for (auto& block : mapChipManager_->ConsumeBrokenPositions()) {
+		auto& fx = block.unitName;
+		if		( fx == "kRock" )	EffectController::Play(GameFx::BreakRock, block.position);
+		else if ( fx == "kDirt" )	EffectController::Play(GameFx::BreakDirt, block.position);
+	}
 
 	if (system_->GetTriggerOn(DIK_0)) {
 		if (useDebugCamera)useDebugCamera = false;

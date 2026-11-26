@@ -729,7 +729,7 @@ void DrawDataCollector::CollectParticle(std::vector<ObjectData>& objectList, std
 	}
 }
 
-void DrawDataCollector::CollectParticle(std::vector<ParticleInstance>& instance) {
+void DrawDataCollector::CollectParticle(std::vector<ParticleInstance>& instance, bool isTo3D) {
 
 	for (int i = 0; i < (int)instance.size(); ++i) {
 
@@ -775,7 +775,18 @@ void DrawDataCollector::CollectParticle(std::vector<ParticleInstance>& instance)
 				data.transMatrix = ObjectWVPAdjustmentPC(targetObject, *modelData->GetModelData().get(), p, inst);
 
 				/// バケットに入れる
-				AddObjectToBucketPC(data);
+				if (isTo3D) {
+					RenderData renderData;
+					renderData.mesh = data.mesh;
+					renderData.textureHandle = data.textureHandle;
+					renderData.psoKey = data.psoKey;
+					renderData.materialID = data.materialID;
+					renderData.transformData = data.transMatrix;
+					renderData.subMeshIndex = 0;
+					AddObjectToBucket3D(renderData);
+				} else {
+					AddObjectToBucketPC(data);
+				}
 			}
 		}
 	}

@@ -42,6 +42,9 @@ public:
 	/// Effect の中の線の id（個別に止める・消すなど用）。無ければ -1
 	int GetLine(int handle, const std::string& particleName) const;
 	bool HasRoot(int handle) const;
+	/// Effect の中身を取り出す（線が今使っている Prototype のコピー。Material も別物）
+	/// 改造して RegisterEffect(新しい key, data) すれば別の Effect になる
+	bool GetEffectData(int handle, EffectData& out) const;
 
 	/// --- エフェクトマネージャーをとる --- ///
 	ParticleManager* GetParticleManager() { return particleManager_.get(); }
@@ -57,6 +60,7 @@ private:
 		std::vector<std::pair<std::string, int>> lines;     // 元の Particle 名, 線の id
 		std::vector<std::string> linkNames;                 // ParticleManager に入れた Link の名前（prefix 付き）
 		std::vector<int> rootIds;                           // Play で撃つ線
+		std::vector<EmitterLink> links;						// 元の Link（prefix 無し）：GetEffectData 用
 		bool isPaused = false;
 	};
 
